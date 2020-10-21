@@ -1,0 +1,13 @@
+/* 
+  Strings.strings (en)
+  EasyIn
+
+  Created by Imac on 3/1/20.
+  Copyright © 2020 OGTech. All rights reserved.
+*/
+
+"Language" = "en"
+"WaitMoments" = "Please wait...";
+"Ok" = "Ok";
+"Retry" = "Retry";
+"Cancel" = "Cancel";

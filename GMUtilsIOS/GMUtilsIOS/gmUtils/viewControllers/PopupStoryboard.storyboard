@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Wait Popup View Controller-->
+        <scene sceneID="F6h-0h-dKD">
+            <objects>
+                <viewController storyboardIdentifier="WaitPopupViewController" id="KW8-ZN-gch" customClass="WaitPopupViewController" customModule="Choueifat" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Xae-mn-Tx7">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" spacing="13" translatesAutoresizingMaskIntoConstraints="NO" id="DjP-Tb-9bi">
+                                <rect key="frame" x="16" y="421.5" width="382" height="53.5"/>
+                                <subviews>
+                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="Czm-28-FDJ">
+                                        <rect key="frame" x="0.0" y="0.0" width="382" height="20"/>
+                                        <color key="color" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </activityIndicatorView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Wait moments..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="29f-JO-Jrv">
+                                        <rect key="frame" x="0.0" y="33" width="382" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nkv-yu-Drj">
+                                <rect key="frame" x="180" y="483" width="54" height="30"/>
+                                <state key="normal" title="Dismiss"/>
+                                <connections>
+                                    <action selector="onDismissClick:" destination="KW8-ZN-gch" eventType="touchUpInside" id="96l-GA-v0e"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="displayP3"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="DjP-Tb-9bi" firstAttribute="centerY" secondItem="Xae-mn-Tx7" secondAttribute="centerY" id="0Wx-oZ-PFj"/>
+                            <constraint firstItem="DjP-Tb-9bi" firstAttribute="leading" secondItem="9TN-9T-yug" secondAttribute="leading" constant="16" id="Ce1-UL-c3N"/>
+                            <constraint firstItem="nkv-yu-Drj" firstAttribute="centerX" secondItem="Xae-mn-Tx7" secondAttribute="centerX" id="UAl-G6-Slh"/>
+                            <constraint firstItem="nkv-yu-Drj" firstAttribute="top" secondItem="DjP-Tb-9bi" secondAttribute="bottom" constant="8" id="d0e-Sj-Kre"/>
+                            <constraint firstItem="9TN-9T-yug" firstAttribute="trailing" secondItem="DjP-Tb-9bi" secondAttribute="trailing" constant="16" id="fx8-zN-Agu"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="9TN-9T-yug"/>
+                    </view>
+                    <connections>
+                        <outlet property="dismissButton" destination="nkv-yu-Drj" id="3pJ-iU-Z1L"/>
+                        <outlet property="msgLabel" destination="29f-JO-Jrv" id="yk6-B3-qQd"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="2l7-do-OXe" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-97.101449275362327" y="3.3482142857142856"/>
+        </scene>
+        <!--Toast View Controller-->
+        <scene sceneID="nV6-cZ-JtB">
+            <objects>
+                <viewController storyboardIdentifier="ToastViewController" id="nB6-A4-Rtz" customClass="ToastViewController" customModule="Choueifat" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="lUZ-nt-NmR">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1CY-Ka-NMW">
+                                <rect key="frame" x="20" y="760" width="374" height="42"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cCs-lQ-35e">
+                                        <rect key="frame" x="10" y="1" width="354" height="40"/>
+                                        <color key="backgroundColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="15"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="highlightedColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <size key="shadowOffset" width="0.0" height="0.0"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="cCs-lQ-35e" secondAttribute="bottom" constant="1" id="A7g-ER-l06"/>
+                                    <constraint firstItem="cCs-lQ-35e" firstAttribute="leading" secondItem="1CY-Ka-NMW" secondAttribute="leading" constant="10" id="OQP-27-n0G"/>
+                                    <constraint firstAttribute="height" constant="42" id="Xpf-Hg-PhN"/>
+                                    <constraint firstItem="cCs-lQ-35e" firstAttribute="top" secondItem="1CY-Ka-NMW" secondAttribute="top" constant="1" id="gJN-Wy-ZUU"/>
+                                    <constraint firstAttribute="trailing" secondItem="cCs-lQ-35e" secondAttribute="trailing" constant="10" id="msd-ni-CCG"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="VGQ-IY-efM" firstAttribute="trailing" secondItem="1CY-Ka-NMW" secondAttribute="trailing" constant="20" id="2KQ-j5-ANT"/>
+                            <constraint firstItem="VGQ-IY-efM" firstAttribute="bottom" secondItem="1CY-Ka-NMW" secondAttribute="bottom" constant="60" id="7mm-Bq-13b"/>
+                            <constraint firstItem="1CY-Ka-NMW" firstAttribute="leading" secondItem="VGQ-IY-efM" secondAttribute="leading" constant="20" id="qee-d1-hfN"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="VGQ-IY-efM"/>
+                    </view>
+                    <connections>
+                        <outlet property="label" destination="cCs-lQ-35e" id="Mlz-HZ-qCz"/>
+                        <outlet property="labelContainerView" destination="1CY-Ka-NMW" id="I4i-mw-6WF"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="JHL-ai-A9g" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="573.91304347826087" y="2.6785714285714284"/>
+        </scene>
+    </scenes>
+</document>

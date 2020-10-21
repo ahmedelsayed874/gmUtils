@@ -1,0 +1,13 @@
+/* 
+  Strings.strings (ar)
+  EasyIn
+
+  Created by Imac on 3/1/20.
+  Copyright © 2020 OGTech. All rights reserved.
+*/
+
+"Language" = "ar"
+"WaitMoments" = "من فضلك انتظر...";
+"Ok" = "حسنا";
+"Retry" = "إعادة";
+"Cancel" = "إلغاء";
