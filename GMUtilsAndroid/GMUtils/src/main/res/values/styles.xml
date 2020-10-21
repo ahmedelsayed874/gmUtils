@@ -1,0 +1,304 @@
+<resources xmlns:tool="http://schemas.android.com/tools">
+
+    <style name="AppThemeDarkActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">@dimen/font_16</item>
+
+        <item name="android:scrollbars">none</item>
+        <item name="android:scrollbarSize">@dimen/size_2</item>
+
+    </style>
+
+    <style name="AppThemeDarkActionBar.Translucent">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="AppThemeDarkActionBar.Translucent.NavAlso">
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+
+    <style name="AppThemeNoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:textSize">@dimen/font_16</item>
+        <item name="android:textColor">@color/text</item>
+
+        <item name="android:scrollbars">none</item>
+        <item name="android:scrollbarSize">@dimen/size_2</item>
+
+    </style>
+
+    <style name="AppThemeNoActionBar.Translucent">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="AppThemeNoActionBar.Translucent.NavAlso">
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+
+    <style name="splashScreen" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+
+    <style name="clickable">
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:minWidth">@dimen/size_40</item>
+        <item name="android:minHeight">@dimen/size_40</item>
+    </style>
+
+
+    <style name="textView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+
+        <item name="android:paddingTop">@dimen/size_5</item>
+        <item name="android:paddingBottom">@dimen/size_5</item>
+        <item name="android:paddingStart">@dimen/size_5</item>
+        <item name="android:paddingEnd">@dimen/size_5</item>
+
+        <item name="android:textSize">@dimen/font_16</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:drawablePadding">@dimen/size_5</item>
+        <item name="android:gravity">center_vertical</item>
+        <!--<item name="android:textCursorDrawable">@drawable/cursor</item>-->
+    </style>
+
+    <style name="textView.pageTitle">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:minHeight">?actionBarSize</item>
+        <item name="android:textColor">@color/screenTitle</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/default_page_title_size</item>
+    </style>
+
+    <style name="textView.click_area">
+        <item name="android:minWidth">@dimen/size_40</item>
+        <item name="android:minHeight">@dimen/size_40</item>
+
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+    <style name="textView.click_area2">
+        <item name="android:minWidth">@dimen/size_40</item>
+        <item name="android:minHeight">@dimen/size_30</item>
+
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+    <style name="textView.click_effect">
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+
+        <item name="android:minWidth">@dimen/size_40</item>
+        <item name="android:minHeight">@dimen/size_30</item>
+
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+    <style name="textView.noPadding">
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+    <style name="textView.noTopBottomPadding">
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+    </style>
+
+    <style name="textView.noStartEndPadding">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+    <style name="textView.errorMsg">
+        <item name="android:textColor">@color/red</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:textSize">@dimen/font_12</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+
+    <style name="editText" parent="textView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:paddingBottom">@dimen/size_10</item>
+        <!--<item name="android:textCursorDrawable">@drawable/cursor</item>-->
+    </style>
+
+    <style name="editText.noPadding" parent="textView.noPadding" />
+
+    <style name="editText.frame">
+        <item name="android:background">@drawable/shape_solid_round_white_with_primarydark_frame
+        </item>
+        <item name="android:paddingStart">@dimen/size_10</item>
+        <item name="android:paddingEnd">@dimen/size_10</item>
+        <item name="android:paddingTop">@dimen/size_8</item>
+        <item name="android:paddingBottom">@dimen/size_8</item>
+    </style>
+
+    <style name="editText.frameDefault">
+        <item name="android:background">@drawable/shape_frame_round_primary</item>
+        <item name="android:paddingStart">@dimen/size_10</item>
+        <item name="android:paddingEnd">@dimen/size_10</item>
+        <item name="android:paddingTop">@dimen/size_8</item>
+        <item name="android:paddingBottom">@dimen/size_8</item>
+    </style>
+
+    <style name="editText.frameGray">
+        <item name="android:background">@drawable/shape_solid_round_white_with_gray_frame</item>
+        <item name="android:paddingStart">@dimen/size_10</item>
+        <item name="android:paddingEnd">@dimen/size_10</item>
+        <item name="android:paddingTop">@dimen/size_8</item>
+        <item name="android:paddingBottom">@dimen/size_8</item>
+    </style>
+
+    <style name="editText.frameRed">
+        <item name="android:background">@drawable/shape_frame_round_color_accent</item>
+        <item name="android:paddingStart">@dimen/size_10</item>
+        <item name="android:paddingEnd">@dimen/size_10</item>
+        <item name="android:paddingTop">@dimen/size_8</item>
+        <item name="android:paddingBottom">@dimen/size_8</item>
+    </style>
+
+
+    <style name="button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">@dimen/size_10</item>
+        <item name="android:paddingEnd">@dimen/size_10</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="button.black">
+        <item name="android:background">@color/black</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="button.green">
+        <item name="android:background">@color/green5</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="button.white">
+        <item name="android:background">@color/white</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="button.blue">
+        <item name="android:background">@color/blue1</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="button.default">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="button.red">
+        <item name="android:background">@color/red</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    
+    <style name="imageView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="imageView.clickSpace">
+        <item name="android:minWidth">@dimen/size_30</item>
+        <item name="android:minHeight">@dimen/size_30</item>
+        <item name="android:scaleType">center</item>
+
+    </style>
+
+    <style name="imageView.clickable">
+        <item name="android:minWidth">@dimen/size_30</item>
+        <item name="android:minHeight">@dimen/size_30</item>
+        <item name="android:scaleType">center</item>
+
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+
+    <style name="horizontal_line">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/size_1</item>
+        <item name="android:background">@color/gray1</item>
+    </style>
+
+    <style name="vertical_line">
+        <item name="android:layout_width">@dimen/size_1</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/gray1</item>
+    </style>
+
+
+    <style name="ratingBar" parent="Widget.AppCompat.RatingBar.Small">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:max">5</item>
+        <item name="android:progressTint" tool:targetApi="lollipop">@color/ratingBar</item>
+        <!--        <item name="android:progressBackgroundTint">@color/yellow</item>-->
+    </style>
+
+    <style name="ratingBar.ar">
+        <item name="android:rotation">180</item>
+        <item name="android:rotationX">-180</item>
+    </style>
+
+    <style name="ratingBarSmall" parent="Widget.AppCompat.RatingBar.Indicator">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:isIndicator">false</item>
+    </style>
+
+    <style name="ratingBarSmall.ar">
+        <item name="android:rotation">180</item>
+        <item name="android:rotationX">-180</item>
+    </style>
+
+    <style name="ratingBarBig" parent="Widget.AppCompat.RatingBar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:max">5</item>
+        <item name="android:progressTint" tool:targetApi="lollipop">@color/yellow</item>
+        <!--        <item name="android:progressBackgroundTint">@color/yellow</item>-->
+    </style>
+
+    <style name="ratingBarBig.ar">
+        <item name="android:rotation">180</item>
+        <item name="android:rotationX">-180</item>
+    </style>
+
+</resources>

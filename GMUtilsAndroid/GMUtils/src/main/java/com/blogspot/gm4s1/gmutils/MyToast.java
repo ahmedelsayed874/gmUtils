@@ -1,0 +1,134 @@
+package com.blogspot.gm4s1.gmutils;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Color;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.AnyRes;
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.StringRes;
+
+/**
+ * Created by Ahmed El-Sayed (Glory Maker)
+ * Computer Engineer / 2012
+ * Android/iOS Developer with (Java/Kotlin, Swift)
+ * Have experience with:
+ *      - (C/C++, C#) languages
+ *      - .NET environment
+ *      - AVR Microcontrollers
+ * a.elsayedabdo@gmail.com
+ * +201022663988
+ */
+public class MyToast {
+    public static Boolean DEFAULT_STYLE = true;
+
+    @AnyRes
+    public static Integer BACKGROUND = android.R.color.black;
+    @ColorInt
+    public static Integer TEXT_COLOR = Color.WHITE;
+
+    @AnyRes
+    public static Integer ERROR_BACKGROUND = android.R.color.holo_red_dark;
+    @ColorInt
+    public static Integer ERROR_TEXT_COLOR = Color.WHITE;
+
+    //----------------------------------------------------------------------------------------------
+
+    private Toast toast;
+    private View view;
+    private TextView tv;
+
+    public MyToast(Context context, @StringRes int msg) {
+        this(context, msg, true);
+    }
+
+    public MyToast(Context context, @StringRes int msg, boolean defaultStyle) {
+        this(context, context.getString(msg), defaultStyle);
+    }
+
+    @SuppressLint("ShowToast")
+    public MyToast(Context context, CharSequence msg) {
+        this(context, msg, true);
+    }
+
+    @SuppressLint("ShowToast")
+    public MyToast(Context context, CharSequence msg, boolean defaultStyle) {
+        toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
+
+        view = toast.getView();
+        view = ((ViewGroup) view).getChildAt(0);
+
+        tv = ((TextView) view);
+        tv.setGravity(Gravity.CENTER);
+
+        if (!defaultStyle) {
+            setBackground(BACKGROUND);
+            setTextColor(TEXT_COLOR);
+        }
+    }
+
+    public MyToast setBackground(@AnyRes int bg) {
+        view.setBackgroundResource(bg);
+
+        int plr = view.getContext().getResources().getDimensionPixelOffset(R.dimen.size_10);
+        int ptd = 0;
+
+        tv.setPadding(plr, ptd, plr, ptd);
+
+        return this;
+    }
+
+    public MyToast setTextColor(@ColorInt int textColor) {
+        tv.setTextColor(textColor);
+        return this;
+    }
+
+    public MyToast show() {
+        try {
+            toast.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public static void show(Context context, @StringRes int msg) {
+        show(context, context.getString(msg), null, null);
+    }
+
+    public static void show(Context context, CharSequence msg) {
+        show(context, msg, null, null);
+    }
+
+    public static void show(Context context, CharSequence msg, @AnyRes Integer bg) {
+        show(context, msg, bg, null);
+    }
+
+    public static void show(Context context, CharSequence msg, @AnyRes Integer bg, @ColorInt Integer textColor) {
+        MyToast toast = new MyToast(context, msg, DEFAULT_STYLE);
+        if (bg != null) {
+            toast.setBackground(bg);
+        }
+        if (textColor != null) {
+            toast.setTextColor(textColor);
+        }
+        toast.show();
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public static void showError(Context context, CharSequence msg) {
+        show(context, msg, ERROR_BACKGROUND, ERROR_TEXT_COLOR);
+    }
+
+    public static void showError(Context context, @StringRes int msg) {
+        show(context, context.getString(msg), ERROR_BACKGROUND, ERROR_TEXT_COLOR);
+    }
+}

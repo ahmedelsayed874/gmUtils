@@ -1,0 +1,3 @@
+include ':GMUtils'
+include ':app'
+rootProject.name = "GMUtileExample"

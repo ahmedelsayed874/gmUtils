@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name" translatable="false">GM-Utils</string>
+
+    <string name="wait_moments">Please wait..</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
+    <string name="skip">Skip</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="continue_">Continue</string>
+    <string name="save">Save</string>
+    <string name="close">Close</string>
+    <string name="finish">Finish</string>
+
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+    <string name="remove">Remove</string>
+
+    <string name="login">Login</string>
+
+    <string name="email">E-mail</string>
+    <string name="email_">E-mail:</string>
+    <string name="type_valid_email">Type valid E-mail address</string>
+
+    <string name="password">Password</string>
+    <string name="passwordـ">Password:</string>
+    <string name="type_valid_password">Type valid password (6-characters at least)</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="change_password">Change Password</string>
+    <string name="current_password">Current Password</string>
+    <string name="current_passwordـ">Current Password:</string>
+    <string name="new_password">New Password</string>
+    <string name="new_passwordـ">New Password:</string>
+    <string name="password_confirm">Confirm Password</string>
+    <string name="password_confirm_">Confirm Password</string>
+    <string name="type_valid_password_confirm">Password isn\'t match</string>
+    <string name="reset_password">Reset Password</string>
+
+    <string name="mobile">Mobile</string>
+    <string name="mobile_">Mobile:</string>
+    <string name="type_valid_mobile">Type valid mobil number with 11 digits at least (ex. 01234567890)</string>
+
+    <string name="name">Name</string>
+    <string name="name_">Name:</string>
+    <string name="first_name">First Name</string>
+    <string name="first_name_">First Name:</string>
+    <string name="last_name">Last Name</string>
+    <string name="last_name_">Last Name:</string>
+    <string name="type_valid_name">Type valid name (3-letters at least)</string>
+
+    <string name="review_mentioned_errors">Review mentioned errors</string>
+    <string name="check_mentioned_errors">Check mentioned errors</string>
+
+    <string name="register">Register</string>
+    <string name="main">Main</string>
+    <string name="home">Home</string>
+    <string name="logout">Logout</string>
+    <string name="profile">Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+
+    <string name="gender">Gender</string>
+    <string name="gender_">Gender:</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="dontShowAgain">Don\'t show again</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
+
+
+</resources>

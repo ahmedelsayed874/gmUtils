@@ -1,0 +1,112 @@
+package com.blogspot.gm4s1.gmutils;
+
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by Ahmed El-Sayed (Glory Maker)
+ * Computer Engineer / 2012
+ * Android/iOS Developer with (Java/Kotlin, Swift)
+ * Have experience with:
+ *      - (C/C++, C#) languages
+ *      - .NET environment
+ *      - AVR Microcontrollers
+ * a.elsayedabdo@gmail.com
+ * +201022663988
+ */
+public class LooperThread extends Thread {
+    public interface MessageHandler {
+        void onMessageHandled(Message msg, int handledMessageCount, int totalMessageCount);
+    }
+
+    private MessageHandler onMessageHandled;
+
+    private MyHandler handler = null;
+    private List<Message> unHandledMessages = new ArrayList<>();
+    private int totalMsgCount = 0;
+    private int handledMsgCount = 0;
+
+    public LooperThread(MessageHandler onMessageHandled) {
+        this(null, onMessageHandled);
+    }
+
+    public LooperThread(String threadName, MessageHandler onMessageHandled) {
+        this.onMessageHandled = onMessageHandled;
+
+        start();
+
+        setName(TextUtils.isEmpty(threadName) ? getClass().getSimpleName() + hashCode() : threadName);
+    }
+
+    @Override
+    public void run() {
+        Looper.prepare();
+
+        handler = new MyHandler(msg -> {
+            handledMsgCount++;
+            onMessageHandled.onMessageHandled(msg, handledMsgCount, totalMsgCount);
+        });
+
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (Message msg : unHandledMessages) {
+            sendMessage(msg);
+        }
+
+        unHandledMessages.clear();
+
+        Looper.loop();
+    }
+
+    public void sendMessage(Message msg) {
+        if (handler != null) {
+            totalMsgCount++;
+            handler.sendMessage(msg);
+
+        } else {
+            unHandledMessages.add(msg);
+        }
+    }
+
+    public void quit() {
+        handler.destroy();
+        handler = null;
+        onMessageHandled = null;
+    }
+
+    public static class MyHandler extends Handler {
+        public interface MessageHandler {
+            void onMessageHandled(Message msg);
+        }
+
+        private MessageHandler onMessageHandled;
+
+        MyHandler(MessageHandler onMessageHandled){
+            this.onMessageHandled = onMessageHandled;
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            onMessageHandled.onMessageHandled(msg);
+        }
+
+        void destroy() {
+            try { getLooper().quitSafely(); } catch (Exception e) { e.printStackTrace(); }
+
+            onMessageHandled = null;
+        }
+    }
+}
+
+

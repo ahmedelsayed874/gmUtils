@@ -1,0 +1,530 @@
+package com.blogspot.gm4s1.gmutils;
+
+import android.Manifest;
+import android.app.Activity;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.text.TextUtils;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.RequiresPermission;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by Ahmed El-Sayed (Glory Maker)
+ * Computer Engineer / 2012
+ * Android/iOS Developer with (Java/Kotlin, Swift)
+ * Have experience with:
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
+ * a.elsayedabdo@gmail.com
+ * +201022663988
+ */
+public class FileUtils {
+
+    public static FileUtils createInstance() {
+        return new FileUtils();
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public File createFileOnStorage(Context context, String dirName, String fileName, String fileExtension) {
+        if (dirName == null) dirName = "";
+
+        File root = Environment.getExternalStorageDirectory();
+        File dir = new File(root, dirName);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                root = context.getExternalFilesDir(null);
+                dir = new File(root, dirName);
+                if (!dir.exists()) {
+                    if (!dir.mkdirs()) {
+                        return null;
+                    }
+                }
+            }
+        }
+
+        if (TextUtils.isEmpty(fileName)) {
+            Date now = new Date();
+            fileName = android.text.format.DateFormat.format("yyyyMMddhhmmss", now).toString();
+        }
+
+        File file = new File(dir, fileName + "." + fileExtension);
+        if (!file.exists()) {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                file.createNewFile();
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
+        return file;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void createFileOnStorageUsingFileExplorer(Activity activity, String fileName, String fileExtension, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mimeType);//"application/pdf");
+        intent.putExtra(Intent.EXTRA_TITLE, fileName + "." + fileExtension);//"invoice.pdf");
+
+        // Optionally, specify a URI for the directory that should be opened in
+        // the system file picker when your app creates the document.
+        if (pickerInitialUri != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
+            }
+        }
+
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            activity.startActivityForResult(intent, requestId);
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public boolean showFileExplorer(Activity activity, int requestId, String mimeType, @Nullable Uri pickerInitialUri) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mimeType);//"application/pdf");
+
+        // Optionally, specify a URI for the file that should appear in the
+        // system file picker when it loads.
+        if (pickerInitialUri != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
+            }
+        }
+
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            activity.startActivityForResult(intent, requestId);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean showFileExplorer(Activity activity, int requestCode, String mimetype) {
+        if (TextUtils.isEmpty(mimetype)) mimetype = "*/*";
+
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mimetype);
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            activity.startActivityForResult(intent, requestCode);
+            return true;
+        }
+
+        return false;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public void viewFileContent(Context context, Uri uri, String mimeType) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mimeType);
+
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            Intent chooser = Intent.createChooser(intent, context.getString(R.string.app_name));
+            context.startActivity(chooser);
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @RequiresPermission(value = Manifest.permission.READ_EXTERNAL_STORAGE)
+    public List<File> collectFiles(String[] extensions) {
+        List<File> fileList = new ArrayList<>();
+        File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
+        return findFiles(extensions, dir, fileList);
+    }
+
+    private List<File> findFiles(String[] extensions, File dir, List<File> fileList) {
+        File[] listFile = dir.listFiles();
+        if (listFile != null && listFile.length > 0) {
+            for (File file : listFile) {
+                if (file.isDirectory()) {
+                    findFiles(extensions, file, fileList);
+                } else {
+                    for (String extension : extensions) {
+                        if (file.getName().endsWith(extension)) {
+                            fileList.add(file);
+                        }
+                    }
+                }
+            }
+        }
+        return fileList;
+    }
+
+    @RequiresPermission(value = Manifest.permission.READ_EXTERNAL_STORAGE)
+    public List<Uri> collectFiles(Context context, String[] mimeTypes) {
+        String[] projection = new String[]{
+                MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.MIME_TYPE,
+                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.Files.FileColumns.DATE_MODIFIED,
+                MediaStore.Files.FileColumns.DISPLAY_NAME,
+                MediaStore.Files.FileColumns.TITLE,
+                MediaStore.Files.FileColumns.SIZE
+        };
+
+        StringBuilder mimeTypesStr = new StringBuilder();
+        if (mimeTypes != null) {
+            for (String mimeType : mimeTypes) {
+                mimeTypesStr
+                        .append("'")
+                        .append(mimeType)
+                        .append("', ");
+            }
+
+            mimeTypesStr
+                    .deleteCharAt(mimeTypesStr.length() - 1)
+                    .deleteCharAt(mimeTypesStr.length() - 1);
+        }
+
+        String whereClause = MediaStore.Files.FileColumns.MIME_TYPE + " IN (" + mimeTypesStr + ")";
+        String orderBy = MediaStore.Files.FileColumns.TITLE + " ASC";
+
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Files.getContentUri("external"),
+                projection,
+                whereClause,
+                null,
+                orderBy
+        );
+
+        List<Uri> fileURIs = new ArrayList<>();
+
+        if (cursor != null) {
+            int idCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID);
+            int sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    Uri fileUri = Uri.withAppendedPath(
+                            MediaStore.Files.getContentUri("external"),
+                            cursor.getString(idCol)
+                    );
+
+                    fileURIs.add(fileUri);
+                } while (cursor.moveToNext());
+            }
+        }
+
+        return fileURIs;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public String findMimeType(String extension) {
+        Map<String, String> mimeTypes = new HashMap<>();
+
+        mimeTypes.put("bin", "application/octet-stream");
+        mimeTypes.put("asd", "application/astound");
+        mimeTypes.put("asn", "application/astound");
+        mimeTypes.put("lcc", "application/fastman");
+        mimeTypes.put("jar", "application/java-archive");
+        mimeTypes.put("ser", "application/java-serialized-object");
+        mimeTypes.put("class", "application/java-vm");
+        mimeTypes.put("hqx", "application/mac-binhex40");
+        mimeTypes.put("sit", "application/x-stuffit");
+        mimeTypes.put("mbd", "application/mbedlet");
+        mimeTypes.put("doc", "application/msword");
+        mimeTypes.put("rtf", "application/msword");
+        mimeTypes.put("wiz", "application/msword");
+        mimeTypes.put("dot", "application/msword");
+        mimeTypes.put("oda", "application/oda");
+        mimeTypes.put("pdf", "application/pdf");
+        mimeTypes.put("ps", "application/postscript");
+        mimeTypes.put("eps", "application/postscript");
+        mimeTypes.put("ai", "application/postscript");
+        mimeTypes.put("smp", "application/studiom");
+        mimeTypes.put("tbt", "application/timbuktu");
+        mimeTypes.put("xlt", "application/vnd.ms-excel");
+        mimeTypes.put("xlm", "application/vnd.ms-excel");
+        mimeTypes.put("xlc", "application/vnd.ms-excel");
+        mimeTypes.put("xla", "application/vnd.ms-excel");
+        mimeTypes.put("xlw", "application/vnd.ms-excel");
+        mimeTypes.put("xls", "application/vnd.ms-excel");
+        mimeTypes.put("pot", "application/vnd.ms-powerpoint");
+        mimeTypes.put("pps", "application/vnd.ms-powerpoint");
+        mimeTypes.put("ppt", "application/vnd.ms-powerpoint");
+        mimeTypes.put("mpp", "application/vnd.ms-project");
+        mimeTypes.put("hlp", "application/winhlp");
+        mimeTypes.put("js", "application/x-javascript");
+        mimeTypes.put("jsu", "application/x-javascript;charset=UTF-8");
+        mimeTypes.put("jnlp", "application/x-java-jnlp-file");
+        mimeTypes.put("aim", "application/x-aim");
+        mimeTypes.put("asp", "application/x-asap");
+        mimeTypes.put("csh", "application/x-csh");
+        mimeTypes.put("dvi", "application/x-dvi");
+        mimeTypes.put("etc", "application/x-earthtime");
+        mimeTypes.put("evy", "application/x-envoy");
+        mimeTypes.put("gtar", "application/x-gtar");
+        mimeTypes.put("cpio", "application/x-cpio");
+        mimeTypes.put("hdf", "application/x-hdf");
+        mimeTypes.put("latex", "application/x-latex");
+        mimeTypes.put("jsc", "application/x-javascript-config");
+        mimeTypes.put("fm", "application/x-maker");
+        mimeTypes.put("mif", "application/x-mif");
+        mimeTypes.put("mi", "application/x-mif");
+        mimeTypes.put("mocha", "application/x-mocha");
+        mimeTypes.put("moc", "application/x-mocha");
+        mimeTypes.put("mdb", "application/x-msaccess");
+        mimeTypes.put("crd", "application/x-mscardfile");
+        mimeTypes.put("clp", "application/x-msclip");
+        mimeTypes.put("m13", "application/x-msmediaview");
+        mimeTypes.put("m14", "application/x-msmediaview");
+        mimeTypes.put("wmf", "application/x-msmetafile");
+        mimeTypes.put("mny", "application/x-msmoney");
+        mimeTypes.put("pub", "application/x-mspublisher");
+        mimeTypes.put("scd", "application/x-msschedule");
+        mimeTypes.put("trm", "application/x-msterminal");
+        mimeTypes.put("wri", "application/x-mswrite");
+        mimeTypes.put("ins", "application/x-NET-Install");
+        mimeTypes.put("nc", "application/x-netcdf");
+        mimeTypes.put("cdf", "application/x-netcdf");
+        mimeTypes.put("proxy", "application/x-ns-proxy-autoconfig");
+        mimeTypes.put("slc", "application/x-salsa");
+        mimeTypes.put("sh", "application/x-sh");
+        mimeTypes.put("shar", "application/x-shar");
+        mimeTypes.put("spr", "application/x-sprite");
+        mimeTypes.put("sprite", "application/x-sprite");
+        mimeTypes.put("tar", "application/x-tar");
+        mimeTypes.put("tcl", "application/x-tcl");
+        mimeTypes.put("pl", "application/x-perl");
+        mimeTypes.put("tex", "application/x-tex");
+        mimeTypes.put("texinfo", "application/x-texinfo");
+        mimeTypes.put("texi", "application/x-texinfo");
+        mimeTypes.put("tbp", "application/x-timbuktu");
+        mimeTypes.put("tki", "application/x-tkined");
+        mimeTypes.put("tkined", "application/x-tkined");
+        mimeTypes.put("man", "application/x-troff-man");
+        mimeTypes.put("me", "application/x-troff-me");
+        mimeTypes.put("ms", "application/x-troff-ms");
+        mimeTypes.put("t", "application/x-troff");
+        mimeTypes.put("tr", "application/x-troff");
+        mimeTypes.put("roff", "application/x-troff");
+        mimeTypes.put("src", "application/x-wais-source");
+        mimeTypes.put("zip", "application/zip");
+        mimeTypes.put("enc", "application/pre-encrypted");
+        mimeTypes.put("crl", "application/x-pkcs7-crl");
+        mimeTypes.put("ckl", "application/x-fortezza-ckl");
+        mimeTypes.put("dtd", "application/xml-dtd");
+
+        mimeTypes.put("au", "audio/basic");
+        mimeTypes.put("snd", "audio/basic");
+        mimeTypes.put("es", "audio/echospeech");
+        mimeTypes.put("esl", "audio/echospeech");
+        mimeTypes.put("midi", "audio/midi");
+        mimeTypes.put("mid", "audio/midi");
+        mimeTypes.put("aif", "audio/x-aiff");
+        mimeTypes.put("aiff", "audio/x-aiff");
+        mimeTypes.put("aifc", "audio/x-aiff");
+        mimeTypes.put("wav", "audio/x-wav");
+        mimeTypes.put("ra", "audio/x-pn-realaudio");
+        mimeTypes.put("ram", "audio/x-pn-realaudio");
+        mimeTypes.put("pac", "audio/x-pac");
+        mimeTypes.put("pae", "audio/x-epac");
+        mimeTypes.put("lam", "audio/x-liveaudio");
+
+        mimeTypes.put("dwf", "drawing/x-dwf");
+
+        mimeTypes.put("fif", "image/fif");
+        mimeTypes.put("ico", "image/x-icon");
+        mimeTypes.put("gif", "image/gif");
+        mimeTypes.put("ief", "image/ief");
+        mimeTypes.put("ifs", "image/ifs");
+        mimeTypes.put("jpeg", "image/jpeg");
+        mimeTypes.put("jpg", "image/jpeg");
+        mimeTypes.put("jpe", "image/jpeg");
+        mimeTypes.put("jfif", "image/jpeg");
+        mimeTypes.put("pjpeg", "image/jpeg");
+        mimeTypes.put("pjp", "image/jpeg");
+        mimeTypes.put("png", "image/png");
+        mimeTypes.put("tiff", "image/tiff");
+        mimeTypes.put("tif", "image/tiff");
+        mimeTypes.put("dwg", "image/vnd");
+        mimeTypes.put("svf", "image/vnd");
+        mimeTypes.put("wi", "image/wavelet");
+        mimeTypes.put("bmp", "image/bmp");
+        mimeTypes.put("pcd", "image/x-photo-cd");
+        mimeTypes.put("ras", "image/x-cmu-raster");
+        mimeTypes.put("pnm", "image/x-portable-anymap");
+        mimeTypes.put("pbm", "image/x-portable-bitmap");
+        mimeTypes.put("pgm", "image/x-portable-graymap");
+        mimeTypes.put("ppm", "image/x-portable-pixmap");
+        mimeTypes.put("rgb", "image/x-rgb");
+        mimeTypes.put("xbm", "image/x-xbitmap");
+        mimeTypes.put("xpm", "image/x-xpixmap");
+        mimeTypes.put("xwd", "image/x-xwindowdump");
+
+        mimeTypes.put("css", "text/css");
+        mimeTypes.put("htm", "text/html");
+        mimeTypes.put("html", "text/html");
+        mimeTypes.put("txt", "text/plain");
+        mimeTypes.put("rtx", "text/richtext");
+        mimeTypes.put("tsv", "text/tab-separated-values");
+        mimeTypes.put("etx", "text/x-setext");
+        mimeTypes.put("talk", "text/x-speech");
+        mimeTypes.put("xml", "text/xml");
+        mimeTypes.put("xul", "text/xul");
+
+        mimeTypes.put("fvi", "video/isivideo");
+        mimeTypes.put("mpeg", "video/mpeg");
+        mimeTypes.put("mpg", "video/mpeg");
+        mimeTypes.put("mpe", "video/mpeg");
+        mimeTypes.put("mpv", "video/mpeg");
+        mimeTypes.put("vbs", "video/mpeg");
+        mimeTypes.put("mpegv", "video/mpeg");
+        mimeTypes.put("mpv2", "video/x-mpeg2");
+        mimeTypes.put("mp2v", "video/x-mpeg2");
+        mimeTypes.put("avi", "video/msvideo");
+        mimeTypes.put("qt", "video/quicktime");
+        mimeTypes.put("mov", "video/quicktime");
+        mimeTypes.put("moov", "video/quicktime");
+        mimeTypes.put("viv", "video/vivo");
+        mimeTypes.put("vivo", "video/vivo");
+        mimeTypes.put("wv", "video/wavelet");
+        mimeTypes.put("movie", "video/x-sgi-movie");
+
+        return mimeTypes.get(extension);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public String getPathFromUri(Context context, Uri uri) {
+
+        boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) { // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                String docId = DocumentsContract.getDocumentId(uri);
+                String[] split = docId.split(":");
+                String type = split[0];
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory().toString() + "/" + split[1];
+                }
+
+            } else if (isDownloadsDocument(uri)) {
+                String id = DocumentsContract.getDocumentId(uri);
+                Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"),
+                        Long.parseLong(id)
+                );
+                return getDataColumn(context, contentUri, null, null);
+
+            } else if (isMediaDocument(uri)) {
+                String docId = DocumentsContract.getDocumentId(uri);
+                String[] split = docId.split(":");
+                String type = split[0];
+                Uri contentUri = null;
+                if ("image".equalsIgnoreCase(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+                } else if ("video".equalsIgnoreCase(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+
+                } else if ("audio".equalsIgnoreCase(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+
+                String selection = "_id=?";
+                String[] selectionArgs = new String[]{split[1]};
+
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) { // Return the remote address
+            if (isGooglePhotosUri(uri))
+                return uri.getLastPathSegment();
+
+            else
+                return getDataColumn(
+                        context,
+                        uri,
+                        null,
+                        null
+                );
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    public String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+        Cursor cursor = null;
+        String column = "_data";
+        String[] projection = new String[]{column};
+
+        try {
+            cursor = context.getContentResolver().query(
+                    uri, projection, selection, selectionArgs,
+                    null
+            );
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+
+        return null;
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    public boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is Google Photos.
+     */
+    public boolean isGooglePhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
+
+}
