@@ -10,7 +10,7 @@
             android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center_vertical"
-            android:background="@drawable/shape_solid_round_red"
+            android:background="@drawable/shape_solid_round_primary"
             android:padding="@dimen/size_7">
 
         <ProgressBar

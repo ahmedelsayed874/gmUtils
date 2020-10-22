@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.blogspot.gm4s1.gmutils.AppLog;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
@@ -69,6 +70,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         return WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
     }
 
+    protected void onCreateViewModel(ViewModelProvider provider) {}
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (allowApplyingPreferenceLocale()) {
@@ -83,9 +86,17 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         super.onCreate(savedInstanceState);
         setContentView(getActivityLayout());
 
-//        if (getSupportActionBar() != null) {
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        }
+        //------------------------------------------------------------------------------------------
+
+        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
+                .AndroidViewModelFactory
+                .getInstance(getApplication());
+
+        ViewModelProvider viewModelProvider = new ViewModelProvider(
+                this,
+                viewModelFactory);
+
+        onCreateViewModel(viewModelProvider);
     }
 
 
@@ -149,6 +160,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     //------------------------------------------------------------------------------------------------------------------
+
+    public void showWaitView() {
+        showWaitView(0);
+    }
 
     @Override
     public void showWaitView(int msg) {

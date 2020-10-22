@@ -4,10 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 
 import com.blogspot.gm4s1.gmutils.R;
+import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -20,7 +23,7 @@ import com.blogspot.gm4s1.gmutils.R;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class WaitDialog {
+public class WaitDialog extends BaseDialog {
 
     public static WaitDialog show(Context context) {
         return show(context, R.string.wait_moments);
@@ -33,28 +36,34 @@ public class WaitDialog {
         return waitDialog;
     }
 
-    private AlertDialog dialog;
+    private View view;
     private TextView textView;
 
     public WaitDialog(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_wait, null);
+        super(context);
+        view = LayoutInflater.from(context).inflate(R.layout.dialog_wait, null);
         textView = view.findViewById(R.id.tv_msg);
+    }
 
-        dialog = new AlertDialog.Builder(context)
-                .setView(view)
-                .create();
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //setCancelable(false);
+        getDialog().setCanceledOnTouchOutside(false);
+    }
+
+    @NonNull
+    @Override
+    public View getView() {
+        return view;
     }
 
     public TextView textView() { return textView; }
 
-    public void show() {
-        if (!dialog.isShowing()) dialog.show();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        view = null;
+        textView = null;
     }
-
-    public void dismiss() {
-        if (dialog.isShowing()) dialog.dismiss();
-    }
-
 }

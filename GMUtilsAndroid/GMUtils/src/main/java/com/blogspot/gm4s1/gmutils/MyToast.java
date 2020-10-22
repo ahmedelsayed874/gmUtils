@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.AnyRes;
@@ -70,6 +71,20 @@ public class MyToast {
             setBackground(BACKGROUND);
             setTextColor(TEXT_COLOR);
         }
+
+        root.getViewTreeObserver().addOnWindowAttachListener(new ViewTreeObserver.OnWindowAttachListener() {
+            @Override
+            public void onWindowAttached() {
+
+            }
+
+            @Override
+            public void onWindowDetached() {
+                MyToast.this.toast = null;
+                MyToast.this.root = null;
+                MyToast.this.tv = null;
+            }
+        });
     }
 
     public MyToast setBackground(@AnyRes int bg) {

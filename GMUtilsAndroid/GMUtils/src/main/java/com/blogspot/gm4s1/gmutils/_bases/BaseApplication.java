@@ -43,7 +43,10 @@ public abstract class BaseApplication extends Application implements Application
 
         registerActivityLifecycleCallbacks(this);
 
+        onPostCreate();
     }
+
+    protected abstract void onPostCreate();
 
     public MessagingCenter getMessagingCenter() {
         return MessagingCenter.getInstance();

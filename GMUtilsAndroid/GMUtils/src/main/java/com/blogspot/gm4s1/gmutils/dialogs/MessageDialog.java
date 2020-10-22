@@ -4,6 +4,7 @@ package com.blogspot.gm4s1.gmutils.dialogs;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -18,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import com.blogspot.gm4s1.gmutils.R;
+import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.ActionListener;
 import com.blogspot.gm4s1.gmutils.listeners.ResultListener;
 import com.blogspot.gm4s1.gmutils.preferences.GeneralPreferences;
@@ -38,7 +40,7 @@ import java.sql.Array;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class MessageDialog {
+public class MessageDialog extends BaseDialog {
 
     public interface Listener {
         void invoke(MessageDialog dialog);
@@ -50,9 +52,9 @@ public class MessageDialog {
     }
 
 
-    private AlertDialog dialog;
-
+    private View view;
     private View lyContainer;
+    private TextView tvTitle;
     private TextView tvMsg;
     private View lyDontShowAgain;
     private TextView tvDontShowAgain;
@@ -67,9 +69,11 @@ public class MessageDialog {
 
 
     MessageDialog(Context context) {
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_message, null);
+        super(context);
+        view = LayoutInflater.from(context).inflate(R.layout.dialog_message, null);
 
         lyContainer = view.findViewById(R.id.lyContainer);
+        tvTitle = view.findViewById(R.id.tv_title);
         tvMsg = view.findViewById(R.id.tv_msg);
         lyDontShowAgain = view.findViewById(R.id.lyDontShowAgain);
         tvDontShowAgain = view.findViewById(R.id.tvDontShowAgain);
@@ -96,12 +100,12 @@ public class MessageDialog {
             dismiss();
         });
 
+    }
 
-        dialog = new AlertDialog.Builder(context)
-                .setView(view)
-                .create();
-
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+    @NonNull
+    @Override
+    public View getView() {
+        return view;
     }
 
     public MessageDialog setBackground(int resId) {
@@ -119,6 +123,19 @@ public class MessageDialog {
         tvButton2.setTextColor(color);
         tvButton3.setTextColor(color);
 
+        return this;
+    }
+
+
+    public MessageDialog setTitle(int msg) {
+        tvTitle.setText(msg);
+        tvTitle.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public MessageDialog setTitle(CharSequence msg) {
+        tvTitle.setText(msg);
+        tvTitle.setVisibility(View.VISIBLE);
         return this;
     }
 
@@ -141,6 +158,12 @@ public class MessageDialog {
 
     public MessageDialog setMessageGravity(int gravity) {
         tvMsg.setGravity(gravity);
+        return this;
+    }
+
+    public MessageDialog setMessageBold() {
+        Typeface typeface = tvMsg.getTypeface();
+        Typeface.create(typeface, Typeface.BOLD);
         return this;
     }
 
@@ -168,7 +191,7 @@ public class MessageDialog {
     }
 
     /**
-     * @param tag : unique number points to checkbox state
+     * @param tag      : unique number points to checkbox state
      * @param listener : sends {@MessageDialog, @Boolean that represents the result} and return an action indicator to remove saved tag or leave
      */
     public MessageDialog isDontShowAgainCheckboxDisabledByUser(int tag, ActionListener<Pair<MessageDialog, Boolean>, Boolean> listener) {
@@ -306,19 +329,36 @@ public class MessageDialog {
 
 
     public MessageDialog setCancelable(boolean cancellable) {
-        dialog.setCancelable(cancellable);
-        dialog.setCanceledOnTouchOutside(cancellable);
+        super.setCancelable(cancellable);
         return this;
     }
 
+    @Override
     public MessageDialog show() {
-        if (isShowingDisabled) return this;
-        if (!dialog.isShowing()) dialog.show();
+        super.show();
         return this;
     }
 
-    public void dismiss() {
-        if (dialog.isShowing()) dialog.dismiss();
-    }
+    //----------------------------------------------------------------------------------------------
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        this.view = null;
+        this.lyContainer = null;
+        this.tvTitle = null;
+        this.tvMsg = null;
+        this.lyDontShowAgain = null;
+        this.tvDontShowAgain = null;
+        this.chkDontShowAgain = null;
+        this.tvButton1 = null;
+        this.tvButton2 = null;
+        this.tvButton3 = null;
+
+        this.listenerBtn1 = null;
+        this.listenerBtn2 = null;
+        this.listenerBtn3 = null;
+    }
 }
