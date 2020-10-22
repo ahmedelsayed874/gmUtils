@@ -40,7 +40,7 @@ public class MyToast {
     //----------------------------------------------------------------------------------------------
 
     private Toast toast;
-    private View view;
+    private View root;
     private TextView tv;
 
     public MyToast(Context context, @StringRes int msg) {
@@ -57,25 +57,25 @@ public class MyToast {
     }
 
     @SuppressLint("ShowToast")
-    public MyToast(Context context, CharSequence msg, boolean defaultStyle) {
+    public MyToast(Context context, CharSequence msg, boolean systemStyle) {
         toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
 
-        view = toast.getView();
-        view = ((ViewGroup) view).getChildAt(0);
+        root = toast.getView();
+        View view = ((ViewGroup) root).getChildAt(0);
 
         tv = ((TextView) view);
         tv.setGravity(Gravity.CENTER);
 
-        if (!defaultStyle) {
+        if (!systemStyle) {
             setBackground(BACKGROUND);
             setTextColor(TEXT_COLOR);
         }
     }
 
     public MyToast setBackground(@AnyRes int bg) {
-        view.setBackgroundResource(bg);
+        root.setBackgroundResource(bg);
 
-        int plr = view.getContext().getResources().getDimensionPixelOffset(R.dimen.size_10);
+        int plr = root.getContext().getResources().getDimensionPixelOffset(R.dimen.size_10);
         int ptd = 0;
 
         tv.setPadding(plr, ptd, plr, ptd);

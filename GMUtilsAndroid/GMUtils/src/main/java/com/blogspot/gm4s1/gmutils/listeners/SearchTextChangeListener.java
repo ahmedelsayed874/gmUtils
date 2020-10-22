@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 
 import com.blogspot.gm4s1.gmutils.AppLog;
 import com.blogspot.gm4s1.gmutils.listeners.TextChangedListener;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -15,9 +16,9 @@ import java.lang.ref.WeakReference;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -26,9 +27,9 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
     public static SearchTextChangeListener create(OnChange change) {
         return create(1500, change);
     }
-    
+
     public static SearchTextChangeListener create(int delayOffset, OnChange change) {
-        return new SearchTextChangeListener() {
+        return new SearchTextChangeListener(delayOffset) {
 
             @Override
             public void onSearchTextUpdated(String text) {
@@ -55,10 +56,13 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
         if (delayOffset != null) this.delayOffset = delayOffset;
 
         handler = new Handler(Looper.getMainLooper());
-        taskRunnable = new TaskRunnable(this);
+
     }
 
     private void start() {
+        if (taskRunnable == null || taskRunnable.isCorrupted()) {
+            taskRunnable = new TaskRunnable(this);
+        }
         handler.postDelayed(taskRunnable, delayOffset);
         started = true;
     }
@@ -86,6 +90,11 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
 
             stcl.started = false;
         }
+
+        private boolean isCorrupted() {
+            SearchTextChangeListener stcl = stclRef.get();
+            return stcl == null;
+        }
     }
 
     public void setEnabled(boolean enabled) {
@@ -111,6 +120,7 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
     public void onTextChanged(String text) {
         if (!enabled) return;
         if (!started) start();
+        if (taskRunnable.isCorrupted()) started = false;
         currentInput = text;
     }
 
