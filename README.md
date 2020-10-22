@@ -15,7 +15,7 @@ My Stratigy in coding in simple:
 ---------------------------------------------
 
 for any question feel free to contact me on:
-a.elsayedabdo@gmail.com
-https://www.linkedin.com/in/ahmed-el-sayed-a9682a60
-https://www.facebook.com/eng.ahmedelsayedabdo12
-https://twitter.com/engahmedGM
+- a.elsayedabdo@gmail.com
+- https://www.linkedin.com/in/ahmed-el-sayed-a9682a60
+- https://www.facebook.com/eng.ahmedelsayedabdo12
+- https://twitter.com/engahmedGM
