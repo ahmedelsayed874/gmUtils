@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/default_margin"
+    tools:context=".ContactEditorActivity">
+
+    <!-- I just add this cardview to demonstrate how to draw a circle without other third-party library -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="@dimen/size_120"
+        android:layout_height="@dimen/size_120"
+        android:layout_gravity="center_horizontal"
+        android:padding="@dimen/size_60"
+        app:cardCornerRadius="@dimen/size_60"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="@dimen/size_80"
+            android:layout_height="@dimen/size_80"
+            android:layout_gravity="center"
+            android:src="@drawable/person"
+            app:civ_border_color="@color/black"
+            app:civ_border_width="@dimen/size_1" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/textView"
+        style="@style/textView"
+        android:layout_marginTop="@dimen/size_15"
+        android:text="@string/name_"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView" />
+
+    <EditText
+        android:id="@+id/editTextTime"
+        style="@style/editText.frameDefault"
+        android:minHeight="@dimen/size_40"
+        android:hint="@string/full_name"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+
+    <TextView
+        android:id="@+id/textView1"
+        style="@style/textView"
+        android:layout_marginTop="@dimen/size_15"
+        android:text="@string/email_"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editTextTime" />
+
+    <EditText
+        android:id="@+id/editTextTime1"
+        style="@style/editText.frameDefault"
+        android:minHeight="@dimen/size_40"
+        android:hint="@string/type_valid_email"
+        android:inputType="textEmailAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView1" />
+
+
+    <TextView
+        android:id="@+id/textView2"
+        style="@style/textView"
+        android:layout_marginTop="@dimen/size_15"
+        android:text="@string/mobile_"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTime1" />
+
+    <LinearLayout
+        android:id="@+id/dialNumberLy"
+        style="@style/editText.frameDefault"
+        android:layout_height="@dimen/size_40"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+        <ImageView
+            android:layout_width="@dimen/size_20"
+            android:layout_height="@dimen/size_15"
+            android:layout_marginEnd="@dimen/size_3"
+            android:src="@drawable/flag_eg" />
+
+        <AutoCompleteTextView
+            android:id="@+id/editTextTime21"
+            style="@style/editText.noPadding"
+            android:minWidth="@dimen/size_60"
+            android:background="@android:color/transparent"
+            android:layout_width="wrap_content"
+            android:text="+20"
+            tools:ignore="LabelFor" />
+
+        <ImageView
+            android:layout_width="@dimen/size_15"
+            android:layout_height="@dimen/size_15"
+            android:src="@drawable/dropdown_arrow" />
+
+    </LinearLayout>
+
+
+    <EditText
+        android:id="@+id/editTextTime22"
+        style="@style/editText.frameDefault"
+        android:minHeight="@dimen/size_40"
+        android:layout_width="0dp"
+        android:layout_marginStart="@dimen/size_8"
+        android:inputType="phone"
+        android:hint="@string/type_valid_phoneNumber2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/dialNumberLy"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+
+    <TextView
+        android:id="@+id/textView3"
+        style="@style/textView"
+        android:layout_marginTop="@dimen/size_15"
+        android:text="@string/passwordـ"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTime22" />
+
+    <EditText
+        android:id="@+id/editTextTime3"
+        style="@style/editText.frameDefault"
+        android:minHeight="@dimen/size_40"
+        android:inputType="textPassword"
+        android:hint="@string/type_valid_password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+    <Button
+        style="@style/button.default"
+        android:layout_marginTop="@dimen/size_50"
+        android:layout_marginBottom="@dimen/size_50"
+        android:text="@string/save"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTime3" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

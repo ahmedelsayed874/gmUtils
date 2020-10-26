@@ -4,13 +4,16 @@ package com.blogspot.gm4s1.gmutils;
 import android.Manifest;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.LayerDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -184,4 +187,20 @@ public class Utils {
         return integerNumber;
     }
 
+    //------------------------------------------------------------------------------------------
+
+    /**
+     * @return "android.resource://[package]/[res id]"
+     */
+    public Uri getResourceUri(Context context, int resourceId) {
+        Resources resources = context.getResources();
+        Uri uri = new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(resources.getResourcePackageName(resourceId))
+                .appendPath(resources.getResourceTypeName(resourceId))
+                .appendPath(resources.getResourceEntryName(resourceId))
+                .build();
+
+        return uri;
+    }
 }

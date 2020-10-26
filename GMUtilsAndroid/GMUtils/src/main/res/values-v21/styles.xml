@@ -21,8 +21,13 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="button.default">
+    <style name="button.primary">
         <item name="android:backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="button.default">
+        <item name="android:backgroundTint">@color/defaultColor</item>
         <item name="android:textColor">@color/white</item>
     </style>
 

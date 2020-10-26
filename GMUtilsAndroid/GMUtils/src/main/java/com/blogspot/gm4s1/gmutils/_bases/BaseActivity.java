@@ -289,7 +289,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (AppLog.WRITE_TO_FILE_ENABLED) {
+        if (AppLog.WRITE_TO_FILE_ENABLED()) {
             if (showBugsMenuItemId == 0) {
                 showBugsMenuItemId = "Show Bug Log".hashCode();
                 if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;

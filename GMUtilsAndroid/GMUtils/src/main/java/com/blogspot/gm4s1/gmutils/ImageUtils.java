@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -294,7 +295,7 @@ public class ImageUtils {
 
     //------------------------------------------------------------------------------------------
 
-    public class SaveBitmapToDevice extends AsyncTask<Bitmap, Void, String> {
+    public static class SaveBitmapToDevice extends AsyncTask<Bitmap, Void, String> {
         ContentResolver contentResolver;
         String title, description;
         boolean savedOnSD;

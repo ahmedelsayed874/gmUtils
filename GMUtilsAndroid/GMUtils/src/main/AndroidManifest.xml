@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true">
 
-        <provider
+        <!-- <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.blogspot.gm4s1.gmutils.fileprovider"
             android:exported="false"
@@ -18,7 +18,7 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider>
+        </provider> -->
 
 
     </application>

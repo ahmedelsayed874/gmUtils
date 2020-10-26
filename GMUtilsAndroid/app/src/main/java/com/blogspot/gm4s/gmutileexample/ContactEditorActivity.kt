@@ -4,11 +4,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener
 
-class MainActivity : AppCompatActivity() {
+class ContactEditorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_contact_editor)
 
     }
 }

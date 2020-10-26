@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
+import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
@@ -35,6 +36,10 @@ public class ImageLoader {
     private static Integer sMinSize;
     public static int DEFAULT_LOADING_PLACEHOLDER = android.R.drawable.stat_sys_download;
     public static int DEFAULT_ERROR_PLACEHOLDER = android.R.drawable.stat_notify_error;
+    public static long CACHE_SIZE_IN_BYTES = 50 /*mega*/ * 1024 /*kb*/ * 1024 /*byte*/;
+    public static void CACHE_SIZE_IN_BYTES(int mega) {
+        CACHE_SIZE_IN_BYTES = mega * 1024 /*kb*/ * 1024 /*byte*/;
+    }
 
 
     public static void load(String url, ImageView imageView) {
@@ -127,14 +132,15 @@ public class ImageLoader {
             e.printStackTrace();
         }
 
+        Cache cache = new Cache(context.getCacheDir(), CACHE_SIZE_IN_BYTES);
+        client.setCache(cache);
+
+        OkHttpDownloader okHttpDownloader = new OkHttpDownloader(client);
+
         Picasso instance = new Picasso.Builder(context)
-                .downloader(new OkHttpDownloader(client))
-                .listener(new Picasso.Listener() {
-                    @Override
-                    public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                        Log.e("PICASSO", exception.getMessage());
-                    }
-                }).build();
+                .downloader(okHttpDownloader)
+                .listener((picasso, uri, exception) -> Log.e("PICASSO", exception.getMessage()))
+                .build();
 
         return instance;
     }

@@ -39,6 +39,12 @@
     <string name="mobile">رقم الموبايل</string>
     <string name="mobile_">رقم الموبايل:</string>
     <string name="type_valid_mobile">اكتب رقم موبايل يتكون من ١١ ارقام على الأقل (مثال: ٠١٢٣٤٥٦٧٨٩٠)</string>
+    <string name="type_valid_mobile2">اكتب رقم هاتف صحيح</string>
+
+    <string name="phoneNumber">رقم الهاتف</string>
+    <string name="phoneNumber_">رقم الهاتف:</string>
+    <string name="type_valid_phoneNumber">اكتب رقم هاتف يتكون من ١١ ارقام على الأقل (مثال: ٠١٢٣٤٥٦٧٨٩٠)</string>
+    <string name="type_valid_phoneNumber2">اكتب رقم هاتف صحيح</string>
 
     <string name="name">الإسم</string>
     <string name="name_">الإسم:</string>

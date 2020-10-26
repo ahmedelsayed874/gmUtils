@@ -19,6 +19,11 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
+    <style name="AppThemeDarkActionBar.FullScreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
     <style name="AppThemeDarkActionBar.Translucent.NavAlso">
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
@@ -41,6 +46,11 @@
     <style name="AppThemeNoActionBar.Translucent">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="AppThemeNoActionBar.FullScreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <style name="AppThemeNoActionBar.Translucent.NavAlso">
@@ -216,8 +226,13 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="button.default">
+    <style name="button.primary">
         <item name="android:background">@color/colorPrimary</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="button.default">
+        <item name="android:background">@color/defaultColor</item>
         <item name="android:textColor">@color/white</item>
     </style>
 

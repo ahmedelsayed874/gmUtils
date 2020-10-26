@@ -45,9 +45,9 @@ import java.util.Locale;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -139,9 +139,10 @@ public class Intents {
     }
 
     public static class ImageIntents {
+
         private File createImageFile(Context context, boolean inCache) throws IOException {
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
-            String imageFileName = "JPEG_" + timeStamp + "_";
+            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH).format(new Date());
+            String imageFileName = timeStamp + "_";
             File storageDir = inCache ? context.getCacheDir() : context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
             File image = File.createTempFile(
                     imageFileName,  /* prefix */
@@ -155,74 +156,83 @@ public class Intents {
         /**
          * must add in manifest
          * <provider
-         *          android:name="androidx.core.content.FileProvider"
-         *          android:authorities="APP_PACKAGE_NAME.fileprovider"
-         *          android:exported="false"
-         *          android:grantUriPermissions="true">
-         *          <meta-data
-         *              android:name="android.support.FILE_PROVIDER_PATHS"
-         *              android:resource="@xml/file_paths" />
+         * android:name="androidx.core.content.FileProvider"
+         * android:authorities="APP_PACKAGE_NAME.fileprovider"
+         * android:exported="false"
+         * android:grantUriPermissions="true">
+         * <meta-data
+         * android:name="android.support.FILE_PROVIDER_PATHS"
+         * android:resource="@xml/file_paths" />
          * </provider>
-         *
+         * <p>
          * ------------------------------------------------------------------
          * add this this text to xml/file_paths
-         *
+         * <p>
          * <?xml version="1.0" encoding="utf-8"?>
          * <paths xmlns:android="http://schemas.android.com/apk/res/android">
-         *     <files-path name="my_images" path="Pictures/" />
-         *     <external-files-path name="my_images" path="Pictures/" />
+         * <files-path name="my_images" path="Pictures/" />
+         * <external-files-path name="my_images" path="Pictures/" />
          * </paths>
          *
          * @param context
          * @param file
          * @return
          */
-        private Uri createFileUri(Context context, File file, boolean useAppPackage) {
-            if (!useAppPackage) {
-                try {
-                    ComponentName cm = new ComponentName(context, "androidx.core.content.FileProvider");
-                    ProviderInfo providerInfo = context.getPackageManager().getProviderInfo(cm, 0);
-                    if (providerInfo.authority.contains(context.getPackageName()))
-                        throw new Exception();
-                } catch (Exception e) {//(PackageManager.NameNotFoundException e) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("please create a file in 'res/xml' path with a name of 'file_paths' or whatever you want");
-                    sb.append("\n");
-                    sb.append("this file will contain the following:");
-                    sb.append("\n");
-                    sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-                    sb.append("<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">");
-                    sb.append("\n\t<files-path name=\"my_images\" path=\"Pictures/\" />");
-                    sb.append("\n\t<external-files-path name=\"my_images\" path=\"Pictures/\" />");
-                    sb.append("\n");
-                    sb.append("</paths>\n");
-                    sb.append("-----------------------------------------------------");
-                    sb.append("\n\n");
-                    sb.append("then add The following to your manifest file:");
-                    sb.append("\n");
-                    sb.append("<provider");
-                    sb.append("\n\tandroid:name=\"androidx.core.content.FileProvider\"");
-                    sb.append("\n\tandroid:authorities=\"APP_PACKAGE_NAME.fileprovider\"");
-                    sb.append("\n\tandroid:exported=\"false\"");
-                    sb.append("\n\tandroid:grantUriPermissions=\"true\">");
-                    sb.append("\n\t<meta-data");
-                    sb.append("\n\t\tandroid:name=\"android.support.FILE_PROVIDER_PATHS\"");
-                    sb.append("\n\t\tandroid:resource=\"@xml/file_paths\" />\n");
-                    sb.append("</provider>");
-                    sb.append("\n");
-                    sb.append("\n----------------------------------------------------");
-                    sb.append("\n");
-                    sb.append("\nmake sure to replace APP_PACKAGE_NAME with your own package name; ex: (com.example)");
+        private Uri createFileUri(Context context, File file) {
+            try {
+                ComponentName cm = new ComponentName(context, "androidx.core.content.FileProvider");
+                ProviderInfo providerInfo = context.getPackageManager().getProviderInfo(cm, 0);
+                String authority = providerInfo.authority;
+                return FileProvider.getUriForFile(context, authority, file);
 
-                    throw new IllegalArgumentException(sb.toString());
-                }
+            } catch (Exception e) {//(PackageManager.NameNotFoundException e) {
+                String er = e.getMessage() + "\n---------------------------------\n" + getFileProviderExceptionMessage();
+                throw new IllegalArgumentException(er);
             }
 
-            String authority = context == null ?
-                    "com.blogspot.gm4s1.gmutils.fileprovider" :
-                    context.getPackageName() + ".fileprovider";
+            /*try {
+                String authority = context.getPackageName() + ".fileprovider";
+                return FileProvider.getUriForFile(context, authority, file);
+            } catch (Exception e) {
+                String er = e.getMessage() + "\n---------------------------------\n" + getFileProviderExceptionMessage();
+                throw new IllegalArgumentException(er);
+            }*/
+        }
 
-            return FileProvider.getUriForFile(context, authority, file);
+        private String getFileProviderExceptionMessage() {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("please create a file in 'res/xml' path with a name of 'file_paths' or whatever you want");
+            sb.append("\n");
+            sb.append("this file will contain the following: (for example) .. (I already created one for you)");
+            sb.append("\n");
+            sb.append("check this for more info: https://developer.android.com/reference/androidx/core/content/FileProvider");
+            sb.append("\n");
+            sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+            sb.append("<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">");
+            sb.append("\n\t<files-path name=\"images\" path=\"Pictures/\" />");
+            sb.append("\n\t<external-files-path name=\"images\" path=\"Pictures/\" />");
+            sb.append("\n");
+            sb.append("</paths>\n");
+            sb.append("-----------------------------------------------------");
+            sb.append("\n\n");
+            sb.append("then add The following to your manifest file:");
+            sb.append("\n");
+            sb.append("<provider");
+            sb.append("\n\tandroid:name=\"androidx.core.content.FileProvider\"");
+            sb.append("\n\tandroid:authorities=\"APP_PACKAGE_NAME.fileprovider\"");
+            sb.append("\n\tandroid:exported=\"false\"");
+            sb.append("\n\tandroid:grantUriPermissions=\"true\">");
+            sb.append("\n\t<meta-data");
+            sb.append("\n\t\tandroid:name=\"android.support.FILE_PROVIDER_PATHS\"");
+            sb.append("\n\t\tandroid:resource=\"@xml/file_paths\" />\n");
+            sb.append("</provider>");
+            sb.append("\n");
+            sb.append("\n----------------------------------------------------");
+            sb.append("\n");
+            sb.append("\nmake sure to replace APP_PACKAGE_NAME with your own package name; ex: (com.example)");
+
+            return sb.toString();
         }
 
         //------------------------------------------------------------------------------------------
@@ -269,10 +279,6 @@ public class Intents {
 
         //@RequiresPermission(allOf = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE})
         public Uri takePicture(Activity activity, int requestCode) {
-            return takePicture(activity, requestCode, false);
-        }
-
-        public Uri takePicture(Activity activity, int requestCode, boolean useAppPackage) {
             if (!checkPermissionForCamera(activity, requestCode)) return null;
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -284,7 +290,7 @@ public class Intents {
                 }
 
                 if (photoFile != null) {
-                    Uri photoURI = createFileUri(activity, photoFile, useAppPackage);
+                    Uri photoURI = createFileUri(activity, photoFile);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                     activity.startActivityForResult(takePictureIntent, requestCode);
@@ -298,10 +304,6 @@ public class Intents {
 
         //@RequiresPermission(allOf = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE})
         public Uri takePicture(Fragment fragment, int requestCode) {
-            return takePicture(fragment, requestCode, false);
-        }
-
-        public Uri takePicture(Fragment fragment, int requestCode, boolean useAppPackage) {
             if (!checkPermissionForCamera(fragment.getActivity(), requestCode)) return null;
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -313,7 +315,7 @@ public class Intents {
                 }
 
                 if (photoFile != null) {
-                    Uri photoURI = createFileUri(fragment.getContext(), photoFile, useAppPackage);
+                    Uri photoURI = createFileUri(fragment.getContext(), photoFile);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                     fragment.startActivityForResult(takePictureIntent, requestCode);
@@ -356,21 +358,13 @@ public class Intents {
         }
 
         public void showImage(ImageView imageView) {
-            showImage(imageView, false);
-        }
-
-        public void showImage(ImageView imageView, boolean useAppPackage) {
             Drawable drawable = imageView.getDrawable();
             if (drawable != null) {
-                showImage(imageView.getContext(), ((BitmapDrawable) drawable).getBitmap(), useAppPackage);
+                showImage(imageView.getContext(), ((BitmapDrawable) drawable).getBitmap());
             }
         }
 
         public boolean showImage(Context context, Bitmap image) {
-            return showImage(context, image, false);
-        }
-
-        public boolean showImage(Context context, Bitmap image, boolean useAppPackage) {
             File imgFile = null;
             try {
                 imgFile = createImageFile(context, true);
@@ -392,7 +386,7 @@ public class Intents {
             }
 
             if (imgFile != null) {
-                Uri imgUri = createFileUri(context, imgFile, useAppPackage);
+                Uri imgUri = createFileUri(context, imgFile);
 
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
@@ -411,21 +405,13 @@ public class Intents {
         }
 
         public void shareImage(ImageView imageView, String text) {
-            shareImage(imageView, text, false);
-        }
-
-        public void shareImage(ImageView imageView, String text, boolean useAppPackage) {
             Bitmap bitmap = ImageUtils.createInstance().getBitmap(imageView);
             if (bitmap != null) {
-                shareImage(imageView.getContext(), bitmap, text, useAppPackage);
+                shareImage(imageView.getContext(), bitmap, text);
             }
         }
 
         public void shareImage(Context context, Bitmap image, String text) {
-            shareImage(context, image, text, false);
-        }
-
-        public void shareImage(Context context, Bitmap image, String text, boolean useAppPackage) {
             File imgFile = null;
             try {
                 imgFile = createImageFile(context, true);
@@ -447,7 +433,7 @@ public class Intents {
             }
 
             if (imgFile != null) {
-                Uri imgUri = createFileUri(context, imgFile, useAppPackage);
+                Uri imgUri = createFileUri(context, imgFile);
 
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_SEND);

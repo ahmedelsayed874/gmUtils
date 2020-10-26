@@ -21,22 +21,29 @@ import java.util.Locale;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
 public class AppLog {
     public static DateOp DEADLINE = DateOp.getInstance(
-            "20-07-2020 00:00:00",
+            "20-10-2020 00:00:00",
             DateOp.PATTERN_dd_MM_yyyy_HH_mm_ss);
 
-    public static boolean DEBUG_MODE =
-            DateOp.getInstance().getTimeInMillis() <=
-                    DEADLINE.getTimeInMillis();
+    public static boolean DEBUG_MODE() {
+        return System.currentTimeMillis() <= DEADLINE.getTimeInMillis();
+    }
 
-    public static boolean WRITE_TO_FILE_ENABLED = DEBUG_MODE;
+    public static Boolean WRITE_TO_FILE_ENABLED = null;
+
+    public static boolean WRITE_TO_FILE_ENABLED() {
+        if (WRITE_TO_FILE_ENABLED == null) return DEBUG_MODE();
+        return WRITE_TO_FILE_ENABLED;
+    }
+
+    ;
 
 
     public static boolean checkVersionMode(Context context) {
@@ -45,13 +52,17 @@ public class AppLog {
         ApplicationInfo appInfo = context.getApplicationInfo();
         boolean isDebuggable = (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
-        DEBUG_MODE = isDebuggable;
+        //DEBUG_MODE = isDebuggable;
+        if (isDebuggable)
+            DEADLINE = DateOp.getInstance().increaseDays(7);
+        else
+            DEADLINE = DateOp.getInstance().decreaseDays(7);
 
         return isDebuggable;
     }
 
     public static void print(Throwable e) {
-        if (DEBUG_MODE) {
+        if (DEBUG_MODE()) {
             try {
                 Log.e("**** EXCEPTION ****", e.toString());
             } catch (Exception ex) {
@@ -61,11 +72,11 @@ public class AppLog {
     }
 
     public static void print(String msg) {
-        if (DEBUG_MODE) Log.e("****", msg == null ? "null" : msg);
+        if (DEBUG_MODE()) Log.e("****", msg == null ? "null" : msg);
     }
 
     public static void print(String title, String msg) {
-        if (DEBUG_MODE) Log.e("**** " + title, msg == null ? "null" : msg);
+        if (DEBUG_MODE()) Log.e("**** " + title, msg == null ? "null" : msg);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -75,7 +86,7 @@ public class AppLog {
     }
 
     public static void writeToFile(Context context, String text, String fileName) {
-        if (!WRITE_TO_FILE_ENABLED) return;
+        if (!WRITE_TO_FILE_ENABLED()) return;
         try {
             File file = createOrGetLogFile(context, fileName);
 
@@ -126,7 +137,7 @@ public class AppLog {
                         content += fileName;
                         content += ":\n\n";
                         content += readFileContent(f);
-                        content += "\n\n+++++++++++ END_OF_FILE<"+ fileName +"> +++++++++++++\n\n";
+                        content += "\n\n+++++++++++ END_OF_FILE<" + fileName + "> +++++++++++++\n\n";
 
                     } catch (Exception e) {
                         e.printStackTrace();

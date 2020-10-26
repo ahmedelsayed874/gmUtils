@@ -2,11 +2,28 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
 
     <files-path
-        name="my_images"
-        path="Pictures/" />
+        name="files"
+        path="Files/" />
+
+    <cache-path
+        name="files"
+        path="Files/" />
+
+
+    <external-path
+        name="files"
+        path="Files/" />
 
     <external-files-path
-        name="my_images"
-        path="Pictures/" />
+        name="files"
+        path="Files/" />
+
+    <external-cache-path
+        name="files"
+        path="Files/" />
+
+    <external-media-path
+        name="files"
+        path="Files/" />
 
 </paths>

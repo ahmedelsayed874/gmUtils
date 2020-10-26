@@ -69,7 +69,7 @@ public abstract class BaseApplication extends Application implements Application
                 current = this;
                 onApplicationStartedFirstActivity();
 
-                if (bugs.length() != 0 && AppLog.DEBUG_MODE) {
+                if (bugs.length() != 0 && AppLog.DEBUG_MODE()) {
                     MessageDialog.create(activity)
                             .setMessage(bugs)
                             .setButton1(R.string.ok, null)
@@ -151,7 +151,7 @@ public abstract class BaseApplication extends Application implements Application
             }
         });
 
-        if (AppLog.WRITE_TO_FILE_ENABLED) {
+        if (AppLog.WRITE_TO_FILE_ENABLED()) {
             bugs = AppLog.readFile(this, bugFileName);
         }
     }

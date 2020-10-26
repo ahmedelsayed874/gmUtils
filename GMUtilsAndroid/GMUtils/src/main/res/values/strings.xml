@@ -39,6 +39,12 @@
     <string name="mobile">Mobile</string>
     <string name="mobile_">Mobile:</string>
     <string name="type_valid_mobile">Type valid mobil number with 11 digits at least (ex. 01234567890)</string>
+    <string name="type_valid_mobile2">Type valid mobil number</string>
+
+    <string name="phoneNumber">Phone Number</string>
+    <string name="phoneNumber_">Phone Number:</string>
+    <string name="type_valid_phoneNumber">Type valid Phone Number with 11 digits at least (ex. 01234567890)</string>
+    <string name="type_valid_phoneNumber2">Type valid Phone Number</string>
 
     <string name="name">Name</string>
     <string name="name_">Name:</string>
