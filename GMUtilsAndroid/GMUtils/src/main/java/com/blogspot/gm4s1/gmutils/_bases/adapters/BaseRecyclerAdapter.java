@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -437,6 +439,19 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             super(v);
             v.setOnClickListener(this);
             v.setOnLongClickListener(this);
+
+            v.getViewTreeObserver().addOnWindowAttachListener(
+                    new ViewTreeObserver.OnWindowAttachListener() {
+                        @Override
+                        public void onWindowAttached() {
+                        }
+
+                        @Override
+                        public void onWindowDetached() {
+                            dispose();
+                        }
+                    }
+            );
         }
 
         private void setValuesInner(T item, int position) {
@@ -463,6 +478,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             else
                 return false;
         }
+
+        protected void dispose() {
+        }
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -484,15 +502,20 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public abstract static class OnListItemsChangedListener<T> {
-        public void onItemAdded(BaseRecyclerAdapter<T> adapter, T item){}
+        public void onItemAdded(BaseRecyclerAdapter<T> adapter, T item) {
+        }
 
-        public void onItemsAdded(BaseRecyclerAdapter<T> adapter, List<T> item){}
+        public void onItemsAdded(BaseRecyclerAdapter<T> adapter, List<T> item) {
+        }
 
-        public void onItemRemoved(BaseRecyclerAdapter<T> adapter, T item, int position){}
+        public void onItemRemoved(BaseRecyclerAdapter<T> adapter, T item, int position) {
+        }
 
-        public void onItemsRemoved(BaseRecyclerAdapter<T> adapter, List<T> item){}
+        public void onItemsRemoved(BaseRecyclerAdapter<T> adapter, List<T> item) {
+        }
 
-        public void onItemCleared(BaseRecyclerAdapter<T> adapter){}
+        public void onItemCleared(BaseRecyclerAdapter<T> adapter) {
+        }
     }
 
 }
