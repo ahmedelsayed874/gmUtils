@@ -140,15 +140,27 @@ public class Intents {
 
     public static class ImageIntents {
 
-        private File createImageFile(Context context, boolean inCache) throws IOException {
+        private File createImageFile(Context context) throws IOException {
+            File root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File storageDir = root;
+
+            //File root = context.getExternalCacheDir();
+            //File root = context.getCacheDir();
+            //File storageDir = new File(root, "_Files");
+            if (!storageDir.exists()) {
+                storageDir.mkdirs();
+            }
+
             String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH).format(new Date());
             String imageFileName = timeStamp + "_";
-            File storageDir = inCache ? context.getCacheDir() : context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
             File image = File.createTempFile(
                     imageFileName,  /* prefix */
                     ".png",   /* suffix */
                     storageDir      /* directory */
             );
+
+            AppLog.print("createImageFile():: " + image);
 
             return image;
         }
@@ -178,25 +190,23 @@ public class Intents {
          * @param file
          * @return
          */
-        private Uri createFileUri(Context context, File file) {
+        private Uri createUriForFile(Context context, File file) {
+            String authority;
+
             try {
                 ComponentName cm = new ComponentName(context, "androidx.core.content.FileProvider");
                 ProviderInfo providerInfo = context.getPackageManager().getProviderInfo(cm, 0);
-                String authority = providerInfo.authority;
-                return FileProvider.getUriForFile(context, authority, file);
-
-            } catch (Exception e) {//(PackageManager.NameNotFoundException e) {
+                authority = providerInfo.authority;
+            } catch (Exception e) {
                 String er = e.getMessage() + "\n---------------------------------\n" + getFileProviderExceptionMessage();
                 throw new IllegalArgumentException(er);
             }
 
-            /*try {
-                String authority = context.getPackageName() + ".fileprovider";
+            try {
                 return FileProvider.getUriForFile(context, authority, file);
             } catch (Exception e) {
-                String er = e.getMessage() + "\n---------------------------------\n" + getFileProviderExceptionMessage();
-                throw new IllegalArgumentException(er);
-            }*/
+                throw new IllegalArgumentException(e);
+            }
         }
 
         private String getFileProviderExceptionMessage() {
@@ -210,8 +220,8 @@ public class Intents {
             sb.append("\n");
             sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
             sb.append("<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">");
-            sb.append("\n\t<files-path name=\"images\" path=\"Pictures/\" />");
-            sb.append("\n\t<external-files-path name=\"images\" path=\"Pictures/\" />");
+            sb.append("\n\t<files-path name=\"files\" path=\"Files/\" />");
+            sb.append("\n\t<external-files-path name=\"files\" path=\"Files/\" />");
             sb.append("\n");
             sb.append("</paths>\n");
             sb.append("-----------------------------------------------------");
@@ -279,18 +289,22 @@ public class Intents {
 
         //@RequiresPermission(allOf = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE})
         public Uri takePicture(Activity activity, int requestCode) {
+            return takePicture(activity, requestCode, false);
+        }
+
+        public Uri takePicture(Activity activity, int requestCode, boolean useAppPackage) {
             if (!checkPermissionForCamera(activity, requestCode)) return null;
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
                 File photoFile = null;
                 try {
-                    photoFile = createImageFile(activity, true);
+                    photoFile = createImageFile(activity);
                 } catch (IOException ex) {
                 }
 
                 if (photoFile != null) {
-                    Uri photoURI = createFileUri(activity, photoFile);
+                    Uri photoURI = createUriForFile(activity, photoFile);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                     activity.startActivityForResult(takePictureIntent, requestCode);
@@ -310,12 +324,12 @@ public class Intents {
             if (takePictureIntent.resolveActivity(fragment.getContext().getPackageManager()) != null) {
                 File photoFile = null;
                 try {
-                    photoFile = createImageFile(fragment.getContext(), true);
+                    photoFile = createImageFile(fragment.getContext());
                 } catch (IOException ex) {
                 }
 
                 if (photoFile != null) {
-                    Uri photoURI = createFileUri(fragment.getContext(), photoFile);
+                    Uri photoURI = createUriForFile(fragment.getContext(), photoFile);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                     fragment.startActivityForResult(takePictureIntent, requestCode);
@@ -359,7 +373,7 @@ public class Intents {
 
         public void showImage(ImageView imageView) {
             Drawable drawable = imageView.getDrawable();
-            if (drawable != null) {
+            if (drawable instanceof BitmapDrawable) {
                 showImage(imageView.getContext(), ((BitmapDrawable) drawable).getBitmap());
             }
         }
@@ -367,7 +381,7 @@ public class Intents {
         public boolean showImage(Context context, Bitmap image) {
             File imgFile = null;
             try {
-                imgFile = createImageFile(context, true);
+                imgFile = createImageFile(context);
             } catch (IOException ex) {
             }
 
@@ -386,7 +400,7 @@ public class Intents {
             }
 
             if (imgFile != null) {
-                Uri imgUri = createFileUri(context, imgFile);
+                Uri imgUri = createUriForFile(context, imgFile);
 
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
@@ -414,7 +428,7 @@ public class Intents {
         public void shareImage(Context context, Bitmap image, String text) {
             File imgFile = null;
             try {
-                imgFile = createImageFile(context, true);
+                imgFile = createImageFile(context);
             } catch (IOException ex) {
             }
 
@@ -433,7 +447,7 @@ public class Intents {
             }
 
             if (imgFile != null) {
-                Uri imgUri = createFileUri(context, imgFile);
+                Uri imgUri = createUriForFile(context, imgFile);
 
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_SEND);

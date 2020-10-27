@@ -20,6 +20,9 @@ import android.os.Vibrator;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
+import android.view.Surface;
 import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -202,5 +205,27 @@ public class Utils {
                 .build();
 
         return uri;
+    }
+
+    public boolean isMobileHasVirtualNavigationBar() {
+        boolean hasHomeKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_HOME);
+        boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+
+        return (hasHomeKey && hasBackKey);
+    }
+
+    public int getNavigationBarHeight(Context context) {
+        if (!isMobileHasVirtualNavigationBar()) {
+            int resourceId = context.getResources().getIdentifier(
+                    "navigation_bar_height",
+                    "dimen",
+                    "android");
+
+            if (resourceId > 0) {
+                return context.getResources().getDimensionPixelSize(resourceId);
+            }
+        }
+
+        return 0;
     }
 }

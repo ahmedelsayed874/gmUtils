@@ -37,7 +37,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     private LongClickListener<T> mLongClickListener;
     private OnDataSetChangedListener<T> mOnDataSetChangedListener;
     private OnListItemsChangedListener<T> mOnListItemsChangedListener;
-    private OnLastItemDisplayedListener<T> mOnLastItemDisplayedListener;
+    private OnLoadingMoreListener<T> mOnLoadingMoreListener;
+    private boolean isLastItemReached = false;
 
 
     public BaseRecyclerAdapter(RecyclerView recyclerView) {
@@ -180,6 +181,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void changeDataSet(List<T> newList, boolean refresh) {
+        isLastItemReached = false;
+
         List<T> oldList = this.mList;
         this.mList = newList;
         if (refresh) notifyDataSetChanged();
@@ -280,8 +283,46 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             mOnListItemsChangedListener.onItemsRemoved(this, items);
     }
 
+    public void removeFirst(int count, boolean refresh) {
+        removeRange(0, count - 1, refresh);
+    }
+
+    public void removeLast(int count, boolean refresh) {
+        removeRange(getItemCount() - count, getItemCount() - 1, refresh);
+    }
+
+    public void removeRange(int firstIndex, int lastIndex, boolean refresh) {
+        if (getItemCount() == 0) return;
+        if (firstIndex < 0) firstIndex = 0;
+        if (lastIndex >= getItemCount()) lastIndex = getItemCount() - 1;
+        if (firstIndex > lastIndex) {
+            int t = firstIndex;
+            firstIndex = lastIndex;
+            lastIndex = t;
+        }
+
+        List<T> removedItems = null;
+        if (mOnListItemsChangedListener != null) removedItems = new ArrayList<>();
+
+        int i = firstIndex;
+        while (i <= lastIndex) {
+            if (removedItems != null) {
+                removedItems.add(mList.get(firstIndex));
+            }
+            mList.remove(firstIndex);
+            i++;
+        }
+
+        if (refresh) notifyDataSetChanged();
+
+        if (mOnListItemsChangedListener != null)
+            mOnListItemsChangedListener.onItemsRemoved(this, removedItems);
+    }
+
 
     public void clear(boolean refresh) {
+        isLastItemReached = false;
+
         mList.clear();
         if (refresh) notifyDataSetChanged();
 
@@ -298,7 +339,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         return (mList != null && mList.size() > 0);
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public void setOnItemClickListener(ClickListener<T> clickListener) {
         this.mClickListener = clickListener;
@@ -316,8 +357,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         this.mOnListItemsChangedListener = listener;
     }
 
-    public void setOnLastItemDisplayedListener(OnLastItemDisplayedListener<T> listener) {
-        this.mOnLastItemDisplayedListener = listener;
+    public void setOnLoadingMoreListener(OnLoadingMoreListener<T> listener) {
+        this.mOnLoadingMoreListener = listener;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -330,8 +371,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         return mLongClickListener;
     }
 
-    public OnLastItemDisplayedListener<T> getOnLastItemDisplayedListener() {
-        return mOnLastItemDisplayedListener;
+    public OnLoadingMoreListener<T> getOnLoadingMoreListener() {
+        return mOnLoadingMoreListener;
     }
 
     public OnDataSetChangedListener<T> getOnDataSetChangedListener() {
@@ -372,10 +413,14 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.setValuesInner(mList.get(position), position);
 
-        if (mOnLastItemDisplayedListener != null) {
+        if (mOnLoadingMoreListener != null) {
             try {
-                if (position == getItemCount() - 1) {
-                    mOnLastItemDisplayedListener.onLastItemDisplayed(this);
+                if (position == 0 && isLastItemReached) {
+                    mOnLoadingMoreListener.onLoadingMore(this, true);
+
+                } else if (position == getItemCount() - 1) {
+                    isLastItemReached = true;
+                    mOnLoadingMoreListener.onLoadingMore(this, true);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -430,6 +475,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         boolean onItemLongClicked(BaseRecyclerAdapter<T> adapter, T item, int position);
     }
 
+    public interface OnLoadingMoreListener<T> {
+        void onLoadingMore(BaseRecyclerAdapter<T> adapter, boolean toBottom);
+    }
+
     public interface OnDataSetChangedListener<T> {
         void onDataSetChanged(BaseRecyclerAdapter<T> adapter, List oldList, List newList);
     }
@@ -444,10 +493,6 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         public void onItemsRemoved(BaseRecyclerAdapter<T> adapter, List<T> item){}
 
         public void onItemCleared(BaseRecyclerAdapter<T> adapter){}
-    }
-
-    public interface OnLastItemDisplayedListener<T> {
-        void onLastItemDisplayed(BaseRecyclerAdapter<T> adapter);
     }
 
 }

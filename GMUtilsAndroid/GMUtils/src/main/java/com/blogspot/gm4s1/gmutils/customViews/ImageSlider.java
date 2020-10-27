@@ -13,6 +13,7 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -81,7 +82,6 @@ public class ImageSlider {
         this.viewPager = viewPager;
 
         viewPager.setClipToPadding(false);
-        //viewPager.setPageMargin(viewPager.getPaddingLeft() / 4);
 
         //------------------------------------------------------------------------------------------
 
@@ -228,6 +228,17 @@ public class ImageSlider {
     }
 
     //----------------------------------------------------------------------------------------------
+
+    public ImageSlider setPageMargin() {
+        viewPager.setPageMargin(viewPager.getPaddingLeft() / 4);
+        return this;
+    }
+
+    public ImageSlider setPageMargin(@DimenRes int dimenId) {
+        int margin = viewPager.getResources().getDimensionPixelOffset(dimenId);
+        viewPager.setPageMargin(margin);
+        return this;
+    }
 
     public ImageSlider setImageScaleType(ImageView.ScaleType imageScaleType) {
         imageAdapter.setImageScaleType(imageScaleType);
@@ -418,11 +429,11 @@ public class ImageSlider {
 
         void setImageScaleType(ImageView.ScaleType imageScaleType) {
             this.imageScaleType = imageScaleType;
-            if (mImageView != null) {
-                mImageView.setScaleType(imageScaleType);
-            }
+//            if (mImageView != null) {
+//                mImageView.setScaleType(imageScaleType);
+//            }
+            notifyDataSetChanged();
         }
-
 
         //------------------------------------------------------------------------------------------
 
@@ -452,35 +463,41 @@ public class ImageSlider {
             mImageView.setOnClickListener(imgViewAreaClickListener());
             mImageView.setOnTouchListener(imgViewAreaTouchListener());
 
+            container.addView(mImageView, 0);
+
+            if (images.size() > 0) {
+                setImage(images.get(i));
+            }
+
+            return mImageView;
+        }
+
+        /**
+         * @param obj uri | string | integer
+         */
+        private void setImage(Object obj) {
             try {
-                Object obj = images.get(i);
-                if (obj != null) {
-                    if (obj instanceof Uri) {
-                        if (obj.toString().indexOf("http") == 0) {
-                            mImageLoader.load(obj.toString(), mImageView);
-                        } else {
-                            mImageView.setImageURI((Uri) obj);
-                        }
-                    } else if (obj instanceof String) {
-                        if (obj.toString().indexOf("http") == 0) {
-                            mImageLoader.load(obj.toString(), mImageView);
-                        } else {
-                            Uri uri = Uri.parse(obj.toString());
-                            mImageView.setImageURI(uri);
-                        }
-                    } else if (obj instanceof Integer) {
-                        mImageView.setImageResource((Integer) obj);
+                if (obj instanceof Uri) {
+                    if (obj.toString().indexOf("http") == 0) {
+                        mImageLoader.load(obj.toString(), mImageView);
+                    } else {
+                        mImageView.setImageURI((Uri) obj);
                     }
+                } else if (obj instanceof String) {
+                    if (obj.toString().indexOf("http") == 0) {
+                        mImageLoader.load(obj.toString(), mImageView);
+                    } else {
+                        Uri uri = Uri.parse(obj.toString());
+                        mImageView.setImageURI(uri);
+                    }
+                } else if (obj instanceof Integer) {
+                    mImageView.setImageResource((Integer) obj);
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
                 AppLog.print(e);
             }
-
-            container.addView(mImageView, 0);
-
-            return mImageView;
         }
 
         public ImageView getImageView() {
@@ -504,6 +521,7 @@ public class ImageSlider {
             imgViewAreaTouchListener = new View.OnTouchListener() {
                 boolean wasDown;
                 long downTime = 0;
+                int moves = 0;
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -514,9 +532,10 @@ public class ImageSlider {
                         mTimerActions.pauseTimer();
                         wasDown = true;
                         downTime = System.currentTimeMillis();
+                        moves = 0;
 
                     } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                        downTime = 0;
+                        if (++moves > 5) downTime = 0;
 
                     } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                         AppLog.print("ViewPager :: ACTION-UP");
