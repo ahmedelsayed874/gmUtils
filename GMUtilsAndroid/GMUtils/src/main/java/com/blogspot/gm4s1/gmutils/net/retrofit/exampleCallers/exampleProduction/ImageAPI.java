@@ -2,7 +2,7 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleProduction
 
 import android.graphics.Bitmap;
 
-import com.blogspot.gm4s1.gmutils.ImageUtils;
+import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.ImageRequest;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.ImageResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIsContract;

@@ -19,15 +19,15 @@ import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.blogspot.gm4s1.gmutils.preferences.SettingsPreferences;
+import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
+import com.blogspot.gm4s1.gmutils.utils.Utils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -132,7 +132,7 @@ public class Intents {
 
     //----------------------------------------------------------------------------------------------
 
-    private ImageIntents mImageIntents = new ImageIntents();
+    private final ImageIntents mImageIntents = new ImageIntents();
 
     public ImageIntents getImageIntents() {
         return mImageIntents;
@@ -140,109 +140,13 @@ public class Intents {
 
     public static class ImageIntents {
 
-        private File createImageFile(Context context) throws IOException {
-            File root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            File storageDir = root;
-
-            //File root = context.getExternalCacheDir();
-            //File root = context.getCacheDir();
-            //File storageDir = new File(root, "_Files");
-            if (!storageDir.exists()) {
-                storageDir.mkdirs();
-            }
-
-            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH).format(new Date());
-            String imageFileName = timeStamp + "_";
-
-            File image = File.createTempFile(
-                    imageFileName,  /* prefix */
-                    ".png",   /* suffix */
-                    storageDir      /* directory */
-            );
-
-            AppLog.print("createImageFile():: " + image);
-
-            return image;
-        }
-
-        /**
-         * must add in manifest
-         * <provider
-         * android:name="androidx.core.content.FileProvider"
-         * android:authorities="APP_PACKAGE_NAME.fileprovider"
-         * android:exported="false"
-         * android:grantUriPermissions="true">
-         * <meta-data
-         * android:name="android.support.FILE_PROVIDER_PATHS"
-         * android:resource="@xml/file_paths" />
-         * </provider>
-         * <p>
-         * ------------------------------------------------------------------
-         * add this this text to xml/file_paths
-         * <p>
-         * <?xml version="1.0" encoding="utf-8"?>
-         * <paths xmlns:android="http://schemas.android.com/apk/res/android">
-         * <files-path name="my_images" path="Pictures/" />
-         * <external-files-path name="my_images" path="Pictures/" />
-         * </paths>
-         *
-         * @param context
-         * @param file
-         * @return
-         */
-        private Uri createUriForFile(Context context, File file) {
-            String authority;
-
+        private Uri createUriForFile(Context context) {
+            ImageUtils imageUtils = ImageUtils.createInstance();
             try {
-                ComponentName cm = new ComponentName(context, "androidx.core.content.FileProvider");
-                ProviderInfo providerInfo = context.getPackageManager().getProviderInfo(cm, 0);
-                authority = providerInfo.authority;
-            } catch (Exception e) {
-                String er = e.getMessage() + "\n---------------------------------\n" + getFileProviderExceptionMessage();
-                throw new IllegalArgumentException(er);
+                return imageUtils.createImageFileUsingFileProvider2(context);
+            } catch (IOException e) {
+                return null;
             }
-
-            try {
-                return FileProvider.getUriForFile(context, authority, file);
-            } catch (Exception e) {
-                throw new IllegalArgumentException(e);
-            }
-        }
-
-        private String getFileProviderExceptionMessage() {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("please create a file in 'res/xml' path with a name of 'file_paths' or whatever you want");
-            sb.append("\n");
-            sb.append("this file will contain the following: (for example) .. (I already created one for you)");
-            sb.append("\n");
-            sb.append("check this for more info: https://developer.android.com/reference/androidx/core/content/FileProvider");
-            sb.append("\n");
-            sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-            sb.append("<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">");
-            sb.append("\n\t<files-path name=\"files\" path=\"Files/\" />");
-            sb.append("\n\t<external-files-path name=\"files\" path=\"Files/\" />");
-            sb.append("\n");
-            sb.append("</paths>\n");
-            sb.append("-----------------------------------------------------");
-            sb.append("\n\n");
-            sb.append("then add The following to your manifest file:");
-            sb.append("\n");
-            sb.append("<provider");
-            sb.append("\n\tandroid:name=\"androidx.core.content.FileProvider\"");
-            sb.append("\n\tandroid:authorities=\"APP_PACKAGE_NAME.fileprovider\"");
-            sb.append("\n\tandroid:exported=\"false\"");
-            sb.append("\n\tandroid:grantUriPermissions=\"true\">");
-            sb.append("\n\t<meta-data");
-            sb.append("\n\t\tandroid:name=\"android.support.FILE_PROVIDER_PATHS\"");
-            sb.append("\n\t\tandroid:resource=\"@xml/file_paths\" />\n");
-            sb.append("</provider>");
-            sb.append("\n");
-            sb.append("\n----------------------------------------------------");
-            sb.append("\n");
-            sb.append("\nmake sure to replace APP_PACKAGE_NAME with your own package name; ex: (com.example)");
-
-            return sb.toString();
         }
 
         //------------------------------------------------------------------------------------------
@@ -297,19 +201,13 @@ public class Intents {
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
-                File photoFile = null;
                 try {
-                    photoFile = createImageFile(activity);
-                } catch (IOException ex) {
-                }
-
-                if (photoFile != null) {
-                    Uri photoURI = createUriForFile(activity, photoFile);
+                    Uri photoURI = createUriForFile(activity);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-
                     activity.startActivityForResult(takePictureIntent, requestCode);
-
                     return photoURI;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -322,19 +220,15 @@ public class Intents {
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(fragment.getContext().getPackageManager()) != null) {
-                File photoFile = null;
                 try {
-                    photoFile = createImageFile(fragment.getContext());
-                } catch (IOException ex) {
-                }
-
-                if (photoFile != null) {
-                    Uri photoURI = createUriForFile(fragment.getContext(), photoFile);
+                    Uri photoURI = createUriForFile(fragment.getContext());
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                     fragment.startActivityForResult(takePictureIntent, requestCode);
 
                     return photoURI;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
 
@@ -379,33 +273,13 @@ public class Intents {
         }
 
         public boolean showImage(Context context, Bitmap image) {
-            File imgFile = null;
-            try {
-                imgFile = createImageFile(context);
-            } catch (IOException ex) {
-            }
+            ImageUtils imageUtils = ImageUtils.createInstance();
+            Uri imgUri = imageUtils.saveImageUsingFileProvide(context, image);
 
-            if (imgFile != null) {
-                try {
-                    FileOutputStream fos = new FileOutputStream(imgFile);
-                    boolean compress = image.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    if (!compress) {
-                        imgFile.delete();
-                        imgFile = null;
-                    }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    imgFile = null;
-                }
-            }
-
-            if (imgFile != null) {
-                Uri imgUri = createUriForFile(context, imgFile);
-
+            if (imgUri != null) {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 intent.setDataAndType(imgUri, "image/*");
-                //intent.putExtra("prefix", "jpg");
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -426,33 +300,14 @@ public class Intents {
         }
 
         public void shareImage(Context context, Bitmap image, String text) {
-            File imgFile = null;
-            try {
-                imgFile = createImageFile(context);
-            } catch (IOException ex) {
-            }
+            ImageUtils imageUtils = ImageUtils.createInstance();
+            Uri imgUri = imageUtils.saveImageUsingFileProvide(context, image);
 
-            if (imgFile != null) {
-                try {
-                    FileOutputStream fos = new FileOutputStream(imgFile);
-                    boolean compress = image.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    if (!compress) {
-                        imgFile.delete();
-                        imgFile = null;
-                    }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    imgFile = null;
-                }
-            }
-
-            if (imgFile != null) {
-                Uri imgUri = createUriForFile(context, imgFile);
-
+            if (imgUri != null) {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_SEND);
-
                 intent.setType("image/*");
+
                 intent.putExtra(Intent.EXTRA_STREAM, imgUri);
                 intent.putExtra(Intent.EXTRA_TEXT, text);
 
@@ -464,8 +319,6 @@ public class Intents {
                     context.startActivity(Intent.createChooser(intent, "Share via"));
                 }
             }
-
-
         }
 
     }

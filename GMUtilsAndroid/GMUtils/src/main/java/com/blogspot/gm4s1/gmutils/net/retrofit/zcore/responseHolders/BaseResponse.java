@@ -86,4 +86,11 @@ public abstract class BaseResponse {
         return getFinalInternalStatus() == Statuses.Error;
     }
 
+    public void copyResponseStatus(BaseResponse otherResponse) {
+        _internalMessage = otherResponse._internalMessage;
+        _internalStatus = otherResponse._internalStatus;
+        _requestId = otherResponse._requestId;
+        _code = otherResponse._code;
+
+    }
 }

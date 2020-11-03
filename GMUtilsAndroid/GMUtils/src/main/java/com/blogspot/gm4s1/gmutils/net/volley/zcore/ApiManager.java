@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 import androidx.fragment.app.Fragment;
 import com.blogspot.gm4s1.gmutils.AppLog;
-import com.blogspot.gm4s1.gmutils.Utils;
+import com.blogspot.gm4s1.gmutils.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

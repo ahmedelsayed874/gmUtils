@@ -1,11 +1,14 @@
-package com.blogspot.gm4s1.gmutils;
+package com.blogspot.gm4s1.gmutils.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -16,13 +19,22 @@ import android.text.TextUtils;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
+import androidx.core.content.FileProvider;
+
+import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.R;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -45,10 +57,21 @@ public class FileUtils {
     //----------------------------------------------------------------------------------------------
 
     @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    public File createFileOnStorage(Context context, String dirName, String fileName, String fileExtension) {
+    public File createFileInCacheStorage(Context context, String dirName, String fileName) {
+        File root = context.getCacheDir();
+        return createFileOnStorage(context, dirName, fileName, root);
+    }
+
+    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public File createFileInPublicStorage(Context context, String dirName, String fileName) {
+        File root = Environment.getExternalStorageDirectory();
+        return createFileOnStorage(context, dirName, fileName, root);
+    }
+
+    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public File createFileOnStorage(Context context, String dirName, String fileName, File root) {
         if (dirName == null) dirName = "";
 
-        File root = Environment.getExternalStorageDirectory();
         File dir = new File(root, dirName);
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
@@ -67,7 +90,7 @@ public class FileUtils {
             fileName = android.text.format.DateFormat.format("yyyyMMddhhmmss", now).toString();
         }
 
-        File file = new File(dir, fileName + "." + fileExtension);
+        File file = new File(dir, fileName);
         if (!file.exists()) {
             try {
                 //noinspection ResultOfMethodCallIgnored
@@ -81,11 +104,11 @@ public class FileUtils {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void createFileOnStorageUsingFileExplorer(Activity activity, String fileName, String fileExtension, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+    public void createFileOnStorageUsingFileExplorer(Activity activity, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType(mimeType);//"application/pdf");
-        intent.putExtra(Intent.EXTRA_TITLE, fileName + "." + fileExtension);//"invoice.pdf");
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);//"invoice.pdf");
 
         // Optionally, specify a URI for the directory that should be opened in
         // the system file picker when your app creates the document.
@@ -102,8 +125,153 @@ public class FileUtils {
 
     //----------------------------------------------------------------------------------------------
 
+    private void validateInputsOfCreatingFileUsingFileProvider(File root, String[] fileExtension) throws IOException {
+        if (!root.exists()) {
+            if (!root.mkdirs()) {
+                throw new IOException("Couldn't create file on: " + root);
+            }
+        }
+
+        if (!fileExtension[0].startsWith(".")) fileExtension[0] = "." + fileExtension[0];
+    }
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public File createFileUsingFileProvider(File root, String fileExtension) throws IOException {
+        String imageFileName = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH).format(new Date());
+
+        String[] ext = new String[] { fileExtension };
+        validateInputsOfCreatingFileUsingFileProvider(root, ext);
+
+        File file = File.createTempFile(
+                imageFileName,   /* prefix */
+                ext[0],          /* suffix */
+                root            /* directory */
+        );
+
+        AppLog.print("createFileUsingFileProvider-> " + file);
+
+        return file;
+    }
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public File createFileUsingFileProvider(File root, String fileName, String extension) throws IOException {
+        String[] ext = new String[] { extension };
+        validateInputsOfCreatingFileUsingFileProvider(root, ext);
+
+        File file = new File(root, fileName + ext[0]);
+        if (!file.exists()) {
+            if (!file.createNewFile()) {
+                throw new IOException("Couldn't create file on: " + root);
+            }
+        }
+        return file;
+    }
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public Uri createFileUsingFileProvider(Context context, File root, String fileExtension) throws IOException {
+        File file = createFileUsingFileProvider(root, fileExtension);
+        return createUriForFileUsingFileProvider(context, file);
+    }
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public Uri createFileUsingFileProvider(Context context, File root, String fileName, String fileExtension) throws IOException {
+        File file = createFileUsingFileProvider(root, fileName, fileExtension);
+        return createUriForFileUsingFileProvider(context, file);
+    }
+
+    /**
+     * must add in manifest
+     * <provider
+     * android:name="androidx.core.content.FileProvider"
+     * android:authorities="APP_PACKAGE_NAME.fileprovider"
+     * android:exported="false"
+     * android:grantUriPermissions="true">
+     * <meta-data
+     * android:name="android.support.FILE_PROVIDER_PATHS"
+     * android:resource="@xml/file_paths" />
+     * </provider>
+     * <p>
+     * ------------------------------------------------------------------
+     * add this this text to xml/file_paths
+     * <p>
+     * <?xml version="1.0" encoding="utf-8"?>
+     * <paths xmlns:android="http://schemas.android.com/apk/res/android">
+     * <files-path name="my_images" path="Pictures/" />
+     * <external-files-path name="my_images" path="Pictures/" />
+     * </paths>
+     *
+     * @param context
+     * @param file
+     * @return
+     */
+    public Uri createUriForFileUsingFileProvider(Context context, File file) {
+        String authority;
+
+        try {
+            ComponentName cm = new ComponentName(context, "androidx.core.content.FileProvider");
+            ProviderInfo providerInfo = context.getPackageManager().getProviderInfo(cm, 0);
+            authority = providerInfo.authority;
+        } catch (Exception e) {
+            String er = e.getMessage() + "\n---------------------------------\n" + getFileProviderExceptionMessage();
+            throw new IllegalArgumentException(er);
+        }
+
+        try {
+            return FileProvider.getUriForFile(context, authority, file);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("review defined <path> in xml file of FileProvider", e);
+        }
+    }
+
+    private String getFileProviderExceptionMessage() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("please create a file in 'res/xml' path with a name of 'file_paths' or whatever you want");
+        sb.append("\n");
+        sb.append("this file will contain the following: (for example) .. (I already created one for you)");
+        sb.append("\n");
+        sb.append("check this for more info: https://developer.android.com/reference/androidx/core/content/FileProvider");
+        sb.append("\n");
+        sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+        sb.append("<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">");
+        sb.append("\n\t<files-path name=\"files\" path=\"Files/\" />");
+        sb.append("\n\t<external-files-path name=\"files\" path=\"Files/\" />");
+        sb.append("\n");
+        sb.append("</paths>\n");
+        sb.append("-----------------------------------------------------");
+        sb.append("\n\n");
+        sb.append("then add The following to your manifest file:");
+        sb.append("\n");
+        sb.append("<provider");
+        sb.append("\n\tandroid:name=\"androidx.core.content.FileProvider\"");
+        sb.append("\n\tandroid:authorities=\"APP_PACKAGE_NAME.fileprovider\"");
+        sb.append("\n\tandroid:exported=\"false\"");
+        sb.append("\n\tandroid:grantUriPermissions=\"true\">");
+        sb.append("\n\t<meta-data");
+        sb.append("\n\t\tandroid:name=\"android.support.FILE_PROVIDER_PATHS\"");
+        sb.append("\n\t\tandroid:resource=\"@xml/file_paths\" />\n");
+        sb.append("</provider>");
+        sb.append("\n");
+        sb.append("\n----------------------------------------------------");
+        sb.append("\n");
+        sb.append("\nmake sure to replace APP_PACKAGE_NAME with your own package name; ex: (com.example)");
+
+        return sb.toString();
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public boolean showFileExplorer(Activity activity, int requestId, String mimeType, @Nullable Uri pickerInitialUri) {
+    public boolean showFileExplorer(Activity activity, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType(mimeType);//"application/pdf");
@@ -124,12 +292,12 @@ public class FileUtils {
         return false;
     }
 
-    public boolean showFileExplorer(Activity activity, int requestCode, String mimetype) {
-        if (TextUtils.isEmpty(mimetype)) mimetype = "*/*";
+    public boolean showFileExplorer(Activity activity, String mimeType, int requestCode) {
+        if (TextUtils.isEmpty(mimeType)) mimeType = "*/*";
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType(mimetype);
+        intent.setType(mimeType);
         if (intent.resolveActivity(activity.getPackageManager()) != null) {
             activity.startActivityForResult(intent, requestCode);
             return true;

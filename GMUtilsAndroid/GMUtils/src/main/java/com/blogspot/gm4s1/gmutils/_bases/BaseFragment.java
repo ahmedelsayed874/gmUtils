@@ -46,7 +46,7 @@ public abstract class BaseFragment extends Fragment {
         listener = null;
     }
 
-    abstract int getFragmentLayout();
+    protected abstract int getFragmentLayout();
 
     @Nullable
     @Override

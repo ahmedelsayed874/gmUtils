@@ -1,7 +1,12 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake;
 
+import android.os.Handler;
+import android.os.Looper;
+
+import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
+
 import java.util.Random;
 
 /**
@@ -9,14 +14,26 @@ import java.util.Random;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
 
 public class _FakeData {
+
+    public void run(ResultCallback<Boolean> res) {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+
+            int r = new Random().nextInt(10);
+            if (r == 0) res.invoke(null);
+            else if (r == 1) res.invoke(false);
+            else res.invoke(true);
+
+        }, 1500);
+
+    }
 
     public static _FakeData instance() {
         return new _FakeData();

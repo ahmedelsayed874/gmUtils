@@ -1,5 +1,7 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders;
 
+import androidx.annotation.Nullable;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -72,27 +74,30 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders;
 
 public abstract class Response<T> extends BaseResponse {
 
-    public abstract void setData(T data);
+    public abstract void set_Data(@Nullable T data);
 
-    public abstract T getData();
+    public abstract T get_Data();
 
     //----------------------------------------------------------------------------------------------
 
     public static <T> Response<T> createInstance(Class<T> c) {
 
         Response<T> response = new Response<T>() {
+            T d;
+
             @Override
-            public void setData(T data) {
+            public void set_Data(T data) {
+                d= data;
             }
 
             @Override
-            public T getData() {
-                return null;
+            public T get_Data() {
+                return d;
             }
 
             @Override
             public Statuses getInternalStatus() {
-                return Statuses.Succeeded;
+                return d != null ? Statuses.Succeeded : Statuses.Error;
             }
         };
 

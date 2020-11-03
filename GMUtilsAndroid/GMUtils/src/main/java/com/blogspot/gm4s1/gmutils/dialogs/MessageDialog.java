@@ -20,8 +20,8 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
-import com.blogspot.gm4s1.gmutils.listeners.ActionListener;
-import com.blogspot.gm4s1.gmutils.listeners.ResultListener;
+import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
+import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.preferences.GeneralPreferences;
 
 import org.json.JSONArray;
@@ -51,8 +51,6 @@ public class MessageDialog extends BaseDialog {
         return dialog;
     }
 
-
-    private View view;
     private View lyContainer;
     private TextView tvTitle;
     private TextView tvMsg;
@@ -68,10 +66,16 @@ public class MessageDialog extends BaseDialog {
     private Listener listenerBtn3;
 
 
+    @NonNull
+    @Override
+    public View createView(LayoutInflater layoutInflater) {
+        return layoutInflater.inflate(R.layout.dialog_message, null);
+    }
+
     MessageDialog(Context context) {
         super(context);
-        view = LayoutInflater.from(context).inflate(R.layout.dialog_message, null);
 
+        View view = getView();
         lyContainer = view.findViewById(R.id.lyContainer);
         tvTitle = view.findViewById(R.id.tv_title);
         tvMsg = view.findViewById(R.id.tv_msg);
@@ -100,12 +104,6 @@ public class MessageDialog extends BaseDialog {
             dismiss();
         });
 
-    }
-
-    @NonNull
-    @Override
-    public View getView() {
-        return view;
     }
 
     public MessageDialog setBackground(int resId) {
@@ -194,7 +192,7 @@ public class MessageDialog extends BaseDialog {
      * @param tag      : unique number points to checkbox state
      * @param listener : sends {@MessageDialog, @Boolean that represents the result} and return an action indicator to remove saved tag or leave
      */
-    public MessageDialog isDontShowAgainCheckboxDisabledByUser(int tag, ActionListener<Pair<MessageDialog, Boolean>, Boolean> listener) {
+    public MessageDialog isDontShowAgainCheckboxDisabledByUser(int tag, ActionCallback<Pair<MessageDialog, Boolean>, Boolean> listener) {
         JSONArray tagsJsonArray = getDontShowAgainCheckboxTagsArray();
 
         try {
@@ -346,7 +344,6 @@ public class MessageDialog extends BaseDialog {
     protected void onDestroy() {
         super.onDestroy();
 
-        this.view = null;
         this.lyContainer = null;
         this.tvTitle = null;
         this.tvMsg = null;

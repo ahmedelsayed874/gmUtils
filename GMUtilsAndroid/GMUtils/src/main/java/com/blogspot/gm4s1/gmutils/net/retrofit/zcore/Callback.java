@@ -119,7 +119,6 @@ public class Callback<DT, R extends Response<DT>> implements retrofit2.Callback<
             e.printStackTrace();
         }
 
-
         if (response != null) {
 
             if (code == 0)

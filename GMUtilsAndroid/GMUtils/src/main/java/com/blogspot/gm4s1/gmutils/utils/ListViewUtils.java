@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils;
+package com.blogspot.gm4s1.gmutils.utils;
 
 import android.util.Log;
 import android.view.View;

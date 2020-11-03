@@ -1,62 +1,51 @@
-package com.blogspot.gm4s1.gmutils;
+package com.blogspot.gm4s1.gmutils.utils;
 
-import android.Manifest;
-import android.content.ClipData;
-import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.content.res.Resources;
+import android.content.pm.ProviderInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Base64;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 
-import androidx.annotation.RequiresPermission;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 
+import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.R;
+import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
+
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -83,7 +72,7 @@ public class ImageUtils {
 
     //----------------------------------------------------------------------------------------------
 
-    public  Bitmap getBitmap(ImageView imageView) {
+    public Bitmap getBitmap(ImageView imageView) {
         Drawable drawable = imageView.getDrawable();
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable) drawable).getBitmap();
@@ -91,11 +80,11 @@ public class ImageUtils {
         return null;
     }
 
-    public  Bitmap resizeImage(Bitmap bitmap) {
+    public Bitmap resizeImage(Bitmap bitmap) {
         return resizeImage(bitmap, 1500);
     }
 
-    public  Bitmap resizeImage(Bitmap bitmap, int maxOneDimensionLength) {
+    public Bitmap resizeImage(Bitmap bitmap, int maxOneDimensionLength) {
         if (bitmap == null) return null;
 
         int w = bitmap.getWidth();
@@ -121,69 +110,158 @@ public class ImageUtils {
         return bitmap;
     }
 
+    //----------------------------------------------------------------------------------------------
+
     /**
      * to avoid OutOfMemoryException
      */
-    public void scaleImageIntoView(ImageView imageView, String imagePath) {
+    public void scaleImageSafelyIntoView(ImageView imageView, File imageFile) {
+        try {
+            FileInputStream stream = new FileInputStream(imageFile);
+            scaleImageSafelyIntoView(imageView, stream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * to avoid OutOfMemoryException
+     */
+    public void scaleImageSafelyIntoView(ImageView imageView, Uri imageUri) {
+        try {
+            InputStream stream = imageView.getContext().getContentResolver().openInputStream(imageUri);
+            scaleImageSafelyIntoView(imageView, stream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * to avoid OutOfMemoryException
+     */
+    public void scaleImageSafelyIntoView(ImageView imageView, InputStream imageFileStream) {
         // Get the dimensions of the View
         int targetW = imageView.getWidth();
         int targetH = imageView.getHeight();
 
+        Bitmap bitmap = null;
+        try {
+            byte[] imgBytes = new byte[imageFileStream.available()];
+            imageFileStream.read(imgBytes);
+
+            bitmap = scaleImageSafely(targetW, targetH, imgBytes);
+        } catch (Exception e) {}
+
+        imageView.setImageBitmap(bitmap);
+    }
+
+
+    /**
+     * to avoid OutOfMemoryException
+     */
+    public Bitmap scaleImageSafely(int targetWidth, int targetHeight, File imageFile) {
+        try {
+            FileInputStream stream = new FileInputStream(imageFile);
+            return scaleImageSafely(targetWidth, targetHeight, stream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * to avoid OutOfMemoryException
+     */
+    public Bitmap scaleImageSafely(int targetWidth, int targetHeight, Uri imageUri, Context context) {
+        try {
+            InputStream stream = context.getContentResolver().openInputStream(imageUri);
+            return scaleImageSafely(targetWidth, targetHeight, stream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * to avoid OutOfMemoryException
+     */
+    public Bitmap scaleImageSafely(int targetWidth, int targetHeight, InputStream imageFileStream) {
+        Bitmap bitmap = null;
+        try {
+            byte[] imgBytes = new byte[imageFileStream.available()];
+            imageFileStream.read(imgBytes);
+
+            bitmap = scaleImageSafely(targetWidth, targetHeight, imgBytes);
+        } catch (Exception e) {}
+
+        return bitmap;
+
+//        return scaleImageSafely(targetWidth, targetHeight, input -> {
+//            Bitmap bitmap = BitmapFactory.decodeStream(imageFileStream, null, input);
+//            try {
+//                imageFileStream.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return bitmap;
+//        });
+    }
+
+
+    /**
+     * to avoid OutOfMemoryException
+     */
+    public Bitmap scaleImageSafely(int targetWidth, int targetHeight, byte[] imageBytes) {
+        return scaleImageSafely(targetWidth, targetHeight, input ->
+                BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length, input)
+        );
+    }
+
+    /**
+     * to avoid OutOfMemoryException
+     */
+    public Bitmap scaleImageSafely(int targetWidth, int targetHeight, ActionCallback<BitmapFactory.Options, Bitmap> decoder) {
+
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, bmOptions);
+        decoder.invoke(bmOptions);
+
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
 
         // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+        int scaleFactor = Math.min(photoW / targetWidth, photoH / targetHeight);
+        if (scaleFactor <= 0) scaleFactor = 1;
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
-        imageView.setImageBitmap(bitmap);
+        Bitmap bitmap = decoder.invoke(bmOptions);
+
+        return bitmap;
     }
 
-    /**
-     * to avoid OutOfMemoryException
-     */
-    public void scaleImageIntoView(ImageView imageView, InputStream imageFileStream) {
-        // Get the dimensions of the View
-        int targetW = imageView.getWidth();
-        int targetH = imageView.getHeight();
+    //------------------------------------------------------------------------------------------
 
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(imageFileStream, null, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeStream(imageFileStream, null, bmOptions);
-        imageView.setImageBitmap(bitmap);
-    }
-
-    public  byte[] encodeImage(Bitmap bitmap) {
+    public byte[] encodeImage(Bitmap bitmap) {
         if (bitmap == null) return null;
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        return byteArrayOutputStream.toByteArray();
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        try {
+            byteArrayOutputStream.flush();
+            byteArrayOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 
-    public  String convertToBase64(Bitmap image) {
+    public String convertToBase64(Bitmap image) {
         if (image == null) return "";
         byte[] data1 = encodeImage(image);
         return Base64.encodeToString(data1, Base64.DEFAULT);
@@ -191,7 +269,12 @@ public class ImageUtils {
 
     //------------------------------------------------------------------------------------------
 
-    public  Bitmap getBitmapFromUri(Context context, Uri uri) throws IOException {
+    public Bitmap getBitmapFromUri1(Context context, Uri uri) throws IOException {
+        Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+        return bitmap;
+    }
+
+    public Bitmap getBitmapFromUri2(Context context, Uri uri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor =
                 context
                         .getContentResolver()
@@ -202,21 +285,9 @@ public class ImageUtils {
         return image;
     }
 
-    public  Bitmap getBitmapFromUri2(Context context, Uri uri) {
-        Bitmap bitmap = null;
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-        } catch (Exception e) {
-            e.printStackTrace();
-            AppLog.print(e);
-        }
-
-        return bitmap;
-    }
-
     //------------------------------------------------------------------------------------------
 
-    public  void addImageToGallery(Context context, String filePath, String mimeType) {
+    public void addImageToGallery(Context context, String filePath, String mimeType) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
         contentValues.put(MediaStore.Images.Media.MIME_TYPE, mimeType);//"image/jpeg");
@@ -227,7 +298,7 @@ public class ImageUtils {
                 contentValues);
     }
 
-    public  void addImageToGallery(Context context, Uri image) {
+    public void addImageToGallery(Context context, Uri image) {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         mediaScanIntent.setData(image);
         context.sendBroadcast(mediaScanIntent);
@@ -237,18 +308,16 @@ public class ImageUtils {
      * this method won't run on Android 10
      */
     @Deprecated
-    public  void addImageToGallery(Context context, File imageFile) {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+    public void addImageToGallery(Context context, File imageFile) {
         Uri contentUri = Uri.fromFile(imageFile);
-        mediaScanIntent.setData(contentUri);
-        context.sendBroadcast(mediaScanIntent);
+        addImageToGallery(context, contentUri);
     }
 
     /**
      * this method won't run on Android 10
      */
     @Deprecated
-    public  void addImageToGalleryByScanner(Context ctx, File filepath) {
+    public void addImageToGalleryByScanner(Context ctx, File filepath) {
 
         MediaScannerConnection.scanFile(
                 ctx,
@@ -267,30 +336,166 @@ public class ImageUtils {
     /**
      * this method won't run on Android 10
      */
-    @Deprecated
-    public  String saveImageToExternal(Context context, Bitmap bm, String imgName) throws IOException {
-        File imgDir = Environment.getExternalStoragePublicDirectory(DIRECTORY_PICTURES);
+    public File saveImageToPublicStorage(Bitmap bm, String imgName) throws IOException {
+        File root = Environment.getExternalStoragePublicDirectory(DIRECTORY_PICTURES);
+        return saveImageToStorage(root, bm, imgName);
+    }
 
-        File imgFile = new File(imgDir, imgName + ".png");
-        imgFile.createNewFile();
+    /**
+     * this method won't run on Android 10
+     */
+    public File saveImageToStorage(File root, Bitmap bm, String imgName) throws IOException {
+        File imgFile = new File(root, imgName + ".png");
+        if (!imgFile.createNewFile()) {
+            throw new IOException("couldn't create the file");
+        }
 
         FileOutputStream out = new FileOutputStream(imgFile);
+        saveImageToStorage(bm, out);
+
+        return imgFile;
+    }
+
+    public boolean saveImageToStorage(Bitmap image, OutputStream outputStream) throws IOException {
         try {
-            bm.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
+            boolean b = image.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
 
-            MediaScannerConnection.scanFile(context, new String[]{imgFile.getAbsolutePath()}, null, new MediaScannerConnection.OnScanCompletedListener() {
-                public void onScanCompleted(String path, Uri uri) {
-                    Log.i("ExternalStorage", "Scanned " + path + ":");
-                    Log.i("ExternalStorage", "-> uri=" + uri);
-                }
-            });
-
-            return imgFile.getAbsolutePath();
+            return b;
         } catch (Exception e) {
-            throw new IOException();
+            throw new IOException(e);
         }
+    }
+
+    //------------------------------------------------------------------------------------------
+
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image) {
+        return saveImageUsingFileProvide(context, image, (String) null);
+    }
+
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image, @Nullable String fileName) {
+        try {
+            File imgFile;
+            if (TextUtils.isEmpty(fileName))
+                imgFile = createImageFileUsingFileProvider(context);
+            else
+                imgFile = createImageFileUsingFileProvider(context, fileName);
+
+            FileOutputStream fos = new FileOutputStream(imgFile);
+            boolean b = saveImageToStorage(image, fos);
+            if (!b) {
+                imgFile.delete();
+            }
+
+            return FileUtils.createInstance().createUriForFileUsingFileProvider(context, imgFile);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image, File root) {
+        return saveImageUsingFileProvide(context, image, root, null);
+    }
+
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image, File root, @Nullable String fileName) {
+        try {
+            File imgFile;
+            if (TextUtils.isEmpty(fileName))
+                imgFile = createImageFileUsingFileProvider(root);
+            else
+                imgFile = createImageFileUsingFileProvider(root, fileName);
+
+            FileOutputStream fos = new FileOutputStream(imgFile);
+            boolean b = saveImageToStorage(image, fos);
+            if (!b) {
+                imgFile.delete();
+            }
+
+            return FileUtils.createInstance().createUriForFileUsingFileProvider(context, imgFile);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //========
+
+    /**
+     * save into ExternalFilesDir -> Pictures
+     * check {@link R.xml#file_paths}
+     */
+    public File createImageFileUsingFileProvider(Context context) throws IOException {
+        File root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return createImageFileUsingFileProvider(root);
+    }
+
+    /**
+     * save into ExternalFilesDir -> Pictures
+     * check {@link R.xml#file_paths}
+     */
+    public File createImageFileUsingFileProvider(Context context, String fileName) throws IOException {
+        File root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        return createImageFileUsingFileProvider(root, fileName);
+    }
+
+    //========
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public File createImageFileUsingFileProvider(File root) throws IOException {
+        File file = FileUtils.createInstance().createFileUsingFileProvider(root, ".png");
+        return file;
+    }
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public File createImageFileUsingFileProvider(File root, String fileName) throws IOException {
+        File file = FileUtils.createInstance().createFileUsingFileProvider(root, fileName, ".png");
+        return file;
+    }
+
+    //========
+
+    /**
+     * save into ExternalFilesDir -> Pictures
+     * check {@link R.xml#file_paths}
+     */
+    public Uri createImageFileUsingFileProvider2(Context context) throws IOException {
+        File file = createImageFileUsingFileProvider(context);
+        return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
+    }
+
+    /**
+     * save into ExternalFilesDir -> Pictures
+     * check {@link R.xml#file_paths}
+     */
+    public Uri createImageFileUsingFileProvider2(Context context, String fileName) throws IOException {
+        File file = createImageFileUsingFileProvider(context, fileName);
+        return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
+    }
+
+    //========
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public Uri createImageFileUsingFileProvider2(Context context, File root) throws IOException {
+        File file = createImageFileUsingFileProvider(root);
+        return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
+    }
+
+    /**
+     * @param root check {@link R.xml#file_paths}
+     */
+    public Uri createImageFileUsingFileProvider2(Context context, File root, String fileName) throws IOException {
+        File file = createImageFileUsingFileProvider(root, fileName);
+        return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
     }
 
     //------------------------------------------------------------------------------------------
@@ -473,7 +678,7 @@ public class ImageUtils {
 
     //------------------------------------------------------------------------------------------
 
-    public  MultipartBody.Part createRetrofitMultipartBodyForImage(
+    public MultipartBody.Part createRetrofitMultipartBodyForImage(
             ImageView imageView,
             String paramName
     ) {
@@ -491,7 +696,7 @@ public class ImageUtils {
         return null;
     }
 
-    public  MultipartBody.Part createRetrofitMultipartBodyForImage(
+    public MultipartBody.Part createRetrofitMultipartBodyForImage(
             Bitmap image,
             String paramName
     ) {
@@ -511,7 +716,7 @@ public class ImageUtils {
         }
     }
 
-    public  RequestBody createRetrofitRequestBodyForImage(
+    public RequestBody createRetrofitRequestBodyForImage(
             Bitmap image
     ) {
 
@@ -520,6 +725,10 @@ public class ImageUtils {
             image.compress(Bitmap.CompressFormat.PNG, 100, bs);
 
             RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), bs.toByteArray());
+            try {
+                bs.close();
+            } catch (Exception e) {
+            }
 
             return requestFile;
         } catch (Exception e) {
@@ -529,11 +738,13 @@ public class ImageUtils {
 
     //------------------------------------------------------------------------------------------
 
-    public ScreenshotHelper screenshotHelper() { return new ScreenshotHelper(); }
+    public ScreenshotHelper screenshotHelper() {
+        return new ScreenshotHelper();
+    }
 
     public static class ScreenshotHelper {
 
-        public  Bitmap takeScreenshotOfView(View view, OutputStream outputStream) {
+        public Bitmap takeScreenshotOfView(View view, OutputStream outputStream) {
             try {
                 Bitmap bitmap = Bitmap.createBitmap(
                         view.getWidth(),
@@ -544,8 +755,12 @@ public class ImageUtils {
                 view.draw(canvas);
 
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                outputStream.flush();
-                outputStream.close();
+
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (Exception e) {
+                }
 
                 return bitmap;
             } catch (Exception e) {
@@ -554,7 +769,7 @@ public class ImageUtils {
             }
         }
 
-        public  Bitmap takeScreenshotOfEntireScreen(Window window, OutputStream outputStream) {
+        public Bitmap takeScreenshotOfEntireScreen(Window window, OutputStream outputStream) {
             try {
                 View v1 = window.getDecorView().getRootView();
 
@@ -563,8 +778,12 @@ public class ImageUtils {
                 v1.setDrawingCacheEnabled(false);
 
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                outputStream.flush();
-                outputStream.close();
+
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (Exception e) {
+                }
 
                 return bitmap;
             } catch (Throwable e) {

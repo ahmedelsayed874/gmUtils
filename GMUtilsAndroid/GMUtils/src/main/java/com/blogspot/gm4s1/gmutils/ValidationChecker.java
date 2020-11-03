@@ -3,8 +3,6 @@ package com.blogspot.gm4s1.gmutils;
 import android.util.Patterns;
 import android.widget.EditText;
 
-import com.blogspot.gm4s1.gmutils.Utils;
-
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012

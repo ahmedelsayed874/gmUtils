@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -24,15 +25,13 @@ import com.blogspot.gm4s1.gmutils.AppLog;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
 import com.blogspot.gm4s1.gmutils.MyToast;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.Utils;
+import com.blogspot.gm4s1.gmutils.utils.Utils;
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
 import com.blogspot.gm4s1.gmutils.dialogs.WaitDialog;
 import com.blogspot.gm4s1.gmutils.preferences.SettingsPreferences;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.Random;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -50,6 +49,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
+    private BaseViewModel viewModel;
+
 
     public abstract int getActivityLayout();
 
@@ -70,7 +71,24 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         return WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
     }
 
-    protected void onCreateViewModel(ViewModelProvider provider) {}
+    //----------------------------------------------------------------------------------------------
+
+    protected ViewModelProvider.Factory createViewModelFactory() {
+        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
+                .AndroidViewModelFactory
+                .getInstance(getApplication());
+        return viewModelFactory;
+    }
+
+    protected BaseViewModel onCreateViewModel(@NonNull ViewModelProvider provider) {
+        return null;
+    }
+
+    public BaseViewModel getViewModel() {
+        return viewModel;
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -88,15 +106,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         //------------------------------------------------------------------------------------------
 
-        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
-                .AndroidViewModelFactory
-                .getInstance(getApplication());
-
         ViewModelProvider viewModelProvider = new ViewModelProvider(
                 this,
-                viewModelFactory);
+                createViewModelFactory());
 
-        onCreateViewModel(viewModelProvider);
+        viewModel = onCreateViewModel(viewModelProvider);
     }
 
 

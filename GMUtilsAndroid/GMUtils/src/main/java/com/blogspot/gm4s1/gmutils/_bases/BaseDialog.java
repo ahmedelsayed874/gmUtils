@@ -1,6 +1,7 @@
 package com.blogspot.gm4s1.gmutils._bases;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -11,9 +12,13 @@ import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 
 public abstract class BaseDialog {
     private AlertDialog dialog;
+    private View view;
+
+    @NonNull
+    protected abstract View createView(LayoutInflater layoutInflater);
 
     public BaseDialog(Context context) {
-        View view = getView();
+        view = createView(LayoutInflater.from(context));
 
         dialog = new AlertDialog.Builder(context)
                 .setView(view)
@@ -41,14 +46,16 @@ public abstract class BaseDialog {
 
     protected void onDestroy() {
         this.dialog = null;
+        this.view = null;
     }
 
-    protected AlertDialog getDialog() {
+    public final AlertDialog getDialog() {
         return dialog;
     }
 
-    @NonNull
-    public abstract View getView();
+    public final View getView() {
+        return view;
+    }
 
     public BaseDialog setCancelable(boolean cancellable) {
         dialog.setCancelable(cancellable);
@@ -63,7 +70,7 @@ public abstract class BaseDialog {
     }
 
     public void dismiss() {
-        if (dialog.isShowing())
+        if (dialog != null && dialog.isShowing())
             dialog.dismiss();
     }
 }

@@ -15,6 +15,9 @@ import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.preferences.PreferencesManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -33,6 +36,8 @@ public abstract class BaseApplication extends Application implements Application
         return  current;
     }
 
+    private final Map<String, Object> globalInstances = new HashMap<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,6 +53,14 @@ public abstract class BaseApplication extends Application implements Application
 
     protected abstract void onPostCreate();
 
+    public void addGlobalInstance(String key, Object instance) {
+        this.globalInstances.put(key, instance);
+    }
+
+    public Object getGlobalInstance(String key) {
+        return this.globalInstances.get(key);
+    }
+
     public MessagingCenter getMessagingCenter() {
         return MessagingCenter.getInstance();
     }
@@ -55,8 +68,8 @@ public abstract class BaseApplication extends Application implements Application
     //----------------------------------------------------------------------------------------------
 
     private int activityCount = 0;
-    private long delayAmount = 500L;
-    private String bugFileName = "BUGS";
+    private final long delayAmount = 500L;
+    private final String bugFileName = "BUGS";
     private String bugs = "";
 
 

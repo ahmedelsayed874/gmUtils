@@ -27,7 +27,7 @@ public class FakeImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.exa
             Response<Object> s = Response.createInstance(Object.class);
 
             if (r >= 2) { //success:-> 2 : 10
-                s.setData(new Object());
+                s.set_Data(new Object());
                 s._code = 200;
 
             } else if (r >= 1) {//error-> 1

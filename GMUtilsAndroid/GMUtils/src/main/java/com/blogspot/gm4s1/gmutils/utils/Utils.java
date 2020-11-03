@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils;
+package com.blogspot.gm4s1.gmutils.utils;
 
 
 import android.Manifest;
@@ -22,7 +22,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.Surface;
 import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;

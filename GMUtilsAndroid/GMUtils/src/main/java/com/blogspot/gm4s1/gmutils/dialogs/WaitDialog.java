@@ -36,26 +36,23 @@ public class WaitDialog extends BaseDialog {
         return waitDialog;
     }
 
-    private View view;
     private TextView textView;
+
+    @NonNull
+    @Override
+    protected View createView(LayoutInflater layoutInflater) {
+        return layoutInflater.inflate(R.layout.dialog_wait, null);
+    }
 
     public WaitDialog(Context context) {
         super(context);
-        view = LayoutInflater.from(context).inflate(R.layout.dialog_wait, null);
-        textView = view.findViewById(R.id.tv_msg);
+        textView = getView().findViewById(R.id.tv_msg);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        //setCancelable(false);
         getDialog().setCanceledOnTouchOutside(false);
-    }
-
-    @NonNull
-    @Override
-    public View getView() {
-        return view;
     }
 
     public TextView textView() { return textView; }
@@ -63,7 +60,6 @@ public class WaitDialog extends BaseDialog {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        view = null;
         textView = null;
     }
 }

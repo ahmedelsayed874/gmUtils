@@ -3,8 +3,6 @@ package com.blogspot.gm4s1.gmutils.customViews;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,12 +13,11 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.blogspot.gm4s1.gmutils.AppLog;
-import com.blogspot.gm4s1.gmutils.ImageLoader;
-import com.blogspot.gm4s1.gmutils.ImageUtils;
 import com.blogspot.gm4s1.gmutils.Intents;
 
 import java.util.ArrayList;
@@ -28,7 +25,17 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
+/**
+ * Created by Ahmed El-Sayed (Glory Maker)
+ * Computer Engineer / 2012
+ * Android/iOS Developer with (Java/Kotlin, Swift)
+ * Have experience with:
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
+ * a.elsayedabdo@gmail.com
+ * +201022663988
+ */
 public class ImageSlider {
     private abstract static class TimerTask2 extends TimerTask {
         ImageSlider imageSlider;
@@ -64,6 +71,7 @@ public class ImageSlider {
     private Runnable2 mRunnable;
     private boolean timerStoppedByUser = false;
     private LoadingProgress mLoadingProgress;
+    private ImageLoader mImageLoader;
 
 
     public ImageSlider(ViewPager viewPager) {
@@ -85,28 +93,28 @@ public class ImageSlider {
 
         //------------------------------------------------------------------------------------------
 
-        //ImageLoader imageLoader = com.blogspot.gm4s1.gmutils.ImageLoader::load;
-        ImageLoader imageLoader = (url, imageView) -> {
+        ImageLoader imageLoader = (url, imageView, complete) -> {
             if (mLoadingProgress != null)
-                mLoadingProgress.setLoadingProgressVisibility(true);
+                mLoadingProgress.setLoadingProgressVisibility(this, true);
 
-            com.blogspot.gm4s1.gmutils.ImageLoader.load(
-                    url,
-                    imageView,
-                    new com.blogspot.gm4s1.gmutils.ImageLoader.Callback() {
-                        @Override
-                        public void onSuccess(String s) {
-                            if (mLoadingProgress != null)
-                                mLoadingProgress.setLoadingProgressVisibility(false);
-                        }
-
-                        @Override
-                        public void onError(String s) {
-                            if (mLoadingProgress != null)
-                                mLoadingProgress.setLoadingProgressVisibility(false);
-                        }
+            if (mImageLoader != null) {
+                mImageLoader.load(url, imageView, new ImageLoaderComplete() {
+                    @Override
+                    public void end() {
+                        if (mLoadingProgress != null)
+                            mLoadingProgress.setLoadingProgressVisibility(ImageSlider.this, false);
                     }
-            );
+                });
+            } else {
+                com.blogspot.gm4s1.gmutils.ImageLoader.load(
+                        url,
+                        imageView,
+                        (imgUrl, imageView1, success) -> {
+                            if (mLoadingProgress != null)
+                                mLoadingProgress.setLoadingProgressVisibility(ImageSlider.this, false);
+                        }
+                );
+            }
         };
         TimerActions timerActions = new TimerActions() {
             @Override
@@ -149,7 +157,7 @@ public class ImageSlider {
     //----------------------------------------------------------------------------------------------
 
     public void setImageLoaderListener(@NonNull ImageLoader imageLoader) {
-        imageAdapter.mImageLoader = imageLoader;
+        mImageLoader = imageLoader;
     }
 
     public void setLoadingProgressListener(LoadingProgress loadingProgress) {
@@ -247,11 +255,21 @@ public class ImageSlider {
 
     //----------------------------------------------------------------------------------------------
 
+    /**
+     * using this will ignore other methods
+     */
+    public ImageSlider setImageSliderAdapter(@NonNull ImageSliderAdapter sliderAdapter) {
+        imageAdapter.setImageSliderAdapter(sliderAdapter);
+
+        viewPager.getAdapter().notifyDataSetChanged();
+
+        return this;
+    }
+
     public ImageSlider setImagesUri(List<Uri> images) {
         imageAdapter.setImagesUri(images);
 
-        viewPager.setAdapter(null);
-        viewPager.setAdapter(imageAdapter);
+        viewPager.getAdapter().notifyDataSetChanged();
 
         return this;
     }
@@ -259,8 +277,7 @@ public class ImageSlider {
     public ImageSlider setImagesUrl(List<String> images) {
         imageAdapter.setImagesUrl(images);
 
-        viewPager.setAdapter(null);
-        viewPager.setAdapter(imageAdapter);
+        viewPager.getAdapter().notifyDataSetChanged();
 
         return this;
     }
@@ -268,8 +285,7 @@ public class ImageSlider {
     public ImageSlider setImagesResources(List<Integer> images) {
         imageAdapter.setImagesResources(images);
 
-        viewPager.setAdapter(null);
-        viewPager.setAdapter(imageAdapter);
+        viewPager.getAdapter().notifyDataSetChanged();
 
         return this;
     }
@@ -277,8 +293,7 @@ public class ImageSlider {
     public ImageSlider addImagesUri(List<Uri> images) {
         imageAdapter.addImagesUri(images);
 
-        viewPager.setAdapter(null);
-        viewPager.setAdapter(imageAdapter);
+        viewPager.getAdapter().notifyDataSetChanged();
 
         return this;
     }
@@ -286,8 +301,7 @@ public class ImageSlider {
     public ImageSlider addImagesUrl(List<String> images) {
         imageAdapter.addImagesUrl(images);
 
-        viewPager.setAdapter(null);
-        viewPager.setAdapter(imageAdapter);
+        viewPager.getAdapter().notifyDataSetChanged();
 
         return this;
     }
@@ -302,11 +316,41 @@ public class ImageSlider {
         return this;
     }
 
-    public ImageSlider clear() {
+
+    public void remove(Object item) {
+        imageAdapter.remove(item);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void remove(int position) {
+        imageAdapter.remove(position);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void remove(List<Object> items) {
+        imageAdapter.remove(items);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void removeFirst(int count) {
+        imageAdapter.removeFirst(count);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void removeLast(int count) {
+        imageAdapter.removeLast(count);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+    public void removeRange(int firstIndex, int lastIndex) {
+        imageAdapter.removeRange(firstIndex, lastIndex);
+        imageAdapter.notifyDataSetChanged();
+    }
+
+
+    public void clear() {
         imageAdapter.clear();
         imageAdapter.notifyDataSetChanged();
-
-        return this;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -319,18 +363,8 @@ public class ImageSlider {
         }
     }
 
-    //----------------------------------------------------------------------------------------------
-
-    public Bitmap getCurrentImage() {
-        if (viewPager.getAdapter() != null) {
-            ImageView imageView = imageAdapter.getImageView();
-
-            if (imageView != null) {
-                return ImageUtils.createInstance().getBitmap(imageView);
-            }
-        }
-
-        return null;
+    public int getCurrentDisplayedImage() {
+        return viewPager.getCurrentItem();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -345,6 +379,7 @@ public class ImageSlider {
         stopTimerPrivate();
 
         mLoadingProgress = null;
+        mImageLoader = null;
     }
 
     @Override
@@ -356,22 +391,29 @@ public class ImageSlider {
     //----------------------------------------------------------------------------------------------
 
     private static class ImageAdapter extends PagerAdapter {
+        private ImageSliderAdapter sliderAdapter = null; //using this will ignore {List<Object> images}
         private List<Object> images = new ArrayList<>();//uri | string | integer
         private ImageView mImageView;
         private View.OnClickListener imgViewAreaClickListener;
         private final boolean enableEnlargeImageOnClick;
         private View.OnTouchListener imgViewAreaTouchListener;
         private ImageView.ScaleType imageScaleType = ImageView.ScaleType.FIT_XY;
-        private ImageSlider.ImageLoader mImageLoader;
+        private ImageLoader mImageLoader;
         private TimerActions mTimerActions;
 
-        ImageAdapter(boolean enableEnlargeImageOnClick, ImageSlider.ImageLoader imageLoader, TimerActions timerActions) {
+        ImageAdapter(boolean enableEnlargeImageOnClick, ImageLoader imageLoader, TimerActions timerActions) {
             this.enableEnlargeImageOnClick = enableEnlargeImageOnClick;
             this.mImageLoader = imageLoader;
             this.mTimerActions = timerActions;
         }
 
         //------------------------------------------------------------------------------------------
+
+
+        public void setImageSliderAdapter(@NonNull ImageSliderAdapter sliderAdapter) {
+            this.sliderAdapter = sliderAdapter;
+            if (sliderAdapter == null) throw new IllegalArgumentException("sliderAdapter = null");
+        }
 
         void setImagesUrl(List<String> images) {
             if (images != null) {
@@ -421,6 +463,53 @@ public class ImageSlider {
             this.images.add(image);
         }
 
+
+        public void remove(Object item) {
+            if (item == null) return;
+            images.remove(item);
+        }
+
+        public void remove(int position) {
+            try {
+                images.remove(position);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void remove(List<Object> items) {
+            if (items == null || items.size() == 0) return;
+            images.removeAll(items);
+        }
+
+        public void removeFirst(int count) {
+            removeRange(0, count - 1);
+        }
+
+        public void removeLast(int count) {
+            removeRange(images.size() - count, images.size() - 1);
+        }
+
+        public void removeRange(int firstIndex, int lastIndex) {
+            int itemCount = images.size();
+
+            if (itemCount == 0) return;
+            if (firstIndex < 0) firstIndex = 0;
+            if (lastIndex >= itemCount) lastIndex = itemCount - 1;
+            if (firstIndex > lastIndex) {
+                int t = firstIndex;
+                firstIndex = lastIndex;
+                lastIndex = t;
+            }
+
+            int i = firstIndex;
+            while (i <= lastIndex) {
+                images.remove(firstIndex);
+                i++;
+            }
+        }
+
+
         void clear() {
             this.images.clear();
         }
@@ -439,7 +528,10 @@ public class ImageSlider {
 
         @Override
         public int getCount() {
-            return images.size();
+            if (sliderAdapter != null)
+                return sliderAdapter.getImagesCount();
+            else
+                return images.size();
         }
 
         @Override
@@ -465,7 +557,15 @@ public class ImageSlider {
 
             container.addView(mImageView, 0);
 
-            if (images.size() > 0) {
+            if (sliderAdapter != null) {
+                Bitmap imageBitmap = sliderAdapter.getImageBitmap(i);
+                if (imageBitmap != null) {
+                    mImageView.setImageBitmap(imageBitmap);
+                } else {
+                    setImage(sliderAdapter.getImageSource(i));
+                }
+
+            } else if (images.size() > 0) {
                 setImage(images.get(i));
             }
 
@@ -479,13 +579,13 @@ public class ImageSlider {
             try {
                 if (obj instanceof Uri) {
                     if (obj.toString().indexOf("http") == 0) {
-                        mImageLoader.load(obj.toString(), mImageView);
+                        mImageLoader.load(obj.toString(), mImageView, null);
                     } else {
                         mImageView.setImageURI((Uri) obj);
                     }
                 } else if (obj instanceof String) {
                     if (obj.toString().indexOf("http") == 0) {
-                        mImageLoader.load(obj.toString(), mImageView);
+                        mImageLoader.load(obj.toString(), mImageView, null);
                     } else {
                         Uri uri = Uri.parse(obj.toString());
                         mImageView.setImageURI(uri);
@@ -525,10 +625,10 @@ public class ImageSlider {
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    AppLog.print("ViewPager :: ACTION :: " + event.getAction());
+//                    AppLog.print("ViewPager :: ACTION :: " + event.getAction());
 
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        AppLog.print("ViewPager :: ACTION-DOWN");
+//                        AppLog.print("ViewPager :: ACTION-DOWN");
                         mTimerActions.pauseTimer();
                         wasDown = true;
                         downTime = System.currentTimeMillis();
@@ -538,7 +638,7 @@ public class ImageSlider {
                         if (++moves > 5) downTime = 0;
 
                     } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                        AppLog.print("ViewPager :: ACTION-UP");
+//                        AppLog.print("ViewPager :: ACTION-UP");
                         v.postDelayed(() -> {
                             if (wasDown) mTimerActions.resumeTimer();
                             wasDown = false;
@@ -567,6 +667,8 @@ public class ImageSlider {
         }
 
         void dispose() {
+            this.sliderAdapter = null;
+
             this.images.clear();
             this.images = null;
 
@@ -590,11 +692,29 @@ public class ImageSlider {
     //----------------------------------------------------------------------------------------------
 
     public interface LoadingProgress {
-        void setLoadingProgressVisibility(boolean show);
+        void setLoadingProgressVisibility(ImageSlider imageSlider, boolean show);
+    }
+
+    public interface ImageSliderAdapter {
+        int getImagesCount();
+
+        @Nullable
+        Bitmap getImageBitmap(int index);
+
+        /**
+         * @return uri | string | integer
+         */
+        @Nullable
+        Object getImageSource(int index);
     }
 
     public interface ImageLoader {
-        void load(String url, ImageView imageView);
+        void load(String url, ImageView imageView, ImageLoaderComplete complete);
+    }
+
+    private ImageLoaderComplete unusedCallback; // it required to tell compiler to let it and don't remove
+    public interface ImageLoaderComplete {
+        void end();
     }
 
     private interface TimerActions {
