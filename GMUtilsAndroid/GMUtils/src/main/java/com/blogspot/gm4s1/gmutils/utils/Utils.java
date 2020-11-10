@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 
@@ -32,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -187,6 +189,28 @@ public class Utils {
         if (dicimalNumber >= threshold) integerNumber++;
 
         return integerNumber;
+    }
+
+    public String formatToMoneyPattern(double number) {
+        NumberFormat f = NumberFormat.getInstance();
+        f.setGroupingUsed(true);
+        f.setMaximumFractionDigits(2);
+        f.setMinimumFractionDigits(2);
+        return f.format(number);
+    }
+
+    public String convertIntegerToHex(int number) {
+        return String.format("%08X", number);
+    }
+
+    //------------------------------------------------------------------------------------------
+
+    public void setScreenLightStatus(Window window, boolean on) {
+        if (on) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 
     //------------------------------------------------------------------------------------------

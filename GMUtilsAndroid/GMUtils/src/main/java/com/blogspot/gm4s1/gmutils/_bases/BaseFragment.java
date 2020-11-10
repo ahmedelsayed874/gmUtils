@@ -68,6 +68,13 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
+    public Listener getListener() {
+        return listener;
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
     private int waitViewShowCount = 0;
 
     public void showWaitView() {

@@ -52,6 +52,11 @@ import javax.net.ssl.SSLSocketFactory;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
+
+/**
+ * it depends on::
+ * 'com.android.volley:volley:1.1.1'
+ */
 public class ApiRequestCreator {
     private static ApiRequestCreator mInstance;
     private RequestQueue mRequestQueue;

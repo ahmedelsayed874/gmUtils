@@ -29,7 +29,7 @@ public class MyToast {
     public static Boolean DEFAULT_STYLE = true;
 
     @AnyRes
-    public static Integer BACKGROUND = android.R.color.black;
+    public static Integer BACKGROUND = R.color.colorPrimary; //android.R.color.black;
     @ColorInt
     public static Integer TEXT_COLOR = Color.WHITE;
 

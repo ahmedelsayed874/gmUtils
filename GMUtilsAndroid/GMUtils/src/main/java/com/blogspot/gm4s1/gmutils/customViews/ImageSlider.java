@@ -21,7 +21,9 @@ import com.blogspot.gm4s1.gmutils.AppLog;
 import com.blogspot.gm4s1.gmutils.Intents;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -249,7 +251,12 @@ public class ImageSlider {
     }
 
     public ImageSlider setImageScaleType(ImageView.ScaleType imageScaleType) {
+        viewPager.setAdapter(null);
+
         imageAdapter.setImageScaleType(imageScaleType);
+        viewPager.setAdapter(imageAdapter);
+        //viewPager.getAdapter().notifyDataSetChanged();
+
         return this;
     }
 
@@ -393,7 +400,8 @@ public class ImageSlider {
     private static class ImageAdapter extends PagerAdapter {
         private ImageSliderAdapter sliderAdapter = null; //using this will ignore {List<Object> images}
         private List<Object> images = new ArrayList<>();//uri | string | integer
-        private ImageView mImageView;
+
+//        private Set<ImageView> mImageViews = new HashSet<>();
         private View.OnClickListener imgViewAreaClickListener;
         private final boolean enableEnlargeImageOnClick;
         private View.OnTouchListener imgViewAreaTouchListener;
@@ -518,10 +526,6 @@ public class ImageSlider {
 
         void setImageScaleType(ImageView.ScaleType imageScaleType) {
             this.imageScaleType = imageScaleType;
-//            if (mImageView != null) {
-//                mImageView.setScaleType(imageScaleType);
-//            }
-            notifyDataSetChanged();
         }
 
         //------------------------------------------------------------------------------------------
@@ -549,7 +553,7 @@ public class ImageSlider {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
 
-            mImageView = new ImageView(context);
+            ImageView mImageView = new ImageView(context);
             mImageView.setLayoutParams(params);
             mImageView.setScaleType(imageScaleType);
             mImageView.setOnClickListener(imgViewAreaClickListener());
@@ -562,11 +566,11 @@ public class ImageSlider {
                 if (imageBitmap != null) {
                     mImageView.setImageBitmap(imageBitmap);
                 } else {
-                    setImage(sliderAdapter.getImageSource(i));
+                    setImage(mImageView, sliderAdapter.getImageSource(i));
                 }
 
             } else if (images.size() > 0) {
-                setImage(images.get(i));
+                setImage(mImageView, images.get(i));
             }
 
             return mImageView;
@@ -575,7 +579,7 @@ public class ImageSlider {
         /**
          * @param obj uri | string | integer
          */
-        private void setImage(Object obj) {
+        private void setImage(ImageView mImageView, Object obj) {
             try {
                 if (obj instanceof Uri) {
                     if (obj.toString().indexOf("http") == 0) {
@@ -598,10 +602,6 @@ public class ImageSlider {
                 e.printStackTrace();
                 AppLog.print(e);
             }
-        }
-
-        public ImageView getImageView() {
-            return mImageView;
         }
 
         private View.OnClickListener imgViewAreaClickListener() {
@@ -672,14 +672,14 @@ public class ImageSlider {
             this.images.clear();
             this.images = null;
 
-            if (mImageView != null) {
-                if (mImageView.getParent() != null) {
-                    if (mImageView.getParent() instanceof ViewGroup) {
-                        ((ViewGroup) mImageView.getParent()).removeAllViews();
-                    }
-                }
-            }
-            this.mImageView = null;
+//            if (mImageView != null) {
+//                if (mImageView.getParent() != null) {
+//                    if (mImageView.getParent() instanceof ViewGroup) {
+//                        ((ViewGroup) mImageView.getParent()).removeAllViews();
+//                    }
+//                }
+//            }
+//            this.mImageView = null;
 
             this.imgViewAreaClickListener = null;
             this.imgViewAreaTouchListener = null;

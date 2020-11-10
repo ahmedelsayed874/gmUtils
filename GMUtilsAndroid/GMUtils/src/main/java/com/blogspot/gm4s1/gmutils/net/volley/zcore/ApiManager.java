@@ -32,6 +32,11 @@ import java.util.Map;
  * this class will manage API request cycle
  * I created it to solve the issue of recreating Activities
  */
+
+/**
+ * it depends on::
+ * 'com.android.volley:volley:1.1.1'
+ */
 public class ApiManager {
     private WeakReference<Activity> mActivity;
     private WeakReference<Fragment> mFragment;

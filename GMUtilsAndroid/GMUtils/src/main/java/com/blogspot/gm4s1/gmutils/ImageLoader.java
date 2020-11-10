@@ -38,6 +38,11 @@ import javax.net.ssl.X509TrustManager;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
+
+/**
+ * this class depends on:
+ * 'com.squareup.picasso:picasso:2.5.2'
+ */
 public class ImageLoader {
     @SuppressLint("StaticFieldLeak")
     private static volatile Picasso INSTANCE;

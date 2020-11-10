@@ -27,6 +27,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 /**
  * https://square.github.io/retrofit/
+ *
+ * it depends on
+ * 'com.squareup.retrofit2:retrofit:2.7.1'
+ * 'com.squareup.retrofit2:converter-gson:2.7.1'
+ * 'com.squareup.okhttp:okhttp:2.4.0'
  */
 public class RetrofitService {
 
