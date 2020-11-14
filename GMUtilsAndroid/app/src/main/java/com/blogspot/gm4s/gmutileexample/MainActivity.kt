@@ -1,8 +1,10 @@
 package com.blogspot.gm4s.gmutileexample
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -10,5 +12,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        openBtn.setOnClickListener {
+            val intent = Intent(this, ContactEditorActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

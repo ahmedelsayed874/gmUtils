@@ -73,5 +73,6 @@
     <string name="dontShowAgain">لا تظهرها ثانية</string>
     <string name="copy">نسخ</string>
     <string name="delete">حذف</string>
+    <string name="back">الخلف</string>
 
 </resources>

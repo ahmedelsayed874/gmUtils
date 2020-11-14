@@ -140,6 +140,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
     <Button
+        android:id="@+id/saveBtn"
         style="@style/button.default"
         android:layout_marginTop="@dimen/size_50"
         android:layout_marginBottom="@dimen/size_50"
@@ -147,6 +148,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTime3" />
+
+
+    <Button
+        android:id="@+id/backBtn"
+        style="@style/button.black"
+        android:layout_marginTop="@dimen/size_5"
+        android:layout_marginBottom="@dimen/size_50"
+        android:text="@string/back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/saveBtn" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

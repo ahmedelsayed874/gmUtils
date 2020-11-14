@@ -1,19 +1,30 @@
 package com.blogspot.gm4s1.gmutils;
 
-/**
- * import those or newest:
- *     implementation 'com.google.firebase:firebase-core:17.2.3'
- *     implementation 'com.google.android.gms:play-services-maps:17.0.0'
- */
+import android.app.Application;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.TextUtils;
 
-//import com.google.android.gms.maps.CameraUpdateFactory;
-//import com.google.android.gms.maps.GoogleMap;
-//import com.google.android.gms.maps.OnMapReadyCallback;
-//import com.google.android.gms.maps.SupportMapFragment;
-//import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-//import com.google.android.gms.maps.model.LatLng;
-//import com.google.android.gms.maps.model.Marker;
-//import com.google.android.gms.maps.model.MarkerOptions;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+
+import com.blogspot.gm4s1.gmutils.utils.Utils;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -26,13 +37,19 @@ package com.blogspot.gm4s1.gmutils;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
+
+/**
+ * dependencies:
+ *     implementation 'com.google.android.gms:play-services-maps:17.0.0'
+ */
+
 public class MapController {
-    /*private Context mContext;
+    private Context mAppContext;
     private GoogleMap mGoogleMap;
     private GoogleMap.InfoWindowAdapter mInfoWindowAdapter;
     private GoogleMap.OnInfoWindowClickListener mOnInfoWindowClickListener;
-    private List<MapPin> pinDataList = new ArrayList<>();
-    private LatLng latLng = new LatLng(25.197197, 55.2743764);//Burj Khalifa
+    private final List<MapPin> pinDataList = new ArrayList<>();
+    private LatLng latLng = new LatLng(29.977344, 31.132493);//giza piramids
     private Float zoom = null;
     private boolean buildingsEnabled = false;
     private boolean toolbarControl = false;
@@ -41,13 +58,13 @@ public class MapController {
     private Listener listener;
 
     public MapController(SupportMapFragment fragment) {
-        mContext = fragment.getContext();
         fragment.getMapAsync(new OnMapReadyCallbackImp());
+        mAppContext = fragment.getContext().getApplicationContext();
     }
 
     public MapController(Context context, @NonNull GoogleMap map) {
         if (map == null) throw new NullPointerException("MapController.GoogleMap");
-        mContext = context;
+        mAppContext = context.getApplicationContext();
         new OnMapReadyCallbackImp().onMapReady(map);
     }
 
@@ -95,6 +112,14 @@ public class MapController {
 
     //----------------------------------------------------------------------------------------------
 
+    public void dispose() {
+        mAppContext = null;
+        mGoogleMap = null;
+        mInfoWindowAdapter = null;
+        mOnInfoWindowClickListener = null;
+        pinDataList.clear();
+        listener = null;
+    }
 
     public GoogleMap getGoogleMap() {
         return mGoogleMap;
@@ -160,7 +185,7 @@ public class MapController {
 
         marker.setTag(mapPin.getExtraData());
 
-        Bitmap icon = mapPin.getIcon(mContext);
+        Bitmap icon = mapPin.getIcon(mAppContext);
         if (icon == null) {
             marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
         } else {
@@ -366,7 +391,7 @@ public class MapController {
                 if (this.lat != otherObj.lat) return false;
                 if (this.lng != otherObj.lng) return false;
                 if (!TextUtils.equals(this.icon, otherObj.icon)) return false;
-                if (!Utils.checkEquality(this.extraData, otherObj.extraData)) return false;
+                if (!Utils.createInstance().checkEquality(this.extraData, otherObj.extraData)) return false;
 
                 return true;
             }
@@ -416,6 +441,6 @@ public class MapController {
         public String toString() {
             return lat + ",\n" + lng + "\n[" + name + "]";
         }
-    }*/
+    }
 
 }

@@ -73,6 +73,7 @@
     <string name="dontShowAgain">Don\'t show again</string>
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
+    <string name="back">Back</string>
 
 
 </resources>
