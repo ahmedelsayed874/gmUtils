@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
@@ -26,7 +27,8 @@ import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
  * +201022663988
  */
 public abstract class BaseFragment extends Fragment {
-    Listener listener = null;
+    private Listener listener = null;
+    private BaseViewModel viewModel;
 
     public BaseFragment() {
         super();
@@ -55,9 +57,41 @@ public abstract class BaseFragment extends Fragment {
         return view;
     }
 
+
+    //----------------------------------------------------------------------------------------------
+
+    protected ViewModelProvider.Factory onCreateViewModelFactory() {
+        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
+                .AndroidViewModelFactory
+                .getInstance(getActivity().getApplication());
+        return viewModelFactory;
+    }
+
+    protected Class<? extends BaseViewModel> getViewModelClass() {
+        return null;
+    }
+
+    public BaseViewModel getViewModel() {
+        return viewModel;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+        //------------------------------------------------------------------------------------------
+
+        if (getViewModelClass() != null) {
+            ViewModelProvider viewModelProvider = new ViewModelProvider(
+                    this,
+                    onCreateViewModelFactory()
+            );
+
+            viewModel = viewModelProvider.get(getViewModelClass());
+        }
     }
 
     //----------------------------------------------------------------------------------------------

@@ -5,6 +5,9 @@ import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.IntRange;
+import androidx.annotation.Nullable;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,12 +31,20 @@ import java.util.Locale;
  * +201022663988
  */
 public class AppLog {
-    public static DateOp DEADLINE = DateOp.getInstance(
-            "20-10-2020 00:00:00",
-            DateOp.PATTERN_dd_MM_yyyy_HH_mm_ss);
+    public static DateOp DEADLINE = null;
+
+    public static void SET_DEADLINE(int d, int M, int y) {
+        SET_DEADLINE(d, M, y, 0, 0, 0);
+    }
+
+    public static void SET_DEADLINE(int d, int M, int y, int h, int m, int s) {
+        DEADLINE = DateOp.getInstance()
+                .setDate(y, M, d)
+                .setTime(h, m, s);
+    }
 
     public static boolean DEBUG_MODE() {
-        return System.currentTimeMillis() <= DEADLINE.getTimeInMillis();
+        return DEADLINE == null || System.currentTimeMillis() <= DEADLINE.getTimeInMillis();
     }
 
     public static Boolean WRITE_TO_FILE_ENABLED = null;
@@ -42,8 +53,6 @@ public class AppLog {
         if (WRITE_TO_FILE_ENABLED == null) return DEBUG_MODE();
         return WRITE_TO_FILE_ENABLED;
     }
-
-    ;
 
 
     public static boolean checkVersionMode(Context context) {
@@ -81,31 +90,51 @@ public class AppLog {
 
     //----------------------------------------------------------------------------------------------
 
+    public static class FileWriter {
+        private final File file;
+        private FileWriter(File file) {
+            this.file = file;
+        }
+
+        public void append(String text) {
+            try {
+                OutputStream os = new FileOutputStream(file, true);
+                OutputStreamWriter sw = new OutputStreamWriter(os);
+                try {
+                    String date = new Date().toString();
+                    sw.write(date);
+                    sw.write(":\n");
+                    sw.write(text);
+                    sw.write("\n\n*-----*-----*-----*-----*\n\n");
+                } finally {
+                    sw.flush();
+                    sw.close();
+                    os.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static FileWriter createFileWriter(File file) {
+        return new FileWriter(file);
+    }
+
+    public static FileWriter createFileWriter(Context context, @Nullable String fileName) {
+        File file = createOrGetLogFile(context, fileName);
+        return new FileWriter(file);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     public static void writeToFile(Context context, String text) {
         writeToFile(context, text, null);
     }
 
     public static void writeToFile(Context context, String text, String fileName) {
         if (!WRITE_TO_FILE_ENABLED()) return;
-        try {
-            File file = createOrGetLogFile(context, fileName);
-
-            OutputStream os = new FileOutputStream(file, true);
-            OutputStreamWriter sw = new OutputStreamWriter(os);
-            try {
-                String date = new Date().toString();
-                sw.write(date);
-                sw.write(":\n");
-                sw.write(text);
-                sw.write("\n\n*-----*-----*-----*-----*\n\n");
-            } finally {
-                sw.flush();
-                sw.close();
-                os.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        createFileWriter(context, fileName).append(text);
     }
 
     public static String readFromCurrentSessionFile(Context context) {

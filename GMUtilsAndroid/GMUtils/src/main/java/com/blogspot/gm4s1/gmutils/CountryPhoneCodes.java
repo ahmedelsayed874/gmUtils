@@ -1,14 +1,13 @@
 package com.blogspot.gm4s1.gmutils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import com.blogspot.gm4s1.gmutils.preferences.SettingsPreferences;
+import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -479,7 +478,7 @@ public class CountryPhoneCodes {
         }
 
         public String getName() {
-            if (SettingsPreferences.Language.usingEnglish()) {
+            if (SettingsStorage.Language.usingEnglish()) {
                 return nameEn;
             } else {
                 if (TextUtils.isEmpty(nameAr)) {

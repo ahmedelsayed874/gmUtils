@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.preferences;
+package com.blogspot.gm4s1.gmutils.storage;
 
 import android.app.Application;
 import android.content.Context;
@@ -14,7 +14,7 @@ import android.content.Context;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class PreferencesManager {
+public class StorageManager {
 
     public interface Callback {
         Application getApplication();

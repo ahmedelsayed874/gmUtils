@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.preferences;
+package com.blogspot.gm4s1.gmutils.storage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,7 +6,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 
 import com.blogspot.gm4s1.gmutils.ContextWrapper;
-import com.blogspot.gm4s1.gmutils.preferences.PreferencesManager;
 
 import java.util.*;
 
@@ -21,20 +20,20 @@ import java.util.*;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class SettingsPreferences {
+public class SettingsStorage {
 
-    private static String PREF_NAME = SettingsPreferences.class.getName() + "SETTINGS";
+    private static String PREF_NAME = SettingsStorage.class.getName() + "SETTINGS";
 
-    public static SettingsPreferences getInstance() {
-        Context appContext = PreferencesManager.getAppContext();
+    public static SettingsStorage getInstance() {
+        Context appContext = StorageManager.getAppContext();
 
-        return new SettingsPreferences(appContext);
+        return new SettingsStorage(appContext);
     }
 
     private SharedPreferences mPreference;
     private Language language = null;
 
-    private SettingsPreferences(Context context) {
+    private SettingsStorage(Context context) {
         mPreference = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 

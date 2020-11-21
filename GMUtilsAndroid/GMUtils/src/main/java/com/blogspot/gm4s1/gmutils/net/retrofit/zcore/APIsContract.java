@@ -1,8 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.zcore;
 
 import com.blogspot.gm4s1.gmutils.DateOp;
-import com.blogspot.gm4s1.gmutils.preferences.AccountPreferences;
-import com.blogspot.gm4s1.gmutils.preferences.SettingsPreferences;
+import com.blogspot.gm4s1.gmutils.storage.AccountStorage;
+import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -43,14 +43,14 @@ public class APIsContract {
 
     public static String TOKEN() {
         try {
-            return "Bearer " + AccountPreferences.ACCOUNT.getBearerToken();
+            return "Bearer " + AccountStorage.ACCOUNT.get_token();
         } catch (Exception e){
             return "";
         }
     }
 
     public static String LANGUAGE() {
-        if (SettingsPreferences.Language.usingEnglish())
+        if (SettingsStorage.Language.usingEnglish())
             return LANG_EN_CODE;
         else
             return LANG_AR_CODE;

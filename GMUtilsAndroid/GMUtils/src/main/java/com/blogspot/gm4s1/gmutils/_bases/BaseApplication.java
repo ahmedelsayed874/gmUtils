@@ -13,7 +13,7 @@ import com.blogspot.gm4s1.gmutils.AppLog;
 import com.blogspot.gm4s1.gmutils.MessagingCenter;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
-import com.blogspot.gm4s1.gmutils.preferences.PreferencesManager;
+import com.blogspot.gm4s1.gmutils.storage.StorageManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +42,7 @@ public abstract class BaseApplication extends Application implements Application
     public void onCreate() {
         super.onCreate();
 
-        PreferencesManager.registerCallback(() -> BaseApplication.this);
+        StorageManager.registerCallback(() -> BaseApplication.this);
 
         registerDefaultUncaughtExceptionHandler();
 

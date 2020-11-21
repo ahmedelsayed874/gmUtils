@@ -17,7 +17,6 @@ import com.android.volley.NetworkError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.ServerError;
@@ -27,13 +26,12 @@ import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.blogspot.gm4s1.gmutils.AppLog;
-import com.blogspot.gm4s1.gmutils.preferences.SettingsPreferences;
+import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -264,7 +262,7 @@ public class ApiRequestCreator {
                     }
 
                     if (error instanceof NoConnectionError) {
-                        if (SettingsPreferences.Language.usingEnglish()) {
+                        if (SettingsStorage.Language.usingEnglish()) {
                             errorMsg = "No Available Internet Connection";
                         } else {
                             errorMsg = "لا يوجد اتصال متوفر بالانترنت";
@@ -273,7 +271,7 @@ public class ApiRequestCreator {
                         statusCode = OnResponseReadyCallback.StatusCode_NotConnected;
 
                     } else if (error instanceof TimeoutError) {
-                        if (SettingsPreferences.Language.usingEnglish()) {
+                        if (SettingsStorage.Language.usingEnglish()) {
                             errorMsg = "Connection Timeout";
                         } else {
                             errorMsg = "تم تجاوز الوقت المحدد للاتصال، حاول ثانيةً";

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.AnyRes;
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
@@ -19,9 +20,9 @@ import androidx.annotation.StringRes;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -40,15 +41,20 @@ public class MyToast {
 
     //----------------------------------------------------------------------------------------------
 
+    public static MyToast createInstance(Context context, @StringRes int msg) {
+        return createInstance(context, msg, true);
+    }
+
+    public static MyToast createInstance(Context context, @StringRes int msg, boolean defaultStyle) {
+        return new MyToast(context, msg, defaultStyle);
+    }
+
     private Toast toast;
     private View root;
     private TextView tv;
 
-    public MyToast(Context context, @StringRes int msg) {
-        this(context, msg, true);
-    }
 
-    public MyToast(Context context, @StringRes int msg, boolean defaultStyle) {
+    private MyToast(Context context, @StringRes int msg, boolean defaultStyle) {
         this(context, context.getString(msg), defaultStyle);
     }
 

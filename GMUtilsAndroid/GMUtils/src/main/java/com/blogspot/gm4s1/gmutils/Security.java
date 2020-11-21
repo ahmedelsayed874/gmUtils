@@ -477,9 +477,13 @@ public class Security {
     //----------------------------------------------------------------------------------------------
 
     public static String hashText(String plainText) {
+        return hashText(plainText, "UTF-16LE");
+    }
+
+    public static String hashText(String plainText, String charset) {
 
         try {
-            byte[] textBytes = plainText.getBytes("UTF-16LE");
+            byte[] textBytes = plainText.getBytes(charset);
 
             MessageDigest md = MessageDigest.getInstance("SHA1");
             md.update(textBytes, 0, textBytes.length);

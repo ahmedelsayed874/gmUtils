@@ -2,17 +2,14 @@ package com.blogspot.gm4s1.gmutils;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.CalendarContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -21,24 +18,18 @@ import android.widget.Toast;
 
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import com.blogspot.gm4s1.gmutils.preferences.SettingsPreferences;
+import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -400,7 +391,7 @@ public class Intents {
         intent.setData(Uri.parse("tel:" + phoneNumber.replace("+", "00").replace(" ", "")));
         if (intent.resolveActivity(context.getPackageManager()) != null) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                boolean en = SettingsPreferences.Language.usingEnglish();
+                boolean en = SettingsStorage.Language.usingEnglish();
                 String msg = en ?
                         "You did not give us the permission for call" :
                         "عفوا، لم تعطنا السماحية بإجراء المكالمات الهاتفية";

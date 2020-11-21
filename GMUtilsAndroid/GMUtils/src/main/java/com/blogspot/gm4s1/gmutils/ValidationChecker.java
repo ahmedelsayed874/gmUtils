@@ -50,7 +50,6 @@ public class ValidationChecker {
             return check(name, lengthOnly);
         }
 
-
         public boolean check(String name, boolean lengthOnly) {
             return check(name, lengthOnly, true);
         }
@@ -118,6 +117,9 @@ public class ValidationChecker {
         }
 
         public boolean check(String pw) {
+//            while (pw.contains("  ")) {
+//                pw = pw.replace("  ", " ");
+//            }
             return pw.length() >= MIN_LENGTH;
         }
 
@@ -127,6 +129,51 @@ public class ValidationChecker {
 
         public boolean check(String pw1, String pw2) {
             return check(pw1) && pw1.equals(pw2);
+        }
+
+        /**
+         * password characteristics::
+         * * 		At least 8 characters—the more characters, the better
+         * * 		A mixture of both uppercase and lowercase letters
+         * * 		A mixture of letters and numbers
+         * * 		Inclusion of at least one special character, e.g., ! @ # ? ] 
+         * Note: do not use < or > in your password, as both can cause problems in Web browsers
+         */
+        public boolean checkStrong(String pw) {
+            if (pw == null) return false;
+
+            int smallCharCount = 0;
+            int capitalCharCount = 0;
+            int numberCount = 0;
+            int specialCharCount = 0;
+
+            if (pw.length() >= 8) {
+                String specialChars = " §±!@#$%^&*()_-+=[{]}\\|'\";:/?>.<,`~";
+
+                for (char c : pw.toCharArray()) {
+                    if (c >= 'a' && c <= 'z') {
+                        smallCharCount++;
+                    } else if (c >= 'A' && c <= 'Z') {
+                        capitalCharCount++;
+                    } else if (c >= '0' && c <= '9') {
+                        numberCount++;
+                    } else if (specialChars.contains(String.valueOf(c))) {
+                        specialCharCount++;
+                    } else {
+                        if (c >= 'ء' && c <= 'ي') {
+                            smallCharCount++;
+                            capitalCharCount++;
+                        } else if (c >= '٠' && c <= '٩') {
+                            numberCount++;
+                        }
+                    }
+                }
+            }
+
+            return smallCharCount > 0
+                    && capitalCharCount > 0
+                    && numberCount > 0
+                    && specialCharCount > 0;
         }
     }
 

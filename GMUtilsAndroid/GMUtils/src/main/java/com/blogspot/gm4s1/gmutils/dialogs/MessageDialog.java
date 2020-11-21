@@ -6,28 +6,21 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
-import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
-import com.blogspot.gm4s1.gmutils.preferences.GeneralPreferences;
+import com.blogspot.gm4s1.gmutils.storage.GeneralStorage;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.sql.Array;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -172,7 +165,7 @@ public class MessageDialog extends BaseDialog {
 
     @NonNull
     private JSONArray getDontShowAgainCheckboxTagsArray() {
-        GeneralPreferences preferences = GeneralPreferences.getInstance(MessageDialog.class.getName());
+        GeneralStorage preferences = GeneralStorage.getInstance(MessageDialog.class.getName());
         String tagsJson = preferences.retrieve("TAGS", "[]");
         try {
             JSONArray tagsJsonArray = new JSONArray(tagsJson);
@@ -184,7 +177,7 @@ public class MessageDialog extends BaseDialog {
     }
 
     private void saveDontShowAgainCheckboxTagsArray(@NonNull JSONArray tagsJsonArray) {
-        GeneralPreferences preferences = GeneralPreferences.getInstance(MessageDialog.class.getName());
+        GeneralStorage preferences = GeneralStorage.getInstance(MessageDialog.class.getName());
         preferences.save("TAGS", tagsJsonArray.toString());
     }
 

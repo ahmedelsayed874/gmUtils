@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.preferences;
+package com.blogspot.gm4s1.gmutils.storage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -21,15 +21,17 @@ import java.util.Map;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class AccountPreferences {
+public class AccountStorage {
 
     public interface IAccount {
-        String getphoto();
-        String getfirstname();
-        String getlastname();
-        String getemail();
-        String getphonenumber();
-        String getBearerToken();
+        String get_id();
+        String get_identifier_name();
+        String get_first_name();
+        String get_last_name();
+        String get_email();
+        String get_mobile_number();
+        String get_photo();
+        String get_token();
     }
 
     private static class EncryptionUtil {
@@ -74,7 +76,7 @@ public class AccountPreferences {
 
     //----------------------------------------------------------------------------------------------
 
-    private static String PREF_NAME = AccountPreferences.class.getName();
+    private static String PREF_NAME = AccountStorage.class.getName();
     private static String KEY_USER = "KEY_USER";
     private static String KEY_PASSWORD = "KEY_PASSWORD";
     private static String KEY_DATE = "KEY_DATE";
@@ -84,9 +86,9 @@ public class AccountPreferences {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public static AccountPreferences getInstance() {
-        Context appContext = PreferencesManager.getAppContext();
-        return new AccountPreferences(appContext);
+    public static AccountStorage getInstance() {
+        Context appContext = StorageManager.getAppContext();
+        return new AccountStorage(appContext);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -134,7 +136,7 @@ public class AccountPreferences {
     private SharedPreferences sharedPreferences;
     private EncryptionUtil encryptionUtil;
 
-    private AccountPreferences(Context context) {
+    private AccountStorage(Context context) {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         encryptionUtil = new EncryptionUtil(context.getApplicationContext());
     }
@@ -151,12 +153,12 @@ public class AccountPreferences {
 
     //----------------------------------------------------------------------------------------------
 
-    public boolean saveUser(IAccount user, String password) {
+    public boolean saveAccount(IAccount account, String password) {
         try {
-            ACCOUNT = user;
+            ACCOUNT = account;
 
             Gson gson = new Gson();
-            String data = gson.toJson(user);
+            String data = gson.toJson(account);
 
             data = tryEncrypt(data);
             password = tryEncrypt(password);
@@ -174,7 +176,7 @@ public class AccountPreferences {
                     .putString(KEY_DATE, date)
                     .apply();
 
-            callListener(user);
+            callListener(account);
 
             return true;
 

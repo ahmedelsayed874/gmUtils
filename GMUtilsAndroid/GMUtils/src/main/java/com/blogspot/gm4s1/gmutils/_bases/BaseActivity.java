@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -29,7 +28,7 @@ import com.blogspot.gm4s1.gmutils.utils.Utils;
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
 import com.blogspot.gm4s1.gmutils.dialogs.WaitDialog;
-import com.blogspot.gm4s1.gmutils.preferences.SettingsPreferences;
+import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
 import java.util.List;
 
@@ -73,14 +72,14 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    protected ViewModelProvider.Factory createViewModelFactory() {
+    protected ViewModelProvider.Factory onCreateViewModelFactory() {
         ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getApplication());
         return viewModelFactory;
     }
 
-    protected BaseViewModel onCreateViewModel(@NonNull ViewModelProvider provider) {
+    protected Class<? extends BaseViewModel> getViewModelClass() {
         return null;
     }
 
@@ -93,7 +92,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (allowApplyingPreferenceLocale()) {
-            SettingsPreferences.getInstance().languagePref().applySavedLanguage(this);
+            SettingsStorage.getInstance().languagePref().applySavedLanguage(this);
         }
 
         if (isOrientationDisabled())
@@ -106,11 +105,14 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         //------------------------------------------------------------------------------------------
 
-        ViewModelProvider viewModelProvider = new ViewModelProvider(
-                this,
-                createViewModelFactory());
+        if (getViewModelClass() != null) {
+            ViewModelProvider viewModelProvider = new ViewModelProvider(
+                    this,
+                    onCreateViewModelFactory()
+            );
 
-        viewModel = onCreateViewModel(viewModelProvider);
+            viewModel = viewModelProvider.get(getViewModelClass());
+        }
     }
 
 
@@ -124,13 +126,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        SettingsPreferences.getInstance().languagePref().applySavedLanguage(this);
+        SettingsStorage.getInstance().languagePref().applySavedLanguage(this);
     }
 
     public void attachBaseContext(Context newBase) {
         if (allowApplyingPreferenceLocale()) {
             super.attachBaseContext(
-                    SettingsPreferences.getInstance().languagePref().createNewContext(newBase)
+                    SettingsStorage.getInstance().languagePref().createNewContext(newBase)
             );
         } else {
             super.attachBaseContext(newBase);

@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.preferences;
+package com.blogspot.gm4s1.gmutils.storage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,14 +15,14 @@ import android.text.TextUtils;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class GeneralPreferences {
+public class GeneralStorage {
 
-    public static GeneralPreferences getInstance() {
-        return new GeneralPreferences(getPrefName());
+    public static GeneralStorage getInstance() {
+        return new GeneralStorage(getPrefName());
     }
 
-    public static GeneralPreferences getInstance(String name) {
-        return new GeneralPreferences(
+    public static GeneralStorage getInstance(String name) {
+        return new GeneralStorage(
                 TextUtils.isEmpty(name) ?
                         getPrefName() :
                         name
@@ -30,15 +30,15 @@ public class GeneralPreferences {
     }
 
     private static String getPrefName() {
-        return GeneralPreferences.class.getName() + "GENERAL";
+        return GeneralStorage.class.getName() + "GENERAL";
     }
 
     //----------------------------------------------------------------------------------------------
 
     private SharedPreferences mPreference;
 
-    private GeneralPreferences(String name) {
-        Context appContext = PreferencesManager.getAppContext();
+    private GeneralStorage(String name) {
+        Context appContext = StorageManager.getAppContext();
 
         mPreference = appContext.getSharedPreferences(name, Context.MODE_PRIVATE);
 
