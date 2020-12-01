@@ -99,12 +99,18 @@ public class ValidationChecker {
     }
 
     public static class Phone {
+        public int defaultPhoneLength;
+
+        public Phone() {
+            defaultPhoneLength = "1022663988".length();
+        }
+
         public boolean check(EditText text) {
             return check(text.getText().toString());
         }
 
         public boolean check(String text) {
-            if (text.length() < "01022663988".length()) return false;
+            if (text.length() < defaultPhoneLength) return false;
             return Patterns.PHONE.matcher(text).matches();
         }
     }

@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
 
+import java.util.HashMap;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -28,7 +30,7 @@ import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
  */
 public abstract class BaseFragment extends Fragment {
     private Listener listener = null;
-    private BaseViewModel[] viewModels;
+    private HashMap<Integer, BaseViewModel> viewModels;
 
     public BaseFragment() {
         super();
@@ -60,23 +62,27 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    protected ViewModelProvider.Factory onCreateViewModelFactory(int index) {
+    protected HashMap<Integer, Class<? extends BaseViewModel>> getViewModelClasses() {
+        return null;
+    }
+
+    protected ViewModelProvider.Factory onCreateViewModelFactory(int id) {
         ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getActivity().getApplication());
         return viewModelFactory;
     }
 
-    protected Class<? extends BaseViewModel>[] getViewModelClasses() {
-        return null;
-    }
-
     public BaseViewModel getViewModel() {
-        return getViewModel(0);
+        if (viewModels.size() == 1) {
+            return viewModels.values().toArray(new BaseViewModel[0])[0];
+        }
+
+        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
     }
 
-    public BaseViewModel getViewModel(int index) {
-        return viewModels[index];
+    public BaseViewModel getViewModel(int id) {
+        return viewModels.get(id);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -88,17 +94,19 @@ public abstract class BaseFragment extends Fragment {
 
         //------------------------------------------------------------------------------------------
 
-        Class<? extends BaseViewModel>[] viewModelClasses = getViewModelClasses();
+        HashMap<Integer, Class<? extends BaseViewModel>> viewModelClasses = getViewModelClasses();
         if (viewModelClasses != null) {
-            viewModels = new BaseViewModel[viewModelClasses.length];
+            viewModels = new HashMap<>();
 
-            for (int i = 0; i < viewModelClasses.length; i++) {
+            for (Integer id : viewModelClasses.keySet()) {
                 ViewModelProvider viewModelProvider = new ViewModelProvider(
                         this,
-                        onCreateViewModelFactory(i)
+                        onCreateViewModelFactory(id)
                 );
 
-                viewModels[i] = viewModelProvider.get(viewModelClasses[i]);
+                Class<? extends BaseViewModel> viewModelClass = viewModelClasses.get(id);
+                assert viewModelClass != null;
+                viewModels.put(id, viewModelProvider.get(viewModelClass));
             }
         }
     }

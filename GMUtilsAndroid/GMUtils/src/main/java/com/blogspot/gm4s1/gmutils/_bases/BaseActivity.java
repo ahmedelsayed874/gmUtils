@@ -30,6 +30,7 @@ import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
 import com.blogspot.gm4s1.gmutils.dialogs.WaitDialog;
 import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -48,7 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
-    private BaseViewModel[] viewModels;
+    private HashMap<Integer, BaseViewModel> viewModels;
 
 
     public abstract int getActivityLayout();
@@ -72,11 +73,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    protected Class<? extends BaseViewModel>[] getViewModelClasses() {
+    protected HashMap<Integer, Class<? extends BaseViewModel>> getViewModelClasses() {
         return null;
     }
 
-    protected ViewModelProvider.Factory onCreateViewModelFactory(int index) {
+    protected ViewModelProvider.Factory onCreateViewModelFactory(int id) {
         ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getApplication());
@@ -84,11 +85,15 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     public BaseViewModel getViewModel() {
-        return getViewModel(0);
+        if (viewModels.size() == 1) {
+            return viewModels.values().toArray(new BaseViewModel[0])[0];
+        }
+
+        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
     }
 
-    public BaseViewModel getViewModel(int index) {
-        return viewModels[index];
+    public BaseViewModel getViewModel(int id) {
+        return viewModels.get(id);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -109,17 +114,19 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         //------------------------------------------------------------------------------------------
 
-        Class<? extends BaseViewModel>[] viewModelClasses = getViewModelClasses();
+        HashMap<Integer, Class<? extends BaseViewModel>> viewModelClasses = getViewModelClasses();
         if (viewModelClasses != null) {
-            viewModels = new BaseViewModel[viewModelClasses.length];
+            viewModels = new HashMap<>();
 
-            for (int i = 0; i < viewModelClasses.length; i++) {
+            for (Integer id : viewModelClasses.keySet()) {
                 ViewModelProvider viewModelProvider = new ViewModelProvider(
                         this,
-                        onCreateViewModelFactory(i)
+                        onCreateViewModelFactory(id)
                 );
 
-                viewModels[i] = viewModelProvider.get(viewModelClasses[i]);
+                Class<? extends BaseViewModel> viewModelClass = viewModelClasses.get(id);
+                assert viewModelClass != null;
+                viewModels.put(id, viewModelProvider.get(viewModelClass));
             }
         }
     }
