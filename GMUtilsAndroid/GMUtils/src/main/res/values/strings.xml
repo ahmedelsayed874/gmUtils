@@ -26,6 +26,7 @@
     <string name="passwordـ">Password:</string>
     <string name="type_valid_password">Type valid password (6-characters at least)</string>
     <string name="forgot_password">Forgot Password</string>
+    <string name="forgot_password_">Forgot Password?</string>
     <string name="change_password">Change Password</string>
     <string name="current_password">Current Password</string>
     <string name="current_passwordـ">Current Password:</string>

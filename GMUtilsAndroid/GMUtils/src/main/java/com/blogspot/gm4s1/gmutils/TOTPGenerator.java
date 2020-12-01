@@ -47,7 +47,7 @@ import dev.samstevens.totp.secret.SecretGenerator
 import dev.samstevens.totp.time.SystemTimeProvider
 import dev.samstevens.totp.time.TimeProvider
 import utils.preferences.SettingsPreferences
-import utils.utils.AppLog
+import utils.utils.Logger
 import utils.utils.TextHelper
 import java.io.ByteArrayOutputStream
 import java.time.Instant

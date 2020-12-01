@@ -17,7 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.Intents;
 
 import java.util.ArrayList;
@@ -600,7 +600,7 @@ public class ImageSlider {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                AppLog.print(e);
+                Logger.print(e);
             }
         }
 
@@ -625,10 +625,10 @@ public class ImageSlider {
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-//                    AppLog.print("ViewPager :: ACTION :: " + event.getAction());
+//                    Logger.print("ViewPager :: ACTION :: " + event.getAction());
 
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                        AppLog.print("ViewPager :: ACTION-DOWN");
+//                        Logger.print("ViewPager :: ACTION-DOWN");
                         mTimerActions.pauseTimer();
                         wasDown = true;
                         downTime = System.currentTimeMillis();
@@ -638,7 +638,7 @@ public class ImageSlider {
                         if (++moves > 5) downTime = 0;
 
                     } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-//                        AppLog.print("ViewPager :: ACTION-UP");
+//                        Logger.print("ViewPager :: ACTION-UP");
                         v.postDelayed(() -> {
                             if (wasDown) mTimerActions.resumeTimer();
                             wasDown = false;

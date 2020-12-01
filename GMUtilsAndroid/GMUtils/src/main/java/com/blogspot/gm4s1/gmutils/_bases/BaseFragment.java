@@ -28,7 +28,7 @@ import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
  */
 public abstract class BaseFragment extends Fragment {
     private Listener listener = null;
-    private BaseViewModel viewModel;
+    private BaseViewModel[] viewModels;
 
     public BaseFragment() {
         super();
@@ -60,19 +60,23 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    protected ViewModelProvider.Factory onCreateViewModelFactory() {
+    protected ViewModelProvider.Factory onCreateViewModelFactory(int index) {
         ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getActivity().getApplication());
         return viewModelFactory;
     }
 
-    protected Class<? extends BaseViewModel> getViewModelClass() {
+    protected Class<? extends BaseViewModel>[] getViewModelClasses() {
         return null;
     }
 
     public BaseViewModel getViewModel() {
-        return viewModel;
+        return getViewModel(0);
+    }
+
+    public BaseViewModel getViewModel(int index) {
+        return viewModels[index];
     }
 
     //----------------------------------------------------------------------------------------------
@@ -84,13 +88,18 @@ public abstract class BaseFragment extends Fragment {
 
         //------------------------------------------------------------------------------------------
 
-        if (getViewModelClass() != null) {
-            ViewModelProvider viewModelProvider = new ViewModelProvider(
-                    this,
-                    onCreateViewModelFactory()
-            );
+        Class<? extends BaseViewModel>[] viewModelClasses = getViewModelClasses();
+        if (viewModelClasses != null) {
+            viewModels = new BaseViewModel[viewModelClasses.length];
 
-            viewModel = viewModelProvider.get(getViewModelClass());
+            for (int i = 0; i < viewModelClasses.length; i++) {
+                ViewModelProvider viewModelProvider = new ViewModelProvider(
+                        this,
+                        onCreateViewModelFactory(i)
+                );
+
+                viewModels[i] = viewModelProvider.get(viewModelClasses[i]);
+            }
         }
     }
 

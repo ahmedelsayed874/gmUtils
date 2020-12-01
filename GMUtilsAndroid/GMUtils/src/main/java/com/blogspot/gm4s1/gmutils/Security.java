@@ -136,7 +136,7 @@ public class Security {
                 String encryptedBase64Encoded = Base64.encodeToString(encodedBytes, Base64.DEFAULT);
                 return encryptedBase64Encoded;
             } catch (Exception e) {
-                AppLog.print(e);
+                Logger.print(e);
                 return input;
             }
         }
@@ -151,7 +151,7 @@ public class Security {
                 String decodedText = new String(decodedBytes);
                 return decodedText;
             } catch (Exception e) {
-                AppLog.print(e);
+                Logger.print(e);
                 return encrypted;
             }
         }
@@ -302,7 +302,7 @@ public class Security {
                 String encryptedBase64Encoded = Base64.encodeToString(encodedBytes, Base64.DEFAULT);
                 return encryptedBase64Encoded;
             } catch (Exception e) {
-                AppLog.print(e);
+                Logger.print(e);
                 return input;
             }
         }
@@ -315,7 +315,7 @@ public class Security {
                 byte[] decodedBytes = doCipher(Cipher.DECRYPT_MODE, encryptedBytes);
                 return new String(decodedBytes);
             } catch (Exception e) {
-                AppLog.print(e);
+                Logger.print(e);
                 return encrypted;
             }
         }
@@ -334,13 +334,13 @@ public class Security {
          * val instance = Security.getSimpleInstance()
          * val plainData = "ABC"
          * val encrypt = instance.encrypt(this, plainData)
-         * AppLog.print(plainData + "encrypted to:\n" + encrypt)
+         * Logger.print(plainData + "encrypted to:\n" + encrypt)
          * val decrypt = instance.decrypt(this, encrypt)
          * <p>
          * if (plainData == decrypt) {
-         * AppLog.print("EncDec: Succeeded")
+         * Logger.print("EncDec: Succeeded")
          * } else {
-         * AppLog.print("EncDec: Failed")
+         * Logger.print("EncDec: Failed")
          * }
          */
         private String karlst = "§1234567890-=][poiuytrewqasdfghjkl;'\\`zxcvbnm,...../±!@@@@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"|~ZXCVBNM<>?";

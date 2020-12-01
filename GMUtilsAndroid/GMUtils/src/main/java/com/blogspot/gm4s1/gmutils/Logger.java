@@ -5,7 +5,6 @@ import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
 
 import java.io.File;
@@ -30,30 +29,32 @@ import java.util.Locale;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class AppLog {
-    public static DateOp DEADLINE = null;
+public class Logger {
+    public static DateOp LOG_DEADLINE = null;
+    public static DateOp WRITE_TO_FILE_DEADLINE = null;
 
-    public static void SET_DEADLINE(int d, int M, int y) {
-        SET_DEADLINE(d, M, y, 0, 0, 0);
-    }
-
-    public static void SET_DEADLINE(int d, int M, int y, int h, int m, int s) {
-        DEADLINE = DateOp.getInstance()
+    public static void setLOGDeadline(int d, int M, int y, int h, int m) {
+        LOG_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
-                .setTime(h, m, s);
+                .setTime(h, m, 0);
     }
 
-    public static boolean DEBUG_MODE() {
-        return DEADLINE == null || System.currentTimeMillis() <= DEADLINE.getTimeInMillis();
+    public static void setWriteToFileDeadline(int d, int M, int y, int h, int m) {
+        WRITE_TO_FILE_DEADLINE = DateOp.getInstance()
+                .setDate(y, M, d)
+                .setTime(h, m, 0);
     }
 
-    public static Boolean WRITE_TO_FILE_ENABLED = null;
-
-    public static boolean WRITE_TO_FILE_ENABLED() {
-        if (WRITE_TO_FILE_ENABLED == null) return DEBUG_MODE();
-        return WRITE_TO_FILE_ENABLED;
+    public static boolean IS_LOG_ENABLED() {
+        return LOG_DEADLINE == null
+                || System.currentTimeMillis() <= LOG_DEADLINE.getTimeInMillis();
     }
 
+    public static boolean IS_WRITE_TO_FILE_ENABLED() {
+        return WRITE_TO_FILE_DEADLINE == null
+                || System.currentTimeMillis() <= WRITE_TO_FILE_DEADLINE.getTimeInMillis();
+
+    }
 
     public static boolean checkVersionMode(Context context) {
         context = context.getApplicationContext();
@@ -63,15 +64,17 @@ public class AppLog {
 
         //DEBUG_MODE = isDebuggable;
         if (isDebuggable)
-            DEADLINE = DateOp.getInstance().increaseDays(7);
+            LOG_DEADLINE = DateOp.getInstance().increaseDays(7);
         else
-            DEADLINE = DateOp.getInstance().decreaseDays(7);
+            LOG_DEADLINE = DateOp.getInstance().decreaseDays(7);
 
         return isDebuggable;
     }
 
+    //----------------------------------------------------------------------------------------------
+
     public static void print(Throwable e) {
-        if (DEBUG_MODE()) {
+        if (IS_LOG_ENABLED()) {
             try {
                 Log.e("**** EXCEPTION ****", e.toString());
             } catch (Exception ex) {
@@ -81,11 +84,11 @@ public class AppLog {
     }
 
     public static void print(String msg) {
-        if (DEBUG_MODE()) Log.e("****", msg == null ? "null" : msg);
+        if (IS_LOG_ENABLED()) Log.e("****", msg == null ? "null" : msg);
     }
 
     public static void print(String title, String msg) {
-        if (DEBUG_MODE()) Log.e("**** " + title, msg == null ? "null" : msg);
+        if (IS_LOG_ENABLED()) Log.e("**** " + title, msg == null ? "null" : msg);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -97,15 +100,27 @@ public class AppLog {
         }
 
         public void append(String text) {
+            append(text, true, true);
+        }
+
+        public void append(String text, boolean addDate, boolean addSeparation) {
             try {
                 OutputStream os = new FileOutputStream(file, true);
                 OutputStreamWriter sw = new OutputStreamWriter(os);
                 try {
-                    String date = new Date().toString();
-                    sw.write(date);
-                    sw.write(":\n");
+                    if (addDate) {
+                        String date = new Date().toString();
+                        sw.write(date);
+                        sw.write(":\n");
+                    }
+
                     sw.write(text);
-                    sw.write("\n\n*-----*-----*-----*-----*\n\n");
+
+                    if (addSeparation) {
+                        sw.write("\n\n*-----*-----*-----*-----*\n\n");
+                    } else {
+                        sw.write("\n");
+                    }
                 } finally {
                     sw.flush();
                     sw.close();
@@ -133,7 +148,7 @@ public class AppLog {
     }
 
     public static void writeToFile(Context context, String text, String fileName) {
-        if (!WRITE_TO_FILE_ENABLED()) return;
+        if (!IS_WRITE_TO_FILE_ENABLED()) return;
         createFileWriter(context, fileName).append(text);
     }
 

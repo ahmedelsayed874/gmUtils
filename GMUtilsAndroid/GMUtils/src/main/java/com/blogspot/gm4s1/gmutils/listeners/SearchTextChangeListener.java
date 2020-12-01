@@ -6,7 +6,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.listeners.TextChangedListener;
 
 import java.lang.ref.WeakReference;
@@ -80,7 +80,7 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
             if (stcl == null || !stcl.started) return;
 
             if (!TextUtils.equals(stcl.currentInput, stcl.lastInput)) {
-                AppLog.print("CurrentInput: " + stcl.currentInput + ", PreviousInput: " + stcl.lastInput);
+                Logger.print("CurrentInput: " + stcl.currentInput + ", PreviousInput: " + stcl.lastInput);
 
                 stcl.lastInput = stcl.currentInput;
 

@@ -12,9 +12,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-
-        multiDexEnabled true
-
+        
     }
 
     buildTypes {
@@ -55,9 +53,5 @@ dependencies {
     //firebase
     implementation 'com.google.firebase:firebase-auth:20.0.1'
     implementation 'com.google.firebase:firebase-database:19.5.1'
-
-    implementation 'com.android.support:multidex:1.0.3'
-
-
 
 }

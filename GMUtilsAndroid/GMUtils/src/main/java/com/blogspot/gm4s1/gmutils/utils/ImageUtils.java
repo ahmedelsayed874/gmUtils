@@ -29,7 +29,7 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
 

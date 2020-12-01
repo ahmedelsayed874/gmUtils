@@ -25,7 +25,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
 import org.json.JSONArray;
@@ -303,7 +303,7 @@ public class ApiRequestCreator {
                         errorMsg = error.toString();
                     }
 
-                    AppLog.print("WebRequest", error.toString());
+                    Logger.print("WebRequest", error.toString());
                     onDataReady.onResponseFetchedFailed(errorMsg, response, statusCode);
                 }
             }
@@ -456,7 +456,7 @@ public class ApiRequestCreator {
                             } catch (Exception e) {
                                 Log.e(ApiRequestCreator.class.getSimpleName(), "contentResolver required in case of uploading file by Uri");
                                 e.printStackTrace();
-                                AppLog.print(e);
+                                Logger.print(e);
                             }
                         }
                     }

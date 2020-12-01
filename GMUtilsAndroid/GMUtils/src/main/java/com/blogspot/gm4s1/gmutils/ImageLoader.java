@@ -235,7 +235,7 @@ public class ImageLoader {
                     imageView.setScaleType(options.loadingScaleType);
                 } catch (Exception e) {
                     //e.printStackTrace();
-                    AppLog.print(e.getMessage());
+                    Logger.print(e.getMessage());
                 }
             }
 
@@ -245,7 +245,7 @@ public class ImageLoader {
                     imageView.setScaleType(options.successScaleType);
                 } catch (Exception e) {
                     //e.printStackTrace();
-                    AppLog.print(e.getMessage());
+                    Logger.print(e.getMessage());
                 }
 
                 if (outerCallback != null) {
@@ -264,7 +264,7 @@ public class ImageLoader {
                     imageView.setScaleType(options.errorScaleType);
                 } catch (Exception e) {
                     //e.printStackTrace();
-                    AppLog.print(e.getMessage());
+                    Logger.print(e.getMessage());
                 }
 
                 if (outerCallback != null) {

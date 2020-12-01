@@ -26,6 +26,7 @@
     <string name="passwordـ">كلمة المرور:</string>
     <string name="type_valid_password">أدخل كلمة مرور صحيحة (لا تقل عن ٦ أحرف)</string>
     <string name="forgot_password">نسيت كلمة المرور</string>
+    <string name="forgot_password_">نسيت كلمة المرور؟</string>
     <string name="change_password">تغيير كلمة المرور</string>
     <string name="current_password">كلمة المرور الحالية</string>
     <string name="current_passwordـ">كلمة المرور الحالية:</string>

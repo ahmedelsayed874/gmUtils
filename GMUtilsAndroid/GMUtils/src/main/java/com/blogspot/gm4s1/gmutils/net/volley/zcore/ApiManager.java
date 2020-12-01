@@ -8,7 +8,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 import androidx.fragment.app.Fragment;
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
 
 import java.lang.ref.WeakReference;
@@ -126,7 +126,7 @@ public class ApiManager {
 
 
     private void printLog(String msg) {
-        AppLog.print("ApiManager", msg);
+        Logger.print("ApiManager", msg);
     }
 
     //--------------------------------------------------------------------------------------------//

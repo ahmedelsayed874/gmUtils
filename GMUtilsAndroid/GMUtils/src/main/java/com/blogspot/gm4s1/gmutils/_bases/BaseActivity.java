@@ -20,7 +20,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
 import com.blogspot.gm4s1.gmutils.MyToast;
 import com.blogspot.gm4s1.gmutils.R;
@@ -48,7 +48,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
-    private BaseViewModel viewModel;
+    private BaseViewModel[] viewModels;
 
 
     public abstract int getActivityLayout();
@@ -72,19 +72,23 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    protected ViewModelProvider.Factory onCreateViewModelFactory() {
+    protected Class<? extends BaseViewModel>[] getViewModelClasses() {
+        return null;
+    }
+
+    protected ViewModelProvider.Factory onCreateViewModelFactory(int index) {
         ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getApplication());
         return viewModelFactory;
     }
 
-    protected Class<? extends BaseViewModel> getViewModelClass() {
-        return null;
+    public BaseViewModel getViewModel() {
+        return getViewModel(0);
     }
 
-    public BaseViewModel getViewModel() {
-        return viewModel;
+    public BaseViewModel getViewModel(int index) {
+        return viewModels[index];
     }
 
     //----------------------------------------------------------------------------------------------
@@ -105,13 +109,18 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         //------------------------------------------------------------------------------------------
 
-        if (getViewModelClass() != null) {
-            ViewModelProvider viewModelProvider = new ViewModelProvider(
-                    this,
-                    onCreateViewModelFactory()
-            );
+        Class<? extends BaseViewModel>[] viewModelClasses = getViewModelClasses();
+        if (viewModelClasses != null) {
+            viewModels = new BaseViewModel[viewModelClasses.length];
 
-            viewModel = viewModelProvider.get(getViewModelClass());
+            for (int i = 0; i < viewModelClasses.length; i++) {
+                ViewModelProvider viewModelProvider = new ViewModelProvider(
+                        this,
+                        onCreateViewModelFactory(i)
+                );
+
+                viewModels[i] = viewModelProvider.get(viewModelClasses[i]);
+            }
         }
     }
 
@@ -279,7 +288,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                         currentFragment = fragmentManager.getFragments().get(0);
                         currentFragment.setArguments(fragment.getArguments());
                     } catch (Exception e) {
-                        AppLog.print(e);
+                        Logger.print(e);
                     }
                 }
             } else {
@@ -305,7 +314,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (AppLog.WRITE_TO_FILE_ENABLED()) {
+        if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
             if (showBugsMenuItemId == 0) {
                 showBugsMenuItemId = "Show Bug Log".hashCode();
                 if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
@@ -326,7 +335,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         }
 
         if (item.getItemId() == showBugsMenuItemId) {
-            String txt = AppLog.readAllFilesContents(thisActivity());
+            String txt = Logger.readAllFilesContents(thisActivity());
 
             MessageDialog.create(thisActivity())
                     .setMessage(txt)
@@ -339,7 +348,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                         }
                     })
                     .setButton2(R.string.delete, (d) -> {
-                        AppLog.deleteSavedFiles(thisActivity());
+                        Logger.deleteSavedFiles(thisActivity());
                     })
                     .show();
 

@@ -1,6 +1,6 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.zcore;
 
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
 
 import okhttp3.Request;
@@ -65,7 +65,7 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
     ) {
         try {
             url = requestURL;
-            AppLog.print("API:Request:", requestDetails);
+            Logger.print("API:Request:", requestDetails);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -101,7 +101,7 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
     @Override
     public void onFailure(Call<R> call, Throwable t) {
         printCallInfo(call, null);
-        AppLog.print(t);
+        Logger.print(t);
 
         setError(t.getMessage(), 0);
     }
@@ -145,7 +145,7 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
 
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response) {
         if (response != null) {
-            AppLog.print(
+            Logger.print(
                     "API:Response:",
                     "url: <" + url + ">, \nresponse: " + response.body() + ", " +
                             "\ncode= " + response.code() + ", \nmsg= " + response.message() + ", " +

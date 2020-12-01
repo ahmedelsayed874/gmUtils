@@ -9,7 +9,7 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.MessagingCenter;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
@@ -82,7 +82,7 @@ public abstract class BaseApplication extends Application implements Application
                 current = this;
                 onApplicationStartedFirstActivity();
 
-                if (bugs.length() != 0 && AppLog.DEBUG_MODE()) {
+                if (bugs.length() != 0 && Logger.IS_WRITE_TO_FILE_ENABLED()) {
                     MessageDialog.create(activity)
                             .setMessage(bugs)
                             .setButton1(R.string.ok, null)
@@ -90,7 +90,7 @@ public abstract class BaseApplication extends Application implements Application
 
                     bugs = "";
 
-                    AppLog.deleteSavedFile(this, bugFileName);
+                    Logger.deleteSavedFile(this, bugFileName);
                 }
             }
         }, delayAmount);
@@ -156,16 +156,16 @@ public abstract class BaseApplication extends Application implements Application
                 t = t.getCause();
             }
 
-            AppLog.writeToFile(this, stack.toString(), bugFileName);
-            AppLog.print(stack.toString());
+            Logger.writeToFile(this, stack.toString(), bugFileName);
+            Logger.print(stack.toString());
 
             if (defaultHandler != null) {
                 defaultHandler.uncaughtException(thread, throwable);
             }
         });
 
-        if (AppLog.WRITE_TO_FILE_ENABLED()) {
-            bugs = AppLog.readFile(this, bugFileName);
+        if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
+            bugs = Logger.readFile(this, bugFileName);
         }
     }
 

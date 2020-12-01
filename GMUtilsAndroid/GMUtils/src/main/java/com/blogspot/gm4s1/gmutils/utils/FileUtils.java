@@ -21,7 +21,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 import androidx.core.content.FileProvider;
 
-import com.blogspot.gm4s1.gmutils.AppLog;
+import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.R;
 
 import java.io.File;
@@ -150,7 +150,7 @@ public class FileUtils {
                 root            /* directory */
         );
 
-        AppLog.print("createFileUsingFileProvider-> " + file);
+        Logger.print("createFileUsingFileProvider-> " + file);
 
         return file;
     }
