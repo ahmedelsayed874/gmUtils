@@ -1,6 +1,7 @@
 package com.blogspot.gm4s1.gmutils.geography;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -13,10 +14,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
 
-import java.io.IOException;
+import com.blogspot.gm4s1.gmutils.listeners.ActivityLifecycleCallbacks;
+
 import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -44,11 +51,46 @@ public class LocationTracker implements LocationListener {
     private LocationManager locationManager; // Declaring a Location Manager
     private Location location;
     private Listener mListener;
+    private LifecycleEventObserver fragmentLifecycleEventObserver;
+    private ActivityLifecycleCallbacks activityLifecycleCallbacks;
+
 
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-    public LocationTracker(Context context, Listener callback) {
-        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+    public LocationTracker(Fragment fragment, Listener callback) {
+        locationManager = (LocationManager) fragment.getContext().getSystemService(LOCATION_SERVICE);
         this.mListener = callback;
+
+        try {
+            fragmentLifecycleEventObserver = (LifecycleEventObserver) (source, event) -> {
+                if (event == Lifecycle.Event.ON_DESTROY) {
+                    if (fragmentLifecycleEventObserver != null)
+                        source.getLifecycle().removeObserver(fragmentLifecycleEventObserver);
+
+                    destroy();
+                }
+            };
+            fragment.getLifecycle().addObserver(fragmentLifecycleEventObserver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+    public LocationTracker(Activity activity, Listener callback) {
+        locationManager = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
+        this.mListener = callback;
+
+        String className = activity.getClass().getName();
+        activityLifecycleCallbacks = new ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityDestroyed(@NonNull Activity activity) {
+                if (className.equals(activity.getClass().getName())) {
+                    activity.getApplication().unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks);
+                    destroy();
+                }
+            }
+        };
+        activity.getApplication().registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -167,7 +209,7 @@ public class LocationTracker implements LocationListener {
                     new Handler(Looper.getMainLooper())
                             .postDelayed(
                                     this::startLocationUpdating,
-                                    20_000
+                                    10_000
                             );
                 })
                 .show();
@@ -179,6 +221,12 @@ public class LocationTracker implements LocationListener {
         stopLocationUpdating();
         mListener = null;
         locationManager = null;
+        fragmentLifecycleEventObserver = null;
+        activityLifecycleCallbacks = null;
+    }
+
+    public boolean isDestroyed() {
+        return locationManager == null;
     }
 
     //----------------------------------------------------------------------------------------------

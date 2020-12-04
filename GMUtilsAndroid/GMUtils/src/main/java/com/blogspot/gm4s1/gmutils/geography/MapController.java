@@ -9,7 +9,11 @@ import android.text.TextUtils;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
 
+import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -19,6 +23,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -59,10 +65,25 @@ public class MapController {
     private boolean allGesturesEnabled = true;
     private PinClickListener listener;
     private Map<String, Marker> mMarkers = new HashMap<>();
+    private LifecycleEventObserver fragmentLifecycleEventObserver;
 
     public MapController(SupportMapFragment fragment) {
         fragment.getMapAsync(new OnMapReadyCallbackImp());
         mAppContext = fragment.getContext().getApplicationContext();
+
+        try {
+            fragmentLifecycleEventObserver = (LifecycleEventObserver) (source, event) -> {
+                if (event == Lifecycle.Event.ON_DESTROY) {
+                    if (fragmentLifecycleEventObserver != null)
+                        source.getLifecycle().removeObserver(fragmentLifecycleEventObserver);
+
+                    destroy();
+                }
+            };
+            fragment.getLifecycle().addObserver(fragmentLifecycleEventObserver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public MapController(Context context, @NonNull GoogleMap map) {
@@ -70,6 +91,7 @@ public class MapController {
         mAppContext = context.getApplicationContext();
 
         new OnMapReadyCallbackImp().onMapReady(map);
+
     }
 
     private class OnMapReadyCallbackImp implements OnMapReadyCallback {
@@ -182,7 +204,8 @@ public class MapController {
 
     public void moveMapCamera() {
         if (mGoogleMap != null) {
-            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            //mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            zoom(zoom);
         }
     }
 
@@ -212,6 +235,10 @@ public class MapController {
         return mMarkers.values();
     }
 
+    public Marker getMarker(String id) {
+        return mMarkers.get(id);
+    }
+
     public void destroy() {
         mAppContext = null;
         mGoogleMap = null;
@@ -219,8 +246,9 @@ public class MapController {
         mOnInfoWindowClickListener = null;
         tempPinDataList = null;
         listener = null;
-        mMarkers.clear();
+        if (mMarkers != null) mMarkers.clear();
         mMarkers = null;
+        fragmentLifecycleEventObserver = null;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -231,6 +259,18 @@ public class MapController {
 
     public void addMarker(double lat, double lng, String title, Object extraData, boolean moveToPin) {
         MapPin pinData = new MapPin(lat, lng)
+                .setName(title)
+                .setExtraData(extraData);
+
+        addMarker(pinData, moveToPin);
+    }
+
+    public void addMarker(String id, double lat, double lng, String title, Object extraData) {
+        addMarker(id, lat, lng, title, extraData, true);
+    }
+
+    public void addMarker(String id, double lat, double lng, String title, Object extraData, boolean moveToPin) {
+        MapPin pinData = new MapPin(id, lat, lng)
                 .setName(title)
                 .setExtraData(extraData);
 
@@ -289,11 +329,16 @@ public class MapController {
     //----------------------------------------------------------------------------------------------
 
     public static class MapPin implements Parcelable, Serializable {
+        private static final int ICON_SOURCE_RESOURCES = 0;
+        private static final int ICON_SOURCE_ASSETS = 1;
+        private static final int ICON_SOURCE_FILE = 2;
+
         private String id;
         private String name;
         private double lat;
         private double lng;
         private String icon;
+        private int iconSource; //0: resources | 1: assets | 2: file
         private Object extraData;
 
 
@@ -343,11 +388,19 @@ public class MapController {
 
         public MapPin setIcon(@DrawableRes int icon) {
             this.icon = icon + "";
+            this.iconSource = ICON_SOURCE_RESOURCES;
             return this;
         }
 
         public MapPin setIcon(String assetPath) {
             this.icon = assetPath;
+            this.iconSource = ICON_SOURCE_ASSETS;
+            return this;
+        }
+
+        public MapPin setIcon(File file) {
+            this.icon = file.getAbsolutePath();
+            this.iconSource = ICON_SOURCE_FILE;
             return this;
         }
 
@@ -359,21 +412,35 @@ public class MapController {
         //----------------------------------------------------------------------------------------------
 
         public Bitmap getIcon(Context context) {
-            try {
-                int resId = Integer.parseInt(icon);
-                Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
-                return bitmap;
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (ICON_SOURCE_RESOURCES == iconSource) {
+                try {
+                    int resId = Integer.parseInt(icon);
+                    Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
+                    return bitmap;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-
-            try {
-                InputStream inputStream = context.getAssets().open(icon);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                inputStream.close();
-                return bitmap;
-            } catch (Exception e) {
-                e.printStackTrace();
+            else if (ICON_SOURCE_ASSETS == iconSource) {
+                try {
+                    InputStream inputStream = context.getAssets().open(icon);
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    inputStream.close();
+                    return bitmap;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            else if (ICON_SOURCE_FILE == iconSource) {
+                try {
+                    File file = new File(icon);
+                    FileInputStream fis = new FileInputStream(file);
+                    Bitmap bitmap = BitmapFactory.decodeStream(fis);
+                    fis.close();
+                    return bitmap;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             return null;
@@ -415,6 +482,7 @@ public class MapController {
             lat = in.readDouble();
             lng = in.readDouble();
             icon = in.readString();
+            iconSource = in.readInt();
             extraData = in.readValue(getClass().getClassLoader());
         }
 
@@ -425,6 +493,7 @@ public class MapController {
             dest.writeDouble(lat);
             dest.writeDouble(lng);
             dest.writeString(icon);
+            dest.writeInt(iconSource);
             dest.writeValue(extraData);
         }
 

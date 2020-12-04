@@ -25,7 +25,10 @@ public class AccountStorage {
 
     public interface IAccount {
         String get_id();
-        String get_identifier_name();
+        String get_identifier(); //user name | email | phone number
+        default String get_full_name() {
+            return get_first_name() + " " + get_last_name();
+        }
         String get_first_name();
         String get_last_name();
         String get_email();
