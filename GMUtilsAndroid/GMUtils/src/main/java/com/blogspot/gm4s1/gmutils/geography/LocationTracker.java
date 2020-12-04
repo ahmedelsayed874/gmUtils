@@ -1,10 +1,10 @@
 package com.blogspot.gm4s1.gmutils.geography;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,6 +15,9 @@ import android.provider.Settings;
 
 import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AlertDialog;
+
+import java.io.IOException;
+import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -31,7 +34,7 @@ import static android.content.Context.LOCATION_SERVICE;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class GPSTracker implements LocationListener {
+public class LocationTracker implements LocationListener {
     // The minimum distance to change Updates in meters
     public static long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
     // The minimum time between updates in milliseconds
@@ -43,7 +46,7 @@ public class GPSTracker implements LocationListener {
     private Listener mListener;
 
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-    public GPSTracker(Context context, Listener callback) {
+    public LocationTracker(Context context, Listener callback) {
         locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         this.mListener = callback;
     }
@@ -111,7 +114,7 @@ public class GPSTracker implements LocationListener {
     @SuppressLint("MissingPermission")
     public void stopLocationUpdating() {
         if (locationManager != null) {
-            locationManager.removeUpdates(GPSTracker.this);
+            locationManager.removeUpdates(LocationTracker.this);
         }
     }
 
@@ -119,6 +122,19 @@ public class GPSTracker implements LocationListener {
 
     public Location getLocation() {
         return location;
+    }
+
+    public Address getLocationDescription(Context context) {
+        Geocoder geocoder = new Geocoder(context);
+
+        try {
+            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            return addresses.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -201,16 +217,16 @@ public class GPSTracker implements LocationListener {
         int ERR_GPS_CLOSED = 1;
         int ERR_EXCEPTION = 2;
 
-        void onLocationFounded(GPSTracker obj, Location location);
+        void onLocationFounded(LocationTracker obj, Location location);
 
         /**
          * @param provider {@link LocationManager#GPS_PROVIDER} or {@link LocationManager#NETWORK_PROVIDER}
          */
-        void onLocationProviderStatusChanged(GPSTracker obj, String provider, boolean disabled);
+        void onLocationProviderStatusChanged(LocationTracker obj, String provider, boolean disabled);
 
         /**
          * @param errorCode {@link #ERR_GPS_CLOSED} or {@link #ERR_EXCEPTION}
          */
-        void onErrorHappened(GPSTracker obj, int errorCode, String msg);
+        void onErrorHappened(LocationTracker obj, int errorCode, String msg);
     }
 }
