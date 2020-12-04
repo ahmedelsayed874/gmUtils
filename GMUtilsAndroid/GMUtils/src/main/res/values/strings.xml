@@ -75,6 +75,10 @@
     <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="back">Back</string>
+    <string name="what_you_are_looking_for">What you are looking for?</string>
+    <string name="select_one">Select One</string>
+    <string name="there_is_no_result">There is no results</string>
+    <string name="click_here_to_add">Click here to add</string>
 
 
 </resources>

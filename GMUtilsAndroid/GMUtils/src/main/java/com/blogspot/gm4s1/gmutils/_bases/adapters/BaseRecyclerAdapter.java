@@ -554,8 +554,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                 return false;
         }
 
-        protected void dispose() {
-        }
+        protected abstract void dispose();
     }
 
     //------------------------------------------------------------------------------------------------------------------

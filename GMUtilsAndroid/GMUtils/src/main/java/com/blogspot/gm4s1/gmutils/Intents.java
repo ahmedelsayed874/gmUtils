@@ -151,10 +151,18 @@ public class Intents {
                     activity, Manifest.permission.WRITE_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED;
 
-            if (!isCameraPermitted || !isWriteExternalPermitted) {
+            List<String> permissions = new ArrayList<>();
+
+            if (!isCameraPermitted)
+                permissions.add(Manifest.permission.CAMERA);
+
+            if (!isWriteExternalPermitted)
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+            if (permissions.size() > 0) {
                 ActivityCompat.requestPermissions(
                         activity,
-                        new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        permissions.toArray(new String[0]),
                         requestCode);
 
                 return false;

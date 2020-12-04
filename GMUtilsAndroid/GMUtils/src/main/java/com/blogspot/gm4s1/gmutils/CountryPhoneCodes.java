@@ -7,12 +7,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.blogspot.gm4s1.gmutils.dialogs.CountryCodeDialog;
+import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 
 
 /**
@@ -20,9 +23,9 @@ import java.util.Comparator;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -313,6 +316,19 @@ public class CountryPhoneCodes {
 
     }
 
+    private String refineCode(String token) {
+        if (token.startsWith("+")) {
+            token = token.replace("+", "");
+
+        } else if (token.startsWith("00")) {
+            token = token.substring(2);
+        }
+
+        return token;
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
     /**
      * @param sortBase 1: NameEn, 2: NameAr, 3: Code
      */
@@ -336,18 +352,13 @@ public class CountryPhoneCodes {
         });
     }
 
-    private String refineCode(String token) {
-        if (token.startsWith("+")) {
-            token = token.replace("+", "");
-
-        } else if (token.startsWith("00")) {
-            token = token.substring(2);
-        }
-
-        return token;
+    public CountryPhoneCodes sortByName() {
+        if (Locale.getDefault().getLanguage().equals(Locale.ENGLISH.getLanguage()))
+            sortByNameEn();
+        else
+            sortByNameAr();
+        return this;
     }
-
-    //--------------------------------------------------------------------------------------------//
 
     public CountryPhoneCodes sortByNameEn() {
         sortList(mCountryCodes, 1);
@@ -369,12 +380,9 @@ public class CountryPhoneCodes {
         return mCountryCodes;
     }
 
-    public enum TargetFields { all, name, alpha_code, dial_code }
+    //----------------------------------------------------------------------------------------------
 
-    public ArrayList<CountryCode> searchByPhoneCode(String phoneCode) {
-        //phoneCode = refineCode(phoneCode);
-        return search(phoneCode, TargetFields.dial_code);
-    }
+    public enum TargetFields {all, name, alpha_code, dial_code}
 
     public ArrayList<CountryCode> search(String token, TargetFields targetFields) {
         if (token == null || token.isEmpty()) return getCountryCodes();
@@ -404,19 +412,29 @@ public class CountryPhoneCodes {
         return newList;
     }
 
-    public void findCodeInPhoneNumber(String phoneNumber, CountryPhoneCodes.FindingCallback callback) {
+    public void searchAsync(String token, TargetFields targetFields, ResultCallback<ArrayList<CountryCode>> callback) {
+        new Thread(() -> {
+            ArrayList<CountryCode> countryCodes = search(token, targetFields);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                callback.invoke(countryCodes);
+            });
+        }).start();
+    }
+
+    public void findCountryPhoneCodeOfPhoneNumber(String phoneNumber, ResultCallback<CountryPhoneCodes.CountryCode> callback) {
         if (TextUtils.isEmpty(phoneNumber)) {
-            if (callback != null) callback.onFindingFinished(null);
+            if (callback != null) callback.invoke(null);
             return;
         }
 
         class FindRunnable implements Runnable {
-            private String phoneNumber;
-            private CountryPhoneCodes.FindingCallback callback;
+            private final String phoneNumber;
+            private ResultCallback<CountryPhoneCodes.CountryCode> callback;
 
-            FindRunnable(String phoneNumber, CountryPhoneCodes.FindingCallback callback) {
+            FindRunnable(String phoneNumber, ResultCallback<CountryPhoneCodes.CountryCode> callback) {
                 if (phoneNumber.startsWith("00")) {
                     phoneNumber = phoneNumber.replaceFirst("00", "");
+
                 } else if (phoneNumber.startsWith("+")) {
                     phoneNumber = phoneNumber.replace("+", "");
                 }
@@ -441,23 +459,17 @@ public class CountryPhoneCodes {
                     }
                 }
 
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (callback != null) {
-                            callback.onFindingFinished(foundedCountryCode);
-                        }
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (callback != null) {
+                        callback.invoke(foundedCountryCode);
                     }
+                    callback = null;
                 });
 
             }
         }
 
         new Thread(new FindRunnable(phoneNumber, callback)).start();
-    }
-
-    public interface FindingCallback {
-        void onFindingFinished(CountryPhoneCodes.CountryCode c);
     }
 
     //--------------------------------------------------------------------------------------------//

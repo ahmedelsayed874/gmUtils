@@ -335,8 +335,6 @@ public class MessageDialog extends BaseDialog {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
         this.lyContainer = null;
         this.tvTitle = null;
         this.tvMsg = null;

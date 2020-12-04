@@ -5,11 +5,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 
+/**
+ * Created by Ahmed El-Sayed (Glory Maker)
+ * Computer Engineer / 2012
+ * Android/iOS Developer with (Java/Kotlin, Swift)
+ * Have experience with:
+ *      - (C/C++, C#) languages
+ *      - .NET environment
+ *      - AVR Microcontrollers
+ * a.elsayedabdo@gmail.com
+ * +201022663988
+ */
 public abstract class BaseDialog {
     private AlertDialog dialog;
     private View view;
@@ -35,7 +47,7 @@ public abstract class BaseDialog {
 
                 @Override
                 public void onWindowDetached() {
-                    onDestroy();
+                    destroy();
                 }
             });
         }
@@ -44,10 +56,14 @@ public abstract class BaseDialog {
     protected void onStart() {
     }
 
-    protected void onDestroy() {
+    private void destroy() {
         this.dialog = null;
         this.view = null;
+
+        onDestroy();
     }
+
+    protected abstract void onDestroy();
 
     public final AlertDialog getDialog() {
         return dialog;
@@ -57,9 +73,21 @@ public abstract class BaseDialog {
         return view;
     }
 
+    //----------------------------------------------------------------------------------------------
+
     public BaseDialog setCancelable(boolean cancellable) {
         dialog.setCancelable(cancellable);
         dialog.setCanceledOnTouchOutside(cancellable);
+        return this;
+    }
+
+    public BaseDialog setBackground(int color) {
+        getView().setBackgroundColor(color);
+        return this;
+    }
+
+    public BaseDialog setBackgroundRes(@DrawableRes int resid) {
+        getView().setBackgroundResource(resid);
         return this;
     }
 

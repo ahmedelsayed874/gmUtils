@@ -59,7 +59,6 @@ public class WaitDialog extends BaseDialog {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         textView = null;
     }
 }

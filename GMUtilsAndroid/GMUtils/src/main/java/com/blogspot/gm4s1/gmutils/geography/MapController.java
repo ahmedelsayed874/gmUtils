@@ -1,6 +1,5 @@
-package com.blogspot.gm4s1.gmutils;
+package com.blogspot.gm4s1.gmutils.geography;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,7 +10,6 @@ import android.text.TextUtils;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
-import com.blogspot.gm4s1.gmutils.utils.Utils;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -24,23 +22,27 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
 
 /**
  * dependencies:
- *     implementation 'com.google.android.gms:play-services-maps:17.0.0'
+ * implementation 'com.google.android.gms:play-services-maps:17.0.0'
  */
 
 public class MapController {
@@ -48,14 +50,15 @@ public class MapController {
     private GoogleMap mGoogleMap;
     private GoogleMap.InfoWindowAdapter mInfoWindowAdapter;
     private GoogleMap.OnInfoWindowClickListener mOnInfoWindowClickListener;
-    private final List<MapPin> pinDataList = new ArrayList<>();
     private LatLng latLng = new LatLng(29.977344, 31.132493);//giza piramids
+    private List<MapPin> tempPinDataList;
     private Float zoom = null;
     private boolean buildingsEnabled = false;
     private boolean toolbarControl = false;
     private boolean zoomControls = false;
     private boolean allGesturesEnabled = true;
-    private Listener listener;
+    private PinClickListener listener;
+    private Map<String, Marker> mMarkers = new HashMap<>();
 
     public MapController(SupportMapFragment fragment) {
         fragment.getMapAsync(new OnMapReadyCallbackImp());
@@ -65,6 +68,7 @@ public class MapController {
     public MapController(Context context, @NonNull GoogleMap map) {
         if (map == null) throw new NullPointerException("MapController.GoogleMap");
         mAppContext = context.getApplicationContext();
+
         new OnMapReadyCallbackImp().onMapReady(map);
     }
 
@@ -73,7 +77,7 @@ public class MapController {
         public void onMapReady(com.google.android.gms.maps.GoogleMap map) {
             mGoogleMap = map;
 
-            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            setMapType(GoogleMap.MAP_TYPE_NORMAL);
             map.setIndoorEnabled(true);
 
             map.setOnMarkerClickListener(new OnMarkerClickListener());
@@ -81,10 +85,12 @@ public class MapController {
             setInfoWindowAdapter(mInfoWindowAdapter);
             setOnInfoWindowClickListener(mOnInfoWindowClickListener);
 
-            if (pinDataList.size() > 0) {
-                for (MapPin pinData : pinDataList) {
+            if (tempPinDataList != null && tempPinDataList.size() > 0) {
+                for (MapPin pinData : tempPinDataList) {
                     addMarker(pinData);
                 }
+                tempPinDataList.clear();
+                tempPinDataList = null;
             } else {
                 moveMapCamera();
             }
@@ -107,119 +113,6 @@ public class MapController {
             marker.setZIndex(0);
             if (listener != null) listener.onPinClicked(marker);
             return false;
-        }
-    }
-
-    //----------------------------------------------------------------------------------------------
-
-    public void dispose() {
-        mAppContext = null;
-        mGoogleMap = null;
-        mInfoWindowAdapter = null;
-        mOnInfoWindowClickListener = null;
-        pinDataList.clear();
-        listener = null;
-    }
-
-    public GoogleMap getGoogleMap() {
-        return mGoogleMap;
-    }
-
-    public MapController setInfoWindowAdapter(GoogleMap.InfoWindowAdapter infoWindowAdapter) {
-        this.mInfoWindowAdapter = infoWindowAdapter;
-        if (mGoogleMap != null) {
-            mGoogleMap.setInfoWindowAdapter(mInfoWindowAdapter);
-        }
-        return this;
-    }
-
-    public MapController setOnInfoWindowClickListener(GoogleMap.OnInfoWindowClickListener onInfoWindowClickListener) {
-        mOnInfoWindowClickListener = onInfoWindowClickListener;
-        if (mGoogleMap != null) {
-            mGoogleMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
-        }
-        return this;
-    }
-
-    //----------------------------------------------------------------------------------------------
-
-    public void addMarker(double lat, double lng, String title, Object tag) {
-        addMarker(lat, lng, title, tag, true);
-    }
-
-    public void addMarker(double lat, double lng, String title, Object tag, boolean moveToPin) {
-        MapPin pinData = new MapPin()
-                .setLat(lat)
-                .setLng(lng)
-                .setName(title)
-                .setExtraData(tag);
-
-        addMarker(pinData, moveToPin);
-    }
-
-    public void addMarkers(List<MapPin> mapPinList) {
-        for (MapPin mapPin : mapPinList) {
-            addMarker(mapPin, false);
-        }
-
-        moveMapCamera();
-    }
-
-    public void addMarker(MapPin mapPin) {
-        addMarker(mapPin, true);
-    }
-
-    public void addMarker(MapPin mapPin, boolean moveToPin) {
-        if (mGoogleMap == null) {
-            if (!pinDataList.contains(mapPin)) {
-                pinDataList.add(mapPin);
-            }
-            return;
-        }
-
-        this.latLng = new LatLng(mapPin.getLat(), mapPin.getLng());
-
-        Marker marker = mGoogleMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title(mapPin.getName()));
-
-        marker.setTag(mapPin.getExtraData());
-
-        Bitmap icon = mapPin.getIcon(mAppContext);
-        if (icon == null) {
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-        } else {
-            marker.setIcon(BitmapDescriptorFactory.fromBitmap(icon));
-        }
-        marker.setZIndex(0);
-
-        if (moveToPin) moveMapCamera();
-    }
-
-    //----------------------------------------------------------------------------------------------
-
-    public void moveMapCamera(double lat, double lng) {
-        latLng = new LatLng(lat, lng);
-        moveMapCamera();
-    }
-
-    public void moveMapCamera() {
-        if (mGoogleMap != null) {
-            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        }
-    }
-
-    public void moveMapCamera(float zoom) {
-        this.zoom = zoom;
-        if (mGoogleMap != null) {
-            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
-        }
-    }
-
-    public void zoom(float zoom) {
-        this.zoom = zoom;
-        if (mGoogleMap != null) {
-            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
         }
     }
 
@@ -253,16 +146,145 @@ public class MapController {
         }
     }
 
+    /**
+     * @param type GoogleMap
+     */
+    public void setMapType(int type) {
+        mGoogleMap.setMapType(type);
+    }
+
     //----------------------------------------------------------------------------------------------
 
-    public void setListener(Listener listener) {
+    public void setPinClickListener(PinClickListener listener) {
         this.listener = listener;
     }
 
-    public interface Listener {
-        void onPinClicked(Marker marker);
+    public void setInfoWindowAdapter(GoogleMap.InfoWindowAdapter infoWindowAdapter) {
+        this.mInfoWindowAdapter = infoWindowAdapter;
+        if (mGoogleMap != null) {
+            mGoogleMap.setInfoWindowAdapter(mInfoWindowAdapter);
+        }
     }
 
+    public void setOnInfoWindowClickListener(GoogleMap.OnInfoWindowClickListener onInfoWindowClickListener) {
+        mOnInfoWindowClickListener = onInfoWindowClickListener;
+        if (mGoogleMap != null) {
+            mGoogleMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public void moveMapCamera(double lat, double lng) {
+        latLng = new LatLng(lat, lng);
+        moveMapCamera();
+    }
+
+    public void moveMapCamera() {
+        if (mGoogleMap != null) {
+            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        }
+    }
+
+    /**
+     * 1: World
+     * 5: Landmass/continent
+     * 10: City
+     * 15: Streets
+     * 20: Buildings
+     * <p>
+     * https://developers.google.com/maps/documentation/android-sdk/views#zoom
+     */
+    public void zoom(float zoom) {
+        this.zoom = zoom;
+        if (mGoogleMap != null) {
+            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public GoogleMap getGoogleMap() {
+        return mGoogleMap;
+    }
+
+    public Collection<Marker> getMarkers() {
+        return mMarkers.values();
+    }
+
+    public void destroy() {
+        mAppContext = null;
+        mGoogleMap = null;
+        mInfoWindowAdapter = null;
+        mOnInfoWindowClickListener = null;
+        tempPinDataList = null;
+        listener = null;
+        mMarkers.clear();
+        mMarkers = null;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public void addMarker(double lat, double lng, String title, Object extraData) {
+        addMarker(lat, lng, title, extraData, true);
+    }
+
+    public void addMarker(double lat, double lng, String title, Object extraData, boolean moveToPin) {
+        MapPin pinData = new MapPin(lat, lng)
+                .setName(title)
+                .setExtraData(extraData);
+
+        addMarker(pinData, moveToPin);
+    }
+
+    public void addMarkers(List<MapPin> mapPinList) {
+        for (MapPin mapPin : mapPinList) {
+            addMarker(mapPin, false);
+        }
+
+        moveMapCamera();
+    }
+
+    public void addMarker(MapPin mapPin) {
+        addMarker(mapPin, true);
+    }
+
+    public void addMarker(MapPin mapPin, boolean moveToPin) {
+        if (mGoogleMap == null) {
+            if (tempPinDataList == null)
+                tempPinDataList = new ArrayList<>();
+
+            if (!tempPinDataList.contains(mapPin)) {
+                tempPinDataList.add(mapPin);
+            }
+            return;
+        }
+
+        if (mMarkers.containsKey(mapPin.id)) {
+            mMarkers.get(mapPin.id).remove();
+            mMarkers.remove(mapPin.id);
+        }
+
+        this.latLng = new LatLng(mapPin.lat, mapPin.lng);
+
+        Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title(mapPin.name));
+
+        marker.setTag(mapPin.extraData);
+
+        Bitmap icon = mapPin.getIcon(mAppContext);
+        if (icon == null) {
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+        } else {
+            marker.setIcon(BitmapDescriptorFactory.fromBitmap(icon));
+        }
+        marker.setZIndex(0);
+
+        if (moveToPin) moveMapCamera();
+
+        mMarkers.put(mapPin.id, marker);
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -275,25 +297,32 @@ public class MapController {
         private Object extraData;
 
 
-        public MapPin() {
+        public MapPin(double lat, double lng) {
+            this(lat + "," + lng, lat, lng);
         }
 
-        public MapPin setId(String id) {
+        public MapPin(String id, double lat, double lng) {
             this.id = id;
-            return this;
+            this.lat = lat;
+            this.lng = lng;
         }
 
-        public MapPin setName(String name) {
-            this.name = name;
-            return this;
+        public MapPin(String latLng) {
+            setLatLng(latLng);
+            this.id = latLng;
         }
 
-        public MapPin setLatLng(String latLng) {
+        public MapPin(String id, String latLng) {
+            setLatLng(latLng);
+            this.id = id;
+        }
+
+        private void setLatLng(String latLng) {
             String[] coodrs = null;
             try {
                 coodrs = latLng.split(",");
             } catch (Exception e) {
-                coodrs = new String[]{"0" , "0"};
+                coodrs = new String[]{"0", "0"};
             }
             try {
                 this.lat = Double.parseDouble(coodrs[0]);
@@ -305,16 +334,10 @@ public class MapController {
             } catch (Exception e) {
                 this.lng = 0;
             }
-            return this;
         }
 
-        public MapPin setLat(double lat) {
-            this.lat = lat;
-            return this;
-        }
-
-        public MapPin setLng(double lng) {
-            this.lng = lng;
+        public MapPin setName(String name) {
+            this.name = name;
             return this;
         }
 
@@ -334,26 +357,6 @@ public class MapController {
         }
 
         //----------------------------------------------------------------------------------------------
-
-        public String getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public double getLat() {
-            return lat;
-        }
-
-        public double getLng() {
-            return lng;
-        }
-
-        public Object getExtraData() {
-            return extraData;
-        }
 
         public Bitmap getIcon(Context context) {
             try {
@@ -387,16 +390,21 @@ public class MapController {
                 MapPin otherObj = (MapPin) obj;
 
                 if (!TextUtils.equals(this.id, otherObj.id)) return false;
-                if (!TextUtils.equals(this.name, otherObj.name)) return false;
+                //if (!TextUtils.equals(this.name, otherObj.name)) return false;
                 if (this.lat != otherObj.lat) return false;
                 if (this.lng != otherObj.lng) return false;
-                if (!TextUtils.equals(this.icon, otherObj.icon)) return false;
-                if (!Utils.createInstance().checkEquality(this.extraData, otherObj.extraData)) return false;
+                //if (!TextUtils.equals(this.icon, otherObj.icon)) return false;
+                //if (!Utils.createInstance().checkEquality(this.extraData, otherObj.extraData)) return false;
 
                 return true;
             }
 
             return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, lat, lng);
         }
 
         //----------------------------------------------------------------------------------------------
@@ -408,6 +416,16 @@ public class MapController {
             lng = in.readDouble();
             icon = in.readString();
             extraData = in.readValue(getClass().getClassLoader());
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(id);
+            dest.writeString(name);
+            dest.writeDouble(lat);
+            dest.writeDouble(lng);
+            dest.writeString(icon);
+            dest.writeValue(extraData);
         }
 
         public static final Creator<MapPin> CREATOR = new Creator<MapPin>() {
@@ -428,19 +446,15 @@ public class MapController {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(id);
-            dest.writeString(name);
-            dest.writeDouble(lat);
-            dest.writeDouble(lng);
-            dest.writeString(icon);
-            dest.writeValue(extraData);
-        }
-
-        @Override
         public String toString() {
             return lat + ",\n" + lng + "\n[" + name + "]";
         }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public interface PinClickListener {
+        void onPinClicked(Marker marker);
     }
 
 }

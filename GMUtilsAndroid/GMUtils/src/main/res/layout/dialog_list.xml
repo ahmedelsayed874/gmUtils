@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="@dimen/default_margin">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/size_5"
+        android:paddingTop="@dimen/size_5">
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:text="@string/select_one"
+            android:textSize="@dimen/font_16"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:id="@+id/image_close"
+            android:layout_width="@dimen/size_25"
+            android:layout_height="@dimen/size_25"
+            android:layout_marginStart="@dimen/size_5"
+            android:layout_marginEnd="@dimen/size_5"
+            android:padding="@dimen/size_7"
+            android:layout_gravity="center_vertical|end"
+            android:src="@drawable/dismiss"/>
+    </FrameLayout>
+
+    <EditText
+        android:id="@+id/text_search_token"
+        style="@style/editText.frameGray"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableStart="@drawable/search"
+        android:hint="@string/what_you_are_looking_for" />
+
+    <TextView
+        android:id="@+id/text_no_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/there_is_no_result"
+        android:layout_marginTop="@dimen/size_10"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/text_add_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:text="@string/click_here_to_add"
+        android:minHeight="@dimen/size_35"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@android:layout/simple_list_item_1"/>
+
+
+</LinearLayout>
