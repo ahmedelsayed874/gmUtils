@@ -11,6 +11,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
@@ -150,7 +152,8 @@ public class ImageUtils {
             imageFileStream.read(imgBytes);
 
             bitmap = scaleImageSafely(targetW, targetH, imgBytes);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         imageView.setImageBitmap(bitmap);
     }
@@ -192,7 +195,8 @@ public class ImageUtils {
             imageFileStream.read(imgBytes);
 
             bitmap = scaleImageSafely(targetWidth, targetHeight, imgBytes);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         return bitmap;
 
@@ -269,12 +273,12 @@ public class ImageUtils {
 
     //------------------------------------------------------------------------------------------
 
-    public Bitmap getBitmapFromUri1(Context context, Uri uri) throws IOException {
+    public Bitmap openBitmapFromUri1(Context context, Uri uri) throws IOException {
         Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
         return bitmap;
     }
 
-    public Bitmap getBitmapFromUri2(Context context, Uri uri) throws IOException {
+    public Bitmap openBitmapFromUri2(Context context, Uri uri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor =
                 context
                         .getContentResolver()
@@ -283,6 +287,20 @@ public class ImageUtils {
         Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
         parcelFileDescriptor.close();
         return image;
+    }
+
+    public Bitmap openBitmapFile(File image) throws IOException {
+        FileInputStream fis = new FileInputStream(image);
+        Bitmap bitmap = BitmapFactory.decodeStream(fis);
+        fis.close();
+        return bitmap;
+    }
+
+    public Bitmap openBitmapFromAssets(Context context, String assetName) throws IOException {
+        InputStream inputStream = context.getAssets().open(assetName);
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+        inputStream.close();
+        return bitmap;
     }
 
     //------------------------------------------------------------------------------------------
@@ -794,4 +812,23 @@ public class ImageUtils {
         }
     }
 
+    //------------------------------------------------------------------------------------------
+
+    public Bitmap drawImageIntoCircle(Bitmap image, int dstWidth, int dstHeight) {
+        Bitmap b = Bitmap.createBitmap(dstWidth, dstHeight, Bitmap.Config.ARGB_8888);
+
+        Path path = new Path();
+        path.addCircle(dstWidth / 2f, dstHeight / 2f, dstWidth / 2f, Path.Direction.CW);
+
+        Canvas canvas = new Canvas(b);
+        canvas.clipPath(path);
+        canvas.drawBitmap(
+                image,
+                null,
+                new RectF(0f, 0f, dstWidth, dstHeight),
+                null
+        );
+
+        return b;
+    }
 }

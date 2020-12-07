@@ -80,5 +80,15 @@
     <string name="there_is_no_result">There is no results</string>
     <string name="click_here_to_add">Click here to add</string>
 
+    <string name="type_strong_password">Type stronger password that has 8-characters at least and contains capital/small characters, numbers or special characters</string>
+    <string name="accept">Accept</string>
+    <string name="accept_terms_and_conditions">I accept terms and conditions.</string>
+
+    <string name="try_again">Try again</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="pickup_photo">Pickup Photo</string>
+    <string name="type_valid_first_name">Type valid first name</string>
+    <string name="type_valid_last_name">Type valid last name.</string>
+
 
 </resources>

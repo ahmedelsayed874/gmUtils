@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +18,10 @@ import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.blogspot.gm4s1.gmutils.ImageLoader;
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.Intents;
+import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -134,18 +137,20 @@ public class ImageSlider {
 
         //------------------------------------------------------------------------------------------
 
-        viewPager.getViewTreeObserver()
-                .addOnWindowAttachListener(new ViewTreeObserver.OnWindowAttachListener() {
-                    @Override
-                    public void onWindowAttached() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            viewPager.getViewTreeObserver()
+                    .addOnWindowAttachListener(new SimpleWindowAttachListener() {
+                        @Override
+                        public void onWindowAttached() {
 
-                    }
+                        }
 
-                    @Override
-                    public void onWindowDetached() {
-                        dispose();
-                    }
-                });
+                        @Override
+                        public void onWindowDetached() {
+                            dispose();
+                        }
+                    });
+        }
 
         //------------------------------------------------------------------------------------------
 

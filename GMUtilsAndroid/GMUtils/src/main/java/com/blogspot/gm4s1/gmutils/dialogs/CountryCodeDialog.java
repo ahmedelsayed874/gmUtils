@@ -123,6 +123,10 @@ public class CountryCodeDialog extends BaseDialog {
             return new CViewHolder(v);
         }
 
+        @Override
+        protected void onDispose() {
+        }
+
         private class CViewHolder extends BaseRecyclerAdapter<CountryPhoneCodes.CountryCode>.ViewHolder {
             TextView txtCode, txtName;
 

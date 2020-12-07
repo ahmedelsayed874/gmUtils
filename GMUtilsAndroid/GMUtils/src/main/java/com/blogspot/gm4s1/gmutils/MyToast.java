@@ -3,6 +3,7 @@ package com.blogspot.gm4s1.gmutils;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import androidx.annotation.AnyRes;
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.StringRes;
+
+import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -78,19 +81,21 @@ public class MyToast {
             setTextColor(TEXT_COLOR);
         }
 
-        root.getViewTreeObserver().addOnWindowAttachListener(new ViewTreeObserver.OnWindowAttachListener() {
-            @Override
-            public void onWindowAttached() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            root.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
+                @Override
+                public void onWindowAttached() {
 
-            }
+                }
 
-            @Override
-            public void onWindowDetached() {
-                MyToast.this.toast = null;
-                MyToast.this.root = null;
-                MyToast.this.tv = null;
-            }
-        });
+                @Override
+                public void onWindowDetached() {
+                    MyToast.this.toast = null;
+                    MyToast.this.root = null;
+                    MyToast.this.tv = null;
+                }
+            });
+        }
     }
 
     public MyToast setBackground(@AnyRes int bg) {

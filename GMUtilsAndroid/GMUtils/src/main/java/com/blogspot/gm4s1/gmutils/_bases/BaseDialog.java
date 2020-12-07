@@ -1,6 +1,7 @@
 package com.blogspot.gm4s1.gmutils._bases;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -10,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
+import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -39,17 +41,19 @@ public abstract class BaseDialog {
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         if (view != null) {
-            view.getViewTreeObserver().addOnWindowAttachListener(new ViewTreeObserver.OnWindowAttachListener() {
-                @Override
-                public void onWindowAttached() {
-                    onStart();
-                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                view.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
+                    @Override
+                    public void onWindowAttached() {
+                        onStart();
+                    }
 
-                @Override
-                public void onWindowDetached() {
-                    destroy();
-                }
-            });
+                    @Override
+                    public void onWindowDetached() {
+                        destroy();
+                    }
+                });
+            }
         }
     }
 

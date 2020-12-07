@@ -1,6 +1,7 @@
 package com.blogspot.gm4s1.gmutils._bases.adapters;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
+import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -87,8 +90,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void setupDetachListener(RecyclerView recyclerView) {
-        recyclerView.getViewTreeObserver().addOnWindowAttachListener(new ViewTreeObserver.OnWindowAttachListener() {
+        recyclerView.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
             @Override
             public void onWindowAttached() {
             }
@@ -152,7 +156,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     public void enableDeleteItemOnSwipe() {
         RecyclerView recyclerView = getRecyclerView();
         if (recyclerView != null) {
-            ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
+                    0,
+                    ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
                 @Override
                 public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                     return false;
@@ -186,7 +192,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         mOnListItemsChangedListener = null;
         mOnLoadMoreListener = null;
 
+        onDispose();
     }
+
+    protected abstract void onDispose();
 
     public void scrollToEnd() {
         RecyclerView recyclerView = getRecyclerView();
@@ -515,18 +524,20 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             v.setOnClickListener(this);
             v.setOnLongClickListener(this);
 
-            v.getViewTreeObserver().addOnWindowAttachListener(
-                    new ViewTreeObserver.OnWindowAttachListener() {
-                        @Override
-                        public void onWindowAttached() {
-                        }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                v.getViewTreeObserver().addOnWindowAttachListener(
+                        new SimpleWindowAttachListener() {
+                            @Override
+                            public void onWindowAttached() {
+                            }
 
-                        @Override
-                        public void onWindowDetached() {
-                            dispose();
+                            @Override
+                            public void onWindowDetached() {
+                                dispose();
+                            }
                         }
-                    }
-            );
+                );
+            }
         }
 
         private void setValuesInner(T item, int position) {

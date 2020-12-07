@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.blogspot.gm4s1.gmutils.listeners.ActivityLifecycleCallbacks;
+import com.blogspot.gm4s1.gmutils.utils.UIUtils;
 
 import java.util.List;
 
@@ -47,12 +48,9 @@ public class LocationTracker implements LocationListener {
     // The minimum time between updates in milliseconds
     public static long MIN_TIME_BW_UPDATES = 1000;
 
-
     private LocationManager locationManager; // Declaring a Location Manager
     private Location location;
     private Listener mListener;
-    private LifecycleEventObserver fragmentLifecycleEventObserver;
-    private ActivityLifecycleCallbacks activityLifecycleCallbacks;
 
 
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
@@ -60,19 +58,7 @@ public class LocationTracker implements LocationListener {
         locationManager = (LocationManager) fragment.getContext().getSystemService(LOCATION_SERVICE);
         this.mListener = callback;
 
-        try {
-            fragmentLifecycleEventObserver = (LifecycleEventObserver) (source, event) -> {
-                if (event == Lifecycle.Event.ON_DESTROY) {
-                    if (fragmentLifecycleEventObserver != null)
-                        source.getLifecycle().removeObserver(fragmentLifecycleEventObserver);
-
-                    destroy();
-                }
-            };
-            fragment.getLifecycle().addObserver(fragmentLifecycleEventObserver);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        UIUtils.createInstance().addOnFragmentDestroyedObserver(fragment, this::destroy);
     }
 
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
@@ -80,17 +66,7 @@ public class LocationTracker implements LocationListener {
         locationManager = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
         this.mListener = callback;
 
-        String className = activity.getClass().getName();
-        activityLifecycleCallbacks = new ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityDestroyed(@NonNull Activity activity) {
-                if (className.equals(activity.getClass().getName())) {
-                    activity.getApplication().unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks);
-                    destroy();
-                }
-            }
-        };
-        activity.getApplication().registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
+        UIUtils.createInstance().addOnActivityDestroyed(activity, this::destroy);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -221,8 +197,6 @@ public class LocationTracker implements LocationListener {
         stopLocationUpdating();
         mListener = null;
         locationManager = null;
-        fragmentLifecycleEventObserver = null;
-        activityLifecycleCallbacks = null;
     }
 
     public boolean isDestroyed() {

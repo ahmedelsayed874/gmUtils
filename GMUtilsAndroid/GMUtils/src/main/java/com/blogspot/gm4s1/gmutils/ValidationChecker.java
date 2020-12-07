@@ -144,16 +144,18 @@ public class ValidationChecker {
          * * 		A mixture of letters and numbers
          * * 		Inclusion of at least one special character, e.g., ! @ # ? ] 
          * Note: do not use < or > in your password, as both can cause problems in Web browsers
+         *
+         * @return 0 : 1
          */
-        public boolean checkStrong(String pw) {
-            if (pw == null) return false;
+        public float checkStrong(String pw) {
+            if (pw == null) return 0;
 
             int smallCharCount = 0;
             int capitalCharCount = 0;
             int numberCount = 0;
             int specialCharCount = 0;
 
-            if (pw.length() >= 8) {
+            if (pw.length() >= MIN_LENGTH) {
                 String specialChars = " §±!@#$%^&*()_-+=[{]}\\|'\";:/?>.<,`~";
 
                 for (char c : pw.toCharArray()) {
@@ -174,12 +176,18 @@ public class ValidationChecker {
                         }
                     }
                 }
+
+                final float constant = 5f;
+                float strong = 1 / constant;
+                if (smallCharCount > 0) strong += 1 / constant;
+                if (capitalCharCount > 0) strong += 1 / constant;
+                if (numberCount > 0) strong += 1 / constant;
+                if (specialCharCount > 0) strong += 1 / constant;
+
+                return strong;
             }
 
-            return smallCharCount > 0
-                    && capitalCharCount > 0
-                    && numberCount > 0
-                    && specialCharCount > 0;
+            return 0;
         }
     }
 
