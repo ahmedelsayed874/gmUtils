@@ -76,13 +76,6 @@ public class Utils {
         }
     }
 
-    public int[] getScreenSize(Window window) {
-        DisplayMetrics dm = new DisplayMetrics();
-        window.getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-        return new int[]{dm.widthPixels, dm.heightPixels};
-    }
-
     public String getSingingKeyHash(Context context, String packageName) {
         /*try {
             MessageDigest md = MessageDigest.getInstance("SHA");
@@ -149,30 +142,6 @@ public class Utils {
 
     //----------------------------------------------------------------------------------------------
 
-    public void setProgressBarColor(ProgressBar progressBar, int color, boolean beforeLollipopOnly) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            LayerDrawable progressDrawable = (LayerDrawable) progressBar.getProgressDrawable();
-            progressDrawable.getDrawable(2).setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-        } else {
-            if (!beforeLollipopOnly) {
-                progressBar.setProgressTintList(ColorStateList.valueOf(color));
-            }
-        }
-    }
-
-    public void setRatingBarColor(RatingBar ratingBar, int color, boolean beforeLollipopOnly) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            LayerDrawable progressDrawable = (LayerDrawable) ratingBar.getProgressDrawable();
-            progressDrawable.getDrawable(2).setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
-        } else {
-            if (!beforeLollipopOnly) {
-                ratingBar.setProgressTintList(ColorStateList.valueOf(color));
-            }
-        }
-    }
-
-    //----------------------------------------------------------------------------------------------
-
     /**
      * example:
      * if number is 5.3 and threshold = 0.1 then result is 6
@@ -205,18 +174,8 @@ public class Utils {
 
     //------------------------------------------------------------------------------------------
 
-    public void setScreenLightStatus(Window window, boolean on) {
-        if (on) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }
-    }
-
-    //------------------------------------------------------------------------------------------
-
     /**
-     * @return "android.resource://[package]/[res id]"
+     * @return "android.resource://[package]/[res type]/[res id]"
      */
     public Uri getResourceUri(Context context, int resourceId) {
         Resources resources = context.getResources();
@@ -228,28 +187,6 @@ public class Utils {
                 .build();
 
         return uri;
-    }
-
-    public boolean isMobileHasVirtualNavigationBar() {
-        boolean hasHomeKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_HOME);
-        boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
-
-        return (hasHomeKey && hasBackKey);
-    }
-
-    public int getNavigationBarHeight(Context context) {
-        if (!isMobileHasVirtualNavigationBar()) {
-            int resourceId = context.getResources().getIdentifier(
-                    "navigation_bar_height",
-                    "dimen",
-                    "android");
-
-            if (resourceId > 0) {
-                return context.getResources().getDimensionPixelSize(resourceId);
-            }
-        }
-
-        return 0;
     }
 
     //------------------------------------------------------------------------------------------

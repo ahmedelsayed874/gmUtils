@@ -1,8 +1,19 @@
 package com.blogspot.gm4s1.gmutils.utils;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.util.DisplayMetrics;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ProgressBar;
+import android.widget.RatingBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -87,6 +98,71 @@ public class UIUtils {
             }
         };
         activity.getApplication().registerActivityLifecycleCallbacks(callback[0]);
+    }
+
+    public int[] getScreenSize(Window window) {
+        DisplayMetrics dm = new DisplayMetrics();
+        window.getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+        return new int[]{dm.widthPixels, dm.heightPixels};
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
+    public void setProgressBarColor(ProgressBar progressBar, int color, boolean beforeLollipopOnly) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            LayerDrawable progressDrawable = (LayerDrawable) progressBar.getProgressDrawable();
+            progressDrawable.getDrawable(2).setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        } else {
+            if (!beforeLollipopOnly) {
+                progressBar.setProgressTintList(ColorStateList.valueOf(color));
+            }
+        }
+    }
+
+    public void setRatingBarColor(RatingBar ratingBar, int color, boolean beforeLollipopOnly) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            LayerDrawable progressDrawable = (LayerDrawable) ratingBar.getProgressDrawable();
+            progressDrawable.getDrawable(2).setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        } else {
+            if (!beforeLollipopOnly) {
+                ratingBar.setProgressTintList(ColorStateList.valueOf(color));
+            }
+        }
+    }
+
+
+    //------------------------------------------------------------------------------------------
+
+    public void setScreenLightStatus(Window window, boolean on) {
+        if (on) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    public boolean isMobileHasVirtualNavigationBar() {
+        boolean hasHomeKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_HOME);
+        boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+
+        return (hasHomeKey && hasBackKey);
+    }
+
+    public int getNavigationBarHeight(Context context) {
+        if (!isMobileHasVirtualNavigationBar()) {
+            int resourceId = context.getResources().getIdentifier(
+                    "navigation_bar_height",
+                    "dimen",
+                    "android");
+
+            if (resourceId > 0) {
+                return context.getResources().getDimensionPixelSize(resourceId);
+            }
+        }
+
+        return 0;
     }
 
 
