@@ -1,7 +1,6 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIsContract;
-
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIConstants;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -27,7 +26,7 @@ public interface ImageRequest {
     @Multipart
     @POST("post")
     Call<ImageResponse> post(
-            @Header(APIsContract.AUTHORIZATION) String token,
+            @Header(APIConstants.AUTHORIZATION) String token,
             @Part("text") RequestBody text,
             @Part MultipartBody.Part image
     );

@@ -57,6 +57,7 @@ import java.util.Objects;
  */
 
 public class MapController {
+    public static int DEFAULT_ZOOM = 10;
 
     public static class MapPin implements Parcelable, Serializable {
         private static final int ICON_SOURCE_RESOURCES = 0;
@@ -254,6 +255,21 @@ public class MapController {
         }
     }
 
+    private static class MapPin2 {
+        MapPin mapPin;
+        Bitmap icon;
+
+        public MapPin2(MapPin mapPin) {
+            this.mapPin = mapPin;
+        }
+
+        public MapPin2(MapPin mapPin, Bitmap icon) {
+            this.mapPin = mapPin;
+            this.icon = icon;
+        }
+
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public interface InitListener {
@@ -271,8 +287,8 @@ public class MapController {
     private GoogleMap.InfoWindowAdapter mInfoWindowAdapter;
     private GoogleMap.OnInfoWindowClickListener mOnInfoWindowClickListener;
     private LatLng latLng = new LatLng(29.977344, 31.132493);//giza piramids
-    private List<MapPin> tempPinDataList;
-    private Float zoom = null;
+    private List<MapPin2> tempPinDataList;
+    private float zoom = DEFAULT_ZOOM;
     private Integer mapType = null;
     private boolean buildingsEnabled = false;
     private boolean showMyLocationEnabled = false;
@@ -328,8 +344,11 @@ public class MapController {
             setOnInfoWindowClickListener(mOnInfoWindowClickListener);
 
             if (tempPinDataList != null && tempPinDataList.size() > 0) {
-                for (MapPin pinData : tempPinDataList) {
-                    addMarker(pinData);
+                for (MapPin2 pinData : tempPinDataList) {
+                    Marker marker = addMarker(pinData.mapPin);
+                    if (marker != null && pinData.icon != null) {
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(pinData.icon));
+                    }
                 }
                 tempPinDataList.clear();
                 tempPinDataList = null;
@@ -337,7 +356,7 @@ public class MapController {
                 moveMapCamera();
             }
 
-            zoom(zoom != null ? zoom : 10);
+            zoom(zoom);
 
             try {
                 map.setMyLocationEnabled(showMyLocationEnabled);
@@ -544,28 +563,28 @@ public class MapController {
 
     //----------------------------------------------------------------------------------------------
 
-    public void addMarker(double lat, double lng, String title, Object extraData) {
-        addMarker(lat, lng, title, extraData, true);
+    public Marker addMarker(double lat, double lng, String title, Object extraData) {
+        return addMarker(lat, lng, title, extraData, true);
     }
 
-    public void addMarker(double lat, double lng, String title, Object extraData, boolean moveToPin) {
+    public Marker addMarker(double lat, double lng, String title, Object extraData, boolean moveToPin) {
         MapPin pinData = new MapPin(lat, lng)
                 .setName(title)
                 .setExtraData(extraData);
 
-        addMarker(pinData, moveToPin);
+        return addMarker(pinData, moveToPin);
     }
 
-    public void addMarker(String id, double lat, double lng, String title, Object extraData) {
-        addMarker(id, lat, lng, title, extraData, true);
+    public Marker addMarker(String id, double lat, double lng, String title, Object extraData) {
+        return addMarker(id, lat, lng, title, extraData, true);
     }
 
-    public void addMarker(String id, double lat, double lng, String title, Object extraData, boolean moveToPin) {
+    public Marker addMarker(String id, double lat, double lng, String title, Object extraData, boolean moveToPin) {
         MapPin pinData = new MapPin(id, lat, lng)
                 .setName(title)
                 .setExtraData(extraData);
 
-        addMarker(pinData, moveToPin);
+        return addMarker(pinData, moveToPin);
     }
 
     public void addMarkers(List<MapPin> mapPinList) {
@@ -576,19 +595,19 @@ public class MapController {
         moveMapCamera();
     }
 
-    public void addMarker(MapPin mapPin) {
-        addMarker(mapPin, true);
+    public Marker addMarker(MapPin mapPin) {
+        return addMarker(mapPin, true);
     }
 
-    public void addMarker(MapPin mapPin, boolean moveToPin) {
+    public Marker addMarker(MapPin mapPin, boolean moveToPin) {
         if (mGoogleMap == null) {
             if (tempPinDataList == null)
                 tempPinDataList = new ArrayList<>();
 
             if (!tempPinDataList.contains(mapPin)) {
-                tempPinDataList.add(mapPin);
+                tempPinDataList.add(new MapPin2(mapPin));
             }
-            return;
+            return null;
         }
 
         if (mMarkers.containsKey(mapPin.id)) {
@@ -619,16 +638,29 @@ public class MapController {
         if (moveToPin) moveMapCamera();
 
         mMarkers.put(mapPin.id, marker);
+
+        return marker;
     }
 
     //----------------------------------------------------------------------------------------------
 
     public void setMarkerIcon(String id, Bitmap icon) {
+        boolean f = false;
         if (mMarkers != null) {
             Marker marker = mMarkers.get(id);
             if (marker != null) {
+                f = true;
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(icon));
             }
+        }
+        if (!f) {
+            if (tempPinDataList != null)
+                for (MapPin2 mapPin : tempPinDataList) {
+                    if (("" + id).equals(mapPin.mapPin.id)) {
+                        mapPin.icon = icon;
+                        break;
+                    }
+                }
         }
     }
 

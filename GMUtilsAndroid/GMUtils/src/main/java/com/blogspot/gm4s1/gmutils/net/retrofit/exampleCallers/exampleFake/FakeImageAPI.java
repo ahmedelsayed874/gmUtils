@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
@@ -22,25 +23,25 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
 public class FakeImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.ImageAPI{
 
     public void post(String text, Bitmap image, OnResponseReady<Object> callback) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            int r = _FakeData.randomNumber();
-            Response<Object> s = Response.createInstance(Object.class);
+        FakeData.run0((s) -> {
+            Response<Object> r = Response.createInstance(Object.class);
 
-            if (r >= 2) { //success:-> 2 : 10
-                s.set_Data(new Object());
-                s._code = 200;
-
-            } else if (r >= 1) {//error-> 1
-                s.setInternalStatus(BaseResponse.Statuses.Error);
-                s._code = 400;
-
-            } else { //connection failed-> 0
-                s.setInternalStatus(BaseResponse.Statuses.ConnectionFailed);
-                s._code = 0;
+            if (s == null) {
+                r.setInternalStatus(BaseResponse.Statuses.ConnectionFailed);
+                r._code = 0;
+            } else {
+                if (s) {
+                    r.set_Data(new Object());
+                    r.setInternalStatus(BaseResponse.Statuses.Succeeded);
+                    r._code = 200;
+                } else {
+                    r.setInternalStatus(BaseResponse.Statuses.Error);
+                    r._code = 400;
+                }
             }
 
-            if (callback != null) callback.invoke(s);
-        }, _FakeData.delay);
+            if (callback != null) callback.invoke(r);
+        });
     }
 
 }

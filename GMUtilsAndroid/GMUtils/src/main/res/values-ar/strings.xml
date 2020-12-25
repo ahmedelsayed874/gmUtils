@@ -91,5 +91,6 @@
     <string name="pickup_photo">فتح صورة</string>
     <string name="type_valid_first_name">أكتب الإسم الأول صحيحا.</string>
     <string name="type_valid_last_name">أكتب الإسم الأخير صحيحا.</string>
+    <string name="done">تم</string>
 
 </resources>

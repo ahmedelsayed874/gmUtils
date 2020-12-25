@@ -14,10 +14,12 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
+import com.blogspot.gm4s1.gmutils.listeners.ResultCallback2;
 import com.blogspot.gm4s1.gmutils.storage.GeneralStorage;
 
 import org.json.JSONArray;
@@ -62,7 +64,7 @@ public class MessageDialog extends BaseDialog {
     @NonNull
     @Override
     public View createView(LayoutInflater layoutInflater) {
-        return layoutInflater.inflate(R.layout.dialog_message, null);
+        return layoutInflater.inflate(R.layout.dialog_message_gm4s, null);
     }
 
     MessageDialog(Context context) {
@@ -105,6 +107,7 @@ public class MessageDialog extends BaseDialog {
     }
 
     public MessageDialog setTextColor(int color) {
+        tvTitle.setTextColor(color);
         tvMsg.setTextColor(color);
         tvDontShowAgain.setTextColor(color);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -183,9 +186,10 @@ public class MessageDialog extends BaseDialog {
 
     /**
      * @param tag      : unique number points to checkbox state
-     * @param listener : sends {@MessageDialog, @Boolean that represents the result} and return an action indicator to remove saved tag or leave
+     * @param listener : sends {@MessageDialog, @Boolean that represents the result}
      */
-    public MessageDialog isDontShowAgainCheckboxDisabledByUser(int tag, ActionCallback<Pair<MessageDialog, Boolean>, Boolean> listener) {
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public MessageDialog isDontShowAgainCheckboxDisabledByUser(int tag, ResultCallback2<MessageDialog, Boolean> listener) {
         JSONArray tagsJsonArray = getDontShowAgainCheckboxTagsArray();
 
         try {
@@ -198,15 +202,34 @@ public class MessageDialog extends BaseDialog {
                 }
             }
 
-            Boolean remove = listener.invoke(new Pair<>(MessageDialog.this, foundedIndex != -1));
-            if (foundedIndex != -1) {
-                if (remove != null && remove) {
-                    tagsJsonArray.remove(foundedIndex);
-                    saveDontShowAgainCheckboxTagsArray(tagsJsonArray);
+            listener.invoke(MessageDialog.this, foundedIndex != -1);
+        } catch (Exception e) {
+            listener.invoke(MessageDialog.this, false);
+        }
+
+        return this;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public MessageDialog dropDontShowAgainCheckboxDisabledByUser(int tag) {
+        JSONArray tagsJsonArray = getDontShowAgainCheckboxTagsArray();
+
+        try {
+            int foundedIndex = -1;
+
+            for (int i = 0; i < tagsJsonArray.length(); i++) {
+                if (tagsJsonArray.getInt(i) == tag) {
+                    foundedIndex = i;
+                    break;
                 }
             }
+
+            if (foundedIndex != -1) {
+                tagsJsonArray.remove(foundedIndex);
+                saveDontShowAgainCheckboxTagsArray(tagsJsonArray);
+            }
         } catch (Exception e) {
-            listener.invoke(new Pair<>(MessageDialog.this, false));
+            e.printStackTrace();
         }
 
         return this;
@@ -215,9 +238,10 @@ public class MessageDialog extends BaseDialog {
     /**
      * @param tag unique number points to checkbox state
      */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public MessageDialog showDontShowAgainCheckbox(int tag) {
-        isDontShowAgainCheckboxDisabledByUser(tag, result -> {
-            isShowingDisabled = result.second;
+        isDontShowAgainCheckboxDisabledByUser(tag, (d, result) -> {
+            isShowingDisabled = result;
             if (!isShowingDisabled) {
 
                 lyDontShowAgain.setVisibility(View.VISIBLE);
@@ -241,7 +265,6 @@ public class MessageDialog extends BaseDialog {
                 });
 
             }
-            return null;
         });
 
         return this;
@@ -250,6 +273,7 @@ public class MessageDialog extends BaseDialog {
     /**
      * @param tag unique number points to checkbox state
      */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public MessageDialog showDontShowAgainCheckbox(int tag, CharSequence msg) {
         showDontShowAgainCheckbox(tag);
         tvDontShowAgain.setText(msg);

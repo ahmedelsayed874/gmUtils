@@ -106,7 +106,7 @@ public class ImageLoader {
         if (application == null) {
             picasso = INSTANCE;
         } else {
-            picasso = (Picasso) application.getGlobalInstance(Picasso.class.getCanonicalName());
+            picasso = (Picasso) application.globalVariables().retrieve(Picasso.class.getCanonicalName());
         }
         if (picasso == null) {
             synchronized (ImageLoader.class) {
@@ -114,7 +114,7 @@ public class ImageLoader {
                 if (application == null) {
                     INSTANCE = picasso;
                 } else {
-                    application.addGlobalInstance(Picasso.class.getCanonicalName(), picasso);
+                    application.globalVariables().add(Picasso.class.getCanonicalName(), picasso);
                 }
             }
         }

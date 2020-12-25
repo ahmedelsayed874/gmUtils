@@ -89,6 +89,7 @@
     <string name="pickup_photo">Pickup Photo</string>
     <string name="type_valid_first_name">Type valid first name</string>
     <string name="type_valid_last_name">Type valid last name.</string>
+    <string name="done">Done</string>
 
 
 </resources>

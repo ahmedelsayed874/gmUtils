@@ -156,6 +156,10 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public void updateWaitViewMsg(int msg) {
+        listener.updateWaitViewMsg(getString(msg));
+    }
+
+    public void updateWaitViewMsg(CharSequence msg) {
         listener.updateWaitViewMsg(msg);
     }
 
@@ -185,7 +189,7 @@ public abstract class BaseFragment extends Fragment {
 
         void hideWaitView();
 
-        void updateWaitViewMsg(int msg);
+        void updateWaitViewMsg(CharSequence msg);
 
         RetryPromptDialog showRetryPromptDialog(
                 CharSequence msg,

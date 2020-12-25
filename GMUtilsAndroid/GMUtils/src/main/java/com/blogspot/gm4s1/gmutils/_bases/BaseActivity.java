@@ -2,6 +2,7 @@ package com.blogspot.gm4s1.gmutils._bases;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -101,7 +102,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (allowApplyingPreferenceLocale()) {
-            SettingsStorage.getInstance().languagePref().applySavedLanguage(this);
+            SettingsStorage.getInstance().languagePref().applySavedLanguage(thisActivity());
         }
 
         if (isOrientationDisabled())
@@ -120,7 +121,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
             for (Integer id : viewModelClasses.keySet()) {
                 ViewModelProvider viewModelProvider = new ViewModelProvider(
-                        this,
+                        thisActivity(),
                         onCreateViewModelFactory(id)
                 );
 
@@ -142,7 +143,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        SettingsStorage.getInstance().languagePref().applySavedLanguage(this);
+        SettingsStorage.getInstance().languagePref().applySavedLanguage(thisActivity());
     }
 
     public void attachBaseContext(Context newBase) {
@@ -157,9 +158,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public AppCompatActivity thisActivity() {
-        return this;
-    }
+    public Activity thisActivity0() { return this; }
+
+    public AppCompatActivity thisActivity() { return this; }
 
     @SuppressLint("ClickableViewAccessibility")
     public void setKeyboardAutoHidden() {
@@ -216,7 +217,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     @Override
-    public void updateWaitViewMsg(int msg) {
+    public void updateWaitViewMsg(CharSequence msg) {
         if (waitDialog != null) waitDialog.textView().setText(msg);
     }
 

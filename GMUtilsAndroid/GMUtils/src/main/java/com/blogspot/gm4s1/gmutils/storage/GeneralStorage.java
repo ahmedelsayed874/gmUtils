@@ -55,4 +55,8 @@ public class GeneralStorage {
     public void remove(String key) {
         mPreference.edit().remove(key).apply();
     }
+
+    public void removeAll() {
+        mPreference.edit().clear().apply();
+    }
 }

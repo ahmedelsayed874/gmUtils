@@ -164,7 +164,7 @@ public class Animations {
         return new TextAnimations(button);
     }
 
-    public TextAnimations getTextAnimations(Button button, @StringRes int specialText) {
+    public TextAnimations getTextAnimations(TextView button, @StringRes int specialText) {
         return new TextAnimations(button, specialText);
     }
 

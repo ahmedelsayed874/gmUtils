@@ -21,12 +21,23 @@ public class MessagingCenter {
 
     private static final Object lock = new Object();
     private static MessagingCenter _instance;
-    public static MessagingCenter getInstance() {
+
+    public static MessagingCenter singleton() {
         synchronized (lock) {
             if (_instance == null) _instance = new MessagingCenter();
         }
 
         return _instance;
+    }
+
+    public static MessagingCenter createInstance() {
+        MessagingCenter instance = null;
+
+        synchronized (lock) {
+            instance = new MessagingCenter();
+        }
+
+        return instance;
     }
 
 

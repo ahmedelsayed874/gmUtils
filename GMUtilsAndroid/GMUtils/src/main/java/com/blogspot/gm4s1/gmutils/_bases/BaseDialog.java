@@ -1,6 +1,7 @@
 package com.blogspot.gm4s1.gmutils._bases;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,6 +76,13 @@ public abstract class BaseDialog {
 
     public final View getView() {
         return view;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public BaseDialog setOnDismissListener(DialogInterface.OnDismissListener listener) {
+        dialog.setOnDismissListener(listener);
+        return this;
     }
 
     //----------------------------------------------------------------------------------------------

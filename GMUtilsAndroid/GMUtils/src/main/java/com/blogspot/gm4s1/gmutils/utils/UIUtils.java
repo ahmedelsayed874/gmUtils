@@ -34,23 +34,7 @@ public class UIUtils {
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public boolean setOnFragmentDestroyedObserver(@NonNull android.app.Fragment fragment, @NonNull Runnable action) {
-        try {
-            final Runnable[] action2 = new Runnable[]{action};
-
-            fragment.getView().getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
-                @Override
-                public void onWindowDetached() {
-                    action2[0].run();
-                    action2[0] = null;
-                }
-            });
-
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        return setViewDetachedObserver(fragment.getView(), action);
     }
 
     public boolean addOnFragmentDestroyedObserver(@NonNull Fragment fragment, @NonNull Runnable action) {
@@ -107,8 +91,32 @@ public class UIUtils {
         return new int[]{dm.widthPixels, dm.heightPixels};
     }
 
+    //----------------------------------------------------------------------------------------------
+
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public boolean setViewDetachedObserver(@NonNull View view, @NonNull Runnable action) {
+        try {
+            final Runnable[] action2 = new Runnable[]{action};
+
+            view.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
+                @Override
+                public void onWindowDetached() {
+                    action2[0].run();
+                    action2[0] = null;
+                }
+            });
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     //----------------------------------------------------------------------------------------------
+
 
     public void setProgressBarColor(ProgressBar progressBar, int color, boolean beforeLollipopOnly) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -132,8 +140,8 @@ public class UIUtils {
         }
     }
 
-
     //------------------------------------------------------------------------------------------
+
 
     public void setScreenLightStatus(Window window, boolean on) {
         if (on) {

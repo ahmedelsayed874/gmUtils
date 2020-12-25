@@ -30,13 +30,36 @@ import java.util.Map;
  * +201022663988
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
+    public static final class GlobalVariables {
+        private Map<String, Object> globalInstances = new HashMap<>();
+
+        private GlobalVariables() {}
+
+        public void add(String key, Object instance) {
+            this.globalInstances.put(key, instance);
+        }
+
+        public Object retrieve(String key) {
+            return this.globalInstances.get(key);
+        }
+
+        public void remove(String key) {
+            this.globalInstances.remove(key);
+        }
+
+        public void clear() {
+            this.globalInstances.clear();
+        }
+
+    }
 
     private static BaseApplication current;
     public static BaseApplication current() {
         return  current;
     }
 
-    private final Map<String, Object> globalInstances = new HashMap<>();
+    private GlobalVariables globalVariables = null;
+    private MessagingCenter messagingCenter = null;
 
     @Override
     public void onCreate() {
@@ -53,16 +76,16 @@ public abstract class BaseApplication extends Application implements Application
 
     protected abstract void onPostCreate();
 
-    public void addGlobalInstance(String key, Object instance) {
-        this.globalInstances.put(key, instance);
+    //----------------------------------------------------------------------------------------------
+
+    public GlobalVariables globalVariables() {
+        if (globalVariables == null) globalVariables = new GlobalVariables();
+        return globalVariables;
     }
 
-    public Object getGlobalInstance(String key) {
-        return this.globalInstances.get(key);
-    }
-
-    public MessagingCenter getMessagingCenter() {
-        return MessagingCenter.getInstance();
+    public MessagingCenter messagingCenter() {
+        if (messagingCenter == null) MessagingCenter.createInstance();
+        return messagingCenter;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -72,14 +95,13 @@ public abstract class BaseApplication extends Application implements Application
     private final String bugFileName = "BUGS";
     private String bugs = "";
 
-
     @Override
     public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
         activityCount++;
+        current = this;
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (activityCount == 1) {
-                current = this;
                 onApplicationStartedFirstActivity();
 
                 if (bugs.length() != 0 && Logger.IS_WRITE_TO_FILE_ENABLED()) {
@@ -125,10 +147,19 @@ public abstract class BaseApplication extends Application implements Application
             if (activityCount <= 0) {
                 onApplicationFinishedLastActivity();
                 activityCount = 0;
-                current = null;
+                dispose();
             }
         }, delayAmount);
+    }
 
+    private void dispose() {
+        current = null;
+
+        if (globalVariables != null) globalVariables.clear();
+        globalVariables = null;
+
+        if (messagingCenter != null) messagingCenter.clearObservers();
+        messagingCenter = null;
     }
 
     //----------------------------------------------------------------------------------------------

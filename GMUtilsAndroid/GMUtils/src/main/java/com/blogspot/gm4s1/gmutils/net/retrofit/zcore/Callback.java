@@ -115,7 +115,9 @@ public class Callback<DT, R extends Response<DT>> implements retrofit2.Callback<
         R response = null;
         try {
             response = TClass.newInstance();
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
             e.printStackTrace();
         }
 

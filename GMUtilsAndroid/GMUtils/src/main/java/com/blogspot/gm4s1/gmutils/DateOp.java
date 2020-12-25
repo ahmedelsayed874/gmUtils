@@ -880,22 +880,22 @@ public class DateOp implements Serializable {
                 .replace("T", " ");
 
         try {
-            return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd, true);
+            return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_Sz, true);
         } catch (Exception e0) {
             try {
-                return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss, true);
+                return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssz, true);
             } catch (Exception e1) {
                 try {
-                    return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssz, true);
+                    return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss, true);
                 } catch (Exception e2) {
                     try {
-                        return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_Sz, true);
+                        return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd, true);
                     } catch (Exception e3) {
                         try {
-                            return parseDate(date1, DateOp.PATTERN_dd_MM_yyyy, true);
+                            return parseDate(date1, DateOp.PATTERN_dd_MM_yyyy_HH_mm_ss, true);
                         } catch (Exception e4) {
                             try {
-                                return parseDate(date1, DateOp.PATTERN_dd_MM_yyyy_HH_mm_ss, true);
+                                return parseDate(date1, DateOp.PATTERN_dd_MM_yyyy, true);
                             } catch (Exception e5) {
                                 try {
                                     return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_T_HH_mm_ssz, true);

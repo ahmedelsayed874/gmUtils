@@ -2,10 +2,10 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleProduction
 
 import android.graphics.Bitmap;
 
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIConstants;
 import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.ImageRequest;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.ImageResponse;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIsContract;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.Callback;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.RetrofitService;
@@ -32,7 +32,7 @@ public class ImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.example
     public void post(String text, Bitmap image, OnResponseReady<Object> callback) {
         ImageRequest request = RetrofitService.create(URL, ImageRequest.class);
         Call<ImageResponse> call = request.post(
-                APIsContract.TOKEN(),
+                APIConstants.TOKEN(),
                 RequestBody.create(MediaType.parse("text/plain"), text),
                 ImageUtils.createInstance().createRetrofitMultipartBodyForImage(image, "image")
         );

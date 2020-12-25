@@ -63,19 +63,20 @@ public abstract class BaseResponse {
     public enum Statuses { Succeeded, Error, ConnectionFailed }
 
     public String _internalMessage;
-    private Statuses _internalStatus = null;
+
+    private String _internalStatus = null;
     public String _requestId;
     public Integer _code;
 
     public void setInternalStatus(@Nullable Statuses status) {
-        this._internalStatus = status;
+        this._internalStatus = status.name();
     }
 
     public abstract Statuses getInternalStatus();
 
     private Statuses getFinalInternalStatus() {
         if (_internalStatus == null) return getInternalStatus();
-        else return _internalStatus;
+        else return Statuses.valueOf(_internalStatus);
     }
 
     public boolean isSuccess() {

@@ -84,9 +84,9 @@ public class RetrofitService {
 
     //----------------------------------------------------------------------------------------------
 
-    public static <T> T create(Class<T> serviceClass) {
-        return create(APIsContract.baseURL(), serviceClass);
-    }
+    /*public static <T> T create(Class<T> serviceClass) {
+        return create(APIsContract.URL(), serviceClass);
+    }*/
 
     public static <T> T create(String baseURL, Class<T> serviceClass) {
         if (sInstance == null) {
@@ -114,12 +114,5 @@ public class RetrofitService {
         if (sInstance != null) sInstance.mRetrofit = null;
     }
 
-    //-----------
-
-    public static String gradleLibraries() {
-        return "implementation 'com.squareup.retrofit2:retrofit:2.7.1'\n" +
-                "implementation 'com.squareup.retrofit2:converter-gson:2.7.1'\n" +
-                "implementation 'com.squareup.okhttp:okhttp:2.4.0'";
-    }
 
 }

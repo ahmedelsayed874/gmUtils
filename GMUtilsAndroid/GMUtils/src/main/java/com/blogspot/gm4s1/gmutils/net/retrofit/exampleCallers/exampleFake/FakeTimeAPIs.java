@@ -23,55 +23,19 @@ public class FakeTimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.exa
 
     @Override
     public void geTimeZoneList(String ofSpecificArea, OnResponseReady2<TimeZones> callback) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            int r = _FakeData.randomNumber();
-            TimeZones t = _FakeData.instance().timeZones();
-
-            if (r >= 2) { //success:-> 2 : 10
-                t._code = 200;
-                t._requestId = ofSpecificArea;
-
-            } else if (r >= 1) {//error-> 1
-                t.clear();
-                t.setInternalStatus(BaseResponse.Statuses.Error);
-                t._code = 400;
-                t._requestId = ofSpecificArea;
-
-            } else { //connection failed-> 0
-                t.clear();
-                t.setInternalStatus(BaseResponse.Statuses.ConnectionFailed);
-                t._code = 0;
-                t._requestId = ofSpecificArea;
-            }
-
-            if (callback != null) callback.invoke(t);
-        }, _FakeData.delay);
+        FakeData.run1(TimeZones.class, (d, r) -> {
+            r._requestId = ofSpecificArea;
+            r.add(d.timeZones().toArray(new String[0])[0]);
+            if (callback != null) callback.invoke(r);
+        });
     }
 
     @Override
     public void getCurrentTime(String zone, OnResponseReady2<TimeOfArea> callback) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            int r = _FakeData.randomNumber();
-            TimeOfArea t = _FakeData.instance().timeOfArea();
-
-            if (r >= 2) { //success:-> 2 : 10
-                t._code = 200;
-                t._requestId = zone;
-
-            } else if (r >= 1) {//error-> 1
-                t.setDatetime("");
-                t.setInternalStatus(BaseResponse.Statuses.Error);
-                t._code = 400;
-                t._requestId = zone;
-
-            } else { //connection failed-> 0
-                t.setDatetime("");
-                t.setInternalStatus(BaseResponse.Statuses.ConnectionFailed);
-                t._code = 0;
-                t._requestId = zone;
-            }
-
-            if (callback != null) callback.invoke(t);
-        }, _FakeData.delay);
+        FakeData.run1(TimeOfArea.class, (d, r) -> {
+            r._requestId = zone;
+            r.setDatetime(d.timeOfArea().getDatetime());
+            if (callback != null) callback.invoke(r);
+        });
     }
 }
