@@ -108,7 +108,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         if (isOrientationDisabled())
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        getWindow().setSoftInputMode(initialKeyboardState());
+        try {
+            getWindow().setSoftInputMode(initialKeyboardState());
+        } catch (Exception e) {}
 
         super.onCreate(savedInstanceState);
         setContentView(getActivityLayout());
