@@ -99,8 +99,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onPreCreate() {
         if (allowApplyingPreferenceLocale()) {
             SettingsStorage.getInstance().languagePref().applySavedLanguage(thisActivity());
         }
@@ -110,13 +109,24 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         try {
             getWindow().setSoftInputMode(initialKeyboardState());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
+
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+
+        onPreCreate();
 
         super.onCreate(savedInstanceState);
         setContentView(getActivityLayout());
 
-        //------------------------------------------------------------------------------------------
+        onPostCreate();
 
+    }
+
+    protected void onPostCreate() {
         HashMap<Integer, Class<? extends BaseViewModel>> viewModelClasses = getViewModelClasses();
         if (viewModelClasses != null) {
             viewModels = new HashMap<>();
@@ -160,9 +170,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public Activity thisActivity0() { return this; }
+    public Activity thisActivity0() {
+        return this;
+    }
 
-    public AppCompatActivity thisActivity() { return this; }
+    public AppCompatActivity thisActivity() {
+        return this;
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     public void setKeyboardAutoHidden() {
