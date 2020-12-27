@@ -3,6 +3,8 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.zcore;
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
 
+import java.io.IOException;
+
 import okhttp3.Request;
 import retrofit2.Call;
 
@@ -21,50 +23,61 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
     private Class<R> TClass;
     private OnResponseReady2<R> onResponseReady;
     private String requestId = null;
-    public String url = "";
 
     public Callback2(
             Class<R> TClass,
             OnResponseReady2<R> onResponseReady
     ) {
-        this("", "", TClass, onResponseReady, null);
+        init("", TClass, onResponseReady, null);
     }
 
     public Callback2(
-            String requestURL,
-            Class<R> TClass,
-            OnResponseReady2<R> onResponseReady
-    ) {
-        this(requestURL, requestURL, TClass, onResponseReady, null);
-    }
-
-    public Callback2(
-            String requestURL,
             String requestDetails,
             Class<R> TClass,
             OnResponseReady2<R> onResponseReady
     ) {
-        this(requestURL, requestDetails, TClass, onResponseReady, null);
+        init(requestDetails, TClass, onResponseReady, null);
     }
 
     public Callback2(
-            String requestURL,
+            String requestDetails,
             Class<R> TClass,
             OnResponseReady2<R> onResponseReady,
             String requestId
     ) {
-        this(requestURL, requestURL, TClass, onResponseReady, requestId);
+        init(requestDetails, TClass, onResponseReady, requestId);
     }
 
     public Callback2(
-            String requestURL,
+            Request request,
+            Class<R> TClass,
+            OnResponseReady2<R> onResponseReady
+    ) {
+        init(request.toString(), TClass, onResponseReady, null);
+    }
+
+    public Callback2(
+            Request request,
+            Class<R> TClass,
+            OnResponseReady2<R> onResponseReady,
+            String requestId
+    ) {
+        init(request.toString(), TClass, onResponseReady, requestId);
+    }
+
+    private void init(
             String requestDetails,
             Class<R> TClass,
             OnResponseReady2<R> onResponseReady,
             String requestId
     ) {
         try {
-            url = requestURL;
+            TClass.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
             Logger.print("API:Request:", requestDetails);
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,7 +94,7 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
 
         if (response.isSuccessful()) {
             R body = response.body();
-            if (body != null && body.isSuccess()) {
+            if (body != null /*&& body.isSuccess()*/) {
                 if (requestId != null) {
                     body._requestId = requestId;
                 }
@@ -94,7 +107,14 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
                 setError(response.body()._internalMessage, response.code());
             }
         } else {
-            setError(response.message() + "\nCode: " + response.code(), response.code());
+            String error = "";
+            try {
+                error = response.errorBody().string();
+            } catch (Exception e) {
+                error = response.message() + "\nCode: " + response.code();
+            }
+
+            setError(error, response.code());
         }
     }
 
@@ -112,12 +132,14 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
 
     private void setError(String error, int code) {
         R response = null;
+
         try {
             response = TClass.newInstance();
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
+            //error += "\n--------\n" + e.getMessage();
         }
-
 
         if (response != null) {
 
@@ -145,11 +167,23 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
 
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response) {
         if (response != null) {
+            String url = "";
+            try {
+                url = call.request().url().toString();
+            } catch (Exception e){}
+
+            String error = "";
+            try {
+                error = response.errorBody().string();
+            } catch (Exception e) {}
+
             Logger.print(
                     "API:Response:",
-                    "url: <" + url + ">, \nresponse: " + response.body() + ", " +
-                            "\ncode= " + response.code() + ", \nmsg= " + response.message() + ", " +
-                            "\nerrorBody= " + response.errorBody()
+                    "url: <" + url + ">, \n" +
+                            "response: " + response.body() + ", " +
+                            "\ncode= " + response.code() + ", \n" +
+                            "msg= " + response.message() + ", " +
+                            "\nerrorBody= " + error
             );
         }
     }

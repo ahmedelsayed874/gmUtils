@@ -72,6 +72,12 @@ public abstract class BaseResponse {
         this._internalStatus = status.name();
     }
 
+    @Nullable
+    public Statuses getSavedInternalStatus() {
+        if (_internalStatus == null) return null;
+        else return Statuses.valueOf(_internalStatus);
+    }
+
     public abstract Statuses getInternalStatus();
 
     private Statuses getFinalInternalStatus() {
