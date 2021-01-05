@@ -1,6 +1,6 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.zcore;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -13,6 +13,6 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public interface OnResponseReady<T> {
-    void invoke(Response<T> response);
+public interface OnResponseReady<R extends BaseResponse> {
+    void invoke(R response);
 }

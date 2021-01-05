@@ -33,16 +33,24 @@ public class Logger {
     public static DateOp LOG_DEADLINE = null;
     public static DateOp WRITE_TO_FILE_DEADLINE = null;
 
+    public static void setLOGDeadline(int d, int M, int y) {
+        setLOGDeadline(d, M, y, 23, 59);
+    }
+
     public static void setLOGDeadline(int d, int M, int y, int h, int m) {
         LOG_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
-                .setTime(h, m, 0);
+                .setTime(h, m, 59);
+    }
+
+    public static void setWriteToFileDeadline(int d, int M, int y) {
+        setWriteToFileDeadline(d, M, y, 23, 59);
     }
 
     public static void setWriteToFileDeadline(int d, int M, int y, int h, int m) {
         WRITE_TO_FILE_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
-                .setTime(h, m, 0);
+                .setTime(h, m, 59);
     }
 
     public static boolean IS_LOG_ENABLED() {

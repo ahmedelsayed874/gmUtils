@@ -67,30 +67,31 @@ public abstract class BaseResponse {
     private String _internalStatus = null;
     public String _requestId;
     public Integer _code;
+    public Object extra;
 
     public void setInternalStatus(@Nullable Statuses status) {
         this._internalStatus = status.name();
     }
 
     @Nullable
-    public Statuses getSavedInternalStatus() {
+    public final Statuses getInternalStatus() {
         if (_internalStatus == null) return null;
         else return Statuses.valueOf(_internalStatus);
     }
 
-    public abstract Statuses getInternalStatus();
+    public abstract Statuses getExternalStatus();
 
-    private Statuses getFinalInternalStatus() {
-        if (_internalStatus == null) return getInternalStatus();
+    private Statuses getFinalStatus() {
+        if (_internalStatus == null) return getExternalStatus();
         else return Statuses.valueOf(_internalStatus);
     }
 
     public boolean isSuccess() {
-        return getFinalInternalStatus() == Statuses.Succeeded;
+        return getFinalStatus() == Statuses.Succeeded;
     }
 
     public boolean hasErrors() {
-        return getFinalInternalStatus() == Statuses.Error;
+        return getFinalStatus() == Statuses.Error;
     }
 
     public void copyResponseStatus(BaseResponse otherResponse) {

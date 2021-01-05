@@ -1,9 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.zcore;
 
-import com.blogspot.gm4s1.gmutils.Logger;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
+import androidx.annotation.NonNull;
 
-import java.io.IOException;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
 
 import okhttp3.Request;
 import retrofit2.Call;
@@ -19,14 +18,18 @@ import retrofit2.Call;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> {
-    private Class<R> TClass;
-    private OnResponseReady2<R> onResponseReady;
-    private String requestId = null;
+/*
+    use this when Response hold data inside it
+ */
+public class Callback2<DT, R extends Response<DT>> implements retrofit2.Callback<R> {
+
+    private CallbackOperations<R> callbackOperations;
+    private OnResponseReady2<DT> onResponseReady;
+
 
     public Callback2(
             Class<R> TClass,
-            OnResponseReady2<R> onResponseReady
+            OnResponseReady2<DT> onResponseReady
     ) {
         init("", TClass, onResponseReady, null);
     }
@@ -34,7 +37,7 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
     public Callback2(
             String requestDetails,
             Class<R> TClass,
-            OnResponseReady2<R> onResponseReady
+            OnResponseReady2<DT> onResponseReady
     ) {
         init(requestDetails, TClass, onResponseReady, null);
     }
@@ -42,7 +45,7 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
     public Callback2(
             String requestDetails,
             Class<R> TClass,
-            OnResponseReady2<R> onResponseReady,
+            OnResponseReady2<DT> onResponseReady,
             String requestId
     ) {
         init(requestDetails, TClass, onResponseReady, requestId);
@@ -51,7 +54,7 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
     public Callback2(
             Request request,
             Class<R> TClass,
-            OnResponseReady2<R> onResponseReady
+            OnResponseReady2<DT> onResponseReady
     ) {
         init(request.toString(), TClass, onResponseReady, null);
     }
@@ -59,132 +62,38 @@ public class Callback2<R extends BaseResponse> implements retrofit2.Callback<R> 
     public Callback2(
             Request request,
             Class<R> TClass,
-            OnResponseReady2<R> onResponseReady,
+            OnResponseReady2<DT> onResponseReady,
             String requestId
-    ) {
+    ){
         init(request.toString(), TClass, onResponseReady, requestId);
     }
 
     private void init(
             String requestDetails,
             Class<R> TClass,
-            OnResponseReady2<R> onResponseReady,
+            OnResponseReady2<DT> onResponseReady,
             String requestId
     ) {
-        try {
-            TClass.newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        callbackOperations = new CallbackOperations<>(TClass, requestDetails, requestId, Callback2.this::setResult);
+    }
 
-        try {
-            Logger.print("API:Request:", requestDetails);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        this.TClass = TClass;
-        this.onResponseReady = onResponseReady;
-        this.requestId = requestId;
+    public void setErrorListener(CallbackErrorHandler errorListener) {
+        this.callbackOperations.setErrorListener(errorListener);
     }
 
     @Override
-    public void onResponse(Call<R> call, retrofit2.Response<R> response) {
-        printCallInfo(call, response);
-
-        if (response.isSuccessful()) {
-            R body = response.body();
-            if (body != null /*&& body.isSuccess()*/) {
-                if (requestId != null) {
-                    body._requestId = requestId;
-                }
-
-                body._code = response.code();
-
-                setResult(response.body());
-
-            } else {
-                setError(response.body()._internalMessage, response.code());
-            }
-        } else {
-            String error = "";
-            try {
-                error = response.errorBody().string();
-            } catch (Exception e) {
-                error = response.message() + "\nCode: " + response.code();
-            }
-
-            setError(error, response.code());
-        }
+    public void onResponse(@NonNull Call<R> call, @NonNull retrofit2.Response<R> response) {
+        callbackOperations.onResponse(call, response);
     }
 
     @Override
-    public void onFailure(Call<R> call, Throwable t) {
-        printCallInfo(call, null);
-        Logger.print(t);
-
-        setError(t.getMessage(), 0);
+    public void onFailure(@NonNull Call<R> call, @NonNull Throwable t) {
+        callbackOperations.onFailure(call, t);
     }
 
     private void setResult(R result) {
         onResponseReady.invoke(result);
+        onResponseReady = null;
     }
 
-    private void setError(String error, int code) {
-        R response = null;
-
-        try {
-            response = TClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-            //error += "\n--------\n" + e.getMessage();
-        }
-
-        if (response != null) {
-
-            if (code == 0)
-                response.setInternalStatus(BaseResponse.Statuses.ConnectionFailed);
-            else
-                response.setInternalStatus(BaseResponse.Statuses.Error);
-
-            if (code == 0) {
-                response._internalMessage = "Connection Timeout, Please check your connection";
-            } else if (code == 401) {
-                response._internalMessage = "Your session has been expired, Please close application and open again";
-            } else {
-                response._internalMessage = error;
-            }
-
-            if (requestId != null) {
-                response._requestId = requestId;
-            }
-            response._code = code;
-        }
-
-        setResult(response);
-    }
-
-    private void printCallInfo(Call<R> call, retrofit2.Response<R> response) {
-        if (response != null) {
-            String url = "";
-            try {
-                url = call.request().url().toString();
-            } catch (Exception e){}
-
-            String error = "";
-            try {
-                error = response.errorBody().string();
-            } catch (Exception e) {}
-
-            Logger.print(
-                    "API:Response:",
-                    "url: <" + url + ">, \n" +
-                            "response: " + response.body() + ", " +
-                            "\ncode= " + response.code() + ", \n" +
-                            "msg= " + response.message() + ", " +
-                            "\nerrorBody= " + error
-            );
-        }
-    }
 }

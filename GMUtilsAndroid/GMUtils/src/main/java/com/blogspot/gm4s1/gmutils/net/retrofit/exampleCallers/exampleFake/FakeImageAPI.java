@@ -1,11 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake;
 
 import android.graphics.Bitmap;
-import android.os.Handler;
-import android.os.Looper;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
 
@@ -22,7 +19,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
  */
 public class FakeImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.ImageAPI{
 
-    public void post(String text, Bitmap image, OnResponseReady<Object> callback) {
+    public void post(String text, Bitmap image, OnResponseReady2<Object> callback) {
         FakeData.run0((s) -> {
             Response<Object> r = Response.createInstance(Object.class);
 
@@ -31,7 +28,7 @@ public class FakeImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.exa
                 r._code = 0;
             } else {
                 if (s) {
-                    r.set_Data(new Object());
+                    r.setData(new Object());
                     r.setInternalStatus(BaseResponse.Statuses.Succeeded);
                     r._code = 200;
                 } else {

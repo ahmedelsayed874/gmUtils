@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,8 +56,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     public abstract int getActivityLayout();
 
-    public int getActivityTitle() {
-        return R.string.app_name;
+    public CharSequence getActivityTitle() {
+        return "";
     }
 
     public boolean allowApplyingPreferenceLocale() {
@@ -144,12 +145,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         }
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
 
-        if (getActivityTitle() != 0) setTitle(getActivityTitle());
+        if (!TextUtils.isEmpty(getActivityTitle())) setTitle(getActivityTitle());
     }
 
     @Override
@@ -171,7 +171,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     //------------------------------------------------------------------------------------------------------------------
 
     public Activity thisActivity0() {
-        return this;
+        return thisActivity();
     }
 
     public AppCompatActivity thisActivity() {

@@ -20,16 +20,16 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
  */
 public class ImageResponse extends Response<Object> {
     @Override
-    public void set_Data(Object data) {
+    public void setData(Object data) {
     }
 
     @Override
-    public Object get_Data() {
+    public Object getData() {
         return null;
     }
 
     @Override
-    public Statuses getInternalStatus() {
+    public Statuses getExternalStatus() {
         return null;
     }
 }

@@ -2,6 +2,7 @@ package com.blogspot.gm4s1.gmutils._bases;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,7 +34,8 @@ public abstract class BaseApplication extends Application implements Application
     public static final class GlobalVariables {
         private Map<String, Object> globalInstances = new HashMap<>();
 
-        private GlobalVariables() {}
+        private GlobalVariables() {
+        }
 
         public void add(String key, Object instance) {
             this.globalInstances.put(key, instance);
@@ -54,15 +56,29 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     private static BaseApplication current;
-    public static BaseApplication current() {
-        return  current;
-    }
+
+    private int activityCount = 0;
+    private final long delayAmount = 500L;
+    private final String bugFileName = "BUGS";
+    private String bugs = "";
+    private boolean isBugMessageDisplayed = false;
+    private Runnable onBugMessageClosed = null;
 
     private GlobalVariables globalVariables = null;
     private MessagingCenter messagingCenter = null;
 
+    //----------------------------------------------------------------------------------------------
+
+    public static BaseApplication current() {
+        return current;
+    }
+
+    protected abstract void onPreCreate();
+
     @Override
     public void onCreate() {
+        onPreCreate();
+
         super.onCreate();
 
         StorageManager.registerCallback(() -> BaseApplication.this);
@@ -90,10 +106,57 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
-    private int activityCount = 0;
-    private final long delayAmount = 500L;
-    private final String bugFileName = "BUGS";
-    private String bugs = "";
+    private void registerDefaultUncaughtExceptionHandler() {
+        Thread.UncaughtExceptionHandler defaultHandler = Thread.getDefaultUncaughtExceptionHandler();
+
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            Throwable t = throwable;
+            StringBuilder stack = new StringBuilder();
+
+            while (t != null) {
+                stack.append("\n-------\n");
+                stack.append(t.getMessage());
+                stack.append("\n-------\n\n");
+
+                for (StackTraceElement it : t.getStackTrace()) {
+                    stack.append("")
+                            .append(it.getClassName())
+                            .append(".")
+                            .append(it.getMethodName())
+                            .append("::")
+                            .append(it.getLineNumber())
+                            .append("+ \n");
+                }
+
+                stack.append("\n");
+
+                t = t.getCause();
+            }
+
+            Logger.writeToFile(this, stack.toString(), bugFileName);
+            Logger.print(stack.toString());
+
+            if (defaultHandler != null) {
+                defaultHandler.uncaughtException(thread, throwable);
+            }
+        });
+
+        if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
+            bugs = Logger.readFile(this, bugFileName);
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public boolean isBugMessageDisplayed() {
+        return isBugMessageDisplayed;
+    }
+
+    public void setOnBugMessageClosedListener(Runnable action) {
+        this.onBugMessageClosed = action;
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
@@ -105,14 +168,22 @@ public abstract class BaseApplication extends Application implements Application
                 onApplicationStartedFirstActivity();
 
                 if (bugs.length() != 0 && Logger.IS_WRITE_TO_FILE_ENABLED()) {
+                    isBugMessageDisplayed = true;
+
                     MessageDialog.create(activity)
                             .setMessage(bugs)
                             .setButton1(R.string.ok, null)
+                            .setButton2(R.string.delete, dialog -> {
+                                Logger.deleteSavedFile(this, bugFileName);
+                            })
+                            .setOnDismissListener(dialog -> {
+                                isBugMessageDisplayed = false;
+                                if (onBugMessageClosed != null) onBugMessageClosed.run();
+                                onBugMessageClosed = null;
+                            })
                             .show();
 
                     bugs = "";
-
-                    Logger.deleteSavedFile(this, bugFileName);
                 }
             }
         }, delayAmount);
@@ -152,8 +223,18 @@ public abstract class BaseApplication extends Application implements Application
         }, delayAmount);
     }
 
+    //----------------------------------------------------------------------------------------------
+
+    protected abstract void onApplicationStartedFirstActivity();
+
+    protected abstract void onApplicationFinishedLastActivity();
+
+    //----------------------------------------------------------------------------------------------
+
     private void dispose() {
         current = null;
+
+        onBugMessageClosed = null;
 
         if (globalVariables != null) globalVariables.clear();
         globalVariables = null;
@@ -161,49 +242,5 @@ public abstract class BaseApplication extends Application implements Application
         if (messagingCenter != null) messagingCenter.clearObservers();
         messagingCenter = null;
     }
-
-    //----------------------------------------------------------------------------------------------
-
-    private void registerDefaultUncaughtExceptionHandler() {
-        Thread.UncaughtExceptionHandler defaultHandler = Thread.getDefaultUncaughtExceptionHandler();
-
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            Throwable t = throwable;
-            StringBuilder stack = new StringBuilder();
-
-            while (t != null) {
-                stack.append(t.getMessage()).append(" -------\n\n ");
-
-                for (StackTraceElement it : throwable.getStackTrace()) {
-                    stack.append(it.getClassName())
-                            .append(".")
-                            .append(it.getMethodName())
-                            .append("::").append(it.getLineNumber())
-                            .append("+++ \n");
-                }
-
-                stack.append("\n\n ");
-
-                t = t.getCause();
-            }
-
-            Logger.writeToFile(this, stack.toString(), bugFileName);
-            Logger.print(stack.toString());
-
-            if (defaultHandler != null) {
-                defaultHandler.uncaughtException(thread, throwable);
-            }
-        });
-
-        if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
-            bugs = Logger.readFile(this, bugFileName);
-        }
-    }
-
-    //----------------------------------------------------------------------------------------------
-
-    protected abstract void onApplicationStartedFirstActivity();
-
-    protected abstract void onApplicationFinishedLastActivity();
 
 }

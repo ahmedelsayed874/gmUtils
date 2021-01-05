@@ -2,7 +2,7 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterface
 
 import android.graphics.Bitmap;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -17,6 +17,6 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
  */
 public interface ImageAPI {
 
-    void post(String text, Bitmap image, OnResponseReady<Object> callback);
+    void post(String text, Bitmap image, OnResponseReady2<Object> callback);
 
 }

@@ -56,7 +56,7 @@ public class ConnectionService {
                 callback.setConnectionCheckResult(false);
             }
         } else {
-            callback.setConnectionCheckResult(true);
+            callback.setConnectionCheckResult(false);
         }
     }
 

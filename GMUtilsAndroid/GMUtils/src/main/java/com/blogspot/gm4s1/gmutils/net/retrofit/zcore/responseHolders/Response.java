@@ -74,9 +74,9 @@ import androidx.annotation.Nullable;
 
 public abstract class Response<T> extends BaseResponse {
 
-    public abstract void set_Data(@Nullable T data);
+    public abstract void setData(@Nullable T data);
 
-    public abstract T get_Data();
+    public abstract T getData();
 
     //----------------------------------------------------------------------------------------------
 
@@ -86,17 +86,17 @@ public abstract class Response<T> extends BaseResponse {
             T d;
 
             @Override
-            public void set_Data(T data) {
+            public void setData(T data) {
                 d= data;
             }
 
             @Override
-            public T get_Data() {
+            public T getData() {
                 return d;
             }
 
             @Override
-            public Statuses getInternalStatus() {
+            public Statuses getExternalStatus() {
                 return d != null ? Statuses.Succeeded : Statuses.Error;
             }
         };

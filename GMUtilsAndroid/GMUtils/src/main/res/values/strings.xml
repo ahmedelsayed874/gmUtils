@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">GM-Utils</string>
+    <string name="app_name" translatable="false">App</string>
 
     <string name="wait_moments">Please wait..</string>
     <string name="ok">OK</string>

@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">GM-Utils</string>
-
     <string name="wait_moments">انتظر من فضلك...</string>
     <string name="ok">موافق</string>
     <string name="cancel">إلغاء</string>

@@ -11,6 +11,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
@@ -29,6 +30,7 @@ public abstract class BaseDialog {
     private AlertDialog dialog;
     private View view;
 
+
     @NonNull
     protected abstract View createView(LayoutInflater layoutInflater);
 
@@ -42,6 +44,8 @@ public abstract class BaseDialog {
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         if (view != null) {
+            //setBackgroundRes(R.color.black_trans2);
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 view.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
                     @Override

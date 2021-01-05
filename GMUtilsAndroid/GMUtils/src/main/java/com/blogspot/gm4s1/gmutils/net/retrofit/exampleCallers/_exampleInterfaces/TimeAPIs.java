@@ -2,7 +2,7 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterface
 
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -17,7 +17,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
  */
 public interface TimeAPIs {
 
-    public void geTimeZoneList(String ofSpecificArea, OnResponseReady2<TimeZones> callback);
+    public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback);
 
-    public void getCurrentTime(String zone, OnResponseReady2<TimeOfArea> callback);
+    public void getCurrentTime(String zone, OnResponseReady<TimeOfArea> callback);
 }

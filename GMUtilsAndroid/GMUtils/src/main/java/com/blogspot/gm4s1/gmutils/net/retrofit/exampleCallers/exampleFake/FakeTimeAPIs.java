@@ -1,12 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -22,7 +18,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseRespons
 public class FakeTimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.TimeAPIs {
 
     @Override
-    public void geTimeZoneList(String ofSpecificArea, OnResponseReady2<TimeZones> callback) {
+    public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback) {
         FakeData.run1(TimeZones.class, (d, r) -> {
             r._requestId = ofSpecificArea;
             r.add(d.timeZones().toArray(new String[0])[0]);
@@ -31,7 +27,7 @@ public class FakeTimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.exa
     }
 
     @Override
-    public void getCurrentTime(String zone, OnResponseReady2<TimeOfArea> callback) {
+    public void getCurrentTime(String zone, OnResponseReady<TimeOfArea> callback) {
         FakeData.run1(TimeOfArea.class, (d, r) -> {
             r._requestId = zone;
             r.setDatetime(d.timeOfArea().getDatetime());

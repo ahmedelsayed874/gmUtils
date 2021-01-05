@@ -3,8 +3,8 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleProduction
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeAPIsRequests;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
 import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.Callback2;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.Callback;
+import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.RetrofitService;
 
 import retrofit2.Call;
@@ -25,10 +25,10 @@ public class TimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.example
     public static final String baseURL = "http://worldtimeapi.org/api/";
 
     @Override
-    public void geTimeZoneList(String ofSpecificArea, OnResponseReady2<TimeZones> callback) {
+    public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback) {
         TimeAPIsRequests request = RetrofitService.create(baseURL, TimeAPIsRequests.class);
         Call<TimeZones> call = request.geTimeZoneList(ofSpecificArea);
-        call.enqueue(new Callback2<>(
+        call.enqueue(new Callback<>(
                 call.request().url().toString(),
                 TimeZones.class,
                 callback,
@@ -37,10 +37,10 @@ public class TimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.example
     }
 
     @Override
-    public void getCurrentTime(String zone, OnResponseReady2<TimeOfArea> callback) {
+    public void getCurrentTime(String zone, OnResponseReady<TimeOfArea> callback) {
         TimeAPIsRequests request = RetrofitService.create(baseURL, TimeAPIsRequests.class);
         Call<TimeOfArea> call = request.getCurrentTime(zone);
-        call.enqueue(new Callback2<>(
+        call.enqueue(new Callback<>(
                 call.request().url().toString(),
                 TimeOfArea.class,
                 callback,
