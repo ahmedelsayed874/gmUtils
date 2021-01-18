@@ -59,6 +59,7 @@ public class RetrofitService {
     }
 
     public static String baseUrl = "";
+    public static boolean allowAllHostname = true;
     public static Callback tmpCallback = null;
 
     private static RetrofitService sInstance;
@@ -101,7 +102,7 @@ public class RetrofitService {
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
             builder.sslSocketFactory(sslSocketFactory, trustManager);
-            builder.hostnameVerifier(new AllowAllHostnameVerifier());
+            if (allowAllHostname) builder.hostnameVerifier(new AllowAllHostnameVerifier());
 
             if (tmpCallback != null) tmpCallback.config(builder);
             tmpCallback = null;

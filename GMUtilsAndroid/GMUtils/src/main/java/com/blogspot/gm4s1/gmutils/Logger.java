@@ -82,6 +82,73 @@ public class Logger {
 
     //----------------------------------------------------------------------------------------------
 
+    public static void print(Throwable e) {
+        print("", e);
+    }
+
+    public static void print(String title, Throwable e) {
+        if (IS_LOG_ENABLED()) {
+            String[] t = refineTitle("*** EXCEPTION *** " + title);
+            Log.e(t[0], t[1] + ": " + (e == null ? "null" : e.toString()));
+        }
+    }
+
+    public static void print(Object... o) {
+        if (IS_LOG_ENABLED()) {
+            print("****", o);
+        }
+    }
+
+    public static void print(String title, Object... o) {
+        if (IS_LOG_ENABLED()) {
+            if (o == null || o.length == 0) {
+                String[] t = refineTitle("**** " + title);
+                Log.e(t[0], t[1] + ": " + "null");
+
+            } else {
+                String log = "";
+
+                for (int i = 0; i < o.length; i++) {
+                    log += "OBJ[" + i + "]: " + (o[i] == null ? "null" : o[i].toString());
+                    if (i < o.length - 1) {
+                        log += "\n+++\n";
+                    }
+                }
+
+                print("" + title, log);
+            }
+        }
+    }
+
+    public static void print(String msg) {
+        if (IS_LOG_ENABLED()) {
+            print("", msg);
+        }
+    }
+
+    public static void print(String title, String msg) {
+        if (IS_LOG_ENABLED()) {
+            String[] t = refineTitle("**** " + title);
+            String[] m = divideMsg(msg);
+
+            if (m.length == 1) {
+                if (t.length == 1)
+                    Log.e(t[0], m[0]);
+                else
+                    Log.e(t[0], t[1] + ": " + m[0]);
+            } else {
+                for (int i = 0; i < m.length; i++) {
+                    if (t.length == 1)
+                        Log.e(t[0], "LOG["+ i +"]-> " + m[i]);
+                    else
+                        Log.e(t[0], t[1] + ": " + "LOG["+ i +"]-> " + m[i]);
+                }
+            }
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     private static String[] refineTitle(String title) {
         String reqTitle, remTitle;
         if (title.length() > 23) {
@@ -92,72 +159,41 @@ public class Logger {
             remTitle = "";
         }
 
-        return new String[] {reqTitle, remTitle};
+        return new String[]{reqTitle, remTitle};
     }
 
-    public static void print(Throwable e) {
-        print("", e);
-    }
+    private static String[] divideMsg(String msg) {
+        if (msg == null) msg = "null";
+        final int MAX_LENGTH = 3500;//4000;
 
-    public static void print(String title, Throwable e) {
-        if (IS_LOG_ENABLED()) {
-            String[] t = refineTitle("*** EXCEPTION *** " + title);
-            Log.e(t[0], t[1] + ": " + (e == null? "null" : e.toString()));
-        }
-    }
+        int parts = (int) Math.ceil(msg.length() / ((float) MAX_LENGTH));
+        if (parts <= 1) {
+            return new String[]{msg};
+        } else {
+            String[] strings = new String[parts];
+            int i = 0;
 
-    public static void print(Object... o) {
-        if (IS_LOG_ENABLED()) {
-            String log = "";
-            if (o == null || o.length == 0) {
-                Log.e("****", "null");
-            } else {
-                for (int i = 0; i < o.length; i++) {
-                    log += "[" + i + "]: " + (o[i] == null? "null" : o[i].toString());
-                    if (i < o.length - 1) {
-                        log += "\n+++\n";
-                    }
+            while (i < parts) {
+                int fi = i * MAX_LENGTH;
+                int li = fi + MAX_LENGTH;
+                if (i > 0 && li < msg.length()) {
+                    strings[i] = msg.substring(fi, li); //(0,4000), (4000, 8000), (8000, 12000)
+                } else {
+                    strings[i] = msg.substring(fi);
                 }
-
-                Log.e("****", log);
+                i++;
             }
+
+            return strings;
         }
     }
 
-    public static void print(String title, Object... o) {
-        if (IS_LOG_ENABLED()) {
-            String[] t = refineTitle("**** " + title);
-            String log = "";
-            if (o == null || o.length == 0) {
-                Log.e(t[0], t[1] + ": " + "null");
-            } else {
-                for (int i = 0; i < o.length; i++) {
-                    log += "[" + i + "]: " + (o[i] == null? "null" : o[i].toString());
-                    if (i < o.length - 1) {
-                        log += "\n+++\n";
-                    }
-                }
-
-                Log.e(t[0], t[1] + ": " + log);
-            }
-        }
-    }
-
-    public static void print(String msg) {
-        if (IS_LOG_ENABLED()) Log.e("****", msg == null ? "null" : msg);
-    }
-
-    public static void print(String title, String msg) {
-        if (IS_LOG_ENABLED()) {
-            String[] t = refineTitle("**** " + title);
-            Log.e(t[0], t[1] + ": " + (msg == null ? "null" : msg));
-        }
-    }
 
     //----------------------------------------------------------------------------------------------
 
     public static class LogFileWriter {
         private final File file;
+
         private LogFileWriter(File file) {
             this.file = file;
         }
