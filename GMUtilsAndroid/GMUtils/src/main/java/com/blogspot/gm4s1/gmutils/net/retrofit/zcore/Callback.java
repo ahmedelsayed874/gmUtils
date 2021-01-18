@@ -70,8 +70,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             OnResponseReady<R> onResponseReady,
             String requestId
     ) {
-        callbackOperations = new CallbackOperations<R>(TClass, requestDetails, requestId, Callback.this::setResult);
-
+        this.callbackOperations = new CallbackOperations<R>(TClass, requestDetails, requestId, Callback.this::setResult);
         this.onResponseReady = onResponseReady;
     }
 

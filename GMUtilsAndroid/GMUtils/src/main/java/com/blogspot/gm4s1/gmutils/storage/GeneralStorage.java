@@ -18,20 +18,16 @@ import android.text.TextUtils;
 public class GeneralStorage {
 
     public static GeneralStorage getInstance() {
-        return new GeneralStorage(getPrefName());
+        return new GeneralStorage(null);
     }
 
     public static GeneralStorage getInstance(String name) {
-        return new GeneralStorage(
-                TextUtils.isEmpty(name) ?
-                        getPrefName() :
-                        name
-        );
+        return new GeneralStorage(name);
     }
 
-    private static String getPrefName() {
+    /*private static String getPrefName() {
         return GeneralStorage.class.getName() + "GENERAL";
-    }
+    }*/
 
     //----------------------------------------------------------------------------------------------
 
@@ -39,6 +35,12 @@ public class GeneralStorage {
 
     private GeneralStorage(String name) {
         Context appContext = StorageManager.getAppContext();
+
+        if (TextUtils.isEmpty(name)) {
+            name = appContext.getPackageName() + "_" + getClass().getSimpleName().toUpperCase();
+        } else {
+            name = appContext.getPackageName() + "_" + name;
+        }
 
         mPreference = appContext.getSharedPreferences(name, Context.MODE_PRIVATE);
 

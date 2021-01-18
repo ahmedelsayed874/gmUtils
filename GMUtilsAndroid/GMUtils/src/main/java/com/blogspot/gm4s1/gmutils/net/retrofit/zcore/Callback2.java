@@ -74,7 +74,8 @@ public class Callback2<DT, R extends Response<DT>> implements retrofit2.Callback
             OnResponseReady2<DT> onResponseReady,
             String requestId
     ) {
-        callbackOperations = new CallbackOperations<>(TClass, requestDetails, requestId, Callback2.this::setResult);
+        this.callbackOperations = new CallbackOperations<>(TClass, requestDetails, requestId, Callback2.this::setResult);
+        this.onResponseReady = onResponseReady;
     }
 
     public void setErrorListener(CallbackErrorHandler errorListener) {

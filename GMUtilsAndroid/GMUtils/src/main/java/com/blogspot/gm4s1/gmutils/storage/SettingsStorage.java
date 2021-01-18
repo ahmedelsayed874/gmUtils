@@ -22,19 +22,18 @@ import java.util.*;
  */
 public class SettingsStorage {
 
-    private static String PREF_NAME = SettingsStorage.class.getName() + "SETTINGS";
-
     public static SettingsStorage getInstance() {
         Context appContext = StorageManager.getAppContext();
 
         return new SettingsStorage(appContext);
     }
 
-    private SharedPreferences mPreference;
+    private final SharedPreferences mPreference;
     private Language language = null;
 
     private SettingsStorage(Context context) {
-        mPreference = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        String prefName = context.getPackageName() + "_" + getClass().getSimpleName().toUpperCase();
+        mPreference = context.getSharedPreferences(prefName, Context.MODE_PRIVATE);
     }
 
     public Language languagePref() {

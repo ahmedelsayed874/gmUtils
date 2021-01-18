@@ -32,6 +32,7 @@ import java.util.Locale;
 public class Logger {
     public static DateOp LOG_DEADLINE = null;
     public static DateOp WRITE_TO_FILE_DEADLINE = null;
+    public static int MAX_LOG_FILES_COUNT = 50;
 
     public static void setLOGDeadline(int d, int M, int y) {
         setLOGDeadline(d, M, y, 23, 59);
@@ -81,12 +82,63 @@ public class Logger {
 
     //----------------------------------------------------------------------------------------------
 
+    private static String[] refineTitle(String title) {
+        String reqTitle, remTitle;
+        if (title.length() > 23) {
+            reqTitle = (title).substring(0, 23);
+            remTitle = (title).substring(23);
+        } else {
+            reqTitle = title;
+            remTitle = "";
+        }
+
+        return new String[] {reqTitle, remTitle};
+    }
+
     public static void print(Throwable e) {
+        print("", e);
+    }
+
+    public static void print(String title, Throwable e) {
         if (IS_LOG_ENABLED()) {
-            try {
-                Log.e("**** EXCEPTION ****", e.toString());
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            String[] t = refineTitle("*** EXCEPTION *** " + title);
+            Log.e(t[0], t[1] + ": " + (e == null? "null" : e.toString()));
+        }
+    }
+
+    public static void print(Object... o) {
+        if (IS_LOG_ENABLED()) {
+            String log = "";
+            if (o == null || o.length == 0) {
+                Log.e("****", "null");
+            } else {
+                for (int i = 0; i < o.length; i++) {
+                    log += "[" + i + "]: " + (o[i] == null? "null" : o[i].toString());
+                    if (i < o.length - 1) {
+                        log += "\n+++\n";
+                    }
+                }
+
+                Log.e("****", log);
+            }
+        }
+    }
+
+    public static void print(String title, Object... o) {
+        if (IS_LOG_ENABLED()) {
+            String[] t = refineTitle("**** " + title);
+            String log = "";
+            if (o == null || o.length == 0) {
+                Log.e(t[0], t[1] + ": " + "null");
+            } else {
+                for (int i = 0; i < o.length; i++) {
+                    log += "[" + i + "]: " + (o[i] == null? "null" : o[i].toString());
+                    if (i < o.length - 1) {
+                        log += "\n+++\n";
+                    }
+                }
+
+                Log.e(t[0], t[1] + ": " + log);
             }
         }
     }
@@ -96,14 +148,17 @@ public class Logger {
     }
 
     public static void print(String title, String msg) {
-        if (IS_LOG_ENABLED()) Log.e("**** " + title, msg == null ? "null" : msg);
+        if (IS_LOG_ENABLED()) {
+            String[] t = refineTitle("**** " + title);
+            Log.e(t[0], t[1] + ": " + (msg == null ? "null" : msg));
+        }
     }
 
     //----------------------------------------------------------------------------------------------
 
-    public static class FileWriter {
+    public static class LogFileWriter {
         private final File file;
-        private FileWriter(File file) {
+        private LogFileWriter(File file) {
             this.file = file;
         }
 
@@ -140,16 +195,16 @@ public class Logger {
         }
     }
 
-    public static FileWriter createFileWriter(File file) {
-        return new FileWriter(file);
+    public static LogFileWriter createLogFileWriter(File file) {
+        return new LogFileWriter(file);
     }
 
-    public static FileWriter createFileWriter(Context context, @Nullable String fileName) {
+    public static LogFileWriter createLogFileWriter(Context context, @Nullable String fileName) {
         File file = createOrGetLogFile(context, fileName);
-        return new FileWriter(file);
+        return new LogFileWriter(file);
     }
 
-    //----------------------------------------------------------------------------------------------
+    //--------------
 
     public static void writeToFile(Context context, String text) {
         writeToFile(context, text, null);
@@ -157,12 +212,14 @@ public class Logger {
 
     public static void writeToFile(Context context, String text, String fileName) {
         if (!IS_WRITE_TO_FILE_ENABLED()) return;
-        createFileWriter(context, fileName).append(text);
+        createLogFileWriter(context, fileName).append(text);
     }
 
     public static String readFromCurrentSessionFile(Context context) {
         return readFile(context, null);
     }
+
+    //--------------
 
     public static String readFile(Context context, String fileName) {
         try {
@@ -179,7 +236,7 @@ public class Logger {
         String content = "";
 
         try {
-            File logFiles = getLogDirector(context, false);
+            File logFiles = getLogDirector(context);
             String[] list = logFiles.list();
 
             if (list != null) {
@@ -204,11 +261,26 @@ public class Logger {
         return content;
     }
 
+    private static String readFileContent(File file) {
+        try {
+            FileInputStream is = new FileInputStream(file);
+            byte[] b = new byte[is.available()];
+            is.read(b);
+            String text = new String(b);
+            return text;
+
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    //--------------
+
     public static List<File> getSavedFiles(Context context) {
         List<File> savedFiles = new ArrayList<>();
 
         try {
-            File logFiles = getLogDirector(context, false);
+            File logFiles = getLogDirector(context);
             String[] list = logFiles.list();
 
             if (list != null) {
@@ -250,27 +322,15 @@ public class Logger {
     }
 
 
-    private static String readFileContent(File file) {
-        try {
-            FileInputStream is = new FileInputStream(file);
-            byte[] b = new byte[is.available()];
-            is.read(b);
-            String text = new String(b);
-            return text;
-
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
     private static String sessionId;
 
     private synchronized static File createOrGetLogFile(Context context, String fileName) {
         try {
-            File logFiles = getLogDirector(context, true);
+            File logFiles = getLogDirector(context);
             if (TextUtils.isEmpty(fileName)) {
-                if (sessionId == null)
-                    sessionId = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH).format(new Date());
+                if (sessionId == null) {
+                    sessionId = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
+                }
                 fileName = sessionId;
             }
 
@@ -286,7 +346,7 @@ public class Logger {
         }
     }
 
-    private synchronized static File getLogDirector(Context context, boolean allowDeletingOldFiles) {
+    private synchronized static File getLogDirector(Context context) {
         try {
             File filesDir = context.getExternalFilesDir(null);
             File logFiles = new File(filesDir.getPath() + "/LOGS");
@@ -294,19 +354,17 @@ public class Logger {
                 logFiles.mkdir();
             }
 
-            if (allowDeletingOldFiles) {
-                String[] list = logFiles.list();
-                final int max_file_count = 50;
+            String[] list = logFiles.list();
+            final int max_file_count = MAX_LOG_FILES_COUNT;
 
-                if (list != null && list.length > max_file_count) {
-                    int fc = list.length - max_file_count;
-                    for (int i = 0; i < fc; i++) {
-                        try {
-                            File f2d = new File(logFiles.getPath() + "/" + list[i]);
-                            f2d.delete();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+            if (list != null && list.length > max_file_count) {
+                int fc = list.length - max_file_count;
+                for (int i = 0; i < fc; i++) {
+                    try {
+                        File f2d = new File(logFiles.getPath() + "/" + list[i]);
+                        f2d.delete();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }

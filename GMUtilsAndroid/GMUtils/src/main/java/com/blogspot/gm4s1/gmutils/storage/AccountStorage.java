@@ -79,7 +79,6 @@ public class AccountStorage {
 
     //----------------------------------------------------------------------------------------------
 
-    private static String PREF_NAME = AccountStorage.class.getName();
     private static String KEY_USER = "KEY_USER";
     private static String KEY_PASSWORD = "KEY_PASSWORD";
     private static String KEY_DATE = "KEY_DATE";
@@ -136,11 +135,12 @@ public class AccountStorage {
 
     //----------------------------------------------------------------------------------------------
 
-    private SharedPreferences sharedPreferences;
-    private EncryptionUtil encryptionUtil;
+    private final SharedPreferences sharedPreferences;
+    private final EncryptionUtil encryptionUtil;
 
     private AccountStorage(Context context) {
-        sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        String prefName = context.getPackageName() + "_" + getClass().getSimpleName().toUpperCase();
+        sharedPreferences = context.getSharedPreferences(prefName, Context.MODE_PRIVATE);
         encryptionUtil = new EncryptionUtil(context.getApplicationContext());
     }
 
