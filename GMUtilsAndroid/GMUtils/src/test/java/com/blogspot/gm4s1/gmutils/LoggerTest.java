@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 
 public class LoggerTest {
 
-    @Test
+    /*@Test
     public void divideMsg1() {
         int msgLen = Logger.MAX_LOG_LENGTH + 3999;
         int offset = 0;
@@ -65,6 +65,6 @@ public class LoggerTest {
         assertEquals(partLen, strings[0].length());
         assertEquals(partLen, strings[1].length());
         assertEquals(remPartLen, strings[2].length());
-    }
+    }*/
 
 }

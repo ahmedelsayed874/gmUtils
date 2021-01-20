@@ -112,7 +112,7 @@ public class Logger {
     public static void print(String title, String msg) {
         if (IS_LOG_ENABLED()) {
             String[] t = refineTitle("**** " + title);
-            String[] m = divideMsg(msg, t.length > 1 ? t[1].length() : 0);
+            String[] m = divideLogMsg(msg, t.length > 1 ? t[1].length() : 0);
 
             if (m.length == 1) {
                 if (t.length == 1)
@@ -145,9 +145,9 @@ public class Logger {
         return new String[]{reqTitle, remTitle};
     }
 
-    public static final int MAX_LOG_LENGTH = 4000;
+    private static final int MAX_LOG_LENGTH = 4000;
 
-    public static String[] divideMsg(String msg, int offset) {
+    private static String[] divideLogMsg(String msg, int offset) {
         if (msg == null) msg = "null";
         final int partLength = MAX_LOG_LENGTH - (offset == 0 ? 0 : (offset + 2));
 
