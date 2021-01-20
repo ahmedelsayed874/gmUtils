@@ -1,8 +1,8 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleProduction;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.production;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeAPIsRequests;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeAPIsRequests;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeZones;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.Callback;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.RetrofitService;
@@ -21,7 +21,7 @@ import retrofit2.Call;
  * +201022663988
  */
 
-public class TimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.TimeAPIs {
+public class TimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.TimeAPIs {
     public static final String baseURL = "http://worldtimeapi.org/api/";
 
     @Override

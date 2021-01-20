@@ -6,8 +6,9 @@
 
     <application
         android:allowBackup="true"
-        android:supportsRtl="true"
         android:usesCleartextTraffic="true">
+        <!-- android:supportsRtl="true" -->
+
 
         <!--<provider
             android:name="androidx.core.content.FileProvider"

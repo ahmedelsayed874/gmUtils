@@ -1,11 +1,11 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleProduction;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.production;
 
 import android.graphics.Bitmap;
 
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.ImageRequest;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.ImageResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIConstants;
 import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.ImageRequest;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.ImageResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.Callback2;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.RetrofitService;
@@ -26,7 +26,7 @@ import retrofit2.Call;
  * +201022663988
  */
 
-public class ImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.ImageAPI {
+public class ImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.ImageAPI {
     public static String URL = "BASE URL OF API";
 
     public void post(String text, Bitmap image, OnResponseReady2<Object> callback) {

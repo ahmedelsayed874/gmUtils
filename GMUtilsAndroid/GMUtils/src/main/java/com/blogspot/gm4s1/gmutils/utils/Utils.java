@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -28,6 +29,8 @@ import android.widget.ProgressBar;
 import android.widget.RatingBar;
 
 import androidx.annotation.RequiresPermission;
+
+import com.blogspot.gm4s1.gmutils.DateOp;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -194,5 +197,16 @@ public class Utils {
     public int calculatePixelInDp(Context context, int dp) {
         float density = context.getResources().getDisplayMetrics().density;
         return (int) (density * dp);
+    }
+
+    //------------------------------------------------------------------------------------------
+
+    public static boolean isAppInDebugMode(Context context) {
+        context = context.getApplicationContext();
+
+        ApplicationInfo appInfo = context.getApplicationInfo();
+        boolean isDebuggable = (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+
+        return isDebuggable;
     }
 }

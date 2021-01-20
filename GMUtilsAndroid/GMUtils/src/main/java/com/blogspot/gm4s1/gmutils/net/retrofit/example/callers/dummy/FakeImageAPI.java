@@ -1,7 +1,8 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.dummy;
 
 import android.graphics.Bitmap;
 
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.ImageAPI;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady2;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
@@ -17,7 +18,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class FakeImageAPI implements com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.ImageAPI{
+public class FakeImageAPI implements ImageAPI {
 
     public void post(String text, Bitmap image, OnResponseReady2<Object> callback) {
         FakeData.run0((s) -> {

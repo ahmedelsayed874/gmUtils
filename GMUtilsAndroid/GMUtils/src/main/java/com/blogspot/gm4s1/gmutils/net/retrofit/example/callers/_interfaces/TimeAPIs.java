@@ -1,7 +1,7 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeZones;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 
 /**

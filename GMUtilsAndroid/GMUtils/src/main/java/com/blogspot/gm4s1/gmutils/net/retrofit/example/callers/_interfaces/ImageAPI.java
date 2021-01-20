@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces;
 
 import android.graphics.Bitmap;
 

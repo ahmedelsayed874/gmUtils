@@ -1,7 +1,6 @@
 package com.blogspot.gm4s1.gmutils;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -33,6 +32,7 @@ public class Logger {
     public static DateOp LOG_DEADLINE = null;
     public static DateOp WRITE_TO_FILE_DEADLINE = null;
     public static int MAX_LOG_FILES_COUNT = 50;
+    public static boolean WRITE_LOGS_TO_FILE = false;
 
     public static void setLOGDeadline(int d, int M, int y) {
         setLOGDeadline(d, M, y, 23, 59);
@@ -65,21 +65,6 @@ public class Logger {
 
     }
 
-    public static boolean checkVersionMode(Context context) {
-        context = context.getApplicationContext();
-
-        ApplicationInfo appInfo = context.getApplicationInfo();
-        boolean isDebuggable = (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-
-        //DEBUG_MODE = isDebuggable;
-        if (isDebuggable)
-            LOG_DEADLINE = DateOp.getInstance().increaseDays(7);
-        else
-            LOG_DEADLINE = DateOp.getInstance().decreaseDays(7);
-
-        return isDebuggable;
-    }
-
     //----------------------------------------------------------------------------------------------
 
     public static void print(Throwable e) {
@@ -88,35 +73,33 @@ public class Logger {
 
     public static void print(String title, Throwable e) {
         if (IS_LOG_ENABLED()) {
-            String[] t = refineTitle("*** EXCEPTION *** " + title);
-            Log.e(t[0], t[1] + ": " + (e == null ? "null" : e.toString()));
+            print("EXCEPTION **** " + title, e == null ? "null" : e.toString());
         }
     }
 
     public static void print(Object... o) {
         if (IS_LOG_ENABLED()) {
-            print("****", o);
+            print("", o);
         }
     }
 
     public static void print(String title, Object... o) {
         if (IS_LOG_ENABLED()) {
+            String msg = "";
+
             if (o == null || o.length == 0) {
-                String[] t = refineTitle("**** " + title);
-                Log.e(t[0], t[1] + ": " + "null");
+                msg = "null";
 
             } else {
-                String log = "";
-
                 for (int i = 0; i < o.length; i++) {
-                    log += "OBJ[" + i + "]: " + (o[i] == null ? "null" : o[i].toString());
+                    msg += "OBJ[" + i + "]: " + (o[i] == null ? "null" : o[i].toString());
                     if (i < o.length - 1) {
-                        log += "\n+++\n";
+                        msg += "\n+++\n";
                     }
                 }
-
-                print("" + title, log);
             }
+
+            print("" + title, msg);
         }
     }
 
@@ -129,7 +112,7 @@ public class Logger {
     public static void print(String title, String msg) {
         if (IS_LOG_ENABLED()) {
             String[] t = refineTitle("**** " + title);
-            String[] m = divideMsg(msg);
+            String[] m = divideMsg(msg, t.length > 1 ? t[1].length() : 0);
 
             if (m.length == 1) {
                 if (t.length == 1)
@@ -139,9 +122,9 @@ public class Logger {
             } else {
                 for (int i = 0; i < m.length; i++) {
                     if (t.length == 1)
-                        Log.e(t[0], "LOG["+ i +"]-> " + m[i]);
+                        Log.e(t[0], "LOG[" + i + "]-> " + m[i]);
                     else
-                        Log.e(t[0], t[1] + ": " + "LOG["+ i +"]-> " + m[i]);
+                        Log.e(t[0], t[1] + ": " + "LOG[" + i + "]-> " + m[i]);
                 }
             }
         }
@@ -162,25 +145,33 @@ public class Logger {
         return new String[]{reqTitle, remTitle};
     }
 
-    private static String[] divideMsg(String msg) {
-        if (msg == null) msg = "null";
-        final int MAX_LENGTH = 3500;//4000;
+    public static final int MAX_LOG_LENGTH = 4000;
 
-        int parts = (int) Math.ceil(msg.length() / ((float) MAX_LENGTH));
+    public static String[] divideMsg(String msg, int offset) {
+        if (msg == null) msg = "null";
+        final int partLength = MAX_LOG_LENGTH - (offset == 0 ? 0 : (offset + 2));
+
+        int parts = (int) Math.ceil(msg.length() / ((float) partLength));
+
         if (parts <= 1) {
             return new String[]{msg};
+
         } else {
             String[] strings = new String[parts];
             int i = 0;
 
             while (i < parts) {
-                int fi = i * MAX_LENGTH;
-                int li = fi + MAX_LENGTH;
-                if (i > 0 && li < msg.length()) {
-                    strings[i] = msg.substring(fi, li); //(0,4000), (4000, 8000), (8000, 12000)
-                } else {
-                    strings[i] = msg.substring(fi);
+                try {
+                    int fi = i * (partLength);
+                    int li = fi + (partLength);
+                    if (li < msg.length()) {
+                        strings[i] = msg.substring(fi, li); //(0,4000), (4000, 8000), (8000, 12000)
+                    } else {
+                        strings[i] = msg.substring(fi);
+                    }
+                } catch (Exception e) {
                 }
+
                 i++;
             }
 

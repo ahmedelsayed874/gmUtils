@@ -1,7 +1,8 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.dummy;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.TimeAPIs;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
 
 /**
@@ -15,7 +16,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class FakeTimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.TimeAPIs {
+public class FakeTimeAPIs implements TimeAPIs {
 
     @Override
     public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback) {

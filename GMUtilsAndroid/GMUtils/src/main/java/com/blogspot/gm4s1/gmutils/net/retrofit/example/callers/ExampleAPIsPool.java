@@ -1,10 +1,10 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers;
 
 import com.blogspot.gm4s1.gmutils.DateOp;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.ImageAPI;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers._exampleInterfaces.TimeAPIs;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake.FakeImageAPI;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake.FakeTimeAPIs;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.ImageAPI;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.TimeAPIs;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.dummy.FakeImageAPI;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.dummy.FakeTimeAPIs;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -38,12 +38,12 @@ public class ExampleAPIsPool {
 
         @Override
         public TimeAPIs timeAPIs() {
-            return new com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleProduction.TimeAPIs();
+            return new com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.production.TimeAPIs();
         }
 
         @Override
         public ImageAPI imageAPI() {
-            return new com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleProduction.ImageAPI();
+            return new com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.production.ImageAPI();
         }
     }
 

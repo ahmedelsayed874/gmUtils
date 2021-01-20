@@ -1,14 +1,12 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleCallers.exampleFake;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.dummy;
 
 import android.os.Handler;
 import android.os.Looper;
 
-import androidx.annotation.Nullable;
-
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback2;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeOfArea;
-import com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeZones;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
 

@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.net.retrofit.exampleAPIRequestes;
+package com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices;
 
 import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIConstants;
 import okhttp3.MultipartBody;
