@@ -6,6 +6,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -121,10 +123,19 @@ public class Logger {
                     Log.e(t[0], t[1] + ": " + m[0]);
             } else {
                 for (int i = 0; i < m.length; i++) {
-                    if (t.length == 1)
+                    if (t.length == 1) {
                         Log.e(t[0], "LOG[" + i + "]-> " + m[i]);
-                    else
+                    } else {
                         Log.e(t[0], t[1] + ": " + "LOG[" + i + "]-> " + m[i]);
+                    }
+                }
+            }
+
+            if (WRITE_LOGS_TO_FILE) {
+                if (BaseApplication.current() != null) {
+                    try {
+                        writeToFile(BaseApplication.current(), msg, "APP_LOGS");
+                    } catch (Exception e) {}
                 }
             }
         }
