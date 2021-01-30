@@ -74,7 +74,7 @@ public class AccountStorage {
     }
 
     public interface Listener {
-        void onUserIAccountChanged(IAccount account);
+        void onUserIAccountChanged(IAccount oldAccount, IAccount newAccount);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -158,6 +158,7 @@ public class AccountStorage {
 
     public boolean saveAccount(IAccount account, String password) {
         try {
+            IAccount acc = ACCOUNT;
             ACCOUNT = account;
 
             Gson gson = new Gson();
@@ -179,7 +180,7 @@ public class AccountStorage {
                     .putString(KEY_DATE, date)
                     .apply();
 
-            callListener(account);
+            callListener(acc, account);
 
             return true;
 
@@ -240,17 +241,19 @@ public class AccountStorage {
 
     public void logOut() {
         sharedPreferences.edit().clear().apply();
+
+        IAccount acc = ACCOUNT;
         ACCOUNT = null;
 
-        callListener(null);
+        callListener(acc, null);
     }
 
-    private void callListener(IAccount account) {
+    private void callListener(IAccount oldAccount, IAccount newAccount) {
         if (sListener != null) {
             for (int cls : sListener.keySet()) {
                 Listener listener = sListener.get(cls);
                 if (listener != null)
-                    listener.onUserIAccountChanged(account);
+                    listener.onUserIAccountChanged(oldAccount, newAccount);
             }
         }
     }

@@ -45,10 +45,29 @@ public class FirebaseDatabase<T> {
         myRef = database.getReference(path);
     }
 
+    private String refinePath(String path) {
+        if (path == null) return "";
+        return path
+                .replace(".", "-")
+                .replace("#", "-")
+                .replace("$", "-")
+                .replace("[", "-")
+                .replace("]", "-");
+    }
+
     //----------------------------------------------------------------------------------------------
 
-    public void insert(T object, ResultCallback2<T, Boolean> insertCallback) {
+    public void save(T object, ResultCallback2<T, Boolean> insertCallback) {
         myRef.setValue(object).addOnCompleteListener(task -> {
+            if (insertCallback != null)
+                insertCallback.invoke(object, task.isSuccessful());
+        });
+    }
+
+    public void save(T object, String path, ResultCallback2<T, Boolean> insertCallback) {
+        DatabaseReference ref = myRef.child(refinePath(path));
+
+        ref.setValue(object).addOnCompleteListener(task -> {
             if (insertCallback != null)
                 insertCallback.invoke(object, task.isSuccessful());
         });
@@ -61,7 +80,7 @@ public class FirebaseDatabase<T> {
     }
 
     public void read(String path, ResultCallback2<T, String> callback) {
-        DatabaseReference child = myRef.child(path);
+        DatabaseReference child = myRef.child(refinePath(path));
         read(child, callback);
     }
 
@@ -87,7 +106,7 @@ public class FirebaseDatabase<T> {
     }
 
     public void addObserve(String path, ResultCallback2<T, String> observer) {
-        DatabaseReference child = myRef.child(path);
+        DatabaseReference child = myRef.child(refinePath(path));
         addObserve(child, observer);
     }
 
@@ -117,7 +136,7 @@ public class FirebaseDatabase<T> {
     }
 
     public void removeObserve(String path, ResultCallback2<T, String> observer) {
-        DatabaseReference child = myRef.child(path);
+        DatabaseReference child = myRef.child(refinePath(path));
         removeObserve(child, observer);
     }
 
@@ -142,24 +161,24 @@ public class FirebaseDatabase<T> {
 
     //----------------------------------------------------------------------------------------------
 
-    public void delete(String key, ResultCallback2<String, String> deleteCallback) {
-        myRef.child(key).removeValue((error, ref) -> {
+    public void delete(String path, ResultCallback2<String, String> deleteCallback) {
+        myRef.child(refinePath(path)).removeValue((error, ref) -> {
             if (deleteCallback != null) {
                 if (error == null) {
-                    deleteCallback.invoke(key, "");
+                    deleteCallback.invoke(path, "");
                 } else {
-                    deleteCallback.invoke(key, error.getDetails());
+                    deleteCallback.invoke(path, error.getDetails());
                 }
             }
         });
     }
 
-    public void deleteMultiple(String[] keys, ResultCallback2<String, String> deleteCallback) {
+    public void deleteMultiple(String[] paths, ResultCallback2<String, String> deleteCallback) {
         Map<String, Object> kMap = new HashMap<>();
         String keyString = "";
 
-        for (String k : keys) {
-            kMap.put(k, null);
+        for (String k : paths) {
+            kMap.put(refinePath(k), null);
             keyString += "[" + k + "]";
         }
 
