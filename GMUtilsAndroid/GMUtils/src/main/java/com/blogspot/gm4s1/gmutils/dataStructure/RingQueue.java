@@ -12,7 +12,7 @@ package com.blogspot.gm4s1.gmutils.dataStructure;
  * +201022663988
  */
 public class RingQueue {
-    private Object[] cells;
+    private final Object[] cells;
     private int lastCell = 0;
     private int startCell = 0;
 

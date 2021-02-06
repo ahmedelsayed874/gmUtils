@@ -31,7 +31,7 @@ public class GeneralStorage {
 
     //----------------------------------------------------------------------------------------------
 
-    private SharedPreferences mPreference;
+    private final SharedPreferences mPreference;
 
     private GeneralStorage(String name) {
         Context appContext = StorageManager.getAppContext();

@@ -57,7 +57,7 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class ApiRequestCreator {
     private static ApiRequestCreator mInstance;
-    private RequestQueue mRequestQueue;
+    private final RequestQueue mRequestQueue;
     private boolean disableCache = true; //use this boolean to enable or disable cache feature
     private int timeout = 30000;
 
@@ -283,16 +283,16 @@ public class ApiRequestCreator {
                         NetworkResponse networkResponse = null;
 
                         if (error instanceof NetworkError) {
-                            networkResponse = ((NetworkError) error).networkResponse;
+                            networkResponse = error.networkResponse;
 
                         } else if (error instanceof AuthFailureError) {
-                            networkResponse = ((AuthFailureError) error).networkResponse;
+                            networkResponse = error.networkResponse;
 
                         } else if (error instanceof ServerError) {
-                            networkResponse = ((ServerError) error).networkResponse;
+                            networkResponse = error.networkResponse;
 
                         } else if (error instanceof ParseError) {
-                            networkResponse = ((ParseError) error).networkResponse;
+                            networkResponse = error.networkResponse;
                         }
 
                         try {
@@ -321,7 +321,7 @@ public class ApiRequestCreator {
     }
 
     public static class Request extends BaseRequest<String> {
-        private StringRequest stringRequest;
+        private final StringRequest stringRequest;
 
         Request(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady) {
             super(urlObj, timeout, onDataReady);
@@ -371,7 +371,7 @@ public class ApiRequestCreator {
     public static class MultipartRequest extends BaseRequest<String> {
         public static int MAX_IMAGE_SIZE = 1024 * 1024;
 
-        private VolleyMultipartRequest multipartRequest;
+        private final VolleyMultipartRequest multipartRequest;
 
         /**
          * @param contentResolver required in case of uploading file by Uri

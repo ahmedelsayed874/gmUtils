@@ -74,7 +74,7 @@ public class MessagingCenter {
         void onObserver(String messageName, Object data);
     }
 
-    private Map<MessageKey, Observer> observers = new HashMap<>();
+    private final Map<MessageKey, Observer> observers = new HashMap<>();
 
     //----------------------------------------------------------------------------------------------
 

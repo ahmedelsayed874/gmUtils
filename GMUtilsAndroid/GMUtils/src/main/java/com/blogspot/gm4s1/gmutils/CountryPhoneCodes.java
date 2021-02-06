@@ -31,7 +31,7 @@ import java.util.Locale;
  */
 public class CountryPhoneCodes {
     private static CountryPhoneCodes mInstance;
-    private ArrayList<CountryCode> mCountryCodes = new ArrayList<>();
+    private final ArrayList<CountryCode> mCountryCodes = new ArrayList<>();
 
     public static CountryPhoneCodes getInstance() {
         if (mInstance == null) mInstance = new CountryPhoneCodes();
@@ -475,8 +475,10 @@ public class CountryPhoneCodes {
     //--------------------------------------------------------------------------------------------//
 
     public static class CountryCode implements Parcelable, Serializable {
-        private String nameEn, nameAr, alpha2Code;
-        private int dialCode;
+        private final String nameEn;
+        private final String nameAr;
+        private final String alpha2Code;
+        private final int dialCode;
         private int flagResId;
 
         public CountryCode(String nameEn, String nameAr, int dialCode, String alpha2Code) {

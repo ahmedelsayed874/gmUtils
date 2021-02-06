@@ -41,9 +41,9 @@ public class ApiManager {
     private WeakReference<Activity> mActivity;
     private WeakReference<Fragment> mFragment;
     private Context mAppContext;
-    private static List<Request> mRequests = new ArrayList<>();
-    private Map<ApiURL.IURL, ApiRequestCreator.BaseRequest<?>> apiRequests = new ArrayMap<>();
-    private Map<ApiURL.IURL, String> responses = new ArrayMap<>();
+    private static final List<Request> mRequests = new ArrayList<>();
+    private final Map<ApiURL.IURL, ApiRequestCreator.BaseRequest<?>> apiRequests = new ArrayMap<>();
+    private final Map<ApiURL.IURL, String> responses = new ArrayMap<>();
     private boolean disableCache = true;
     private int timeout = 30000;
 
@@ -116,10 +116,6 @@ public class ApiManager {
             if (fragment != null) return fragment.toString();
 
         }
-
-        /*if (mAppContext != null) {
-            return mAppContext.toString();
-        }*/
 
         return "";
     }
@@ -357,9 +353,7 @@ public class ApiManager {
      * @param response
      */
     private void saveResponse(ApiURL.IURL url, String response) {
-        if (responses.containsKey(url)) {
-            responses.remove(url);
-        }
+        responses.remove(url);
 
         responses.put(url, response);
     }
@@ -367,8 +361,8 @@ public class ApiManager {
     //--------------------------------------------------------------------------------------------//
 
     private static class RequestCallback implements OnResponseReadyCallback<String> {
-        private ApiManager apiManager;
-        private Request request;
+        private final ApiManager apiManager;
+        private final Request request;
 
         private RequestCallback(ApiManager apiManager, Request request) {
             this.apiManager = apiManager;
@@ -425,9 +419,9 @@ public class ApiManager {
     }
 
     protected static class Request {
-        private ApiURL.IURL url;
+        private final ApiURL.IURL url;
         private String response;
-        private long requestTime;
+        private final long requestTime;
         private long responseTime;
         private Listener listener;
         private RequestCallback requestCallback;
@@ -472,10 +466,7 @@ public class ApiManager {
                     Utils utils = Utils.createInstance();
                     if (!utils.checkEquality(requestRrl.getParams(), this.url.getParams()))
                         return false;
-                    if (!utils.checkEquality(requestRrl.getBody(), this.url.getBody()))
-                        return false;
-
-                    return true;
+                    return utils.checkEquality(requestRrl.getBody(), this.url.getBody());
                 }
             }
 

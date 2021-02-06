@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
     public static final class GlobalVariables {
-        private Map<String, Object> globalInstances = new HashMap<>();
+        private final Map<String, Object> globalInstances = new HashMap<>();
 
         private GlobalVariables() {
         }

@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
+import com.blogspot.gm4s1.gmutils.listeners.RecyclerViewPaginationListener;
 import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
 import java.lang.ref.WeakReference;
@@ -38,7 +39,7 @@ import java.util.List;
  */
 public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerAdapter<T>.ViewHolder> {
 
-    private WeakReference<RecyclerView> mRecyclerView;
+    private final WeakReference<RecyclerView> mRecyclerView;
     private RecyclerView.AdapterDataObserver adapterDataObserver;
     private List<T> mList;
     private ClickListener<T> mClickListener;
@@ -74,7 +75,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         if (recyclerView != null) {
             setupLayout(recyclerView, linearLayout, vertical, gridColumnCount);
 
-            setupDetachListener(recyclerView);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                setupDetachListener(recyclerView);
+            }
         }
 
         registerAdapterDataObserver();
@@ -441,6 +444,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         this.isFirstItemInitialized = false;
     }
 
+    public void setupRecyclerViewPaginationListener(RecyclerViewPaginationListener listener) {
+        getRecyclerView().addOnScrollListener(listener);
+
+    }
     //------------------------------------------------------------------------------------------------------------------
 
     public ClickListener<T> getClickListener() {
@@ -604,3 +611,4 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
 }
+

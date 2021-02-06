@@ -29,22 +29,20 @@ import java.util.Random;
  * +201022663988
  */
 public class Notifier {
-    private Context context;
     private NotificationCompat.Builder notificationBuilder;
-    private int notificationIconRes;
+    private final int notificationIconRes;
     private int iconBackgroundColor = Color.WHITE;
 
-    public static Notifier getInstance(Context context, int notificationIconRes, int iconBackgroundColor) {
-        return new Notifier(context, notificationIconRes, iconBackgroundColor);
+    public static Notifier getInstance(int notificationIconRes, int iconBackgroundColor) {
+        return new Notifier(notificationIconRes, iconBackgroundColor);
     }
 
-    private Notifier(Context context, int notificationIconRes, int iconBackgroundColor) {
-        this.context = context;
+    private Notifier(int notificationIconRes, int iconBackgroundColor) {
         this.notificationIconRes = notificationIconRes;
         this.iconBackgroundColor = iconBackgroundColor;
     }
 
-    public Notifier createNotification(CharSequence title, CharSequence body, String channelId, Intent intent) {
+    public Notifier createNotification(Context context, CharSequence title, CharSequence body, String channelId, Intent intent) {
         PendingIntent pendingIntent = null;
         if (intent != null) {
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -88,7 +86,7 @@ public class Notifier {
         return this;
     }
 
-    public Notifier addActionForUrl(String title, String url) {
+    public Notifier addActionForUrl(Context context, String title, String url) {
         if (notificationBuilder == null) return null;
         if (TextUtils.isEmpty(url)) return this;
 
@@ -104,12 +102,12 @@ public class Notifier {
         return this;
     }
 
-    public void release() {
+    public void release(Context context) {
         int i = new Random(100).nextInt(1000);
-        release(i);
+        release(context, i);
     }
 
-    public void release(int notificationId) {
+    public void release(Context context, int notificationId) {
         if (notificationBuilder == null) throw new NullPointerException();
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);

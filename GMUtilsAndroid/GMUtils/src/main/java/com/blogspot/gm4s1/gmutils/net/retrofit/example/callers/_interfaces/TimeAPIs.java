@@ -17,7 +17,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
  */
 public interface TimeAPIs {
 
-    public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback);
+    void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback);
 
-    public void getCurrentTime(String zone, OnResponseReady<TimeOfArea> callback);
+    void getCurrentTime(String zone, OnResponseReady<TimeOfArea> callback);
 }

@@ -1,5 +1,6 @@
 package com.blogspot.gm4s1.gmutils;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -29,7 +30,7 @@ public class LooperThread extends Thread {
     private MessageHandler onMessageHandled;
 
     private MyHandler handler = null;
-    private List<Message> unHandledMessages = new ArrayList<>();
+    private final List<Message> unHandledMessages = new ArrayList<>();
     private int totalMsgCount = 0;
     private int handledMsgCount = 0;
 
@@ -102,7 +103,13 @@ public class LooperThread extends Thread {
         }
 
         void destroy() {
-            try { getLooper().quitSafely(); } catch (Exception e) { e.printStackTrace(); }
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    getLooper().quitSafely();
+                } else {
+                    getLooper().quit();
+                }
+            } catch (Exception e) { e.printStackTrace(); }
 
             onMessageHandled = null;
         }

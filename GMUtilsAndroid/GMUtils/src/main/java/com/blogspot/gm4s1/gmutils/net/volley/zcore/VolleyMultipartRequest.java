@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,8 +42,8 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
     private final String lineEnd = "\r\n";
     private final String boundary = "apiclient-" + System.currentTimeMillis();
 
-    private Response.Listener<NetworkResponse> mListener;
-    private Response.ErrorListener mErrorListener;
+    private final Response.Listener<NetworkResponse> mListener;
+    private final Response.ErrorListener mErrorListener;
     private Map<String, String> mHeaders;
 
 
@@ -170,11 +171,11 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
 
         dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
         dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"");
-        dataOutputStream.write(parameterName.getBytes("UTF-8"));
+        dataOutputStream.write(parameterName.getBytes(StandardCharsets.UTF_8));
         dataOutputStream.writeBytes(lineEnd);
         dataOutputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + lineEnd);
         dataOutputStream.writeBytes(lineEnd);
-        dataOutputStream.write(parameterValue.getBytes("UTF-8"));
+        dataOutputStream.write(parameterValue.getBytes(StandardCharsets.UTF_8));
         dataOutputStream.writeBytes(lineEnd);
     }
 

@@ -25,7 +25,7 @@ public class FirebaseAuth {
         void onAccountNotCreated(FirebaseAuth obj, String msg);
     }
 
-    private com.google.firebase.auth.FirebaseAuth mAuth;
+    private final com.google.firebase.auth.FirebaseAuth mAuth;
 
     public static FirebaseAuth init() {
         return new FirebaseAuth();

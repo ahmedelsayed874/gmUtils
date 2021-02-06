@@ -79,9 +79,9 @@ public class AccountStorage {
 
     //----------------------------------------------------------------------------------------------
 
-    private static String KEY_USER = "KEY_USER";
-    private static String KEY_PASSWORD = "KEY_PASSWORD";
-    private static String KEY_DATE = "KEY_DATE";
+    private static final String KEY_USER = "KEY_USER";
+    private static final String KEY_PASSWORD = "KEY_PASSWORD";
+    private static final String KEY_DATE = "KEY_DATE";
 
     public static IAccount ACCOUNT;
 

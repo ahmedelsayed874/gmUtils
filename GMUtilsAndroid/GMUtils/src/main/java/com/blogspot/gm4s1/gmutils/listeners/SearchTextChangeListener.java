@@ -68,7 +68,7 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
     }
 
     private static class TaskRunnable implements Runnable {
-        private WeakReference<SearchTextChangeListener> stclRef;
+        private final WeakReference<SearchTextChangeListener> stclRef;
 
         private TaskRunnable(SearchTextChangeListener o) {
             stclRef = new WeakReference<>(o);

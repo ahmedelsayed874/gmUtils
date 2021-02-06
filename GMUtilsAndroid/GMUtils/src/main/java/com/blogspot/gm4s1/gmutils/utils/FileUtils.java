@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
 
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.R;
@@ -104,7 +105,25 @@ public class FileUtils {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void createFileOnStorageUsingFileExplorer(Fragment fragment, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+        Intent intent = createFileOnStorageUsingFileExplorerIntent(fileName, mimeType, pickerInitialUri);
+
+        if (intent.resolveActivity(fragment.getActivity().getPackageManager()) != null) {
+            fragment.startActivityForResult(intent, requestId);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void createFileOnStorageUsingFileExplorer(Activity activity, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+        Intent intent = createFileOnStorageUsingFileExplorerIntent(fileName, mimeType, pickerInitialUri);
+
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            activity.startActivityForResult(intent, requestId);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private Intent createFileOnStorageUsingFileExplorerIntent(String fileName, String mimeType, @Nullable Uri pickerInitialUri) {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType(mimeType);//"application/pdf");
@@ -118,9 +137,7 @@ public class FileUtils {
             }
         }
 
-        if (intent.resolveActivity(activity.getPackageManager()) != null) {
-            activity.startActivityForResult(intent, requestId);
-        }
+        return intent;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -141,7 +158,7 @@ public class FileUtils {
     public File createFileUsingFileProvider(File root, String fileExtension) throws IOException {
         String imageFileName = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH).format(new Date());
 
-        String[] ext = new String[] { fileExtension };
+        String[] ext = new String[]{fileExtension};
         validateInputsOfCreatingFileUsingFileProvider(root, ext);
 
         File file = File.createTempFile(
@@ -159,7 +176,7 @@ public class FileUtils {
      * @param root check {@link R.xml#file_paths}
      */
     public File createFileUsingFileProvider(File root, String fileName, String extension) throws IOException {
-        String[] ext = new String[] { extension };
+        String[] ext = new String[]{extension};
         validateInputsOfCreatingFileUsingFileProvider(root, ext);
 
         File file = new File(root, fileName + ext[0]);
@@ -271,7 +288,31 @@ public class FileUtils {
     //----------------------------------------------------------------------------------------------
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public boolean showFileExplorer(Fragment fragment, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+        Intent intent = createShowingFileExplorerIntent(mimeType, pickerInitialUri);
+
+        if (intent.resolveActivity(fragment.getActivity().getPackageManager()) != null) {
+            fragment.startActivityForResult(intent, requestId);
+            return true;
+        }
+
+        return false;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public boolean showFileExplorer(Activity activity, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+        Intent intent = createShowingFileExplorerIntent(mimeType, pickerInitialUri);
+
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            activity.startActivityForResult(intent, requestId);
+            return true;
+        }
+
+        return false;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private Intent createShowingFileExplorerIntent(String mimeType, @Nullable Uri pickerInitialUri) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType(mimeType);//"application/pdf");
@@ -284,8 +325,15 @@ public class FileUtils {
             }
         }
 
-        if (intent.resolveActivity(activity.getPackageManager()) != null) {
-            activity.startActivityForResult(intent, requestId);
+        return intent;
+    }
+
+
+    public boolean showFileExplorer(Fragment fragment, String mimeType, int requestCode) {
+        Intent intent = createShowingFileExplorerIntent(mimeType);
+
+        if (intent.resolveActivity(fragment.getActivity().getPackageManager()) != null) {
+            fragment.startActivityForResult(intent, requestCode);
             return true;
         }
 
@@ -293,17 +341,24 @@ public class FileUtils {
     }
 
     public boolean showFileExplorer(Activity activity, String mimeType, int requestCode) {
-        if (TextUtils.isEmpty(mimeType)) mimeType = "*/*";
+        Intent intent = createShowingFileExplorerIntent(mimeType);
 
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType(mimeType);
         if (intent.resolveActivity(activity.getPackageManager()) != null) {
             activity.startActivityForResult(intent, requestCode);
             return true;
         }
 
         return false;
+    }
+
+    private Intent createShowingFileExplorerIntent(String mimeType) {
+        if (TextUtils.isEmpty(mimeType)) mimeType = "*/*";
+
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mimeType);
+
+        return intent;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -582,6 +637,7 @@ public class FileUtils {
 
     //----------------------------------------------------------------------------------------------
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public String getPathFromUri(Context context, Uri uri) {
 
         boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;

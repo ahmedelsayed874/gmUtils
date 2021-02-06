@@ -3,5 +3,5 @@
 
     <item android:state_pressed="true" android:drawable="@drawable/shape_solid_rectangle_accent" />
     <item android:state_enabled="false" android:drawable="@drawable/shape_solid_rectangle_primarydark" />
-    <item android:drawable="@drawable/shape_solid_rectangle_default" />
+    <item android:drawable="@drawable/shape_solid_rectangle_brand" />
 </selector>

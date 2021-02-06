@@ -545,7 +545,7 @@ public class ImageSlider {
 
         @Override
         public boolean isViewFromObject(View v, Object obj) {
-            return v == ((ImageView) obj);
+            return v == obj;
         }
 
         @NonNull

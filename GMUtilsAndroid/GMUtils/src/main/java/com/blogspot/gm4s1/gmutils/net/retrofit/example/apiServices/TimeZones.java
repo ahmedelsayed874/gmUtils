@@ -26,7 +26,7 @@ import java.util.List;
     but I added it here for demonstration purpose
  */
 public class TimeZones extends BaseResponse implements Collection<String> {
-    private List<String> list = new ArrayList<>();
+    private final List<String> list = new ArrayList<>();
 
     @Override
     public Statuses getExternalStatus() {

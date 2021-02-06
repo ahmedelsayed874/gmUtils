@@ -240,13 +240,13 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="button.primary">
-        <item name="android:background">@color/colorPrimary</item>
+    <style name="button.primaryDark">
+        <item name="android:background">@color/colorPrimaryDark</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="button.default">
-        <item name="android:background">@color/defaultColor</item>
+    <style name="button.brand">
+        <item name="android:background">@color/brandColor</item>
         <item name="android:textColor">@color/white</item>
     </style>
 

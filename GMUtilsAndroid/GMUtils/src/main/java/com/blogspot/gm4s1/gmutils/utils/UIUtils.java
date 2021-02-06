@@ -42,7 +42,7 @@ public class UIUtils {
             final LifecycleEventObserver[] fragmentLifecycleEventObserver = new LifecycleEventObserver[1];
             final Runnable[] action2 = new Runnable[]{action};
 
-            LifecycleEventObserver observer = (LifecycleEventObserver) (source, event) -> {
+            LifecycleEventObserver observer = (source, event) -> {
                 if (event == Lifecycle.Event.ON_DESTROY) {
                     if (fragmentLifecycleEventObserver[0] != null)
                         source.getLifecycle().removeObserver(fragmentLifecycleEventObserver[0]);

@@ -52,9 +52,9 @@ public final class ApiURL {
     //-------------------------------------------------------------------------------//
 
     public abstract static class Parameters {
-        private Map<String, String> params = new ArrayMap<>();
-        private Map<String, Bitmap> imagesParams = new ArrayMap<>();
-        private Map<String, Uri> filesParams = new ArrayMap<>();
+        private final Map<String, String> params = new ArrayMap<>();
+        private final Map<String, Bitmap> imagesParams = new ArrayMap<>();
+        private final Map<String, Uri> filesParams = new ArrayMap<>();
 
         public Parameters put(String key, String value) {
             if (value == null) value = "";

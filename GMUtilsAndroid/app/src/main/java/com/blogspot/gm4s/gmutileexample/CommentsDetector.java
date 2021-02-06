@@ -56,7 +56,7 @@ public class CommentsDetector {
             }
         }
 
-        private List<Comment> comments = new ArrayList<>();
+        private final List<Comment> comments = new ArrayList<>();
 
         public void addComment(Comment comment) {
             comments.add(comment);
@@ -109,7 +109,7 @@ public class CommentsDetector {
         for (int i = 0; i < texts.length; i++) {
             System.out.println((i + 1) + "> ----------------------");
             System.out.println(texts[i]);
-            System.out.println("");
+            System.out.println();
             System.out.println(comments[i]);
         }
     }

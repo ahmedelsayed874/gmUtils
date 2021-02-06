@@ -174,7 +174,7 @@ public class BiometricAuthentication {
 
     private KeyStore keyStore;
     private KeyGenerator keyGenerator;
-    private String ENC_KEY_NAME = "enc_key";
+    private final String ENC_KEY_NAME = "enc_key";
     private FingerprintManager fingerprintManager;
 
 
@@ -308,8 +308,8 @@ public class BiometricAuthentication {
 
     @SuppressLint("ByteOrderMark")
     static class FingerprintHelper extends FingerprintManager.AuthenticationCallback {
-        private String textToEncrypt;
-        private AuthenticateListener authenticateListener;
+        private final String textToEncrypt;
+        private final AuthenticateListener authenticateListener;
 
         private FingerprintHelper(String textToEncrypt, AuthenticateListener listener) {
             this.textToEncrypt = textToEncrypt;

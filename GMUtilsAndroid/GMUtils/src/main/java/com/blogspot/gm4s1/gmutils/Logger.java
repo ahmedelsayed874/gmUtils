@@ -3,11 +3,8 @@ package com.blogspot.gm4s1.gmutils;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-
 import androidx.annotation.Nullable;
-
 import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,38 +30,36 @@ import java.util.Locale;
 public class Logger {
     public static DateOp LOG_DEADLINE = null;
     public static DateOp WRITE_TO_FILE_DEADLINE = null;
+    public static Integer FILE_CONTENT_ENCRYPT_KEY = null;
     public static int MAX_LOG_FILES_COUNT = 50;
     public static boolean WRITE_LOGS_TO_FILE = false;
 
     public static void setLOGDeadline(int d, int M, int y) {
-        setLOGDeadline(d, M, y, 23, 59);
+        setLOGDeadline(d, M, y, 0, 0);
     }
 
     public static void setLOGDeadline(int d, int M, int y, int h, int m) {
         LOG_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
-                .setTime(h, m, 59);
+                .setTime(h, m, 0);
     }
 
     public static void setWriteToFileDeadline(int d, int M, int y) {
-        setWriteToFileDeadline(d, M, y, 23, 59);
+        setWriteToFileDeadline(d, M, y, 0, 0);
     }
 
     public static void setWriteToFileDeadline(int d, int M, int y, int h, int m) {
         WRITE_TO_FILE_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
-                .setTime(h, m, 59);
+                .setTime(h, m, 0);
     }
 
     public static boolean IS_LOG_ENABLED() {
-        return LOG_DEADLINE == null
-                || System.currentTimeMillis() <= LOG_DEADLINE.getTimeInMillis();
+        return LOG_DEADLINE != null && LOG_DEADLINE.getTimeInMillis() >= System.currentTimeMillis();
     }
 
     public static boolean IS_WRITE_TO_FILE_ENABLED() {
-        return WRITE_TO_FILE_DEADLINE == null
-                || System.currentTimeMillis() <= WRITE_TO_FILE_DEADLINE.getTimeInMillis();
-
+        return WRITE_TO_FILE_DEADLINE != null && WRITE_TO_FILE_DEADLINE.getTimeInMillis() >= System.currentTimeMillis();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -215,7 +210,16 @@ public class Logger {
                         sw.write(":\n");
                     }
 
-                    sw.write(text);
+                    try {
+                        if (FILE_CONTENT_ENCRYPT_KEY != null) {
+                            String encText = Security.getSimpleInstance(FILE_CONTENT_ENCRYPT_KEY).encrypt(text);
+                            sw.write(encText);
+                        } else {
+                            sw.write(text);
+                        }
+                    } catch (Exception e) {
+                        sw.write(text);
+                    }
 
                     if (addSeparation) {
                         sw.write("\n\n*-----*-----*-----*-----*\n\n");
@@ -299,12 +303,19 @@ public class Logger {
         return content;
     }
 
-    private static String readFileContent(File file) {
+    public static String readFileContent(File file) {
         try {
             FileInputStream is = new FileInputStream(file);
             byte[] b = new byte[is.available()];
             is.read(b);
             String text = new String(b);
+
+            if (FILE_CONTENT_ENCRYPT_KEY != null) {
+                try {
+                    text = Security.getSimpleInstance(FILE_CONTENT_ENCRYPT_KEY).decrypt(text);
+                } catch (Exception e) {}
+            }
+
             return text;
 
         } catch (Exception e) {

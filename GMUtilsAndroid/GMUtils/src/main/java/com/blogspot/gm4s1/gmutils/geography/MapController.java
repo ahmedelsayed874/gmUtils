@@ -64,7 +64,7 @@ public class MapController {
         private static final int ICON_SOURCE_ASSETS = 1;
         private static final int ICON_SOURCE_FILE = 2;
 
-        private String id;
+        private final String id;
         private String name;
         private double lat;
         private double lng;
@@ -190,11 +190,9 @@ public class MapController {
                 if (!TextUtils.equals(this.id, otherObj.id)) return false;
                 //if (!TextUtils.equals(this.name, otherObj.name)) return false;
                 if (this.lat != otherObj.lat) return false;
-                if (this.lng != otherObj.lng) return false;
+                return this.lng == otherObj.lng;
                 //if (!TextUtils.equals(this.icon, otherObj.icon)) return false;
                 //if (!Utils.createInstance().checkEquality(this.extraData, otherObj.extraData)) return false;
-
-                return true;
             }
 
             return false;

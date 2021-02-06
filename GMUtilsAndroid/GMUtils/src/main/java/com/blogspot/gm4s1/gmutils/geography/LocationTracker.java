@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.listeners.ActivityLifecycleCallbacks;
 import com.blogspot.gm4s1.gmutils.utils.UIUtils;
 
@@ -107,7 +108,7 @@ public class LocationTracker implements LocationListener {
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 }
 
-                if (mListener != null) {
+                if (mListener != null && location != null) {
                     mListener.onLocationFounded(this, location);
                 }
 
@@ -166,7 +167,9 @@ public class LocationTracker implements LocationListener {
                 context,
                 "GPS",
                 "Enable GPS to complete",
-                "Location Settings"
+                "Location Settings",
+                "Cancel",
+                null
         );
     }
 
@@ -174,23 +177,26 @@ public class LocationTracker implements LocationListener {
      * Function to show settings alert dialog
      * On pressing Settings button will launch Settings Options
      */
-    public void showGPSDisabledAlert(Context context, String title, String message, String buttonTitle) {
-        new AlertDialog.Builder(context)
-                .setTitle(title)
+    public void showGPSDisabledAlert(Context context, String title, String message, String mainButtonTitle, String cancelButtonTitle, Runnable cancel) {
+        MessageDialog.create(context)
                 .setMessage(message)
-                .setPositiveButton(buttonTitle, (dialog, which) -> {
+                .setTitle(title)
+                .setButton1(mainButtonTitle, dialog -> {
                     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     context.startActivity(intent);
 
                     new Handler(Looper.getMainLooper())
                             .postDelayed(
-                                    this::startLocationUpdating,
+                                    LocationTracker.this::startLocationUpdating,
                                     10_000
                             );
                 })
+                .setButton2(cancelButtonTitle, dialog -> {
+                    if (cancel != null) cancel.run();
+                })
+                .setCancelable(false)
                 .show();
     }
-
     //----------------------------------------------------------------------------------------------
 
     public void destroy() {
@@ -239,7 +245,7 @@ public class LocationTracker implements LocationListener {
         int ERR_GPS_CLOSED = 1;
         int ERR_EXCEPTION = 2;
 
-        void onLocationFounded(LocationTracker obj, Location location);
+        void onLocationFounded(LocationTracker obj, @NonNull Location location);
 
         /**
          * @param provider {@link LocationManager#GPS_PROVIDER} or {@link LocationManager#NETWORK_PROVIDER}

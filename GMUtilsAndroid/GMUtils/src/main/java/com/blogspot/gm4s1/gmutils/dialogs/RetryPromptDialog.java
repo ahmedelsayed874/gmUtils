@@ -31,7 +31,7 @@ public class RetryPromptDialog {
         return dialog;
     }
 
-    private MessageDialog dialog;
+    private final MessageDialog dialog;
 
 
     RetryPromptDialog(Context context, CharSequence msg, Listener onRetry, Listener onCancel) {

@@ -19,8 +19,8 @@ public abstract class MultiListAdapter extends RecyclerView.Adapter<MultiListAda
     private static final int VIEW_TYPE_TITLE = 1;
     private static final int VIEW_TYPE_CONTENT = 2;
 
-    private WeakReference<RecyclerView> mRecyclerView;
-    private List<ListWrapper> wrapperList;
+    private final WeakReference<RecyclerView> mRecyclerView;
+    private final List<ListWrapper> wrapperList;
 
     public MultiListAdapter(RecyclerView recyclerView, @NonNull ListWrapper... listWrappers) {
         int x = listWrappers.length; //to throw exception if list equal null
@@ -300,10 +300,10 @@ public abstract class MultiListAdapter extends RecyclerView.Adapter<MultiListAda
     //--------------------------------------------------------------------------------------------//
 
     public static class ListWrapper<T> {
-        private int id;
-        private String title;
-        private List<T> list;
-        private Object parent;
+        private final int id;
+        private final String title;
+        private final List<T> list;
+        private final Object parent;
 
         public ListWrapper(int id, String title, @NonNull List<T> list) {
             this(id, title, list, null);

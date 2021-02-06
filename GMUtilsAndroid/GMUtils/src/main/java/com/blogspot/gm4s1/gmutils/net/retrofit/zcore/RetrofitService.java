@@ -140,7 +140,7 @@ public class RetrofitService {
             }
         }
 
-        return (T) sInstance.mRetrofit.create(serviceClass);
+        return sInstance.mRetrofit.create(serviceClass);
     }
 
     public static void destroy() {

@@ -70,47 +70,56 @@ public class MyToast {
     public MyToast(Context context, CharSequence msg, boolean systemStyle) {
         toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
 
-        root = toast.getView();
-        View view = ((ViewGroup) root).getChildAt(0);
+        try {
+            root = toast.getView();
+            View view = ((ViewGroup) root).getChildAt(0);
 
-        tv = ((TextView) view);
-        tv.setGravity(Gravity.CENTER);
+            tv = ((TextView) view);
+            tv.setGravity(Gravity.CENTER);
 
-        if (!systemStyle) {
-            setBackground(BACKGROUND);
-            setTextColor(TEXT_COLOR);
-        }
+            if (!systemStyle) {
+                setBackground(BACKGROUND);
+                setTextColor(TEXT_COLOR);
+            }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            root.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
-                @Override
-                public void onWindowAttached() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                root.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
+                    @Override
+                    public void onWindowAttached() {
 
-                }
+                    }
 
-                @Override
-                public void onWindowDetached() {
-                    MyToast.this.toast = null;
-                    MyToast.this.root = null;
-                    MyToast.this.tv = null;
-                }
-            });
+                    @Override
+                    public void onWindowDetached() {
+                        MyToast.this.toast = null;
+                        MyToast.this.root = null;
+                        MyToast.this.tv = null;
+                    }
+                });
+            }
+        } catch (Exception e) {
         }
     }
 
     public MyToast setBackground(@AnyRes int bg) {
-        root.setBackgroundResource(bg);
+        try {
+            root.setBackgroundResource(bg);
 
-        int plr = root.getContext().getResources().getDimensionPixelOffset(R.dimen.size_10);
-        int ptd = 0;
+            int plr = root.getContext().getResources().getDimensionPixelOffset(R.dimen.size_10);
+            int ptd = 0;
 
-        tv.setPadding(plr, ptd, plr, ptd);
+            tv.setPadding(plr, ptd, plr, ptd);
+        } catch (Exception e) {
+        }
 
         return this;
     }
 
     public MyToast setTextColor(@ColorInt int textColor) {
-        tv.setTextColor(textColor);
+        try {
+            tv.setTextColor(textColor);
+        } catch (Exception e) {
+        }
         return this;
     }
 

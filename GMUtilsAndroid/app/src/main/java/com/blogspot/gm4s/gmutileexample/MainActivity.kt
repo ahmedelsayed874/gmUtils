@@ -3,6 +3,8 @@ package com.blogspot.gm4s.gmutileexample
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
+import com.blogspot.gm4s1.gmutils.MyToast
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener
 import kotlinx.android.synthetic.main.activity_main.*
@@ -14,23 +16,28 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        openBtn.setOnClickListener {
+        btn1.text = "Show contact editor"
+        btn1.setOnClickListener {
             val intent = Intent(this, ContactEditorActivity::class.java)
             startActivity(intent)
         }
 
-        showDialogMsgBtn.setOnClickListener {
-            MessageDialog.create(this)
-                .setMessage("Message")
-                .setButton1("OK", null)
-                .show()
+        btn2.text = "read log file"
+        btn2.setOnClickListener {
+            val intent = Intent(this, ReadLogFileActivity::class.java)
+            startActivity(intent)
         }
 
-        doExceptionBtn.setOnClickListener {
-            throw RuntimeException("zxc")
+        btn3.text = "show my toast"
+        btn3.setOnClickListener {
+            MyToast.show(this, "test my toast")
+        }
+
+        btn4.text = "show original toast"
+        btn4.setOnClickListener {
+            Toast.makeText(this, "test original toast", Toast.LENGTH_LONG).show()
         }
 
     }
 
 }
-

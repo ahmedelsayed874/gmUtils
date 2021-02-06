@@ -83,6 +83,10 @@ public class Security {
         return new SimpleEncDec(context);
     }
 
+    public static EncryptDecryptInterface getSimpleInstance(int key) {
+        return new SimpleEncDec(key);
+    }
+
     //----------------------------------------------------------------------------------------------
 
     private static class EncDecAndroidM implements EncryptDecryptInterface {
@@ -181,7 +185,7 @@ public class Security {
         private static final String ENCRYPTED_KEY = "enc-dec-key";
 
         private KeyStore keyStore;
-        private SharedPreferences pref;
+        private final SharedPreferences pref;
 
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
         EncDecPreAndroidM(Context context) throws Exception {
@@ -343,10 +347,10 @@ public class Security {
          * Logger.print("EncDec: Failed")
          * }
          */
-        private String karlst = "§1234567890-=][poiuytrewqasdfghjkl;'\\`zxcvbnm,...../±!@@@@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"|~ZXCVBNM<>?";
-        private int key;
-        private int factor1 = 9;
-        private int factor2 = 17;
+        private final String karlst = "§1234567890-=][poiuytrewqasdfghjkl;'\\`zxcvbnm,...../±!@@@@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"|~ZXCVBNM<>?";
+        private final int key;
+        private final int factor1 = 9;
+        private final int factor2 = 17;
 
         public SimpleEncDec(Context context) {
             key = context.getPackageName().hashCode();
