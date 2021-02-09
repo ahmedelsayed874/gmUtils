@@ -141,7 +141,7 @@
 
     <Button
         android:id="@+id/saveBtn"
-        style="@style/button.default"
+        style="@style/button.brand"
         android:layout_marginTop="@dimen/size_50"
         android:layout_marginBottom="@dimen/size_50"
         android:text="@string/save"

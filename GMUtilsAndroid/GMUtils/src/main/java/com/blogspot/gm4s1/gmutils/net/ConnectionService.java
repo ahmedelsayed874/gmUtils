@@ -29,19 +29,16 @@ public class ConnectionService {
                     InetAddress ipAddr = InetAddress.getByName(url == null ? "google.com" : url);
                     boolean b = !ipAddr.equals("");
 
-                    returnResult(b);
+                    returnResult(b, "");
                 } catch (Exception e) {
-                    returnResult(false);
+                    returnResult(false, e.getMessage());
                 }
             }
 
-            private void returnResult(final boolean success) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.setConnectionCheckResult(success);
-                        callback = null;
-                    }
+            private void returnResult(final boolean success, String msg) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    callback.setConnectionCheckResult(success, msg);
+                    callback = null;
                 });
             }
         }
@@ -53,14 +50,14 @@ public class ConnectionService {
                 new Thread(new Test(url, callback)).start();
 
             } else {
-                callback.setConnectionCheckResult(false);
+                callback.setConnectionCheckResult(false, "Network not available");
             }
         } else {
-            callback.setConnectionCheckResult(false);
+            callback.setConnectionCheckResult(false, "ConnectivityManager not available");
         }
     }
 
     public interface ConnectionCheckCallback {
-        void setConnectionCheckResult(boolean connected);
+        void setConnectionCheckResult(boolean connected, String msg);
     }
 }

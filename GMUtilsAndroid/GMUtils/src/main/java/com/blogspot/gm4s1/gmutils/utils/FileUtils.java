@@ -105,21 +105,27 @@ public class FileUtils {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void createFileOnStorageUsingFileExplorer(Fragment fragment, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+    public boolean createFileOnStorageUsingFileExplorer(Fragment fragment, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
         Intent intent = createFileOnStorageUsingFileExplorerIntent(fileName, mimeType, pickerInitialUri);
 
         if (intent.resolveActivity(fragment.getActivity().getPackageManager()) != null) {
             fragment.startActivityForResult(intent, requestId);
+            return true;
         }
+
+        return false;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void createFileOnStorageUsingFileExplorer(Activity activity, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+    public boolean createFileOnStorageUsingFileExplorer(Activity activity, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
         Intent intent = createFileOnStorageUsingFileExplorerIntent(fileName, mimeType, pickerInitialUri);
 
         if (intent.resolveActivity(activity.getPackageManager()) != null) {
             activity.startActivityForResult(intent, requestId);
+            return true;
         }
+
+        return false;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)

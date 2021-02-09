@@ -23,8 +23,32 @@ import java.util.List;
  * +201022663988
  */
 public class LooperThread extends Thread {
+    public static class MessageArgs {
+        private final Message msg;
+        private final int handledMessageCount;
+        private final int totalMessageCount;
+
+        private MessageArgs(Message msg, int handledMessageCount, int totalMessageCount) {
+            this.msg = msg;
+            this.handledMessageCount = handledMessageCount;
+            this.totalMessageCount = totalMessageCount;
+        }
+
+        public Message getMsg() {
+            return msg;
+        }
+
+        public int getHandledMessageCount() {
+            return handledMessageCount;
+        }
+
+        public int getTotalMessageCount() {
+            return totalMessageCount;
+        }
+    }
     public interface MessageHandler {
-        void onMessageHandled(Message msg, int handledMessageCount, int totalMessageCount);
+        //void onMessageHandled(Message msg, int handledMessageCount, int totalMessageCount);
+        void onMessageHandled(MessageArgs args);
     }
 
     private MessageHandler onMessageHandled;
@@ -52,7 +76,7 @@ public class LooperThread extends Thread {
 
         handler = new MyHandler(msg -> {
             handledMsgCount++;
-            onMessageHandled.onMessageHandled(msg, handledMsgCount, totalMsgCount);
+            onMessageHandled.onMessageHandled(new MessageArgs(msg, handledMsgCount, totalMsgCount));
         });
 
         try {

@@ -5,6 +5,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,32 +31,70 @@ import java.util.Locale;
  * +201022663988
  */
 public class Logger {
-    public static DateOp LOG_DEADLINE = null;
-    public static DateOp WRITE_TO_FILE_DEADLINE = null;
-    public static Integer FILE_CONTENT_ENCRYPT_KEY = null;
-    public static int MAX_LOG_FILES_COUNT = 50;
-    public static boolean WRITE_LOGS_TO_FILE = false;
+    private static DateOp LOG_DEADLINE = null;
+    private static DateOp WRITE_TO_FILE_DEADLINE = null;
+    private static DateOp WRITE_LOGS_TO_FILE_DEADLINE = null;
+    private static DateOp FILE_CONTENT_ENCRYPT_DEADLINE = null;
 
-    public static void setLOGDeadline(int d, int M, int y) {
-        setLOGDeadline(d, M, y, 0, 0);
+    private static Integer FILE_CONTENT_ENCRYPT_KEY = null;
+    private static final int DEF_ENC_KEY = 13579;
+
+    public static int MAX_LOG_FILES_COUNT = 50;
+
+    //----------------------------------------------------------------------------------------------
+
+    //region set printing logs deadline
+    public static void SET_LOG_DEADLINE(int d, int M, int y) {
+        SET_LOG_DEADLINE(d, M, y, 0, 0);
     }
 
-    public static void setLOGDeadline(int d, int M, int y, int h, int m) {
+    public static void SET_LOG_DEADLINE(int d, int M, int y, int h, int m) {
         LOG_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
                 .setTime(h, m, 0);
     }
+    //endregion set printing logs deadline
 
-    public static void setWriteToFileDeadline(int d, int M, int y) {
-        setWriteToFileDeadline(d, M, y, 0, 0);
+    //region set writing to file deadline
+    public static void SET_WRITE_TO_FILE_DEADLINE(int d, int M, int y) {
+        SET_WRITE_TO_FILE_DEADLINE(d, M, y, 0, 0);
     }
 
-    public static void setWriteToFileDeadline(int d, int M, int y, int h, int m) {
+    public static void SET_WRITE_TO_FILE_DEADLINE(int d, int M, int y, int h, int m) {
         WRITE_TO_FILE_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
                 .setTime(h, m, 0);
     }
+    //endregion set writing to file deadline
 
+    //region set writing <<<logs>>> to file deadline
+    public static void SET_WRITE_LOGS_TO_FILE_DEADLINE(int d, int M, int y) {
+        SET_WRITE_LOGS_TO_FILE_DEADLINE(d, M, y, 0, 0);
+    }
+
+    public static void SET_WRITE_LOGS_TO_FILE_DEADLINE(int d, int M, int y, int h, int m) {
+        WRITE_LOGS_TO_FILE_DEADLINE = DateOp.getInstance()
+                .setDate(y, M, d)
+                .setTime(h, m, 0);
+    }
+    //endregion set writing <<<logs>>> to file deadline
+
+    //region set encrypting file content deadline
+    public static void SET_FILE_CONTENT_ENCRYPT_DEADLINE(int encryptKey, int d, int M, int y) {
+        SET_FILE_CONTENT_ENCRYPT_DEADLINE(encryptKey, d, M, y, 0, 0);
+    }
+
+    public static void SET_FILE_CONTENT_ENCRYPT_DEADLINE(int encryptKey, int d, int M, int y, int h, int m) {
+        FILE_CONTENT_ENCRYPT_DEADLINE = DateOp.getInstance()
+                .setDate(y, M, d)
+                .setTime(h, m, 0);
+        FILE_CONTENT_ENCRYPT_KEY = encryptKey;
+    }
+    //endregion set encrypting file content deadline
+
+    //----------------------------------------------------------------------------------------------
+
+    //region check enable status
     public static boolean IS_LOG_ENABLED() {
         return LOG_DEADLINE != null && LOG_DEADLINE.getTimeInMillis() >= System.currentTimeMillis();
     }
@@ -62,28 +103,34 @@ public class Logger {
         return WRITE_TO_FILE_DEADLINE != null && WRITE_TO_FILE_DEADLINE.getTimeInMillis() >= System.currentTimeMillis();
     }
 
+    public static boolean IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED() {
+        return WRITE_LOGS_TO_FILE_DEADLINE != null && WRITE_LOGS_TO_FILE_DEADLINE.getTimeInMillis() >= System.currentTimeMillis();
+    }
+
+    public static boolean IS_FILE_CONTENT_ENCRYPT_ENABLED() {
+        return FILE_CONTENT_ENCRYPT_DEADLINE != null && FILE_CONTENT_ENCRYPT_DEADLINE.getTimeInMillis() >= System.currentTimeMillis();
+    }
+    //endregion check enable status
+
     //----------------------------------------------------------------------------------------------
 
+    //region LOGs
     public static void print(Throwable e) {
         print("", e);
     }
 
     public static void print(String title, Throwable e) {
-        if (IS_LOG_ENABLED()) {
-            print("EXCEPTION **** " + title, e == null ? "null" : e.toString());
-        }
+        print("EXCEPTION **** " + title, e == null ? "null" : e.toString());
     }
 
     public static void print(Object... o) {
-        if (IS_LOG_ENABLED()) {
-            print("", o);
-        }
+        print("", o);
     }
 
     public static void print(String title, Object... o) {
-        if (IS_LOG_ENABLED()) {
-            String msg = "";
+        String msg = "";
 
+        if (IS_LOG_ENABLED() || IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
             if (o == null || o.length == 0) {
                 msg = "null";
 
@@ -95,15 +142,13 @@ public class Logger {
                     }
                 }
             }
-
-            print("" + title, msg);
         }
+
+        print("" + title, msg);
     }
 
     public static void print(String msg) {
-        if (IS_LOG_ENABLED()) {
-            print("", msg);
-        }
+        print("", msg);
     }
 
     public static void print(String title, String msg) {
@@ -125,13 +170,13 @@ public class Logger {
                     }
                 }
             }
+        }
 
-            if (WRITE_LOGS_TO_FILE) {
-                if (BaseApplication.current() != null) {
-                    try {
-                        writeToFile(BaseApplication.current(), msg, "APP_LOGS");
-                    } catch (Exception e) {}
-                }
+        if (IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+            if (BaseApplication.current() != null) {
+                try {
+                    writeToFile(BaseApplication.current(), msg, "APP_LOGS");
+                } catch (Exception e) {}
             }
         }
     }
@@ -184,7 +229,7 @@ public class Logger {
             return strings;
         }
     }
-
+    //endregion LOGs
 
     //----------------------------------------------------------------------------------------------
 
@@ -211,7 +256,8 @@ public class Logger {
                     }
 
                     try {
-                        if (FILE_CONTENT_ENCRYPT_KEY != null) {
+                        if (IS_FILE_CONTENT_ENCRYPT_ENABLED()) {
+                            if (FILE_CONTENT_ENCRYPT_KEY == null) FILE_CONTENT_ENCRYPT_KEY = DEF_ENC_KEY;
                             String encText = Security.getSimpleInstance(FILE_CONTENT_ENCRYPT_KEY).encrypt(text);
                             sw.write(encText);
                         } else {
@@ -237,35 +283,74 @@ public class Logger {
         }
     }
 
-    public static LogFileWriter createLogFileWriter(File file) {
+    public static LogFileWriter createLogFileWriter(File destinationFile) {
+        return new LogFileWriter(destinationFile);
+    }
+
+    public static LogFileWriter createLogFileWriter(Context context, String fileName) {
+        File file = TextUtils.isEmpty(fileName) ?
+                createOrGetLogFile(context) :
+                createOrGetLogFile(context, fileName);
         return new LogFileWriter(file);
     }
 
-    public static LogFileWriter createLogFileWriter(Context context, @Nullable String fileName) {
-        File file = createOrGetLogFile(context, fileName);
+    public static LogFileWriter createLogFileWriter(Context context, String dirName, String fileName) {
+        File file = createOrGetLogFile(context, dirName, fileName);
         return new LogFileWriter(file);
     }
 
-    //--------------
-
+    //region write to files
     public static void writeToFile(Context context, String text) {
         writeToFile(context, text, null);
     }
 
     public static void writeToFile(Context context, String text, String fileName) {
-        if (!IS_WRITE_TO_FILE_ENABLED()) return;
-        createLogFileWriter(context, fileName).append(text);
+        if (IS_WRITE_TO_FILE_ENABLED() || IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+            createLogFileWriter(context, fileName).append(text);
+        } else {
+            if (!IS_WRITE_TO_FILE_ENABLED() || !IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+                deleteSavedFiles(context);
+            }
+        }
     }
 
+    public static void writeToFile(Context context, String text, String dirName, String fileName) {
+        if (IS_WRITE_TO_FILE_ENABLED() || IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+            createLogFileWriter(context, fileName).append(text);
+        } else {
+            if (!IS_WRITE_TO_FILE_ENABLED() || !IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+                deleteSavedFiles(context, dirName);
+            }
+        }
+    }
+    //endregion write to files
+
+    //region read files
     public static String readFromCurrentSessionFile(Context context) {
-        return readFile(context, null);
+        try {
+            File file = createOrGetLogFile(context);
+            String text = readFileContent(file);
+            return text;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
-
-    //--------------
 
     public static String readFile(Context context, String fileName) {
         try {
             File file = createOrGetLogFile(context, fileName);
+            String text = readFileContent(file);
+            return text;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static String readFile(Context context, String dirName, String fileName) {
+        try {
+            File file = createOrGetLogFile(context, dirName, fileName);
             String text = readFileContent(file);
             return text;
         } catch (Exception e) {
@@ -310,10 +395,14 @@ public class Logger {
             is.read(b);
             String text = new String(b);
 
-            if (FILE_CONTENT_ENCRYPT_KEY != null) {
+            if (IS_FILE_CONTENT_ENCRYPT_ENABLED()) {
+                if (FILE_CONTENT_ENCRYPT_KEY == null)
+                    FILE_CONTENT_ENCRYPT_KEY = DEF_ENC_KEY;
+
                 try {
                     text = Security.getSimpleInstance(FILE_CONTENT_ENCRYPT_KEY).decrypt(text);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
 
             return text;
@@ -322,14 +411,23 @@ public class Logger {
             return "";
         }
     }
+    //endregion read files
 
-    //--------------
-
+    //region list saved files
     public static List<File> getSavedFiles(Context context) {
+        File logFiles = getLogDirector(context);
+        return getSavedFiles(logFiles);
+    }
+
+    public static List<File> getSavedFiles(Context context, String dirName) {
+        File logFiles = getLogDirector(context, dirName);
+        return getSavedFiles(logFiles);
+    }
+
+    public static List<File> getSavedFiles(File logFiles) {
         List<File> savedFiles = new ArrayList<>();
 
         try {
-            File logFiles = getLogDirector(context);
             String[] list = logFiles.list();
 
             if (list != null) {
@@ -348,15 +446,15 @@ public class Logger {
 
         return savedFiles;
     }
+    //endregion list saved files
 
+    //region delete files
     public static void deleteSavedFiles(Context context) {
         List<File> files = getSavedFiles(context);
-        if (files != null) {
-            for (File file : files) {
-                try {
-                    file.delete();
-                } catch (Exception e) {
-                }
+        for (File file : files) {
+            try {
+                file.delete();
+            } catch (Exception e) {
             }
         }
     }
@@ -370,20 +468,53 @@ public class Logger {
         }
     }
 
+    public static void deleteSavedFile(Context context, String dirName, String fileName) {
+        try {
+            File file = createOrGetLogFile(context, dirName, fileName);
+            file.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    public static void deleteSavedFiles(Context context, String dirName) {
+        try {
+            File file = createOrGetLogFile(context, dirName);
+            file.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    //endregion delete files
+
+    //region create file
     private static String sessionId;
 
+    private synchronized static File createOrGetLogFile(Context context) {
+        if (sessionId == null) {
+            sessionId = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
+        }
+
+        return createOrGetLogFile(context, "/LOG_FILE_" + sessionId + ".txt");
+    }
+
     private synchronized static File createOrGetLogFile(Context context, String fileName) {
+        File logFiles = getLogDirector(context);
+        return createOrGetLogFile(logFiles, fileName);
+    }
+
+    private synchronized static File createOrGetLogFile(Context context, String dirName, String fileName) {
+        File logFiles = getLogDirector(context, dirName);
+        return createOrGetLogFile(logFiles, fileName);
+    }
+
+    private synchronized static File createOrGetLogFile(File logFilesDir, @NotNull String fileName) {
         try {
-            File logFiles = getLogDirector(context);
             if (TextUtils.isEmpty(fileName)) {
-                if (sessionId == null) {
-                    sessionId = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
-                }
-                fileName = sessionId;
+                fileName = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
             }
 
-            String filePath = logFiles.getPath() + "/LOG_FILE_" + fileName + ".txt";
+            String filePath = logFilesDir.getPath() + fileName + ".txt";
             File file = new File(filePath);
             if (!file.exists()) {
                 file.createNewFile();
@@ -395,12 +526,17 @@ public class Logger {
         }
     }
 
+    // get/create directory
     private synchronized static File getLogDirector(Context context) {
+        return getLogDirector(context, "LOGS");
+    }
+
+    private synchronized static File getLogDirector(Context context, String dirName) {
         try {
             File filesDir = context.getExternalFilesDir(null);
-            File logFiles = new File(filesDir.getPath() + "/LOGS");
+            File logFiles = new File(filesDir.getPath() + "/" + dirName);
             if (!logFiles.exists()) {
-                logFiles.mkdir();
+                logFiles.mkdirs();
             }
 
             String[] list = logFiles.list();
@@ -424,5 +560,6 @@ public class Logger {
             return null;
         }
     }
+    //endregion create file
 
 }
