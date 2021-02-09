@@ -3,7 +3,7 @@ package com.blogspot.gm4s1.gmutils;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
-import androidx.annotation.Nullable;
+
 import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
 
 import org.jetbrains.annotations.NotNull;
@@ -53,6 +53,10 @@ public class Logger {
                 .setDate(y, M, d)
                 .setTime(h, m, 0);
     }
+
+    public static void SET_LOG_DEADLINE(DateOp dateOp) {
+        LOG_DEADLINE = dateOp;
+    }
     //endregion set printing logs deadline
 
     //region set writing to file deadline
@@ -65,6 +69,10 @@ public class Logger {
                 .setDate(y, M, d)
                 .setTime(h, m, 0);
     }
+
+    public static void SET_WRITE_TO_FILE_DEADLINE(DateOp dateOp) {
+        WRITE_TO_FILE_DEADLINE = dateOp;
+    }
     //endregion set writing to file deadline
 
     //region set writing <<<logs>>> to file deadline
@@ -76,6 +84,10 @@ public class Logger {
         WRITE_LOGS_TO_FILE_DEADLINE = DateOp.getInstance()
                 .setDate(y, M, d)
                 .setTime(h, m, 0);
+    }
+
+    public static void SET_WRITE_LOGS_TO_FILE_DEADLINE(DateOp dateOp) {
+        WRITE_LOGS_TO_FILE_DEADLINE = dateOp;
     }
     //endregion set writing <<<logs>>> to file deadline
 
@@ -90,7 +102,40 @@ public class Logger {
                 .setTime(h, m, 0);
         FILE_CONTENT_ENCRYPT_KEY = encryptKey;
     }
+
+    public static void SET_FILE_CONTENT_ENCRYPT_DEADLINE(DateOp dateOp) {
+        FILE_CONTENT_ENCRYPT_DEADLINE = dateOp;
+    }
     //endregion set encrypting file content deadline
+
+    //----------------------------------------------------------------------------------------------
+
+    //region get printing logs deadline
+    public static DateOp GET_LOG_DEADLINE() {
+        return LOG_DEADLINE;
+    }
+    //endregion get printing logs deadline
+
+    //region get writing to file deadline
+    public static DateOp GET_WRITE_TO_FILE_DEADLINE() {
+        return WRITE_TO_FILE_DEADLINE;
+    }
+    //endregion get writing to file deadline
+
+    //region get writing <<<logs>>> to file deadline
+    public static DateOp GET_WRITE_LOGS_TO_FILE_DEADLINE() {
+        return WRITE_LOGS_TO_FILE_DEADLINE;
+    }
+    //endregion get writing <<<logs>>> to file deadline
+
+    //region get encrypting file content deadline
+    public static DateOp GET_FILE_CONTENT_ENCRYPT_DEADLINE() {
+        return FILE_CONTENT_ENCRYPT_DEADLINE;
+    }
+    public static Integer GET_FILE_CONTENT_ENCRYPT_KEY() {
+        return FILE_CONTENT_ENCRYPT_KEY;
+    }
+    //endregion get encrypting file content deadline
 
     //----------------------------------------------------------------------------------------------
 
