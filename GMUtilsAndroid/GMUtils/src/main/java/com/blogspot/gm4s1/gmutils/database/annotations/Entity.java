@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Entity {
     String tableName();
