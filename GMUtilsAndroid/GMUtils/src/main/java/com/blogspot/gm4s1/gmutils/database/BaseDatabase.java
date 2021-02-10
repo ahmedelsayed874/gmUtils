@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
 import com.blogspot.gm4s1.gmutils.database.annotations.AutoIncrement;
 import com.blogspot.gm4s1.gmutils.database.annotations.Default;
 import com.blogspot.gm4s1.gmutils.database.annotations.Not_Null;
@@ -91,6 +92,19 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     public BaseDatabase(@NotNull Context context) {
         mDatabase = new Database(context, databaseName(), databaseVersion(), this);
+
+        if (BaseApplication.current() != null) {
+            BaseApplication.current().addCallback(BaseDatabase.class.getName(), new BaseApplication.Callbacks() {
+                @Override
+                public void onApplicationStartedFirstActivity() {
+                }
+
+                @Override
+                public void onApplicationFinishedLastActivity() {
+                    mDatabase = null;
+                }
+            });
+        }
     }
 
     @NotNull
