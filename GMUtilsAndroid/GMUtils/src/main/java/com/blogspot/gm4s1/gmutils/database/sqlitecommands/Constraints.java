@@ -31,7 +31,7 @@ public enum Constraints {
     /**
      Uniquely identified each rows/records in a database table.
      */
-    PRIMARY_Key,
+    PRIMARY_KEY,
 
     AUTOINCREMENT,
 

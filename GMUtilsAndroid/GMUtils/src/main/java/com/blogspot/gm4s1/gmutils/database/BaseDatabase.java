@@ -5,137 +5,551 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
-import com.blogspot.gm4s1.gmutils.DateOp;
-import com.blogspot.gm4s1.gmutils.Logger;
+import com.blogspot.gm4s1.gmutils.database.annotations.AutoIncrement;
+import com.blogspot.gm4s1.gmutils.database.annotations.Default;
+import com.blogspot.gm4s1.gmutils.database.annotations.Not_Null;
+import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey;
+import com.blogspot.gm4s1.gmutils.database.annotations.Unique;
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.Constraints;
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.DataTypes;
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.SqlCommands;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class BaseDatabase<C> extends SQLiteOpenHelper {
-    public static final String DB_NAME = "tasks_db";
-    public static final int DB_VERSION = 2;
+interface DatabaseCallbacks {
+    void onCreate(SQLiteDatabase db);
 
-    public BaseDatabase(Context context, @NotNull Class<C> dataClass) {
-        super(context, DB_NAME, null, DB_VERSION);
+    void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
+}
 
-        DateOp dateOp = Logger.GET_LOG_DEADLINE();
-        Logger.SET_LOG_DEADLINE(30, 12, 2222);
+public abstract class BaseDatabase implements DatabaseCallbacks {
 
-        Class<?> cls =  dataClass;
-        while (cls != null) {
-            Method[] declaredMethods = cls.getDeclaredMethods();
-            Field[] fields = cls.getDeclaredFields();
+    private static class Database extends SQLiteOpenHelper {
+        private DatabaseCallbacks mDatabaseCallbacks;
 
-            String info = "+++++++++++++++++++++++++++++++++\n";
-            info += cls.getName() + "\n";
+        private Database(Context context, String databaseName, int databaseVersion, DatabaseCallbacks callbacks) {
+            super(context, databaseName, null, databaseVersion);
 
-            for (Field field : fields) {
-                info += ".\n";
-                info += field.toString() + "\n";
-                info += "NAME: " + field.getName() + "\n";
-                info += "TYPE: " + field.getType().getName() + "\n";
-                info += "MODIFIERS: " + Modifier.toString(field.getModifiers()) + "\n";
+            mDatabaseCallbacks = callbacks;
 
-            }
+            SQLiteDatabase readableDatabase = getReadableDatabase();
+            //String path = readableDatabase.getPath();
+            //Log.e("*** database path", path);
 
-            cls = cls.getSuperclass();
-
-            Logger.print(info + "\n");
+            mDatabaseCallbacks = null;
         }
 
-        Logger.SET_LOG_DEADLINE(dateOp);
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            if (mDatabaseCallbacks != null) {
+                mDatabaseCallbacks.onCreate(db);
+            }
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            if (mDatabaseCallbacks != null) {
+                mDatabaseCallbacks.onUpgrade(db, oldVersion, newVersion);
+            }
+        }
+
+
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    private Database mDatabase;
+
+    public BaseDatabase(@NotNull Context context) {
+        mDatabase = new Database(context, databaseName(), databaseVersion(), this);
+    }
+
+    @NotNull
+    protected abstract String databaseName();
+
+    protected abstract int databaseVersion();
+
+    @NotNull
+    protected abstract Class<?>[] databaseEntities();
+
+    @Nullable
+    private Constraints[] getFieldConstraints(@NotNull Field field) {
+        List<Constraints> constraints = new ArrayList<>();
+
+        Annotation[] annotations = field.getDeclaredAnnotations();
+
+        if (annotations != null && annotations.length > 0) {
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType() == PrimaryKey.class) {
+                    constraints.add(Constraints.PRIMARY_KEY);
+
+                } else if (annotation.annotationType() == AutoIncrement.class) {
+                    constraints.add(Constraints.AUTOINCREMENT);
+
+                } else if (annotation.annotationType() == Not_Null.class) {
+                    constraints.add(Constraints.NOT_NULL);
+
+                } else if (annotation.annotationType() == Default.class) {
+                    constraints.add(Constraints.DEFAULT);
+
+                } else if (annotation.annotationType() == Unique.class) {
+                    constraints.add(Constraints.UNIQUE);
+                }
+            }
+        }
+
+        if (constraints.size() > 0)
+            return constraints.toArray(new Constraints[0]);
+        else
+            return null;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        /*SqlCommands sqlCommands = new SqlCommands();
+//        DateOp logDeadline = Logger.GET_LOG_DEADLINE();
+//        Logger.SET_LOG_DEADLINE(30, 12, 2222);
 
-        SqlCommands.CreateTable tasksTable = sqlCommands.new CreateTable(TasksDB_tables.TASKS.TABLE_NAME);
-        tasksTable.addColumn(TasksDB_tables.TASKS._ID                 , DataTypes.INTEGER, new Constraints[]{ Constraints.PRIMARY_Key, Constraints.AUTOINCREMENT });
+        SqlCommands sqlCommands = new SqlCommands();
 
-        tasksTable.addColumn(TasksDB_tables.TASKS.START_DATE_I        , DataTypes.INTEGER, null);
-        tasksTable.addColumn(TasksDB_tables.TASKS.START_TIME_I        , DataTypes.INTEGER, null);
+        Class<?>[] entities = databaseEntities();
 
-        tasksTable.addColumn(TasksDB_tables.TASKS.END_DATE_I          , DataTypes.INTEGER, null);
-        tasksTable.addColumn(TasksDB_tables.TASKS.END_TIME_I          , DataTypes.INTEGER, null);
+        for (Class<?> entity : entities) {
+            Class<?> cls = entity;
 
-        tasksTable.addColumn(TasksDB_tables.TASKS.INTERVAL_I          , DataTypes.INTEGER, null);
+            SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(cls.getSimpleName());
 
-        tasksTable.addColumn(TasksDB_tables.TASKS.TASK_TEXT_S         , DataTypes.TEXT   , null);
-        tasksTable.addColumn(TasksDB_tables.TASKS.TASK_AUDIO_PATH_S   , DataTypes.TEXT   , null);
+            while (cls != null) {
+                Field[] fields = cls.getDeclaredFields();
 
-        tasksTable.addColumn(TasksDB_tables.TASKS.BACKGROUND_COLOR_I  , DataTypes.INTEGER, null);
-        tasksTable.addColumn(TasksDB_tables.TASKS.TEXT_COLOR_I        , DataTypes.INTEGER, null);
+                /*String info = "+++++++++++++++++++++++++++++++++\n";
+                info += cls.getName() + "\n";
 
-        tasksTable.addColumn(TasksDB_tables.TASKS.ALLOW_NOTIFICATION_I, DataTypes.INTEGER, null);
-        tasksTable.addColumn(TasksDB_tables.TASKS.TONE_AUDIO_URI_S    , DataTypes.TEXT   , null);
+                for (Field field : fields) {
+                    info += ".\n";
+                    info += field.toString() + "\n";
+                    info += "NAME: " + field.getName() + "\n";
+                    info += "TYPE: " + field.getType().getName() + "\n";
+                    info += "MODIFIERS: " + Modifier.toString(field.getModifiers()) + "\n";
+                }
 
-        tasksTable.addColumn(TasksDB_tables.TASKS.REPETITION_TYPE_I   , DataTypes.INTEGER, null);
-        tasksTable.addColumn(TasksDB_tables.TASKS.PARENT_ID_I         , DataTypes.INTEGER, null);
+                Logger.print(info + "\n");*/
 
-        db.execSQL(tasksTable.getCode());*/
+                /*
+                    private java.lang.Long com.blogspot.gm4s.gmutileexample.Entity0.longField0
+                    NAME: longField0
+                    TYPE: java.lang.Long
+                    MODIFIERS: private
+                */
+
+                for (Field field : fields) {
+                    DataTypes dataType;
+                    Class<?> fieldType = field.getType();
+
+                    if (fieldType == short.class || fieldType == Short.class)
+                        dataType = DataTypes.INTEGER;
+                    else if (fieldType == int.class || fieldType == Integer.class)
+                        dataType = DataTypes.INTEGER;
+                    else if (fieldType == long.class || fieldType == Long.class)
+                        dataType = DataTypes.INTEGER;
+
+                    else if (fieldType == boolean.class || fieldType == Boolean.class)
+                        dataType = DataTypes.INTEGER;
+
+                    else if (fieldType == float.class || fieldType == Float.class)
+                        dataType = DataTypes.REAL;
+                    else if (fieldType == double.class || fieldType == Double.class)
+                        dataType = DataTypes.REAL;
+
+                    else if (fieldType == String.class) dataType = DataTypes.TEXT;
+
+                    else
+                        throw new IllegalArgumentException("only supported field types are: [short, int, long, float, double, String, boolean] for field name: [" + field.getName() + "], given type is: [" + fieldType + "]");
+
+                    dbTable.addColumn(field.getName(), dataType, getFieldConstraints(field));
+                }
+
+                cls = cls.getSuperclass();
+                if (cls == Object.class) break;
+            }
+
+            db.execSQL(dbTable.getCode());
+        }
+
+//        Logger.SET_LOG_DEADLINE(logDeadline);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        /*SqlCommands sqlCommands = new SqlCommands();
+        SqlCommands sqlCommands = new SqlCommands();
 
-        SqlCommands.DropTable tasksTable = sqlCommands.new DropTable(TasksDB_tables.TASKS.TABLE_NAME);
-        db.execSQL(tasksTable.getCode());
+        Class<?>[] entities = databaseEntities();
 
-        onCreate(db);*/
+        for (Class<?> entity : entities) {
+            SqlCommands.DropTable tasksTable = sqlCommands.new DropTable(entity.getSimpleName());
+            try {
+                db.execSQL(tasksTable.getCode());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        onCreate(db);
     }
 
+    /*--- SQL OP ---------------------------------------------------------------------------------*/
 
-    //---------------------------------------------------------------------//
-    public static Cursor query(Context context, String[] columns, String whereClause, String orderBy) {
-        /*TasksDB task_db = new TasksDB(context);
-        SQLiteDatabase db = task_db.getReadableDatabase();
+    /* SELECT */
+    public <T> T select(@NotNull Class<T> entity, @NotNull String whereClause, String orderBy) {
+        T item = select(entity, collectColumns(entity), whereClause, orderBy);
+        return item;
+    }
 
-        *//*select columnsNames from tableName where columnName1=value1 AND columnName1=value1*//*
+    public <T> T select(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
+        JSONArray result = doSelect(entity, specialColumns, whereClause, orderBy);
+
+        T item = new Gson().fromJson(result.toString(), entity);
+        return item;
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, String whereClause, String orderBy) {
+        List<T> lst = select(entity, typeToken, collectColumns(entity), whereClause, orderBy);
+        return lst;
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns, String whereClause, String orderBy) {
+        JSONArray result = doSelect(entity, specialColumns, whereClause, orderBy);
+
+        //Type typeOfT = new TypeToken<List<T>>(){}.getType();
+        Type typeOfT = typeToken.getType();
+        List<T> lst = new Gson().fromJson(result.toString(), typeOfT);
+        return lst;
+    }
+
+    public <T> JSONArray doSelect(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+
+        //select columnsNames from tableName where columnName1=value1 AND columnName1=value1
         Cursor query = db.query(
-                TasksDB_tables.TASKS.TABLE_NAME,
-                columns,
+                entity.getSimpleName(),
+                specialColumns,
                 whereClause,
-                null, null, null,
-                orderBy);
+                null,
+                null,
+                null,
+                orderBy
+        );
 
-        return query;*/
-        return null;
+        JSONArray result = new JSONArray();
+
+        if (specialColumns != null && specialColumns.length > 0) {
+            if (query.moveToFirst()) {
+                do {
+                    JSONObject item = new JSONObject();
+
+                    for (String colName : specialColumns) {
+                        int columnIndex = query.getColumnIndex(colName);
+
+                        Field field = null;
+                        Class<?> cls = entity;
+                        while (cls != null) {
+                            try {
+                                field = cls.getDeclaredField(colName);
+                            } catch (NoSuchFieldException e) {
+                                e.printStackTrace();
+                            }
+
+                            if (field != null) break;
+
+                            cls = cls.getSuperclass();
+                            if (cls == Object.class) break;
+                        }
+
+                        if (field == null) {
+                            Log.e("*** " + Database.class.getSimpleName(), "there is no field with the name: [" + colName + "] in [" + entity.getSimpleName() + "] or its super classes");
+                            continue;
+                        }
+
+                        Class<?> fieldType = field.getType();
+                        Object value = null;
+
+                        if (fieldType == short.class || fieldType == Short.class) {
+                            if (!query.isNull(columnIndex)) {
+                                value = query.getShort(columnIndex);
+                            }
+                        } else if (fieldType == boolean.class || fieldType == Boolean.class) {
+                            if (!query.isNull(columnIndex)) {
+                                value = query.getShort(columnIndex) == 1;
+                            }
+                        } else if (fieldType == int.class || fieldType == Integer.class) {
+                            if (!query.isNull(columnIndex)) {
+                                value = query.getInt(columnIndex);
+                            }
+                        } else if (fieldType == long.class || fieldType == Long.class) {
+                            if (!query.isNull(columnIndex)) {
+                                value = query.getLong(columnIndex);
+                            }
+                        } else if (fieldType == float.class || fieldType == Float.class) {
+                            if (!query.isNull(columnIndex)) {
+                                value = query.getFloat(columnIndex);
+                            }
+                        } else if (fieldType == double.class || fieldType == Double.class) {
+                            if (!query.isNull(columnIndex)) {
+                                value = query.getDouble(columnIndex);
+                            }
+                        } else if (fieldType == String.class) {
+                            if (!query.isNull(columnIndex)) {
+                                value = query.getString(columnIndex);
+                            }
+                        }
+
+                        try {
+                            item.put(field.getName(), value);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    result.put(item);
+
+                } while (query.moveToNext());
+
+                query.close();
+            }
+        }
+
+        return result;
     }
-    public static void insert(Context context, ContentValues values) {
-        /*TasksDB task_db = new TasksDB(context);
-        SQLiteDatabase db = task_db.getWritableDatabase();
 
-        *//*insert into TableName(column1, ..., columnN) values(value1, ..., valuesN)*//*
-        db.insert(TasksDB_tables.TASKS.TABLE_NAME, null, values);*/
+    private <T> String[] collectColumns(@NotNull Class<T> entity) {
+        List<String> specialColumns = new ArrayList<>();
+
+        Class<?> cls = entity;
+        while (cls != null) {
+            Field[] fields = cls.getDeclaredFields();
+
+            for (Field field : fields) {
+                specialColumns.add(field.getName());
+            }
+
+            cls = cls.getSuperclass();
+            if (cls == Object.class) break;
+        }
+
+        return specialColumns.toArray(new String[0]);
     }
-    public static void update(Context context, ContentValues values, String targetID) {
-        /*TasksDB task_db = new TasksDB(context);
-        SQLiteDatabase db = task_db.getWritableDatabase();
 
-        db.update(
-                TasksDB_tables.TASKS.TABLE_NAME,
+
+    /* INSERT */
+    public <T> List<Long> insert(@NotNull List<T> data) {
+        List<Long> ids = new ArrayList<>();
+
+        for (T d : data) {
+            ContentValues values = collectContentValues(d);
+            long id = insert(d.getClass(), values);
+            ids.add(id);
+        }
+
+        return ids;
+    }
+
+    public long insert(Class<?> entity, ContentValues values) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+
+        //insert into TableName(column1, ..., columnN) values(value1, ..., valuesN)
+        long rowID = db.insert(
+                entity.getSimpleName(),
+                null,
+                values
+        );
+
+        return rowID;
+    }
+
+    public <T> ContentValues collectContentValues(@NotNull T data) {
+        Class<?> cls = data.getClass();
+        ContentValues values = new ContentValues();
+
+        while (cls != null) {
+            Field[] fields = cls.getDeclaredFields();
+
+            for (Field field : fields) {
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(data);
+                    Class<?> fieldType = field.getType();
+
+                    if (fieldType == short.class || fieldType == Short.class)
+                        values.put(field.getName(), (Short) value);
+
+                    else if (fieldType == int.class || fieldType == Integer.class)
+                        values.put(field.getName(), (Integer) value);
+
+                    else if (fieldType == long.class || fieldType == Long.class)
+                        values.put(field.getName(), (Long) value);
+
+                    else if (fieldType == boolean.class || fieldType == Boolean.class) {
+                        Integer bv = null;
+                        if (value != null) bv = ((Boolean) value) ? 1 : 0;
+                        values.put(field.getName(), bv);
+                    }
+
+                    else if (fieldType == float.class || fieldType == Float.class)
+                        values.put(field.getName(), (Float) value);
+
+                    else if (fieldType == double.class || fieldType == Double.class)
+                        values.put(field.getName(), (Double) value);
+
+                    else if (fieldType == String.class)
+                        values.put(field.getName(), (String) value);
+
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            cls = cls.getSuperclass();
+            if (cls == Object.class) break;
+        }
+
+        return values;
+    }
+
+
+    /* UPDATE */
+    public <T> int update(@NotNull T data) {
+        Map<String, Object> primaryFieldsValues = new HashMap<>();
+
+        Class<?> cls = data.getClass();
+        while (cls != null) {
+            Field[] fields = cls.getDeclaredFields();
+
+            for (Field field : fields) {
+                Constraints[] constraints = getFieldConstraints(field);
+                if (constraints != null) {
+                    for (Constraints constraint : constraints) {
+                        if (constraint == Constraints.PRIMARY_KEY) {
+                            try {
+                                field.setAccessible(true);
+                                Object value = field.get(data);
+                                primaryFieldsValues.put(field.getName(), value);
+                            } catch (IllegalAccessException e) {
+                                primaryFieldsValues.put(field.getName(), null);
+                            }
+                        }
+                    }
+                }
+            }
+
+            cls = cls.getSuperclass();
+            if (cls == Object.class) break;
+        }
+
+        if (primaryFieldsValues.size() > 0) {
+            String whereClause = "";
+            Set<Map.Entry<String, Object>> entries = primaryFieldsValues.entrySet();
+            for (Map.Entry<String, Object> entry : entries) {
+                whereClause += entry.getKey() + "=" + entry.getValue();
+            }
+            return update(data, whereClause);
+        } else {
+            return 0;
+        }
+    }
+
+    public <T> int update(@NotNull T data, String whereClause) {
+        List<T> dataList = new ArrayList<>();
+        dataList.add(data);
+        return update(dataList, whereClause);
+    }
+
+    public <T> int update(@NotNull List<T> data, String whereClause) {
+        int r = 0;
+        for (T d : data) {
+            ContentValues values = collectContentValues(d);
+            int r0 = update(d.getClass(), values, whereClause);
+            r += r0;
+        }
+        return r;
+    }
+
+    public int update(Class<?> entity, ContentValues values, String whereClause) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+
+        return db.update(
+                entity.getSimpleName(),
                 values,
-                TasksDB_tables.TASKS._ID + "=?",
-                new String[] { targetID }
-        );*/
+                whereClause,
+                null
+        );
     }
-    public static void delete(Context context, int taskID) {
-        /*TasksDB task_db = new TasksDB(context);
-        SQLiteDatabase db = task_db.getWritableDatabase();
 
-        db.delete(
-                TasksDB_tables.TASKS.TABLE_NAME,
-                TasksDB_tables.TASKS._ID + "=?",
-                new String[] { taskID + "" }
-        );*/
+
+    /* DELETE */
+    public <T> int delete(@NotNull T data) {
+        Map<String, Object> primaryFieldsValues = new HashMap<>();
+
+        Class<?> cls = data.getClass();
+        while (cls != null) {
+            Field[] fields = cls.getDeclaredFields();
+
+            for (Field field : fields) {
+                Constraints[] constraints = getFieldConstraints(field);
+                if (constraints != null) {
+                    for (Constraints constraint : constraints) {
+                        if (constraint == Constraints.PRIMARY_KEY) {
+                            try {
+                                field.setAccessible(true);
+                                Object value = field.get(data);
+                                primaryFieldsValues.put(field.getName(), value);
+                            } catch (IllegalAccessException e) {
+                                primaryFieldsValues.put(field.getName(), null);
+                            }
+                        }
+                    }
+                }
+            }
+
+            cls = cls.getSuperclass();
+            if (cls == Object.class) break;
+        }
+
+        if (primaryFieldsValues.size() > 0) {
+            String whereClause = "";
+            Set<Map.Entry<String, Object>> entries = primaryFieldsValues.entrySet();
+            for (Map.Entry<String, Object> entry : entries) {
+                whereClause += entry.getKey() + "=" + entry.getValue();
+            }
+            return delete(data.getClass(), whereClause);
+        } else {
+            return 0;
+        }
+    }
+
+    public int delete(Class<?> entity, String whereClause) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+
+        return db.delete(
+                entity.getSimpleName(),
+                whereClause,
+                null
+        );
     }
 }

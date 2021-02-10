@@ -1,15 +1,20 @@
 package com.blogspot.gm4s.gmutileexample
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import com.blogspot.gm4s1.gmutils.MyToast
 import com.blogspot.gm4s1.gmutils.database.BaseDatabase
+import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.Constraints
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.RuntimeException
 
@@ -41,22 +46,102 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "test original toast", Toast.LENGTH_LONG).show()
         }
 
-        btn5.text = "db"
+        btn5.text = "test BaseDatabase class"
         btn5.setOnClickListener {
-            db(this, data1::class.java)
+            val db = db(this)
+
+            db.insert(
+                Entity2::class.java,
+                ContentValues().apply {
+                    this.put("intField2", 2212122)
+                }
+            )
+
+            db.insert(
+                Entity2::class.java,
+                ContentValues().apply {
+                    this.put("intField2", null as? Int)
+                }
+            )
+
+            db.insert(listOf(
+                Entity1(
+                    110, 120, 130f, 140.0, "150", true, null, null, null, null, null, null
+                ).apply {
+                    longField0 = 7654356786543567
+                }
+            ))
+
+            db.insert(listOf(
+                Entity1(
+                    111, 121, 131f, 141.0, "151", true, 171, null, 191f, null, "201", null
+                )
+            ))
+
+            var query1 = db.select(
+                Entity1::class.java,
+                object : TypeToken<List<Entity1>>() {},
+                null,
+                null
+            )
+
+            val query2 = db.select(
+                Entity2::class.java,
+                object : TypeToken<List<Entity2>>() {},
+                null,
+                null
+            )
+
+            Log.e("****", query1.toString())
+            Log.e("****", query1.last().intField0.toString())
+            Log.e("****", query2.toString())
+            Log.e("****", query2.last().intField2?.toString() ?: "")
+
+            db.update(
+                Entity1(
+                    111, 565665, 988998f, 123456.0, "mncbnmmnbv bvbv", true, 17231, null, 12391f, null, "20231", null
+                )
+            )
+
+            query1 = db.select(
+                Entity1::class.java,
+                object : TypeToken<List<Entity1>>() {},
+                null,
+                null
+            )
+
+            Log.e("****", query1.toString())
+            Log.e("****", query1.last().intField0.toString())
+
+            db.delete(
+                Entity1(
+                    111, 1232231, 13231f, 14231.0, "15231", true, 17231, null, 12391f, null, "20231", null
+                )
+            )
+
+            query1 = db.select(
+                Entity1::class.java,
+                object : TypeToken<List<Entity1>>() {},
+                null,
+                null
+            )
+
+            Log.e("****", query1.toString())
+            Log.e("****", query1.last().intField0.toString())
         }
 
     }
 
 }
 
-open class data0(
+open class Entity0(
     val intField0: Int,
 ) {
     var longField0: Long? = null
 }
 
-data class data1(
+data class Entity1(
+    @PrimaryKey
     val intField1: Int,
     val longField: Long,
 
@@ -67,16 +152,40 @@ data class data1(
 
     val booleanField: Boolean,
 
-    val data2Field: data2
-) : data0(intField1) {
+    val intField1Nullable: Int?,
+    val longFieldNullable: Long?,
+
+    val floatFieldNullable: Float?,
+    val doubleFieldNullable: Double?,
+
+    val stringFieldNullable: String?,
+
+    val booleanFieldNullable: Boolean?,
+
+) : Entity0(intField1) {
 
     var longField1: Long? = null
 }
 
-data class data2(
-    val intField2: Int
+data class Entity2(
+    @PrimaryKey
+    val intField2: Int?
 )
 
-class db(context: Context?, dataClass: Class<data1>) : BaseDatabase<data1>(context, dataClass) {
+class db(context: Context) : BaseDatabase(context) {
+    override fun databaseName(): String {
+        return "bd";
+    }
+
+    override fun databaseVersion(): Int {
+        return 13;
+    }
+
+    override fun databaseEntities(): Array<Class<*>> {
+        return arrayOf(
+            Entity1::class.java,
+            Entity2::class.java
+        )
+    }
 
 }
