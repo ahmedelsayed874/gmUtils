@@ -10,6 +10,7 @@ import android.util.Log;
 import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
 import com.blogspot.gm4s1.gmutils.database.annotations.AutoIncrement;
 import com.blogspot.gm4s1.gmutils.database.annotations.Default;
+import com.blogspot.gm4s1.gmutils.database.annotations.Entity;
 import com.blogspot.gm4s1.gmutils.database.annotations.Not_Null;
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey;
 import com.blogspot.gm4s1.gmutils.database.annotations.Unique;
@@ -161,7 +162,18 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         for (Class<?> entity : entities) {
             Class<?> cls = entity;
 
-            SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(cls.getSimpleName());
+            String tableName = cls.getSimpleName();
+            Annotation[] annotations = cls.getDeclaredAnnotations();
+            if (annotations != null && annotations.length > 0) {
+                for (Annotation annotation : annotations) {
+                    if (annotation.annotationType() == Entity.class) {
+                        Entity anEntity = cls.getAnnotation(Entity.class);
+                        tableName = anEntity.tableName();
+                    }
+                }
+            }
+
+            SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(tableName);
 
             while (cls != null) {
                 Field[] fields = cls.getDeclaredFields();
@@ -437,9 +449,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                         Integer bv = null;
                         if (value != null) bv = ((Boolean) value) ? 1 : 0;
                         values.put(field.getName(), bv);
-                    }
-
-                    else if (fieldType == float.class || fieldType == Float.class)
+                    } else if (fieldType == float.class || fieldType == Float.class)
                         values.put(field.getName(), (Float) value);
 
                     else if (fieldType == double.class || fieldType == Double.class)
