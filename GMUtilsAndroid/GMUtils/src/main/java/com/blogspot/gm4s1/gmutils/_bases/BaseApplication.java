@@ -16,7 +16,9 @@ import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.storage.StorageManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +34,13 @@ import java.util.Set;
  * +201022663988
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
+    public interface Callbacks {
+        void onApplicationStartedFirstActivity();
+
+        void onApplicationFinishedLastActivity();
+
+    }
+
     public interface GlobalVariableDisposal {
         void dispose();
     }
@@ -84,6 +93,8 @@ public abstract class BaseApplication extends Application implements Application
 
     private GlobalVariables globalVariables = null;
     private MessagingCenter messagingCenter = null;
+
+    private Map<String, Callbacks> mCallbacks;
 
     //----------------------------------------------------------------------------------------------
 
@@ -176,6 +187,19 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
+    public void addCallback(String name, Callbacks callbacks) {
+        if (mCallbacks == null) mCallbacks = new HashMap<>();
+        mCallbacks.put(name, callbacks);
+    }
+
+    public void removeCallback(String name) {
+        if (mCallbacks == null) return;
+        mCallbacks.remove(name);
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
     @Override
     public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
         activityCount++;
@@ -259,6 +283,9 @@ public abstract class BaseApplication extends Application implements Application
 
         if (messagingCenter != null) messagingCenter.clearObservers();
         messagingCenter = null;
+
+        if (mCallbacks != null) mCallbacks.clear();
+        mCallbacks = null;
     }
 
 }

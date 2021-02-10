@@ -227,7 +227,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         onCreate(db);
     }
 
-    /*--- SQL OP ---------------------------------------------------------------------------------*/
+    //region--- SQL OP -----------------------------------------------------------------------------
 
     /* SELECT */
     public <T> T select(@NotNull Class<T> entity, @NotNull String whereClause, String orderBy) {
@@ -566,4 +566,5 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 null
         );
     }
+    //endregion--- SQL OP -----------------------------------------------------------------------------
 }
