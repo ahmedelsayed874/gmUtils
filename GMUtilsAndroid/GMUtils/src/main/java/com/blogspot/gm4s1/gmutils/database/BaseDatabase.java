@@ -12,7 +12,8 @@ import com.blogspot.gm4s1.gmutils.database.annotations.Default;
 import com.blogspot.gm4s1.gmutils.database.annotations.Not_Null;
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey;
 import com.blogspot.gm4s1.gmutils.database.annotations.Unique;
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.Constraints;
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.Constraint;
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.ConstraintKeywords;
 import com.blogspot.gm4s1.gmutils.database.sqlitecommands.DataTypes;
 import com.blogspot.gm4s1.gmutils.database.sqlitecommands.SqlCommands;
 import com.google.gson.Gson;
@@ -101,33 +102,35 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     protected abstract Class<?>[] databaseEntities();
 
     @Nullable
-    private Constraints[] getFieldConstraints(@NotNull Field field) {
-        List<Constraints> constraints = new ArrayList<>();
+    private Constraint[] getFieldConstraints(@NotNull Field field) {
+        List<Constraint> constraints = new ArrayList<>();
 
         Annotation[] annotations = field.getDeclaredAnnotations();
 
         if (annotations != null && annotations.length > 0) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == PrimaryKey.class) {
-                    constraints.add(Constraints.PRIMARY_KEY);
+                    constraints.add(new Constraint(ConstraintKeywords.PRIMARY_KEY));
 
                 } else if (annotation.annotationType() == AutoIncrement.class) {
-                    constraints.add(Constraints.AUTOINCREMENT);
+                    constraints.add(new Constraint(ConstraintKeywords.AUTOINCREMENT));
 
                 } else if (annotation.annotationType() == Not_Null.class) {
-                    constraints.add(Constraints.NOT_NULL);
+                    constraints.add(new Constraint(ConstraintKeywords.NOT_NULL));
 
                 } else if (annotation.annotationType() == Default.class) {
-                    constraints.add(Constraints.DEFAULT);
+                    Default aDefault = field.getAnnotation(Default.class);
+                    String defVal = aDefault.value();
+                    constraints.add(new Constraint(ConstraintKeywords.DEFAULT, defVal));
 
                 } else if (annotation.annotationType() == Unique.class) {
-                    constraints.add(Constraints.UNIQUE);
+                    constraints.add(new Constraint(ConstraintKeywords.UNIQUE));
                 }
             }
         }
 
         if (constraints.size() > 0)
-            return constraints.toArray(new Constraints[0]);
+            return constraints.toArray(new Constraint[0]);
         else
             return null;
     }
@@ -453,10 +456,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             Field[] fields = cls.getDeclaredFields();
 
             for (Field field : fields) {
-                Constraints[] constraints = getFieldConstraints(field);
+                Constraint[] constraints = getFieldConstraints(field);
                 if (constraints != null) {
-                    for (Constraints constraint : constraints) {
-                        if (constraint == Constraints.PRIMARY_KEY) {
+                    for (Constraint constraint : constraints) {
+                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
                             try {
                                 field.setAccessible(true);
                                 Object value = field.get(data);
@@ -522,10 +525,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             Field[] fields = cls.getDeclaredFields();
 
             for (Field field : fields) {
-                Constraints[] constraints = getFieldConstraints(field);
+                Constraint[] constraints = getFieldConstraints(field);
                 if (constraints != null) {
-                    for (Constraints constraint : constraints) {
-                        if (constraint == Constraints.PRIMARY_KEY) {
+                    for (Constraint constraint : constraints) {
+                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
                             try {
                                 field.setAccessible(true);
                                 Object value = field.get(data);

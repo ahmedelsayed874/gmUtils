@@ -10,13 +10,10 @@ import android.util.Log
 import android.widget.Toast
 import com.blogspot.gm4s1.gmutils.MyToast
 import com.blogspot.gm4s1.gmutils.database.BaseDatabase
+import com.blogspot.gm4s1.gmutils.database.annotations.Default
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.Constraints
-import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog
-import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.RuntimeException
 
 class MainActivity : AppCompatActivity() {
 
@@ -115,7 +112,7 @@ class MainActivity : AppCompatActivity() {
 
             db.delete(
                 Entity1(
-                    111, 1232231, 13231f, 14231.0, "15231", true, 17231, null, 12391f, null, "20231", null
+                    111, 1232231, 13231f, 14231.0, "15231", true, 17231, null, 12391f, null, null, null
                 )
             )
 
@@ -158,6 +155,7 @@ data class Entity1(
     val floatFieldNullable: Float?,
     val doubleFieldNullable: Double?,
 
+    @Default("default of stringFieldNullable")
     val stringFieldNullable: String?,
 
     val booleanFieldNullable: Boolean?,

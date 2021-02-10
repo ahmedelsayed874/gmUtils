@@ -41,7 +41,7 @@ public class SqlCommands {
             super(tableName);
         }
 
-        public void addColumn(String name, DataTypes dataType, Constraints[] constraints){
+        public void addColumn(String name, DataTypes dataType, Constraint[] constraints){
             columns.add(new Column(name, dataType, constraints));
         }
 

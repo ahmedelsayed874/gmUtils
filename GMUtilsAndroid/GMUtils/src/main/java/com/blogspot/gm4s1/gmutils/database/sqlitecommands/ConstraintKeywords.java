@@ -12,7 +12,7 @@ package com.blogspot.gm4s1.gmutils.database.sqlitecommands;
  * +201022663988
  */
 
-public enum Constraints {
+public enum ConstraintKeywords {
     /**
      Ensures that a column cannot have NULL value.
      */

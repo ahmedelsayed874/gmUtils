@@ -15,9 +15,9 @@ package com.blogspot.gm4s1.gmutils.database.sqlitecommands;
 public class Column implements ICommand {
     String name;
     DataTypes dataType;
-    Constraints[] constraints;
+    Constraint[] constraints;
 
-    public Column(String name, DataTypes dataType, Constraints[] constraints){
+    public Column(String name, DataTypes dataType, Constraint[] constraints){
         this.name = name;
         this.dataType = dataType;
         this.constraints = constraints;
@@ -28,7 +28,7 @@ public class Column implements ICommand {
         String contraintstr = " ";
         if (constraints != null) {
             for (int i = 0; i < constraints.length; i++) {
-                contraintstr += constraints[i].getName() + " ";
+                contraintstr += constraints[i].getCode() + " ";
             }
         }
         return name + " " + dataType.name() + contraintstr;
