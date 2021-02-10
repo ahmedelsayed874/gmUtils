@@ -46,6 +46,10 @@ public abstract class BaseApplication extends Application implements Application
             this.globalInstances.put(key, instance);
         }
 
+        public void add(String key, GlobalVariableDisposal instance) {
+            this.globalInstances.put(key, instance);
+        }
+
         public Object retrieve(String key) {
             return this.globalInstances.get(key);
         }
