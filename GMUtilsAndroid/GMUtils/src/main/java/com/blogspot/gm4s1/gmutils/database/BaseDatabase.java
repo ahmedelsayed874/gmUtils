@@ -11,6 +11,7 @@ import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
 import com.blogspot.gm4s1.gmutils.database.annotations.AutoIncrement;
 import com.blogspot.gm4s1.gmutils.database.annotations.Default;
 import com.blogspot.gm4s1.gmutils.database.annotations.Entity;
+import com.blogspot.gm4s1.gmutils.database.annotations.Ignore;
 import com.blogspot.gm4s1.gmutils.database.annotations.Not_Null;
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey;
 import com.blogspot.gm4s1.gmutils.database.annotations.Unique;
@@ -108,6 +109,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         }
     }
 
+    //region --- help methods ----------------------------------------------------------------------
     @NotNull
     protected abstract String databaseName();
 
@@ -149,6 +151,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         else
             return null;
     }
+    //endregion --- help methods -------------------------------------------------------------------
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -178,51 +181,45 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             while (cls != null) {
                 Field[] fields = cls.getDeclaredFields();
 
-                /*String info = "+++++++++++++++++++++++++++++++++\n";
-                info += cls.getName() + "\n";
-
                 for (Field field : fields) {
-                    info += ".\n";
-                    info += field.toString() + "\n";
-                    info += "NAME: " + field.getName() + "\n";
-                    info += "TYPE: " + field.getType().getName() + "\n";
-                    info += "MODIFIERS: " + Modifier.toString(field.getModifiers()) + "\n";
-                }
+                    boolean ignore = false;
+                    Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
+                    if (fieldAnnotations != null && fieldAnnotations.length > 0) {
+                        for (Annotation annotation : fieldAnnotations) {
+                            if (annotation.annotationType() == Ignore.class) {
+                                ignore = true;
+                                break;
+                            }
+                        }
+                    }
 
-                Logger.print(info + "\n");*/
+                    if (!ignore) {
+                        DataTypes dataType;
+                        Class<?> fieldType = field.getType();
 
-                /*
-                    private java.lang.Long com.blogspot.gm4s.gmutileexample.Entity0.longField0
-                    NAME: longField0
-                    TYPE: java.lang.Long
-                    MODIFIERS: private
-                */
+                        if (fieldType == short.class || fieldType == Short.class)
+                            dataType = DataTypes.INTEGER;
+                        else if (fieldType == int.class || fieldType == Integer.class)
+                            dataType = DataTypes.INTEGER;
+                        else if (fieldType == long.class || fieldType == Long.class)
+                            dataType = DataTypes.INTEGER;
 
-                for (Field field : fields) {
-                    DataTypes dataType;
-                    Class<?> fieldType = field.getType();
+                        else if (fieldType == boolean.class || fieldType == Boolean.class)
+                            dataType = DataTypes.INTEGER;
 
-                    if (fieldType == short.class || fieldType == Short.class)
-                        dataType = DataTypes.INTEGER;
-                    else if (fieldType == int.class || fieldType == Integer.class)
-                        dataType = DataTypes.INTEGER;
-                    else if (fieldType == long.class || fieldType == Long.class)
-                        dataType = DataTypes.INTEGER;
+                        else if (fieldType == float.class || fieldType == Float.class)
+                            dataType = DataTypes.REAL;
+                        else if (fieldType == double.class || fieldType == Double.class)
+                            dataType = DataTypes.REAL;
 
-                    else if (fieldType == boolean.class || fieldType == Boolean.class)
-                        dataType = DataTypes.INTEGER;
+                        else if (fieldType == String.class) dataType = DataTypes.TEXT;
 
-                    else if (fieldType == float.class || fieldType == Float.class)
-                        dataType = DataTypes.REAL;
-                    else if (fieldType == double.class || fieldType == Double.class)
-                        dataType = DataTypes.REAL;
+                        else {
+                            throw new IllegalArgumentException("only supported field types are: [short, int, long, float, double, String, boolean] for field name: [" + field.getName() + "], given type is: [" + fieldType + "]");
+                        }
 
-                    else if (fieldType == String.class) dataType = DataTypes.TEXT;
-
-                    else
-                        throw new IllegalArgumentException("only supported field types are: [short, int, long, float, double, String, boolean] for field name: [" + field.getName() + "], given type is: [" + fieldType + "]");
-
-                    dbTable.addColumn(field.getName(), dataType, getFieldConstraints(field));
+                        dbTable.addColumn(field.getName(), dataType, getFieldConstraints(field));
+                    }
                 }
 
                 cls = cls.getSuperclass();
@@ -386,7 +383,20 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             Field[] fields = cls.getDeclaredFields();
 
             for (Field field : fields) {
-                specialColumns.add(field.getName());
+                boolean ignore = false;
+                Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
+                if (fieldAnnotations != null && fieldAnnotations.length > 0) {
+                    for (Annotation annotation : fieldAnnotations) {
+                        if (annotation.annotationType() == Ignore.class) {
+                            ignore = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!ignore) {
+                    specialColumns.add(field.getName());
+                }
             }
 
             cls = cls.getSuperclass();
@@ -431,6 +441,19 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             Field[] fields = cls.getDeclaredFields();
 
             for (Field field : fields) {
+                boolean ignore = false;
+                Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
+                if (fieldAnnotations != null && fieldAnnotations.length > 0) {
+                    for (Annotation annotation : fieldAnnotations) {
+                        if (annotation.annotationType() == Ignore.class) {
+                            ignore = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (ignore) continue;
+
                 try {
                     field.setAccessible(true);
                     Object value = field.get(data);

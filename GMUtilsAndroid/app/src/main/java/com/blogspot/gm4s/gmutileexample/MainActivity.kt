@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.blogspot.gm4s1.gmutils.MyToast
 import com.blogspot.gm4s1.gmutils.database.BaseDatabase
 import com.blogspot.gm4s1.gmutils.database.annotations.Default
+import com.blogspot.gm4s1.gmutils.database.annotations.Ignore
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
@@ -162,6 +163,7 @@ data class Entity1(
 
 ) : Entity0(intField1) {
 
+    @Ignore
     var longField1: Long? = null
 }
 
@@ -176,7 +178,7 @@ class db(context: Context) : BaseDatabase(context) {
     }
 
     override fun databaseVersion(): Int {
-        return 13;
+        return 15;
     }
 
     override fun databaseEntities(): Array<Class<*>> {
