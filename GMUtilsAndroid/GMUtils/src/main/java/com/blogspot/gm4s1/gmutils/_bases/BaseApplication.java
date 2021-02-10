@@ -18,6 +18,7 @@ import com.blogspot.gm4s1.gmutils.storage.StorageManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -31,6 +32,10 @@ import java.util.Map;
  * +201022663988
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
+    public interface GlobalVariableDisposal {
+        void dispose();
+    }
+
     public static final class GlobalVariables {
         private final Map<String, Object> globalInstances = new HashMap<>();
 
@@ -46,10 +51,19 @@ public abstract class BaseApplication extends Application implements Application
         }
 
         public void remove(String key) {
-            this.globalInstances.remove(key);
+            Object o = this.globalInstances.remove(key);
+            if (o instanceof GlobalVariableDisposal) {
+                ((GlobalVariableDisposal) o).dispose();
+            }
         }
 
         public void clear() {
+            Set<Map.Entry<String, Object>> entries = this.globalInstances.entrySet();
+            for (Map.Entry<String, Object> entry : entries) {
+                if (entry.getValue() instanceof GlobalVariableDisposal) {
+                    ((GlobalVariableDisposal) entry.getValue()).dispose();
+                }
+            }
             this.globalInstances.clear();
         }
 
