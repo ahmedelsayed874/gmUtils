@@ -103,8 +103,9 @@ public class Logger {
         FILE_CONTENT_ENCRYPT_KEY = encryptKey;
     }
 
-    public static void SET_FILE_CONTENT_ENCRYPT_DEADLINE(DateOp dateOp) {
+    public static void SET_FILE_CONTENT_ENCRYPT_DEADLINE(int encryptKey, DateOp dateOp) {
         FILE_CONTENT_ENCRYPT_DEADLINE = dateOp;
+        FILE_CONTENT_ENCRYPT_KEY = encryptKey;
     }
     //endregion set encrypting file content deadline
 
