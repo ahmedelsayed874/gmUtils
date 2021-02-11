@@ -1,9 +1,12 @@
 package com.blogspot.gm4s1.gmutils._bases.adapters;
 
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+
+import com.blogspot.gm4s1.gmutils.utils.UIUtils;
 
 import java.util.List;
 
@@ -117,7 +120,17 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         private int itemPosition;
         private T item;
 
-        public ViewHolder(View view) {}
+        public ViewHolder(View view) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                UIUtils.createInstance().setViewDetachedObserver(view, new Runnable() {
+                    @Override
+                    public void run() {
+                        item = null;
+                        onDispose();
+                    }
+                });
+            }
+        }
 
         private void setValues(T item, int position) {
             this.itemPosition = position;
@@ -132,5 +145,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         protected T getItem() {
             return item;
         }
+
+        protected abstract void onDispose();
     }
 }
