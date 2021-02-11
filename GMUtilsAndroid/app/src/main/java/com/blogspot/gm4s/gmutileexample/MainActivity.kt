@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
             db.insert(listOf(
                 Entity1(
-                    110, 120, 130f, 140.0, "150", true, null, null, null, null, null, null
+                    "123", 110, 120, 130f, 140.0, "150", true, null, null, null, null, null, null
                 ).apply {
                     longField0 = 7654356786543567
                 }
@@ -72,9 +72,15 @@ class MainActivity : AppCompatActivity() {
 
             db.insert(listOf(
                 Entity1(
-                    111, 121, 131f, 141.0, "151", true, 171, null, 191f, null, "201", null
+                    "124", 111, 121, 131f, 141.0, "151", true, 171, null, 191f, null, "201", null
                 )
             ))
+
+            db.insert(listOf(
+                Entity1(
+                    "124", 111, 121, 131f, 141.0, "151", true, 171, null, 191f, null, "201", null
+                )
+            ), true)
 
             var query1 = db.select(
                 Entity1::class.java,
@@ -97,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
             db.update(
                 Entity1(
-                    111, 565665, 988998f, 123456.0, "mncbnmmnbv bvbv", true, 17231, null, 12391f, null, "20231", null
+                    "124", 111, 565665, 988998f, 123456.0, "mncbnmmnbv bvbv", true, 17231, null, 12391f, null, "20231", null
                 )
             )
 
@@ -113,9 +119,17 @@ class MainActivity : AppCompatActivity() {
 
             db.delete(
                 Entity1(
-                    111, 1232231, 13231f, 14231.0, "15231", true, 17231, null, 12391f, null, null, null
+                    "124", 111, 1232231, 13231f, 14231.0, "15231", true, 17231, null, 12391f, null, null, null
                 )
             )
+
+            db.delete(Entity1::class.java, "${Entity1::id.name}=123")
+
+            db.insert(listOf(
+                Entity1(
+                    "1240421", 111, 121, 131f, 141.0, "151", true, 171, null, 191f, null, "201", null
+                )
+            ))
 
             query1 = db.select(
                 Entity1::class.java,
@@ -151,6 +165,8 @@ open class Entity0(
 
 data class Entity1(
     @PrimaryKey
+    val id: String,
+
     val intField1: Int,
     val longField: Long,
 
@@ -180,16 +196,17 @@ data class Entity1(
 
 data class Entity2(
     @PrimaryKey
+    val id: String,
     val intField2: Int?
 )
 
 class db(context: Context) : BaseDatabase(context) {
     override fun databaseName(): String {
-        return "bd";
+        return "db";
     }
 
     override fun databaseVersion(): Int {
-        return 15;
+        return 16;
     }
 
     override fun databaseEntities(): Array<Class<*>> {

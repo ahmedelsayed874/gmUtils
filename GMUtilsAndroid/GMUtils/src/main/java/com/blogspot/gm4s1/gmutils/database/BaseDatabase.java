@@ -492,7 +492,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
-        String sql = "SELECT COUNT(*) as count FROM "+ entity.getSimpleName();
+        String sql = "SELECT COUNT(*) as count FROM " + entity.getSimpleName();
         if (!TextUtils.isEmpty(whereClause)) {
             sql += " WHERE " + whereClause;
         }
@@ -512,11 +512,15 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     /* INSERT */
     public <T> List<Long> insert(@NotNull List<T> data) {
+        return insert(data, false);
+    }
+
+    public <T> List<Long> insert(@NotNull List<T> data, boolean forceReplace) {
         List<Long> ids = new ArrayList<>();
 
         for (T d : data) {
-            ContentValues values = collectContentValues(d);
-            long id = insert(d.getClass(), values);
+            ContentValues values = convertDataToContentValues(d);
+            long id = insert(d.getClass(), values, forceReplace);
             ids.add(id);
         }
 
@@ -524,6 +528,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public long insert(Class<?> entity, ContentValues values) {
+        return insert(entity, values, false);
+    }
+
+    public long insert(Class<?> entity, ContentValues values, boolean forceReplace) {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
 
         //insert into TableName(column1, ..., columnN) values(value1, ..., valuesN)
@@ -533,12 +541,56 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 values
         );
 
+        if (forceReplace && rowID < 0) {
+            String whereClause = "";
+            String[] pfs = getPrimaryFields(entity);
+            Map<String, Object> primaryFieldsValues = new HashMap<>();
+            for (String pf : pfs) {
+                primaryFieldsValues.put(pf, values.get(pf));
+            }
+            whereClause = generateWhereClauseFromPrimaryFields(primaryFieldsValues);
+            int deleted = delete(entity, whereClause);
+            if (deleted > 0) {
+                db = mDatabase.getReadableDatabase();
+                rowID = db.insert(
+                        entity.getSimpleName(),
+                        null,
+                        values
+                );
+            }
+        }
+
         db.close();
 
         return rowID;
     }
 
-    public <T> ContentValues collectContentValues(@NotNull T data) {
+    private String[] getPrimaryFields(Class<?> entity) {
+        List<String> primaryFields = new ArrayList<>();
+
+        Class<?> cls = entity;
+        while (cls != null) {
+            Field[] fields = cls.getDeclaredFields();
+
+            for (Field field : fields) {
+                Constraint[] constraints = getFieldConstraints(field);
+                if (constraints != null) {
+                    for (Constraint constraint : constraints) {
+                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
+                            primaryFields.add(field.getName());
+                        }
+                    }
+                }
+            }
+
+            cls = cls.getSuperclass();
+            if (cls == Object.class) break;
+        }
+
+        return primaryFields.toArray(new String[0]);
+    }
+
+    public <T> ContentValues convertDataToContentValues(@NotNull T data) {
         Class<?> cls = data.getClass();
         ContentValues values = new ContentValues();
 
@@ -601,39 +653,9 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     /* UPDATE */
     public <T> int update(@NotNull T data) {
-        Map<String, Object> primaryFieldsValues = new HashMap<>();
+        String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
 
-        Class<?> cls = data.getClass();
-        while (cls != null) {
-            Field[] fields = cls.getDeclaredFields();
-
-            for (Field field : fields) {
-                Constraint[] constraints = getFieldConstraints(field);
-                if (constraints != null) {
-                    for (Constraint constraint : constraints) {
-                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
-                            try {
-                                field.setAccessible(true);
-                                Object value = field.get(data);
-                                primaryFieldsValues.put(field.getName(), value);
-                            } catch (IllegalAccessException e) {
-                                primaryFieldsValues.put(field.getName(), null);
-                            }
-                        }
-                    }
-                }
-            }
-
-            cls = cls.getSuperclass();
-            if (cls == Object.class) break;
-        }
-
-        if (primaryFieldsValues.size() > 0) {
-            String whereClause = "";
-            Set<Map.Entry<String, Object>> entries = primaryFieldsValues.entrySet();
-            for (Map.Entry<String, Object> entry : entries) {
-                whereClause += entry.getKey() + "=" + entry.getValue();
-            }
+        if (!TextUtils.isEmpty(whereClause)) {
             return update(data, whereClause);
         } else {
             return 0;
@@ -649,7 +671,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     public <T> int update(@NotNull List<T> data, String whereClause) {
         int r = 0;
         for (T d : data) {
-            ContentValues values = collectContentValues(d);
+            ContentValues values = convertDataToContentValues(d);
             int r0 = update(d.getClass(), values, whereClause);
             r += r0;
         }
@@ -671,9 +693,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return c;
     }
 
-
-    /* DELETE */
-    public <T> int delete(@NotNull T data) {
+    private <T> Map<String, Object> getPrimaryFieldsValues(@NotNull T data) {
         Map<String, Object> primaryFieldsValues = new HashMap<>();
 
         Class<?> cls = data.getClass();
@@ -701,12 +721,28 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             if (cls == Object.class) break;
         }
 
-        if (primaryFieldsValues.size() > 0) {
-            String whereClause = "";
-            Set<Map.Entry<String, Object>> entries = primaryFieldsValues.entrySet();
-            for (Map.Entry<String, Object> entry : entries) {
-                whereClause += entry.getKey() + "=" + entry.getValue();
+        return primaryFieldsValues;
+    }
+
+    private String generateWhereClauseFromPrimaryFields(Map<String, Object> primaryFieldsValues) {
+        String whereClause = "";
+        Set<Map.Entry<String, Object>> entries = primaryFieldsValues.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            Object value = entry.getValue();
+            if (value != null && value.getClass() == String.class) {
+                whereClause += entry.getKey() + "='" + value + "'";
+            } else {
+                whereClause += entry.getKey() + "=" + value;
             }
+        }
+        return whereClause;
+    }
+
+    /* DELETE */
+    public <T> int delete(@NotNull T data) {
+        String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
+
+        if (!TextUtils.isEmpty(whereClause)) {
             return delete(data.getClass(), whereClause);
         } else {
             return 0;
