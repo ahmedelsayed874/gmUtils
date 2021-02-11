@@ -119,6 +119,8 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     @NotNull
     protected abstract Class<?>[] databaseEntities();
 
+    private int primaryKeysCount = 0;
+
     @Nullable
     private Constraint[] getFieldConstraints(@NotNull Field field) {
         List<Constraint> constraints = new ArrayList<>();
@@ -129,6 +131,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == PrimaryKey.class) {
                     constraints.add(new Constraint(ConstraintKeywords.PRIMARY_KEY));
+                    primaryKeysCount++;
 
                 } else if (annotation.annotationType() == AutoIncrement.class) {
                     constraints.add(new Constraint(ConstraintKeywords.AUTOINCREMENT));
@@ -167,6 +170,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             Class<?> cls = entity;
 
             String tableName = getTableName(cls);
+            primaryKeysCount = 0;
 
             SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(tableName);
 
@@ -216,6 +220,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
                 cls = cls.getSuperclass();
                 if (cls == Object.class) break;
+            }
+
+            if (primaryKeysCount == 0) {
+                throw new IllegalStateException(entity.getSimpleName() + " class doesn't contains primary key ... use the annotation: " + PrimaryKey.class.getName());
             }
 
             db.execSQL(dbTable.getCode());
