@@ -166,16 +166,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         for (Class<?> entity : entities) {
             Class<?> cls = entity;
 
-            String tableName = cls.getSimpleName();
-            Annotation[] annotations = cls.getDeclaredAnnotations();
-            if (annotations != null && annotations.length > 0) {
-                for (Annotation annotation : annotations) {
-                    if (annotation.annotationType() == Entity.class) {
-                        Entity anEntity = cls.getAnnotation(Entity.class);
-                        tableName = anEntity.tableName();
-                    }
-                }
-            }
+            String tableName = getTableName(cls);
 
             SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(tableName);
 
@@ -240,7 +231,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         Class<?>[] entities = databaseEntities();
 
         for (Class<?> entity : entities) {
-            SqlCommands.DropTable tasksTable = sqlCommands.new DropTable(entity.getSimpleName());
+            SqlCommands.DropTable tasksTable = sqlCommands.new DropTable(getTableName(entity));
             try {
                 db.execSQL(tasksTable.getCode());
             } catch (Exception e) {
@@ -249,6 +240,22 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         }
 
         onCreate(db);
+    }
+
+    private String getTableName(Class<?> entity) {
+        String tableName = entity.getSimpleName();
+
+        Annotation[] annotations = entity.getDeclaredAnnotations();
+        if (annotations != null && annotations.length > 0) {
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType() == Entity.class) {
+                    Entity anEntity = entity.getAnnotation(Entity.class);
+                    tableName = anEntity.tableName();
+                }
+            }
+        }
+
+        return tableName;
     }
 
     //region--- SQL OP -----------------------------------------------------------------------------
@@ -285,7 +292,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         //select columnsNames from tableName where columnName1=value1 AND columnName1=value1
         Cursor query = db.query(
-                entity.getSimpleName(),
+                getTableName(entity),
                 specialColumns,
                 whereClause,
                 null,
@@ -320,7 +327,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                         }
 
                         if (field == null) {
-                            Log.e("*** " + Database.class.getSimpleName(), "there is no field with the name: [" + colName + "] in [" + entity.getSimpleName() + "] or its super classes");
+                            Log.e("*** " + Database.class.getSimpleName(), "there is no field with the name: [" + colName + "] in [" + getTableName(entity) + "] or its super classes");
                             continue;
                         }
 
@@ -415,7 +422,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         //select columnsNames from tableName where columnName1=value1 AND columnName1=value1
         Cursor cursor = db.query(
-                entity.getSimpleName(),
+                getTableName(entity),
                 specialColumns,
                 whereClause,
                 null,
@@ -492,7 +499,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
-        String sql = "SELECT COUNT(*) as count FROM " + entity.getSimpleName();
+        String sql = "SELECT COUNT(*) as count FROM " + getTableName(entity);
         if (!TextUtils.isEmpty(whereClause)) {
             sql += " WHERE " + whereClause;
         }
@@ -536,7 +543,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         //insert into TableName(column1, ..., columnN) values(value1, ..., valuesN)
         long rowID = db.insert(
-                entity.getSimpleName(),
+                getTableName(entity),
                 null,
                 values
         );
@@ -553,7 +560,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             if (deleted > 0) {
                 db = mDatabase.getReadableDatabase();
                 rowID = db.insert(
-                        entity.getSimpleName(),
+                        getTableName(entity),
                         null,
                         values
                 );
@@ -682,7 +689,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
 
         int c = db.update(
-                entity.getSimpleName(),
+                getTableName(entity),
                 values,
                 whereClause,
                 null
@@ -753,7 +760,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
 
         int c = db.delete(
-                entity.getSimpleName(),
+                getTableName(entity),
                 whereClause,
                 null
         );
