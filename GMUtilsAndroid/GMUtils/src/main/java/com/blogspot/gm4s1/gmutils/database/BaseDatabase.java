@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.blogspot.gm4s1.gmutils._bases.BaseApplication;
@@ -367,10 +368,11 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                     result.put(item);
 
                 } while (query.moveToNext());
-
-                query.close();
             }
         }
+
+        query.close();
+        db.close();
 
         return result;
     }
@@ -406,6 +408,98 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return specialColumns.toArray(new String[0]);
     }
 
+    /* SPECIAL QUERIES */
+    @Nullable
+    public <T> Map<String, Object> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+
+        //select columnsNames from tableName where columnName1=value1 AND columnName1=value1
+        Cursor cursor = db.query(
+                entity.getSimpleName(),
+                specialColumns,
+                whereClause,
+                null,
+                null,
+                null,
+                orderBy
+        );
+
+        Map<String, Object> map = convertCursorToMap(cursor);
+
+        cursor.close();
+        db.close();
+
+        return map;
+    }
+
+    private Map<String, Object> convertCursorToMap(Cursor cursor) {
+        Map<String, Object> map = null;
+
+        if (cursor.moveToFirst()) {
+            map = new HashMap<>();
+
+            do {
+                String[] columnNames = cursor.getColumnNames();
+                for (String columnName : columnNames) {
+                    int columnIndex = cursor.getColumnIndex(columnName);
+                    Object value = null;
+
+                    switch (cursor.getType(columnIndex)) {
+                        case Cursor.FIELD_TYPE_NULL:
+                            value = null;
+                            break;
+
+                        case Cursor.FIELD_TYPE_INTEGER:
+                            value = cursor.getLong(columnIndex);
+                            break;
+
+                        case Cursor.FIELD_TYPE_FLOAT:
+                            value = cursor.getDouble(columnIndex);
+                            break;
+
+                        case Cursor.FIELD_TYPE_STRING:
+                            value = cursor.getString(columnIndex);
+                            break;
+
+                        case Cursor.FIELD_TYPE_BLOB:
+                            value = cursor.getBlob(columnIndex);
+                            break;
+                    }
+
+                    map.put(columnName, value);
+                }
+            } while (cursor.moveToNext());
+        }
+
+        return map;
+    }
+
+    public Map<String, Object> sqlQuery(String sqlInstruction) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+        Cursor cursor = db.rawQuery(sqlInstruction, null);
+
+        Map<String, Object> map = convertCursorToMap(cursor);
+
+        cursor.close();
+        db.close();
+
+        return map;
+    }
+
+    public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
+        String sql = "SELECT COUNT(*) FROM "+ entity.getSimpleName();
+        if (!TextUtils.isEmpty(whereClause)) {
+            sql += " WHERE " + whereClause;
+        }
+        Map<String, Object> res = sqlQuery(sql);
+        if (res != null && res.size() > 0) {
+            Object o = res.values().toArray()[0];
+            return (long) o;
+        } else {
+            return -1;
+        }
+    }
+
 
     /* INSERT */
     public <T> List<Long> insert(@NotNull List<T> data) {
@@ -429,6 +523,8 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 null,
                 values
         );
+
+        db.close();
 
         return rowID;
     }
@@ -554,12 +650,16 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     public int update(Class<?> entity, ContentValues values, String whereClause) {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
 
-        return db.update(
+        int c = db.update(
                 entity.getSimpleName(),
                 values,
                 whereClause,
                 null
         );
+
+        db.close();
+
+        return c;
     }
 
 
@@ -607,11 +707,23 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     public int delete(Class<?> entity, String whereClause) {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
 
-        return db.delete(
+        int c = db.delete(
                 entity.getSimpleName(),
                 whereClause,
                 null
         );
+
+        db.close();
+
+        return c;
     }
+
+    /* SPECIAL QUERIES */
+    public void sqlInstruction(String sqlInstruction) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+        db.execSQL(sqlInstruction);
+        db.close();
+    }
+
     //endregion--- SQL OP -----------------------------------------------------------------------------
 }

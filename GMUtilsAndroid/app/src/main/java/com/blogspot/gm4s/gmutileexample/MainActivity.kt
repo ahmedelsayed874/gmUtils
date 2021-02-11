@@ -126,6 +126,17 @@ class MainActivity : AppCompatActivity() {
 
             Log.e("****", query1.toString())
             Log.e("****", query1.last().intField0.toString())
+
+            val selectSpecial =
+                db.selectSpecial(Entity1::class.java, arrayOf("count(*) as count"), null, null)
+
+            val entityCount = db.getEntityCount(Entity1::class.java, null)
+
+            val sqlQuery = db.sqlQuery("select count(*) as count from ${Entity1::class.java.simpleName}")
+
+            Log.e("****", selectSpecial.toString())
+            Log.e("****", entityCount.toString())
+            Log.e("****", sqlQuery.toString())
         }
 
     }
