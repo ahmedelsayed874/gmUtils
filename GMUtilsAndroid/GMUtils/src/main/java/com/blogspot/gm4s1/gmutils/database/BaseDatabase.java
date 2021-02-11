@@ -410,7 +410,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     /* SPECIAL QUERIES */
     @Nullable
-    public <T> Map<String, Object> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
+    public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
 
         //select columnsNames from tableName where columnName1=value1 AND columnName1=value1
@@ -424,7 +424,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 orderBy
         );
 
-        Map<String, Object> map = convertCursorToMap(cursor);
+        List<Map<String, Object>> map = convertCursorToMap(cursor);
 
         cursor.close();
         db.close();
@@ -432,13 +432,15 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return map;
     }
 
-    private Map<String, Object> convertCursorToMap(Cursor cursor) {
-        Map<String, Object> map = null;
+    private List<Map<String, Object>> convertCursorToMap(Cursor cursor) {
+        List<Map<String, Object>> result = null;
 
         if (cursor.moveToFirst()) {
-            map = new HashMap<>();
+            result = new ArrayList<>();
 
             do {
+                Map<String, Object> map = new HashMap<>();
+
                 String[] columnNames = cursor.getColumnNames();
                 for (String columnName : columnNames) {
                     int columnIndex = cursor.getColumnIndex(columnName);
@@ -468,17 +470,20 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
                     map.put(columnName, value);
                 }
+
+                result.add(map);
+
             } while (cursor.moveToNext());
         }
 
-        return map;
+        return result;
     }
 
-    public Map<String, Object> sqlQuery(String sqlInstruction) {
+    public List<Map<String, Object>> sqlQuery(String sqlInstruction) {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
         Cursor cursor = db.rawQuery(sqlInstruction, null);
 
-        Map<String, Object> map = convertCursorToMap(cursor);
+        List<Map<String, Object>> map = convertCursorToMap(cursor);
 
         cursor.close();
         db.close();
@@ -487,14 +492,18 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
-        String sql = "SELECT COUNT(*) FROM "+ entity.getSimpleName();
+        String sql = "SELECT COUNT(*) as count FROM "+ entity.getSimpleName();
         if (!TextUtils.isEmpty(whereClause)) {
             sql += " WHERE " + whereClause;
         }
-        Map<String, Object> res = sqlQuery(sql);
+        List<Map<String, Object>> res = sqlQuery(sql);
         if (res != null && res.size() > 0) {
-            Object o = res.values().toArray()[0];
-            return (long) o;
+            if (res.get(0).size() > 0) {
+                Object o = res.get(0).values().toArray()[0];
+                return (long) o;
+            } else {
+                return -1;
+            }
         } else {
             return -1;
         }
