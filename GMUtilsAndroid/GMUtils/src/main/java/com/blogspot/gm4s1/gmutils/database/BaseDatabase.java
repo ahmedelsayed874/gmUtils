@@ -589,7 +589,11 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
-        String sql = "SELECT COUNT(*) as count FROM " + getTableName(entity);
+        return getEntityCount(entity, "*", whereClause);
+    }
+
+    public <T> long getEntityCount(@NotNull Class<T> entity, String columnName, String whereClause) {
+        String sql = "SELECT COUNT("+columnName+") FROM " + getTableName(entity);
         if (!TextUtils.isEmpty(whereClause)) {
             sql += " WHERE " + whereClause;
         }
@@ -605,6 +609,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             return -1;
         }
     }
+
     //endregion SELECT -----------------
 
 
