@@ -270,6 +270,15 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     //region--- SQL OP -----------------------------------------------------------------------------
 
     //region INSERT --------
+    public <T> Long insert(@NotNull T data){
+        return insert(data, false);
+    }
+
+    public <T> Long insert(@NotNull T data, boolean forceReplace){
+        ContentValues values = collectDataFields(data);
+        return insert(data.getClass(), values, forceReplace);
+    }
+
     public <T> List<Long> insert(@NotNull List<T> data) {
         return insert(data, false);
     }
@@ -278,8 +287,8 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         List<Long> ids = new ArrayList<>();
 
         for (T d : data) {
-            ContentValues values = convertDataToContentValues(d);
-            long id = insert(d.getClass(), values, forceReplace);
+            ContentValues values = collectDataFields(d);
+            long id = insert(d, forceReplace);
             ids.add(id);
         }
 
@@ -324,7 +333,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return rowID;
     }
 
-    public <T> ContentValues convertDataToContentValues(@NotNull T data) {
+    public <T> ContentValues collectDataFields(@NotNull T data) {
         Class<?> cls = data.getClass();
         ContentValues values = new ContentValues();
 
@@ -383,6 +392,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         return values;
     }
+
     //endregion INSERT --------------
 
 
@@ -618,7 +628,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
 
         if (!TextUtils.isEmpty(whereClause)) {
-            ContentValues values = convertDataToContentValues(data);
+            ContentValues values = collectDataFields(data);
             return update(data.getClass(), values, whereClause);
         } else {
             return 0;
