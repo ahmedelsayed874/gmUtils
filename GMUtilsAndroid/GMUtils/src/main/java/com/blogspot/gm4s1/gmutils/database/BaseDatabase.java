@@ -261,6 +261,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     //region--- SQL OP -----------------------------------------------------------------------------
 
     /* SELECT */
+    public <T> T select(@NotNull Class<T> entity, @NotNull String whereClause) {
+        return select(entity, whereClause, null);
+    }
+
     public <T> T select(@NotNull Class<T> entity, @NotNull String whereClause, String orderBy) {
         T item = select(entity, collectColumns(entity), whereClause, orderBy);
         return item;
@@ -282,19 +286,37 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         }
     }
 
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken) {
+        return select(entity, typeToken, (String) null, (String) null);
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, String whereClause) {
+        return select(entity, typeToken, whereClause, null);
+    }
+
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, String whereClause, String orderBy) {
         List<T> lst = select(entity, typeToken, collectColumns(entity), whereClause, orderBy);
         return lst;
     }
 
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns) {
+        return select(entity, typeToken, specialColumns, null, null);
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns, String whereClause) {
+        return select(entity, typeToken, specialColumns, whereClause, null);
+    }
+
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns, String whereClause, String orderBy) {
         JSONArray result = doSelect(entity, specialColumns, whereClause, orderBy);
 
-        //Type typeOfT = new TypeToken<List<T>>(){}.getType();
         Type typeOfT = typeToken.getType();
         List<T> lst = new Gson().fromJson(result.toString(), typeOfT);
         return lst;
     }
+
 
     public <T> JSONArray doSelect(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
@@ -425,6 +447,16 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     /* SPECIAL QUERIES */
+    @Nullable
+    public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns) {
+        return selectSpecial(entity, specialColumns, null, null);
+    }
+
+    @Nullable
+    public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause) {
+        return selectSpecial(entity, specialColumns, whereClause, null);
+    }
+
     @Nullable
     public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
         SQLiteDatabase db = mDatabase.getReadableDatabase();
@@ -684,6 +716,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return update(dataList, whereClause);
     }
 
+    public <T> int update(@NotNull List<T> data) {
+        return update(data, null);
+    }
+
     public <T> int update(@NotNull List<T> data, String whereClause) {
         int r = 0;
         for (T d : data) {
@@ -754,6 +790,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return whereClause;
     }
 
+
     /* DELETE */
     public <T> int delete(@NotNull T data) {
         String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
@@ -778,6 +815,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         return c;
     }
+
 
     /* SPECIAL QUERIES */
     public void sqlInstruction(String sqlInstruction) {
