@@ -96,10 +96,24 @@ class MainActivity : AppCompatActivity() {
                 null
             )
 
+            val query3 = db.select(
+                Entity1::class.java,
+                "${Entity2::id.name}='124'",
+                null
+            )
+
+            val query4 = db.select(
+                Entity1::class.java,
+                "${Entity2::id.name}='12555'",
+                null
+            )
+
             Log.e("****", query1.toString())
             Log.e("****", query1.last().intField0.toString())
             Log.e("****", query2.toString())
             Log.e("****", query2.last().intField2?.toString() ?: "")
+            Log.e("****", (query3 ?: "").toString())
+            Log.e("****", (query4 ?: "").toString())
 
             db.update(
                 Entity1(

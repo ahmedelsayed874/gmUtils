@@ -269,8 +269,17 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     public <T> T select(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, String orderBy) {
         JSONArray result = doSelect(entity, specialColumns, whereClause, orderBy);
 
-        T item = new Gson().fromJson(result.toString(), entity);
-        return item;
+        if (result.length() > 0) {
+            T item = null;
+            try {
+                item = new Gson().fromJson(result.getJSONObject(0).toString(), entity);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return item;
+        } else {
+            return null;
+        }
     }
 
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, String whereClause, String orderBy) {
