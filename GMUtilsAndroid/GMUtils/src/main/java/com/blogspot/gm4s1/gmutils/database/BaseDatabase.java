@@ -155,6 +155,23 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         else
             return null;
     }
+
+    private String getTableName(Class<?> entity) {
+        String tableName = entity.getSimpleName();
+
+        Annotation[] annotations = entity.getDeclaredAnnotations();
+        if (annotations != null && annotations.length > 0) {
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType() == Entity.class) {
+                    Entity anEntity = entity.getAnnotation(Entity.class);
+                    tableName = anEntity.tableName();
+                }
+            }
+        }
+
+        return tableName;
+    }
+
     //endregion --- help methods -------------------------------------------------------------------
 
     @Override
@@ -250,25 +267,9 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         onCreate(db);
     }
 
-    private String getTableName(Class<?> entity) {
-        String tableName = entity.getSimpleName();
-
-        Annotation[] annotations = entity.getDeclaredAnnotations();
-        if (annotations != null && annotations.length > 0) {
-            for (Annotation annotation : annotations) {
-                if (annotation.annotationType() == Entity.class) {
-                    Entity anEntity = entity.getAnnotation(Entity.class);
-                    tableName = anEntity.tableName();
-                }
-            }
-        }
-
-        return tableName;
-    }
-
     //region--- SQL OP -----------------------------------------------------------------------------
 
-    /* INSERT */
+    //region INSERT --------
     public <T> List<Long> insert(@NotNull List<T> data) {
         return insert(data, false);
     }
@@ -321,31 +322,6 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         db.close();
 
         return rowID;
-    }
-
-    private String[] getPrimaryFields(Class<?> entity) {
-        List<String> primaryFields = new ArrayList<>();
-
-        Class<?> cls = entity;
-        while (cls != null) {
-            Field[] fields = cls.getDeclaredFields();
-
-            for (Field field : fields) {
-                Constraint[] constraints = getFieldConstraints(field);
-                if (constraints != null) {
-                    for (Constraint constraint : constraints) {
-                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
-                            primaryFields.add(field.getName());
-                        }
-                    }
-                }
-            }
-
-            cls = cls.getSuperclass();
-            if (cls == Object.class) break;
-        }
-
-        return primaryFields.toArray(new String[0]);
     }
 
     public <T> ContentValues convertDataToContentValues(@NotNull T data) {
@@ -407,9 +383,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         return values;
     }
+    //endregion INSERT --------------
 
 
-    /* SELECT */
+    //region SELECT --------
     public <T> T select(@NotNull Class<T> entity, @NotNull String whereClause) {
         return select(entity, whereClause, null);
     }
@@ -564,36 +541,6 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return result;
     }
 
-    private <T> String[] collectColumns(@NotNull Class<T> entity) {
-        List<String> specialColumns = new ArrayList<>();
-
-        Class<?> cls = entity;
-        while (cls != null) {
-            Field[] fields = cls.getDeclaredFields();
-
-            for (Field field : fields) {
-                boolean ignore = false;
-                Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
-                if (fieldAnnotations != null && fieldAnnotations.length > 0) {
-                    for (Annotation annotation : fieldAnnotations) {
-                        if (annotation.annotationType() == Ignore.class) {
-                            ignore = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!ignore) {
-                    specialColumns.add(field.getName());
-                }
-            }
-
-            cls = cls.getSuperclass();
-            if (cls == Object.class) break;
-        }
-
-        return specialColumns.toArray(new String[0]);
-    }
 
     /* SPECIAL QUERIES */
     @Nullable
@@ -629,6 +576,136 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return map;
     }
 
+    public List<Map<String, Object>> sqlQuery(String sqlInstruction) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+        Cursor cursor = db.rawQuery(sqlInstruction, null);
+
+        List<Map<String, Object>> map = convertCursorToMap(cursor);
+
+        cursor.close();
+        db.close();
+
+        return map;
+    }
+
+    public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
+        String sql = "SELECT COUNT(*) as count FROM " + getTableName(entity);
+        if (!TextUtils.isEmpty(whereClause)) {
+            sql += " WHERE " + whereClause;
+        }
+        List<Map<String, Object>> res = sqlQuery(sql);
+        if (res != null && res.size() > 0) {
+            if (res.get(0).size() > 0) {
+                Object o = res.get(0).values().toArray()[0];
+                return (long) o;
+            } else {
+                return -1;
+            }
+        } else {
+            return -1;
+        }
+    }
+    //endregion SELECT -----------------
+
+
+    //region UPDATE --------
+    public <T> int update(@NotNull T data) {
+        String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
+
+        if (!TextUtils.isEmpty(whereClause)) {
+            ContentValues values = convertDataToContentValues(data);
+            return update(data.getClass(), values, whereClause);
+        } else {
+            return 0;
+        }
+    }
+
+    public <T> int update(@NotNull List<T> data) {
+        int r = 0;
+        for (T d : data) {
+            int r0 = update(d);
+            r += r0;
+        }
+        return r;
+    }
+
+    public int update(Class<?> entity, ContentValues values, String whereClause) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+
+        int c = db.update(
+                getTableName(entity),
+                values,
+                whereClause,
+                null
+        );
+
+        db.close();
+
+        return c;
+    }
+    //endregion UPDATE -------------
+
+
+    //region DELETE --------
+    public <T> int delete(@NotNull T data) {
+        String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
+
+        if (!TextUtils.isEmpty(whereClause)) {
+            return delete(data.getClass(), whereClause);
+        } else {
+            return 0;
+        }
+    }
+
+    public int delete(Class<?> entity, String whereClause) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+
+        int c = db.delete(
+                getTableName(entity),
+                whereClause,
+                null
+        );
+
+        db.close();
+
+        return c;
+    }
+    //endregion DELETE -----------
+
+
+    // SPECIAL QUERIES
+    public void sqlInstruction(String sqlInstruction) {
+        SQLiteDatabase db = mDatabase.getReadableDatabase();
+        db.execSQL(sqlInstruction);
+        db.close();
+    }
+
+    //--------------------------------------------
+
+    private String[] getPrimaryFields(Class<?> entity) {
+        List<String> primaryFields = new ArrayList<>();
+
+        Class<?> cls = entity;
+        while (cls != null) {
+            Field[] fields = cls.getDeclaredFields();
+
+            for (Field field : fields) {
+                Constraint[] constraints = getFieldConstraints(field);
+                if (constraints != null) {
+                    for (Constraint constraint : constraints) {
+                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
+                            primaryFields.add(field.getName());
+                        }
+                    }
+                }
+            }
+
+            cls = cls.getSuperclass();
+            if (cls == Object.class) break;
+        }
+
+        return primaryFields.toArray(new String[0]);
+    }
 
     private List<Map<String, Object>> convertCursorToMap(Cursor cursor) {
         List<Map<String, Object>> result = null;
@@ -677,73 +754,35 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return result;
     }
 
-    public List<Map<String, Object>> sqlQuery(String sqlInstruction) {
-        SQLiteDatabase db = mDatabase.getReadableDatabase();
-        Cursor cursor = db.rawQuery(sqlInstruction, null);
+    private <T> String[] collectColumns(@NotNull Class<T> entity) {
+        List<String> specialColumns = new ArrayList<>();
 
-        List<Map<String, Object>> map = convertCursorToMap(cursor);
+        Class<?> cls = entity;
+        while (cls != null) {
+            Field[] fields = cls.getDeclaredFields();
 
-        cursor.close();
-        db.close();
+            for (Field field : fields) {
+                boolean ignore = false;
+                Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
+                if (fieldAnnotations != null && fieldAnnotations.length > 0) {
+                    for (Annotation annotation : fieldAnnotations) {
+                        if (annotation.annotationType() == Ignore.class) {
+                            ignore = true;
+                            break;
+                        }
+                    }
+                }
 
-        return map;
-    }
-
-
-    public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
-        String sql = "SELECT COUNT(*) as count FROM " + getTableName(entity);
-        if (!TextUtils.isEmpty(whereClause)) {
-            sql += " WHERE " + whereClause;
-        }
-        List<Map<String, Object>> res = sqlQuery(sql);
-        if (res != null && res.size() > 0) {
-            if (res.get(0).size() > 0) {
-                Object o = res.get(0).values().toArray()[0];
-                return (long) o;
-            } else {
-                return -1;
+                if (!ignore) {
+                    specialColumns.add(field.getName());
+                }
             }
-        } else {
-            return -1;
+
+            cls = cls.getSuperclass();
+            if (cls == Object.class) break;
         }
-    }
 
-
-
-    /* UPDATE */
-    public <T> int update(@NotNull T data) {
-        String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
-
-        if (!TextUtils.isEmpty(whereClause)) {
-            ContentValues values = convertDataToContentValues(data);
-            return update(data.getClass(), values, whereClause);
-        } else {
-            return 0;
-        }
-    }
-
-    public <T> int update(@NotNull List<T> data) {
-        int r = 0;
-        for (T d : data) {
-            int r0 = update(d);
-            r += r0;
-        }
-        return r;
-    }
-
-    public int update(Class<?> entity, ContentValues values, String whereClause) {
-        SQLiteDatabase db = mDatabase.getReadableDatabase();
-
-        int c = db.update(
-                getTableName(entity),
-                values,
-                whereClause,
-                null
-        );
-
-        db.close();
-
-        return c;
+        return specialColumns.toArray(new String[0]);
     }
 
     private <T> Map<String, Object> getPrimaryFieldsValues(@NotNull T data) {
@@ -791,41 +830,6 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return whereClause;
     }
 
-
-
-    /* DELETE */
-    public <T> int delete(@NotNull T data) {
-        String whereClause = generateWhereClauseFromPrimaryFields(getPrimaryFieldsValues(data));
-
-        if (!TextUtils.isEmpty(whereClause)) {
-            return delete(data.getClass(), whereClause);
-        } else {
-            return 0;
-        }
-    }
-
-    public int delete(Class<?> entity, String whereClause) {
-        SQLiteDatabase db = mDatabase.getReadableDatabase();
-
-        int c = db.delete(
-                getTableName(entity),
-                whereClause,
-                null
-        );
-
-        db.close();
-
-        return c;
-    }
-
-
-
-    /* SPECIAL QUERIES */
-    public void sqlInstruction(String sqlInstruction) {
-        SQLiteDatabase db = mDatabase.getReadableDatabase();
-        db.execSQL(sqlInstruction);
-        db.close();
-    }
 
     //endregion--- SQL OP -----------------------------------------------------------------------------
 }
