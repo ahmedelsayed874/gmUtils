@@ -156,20 +156,32 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             return null;
     }
 
-    private String getTableName(Class<?> entity) {
-        String tableName = entity.getSimpleName();
+    private static class EntityProperties {
+        String tableName;
+        String[] ignoredFields;
+    }
+
+    private EntityProperties getEntityProperties(Class<?> entity) {
+        EntityProperties entityProperties = new EntityProperties();
+        entityProperties.tableName = entity.getSimpleName();
 
         Annotation[] annotations = entity.getDeclaredAnnotations();
         if (annotations != null && annotations.length > 0) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == Entity.class) {
                     Entity anEntity = entity.getAnnotation(Entity.class);
-                    tableName = anEntity.tableName();
+                    entityProperties.tableName = anEntity.tableName();
+                    entityProperties.ignoredFields = anEntity.ignoredFields();
                 }
             }
         }
 
-        return tableName;
+        return entityProperties;
+    }
+
+    private String getTableName(Class<?> entity) {
+        EntityProperties prop = getEntityProperties(entity);
+        return prop.tableName;
     }
 
     //endregion --- help methods -------------------------------------------------------------------
@@ -186,22 +198,34 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         for (Class<?> entity : entities) {
             Class<?> cls = entity;
 
-            String tableName = getTableName(cls);
+            EntityProperties entityProperties = getEntityProperties(entity);
             primaryKeysCount = 0;
 
-            SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(tableName);
+            SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(entityProperties.tableName);
 
             while (cls != null) {
                 Field[] fields = cls.getDeclaredFields();
 
                 for (Field field : fields) {
                     boolean ignore = false;
+
                     Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
                     if (fieldAnnotations != null && fieldAnnotations.length > 0) {
                         for (Annotation annotation : fieldAnnotations) {
                             if (annotation.annotationType() == Ignore.class) {
                                 ignore = true;
                                 break;
+                            }
+                        }
+                    }
+
+                    if (!ignore) {
+                        if (entityProperties.ignoredFields != null) {
+                            for (String fName : entityProperties.ignoredFields) {
+                                if (TextUtils.equals(fName, field.getName())) {
+                                    ignore = true;
+                                    break;
+                                }
                             }
                         }
                     }
