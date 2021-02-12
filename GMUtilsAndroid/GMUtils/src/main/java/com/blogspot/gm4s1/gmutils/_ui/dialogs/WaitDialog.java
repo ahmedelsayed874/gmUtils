@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.dialogs;
+package com.blogspot.gm4s1.gmutils._ui.dialogs;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
+import com.blogspot.gm4s1.gmutils._ui._bases.BaseDialog;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

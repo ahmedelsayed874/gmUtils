@@ -1,18 +1,15 @@
-package com.blogspot.gm4s1.gmutils._bases;
+package com.blogspot.gm4s1.gmutils._ui._bases;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewTreeObserver;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
-import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
 /**

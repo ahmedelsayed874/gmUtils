@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._bases;
+package com.blogspot.gm4s1.gmutils._ui._bases;
 
 
 import android.annotation.SuppressLint;
@@ -24,12 +24,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
-import com.blogspot.gm4s1.gmutils.MyToast;
+import com.blogspot.gm4s1.gmutils._ui.MyToast;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
-import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
-import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
-import com.blogspot.gm4s1.gmutils.dialogs.WaitDialog;
+import com.blogspot.gm4s1.gmutils._ui.dialogs.MessageDialog;
+import com.blogspot.gm4s1.gmutils._ui.dialogs.RetryPromptDialog;
+import com.blogspot.gm4s1.gmutils._ui.dialogs.WaitDialog;
 import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
 import java.util.HashMap;

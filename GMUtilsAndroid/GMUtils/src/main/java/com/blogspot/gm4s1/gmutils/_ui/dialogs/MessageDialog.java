@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.dialogs;
+package com.blogspot.gm4s1.gmutils._ui.dialogs;
 
 
 import android.annotation.SuppressLint;
@@ -7,7 +7,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -17,8 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
-import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
+import com.blogspot.gm4s1.gmutils._ui._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback2;
 import com.blogspot.gm4s1.gmutils.storage.GeneralStorage;
 

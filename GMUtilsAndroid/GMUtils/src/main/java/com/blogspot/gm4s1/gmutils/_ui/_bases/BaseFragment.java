@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._bases;
+package com.blogspot.gm4s1.gmutils._ui._bases;
 
 
 import android.content.Context;
@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
+import com.blogspot.gm4s1.gmutils._ui.dialogs.RetryPromptDialog;
 
 import java.util.HashMap;
 

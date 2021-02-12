@@ -2,9 +2,6 @@ package com.blogspot.gm4s1.gmutils.firebase;
 
 import android.net.Uri;
 import android.util.Pair;
-
-import androidx.annotation.NonNull;
-
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -69,7 +66,7 @@ public class FirebaseAuth {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    public void onComplete(Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (callback != null)
@@ -156,7 +153,7 @@ public class FirebaseAuth {
         mAuth.sendPasswordResetEmail(emailAddress)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+                    public void onComplete(Task<Void> task) {
                         if (callback != null)
                             callback.invoke(task.isSuccessful());
                     }

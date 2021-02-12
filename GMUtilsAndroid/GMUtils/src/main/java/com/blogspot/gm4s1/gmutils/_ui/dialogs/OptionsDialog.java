@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.dialogs;
+package com.blogspot.gm4s1.gmutils._ui.dialogs;
 
 import android.content.Context;
 import androidx.annotation.Nullable;

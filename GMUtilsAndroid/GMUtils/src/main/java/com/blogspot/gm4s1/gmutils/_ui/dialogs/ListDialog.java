@@ -1,10 +1,9 @@
-package com.blogspot.gm4s1.gmutils.dialogs;
+package com.blogspot.gm4s1.gmutils._ui.dialogs;
 
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +16,8 @@ import android.widget.TextView;
 
 import com.blogspot.gm4s1.gmutils.Animations;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
-import com.blogspot.gm4s1.gmutils.MyToast;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
+import com.blogspot.gm4s1.gmutils._ui._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener;
 
 import java.util.ArrayList;

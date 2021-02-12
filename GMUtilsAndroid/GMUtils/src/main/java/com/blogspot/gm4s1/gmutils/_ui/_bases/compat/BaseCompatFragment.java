@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._bases.compat;
+package com.blogspot.gm4s1.gmutils._ui._bases.compat;
 
 
 import android.app.Fragment;
@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.dialogs.RetryPromptDialog;
+import com.blogspot.gm4s1.gmutils._ui.dialogs.RetryPromptDialog;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

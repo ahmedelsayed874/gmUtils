@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._bases;
+package com.blogspot.gm4s1.gmutils._ui._bases;
 
 import android.app.Application;
 

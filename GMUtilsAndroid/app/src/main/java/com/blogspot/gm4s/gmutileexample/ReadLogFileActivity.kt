@@ -5,13 +5,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.blogspot.gm4s1.gmutils.Logger
-import com.blogspot.gm4s1.gmutils.MyToast
+import com.blogspot.gm4s1.gmutils._ui.MyToast
 import com.blogspot.gm4s1.gmutils.Security
 import com.blogspot.gm4s1.gmutils.utils.FileUtils
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_read_log_file.*
-import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.Charset
 import java.util.*

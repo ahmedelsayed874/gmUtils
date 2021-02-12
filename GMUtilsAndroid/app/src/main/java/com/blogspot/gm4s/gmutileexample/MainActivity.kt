@@ -3,12 +3,11 @@ package com.blogspot.gm4s.gmutileexample
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import com.blogspot.gm4s1.gmutils.MyToast
+import com.blogspot.gm4s1.gmutils._ui.MyToast
 import com.blogspot.gm4s1.gmutils.database.BaseDatabase
 import com.blogspot.gm4s1.gmutils.database.annotations.Default
 import com.blogspot.gm4s1.gmutils.database.annotations.Ignore

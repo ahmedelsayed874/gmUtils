@@ -1,32 +1,24 @@
-package com.blogspot.gm4s1.gmutils.dialogs;
+package com.blogspot.gm4s1.gmutils._ui.dialogs;
 
 import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Locale;
 
 import com.blogspot.gm4s1.gmutils.CountryPhoneCodes;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
-import com.blogspot.gm4s1.gmutils._bases.adapters.BaseRecyclerAdapter;
+import com.blogspot.gm4s1.gmutils._ui._bases.BaseDialog;
+import com.blogspot.gm4s1.gmutils._ui._bases.adapters.BaseRecyclerAdapter;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener;
-import com.blogspot.gm4s1.gmutils.listeners.TextChangedListener;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

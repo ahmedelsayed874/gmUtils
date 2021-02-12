@@ -16,14 +16,9 @@ import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
-import androidx.lifecycle.LifecycleOwner;
 
-import com.blogspot.gm4s1.gmutils.dialogs.MessageDialog;
-import com.blogspot.gm4s1.gmutils.listeners.ActivityLifecycleCallbacks;
+import com.blogspot.gm4s1.gmutils._ui.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.utils.UIUtils;
 
 import java.util.List;
