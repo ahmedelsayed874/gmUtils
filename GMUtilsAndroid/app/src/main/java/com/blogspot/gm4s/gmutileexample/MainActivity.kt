@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import com.blogspot.gm4s1.gmutils._ui.MyToast
+import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.database.BaseDatabase
 import com.blogspot.gm4s1.gmutils.database.annotations.Default
 import com.blogspot.gm4s1.gmutils.database.annotations.Ignore

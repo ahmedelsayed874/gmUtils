@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.blogspot.gm4s1.gmutils._ui._bases.BaseApplication;
+import com.blogspot.gm4s1.gmutils.ui._bases.BaseApplication;
 import com.blogspot.gm4s1.gmutils.database.annotations.AutoIncrement;
 import com.blogspot.gm4s1.gmutils.database.annotations.Default;
 import com.blogspot.gm4s1.gmutils.database.annotations.Entity;

@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._ui.dialogs;
+package com.blogspot.gm4s1.gmutils.ui.dialogs;
 
 
 import android.annotation.SuppressLint;
@@ -16,7 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._ui._bases.BaseDialog;
+import com.blogspot.gm4s1.gmutils.ui._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback2;
 import com.blogspot.gm4s1.gmutils.storage.GeneralStorage;
 

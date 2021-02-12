@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._ui;
+package com.blogspot.gm4s1.gmutils.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

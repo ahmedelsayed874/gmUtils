@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 import androidx.fragment.app.Fragment;
 
-import com.blogspot.gm4s1.gmutils._ui.dialogs.MessageDialog;
+import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.utils.UIUtils;
 
 import java.util.List;

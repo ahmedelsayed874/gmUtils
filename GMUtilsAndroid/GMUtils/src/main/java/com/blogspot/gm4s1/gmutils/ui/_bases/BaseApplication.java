@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._ui._bases;
+package com.blogspot.gm4s1.gmutils.ui._bases;
 
 import android.app.Activity;
 import android.app.Application;
@@ -8,7 +8,7 @@ import android.os.Looper;
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.MessagingCenter;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._ui.dialogs.MessageDialog;
+import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.storage.StorageManager;
 
 import java.util.HashMap;

@@ -1,15 +1,11 @@
-package com.blogspot.gm4s1.gmutils._ui._bases.compat;
+package com.blogspot.gm4s1.gmutils.ui._bases;
 
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -20,18 +16,23 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.blogspot.gm4s1.gmutils.KeypadOp;
 import com.blogspot.gm4s1.gmutils.Logger;
-import com.blogspot.gm4s1.gmutils._ui.MyToast;
+import com.blogspot.gm4s1.gmutils.KeypadOp;
+import com.blogspot.gm4s1.gmutils.ui.MyToast;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._ui.dialogs.MessageDialog;
-import com.blogspot.gm4s1.gmutils._ui.dialogs.RetryPromptDialog;
-import com.blogspot.gm4s1.gmutils._ui.dialogs.WaitDialog;
-import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
+import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog;
+import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
+import com.blogspot.gm4s1.gmutils.ui.dialogs.WaitDialog;
+import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -46,10 +47,11 @@ import java.util.List;
  * +201022663988
  */
 @SuppressLint("Registered")
-public abstract class BaseCompatActivity extends Activity implements BaseCompatFragment.Listener {
+public abstract class BaseActivity extends AppCompatActivity implements BaseFragment.Listener {
 
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
+    private HashMap<Integer, BaseViewModel> viewModels;
 
 
     public abstract int getActivityLayout();
@@ -69,6 +71,31 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
     public int initialKeyboardState() {
         //return WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
         return WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    protected HashMap<Integer, Class<? extends BaseViewModel>> getViewModelClasses() {
+        return null;
+    }
+
+    protected ViewModelProvider.Factory onCreateViewModelFactory(int id) {
+        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
+                .AndroidViewModelFactory
+                .getInstance(getApplication());
+        return viewModelFactory;
+    }
+
+    public BaseViewModel getViewModel() {
+        if (viewModels.size() == 1) {
+            return viewModels.values().toArray(new BaseViewModel[0])[0];
+        }
+
+        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
+    }
+
+    public BaseViewModel getViewModel(int id) {
+        return viewModels.get(id);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -101,7 +128,21 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
     }
 
     protected void onPostCreate() {
+        HashMap<Integer, Class<? extends BaseViewModel>> viewModelClasses = getViewModelClasses();
+        if (viewModelClasses != null) {
+            viewModels = new HashMap<>();
 
+            for (Integer id : viewModelClasses.keySet()) {
+                ViewModelProvider viewModelProvider = new ViewModelProvider(
+                        thisActivity(),
+                        onCreateViewModelFactory(id)
+                );
+
+                Class<? extends BaseViewModel> viewModelClass = viewModelClasses.get(id);
+                assert viewModelClass != null;
+                viewModels.put(id, viewModelProvider.get(viewModelClass));
+            }
+        }
     }
 
     @Override
@@ -129,8 +170,12 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public Activity thisActivity() {
+    public Activity thisActivity0() {
         return thisActivity();
+    }
+
+    public AppCompatActivity thisActivity() {
+        return this;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -224,18 +269,17 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
     }
 
     @Override
-    public void showFragment(BaseCompatFragment fragment, String stackName) {
+    public void showFragment(BaseFragment fragment, String stackName) {
         showFragment(fragment, true, stackName, R.id.layout_fragment_container);
     }
 
     @Override
-    public void showFragment(BaseCompatFragment fragment, String stackName, int fragmentContainerId) {
+    public void showFragment(BaseFragment fragment, String stackName, int fragmentContainerId) {
         showFragment(fragment, true, stackName, fragmentContainerId);
     }
 
     public void showFragment(Fragment fragment, Boolean addToBackStack, String stackName, int fragmentContainerId) {
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager()
                 .beginTransaction()
                 .replace(fragmentContainerId, fragment);
 
@@ -248,18 +292,16 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
         fragmentTransaction.commit();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void showFragmentOnTop(Fragment fragment) {
         showFragmentOnTop(fragment, fragment.getClass().getName());
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void showFragmentOnTop(Fragment fragment, String stackName) {
         Fragment currentFragment = getCurrentDisplayedFragment();
 
         if (currentFragment != null) {
             if (currentFragment.getClass() != fragment.getClass()) {
-                FragmentManager fragmentManager = getFragmentManager();
+                FragmentManager fragmentManager = getSupportFragmentManager();
                 boolean pop = fragmentManager.popBackStackImmediate(stackName, 0);
 
                 if (!pop) {
@@ -281,9 +323,8 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public Fragment getCurrentDisplayedFragment() {
-        List<Fragment> fragments = getFragmentManager().getFragments();
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
         if (fragments.size() > 0)
             return fragments.get(fragments.size() - 1);
         else

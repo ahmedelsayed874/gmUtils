@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.blogspot.gm4s1.gmutils._ui._bases.BaseApplication;
+import com.blogspot.gm4s1.gmutils.ui._bases.BaseApplication;
 
 import org.jetbrains.annotations.NotNull;
 

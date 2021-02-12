@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._ui.dialogs;
+package com.blogspot.gm4s1.gmutils.ui.dialogs;
 
 import android.content.Context;
 
@@ -15,8 +15,8 @@ import java.util.ArrayList;
 
 import com.blogspot.gm4s1.gmutils.CountryPhoneCodes;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils._ui._bases.BaseDialog;
-import com.blogspot.gm4s1.gmutils._ui._bases.adapters.BaseRecyclerAdapter;
+import com.blogspot.gm4s1.gmutils.ui._bases.BaseDialog;
+import com.blogspot.gm4s1.gmutils.ui._bases.adapters.BaseRecyclerAdapter;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener;
 

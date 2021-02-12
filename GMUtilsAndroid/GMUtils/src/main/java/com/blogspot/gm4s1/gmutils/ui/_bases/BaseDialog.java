@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils._ui._bases;
+package com.blogspot.gm4s1.gmutils.ui._bases;
 
 import android.content.Context;
 import android.content.DialogInterface;
