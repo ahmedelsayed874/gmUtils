@@ -2,14 +2,9 @@ package com.blogspot.gm4s1.gmutils._bases;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.MessagingCenter;
 import com.blogspot.gm4s1.gmutils.R;
@@ -201,7 +196,7 @@ public abstract class BaseApplication extends Application implements Application
     //----------------------------------------------------------------------------------------------
 
     @Override
-    public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         activityCount++;
         current = this;
 
@@ -233,27 +228,27 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     @Override
-    public void onActivityStarted(@NonNull Activity activity) {
+    public void onActivityStarted(Activity activity) {
     }
 
     @Override
-    public void onActivityResumed(@NonNull Activity activity) {
+    public void onActivityResumed(Activity activity) {
     }
 
     @Override
-    public void onActivityPaused(@NonNull Activity activity) {
+    public void onActivityPaused(Activity activity) {
     }
 
     @Override
-    public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
     }
 
     @Override
-    public void onActivityStopped(@NonNull Activity activity) {
+    public void onActivityStopped(Activity activity) {
     }
 
     @Override
-    public void onActivityDestroyed(@NonNull Activity activity) {
+    public void onActivityDestroyed(Activity activity) {
         activityCount--;
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
