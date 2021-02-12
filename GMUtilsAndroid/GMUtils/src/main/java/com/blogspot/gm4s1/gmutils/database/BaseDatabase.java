@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,7 +171,9 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == Entity.class) {
                     Entity anEntity = entity.getAnnotation(Entity.class);
-                    entityProperties.tableName = anEntity.tableName();
+                    if (!TextUtils.isEmpty(anEntity.tableName())) {
+                        entityProperties.tableName = anEntity.tableName();
+                    }
                     entityProperties.ignoredFields = anEntity.ignoredFields();
                 }
             }
@@ -207,6 +210,9 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 Field[] fields = cls.getDeclaredFields();
 
                 for (Field field : fields) {
+                    if (Modifier.isStatic(field.getModifiers()))
+                        continue;
+
                     boolean ignore = false;
 
                     Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
@@ -294,11 +300,11 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     //region--- SQL OP -----------------------------------------------------------------------------
 
     //region INSERT --------
-    public <T> Long insert(@NotNull T data){
+    public <T> Long insert(@NotNull T data) {
         return insert(data, false);
     }
 
-    public <T> Long insert(@NotNull T data, boolean forceReplace){
+    public <T> Long insert(@NotNull T data, boolean forceReplace) {
         ContentValues values = collectDataFields(data);
         return insert(data.getClass(), values, forceReplace);
     }
@@ -627,7 +633,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String columnName, String whereClause) {
-        String sql = "SELECT COUNT("+columnName+") FROM " + getTableName(entity);
+        String sql = "SELECT COUNT(" + columnName + ") FROM " + getTableName(entity);
         if (!TextUtils.isEmpty(whereClause)) {
             sql += " WHERE " + whereClause;
         }
