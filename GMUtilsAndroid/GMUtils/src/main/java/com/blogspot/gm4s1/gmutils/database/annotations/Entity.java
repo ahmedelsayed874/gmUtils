@@ -20,4 +20,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Entity {
     String tableName();
+    String[] ignoredFields() default {};
 }
