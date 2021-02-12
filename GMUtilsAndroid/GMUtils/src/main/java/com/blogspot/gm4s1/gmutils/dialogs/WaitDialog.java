@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
 
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils._bases.BaseDialog;
