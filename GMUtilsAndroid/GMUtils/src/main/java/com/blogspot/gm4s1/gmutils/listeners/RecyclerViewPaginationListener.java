@@ -1,10 +1,15 @@
 package com.blogspot.gm4s1.gmutils.listeners;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.blogspot.gm4s1.gmutils.ui._bases.adapters.BaseRecyclerAdapter;
+
 public abstract class RecyclerViewPaginationListener extends RecyclerView.OnScrollListener {
+
+    private Integer lY;
 
     @Override
     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -12,18 +17,27 @@ public abstract class RecyclerViewPaginationListener extends RecyclerView.OnScro
 
         if (!isLoadingMoreEnabled()) return;
 
-        int visibleItemCount = recyclerView.getLayoutManager().getChildCount();
-        int totalItemCount = recyclerView.getLayoutManager().getItemCount();
-        int firstVisibleItemPosition = ((LinearLayoutManager) recyclerView.getLayoutManager())
-                .findFirstVisibleItemPosition();
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        int totalItemCount = layoutManager.getItemCount();
+        int visibleItemCount = layoutManager.getChildCount();
+        int firstVisibleItemPosition = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
+        int supposedLastPosition = firstVisibleItemPosition + visibleItemCount;
 
-        if (visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
-            loadMoreItems();
+        if (firstVisibleItemPosition == 0 && supposedLastPosition < totalItemCount) {
+            if (lY != null && lY > dy) {
+                loadMore(false);
+            }
+        } else if (firstVisibleItemPosition > 0 && supposedLastPosition >= totalItemCount) {
+            if (lY != null && dy > lY) {
+                loadMore(true);
+            }
         }
+
+        lY = dy;
     }
 
     protected abstract boolean isLoadingMoreEnabled();
 
-    protected abstract void loadMoreItems();
+    protected abstract void loadMore(boolean toBottom);
 
 }

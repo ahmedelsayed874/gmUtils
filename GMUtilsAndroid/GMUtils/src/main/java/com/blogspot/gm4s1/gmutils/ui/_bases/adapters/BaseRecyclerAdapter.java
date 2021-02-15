@@ -45,6 +45,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     private OnListItemsChangedListener<T> mOnListItemsChangedListener;
     private OnLoadMoreListener<T> mOnLoadMoreListener;
     private Boolean isFirstItemInitialized = false;
+    private RecyclerViewPaginationListener mPaginationListener;
 
 
     public BaseRecyclerAdapter(RecyclerView recyclerView) {
@@ -441,10 +442,22 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         this.isFirstItemInitialized = false;
     }
 
-    public void setupRecyclerViewPaginationListener(RecyclerViewPaginationListener listener) {
-        getRecyclerView().addOnScrollListener(listener);
+    public void setOnLoadMoreListener(RecyclerViewPaginationListener listener) {
+        if (listener != null) {
+            getRecyclerView().addOnScrollListener(listener);
+            this.mPaginationListener = listener;
 
+        } else {
+            if (this.mPaginationListener != null) {
+                RecyclerView rv = getRecyclerView();
+                if (rv != null) {
+                    rv.removeOnScrollListener(this.mPaginationListener);
+                }
+            }
+        }
     }
+
+
     //------------------------------------------------------------------------------------------------------------------
 
     public ClickListener<T> getClickListener() {
@@ -457,6 +470,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     public OnLoadMoreListener<T> getOnLoadMoreListener() {
         return mOnLoadMoreListener;
+    }
+
+    public RecyclerViewPaginationListener getPaginationListener() {
+        return mPaginationListener;
     }
 
     public OnDataSetChangedListener<T> getOnDataSetChangedListener() {
@@ -608,4 +625,3 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
 }
-
