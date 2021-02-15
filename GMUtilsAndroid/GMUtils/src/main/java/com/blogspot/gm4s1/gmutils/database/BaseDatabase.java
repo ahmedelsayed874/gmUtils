@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.CreateTable;
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.DropTable;
 import com.blogspot.gm4s1.gmutils.database.sqlitecommands.WhereClause;
 import com.blogspot.gm4s1.gmutils.ui._bases.BaseApplication;
 import com.blogspot.gm4s1.gmutils.database.annotations.AutoIncrement;
@@ -17,10 +19,6 @@ import com.blogspot.gm4s1.gmutils.database.annotations.Ignore;
 import com.blogspot.gm4s1.gmutils.database.annotations.Not_Null;
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey;
 import com.blogspot.gm4s1.gmutils.database.annotations.Unique;
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.Constraint;
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.ConstraintKeywords;
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.DataTypes;
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.SqlCommands;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -52,6 +50,7 @@ import java.util.Set;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
+
 interface DatabaseCallbacks {
     void onCreate(SQLiteDatabase db);
 
@@ -185,26 +184,27 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     private int primaryKeysCount = 0;
 
     @Nullable
-    private Constraint[] getFieldConstraints(@NotNull Field field) {
-        List<Constraint> constraints = new ArrayList<>();
+    private CreateTable.Constraint[] getFieldConstraints(@NotNull Field field) {
+        List<CreateTable.Constraint> constraints = new ArrayList<>();
 
         Annotation[] annotations = field.getDeclaredAnnotations();
 
         if (annotations != null && annotations.length > 0) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == PrimaryKey.class) {
-                    constraints.add(new Constraint(ConstraintKeywords.PRIMARY_KEY));
+                    constraints.add(new CreateTable.Constraint(CreateTable.ConstraintKeywords.PRIMARY_KEY));
                     primaryKeysCount++;
 
                 } else if (annotation.annotationType() == AutoIncrement.class) {
-                    constraints.add(new Constraint(ConstraintKeywords.AUTOINCREMENT));
+                    constraints.add(new CreateTable.Constraint(CreateTable.ConstraintKeywords.AUTOINCREMENT));
 
                 } else if (annotation.annotationType() == Not_Null.class) {
-                    constraints.add(new Constraint(ConstraintKeywords.NOT_NULL));
+                    constraints.add(new CreateTable.Constraint(CreateTable.ConstraintKeywords.NOT_NULL));
 
                 } else if (annotation.annotationType() == Default.class) {
-                    Default aDefault = field.getAnnotation(Default.class);
-                    String defVal = aDefault.value();
+                    Default def = field.getAnnotation(Default.class);
+                    String defVal = def.value();
+                    boolean isFunction = def.isFunction();
                     if (field.getType() == boolean.class || field.getType() == Boolean.class) {
                         if ("true".equalsIgnoreCase(defVal)) {
                             defVal = "1";
@@ -214,16 +214,16 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                             defVal = "";
                         }
                     }
-                    constraints.add(new Constraint(ConstraintKeywords.DEFAULT, defVal));
+                    constraints.add(new CreateTable.Constraint(CreateTable.ConstraintKeywords.DEFAULT, defVal));
 
                 } else if (annotation.annotationType() == Unique.class) {
-                    constraints.add(new Constraint(ConstraintKeywords.UNIQUE));
+                    constraints.add(new CreateTable.Constraint(CreateTable.ConstraintKeywords.UNIQUE));
                 }
             }
         }
 
         if (constraints.size() > 0)
-            return constraints.toArray(new Constraint[0]);
+            return constraints.toArray(new CreateTable.Constraint[0]);
         else
             return null;
     }
@@ -236,8 +236,6 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 //        DateOp logDeadline = Logger.GET_LOG_DEADLINE();
 //        Logger.SET_LOG_DEADLINE(30, 12, 2222);
 
-        SqlCommands sqlCommands = new SqlCommands();
-
         Class<?>[] entities = databaseEntities();
 
         for (Class<?> entity : entities) {
@@ -246,7 +244,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             EntityProperties entityProperties = getEntityProperties(entity);
             primaryKeysCount = 0;
 
-            SqlCommands.CreateTable dbTable = sqlCommands.new CreateTable(entityProperties.tableName);
+            CreateTable dbTable = new CreateTable(entityProperties.tableName);
 
             while (cls != null) {
                 Field[] fields = cls.getDeclaredFields();
@@ -279,29 +277,29 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                     }
 
                     if (!ignore) {
-                        DataTypes dataType;
+                        CreateTable.DataTypes dataType;
                         Class<?> fieldType = field.getType();
 
                         if (fieldType == short.class || fieldType == Short.class)
-                            dataType = DataTypes.INTEGER;
+                            dataType = CreateTable.DataTypes.INTEGER;
                         else if (fieldType == int.class || fieldType == Integer.class)
-                            dataType = DataTypes.INTEGER;
+                            dataType = CreateTable.DataTypes.INTEGER;
                         else if (fieldType == long.class || fieldType == Long.class)
-                            dataType = DataTypes.INTEGER;
+                            dataType = CreateTable.DataTypes.INTEGER;
 
                         else if (fieldType == boolean.class || fieldType == Boolean.class)
-                            dataType = DataTypes.INTEGER;
+                            dataType = CreateTable.DataTypes.INTEGER;
 
                         else if (fieldType == float.class || fieldType == Float.class)
-                            dataType = DataTypes.REAL;
+                            dataType = CreateTable.DataTypes.REAL;
                         else if (fieldType == double.class || fieldType == Double.class)
-                            dataType = DataTypes.REAL;
+                            dataType = CreateTable.DataTypes.REAL;
 
                         else if (fieldType == String.class)
-                            dataType = DataTypes.TEXT;
+                            dataType = CreateTable.DataTypes.TEXT;
 
                         else {
-                            dataType = DataTypes.TEXT;
+                            dataType = CreateTable.DataTypes.TEXT;
 
                             //check if end code has converter
                             onConvertDataTypeToJsonRequired(cls, field.getName(), fieldType, null);
@@ -333,12 +331,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        SqlCommands sqlCommands = new SqlCommands();
-
         Class<?>[] entities = databaseEntities();
 
         for (Class<?> entity : entities) {
-            SqlCommands.DropTable tasksTable = sqlCommands.new DropTable(getTableName(entity));
+            DropTable tasksTable = new DropTable(getTableName(entity));
             try {
                 db.execSQL(tasksTable.getCode());
             } catch (Exception e) {
@@ -487,51 +483,21 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
 
     //region SELECT --------
-    public <T> T select(@NotNull Class<T> entity, @NotNull WhereClause whereClause) {
-        return select(entity, whereClause, null);
-    }
 
-    public <T> T select(@NotNull Class<T> entity, @NotNull WhereClause whereClause, Boolean orderAscending) {
-        T item = select(entity, collectColumns(entity), whereClause, orderAscending);
-        return item;
-    }
-
-    public <T> T select(@NotNull Class<T> entity, @NotNull String[] specialColumns, WhereClause whereClause, Boolean orderAscending) {
-        JSONArray result = doSelect(entity, specialColumns, whereClause, orderAscending);
-
-        if (result.length() > 0) {
-            T item = null;
-            try {
-                item = new Gson().fromJson(result.getJSONObject(0).toString(), entity);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return item;
-        } else {
-            return null;
-        }
-    }
-
-
+    //region select multiple items
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken) {
         return select(entity, typeToken, (WhereClause) null, (Boolean) null);
     }
-
-    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, WhereClause whereClause) {
-        return select(entity, typeToken, whereClause, null);
-    }
-
-    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, WhereClause whereClause, Boolean orderAscending) {
-        List<T> lst = select(entity, typeToken, collectColumns(entity), whereClause, orderAscending);
-        return lst;
-    }
-
 
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns) {
         return select(entity, typeToken, specialColumns, (WhereClause) null, null);
     }
 
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns, WhereClause whereClause) {
+        return select(entity, typeToken, specialColumns, whereClause == null ? null : whereClause.getCode());
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns, String whereClause) {
         return select(entity, typeToken, specialColumns, whereClause, null);
     }
 
@@ -547,6 +513,65 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return lst;
     }
 
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, WhereClause whereClause) {
+        return select(entity, typeToken, whereClause == null ? null : whereClause.getCode(), null);
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, String whereClause) {
+        return select(entity, typeToken, whereClause, null);
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, WhereClause whereClause, Boolean orderAscending) {
+        return select(entity, typeToken, whereClause == null? null : whereClause.getCode(), orderAscending);
+    }
+
+    public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, String whereClause, Boolean orderAscending) {
+        List<T> lst = select(entity, typeToken, collectColumns(entity), whereClause, orderAscending);
+        return lst;
+    }
+    //endregion select multiple items
+
+    //region select single item
+    public <T> T select(@NotNull Class<T> entity, @NotNull WhereClause whereClause) {
+        return select(entity, whereClause.getCode());
+    }
+
+    public <T> T select(@NotNull Class<T> entity, @NotNull String whereClause) {
+        return select(entity, whereClause, null);
+    }
+
+
+    public <T> T select(@NotNull Class<T> entity, @NotNull WhereClause whereClause, Boolean orderAscending) {
+        return select(entity, whereClause.getCode(), orderAscending);
+    }
+
+    public <T> T select(@NotNull Class<T> entity, @NotNull String whereClause, Boolean orderAscending) {
+        T item = select(entity, collectColumns(entity), whereClause, orderAscending);
+        return item;
+    }
+
+
+    public <T> T select(@NotNull Class<T> entity, @NotNull String[] specialColumns, @NotNull WhereClause whereClause, Boolean orderAscending) {
+        return select(entity, specialColumns, whereClause.getCode(), orderAscending);
+    }
+
+    public <T> T select(@NotNull Class<T> entity, @NotNull String[] specialColumns, @NotNull String whereClause, Boolean orderAscending) {
+        JSONArray result = doSelect(entity, specialColumns, whereClause, orderAscending);
+
+        if (result.length() > 0) {
+            T item = null;
+            try {
+                item = new Gson().fromJson(result.getJSONObject(0).toString(), entity);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return item;
+        } else {
+            return null;
+        }
+    }
+    //endregion select single item
 
     public <T> JSONArray doSelect(@NotNull Class<T> entity, @NotNull String[] specialColumns, WhereClause whereClause, Boolean orderAscending) {
         return doSelect(entity, specialColumns, whereClause == null? null : whereClause.getCode(), orderAscending);
@@ -663,6 +688,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     @Nullable
     public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, WhereClause whereClause) {
+        return selectSpecial(entity, specialColumns, whereClause == null? null : whereClause.getCode());
+    }
+
+    public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause) {
         return selectSpecial(entity, specialColumns, whereClause, null);
     }
 
@@ -702,13 +731,26 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         return map;
     }
 
+
+    public <T> long getEntityCount(@NotNull Class<T> entity) {
+        return getEntityCount(entity, (WhereClause) null);
+    }
+
     public <T> long getEntityCount(@NotNull Class<T> entity, WhereClause whereClause) {
+        return getEntityCount(entity, whereClause == null ? null : whereClause.getCode());
+    }
+
+    public <T> long getEntityCount(@NotNull Class<T> entity, String whereClause) {
         return getEntityCount(entity, "*", whereClause);
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String columnName, WhereClause whereClause) {
+        return getEntityCount(entity, columnName, whereClause == null? null : whereClause.getCode());
+    }
+
+    public <T> long getEntityCount(@NotNull Class<T> entity, String columnName, String whereClause) {
         String sql = "SELECT COUNT(" + columnName + ") FROM " + getTableName(entity);
-        if (whereClause != null && whereClause.hasCode()) {
+        if (!TextUtils.isEmpty(whereClause)) {
             sql += " WHERE " + whereClause;
         }
         List<Map<String, Object>> res = sqlQuery(sql);
@@ -825,10 +867,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 if (Modifier.isStatic(field.getModifiers()))
                     continue;
 
-                Constraint[] constraints = getFieldConstraints(field);
+                CreateTable.Constraint[] constraints = getFieldConstraints(field);
                 if (constraints != null) {
-                    for (Constraint constraint : constraints) {
-                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
+                    for (CreateTable.Constraint constraint : constraints) {
+                        if (constraint.getConstraint() == CreateTable.ConstraintKeywords.PRIMARY_KEY) {
                             primaryFields.add(field.getName());
                         }
                     }
@@ -934,10 +976,10 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 if (Modifier.isStatic(field.getModifiers()))
                     continue;
 
-                Constraint[] constraints = getFieldConstraints(field);
+                CreateTable.Constraint[] constraints = getFieldConstraints(field);
                 if (constraints != null) {
-                    for (Constraint constraint : constraints) {
-                        if (constraint.getConstraint() == ConstraintKeywords.PRIMARY_KEY) {
+                    for (CreateTable.Constraint constraint : constraints) {
+                        if (constraint.getConstraint() == CreateTable.ConstraintKeywords.PRIMARY_KEY) {
                             try {
                                 field.setAccessible(true);
                                 Object value = field.get(data);

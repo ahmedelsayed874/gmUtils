@@ -8,6 +8,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Created by Ahmed El-Sayed (Glory Maker)
+ * Computer Engineer / 2012
+ * Android/iOS Developer with (Java/Kotlin, Swift)
+ * Have experience with:
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
+ * a.elsayedabdo@gmail.com
+ * +201022663988
+ */
 public class WhereClause implements ICommand {
 
     public static class Clause implements ICommand {

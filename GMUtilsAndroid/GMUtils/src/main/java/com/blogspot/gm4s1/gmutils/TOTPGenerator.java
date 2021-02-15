@@ -1,7 +1,5 @@
 package com.blogspot.gm4s1.gmutils;
 
-import android.graphics.Bitmap;
-
 /**
  * this class wrote with Kotlin language
  * I changed file extension to java to make all module support java only
@@ -23,12 +21,13 @@ import android.graphics.Bitmap;
  */
 public class TOTPGenerator {}
 
-//package utils.services
-//
+//import android.content.Context
 //        import android.graphics.Bitmap
 //        import android.graphics.BitmapFactory
 //        import android.os.Build
+//        import android.util.DisplayMetrics
 //        import android.util.Log
+//        import androidx.annotation.DimenRes
 //        import com.google.zxing.BarcodeFormat
 //        import com.google.zxing.MultiFormatWriter
 //        import com.google.zxing.client.j2se.MatrixToImageWriter
@@ -48,6 +47,7 @@ public class TOTPGenerator {}
 //        import dev.samstevens.totp.secret.SecretGenerator
 //        import dev.samstevens.totp.time.SystemTimeProvider
 //        import dev.samstevens.totp.time.TimeProvider
+//        import utils.R
 //        import utils.preferences.SettingsPreferences
 //        import utils.utils.AppLog
 //        import utils.utils.TextHelper
@@ -60,9 +60,6 @@ public class TOTPGenerator {}
 //        val HMAC_ALGORITHM = HashingAlgorithm.SHA1
 //        const val DIGIT_LENGTH = 8
 //        const val PERIOD = 30
-//        const val IMAGE_WIDTH = 800
-//        const val QR_IMAGE_HEIGHT = 800
-//        const val BC_IMAGE_HEIGHT = 240
 //    }
 //
 //    fun generateSharedSecret(): String {
@@ -148,8 +145,50 @@ public class TOTPGenerator {}
 //        return generateQRCode(textForEncoding = data.uri, QRType = QRType, imageWidth = imageWidth, imageHeight = imageHeight)
 //    }
 //
-//    fun generateQRCode(textForEncoding: String, QRType: BarcodeFormat, imageWidth: Int, imageHeight: Int): Bitmap {
+//    fun generateQRCode(
+//            textForEncoding: String,
+//            QRType: BarcodeFormat,
+//            imageWidth: Int,
+//            imageHeight: Int
+//    ): Bitmap {
 //        val qrGen = QRGen()
+//        return qrGen.generate(textForEncoding, QRType, imageWidth, imageHeight)
+//    }
+//
+//    fun generateQRCode(
+//            secret: String,
+//            userName: String,
+//            appName: String,
+//            QRType: BarcodeFormat,
+//            @DimenRes imageWidthDp: Int,
+//            @DimenRes imageHeightDp: Int,
+//            context: Context
+//    ): Bitmap {
+//        val imageWidth = context.resources.getDimensionPixelSize(imageWidthDp)
+//        val imageHeight = context.resources.getDimensionPixelSize(imageHeightDp)
+//
+//        return generateQRCode(
+//                secret = secret,
+//                userName = userName,
+//                appName = appName,
+//                QRType = QRType,
+//                imageWidth = imageWidth,
+//                imageHeight = imageHeight
+//        )
+//    }
+//
+//    fun generateQRCode(
+//            textForEncoding: String,
+//            QRType: BarcodeFormat,
+//            @DimenRes imageWidthDp: Int,
+//            @DimenRes imageHeightDp: Int,
+//            context: Context
+//    ): Bitmap {
+//        val qrGen = QRGen()
+//
+//        val imageWidth = context.resources.getDimensionPixelSize(imageWidthDp)
+//        val imageHeight = context.resources.getDimensionPixelSize(imageHeightDp)
+//
 //        return qrGen.generate(textForEncoding, QRType, imageWidth, imageHeight)
 //    }
 //
@@ -193,6 +232,7 @@ public class TOTPGenerator {}
 //                    imageWidth,
 //                    imageHeight
 //            )
+//
 //            qrBitmap = Bitmap.createBitmap(
 //                    bitMatrix.width,
 //                    bitMatrix.height,
@@ -213,18 +253,18 @@ public class TOTPGenerator {}
 //            return qrBitmap as Bitmap
 //
 //        } else {
-//
 //            // Barcode
 //            val bitMatrix = writer.encode(
 //                    data,
 //                    type,
-//                    350,
-//                    200
+//                    imageWidth,
+//                    imageHeight
 //            )
 //
 //            val barcodeEncoder = BarcodeEncoder()
 //            barcodeBitmap = barcodeEncoder.createBitmap(bitMatrix)
 //            return barcodeBitmap as Bitmap
+//
 //        }
 //    }
 //

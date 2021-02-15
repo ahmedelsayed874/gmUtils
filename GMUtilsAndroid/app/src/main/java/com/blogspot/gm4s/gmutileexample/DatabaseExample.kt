@@ -104,16 +104,12 @@ class DB(context: Context) : BaseDatabase(context) {
 
         var query1 = select(
             Entity1::class.java,
-            object : TypeToken<List<Entity1>>() {},
-            null,
-            null
+            object : TypeToken<List<Entity1>>() {}
         )
 
         val query2 = select(
             Entity2::class.java,
-            object : TypeToken<List<Entity2>>() {},
-            null,
-            null
+            object : TypeToken<List<Entity2>>() {}
         )
 
         val query3 = select(
@@ -155,9 +151,7 @@ class DB(context: Context) : BaseDatabase(context) {
 
         query1 = select(
             Entity1::class.java,
-            object : TypeToken<List<Entity1>>() {},
-            null,
-            null
+            object : TypeToken<List<Entity1>>() {}
         )
 
         Log.e("****", query1.toString())
@@ -205,18 +199,15 @@ class DB(context: Context) : BaseDatabase(context) {
 
         query1 = select(
             Entity1::class.java,
-            object : TypeToken<List<Entity1>>() {},
-            null,
-            null
+            object : TypeToken<List<Entity1>>() {}
         )
 
         Log.e("****", query1.toString())
         Log.e("****", query1.last().intField0.toString())
 
-        val selectSpecial =
-            selectSpecial(Entity1::class.java, arrayOf("count(*) as count"), null)
+        val selectSpecial = selectSpecial(Entity1::class.java, arrayOf("count(*) as count"))
 
-        val entityCount = getEntityCount(Entity1::class.java, null)
+        val entityCount = getEntityCount(Entity1::class.java)
 
         val sqlQuery =
             sqlQuery("select count(*) as count from ${Entity1::class.java.simpleName}")
