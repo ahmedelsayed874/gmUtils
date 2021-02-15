@@ -12,10 +12,12 @@ import com.blogspot.gm4s1.gmutils.database.BaseDatabase
 import com.blogspot.gm4s1.gmutils.database.annotations.Default
 import com.blogspot.gm4s1.gmutils.database.annotations.Ignore
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey
+import com.blogspot.gm4s1.gmutils.database.sqlitecommands.WhereClause
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+var brightness = -1f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,13 +139,13 @@ class MainActivity : AppCompatActivity() {
 
             val query3 = db.select(
                 Entity1::class.java,
-                "${Entity2::id.name}='124'",
+                WhereClause().append(WhereClause.Clause(Entity2::id.name, WhereClause.CompareOperator.Equal, "124")),
                 null
             )
 
             val query4 = db.select(
                 Entity1::class.java,
-                "${Entity2::id.name}='12555'",
+                WhereClause().append(WhereClause.Clause(Entity2::id.name, WhereClause.CompareOperator.Equal, "12555")),
                 null
             )
 
@@ -233,7 +235,7 @@ class MainActivity : AppCompatActivity() {
             Log.e("****", query1.last().intField0.toString())
 
             val selectSpecial =
-                db.selectSpecial(Entity1::class.java, arrayOf("count(*) as count"), null, null)
+                db.selectSpecial(Entity1::class.java, arrayOf("count(*) as count"), null)
 
             val entityCount = db.getEntityCount(Entity1::class.java, null)
 
@@ -243,6 +245,14 @@ class MainActivity : AppCompatActivity() {
             Log.e("****", selectSpecial.toString())
             Log.e("****", entityCount.toString())
             Log.e("****", sqlQuery.toString())
+        }
+
+        btn6.text = "change brightness"
+        btn6.setOnClickListener {
+            val attr = window.attributes
+            attr.screenBrightness = brightness
+            window.setAttributes(attr);
+            brightness += 0.3f
         }
 
     }
@@ -302,7 +312,7 @@ class db(context: Context) : BaseDatabase(context) {
     }
 
     override fun databaseVersion(): Int {
-        return 17;
+        return 18;
     }
 
     override fun databaseEntities(): Array<Class<*>> {

@@ -19,18 +19,22 @@ import org.jetbrains.annotations.NotNull;
 public class Constraint implements ICommand {
     private final ConstraintKeywords constraint;
     private final String name;
-    private final String extra;
+    private final Object extra;
 
     public Constraint(@NotNull ConstraintKeywords name) {
         this.constraint = name;
         this.name = name.getName();
-        this.extra = "";
+        this.extra = null;
     }
 
     public Constraint(@NotNull ConstraintKeywords name, String extra) {
         this.constraint = name;
         this.name = name.getName();
-        this.extra = extra;
+        if (name == ConstraintKeywords.DEFAULT && null == extra) {
+            this.extra = "";
+        } else {
+            this.extra = extra;
+        }
     }
 
     public ConstraintKeywords getConstraint() {
@@ -40,11 +44,15 @@ public class Constraint implements ICommand {
     @Override
     public String getCode() {
         String code = name;
-        if (!TextUtils.isEmpty(extra)) {
-            if (extra.contains("()"))
+        if (null != extra) {
+            if (extra.getClass() == String.class) {
+                if (((String) extra).contains("()"))
+                    code += " " + extra;
+                else
+                    code += " '" + extra + "'";
+            } else {
                 code += " " + extra;
-            else
-                code += " '" + extra + "'";
+            }
         }
         return code;
     }

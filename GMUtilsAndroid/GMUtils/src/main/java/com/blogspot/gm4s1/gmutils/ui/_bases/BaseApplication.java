@@ -5,6 +5,7 @@ import android.app.Application;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.MessagingCenter;
 import com.blogspot.gm4s1.gmutils.R;
@@ -81,6 +82,7 @@ public abstract class BaseApplication extends Application implements Application
     private final long delayAmount = 500L;
     private final String bugFileName = "BUGS";
     private String bugs = "";
+    private boolean hasBugs = false;
     private boolean isBugMessageDisplayed = false;
     private Runnable onBugMessageClosed = null;
 
@@ -164,7 +166,7 @@ public abstract class BaseApplication extends Application implements Application
         });
 
         if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
-            bugs = Logger.readFile(this, bugFileName);
+            bugs = getReportedBugs();
         }
     }
 
@@ -193,6 +195,23 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
+    public boolean hasBugs() {
+        return hasBugs;
+    }
+
+    public String getReportedBugs() {
+        return Logger.readFile(this, bugFileName);
+    }
+
+    public void deleteBugs() {
+        try {
+            Logger.deleteSavedFile(this, bugFileName);
+        } catch (Exception e) {}
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         activityCount++;
@@ -203,20 +222,24 @@ public abstract class BaseApplication extends Application implements Application
                 onApplicationStartedFirstActivity();
 
                 if (bugs.length() != 0 && Logger.IS_WRITE_TO_FILE_ENABLED()) {
+                    hasBugs = true;
                     isBugMessageDisplayed = true;
-
-                    MessageDialog.create(activity)
-                            .setMessage(bugs)
-                            .setButton1(R.string.ok, null)
-                            .setButton2(R.string.delete, dialog -> {
-                                Logger.deleteSavedFile(this, bugFileName);
-                            })
-                            .setOnDismissListener(dialog -> {
-                                isBugMessageDisplayed = false;
-                                if (onBugMessageClosed != null) onBugMessageClosed.run();
-                                onBugMessageClosed = null;
-                            })
-                            .show();
+                    try {
+                        MessageDialog.create(activity)
+                                .setMessage(bugs)
+                                .setButton1(R.string.ok, null)
+                                .setButton2(R.string.delete, dialog -> {
+                                    deleteBugs();
+                                })
+                                .setOnDismissListener(dialog -> {
+                                    isBugMessageDisplayed = false;
+                                    if (onBugMessageClosed != null) onBugMessageClosed.run();
+                                    onBugMessageClosed = null;
+                                })
+                                .show();
+                    } catch (Throwable t) {
+                        isBugMessageDisplayed = false;
+                    }
 
                     bugs = "";
                 }
