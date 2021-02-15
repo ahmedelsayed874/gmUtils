@@ -2,6 +2,7 @@ package com.blogspot.gm4s1.gmutils.utils;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
@@ -18,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -28,6 +30,8 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntRange;
 import androidx.annotation.RequiresPermission;
 
 import com.blogspot.gm4s1.gmutils.DateOp;
@@ -209,4 +213,36 @@ public class Utils {
 
         return isDebuggable;
     }
+
+    //------------------------------------------------------------------------------------------
+
+    public float getScreenBrightness(Activity activity) {
+        Window window = activity.getWindow();
+        WindowManager.LayoutParams attributes = window.getAttributes();
+        return attributes.screenBrightness;
+    }
+
+    public void setScreenBrightness(Activity activity, @FloatRange(from = -0.1, to = 1) float value) {
+        Window window = activity.getWindow();
+        WindowManager.LayoutParams attributes = window.getAttributes();
+        attributes.screenBrightness = value;
+        window.setAttributes(attributes);
+    }
+
+    public int getDeviceBrightness(Context context) {
+        int brightness = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 0);
+        return brightness;
+    }
+
+    /**
+     * must request permission in manifest
+     * <uses-permission
+     *       android:name="android.permission.WRITE_SETTINGS"
+     *       tools:ignore="ProtectedPermissions" />
+     */
+    @RequiresPermission("android.permission.WRITE_SETTINGS")
+    public void setDeviceBrightness(Context context, @IntRange(from = 0, to = 100) int value) {
+        Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, value);
+    }
+
 }

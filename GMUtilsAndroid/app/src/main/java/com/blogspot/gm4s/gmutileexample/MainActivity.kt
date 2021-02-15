@@ -3,21 +3,23 @@ package com.blogspot.gm4s.gmutileexample
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.database.BaseDatabase
 import com.blogspot.gm4s1.gmutils.database.annotations.Default
 import com.blogspot.gm4s1.gmutils.database.annotations.Ignore
 import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey
 import com.blogspot.gm4s1.gmutils.database.sqlitecommands.WhereClause
+import com.blogspot.gm4s1.gmutils.utils.Utils
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-var brightness = -1f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,279 +49,42 @@ var brightness = -1f
 
         btn5.text = "test BaseDatabase class"
         btn5.setOnClickListener {
-            val db = db(this)
-
-            db.insert(
-                Entity2::class.java,
-                ContentValues().apply {
-                    this.put("intField2", 2212122)
-                }
-            )
-
-            db.insert(
-                Entity2::class.java,
-                ContentValues().apply {
-                    this.put("intField2", null as? Int)
-                }
-            )
-
-            db.insert(listOf(
-                Entity1(
-                    "123",
-                    110,
-                    120,
-                    130f,
-                    140.0,
-                    "150",
-                    true,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-                ).apply {
-                    longField0 = 7654356786543567
-                }
-            ))
-
-            db.insert(
-                listOf(
-                    Entity1(
-                        "124",
-                        111,
-                        121,
-                        131f,
-                        141.0,
-                        "151",
-                        true,
-                        171,
-                        null,
-                        191f,
-                        null,
-                        "201",
-                        null
-                    )
-                )
-            )
-
-            db.insert(
-                listOf(
-                    Entity1(
-                        "124",
-                        111,
-                        121,
-                        131f,
-                        141.0,
-                        "151",
-                        true,
-                        171,
-                        null,
-                        191f,
-                        null,
-                        "201",
-                        null
-                    )
-                ), true
-            )
-
-            var query1 = db.select(
-                Entity1::class.java,
-                object : TypeToken<List<Entity1>>() {},
-                null,
-                null
-            )
-
-            val query2 = db.select(
-                Entity2::class.java,
-                object : TypeToken<List<Entity2>>() {},
-                null,
-                null
-            )
-
-            val query3 = db.select(
-                Entity1::class.java,
-                WhereClause().append(WhereClause.Clause(Entity2::id.name, WhereClause.CompareOperator.Equal, "124")),
-                null
-            )
-
-            val query4 = db.select(
-                Entity1::class.java,
-                WhereClause().append(WhereClause.Clause(Entity2::id.name, WhereClause.CompareOperator.Equal, "12555")),
-                null
-            )
-
-            Log.e("****", query1.toString())
-            Log.e("****", query1.last().intField0.toString())
-            Log.e("****", query2.toString())
-            Log.e("****", query2.last().intField2?.toString() ?: "")
-            Log.e("****", (query3 ?: "").toString())
-            Log.e("****", (query4 ?: "").toString())
-
-            db.update(
-                Entity1(
-                    "124",
-                    111,
-                    565665,
-                    988998f,
-                    123456.0,
-                    "mncbnmmnbv bvbv",
-                    true,
-                    17231,
-                    null,
-                    12391f,
-                    null,
-                    "20231",
-                    null
-                )
-            )
-
-            query1 = db.select(
-                Entity1::class.java,
-                object : TypeToken<List<Entity1>>() {},
-                null,
-                null
-            )
-
-            Log.e("****", query1.toString())
-            Log.e("****", query1.last().intField0.toString())
-
-            db.delete(
-                Entity1(
-                    "124",
-                    111,
-                    1232231,
-                    13231f,
-                    14231.0,
-                    "15231",
-                    true,
-                    17231,
-                    null,
-                    12391f,
-                    null,
-                    null,
-                    null
-                )
-            )
-
-            db.delete(Entity1::class.java, "${Entity1::id.name}=123")
-
-            db.insert(
-                listOf(
-                    Entity1(
-                        "1240421",
-                        111,
-                        121,
-                        131f,
-                        141.0,
-                        "151",
-                        true,
-                        171,
-                        null,
-                        191f,
-                        null,
-                        "201",
-                        null
-                    )
-                )
-            )
-
-            query1 = db.select(
-                Entity1::class.java,
-                object : TypeToken<List<Entity1>>() {},
-                null,
-                null
-            )
-
-            Log.e("****", query1.toString())
-            Log.e("****", query1.last().intField0.toString())
-
-            val selectSpecial =
-                db.selectSpecial(Entity1::class.java, arrayOf("count(*) as count"), null)
-
-            val entityCount = db.getEntityCount(Entity1::class.java, null)
-
-            val sqlQuery =
-                db.sqlQuery("select count(*) as count from ${Entity1::class.java.simpleName}")
-
-            Log.e("****", selectSpecial.toString())
-            Log.e("****", entityCount.toString())
-            Log.e("****", sqlQuery.toString())
+            DB(this).test()
         }
 
-        btn6.text = "change brightness"
+        btn6.text = "change screen brightness ${Utils.createInstance().getScreenBrightness(this)}"
         btn6.setOnClickListener {
-            val attr = window.attributes
-            attr.screenBrightness = brightness
-            window.setAttributes(attr);
-            brightness += 0.3f
+            var bn = Utils.createInstance().getScreenBrightness(this)
+
+            bn += 0.1f
+            if (1f - bn < 0.1f && 1f - bn > 0) bn = 1f
+            else if (bn > 1) bn = -0.1f
+
+            Utils.createInstance().setScreenBrightness(this, bn)
+
+            btn6.text = "change screen brightness (C: $bn)"
         }
 
-    }
+        btn7.text = "change device brightness ${Utils.createInstance().getDeviceBrightness(this)}"
+        btn7.setOnClickListener {
+            val checkSelfPermission =
+                ActivityCompat.checkSelfPermission(this, "android.permission.WRITE_SETTINGS")
+            if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf("android.permission.WRITE_SETTINGS"), 10)
+                return@setOnClickListener
+            }
 
-}
+            var bn = Utils.createInstance().getDeviceBrightness(this)
 
-open class Entity0(
-    val intField0: Int,
-) {
-    var longField0: Long? = null
-}
+            bn += 10
+            if (100 - bn in 1..9) bn = 100
+            else if (bn > 100) bn = 0
 
-data class Entity1(
-    @PrimaryKey
-    val id: String,
+            Utils.createInstance().setDeviceBrightness(this, bn)
 
-    val intField1: Int,
-    val longField: Long,
+            btn7.text = "change device brightness (C: $bn)"
+        }
 
-    val floatField: Float,
-    val doubleField: Double,
-
-    val stringField: String,
-
-    val booleanField: Boolean,
-
-    val intField1Nullable: Int?,
-    val longFieldNullable: Long?,
-
-    val floatFieldNullable: Float?,
-    val doubleFieldNullable: Double?,
-
-    @Default("default of stringFieldNullable")
-    val stringFieldNullable: String?,
-
-    val booleanFieldNullable: Boolean?,
-
-    ) : Entity0(intField1) {
-
-    @Ignore
-    var longField1: Long? = null
-}
-
-data class Entity2(
-    @PrimaryKey
-    val id: String,
-    val intField2: Int?
-) {
-    companion object {
-        const val vvvvvvvvvvvvvvv: String = "ll"
-    }
-}
-
-class db(context: Context) : BaseDatabase(context) {
-    override fun databaseName(): String {
-        return "db";
-    }
-
-    override fun databaseVersion(): Int {
-        return 18;
-    }
-
-    override fun databaseEntities(): Array<Class<*>> {
-        return arrayOf(
-            Entity1::class.java,
-            Entity2::class.java
-        )
     }
 
 }
