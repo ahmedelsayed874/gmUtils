@@ -1,5 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices;
 
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeZones;
+
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;

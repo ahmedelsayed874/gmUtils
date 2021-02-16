@@ -1,6 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.APIConstants;
+import com.blogspot.gm4s1.gmutils.net.retrofit.APIConstants;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.ImageResponse;
+
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;

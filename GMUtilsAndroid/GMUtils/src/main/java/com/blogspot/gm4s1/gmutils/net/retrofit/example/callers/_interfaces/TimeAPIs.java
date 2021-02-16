@@ -1,8 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeOfArea;
-import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeZones;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

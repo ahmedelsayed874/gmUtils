@@ -1,11 +1,11 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.production;
 
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeAPIsRequests;
-import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeOfArea;
-import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeZones;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.Callback;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.OnResponseReady;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.RetrofitService;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.callback.Callback;
+import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady;
+import com.blogspot.gm4s1.gmutils.net.retrofit.RetrofitService;
 
 import retrofit2.Call;
 

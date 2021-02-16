@@ -1,7 +1,8 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers;
 
 import com.blogspot.gm4s1.gmutils.DateOp;
-import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.ImageAPI;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.FileAPIs;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.ImageAPIs;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.TimeAPIs;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.dummy.FakeImageAPI;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.dummy.FakeTimeAPIs;
@@ -30,11 +31,17 @@ public class ExampleAPIsPool {
     }
 
     public interface APIs {
+        FileAPIs fileAPIs();
         TimeAPIs timeAPIs();
-        ImageAPI imageAPI();
+        ImageAPIs imageAPI();
     }
 
     public static class ProductionAPI implements APIs {
+
+        @Override
+        public FileAPIs fileAPIs() {
+            return new com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.production.FileAPIs();
+        }
 
         @Override
         public TimeAPIs timeAPIs() {
@@ -42,7 +49,7 @@ public class ExampleAPIsPool {
         }
 
         @Override
-        public ImageAPI imageAPI() {
+        public ImageAPIs imageAPI() {
             return new com.blogspot.gm4s1.gmutils.net.retrofit.example.callers.production.ImageAPI();
         }
     }
@@ -50,12 +57,17 @@ public class ExampleAPIsPool {
     public static class FakeAPI implements APIs {
 
         @Override
+        public FileAPIs fileAPIs() {
+            return null;
+        }
+
+        @Override
         public TimeAPIs timeAPIs() {
             return new FakeTimeAPIs();
         }
 
         @Override
-        public ImageAPI imageAPI() {
+        public ImageAPIs imageAPI() {
             return new FakeImageAPI();
         }
     }

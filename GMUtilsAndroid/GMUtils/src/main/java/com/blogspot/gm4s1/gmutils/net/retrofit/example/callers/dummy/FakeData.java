@@ -5,10 +5,10 @@ import android.os.Looper;
 
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback2;
-import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeOfArea;
-import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.TimeZones;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.BaseResponse;
-import com.blogspot.gm4s1.gmutils.net.retrofit.zcore.responseHolders.Response;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeOfArea;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeZones;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.Response;
 
 import java.util.Random;
 
