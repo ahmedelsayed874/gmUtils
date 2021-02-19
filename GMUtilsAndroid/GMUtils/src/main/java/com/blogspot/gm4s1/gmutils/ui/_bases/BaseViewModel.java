@@ -4,6 +4,8 @@ import android.app.Application;
 
 import androidx.lifecycle.AndroidViewModel;
 
+import org.jetbrains.annotations.NotNull;
+
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -18,7 +20,7 @@ import androidx.lifecycle.AndroidViewModel;
  */
 public class BaseViewModel extends AndroidViewModel {
 
-    public BaseViewModel(Application application) {
+    public BaseViewModel(@NotNull Application application) {
         super(application);
 
     }

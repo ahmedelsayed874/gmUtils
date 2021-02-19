@@ -222,7 +222,7 @@ public class Utils {
         return attributes.screenBrightness;
     }
 
-    public void setScreenBrightness(Activity activity, @FloatRange(from = -0.1, to = 1) float value) {
+    public void setScreenBrightness(Activity activity, @FloatRange(from = -1, to = 1) float value) {
         Window window = activity.getWindow();
         WindowManager.LayoutParams attributes = window.getAttributes();
         attributes.screenBrightness = value;

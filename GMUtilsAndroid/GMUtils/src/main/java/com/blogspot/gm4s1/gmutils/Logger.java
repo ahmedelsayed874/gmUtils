@@ -560,7 +560,7 @@ public class Logger {
                 fileName = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
             }
 
-            String filePath = logFilesDir.getPath() + fileName + ".txt";
+            String filePath = logFilesDir.getPath() + "/" + fileName + ".txt";
             File file = new File(filePath);
             if (!file.exists()) {
                 file.createNewFile();

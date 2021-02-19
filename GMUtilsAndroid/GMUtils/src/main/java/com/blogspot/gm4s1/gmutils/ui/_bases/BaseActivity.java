@@ -79,7 +79,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         return null;
     }
 
-    protected ViewModelProvider.Factory onCreateViewModelFactory(int id) {
+    protected ViewModelProvider.Factory getViewModelFactory(int id) {
         ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getApplication());
@@ -135,7 +135,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
             for (Integer id : viewModelClasses.keySet()) {
                 ViewModelProvider viewModelProvider = new ViewModelProvider(
                         thisActivity(),
-                        onCreateViewModelFactory(id)
+                        getViewModelFactory(id)
                 );
 
                 Class<? extends BaseViewModel> viewModelClass = viewModelClasses.get(id);

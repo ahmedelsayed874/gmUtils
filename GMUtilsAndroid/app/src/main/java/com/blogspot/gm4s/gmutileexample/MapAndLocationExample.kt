@@ -49,7 +49,7 @@ class MapAndLocationExample : BaseActivity() {
     private var mMapController: MapController? = null
     private var mLocationTracker: LocationTracker? = null
 
-    private var id = 1
+    private var mapPinId = 1 //important for tracking
 
     override fun getActivityLayout() = R.layout.activity_map_and_location
 
@@ -189,7 +189,7 @@ class MapAndLocationExample : BaseActivity() {
         mLocationTracker = LocationTracker(this, object : LocationTracker.Listener {
             override fun onLocationFounded(obj: LocationTracker?, location: Location) {
                 val pin = MapController.MapPin(
-                    id.toString(), //important for tracking
+                    mapPinId.toString(), //important for tracking
                     location.latitude,
                     location.longitude
                 ).also {

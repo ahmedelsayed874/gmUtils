@@ -1,22 +1,17 @@
-package com.blogspot.gm4s.gmutileexample
+package com.blogspot.gm4s.gmutileexample.activities
 
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.blogspot.gm4s.gmutileexample.ContactEditorActivity
+import com.blogspot.gm4s.gmutileexample.DB
+import com.blogspot.gm4s.gmutileexample.R
+import com.blogspot.gm4s.gmutileexample.ReadLogFileActivity
 import com.blogspot.gm4s1.gmutils.ui.MyToast
-import com.blogspot.gm4s1.gmutils.database.BaseDatabase
-import com.blogspot.gm4s1.gmutils.database.annotations.Default
-import com.blogspot.gm4s1.gmutils.database.annotations.Ignore
-import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.WhereClause
 import com.blogspot.gm4s1.gmutils.utils.Utils
-import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
