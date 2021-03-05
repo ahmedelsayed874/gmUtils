@@ -4,6 +4,8 @@ import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.Response;
 
+import java.io.IOException;
+
 import retrofit2.Call;
 
 /**
@@ -27,6 +29,8 @@ final class CallbackOperations<R extends BaseResponse> {
     private Object extra;
     private Listener<R> listener;
     private CallbackErrorHandler errorListener;
+    private boolean includeRawResponse = false;
+    private boolean printRawResponse = false;
 
     public CallbackOperations(Class<R> TClass, String requestDetails, String requestId, Listener<R> listener) {
         this.TClass = TClass;
@@ -55,6 +59,16 @@ final class CallbackOperations<R extends BaseResponse> {
         this.errorListener = errorListener;
     }
 
+    public void includeRawResponse() {
+        this.includeRawResponse = true;
+    }
+
+    public void printRawResponse() {
+        this.printRawResponse = true;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     void onResponse(Call<R> call, retrofit2.Response<R> response) {
         String error = "";
         try {
@@ -77,6 +91,14 @@ final class CallbackOperations<R extends BaseResponse> {
                 }
 
                 body._code = response.code();
+
+                if (includeRawResponse) {
+                    try {
+                        body.rawResponse = response.raw().body().bytes();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 setResult(response.body());
 
@@ -152,17 +174,35 @@ final class CallbackOperations<R extends BaseResponse> {
         setResult(response);
     }
 
+    //----------------------------------------------------------------------------------------------
+
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response, String errorBody) {
+        if (!Logger.IS_LOG_ENABLED()) return;
+
         String url = "";
+
         try {
             url = call.request().url().toString();
         } catch (Exception e){}
 
         if (response != null) {
+            String resStr;
+            if (printRawResponse) {
+                try {
+                    resStr = "response(RAW): " + response.raw().body().string() + "\n"
+                            + "response(NOW): " + response.body();
+                } catch (Exception e) {
+                    resStr = "response(RAW): " + "NULL\n"
+                            + "response(NOW): " + response.body();
+                }
+            } else {
+                resStr = "response: " + response.body();
+            }
+
             Logger.print(
                     "API:Response:",
                     "url: <" + url + ">, \n" +
-                            "response: " + response.body() + ", " +
+                            resStr + ", " +
                             "\ncode= " + response.code() + ", \n" +
                             "msg= " + response.message() + ", " +
                             "\nerrorBody= " + errorBody

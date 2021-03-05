@@ -35,6 +35,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.RequiresPermission;
 
 import com.blogspot.gm4s1.gmutils.DateOp;
+import com.blogspot.gm4s1.gmutils.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -201,6 +202,28 @@ public class Utils {
     public int calculatePixelInDp(Context context, int dp) {
         float density = context.getResources().getDisplayMetrics().density;
         return (int) (density * dp);
+    }
+
+    public int calculatePixelInCm(Context context, double cm) {
+        /*
+            dpi is the pixel density or dots per inch.
+            96 dpi means there are 96 pixels per inch.
+            1 inch is equal to 2.54 centimeters.
+
+            1 inch = 2.54 cm
+            dpi = 96 px / in
+            96 px / 2.54 cm
+
+            Therefore one pixel is equal to
+            1 px = 2.54 cm / 96
+            1 px = 0.026458333 cm
+         */
+
+        int density = context.getResources().getDisplayMetrics().densityDpi; // dots per inch and 1-inch = 2.54 centimeters
+        double oneCmPx = density / 2.54;
+
+        double px = cm * oneCmPx;
+        return roundNumber(px, 0.5F);
     }
 
     //------------------------------------------------------------------------------------------

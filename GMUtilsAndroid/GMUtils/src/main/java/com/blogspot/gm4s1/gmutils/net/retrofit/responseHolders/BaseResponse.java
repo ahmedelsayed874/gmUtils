@@ -1,6 +1,7 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders;
 
 import androidx.annotation.Nullable;
+import androidx.room.Ignore;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -62,12 +63,25 @@ import androidx.annotation.Nullable;
 public abstract class BaseResponse {
     public enum Statuses { Succeeded, Error, ConnectionFailed }
 
+    @Ignore
     public String _internalMessage;
 
+    @Ignore
     private String _internalStatus = null;
+
+    @Ignore
     public String _requestId;
+
+    @Ignore
     public Integer _code;
+
+    @Ignore
     public Object extra;
+
+    @Ignore
+    public byte[] rawResponse;
+
+    //----------------------------------------------------------------------------------------------
 
     public void setInternalStatus(@Nullable Statuses status) {
         this._internalStatus = status.name();

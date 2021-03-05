@@ -6,9 +6,11 @@ import android.content.Context;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,44 +29,82 @@ import java.util.TimeZone;
  * +201022663988
  */
 public class DateOp implements Serializable {
+    //https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+
+    public static final String PATTERN_SYMBOL_YEAR = "yyyy";
+
+    public static final String PATTERN_SYMBOL_MONTH = "MM";
+    public static final String PATTERN_SYMBOL_MONTH_NAME = "MMMM";
+    public static final String PATTERN_SYMBOL_MONTH_HALF_NAME = "MMM";
+
+    public static final String PATTERN_SYMBOL_DAY = "dd";
+    public static final String PATTERN_SYMBOL_DAY_NAME = "EEEE";
+    public static final String PATTERN_SYMBOL_DAY_HALF_NAME = "EEE";
+
+    public static final String PATTERN_SYMBOL_HOUR24 = "HH";
+    public static final String PATTERN_SYMBOL_HOUR12 = "hh";
+
+    public static final String PATTERN_SYMBOL_MINUTE = "mm";
+    public static final String PATTERN_SYMBOL_SECOND = "ss";
+    public static final String PATTERN_SYMBOL_MILLISECOND = "SSS";
+    public static final String PATTERN_SYMBOL_AM_PM = "a";
+
+    public static final String PATTERN_SYMBOL_TIME_ZONE = "z";//General time zone -> GMT+02:00
+    public static final String PATTERN_SYMBOL_TIME_ZONE_RFC822 = "Z";//+0200
+    public static final String PATTERN_SYMBOL_TIME_ZONE_ISO8601 = "XXX";//+02:00
+
+    //----------------------------------------------------------------------------------------------
+
     public static final String PATTERN_HH_mm = "HH:mm";
+    public static final String PATTERN_hh_mm_a = "hh:mm a";
+
     public static final String PATTERN_HH_mm_ss = "HH:mm:ss";
+    public static final String PATTERN_hh_mm_ss_a = "hh:mm:ss a";
+
+    public static final String PATTERN_HH_mm_ss_SSS = "HH:mm:ss.SSS";
+    public static final String PATTERN_HH_mm_ss_SSS_z = "HH:mm:ss.SSS z"; //.... GMT+02:00
+    public static final String PATTERN_HH_mm_ss_SSS_Z = "HH:mm:ss.SSS Z"; //.... +0200
+    public static final String PATTERN_HH_mm_ss_SSS_XXX = "HH:mm:ss.SSS XXX";//.... +02:00
+
     public static final String PATTERN_dd_MM_yyyy = "dd-MM-yyyy";
     public static final String PATTERN_dd_MM_yyyy_HH_mm = "dd-MM-yyyy HH:mm";
     public static final String PATTERN_dd_MM_yyyy_HH_mm_ss = "dd-MM-yyyy HH:mm:ss";
-    public static final String PATTERN_dd_MM_yyyy_HH_mm_ssz = "dd-MM-yyyy HH:mm:ssz";
+    public static final String PATTERN_dd_MM_yyyy_HH_mm_ss_z = "dd-MM-yyyy HH:mm:ss z";//....:00 GMT+02:00
+    public static final String PATTERN_dd_MM_yyyy_HH_mm_ssZ = "dd-MM-yyyy HH:mm:ssZ"; //....:00+0200
+    public static final String PATTERN_dd_MM_yyyy_HH_mm_ssXXX = "dd-MM-yyyy HH:mm:ssXXX";//...:00+02:00
+    public static final String PATTERN_dd_MM_yyyy_HH_mm_ss_SSS_z = "dd-MM-yyyy HH:mm:ss.SSS z";//....:00 GMT+02:00
+    public static final String PATTERN_dd_MM_yyyy_HH_mm_ss_SSSZ = "dd-MM-yyyy HH:mm:ss.SSSZ"; //....:00+0200
+    public static final String PATTERN_dd_MM_yyyy_HH_mm_ss_SSSXXX = "dd-MM-yyyy HH:mm:ss.SSSXXX";//...:00+02:00
+
     public static final String PATTERN_yyyy_MM_dd = "yyyy-MM-dd";
+    public static final String PATTERN_yyyy_MM_dd_HH_mm = "yyyy-MM-dd HH:mm";
     public static final String PATTERN_yyyy_MM_dd_HH_mm_ss = "yyyy-MM-dd HH:mm:ss";
-    public static final String PATTERN_yyyy_MM_dd_HH_mm_ssz = "yyyy-MM-dd HH:mm:ssz";
-    public static final String PATTERN_yyyy_MM_dd_HH_mm_ss_Sz = "yyyy-MM-dd HH:mm:ss.Sz";
+    public static final String PATTERN_yyyy_MM_dd_HH_mm_ss_z = "yyyy-MM-dd HH:mm:ss z";
+    public static final String PATTERN_yyyy_MM_dd_HH_mm_ssZ = "yyyy-MM-dd HH:mm:ssZ";
+    public static final String PATTERN_yyyy_MM_dd_HH_mm_ssXXX = "yyyy-MM-dd HH:mm:ssXXX";
+    public static final String PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z = "yyyy-MM-dd HH:mm:ss.SSS z";
+    public static final String PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ = "yyyy-MM-dd HH:mm:ss.SSSZ";
+    public static final String PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX = "yyyy-MM-dd HH:mm:ss.SSSXXX";
+
     public static final String PATTERN_yyyy_MM_dd_T_HH_mm_ss = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String PATTERN_yyyy_MM_dd_T_HH_mm_ssz = "yyyy-MM-dd'T'HH:mm:ssz";
     public static final String PATTERN_yyyy_MM_dd_T_HH_mm_ss_SSS_z = "yyyy-MM-dd'T'HH:mm:ss.SSSz";
-    public static final String PATTERN_dd_MMM_E_yyyy = "dd-MMM, E yyyy";
-    public static final String PATTERN_dd_MMM_E_yyyy_HH_mm_ss = "dd-MMM, E yyyy HH:mm:ss";
 
-    public static final int STYLE_DName_dd_MName_yyyy_HH_mm_ss = -1;    //Saturday 01 January 2020, 20:00:ss
-    public static final int STYLE_DName_dd_MName_yyyy_HH_mm = 0;        //Saturday 01 January 2020, 20:00
-    public static final int STYLE_DName_dd_MName_yyyy = 1;              //Saturday 01 January 2020
-    public static final int STYLE_DName_dd_MName = 2;                   //Saturday 01 January
-    public static final int STYLE_MName_dd_DHName_yyyy = 3;             //January 01, Sat 2020
-    public static final int STYLE_MName_dd_yyyy = 4;                    //January 01, 2020
-    public static final int STYLE_dd_MHName_yyyy = 5;                   //01-Jan-2020
-    public static final int STYLE_dd_MHName_DHName_NL_yyyy = 6;         //01-Jan, Sat\n2020
-    public static final int STYLE_dd_MHName_yyyy2 = 7;                  //01 Jan, 2020
-    public static final int STYLE_dd_MM_yyyy = 8;                       //01-01-2020
-    public static final int STYLE_yyyy_MM_dd = 9;                       //2020-01-01
-    public static final int STYLE_yyyy_MM_dd_HH_mm_ss = 10;             //2020-01-01 20:00:00
-    public static final int STYLE_dd_MM_yyyy_HH_mm_ss = 11;             //01-01-2020 20:00:00
-    public static final int STYLE_HH_mm_MHName_dd_NL_DHName_yyyy = 12;  //20:00, Jan 01\nSat, 2020
-    public static final int STYLE_HH_mm_MHName_dd_DHName_yyyy2 = 13;    //20:00, Jan 01 Sat, 2020
-    public static final int STYLE_HH_mm = 14;                           //20:00
+    public static final String PATTERN_dd_MMM_EEEE_yyyy = "dd-MMM, EEEE yyyy"; //01-Mar, Saturday 2020
+    public static final String PATTERN_dd_MMM_EEEE_yyyy_HH_mm_ss = "dd-MMM, EEEE yyyy HH:mm:ss";
 
-    public static final long ONE_DAY_MILLIS = 86_400_000L; // (1d * 24h * 60m * 60s * 1000ms);
-    public static final long ONE_HOUR_MILLIS = 3_600_000L; // (0d * 01h * 60m * 60s * 1000ms);
-    public static final long ONE_MINUTE_MILLIS = 60_000L; //  (0d * 00h * 01m * 60s * 1000ms);
-    public static final long TEN_SECOND_MILLIS = 10_000L; //  (0d * 00h * 00m * 10s * 1000ms);
+    public static final String PATTERN_EEEE_dd_MMMM_yyyy = "EEEE dd MMMM yyyy";
+    public static final String PATTERN_EEEE_dd_MMMM_yyyy_HH_mm = "EEEE dd MMMM yyyy, HH:mm";
+    public static final String PATTERN_EEEE_dd_MMMM_yyyy_HH_mm_ss = "EEEE dd MMMM yyyy, HH:mm:ss";
+    public static final String PATTERN_MMMM_dd_EEE_yyyy = "MMMM dd, EEE yyyy";
+    public static final String PATTERN_MMMM_dd_yyyy = "MMMM dd, yyyy";
+    public static final String PATTERN_dd_MMM_yyyy = "dd-MMM-yyyy";
+    public static final String PATTERN_HH_mm_MMM_dd_EEE_yyyy = "HH:mm, MMM dd, EEE yyyy";
+
     public static final long ONE_SECOND_MILLIS = 1_000L; //   (0d * 00h * 00m * 01s * 1000ms);
+    public static final long ONE_MINUTE_MILLIS = 60_000L; //  (0d * 00h * 01m * 60s * 1000ms);
+    public static final long ONE_HOUR_MILLIS = 3_600_000L; // (0d * 01h * 60m * 60s * 1000ms);
+    public static final long ONE_DAY_MILLIS = 86_400_000L; // (1d * 24h * 60m * 60s * 1000ms);
 
     private Calendar calendar;
     private Locale currentLocale;
@@ -115,118 +155,10 @@ public class DateOp implements Serializable {
         this.currentLocale = locale;
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return String.format(
-                currentLocale,
-                "%s %02d %s %04d, %02d:%02d:%02d / %d",
-                getDayName(),
-                getDay(),
-                getMonthName(),
-                getYear(),
-
-                getHour24(),
-                getMinute(),
-                getSeconds(),
-
-                getTimeInMillis()
-        );
-    }
-
-    public String toString(int style) {
-
-        String format;
-        Object[] args;
-        Locale lang = currentLocale;
-
-        switch (style) {
-            case STYLE_DName_dd_MName_yyyy:
-                format = "%s %02d %s %04d";
-                args = new Object[]{getDayName(), getDay(), getMonthName(), getYear()};
-                break;
-
-            case STYLE_dd_MHName_yyyy:
-                format = "%02d-%s-%04d";
-                args = new Object[]{getDay(), getMonthName().substring(0, 3), getYear()};
-                break;
-
-            case STYLE_dd_MHName_yyyy2:
-                format = "%02d %s, %04d";
-                args = new Object[]{getDay(), getMonthName().substring(0, 3), getYear()};
-                break;
-
-            case STYLE_DName_dd_MName:
-                format = "%s %02d %s";
-                args = new Object[]{getDayName(), getDay(), getMonthName()};
-                break;
-
-            case STYLE_HH_mm:
-                format = "%02d:%02d";
-                args = new Object[]{getHour24(), getMinute()};
-                break;
-
-            case STYLE_DName_dd_MName_yyyy_HH_mm:
-                format = "%s %02d %s %04d, %02d:%02d";
-                args = new Object[]{getDayName(), getDay(), getMonthName(), getYear(), getHour24(), getMinute()};
-                break;
-
-            case STYLE_DName_dd_MName_yyyy_HH_mm_ss:
-                format = "%s %02d %s %04d, %02d:%02d:%02d";
-                args = new Object[]{getDayName(), getDay(), getMonthName(), getYear(), getHour24(), getMinute(), getSeconds()};
-                break;
-
-            case STYLE_dd_MM_yyyy:
-                format = "%02d-%02d-%04d";
-                args = new Object[]{getDay(), getMonth(), getYear()};
-                break;
-
-            case STYLE_dd_MM_yyyy_HH_mm_ss:
-                format = "%02d-%02d-%04d %02d:%02d:%02d";
-                args = new Object[]{getDay(), getMonth(), getYear(), getHour24(), getMinute(), getSeconds()};
-                break;
-
-            case STYLE_yyyy_MM_dd_HH_mm_ss:
-                format = "%04d-%02d-%02d %02d:%02d:%02d";
-                args = new Object[]{getYear(), getMonth(), getDay(), getHour24(), getMinute(), getSeconds()};
-                break;
-
-            case STYLE_yyyy_MM_dd:
-                format = "%04d-%02d-%02d";
-                args = new Object[]{getYear(), getMonth(), getDay()};
-                break;
-
-            case STYLE_MName_dd_DHName_yyyy:
-                format = "%s %02d, %s %04d";
-                args = new Object[]{getMonthName(), getDay(), getDayName().substring(0, 3), getYear()};
-                break;
-
-            case STYLE_HH_mm_MHName_dd_NL_DHName_yyyy:
-                format = "%02d:%02d, %s %02d\n%s, %04d";
-                args = new Object[]{getHour24(), getMinute(), getMonthName().substring(0, 3), getDay(), getDayName().substring(0, 3), getYear()};
-                break;
-
-            case STYLE_HH_mm_MHName_dd_DHName_yyyy2:
-                format = "%02d:%02d, %s %02d %s, %04d";
-                args = new Object[]{getHour24(), getMinute(), getMonthName().substring(0, 3), getDay(), getDayName().substring(0, 3), getYear()};
-                break;
-
-            case STYLE_dd_MHName_DHName_NL_yyyy://12-Jan, Sat\n2020
-                format = "%02d-%s, %s\n%04d";
-                args = new Object[]{getDay(), getMonthName().substring(0, 3), getDayName().substring(0, 3), getYear()};
-                break;
-
-            case STYLE_MName_dd_yyyy://January 01, 2020
-                format = "%s %02d, %04d";
-                args = new Object[]{getMonthName(), getDay(), getYear()};
-                break;
-
-            default:
-                format = toString();
-                args = null;
-                break;
-        }
-
-        return String.format(lang, format, args);
+        return formatDate("E dd-MMMM'('MM')'-yyyy HH:mm:ss.SSSXXX", false) + " / " + getTimeInMillis();
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -249,617 +181,649 @@ public class DateOp implements Serializable {
 
     //--------------------------------------------------------------------------------------------//
 
-    public DateOp setTimeInMillis(long timeInMillis) {
-        calendar.setTimeInMillis(timeInMillis);
+    public DateOp parseDate(String date, String pattern, boolean throwException) {
+        Long l = null;
+        String exception = "";
+
+        try {
+            l = DateOp.parseDate(date, pattern);
+        } catch (Exception E) {
+            if (throwException)
+                throw new RuntimeException(E);
+            else
+                exception = E.getMessage();
+        }
+
+        if (l != null) {
+            setTimeInMillis(l);
+            return this;
+        } else {
+            throw new IllegalArgumentException(date + " | " + pattern + "\n----\n" + exception);
+        }
+    }
+
+    public DateOp tryParseDate(String date, boolean throwException) {
+        Long parseDate = DateOp.tryParseDate(date);
+        if (parseDate == null) {
+            if (throwException) {
+                throw new IllegalArgumentException("Unknown date format of " + date);
+            }
+        } else {
+            setTimeInMillis(parseDate);
+        }
+
         return this;
     }
 
-    public DateOp setTimeZone(int zone) {
-        TimeZone aDefault = TimeZone.getDefault();
-        aDefault.setRawOffset((int) (zone * ONE_HOUR_MILLIS));
-        this.calendar.setTimeZone(aDefault);
+    //--------------------------------------------------------------------------------------------//
+
+    public DateOp setTimeZone(float hours) {
+        TimeZone timeZone = TimeZone.getDefault();
+        timeZone.setRawOffset((int) (hours * ONE_HOUR_MILLIS));
+        this.calendar.setTimeZone(timeZone);
 
         return this;
     }
 
-    /**
-     * Africa/Accra
-     * Africa/Addis_Ababa
-     * Africa/Algiers
-     * Africa/Asmara
-     * Africa/Asmera
-     * Africa/Bamako
-     * Africa/Bangui
-     * Africa/Banjul
-     * Africa/Bissau
-     * Africa/Blantyre
-     * Africa/Brazzaville
-     * Africa/Bujumbura
-     * Africa/Cairo
-     * Africa/Casablanca
-     * Africa/Ceuta
-     * Africa/Conakry
-     * Africa/Dakar
-     * Africa/Dar_es_Salaam
-     * Africa/Djibouti
-     * Africa/Douala
-     * Africa/El_Aaiun
-     * Africa/Freetown
-     * Africa/Gaborone
-     * Africa/Harare
-     * Africa/Johannesburg
-     * Africa/Juba
-     * Africa/Kampala
-     * Africa/Khartoum
-     * Africa/Kigali
-     * Africa/Kinshasa
-     * Africa/Lagos
-     * Africa/Libreville
-     * Africa/Lome
-     * Africa/Luanda
-     * Africa/Lubumbashi
-     * Africa/Lusaka
-     * Africa/Malabo
-     * Africa/Maputo
-     * Africa/Maseru
-     * Africa/Mbabane
-     * Africa/Mogadishu
-     * Africa/Monrovia
-     * Africa/Nairobi
-     * Africa/Ndjamena
-     * Africa/Niamey
-     * Africa/Nouakchott
-     * Africa/Ouagadougou
-     * Africa/Porto-Novo
-     * Africa/Sao_Tome
-     * Africa/Timbuktu
-     * Africa/Tripoli
-     * Africa/Tunis
-     * Africa/Windhoek
-     * America/Adak
-     * America/Anchorage
-     * America/Anguilla
-     * America/Antigua
-     * America/Araguaina
-     * America/Argentina/Buenos_Aires
-     * America/Argentina/Catamarca
-     * America/Argentina/ComodRivadavia
-     * America/Argentina/Cordoba
-     * America/Argentina/Jujuy
-     * America/Argentina/La_Rioja
-     * America/Argentina/Mendoza
-     * America/Argentina/Rio_Gallegos
-     * America/Argentina/Salta
-     * America/Argentina/San_Juan
-     * America/Argentina/San_Luis
-     * America/Argentina/Tucuman
-     * America/Argentina/Ushuaia
-     * America/Aruba
-     * America/Asuncion
-     * America/Atikokan
-     * America/Atka
-     * America/Bahia
-     * America/Bahia_Banderas
-     * America/Barbados
-     * America/Belem
-     * America/Belize
-     * America/Blanc-Sablon
-     * America/Boa_Vista
-     * America/Bogota
-     * America/Boise
-     * America/Buenos_Aires
-     * America/Cambridge_Bay
-     * America/Campo_Grande
-     * America/Cancun
-     * America/Caracas
-     * America/Catamarca
-     * America/Cayenne
-     * America/Cayman
-     * America/Chicago
-     * America/Chihuahua
-     * America/Coral_Harbour
-     * America/Cordoba
-     * America/Costa_Rica
-     * America/Creston
-     * America/Cuiaba
-     * America/Curacao
-     * America/Danmarkshavn
-     * America/Dawson
-     * America/Dawson_Creek
-     * America/Denver
-     * America/Detroit
-     * America/Dominica
-     * America/Edmonton
-     * America/Eirunepe
-     * America/El_Salvador
-     * America/Ensenada
-     * America/Fort_Nelson
-     * America/Fort_Wayne
-     * America/Fortaleza
-     * America/Glace_Bay
-     * America/Godthab
-     * America/Goose_Bay
-     * America/Grand_Turk
-     * America/Grenada
-     * America/Guadeloupe
-     * America/Guatemala
-     * America/Guayaquil
-     * America/Guyana
-     * America/Halifax
-     * America/Havana
-     * America/Hermosillo
-     * America/Indiana/Indianapolis
-     * America/Indiana/Knox
-     * America/Indiana/Marengo
-     * America/Indiana/Petersburg
-     * America/Indiana/Tell_City
-     * America/Indiana/Vevay
-     * America/Indiana/Vincennes
-     * America/Indiana/Winamac
-     * America/Indianapolis
-     * America/Inuvik
-     * America/Iqaluit
-     * America/Jamaica
-     * America/Jujuy
-     * America/Juneau
-     * America/Kentucky/Louisville
-     * America/Kentucky/Monticello
-     * America/Knox_IN
-     * America/Kralendijk
-     * America/La_Paz
-     * America/Lima
-     * America/Los_Angeles
-     * America/Louisville
-     * America/Lower_Princes
-     * America/Maceio
-     * America/Managua
-     * America/Manaus
-     * America/Marigot
-     * America/Martinique
-     * America/Matamoros
-     * America/Mazatlan
-     * America/Mendoza
-     * America/Menominee
-     * America/Merida
-     * America/Metlakatla
-     * America/Mexico_City
-     * America/Miquelon
-     * America/Moncton
-     * America/Monterrey
-     * America/Montevideo
-     * America/Montreal
-     * America/Montserrat
-     * America/Nassau
-     * America/New_York
-     * America/Nipigon
-     * America/Nome
-     * America/Noronha
-     * America/North_Dakota/Beulah
-     * America/North_Dakota/Center
-     * America/North_Dakota/New_Salem
-     * America/Ojinaga
-     * America/Panama
-     * America/Pangnirtung
-     * America/Paramaribo
-     * America/Phoenix
-     * America/Port-au-Prince
-     * America/Port_of_Spain
-     * America/Porto_Acre
-     * America/Porto_Velho
-     * America/Puerto_Rico
-     * America/Punta_Arenas
-     * America/Rainy_River
-     * America/Rankin_Inlet
-     * America/Recife
-     * America/Regina
-     * America/Resolute
-     * America/Rio_Branco
-     * America/Rosario
-     * America/Santa_Isabel
-     * America/Santarem
-     * America/Santiago
-     * America/Santo_Domingo
-     * America/Sao_Paulo
-     * America/Scoresbysund
-     * America/Shiprock
-     * America/Sitka
-     * America/St_Barthelemy
-     * America/St_Johns
-     * America/St_Kitts
-     * America/St_Lucia
-     * America/St_Thomas
-     * America/St_Vincent
-     * America/Swift_Current
-     * America/Tegucigalpa
-     * America/Thule
-     * America/Thunder_Bay
-     * America/Tijuana
-     * America/Toronto
-     * America/Tortola
-     * America/Vancouver
-     * America/Virgin
-     * America/Whitehorse
-     * America/Winnipeg
-     * America/Yakutat
-     * America/Yellowknife
-     * Antarctica/Casey
-     * Antarctica/Davis
-     * Antarctica/DumontDUrville
-     * Antarctica/Macquarie
-     * Antarctica/Mawson
-     * Antarctica/McMurdo
-     * Antarctica/Palmer
-     * Antarctica/Rothera
-     * Antarctica/South_Pole
-     * Antarctica/Syowa
-     * Antarctica/Troll
-     * Antarctica/Vostok
-     * Arctic/Longyearbyen
-     * Asia/Aden
-     * Asia/Almaty
-     * Asia/Amman
-     * Asia/Anadyr
-     * Asia/Aqtau
-     * Asia/Aqtobe
-     * Asia/Ashgabat
-     * Asia/Ashkhabad
-     * Asia/Atyrau
-     * Asia/Baghdad
-     * Asia/Bahrain
-     * Asia/Baku
-     * Asia/Bangkok
-     * Asia/Barnaul
-     * Asia/Beirut
-     * Asia/Bishkek
-     * Asia/Brunei
-     * Asia/Calcutta
-     * Asia/Chita
-     * Asia/Choibalsan
-     * Asia/Chongqing
-     * Asia/Chungking
-     * Asia/Colombo
-     * Asia/Dacca
-     * Asia/Damascus
-     * Asia/Dhaka
-     * Asia/Dili
-     * Asia/Dubai
-     * Asia/Dushanbe
-     * Asia/Famagusta
-     * Asia/Gaza
-     * Asia/Hanoi
-     * Asia/Harbin
-     * Asia/Hebron
-     * Asia/Ho_Chi_Minh
-     * Asia/Hong_Kong
-     * Asia/Hovd
-     * Asia/Irkutsk
-     * Asia/Istanbul
-     * Asia/Jakarta
-     * Asia/Jayapura
-     * Asia/Jerusalem
-     * Asia/Kabul
-     * Asia/Kamchatka
-     * Asia/Karachi
-     * Asia/Kashgar
-     * Asia/Kathmandu
-     * Asia/Katmandu
-     * Asia/Khandyga
-     * Asia/Kolkata
-     * Asia/Krasnoyarsk
-     * Asia/Kuala_Lumpur
-     * Asia/Kuching
-     * Asia/Kuwait
-     * Asia/Macao
-     * Asia/Macau
-     * Asia/Magadan
-     * Asia/Makassar
-     * Asia/Manila
-     * Asia/Muscat
-     * Asia/Nicosia
-     * Asia/Novokuznetsk
-     * Asia/Novosibirsk
-     * Asia/Omsk
-     * Asia/Oral
-     * Asia/Phnom_Penh
-     * Asia/Pontianak
-     * Asia/Pyongyang
-     * Asia/Qatar
-     * Asia/Qyzylorda
-     * Asia/Rangoon
-     * Asia/Riyadh
-     * Asia/Saigon
-     * Asia/Sakhalin
-     * Asia/Samarkand
-     * Asia/Seoul
-     * Asia/Shanghai
-     * Asia/Singapore
-     * Asia/Srednekolymsk
-     * Asia/Taipei
-     * Asia/Tashkent
-     * Asia/Tbilisi
-     * Asia/Tehran
-     * Asia/Tel_Aviv
-     * Asia/Thimbu
-     * Asia/Thimphu
-     * Asia/Tokyo
-     * Asia/Tomsk
-     * Asia/Ujung_Pandang
-     * Asia/Ulaanbaatar
-     * Asia/Ulan_Bator
-     * Asia/Urumqi
-     * Asia/Ust-Nera
-     * Asia/Vientiane
-     * Asia/Vladivostok
-     * Asia/Yakutsk
-     * Asia/Yangon
-     * Asia/Yekaterinburg
-     * Asia/Yerevan
-     * Atlantic/Azores
-     * Atlantic/Bermuda
-     * Atlantic/Canary
-     * Atlantic/Cape_Verde
-     * Atlantic/Faeroe
-     * Atlantic/Faroe
-     * Atlantic/Jan_Mayen
-     * Atlantic/Madeira
-     * Atlantic/Reykjavik
-     * Atlantic/South_Georgia
-     * Atlantic/St_Helena
-     * Atlantic/Stanley
-     * Australia/ACT
-     * Australia/Adelaide
-     * Australia/Brisbane
-     * Australia/Broken_Hill
-     * Australia/Canberra
-     * Australia/Currie
-     * Australia/Darwin
-     * Australia/Eucla
-     * Australia/Hobart
-     * Australia/LHI
-     * Australia/Lindeman
-     * Australia/Lord_Howe
-     * Australia/Melbourne
-     * Australia/NSW
-     * Australia/North
-     * Australia/Perth
-     * Australia/Queensland
-     * Australia/South
-     * Australia/Sydney
-     * Australia/Tasmania
-     * Australia/Victoria
-     * Australia/West
-     * Australia/Yancowinna
-     * Brazil/Acre
-     * Brazil/DeNoronha
-     * Brazil/East
-     * Brazil/West
-     * CET
-     * CST6CDT
-     * Canada/Atlantic
-     * Canada/Central
-     * Canada/Eastern
-     * Canada/Mountain
-     * Canada/Newfoundland
-     * Canada/Pacific
-     * Canada/Saskatchewan
-     * Canada/Yukon
-     * Chile/Continental
-     * Chile/EasterIsland
-     * Cuba
-     * EET
-     * EST
-     * EST5EDT
-     * Egypt
-     * Eire
-     * Etc/GMT
-     * Etc/GMT+0
-     * Etc/GMT+1
-     * Etc/GMT+10
-     * Etc/GMT+11
-     * Etc/GMT+12
-     * Etc/GMT+2
-     * Etc/GMT+3
-     * Etc/GMT+4
-     * Etc/GMT+5
-     * Etc/GMT+6
-     * Etc/GMT+7
-     * Etc/GMT+8
-     * Etc/GMT+9
-     * Etc/GMT-0
-     * Etc/GMT-1
-     * Etc/GMT-10
-     * Etc/GMT-11
-     * Etc/GMT-12
-     * Etc/GMT-13
-     * Etc/GMT-14
-     * Etc/GMT-2
-     * Etc/GMT-3
-     * Etc/GMT-4
-     * Etc/GMT-5
-     * Etc/GMT-6
-     * Etc/GMT-7
-     * Etc/GMT-8
-     * Etc/GMT-9
-     * Etc/GMT0
-     * Etc/Greenwich
-     * Etc/UCT
-     * Etc/UTC
-     * Etc/Universal
-     * Etc/Zulu
-     * Europe/Amsterdam
-     * Europe/Andorra
-     * Europe/Astrakhan
-     * Europe/Athens
-     * Europe/Belfast
-     * Europe/Belgrade
-     * Europe/Berlin
-     * Europe/Bratislava
-     * Europe/Brussels
-     * Europe/Bucharest
-     * Europe/Budapest
-     * Europe/Busingen
-     * Europe/Chisinau
-     * Europe/Copenhagen
-     * Europe/Dublin
-     * Europe/Gibraltar
-     * Europe/Guernsey
-     * Europe/Helsinki
-     * Europe/Isle_of_Man
-     * Europe/Istanbul
-     * Europe/Jersey
-     * Europe/Kaliningrad
-     * Europe/Kiev
-     * Europe/Kirov
-     * Europe/Lisbon
-     * Europe/Ljubljana
-     * Europe/London
-     * Europe/Luxembourg
-     * Europe/Madrid
-     * Europe/Malta
-     * Europe/Mariehamn
-     * Europe/Minsk
-     * Europe/Monaco
-     * Europe/Moscow
-     * Europe/Nicosia
-     * Europe/Oslo
-     * Europe/Paris
-     * Europe/Podgorica
-     * Europe/Prague
-     * Europe/Riga
-     * Europe/Rome
-     * Europe/Samara
-     * Europe/San_Marino
-     * Europe/Sarajevo
-     * Europe/Saratov
-     * Europe/Simferopol
-     * Europe/Skopje
-     * Europe/Sofia
-     * Europe/Stockholm
-     * Europe/Tallinn
-     * Europe/Tirane
-     * Europe/Tiraspol
-     * Europe/Ulyanovsk
-     * Europe/Uzhgorod
-     * Europe/Vaduz
-     * Europe/Vatican
-     * Europe/Vienna
-     * Europe/Vilnius
-     * Europe/Volgograd
-     * Europe/Warsaw
-     * Europe/Zagreb
-     * Europe/Zaporozhye
-     * Europe/Zurich
-     * GB
-     * GB-Eire
-     * GMT
-     * GMT+0
-     * GMT-0
-     * GMT0
-     * Greenwich
-     * HST
-     * Hongkong
-     * Iceland
-     * Indian/Antananarivo
-     * Indian/Chagos
-     * Indian/Christmas
-     * Indian/Cocos
-     * Indian/Comoro
-     * Indian/Kerguelen
-     * Indian/Mahe
-     * Indian/Maldives
-     * Indian/Mauritius
-     * Indian/Mayotte
-     * Indian/Reunion
-     * Iran
-     * Israel
-     * Jamaica
-     * Japan
-     * Kwajalein
-     * Libya
-     * MET
-     * MST
-     * MST7MDT
-     * Mexico/BajaNorte
-     * Mexico/BajaSur
-     * Mexico/General
-     * NZ
-     * NZ-CHAT
-     * Navajo
-     * PRC
-     * PST8PDT
-     * Pacific/Apia
-     * Pacific/Auckland
-     * Pacific/Bougainville
-     * Pacific/Chatham
-     * Pacific/Chuuk
-     * Pacific/Easter
-     * Pacific/Efate
-     * Pacific/Enderbury
-     * Pacific/Fakaofo
-     * Pacific/Fiji
-     * Pacific/Funafuti
-     * Pacific/Galapagos
-     * Pacific/Gambier
-     * Pacific/Guadalcanal
-     * Pacific/Guam
-     * Pacific/Honolulu
-     * Pacific/Johnston
-     * Pacific/Kiritimati
-     * Pacific/Kosrae
-     * Pacific/Kwajalein
-     * Pacific/Majuro
-     * Pacific/Marquesas
-     * Pacific/Midway
-     * Pacific/Nauru
-     * Pacific/Niue
-     * Pacific/Norfolk
-     * Pacific/Noumea
-     * Pacific/Pago_Pago
-     * Pacific/Palau
-     * Pacific/Pitcairn
-     * Pacific/Pohnpei
-     * Pacific/Ponape
-     * Pacific/Port_Moresby
-     * Pacific/Rarotonga
-     * Pacific/Saipan
-     * Pacific/Samoa
-     * Pacific/Tahiti
-     * Pacific/Tarawa
-     * Pacific/Tongatapu
-     * Pacific/Truk
-     * Pacific/Wake
-     * Pacific/Wallis
-     * Pacific/Yap
-     * Poland
-     * Portugal
-     * ROC
-     * ROK
-     * Singapore
-     * Turkey
-     * UCT
-     * US/Alaska
-     * US/Aleutian
-     * US/Arizona
-     * US/Central
-     * US/East-Indiana
-     * US/Eastern
-     * US/Hawaii
-     * US/Indiana-Starke
-     * US/Michigan
-     * US/Mountain
-     * US/Pacific
-     * US/Samoa
-     * UTC
-     * Universal
-     * W-SU
-     * WET
-     * Zulu
-     *
-     * @param areaId ex. Africa/Cairo
-     * @return
-     * @throws Exception
-     */
     public DateOp setTimeZone(String areaId) throws Exception {
+        /**
+         * Africa/Accra
+         * Africa/Addis_Ababa
+         * Africa/Algiers
+         * Africa/Asmara
+         * Africa/Asmera
+         * Africa/Bamako
+         * Africa/Bangui
+         * Africa/Banjul
+         * Africa/Bissau
+         * Africa/Blantyre
+         * Africa/Brazzaville
+         * Africa/Bujumbura
+         * Africa/Cairo
+         * Africa/Casablanca
+         * Africa/Ceuta
+         * Africa/Conakry
+         * Africa/Dakar
+         * Africa/Dar_es_Salaam
+         * Africa/Djibouti
+         * Africa/Douala
+         * Africa/El_Aaiun
+         * Africa/Freetown
+         * Africa/Gaborone
+         * Africa/Harare
+         * Africa/Johannesburg
+         * Africa/Juba
+         * Africa/Kampala
+         * Africa/Khartoum
+         * Africa/Kigali
+         * Africa/Kinshasa
+         * Africa/Lagos
+         * Africa/Libreville
+         * Africa/Lome
+         * Africa/Luanda
+         * Africa/Lubumbashi
+         * Africa/Lusaka
+         * Africa/Malabo
+         * Africa/Maputo
+         * Africa/Maseru
+         * Africa/Mbabane
+         * Africa/Mogadishu
+         * Africa/Monrovia
+         * Africa/Nairobi
+         * Africa/Ndjamena
+         * Africa/Niamey
+         * Africa/Nouakchott
+         * Africa/Ouagadougou
+         * Africa/Porto-Novo
+         * Africa/Sao_Tome
+         * Africa/Timbuktu
+         * Africa/Tripoli
+         * Africa/Tunis
+         * Africa/Windhoek
+         * America/Adak
+         * America/Anchorage
+         * America/Anguilla
+         * America/Antigua
+         * America/Araguaina
+         * America/Argentina/Buenos_Aires
+         * America/Argentina/Catamarca
+         * America/Argentina/ComodRivadavia
+         * America/Argentina/Cordoba
+         * America/Argentina/Jujuy
+         * America/Argentina/La_Rioja
+         * America/Argentina/Mendoza
+         * America/Argentina/Rio_Gallegos
+         * America/Argentina/Salta
+         * America/Argentina/San_Juan
+         * America/Argentina/San_Luis
+         * America/Argentina/Tucuman
+         * America/Argentina/Ushuaia
+         * America/Aruba
+         * America/Asuncion
+         * America/Atikokan
+         * America/Atka
+         * America/Bahia
+         * America/Bahia_Banderas
+         * America/Barbados
+         * America/Belem
+         * America/Belize
+         * America/Blanc-Sablon
+         * America/Boa_Vista
+         * America/Bogota
+         * America/Boise
+         * America/Buenos_Aires
+         * America/Cambridge_Bay
+         * America/Campo_Grande
+         * America/Cancun
+         * America/Caracas
+         * America/Catamarca
+         * America/Cayenne
+         * America/Cayman
+         * America/Chicago
+         * America/Chihuahua
+         * America/Coral_Harbour
+         * America/Cordoba
+         * America/Costa_Rica
+         * America/Creston
+         * America/Cuiaba
+         * America/Curacao
+         * America/Danmarkshavn
+         * America/Dawson
+         * America/Dawson_Creek
+         * America/Denver
+         * America/Detroit
+         * America/Dominica
+         * America/Edmonton
+         * America/Eirunepe
+         * America/El_Salvador
+         * America/Ensenada
+         * America/Fort_Nelson
+         * America/Fort_Wayne
+         * America/Fortaleza
+         * America/Glace_Bay
+         * America/Godthab
+         * America/Goose_Bay
+         * America/Grand_Turk
+         * America/Grenada
+         * America/Guadeloupe
+         * America/Guatemala
+         * America/Guayaquil
+         * America/Guyana
+         * America/Halifax
+         * America/Havana
+         * America/Hermosillo
+         * America/Indiana/Indianapolis
+         * America/Indiana/Knox
+         * America/Indiana/Marengo
+         * America/Indiana/Petersburg
+         * America/Indiana/Tell_City
+         * America/Indiana/Vevay
+         * America/Indiana/Vincennes
+         * America/Indiana/Winamac
+         * America/Indianapolis
+         * America/Inuvik
+         * America/Iqaluit
+         * America/Jamaica
+         * America/Jujuy
+         * America/Juneau
+         * America/Kentucky/Louisville
+         * America/Kentucky/Monticello
+         * America/Knox_IN
+         * America/Kralendijk
+         * America/La_Paz
+         * America/Lima
+         * America/Los_Angeles
+         * America/Louisville
+         * America/Lower_Princes
+         * America/Maceio
+         * America/Managua
+         * America/Manaus
+         * America/Marigot
+         * America/Martinique
+         * America/Matamoros
+         * America/Mazatlan
+         * America/Mendoza
+         * America/Menominee
+         * America/Merida
+         * America/Metlakatla
+         * America/Mexico_City
+         * America/Miquelon
+         * America/Moncton
+         * America/Monterrey
+         * America/Montevideo
+         * America/Montreal
+         * America/Montserrat
+         * America/Nassau
+         * America/New_York
+         * America/Nipigon
+         * America/Nome
+         * America/Noronha
+         * America/North_Dakota/Beulah
+         * America/North_Dakota/Center
+         * America/North_Dakota/New_Salem
+         * America/Ojinaga
+         * America/Panama
+         * America/Pangnirtung
+         * America/Paramaribo
+         * America/Phoenix
+         * America/Port-au-Prince
+         * America/Port_of_Spain
+         * America/Porto_Acre
+         * America/Porto_Velho
+         * America/Puerto_Rico
+         * America/Punta_Arenas
+         * America/Rainy_River
+         * America/Rankin_Inlet
+         * America/Recife
+         * America/Regina
+         * America/Resolute
+         * America/Rio_Branco
+         * America/Rosario
+         * America/Santa_Isabel
+         * America/Santarem
+         * America/Santiago
+         * America/Santo_Domingo
+         * America/Sao_Paulo
+         * America/Scoresbysund
+         * America/Shiprock
+         * America/Sitka
+         * America/St_Barthelemy
+         * America/St_Johns
+         * America/St_Kitts
+         * America/St_Lucia
+         * America/St_Thomas
+         * America/St_Vincent
+         * America/Swift_Current
+         * America/Tegucigalpa
+         * America/Thule
+         * America/Thunder_Bay
+         * America/Tijuana
+         * America/Toronto
+         * America/Tortola
+         * America/Vancouver
+         * America/Virgin
+         * America/Whitehorse
+         * America/Winnipeg
+         * America/Yakutat
+         * America/Yellowknife
+         * Antarctica/Casey
+         * Antarctica/Davis
+         * Antarctica/DumontDUrville
+         * Antarctica/Macquarie
+         * Antarctica/Mawson
+         * Antarctica/McMurdo
+         * Antarctica/Palmer
+         * Antarctica/Rothera
+         * Antarctica/South_Pole
+         * Antarctica/Syowa
+         * Antarctica/Troll
+         * Antarctica/Vostok
+         * Arctic/Longyearbyen
+         * Asia/Aden
+         * Asia/Almaty
+         * Asia/Amman
+         * Asia/Anadyr
+         * Asia/Aqtau
+         * Asia/Aqtobe
+         * Asia/Ashgabat
+         * Asia/Ashkhabad
+         * Asia/Atyrau
+         * Asia/Baghdad
+         * Asia/Bahrain
+         * Asia/Baku
+         * Asia/Bangkok
+         * Asia/Barnaul
+         * Asia/Beirut
+         * Asia/Bishkek
+         * Asia/Brunei
+         * Asia/Calcutta
+         * Asia/Chita
+         * Asia/Choibalsan
+         * Asia/Chongqing
+         * Asia/Chungking
+         * Asia/Colombo
+         * Asia/Dacca
+         * Asia/Damascus
+         * Asia/Dhaka
+         * Asia/Dili
+         * Asia/Dubai
+         * Asia/Dushanbe
+         * Asia/Famagusta
+         * Asia/Gaza
+         * Asia/Hanoi
+         * Asia/Harbin
+         * Asia/Hebron
+         * Asia/Ho_Chi_Minh
+         * Asia/Hong_Kong
+         * Asia/Hovd
+         * Asia/Irkutsk
+         * Asia/Istanbul
+         * Asia/Jakarta
+         * Asia/Jayapura
+         * Asia/Jerusalem
+         * Asia/Kabul
+         * Asia/Kamchatka
+         * Asia/Karachi
+         * Asia/Kashgar
+         * Asia/Kathmandu
+         * Asia/Katmandu
+         * Asia/Khandyga
+         * Asia/Kolkata
+         * Asia/Krasnoyarsk
+         * Asia/Kuala_Lumpur
+         * Asia/Kuching
+         * Asia/Kuwait
+         * Asia/Macao
+         * Asia/Macau
+         * Asia/Magadan
+         * Asia/Makassar
+         * Asia/Manila
+         * Asia/Muscat
+         * Asia/Nicosia
+         * Asia/Novokuznetsk
+         * Asia/Novosibirsk
+         * Asia/Omsk
+         * Asia/Oral
+         * Asia/Phnom_Penh
+         * Asia/Pontianak
+         * Asia/Pyongyang
+         * Asia/Qatar
+         * Asia/Qyzylorda
+         * Asia/Rangoon
+         * Asia/Riyadh
+         * Asia/Saigon
+         * Asia/Sakhalin
+         * Asia/Samarkand
+         * Asia/Seoul
+         * Asia/Shanghai
+         * Asia/Singapore
+         * Asia/Srednekolymsk
+         * Asia/Taipei
+         * Asia/Tashkent
+         * Asia/Tbilisi
+         * Asia/Tehran
+         * Asia/Tel_Aviv
+         * Asia/Thimbu
+         * Asia/Thimphu
+         * Asia/Tokyo
+         * Asia/Tomsk
+         * Asia/Ujung_Pandang
+         * Asia/Ulaanbaatar
+         * Asia/Ulan_Bator
+         * Asia/Urumqi
+         * Asia/Ust-Nera
+         * Asia/Vientiane
+         * Asia/Vladivostok
+         * Asia/Yakutsk
+         * Asia/Yangon
+         * Asia/Yekaterinburg
+         * Asia/Yerevan
+         * Atlantic/Azores
+         * Atlantic/Bermuda
+         * Atlantic/Canary
+         * Atlantic/Cape_Verde
+         * Atlantic/Faeroe
+         * Atlantic/Faroe
+         * Atlantic/Jan_Mayen
+         * Atlantic/Madeira
+         * Atlantic/Reykjavik
+         * Atlantic/South_Georgia
+         * Atlantic/St_Helena
+         * Atlantic/Stanley
+         * Australia/ACT
+         * Australia/Adelaide
+         * Australia/Brisbane
+         * Australia/Broken_Hill
+         * Australia/Canberra
+         * Australia/Currie
+         * Australia/Darwin
+         * Australia/Eucla
+         * Australia/Hobart
+         * Australia/LHI
+         * Australia/Lindeman
+         * Australia/Lord_Howe
+         * Australia/Melbourne
+         * Australia/NSW
+         * Australia/North
+         * Australia/Perth
+         * Australia/Queensland
+         * Australia/South
+         * Australia/Sydney
+         * Australia/Tasmania
+         * Australia/Victoria
+         * Australia/West
+         * Australia/Yancowinna
+         * Brazil/Acre
+         * Brazil/DeNoronha
+         * Brazil/East
+         * Brazil/West
+         * CET
+         * CST6CDT
+         * Canada/Atlantic
+         * Canada/Central
+         * Canada/Eastern
+         * Canada/Mountain
+         * Canada/Newfoundland
+         * Canada/Pacific
+         * Canada/Saskatchewan
+         * Canada/Yukon
+         * Chile/Continental
+         * Chile/EasterIsland
+         * Cuba
+         * EET
+         * EST
+         * EST5EDT
+         * Egypt
+         * Eire
+         * Etc/GMT
+         * Etc/GMT+0
+         * Etc/GMT+1
+         * Etc/GMT+10
+         * Etc/GMT+11
+         * Etc/GMT+12
+         * Etc/GMT+2
+         * Etc/GMT+3
+         * Etc/GMT+4
+         * Etc/GMT+5
+         * Etc/GMT+6
+         * Etc/GMT+7
+         * Etc/GMT+8
+         * Etc/GMT+9
+         * Etc/GMT-0
+         * Etc/GMT-1
+         * Etc/GMT-10
+         * Etc/GMT-11
+         * Etc/GMT-12
+         * Etc/GMT-13
+         * Etc/GMT-14
+         * Etc/GMT-2
+         * Etc/GMT-3
+         * Etc/GMT-4
+         * Etc/GMT-5
+         * Etc/GMT-6
+         * Etc/GMT-7
+         * Etc/GMT-8
+         * Etc/GMT-9
+         * Etc/GMT0
+         * Etc/Greenwich
+         * Etc/UCT
+         * Etc/UTC
+         * Etc/Universal
+         * Etc/Zulu
+         * Europe/Amsterdam
+         * Europe/Andorra
+         * Europe/Astrakhan
+         * Europe/Athens
+         * Europe/Belfast
+         * Europe/Belgrade
+         * Europe/Berlin
+         * Europe/Bratislava
+         * Europe/Brussels
+         * Europe/Bucharest
+         * Europe/Budapest
+         * Europe/Busingen
+         * Europe/Chisinau
+         * Europe/Copenhagen
+         * Europe/Dublin
+         * Europe/Gibraltar
+         * Europe/Guernsey
+         * Europe/Helsinki
+         * Europe/Isle_of_Man
+         * Europe/Istanbul
+         * Europe/Jersey
+         * Europe/Kaliningrad
+         * Europe/Kiev
+         * Europe/Kirov
+         * Europe/Lisbon
+         * Europe/Ljubljana
+         * Europe/London
+         * Europe/Luxembourg
+         * Europe/Madrid
+         * Europe/Malta
+         * Europe/Mariehamn
+         * Europe/Minsk
+         * Europe/Monaco
+         * Europe/Moscow
+         * Europe/Nicosia
+         * Europe/Oslo
+         * Europe/Paris
+         * Europe/Podgorica
+         * Europe/Prague
+         * Europe/Riga
+         * Europe/Rome
+         * Europe/Samara
+         * Europe/San_Marino
+         * Europe/Sarajevo
+         * Europe/Saratov
+         * Europe/Simferopol
+         * Europe/Skopje
+         * Europe/Sofia
+         * Europe/Stockholm
+         * Europe/Tallinn
+         * Europe/Tirane
+         * Europe/Tiraspol
+         * Europe/Ulyanovsk
+         * Europe/Uzhgorod
+         * Europe/Vaduz
+         * Europe/Vatican
+         * Europe/Vienna
+         * Europe/Vilnius
+         * Europe/Volgograd
+         * Europe/Warsaw
+         * Europe/Zagreb
+         * Europe/Zaporozhye
+         * Europe/Zurich
+         * GB
+         * GB-Eire
+         * GMT
+         * GMT+0
+         * GMT-0
+         * GMT0
+         * Greenwich
+         * HST
+         * Hongkong
+         * Iceland
+         * Indian/Antananarivo
+         * Indian/Chagos
+         * Indian/Christmas
+         * Indian/Cocos
+         * Indian/Comoro
+         * Indian/Kerguelen
+         * Indian/Mahe
+         * Indian/Maldives
+         * Indian/Mauritius
+         * Indian/Mayotte
+         * Indian/Reunion
+         * Iran
+         * Israel
+         * Jamaica
+         * Japan
+         * Kwajalein
+         * Libya
+         * MET
+         * MST
+         * MST7MDT
+         * Mexico/BajaNorte
+         * Mexico/BajaSur
+         * Mexico/General
+         * NZ
+         * NZ-CHAT
+         * Navajo
+         * PRC
+         * PST8PDT
+         * Pacific/Apia
+         * Pacific/Auckland
+         * Pacific/Bougainville
+         * Pacific/Chatham
+         * Pacific/Chuuk
+         * Pacific/Easter
+         * Pacific/Efate
+         * Pacific/Enderbury
+         * Pacific/Fakaofo
+         * Pacific/Fiji
+         * Pacific/Funafuti
+         * Pacific/Galapagos
+         * Pacific/Gambier
+         * Pacific/Guadalcanal
+         * Pacific/Guam
+         * Pacific/Honolulu
+         * Pacific/Johnston
+         * Pacific/Kiritimati
+         * Pacific/Kosrae
+         * Pacific/Kwajalein
+         * Pacific/Majuro
+         * Pacific/Marquesas
+         * Pacific/Midway
+         * Pacific/Nauru
+         * Pacific/Niue
+         * Pacific/Norfolk
+         * Pacific/Noumea
+         * Pacific/Pago_Pago
+         * Pacific/Palau
+         * Pacific/Pitcairn
+         * Pacific/Pohnpei
+         * Pacific/Ponape
+         * Pacific/Port_Moresby
+         * Pacific/Rarotonga
+         * Pacific/Saipan
+         * Pacific/Samoa
+         * Pacific/Tahiti
+         * Pacific/Tarawa
+         * Pacific/Tongatapu
+         * Pacific/Truk
+         * Pacific/Wake
+         * Pacific/Wallis
+         * Pacific/Yap
+         * Poland
+         * Portugal
+         * ROC
+         * ROK
+         * Singapore
+         * Turkey
+         * UCT
+         * US/Alaska
+         * US/Aleutian
+         * US/Arizona
+         * US/Central
+         * US/East-Indiana
+         * US/Eastern
+         * US/Hawaii
+         * US/Indiana-Starke
+         * US/Michigan
+         * US/Mountain
+         * US/Pacific
+         * US/Samoa
+         * UTC
+         * Universal
+         * W-SU
+         * WET
+         * Zulu
+         *
+         * @param areaId ex. Africa/Cairo
+         * @return
+         * @throws Exception
+         */
+
         TimeZone timeZone = TimeZone.getTimeZone(areaId);
         if (timeZone == null) {
             throw new Exception("There is no area id with: \"" + areaId + "\"");
@@ -869,73 +833,21 @@ public class DateOp implements Serializable {
         return this;
     }
 
-    public DateOp parseDate(String date, String pattern, boolean throwException) {
-        Long l = null;
-        String exception = "";
-
-        if (throwException) {
-            try {
-                l = DateOp.parseDateTime(date, pattern);
-            } catch (Exception E) {
-                throw new RuntimeException(E);
-            }
-        } else {
-            try {
-                l = DateOp.parseDateTime(date, pattern);
-            } catch (Exception E) {
-                exception = E.getMessage();
-            }
-        }
-
-        if (l != null) {
-            this.calendar.setTimeInMillis(l);
-            return this;
-        } else {
-            throw new IllegalArgumentException(date + " | " + pattern + "\n----\n" + exception);
-        }
-    }
-
-    public DateOp tryParseDate(String date, boolean throwException) {
-        String date1 =
-                date.replace("'T'", " ")
-                        .replace("T", " ");
-
+    public DateOp setTimeZoneToUTC() {
         try {
-            return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_Sz, true);
-        } catch (Exception e0) {
-            try {
-                return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssz, true);
-            } catch (Exception e1) {
-                try {
-                    return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss, true);
-                } catch (Exception e2) {
-                    try {
-                        return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd, true);
-                    } catch (Exception e3) {
-                        try {
-                            return parseDate(date1, DateOp.PATTERN_dd_MM_yyyy_HH_mm_ss, true);
-                        } catch (Exception e4) {
-                            try {
-                                return parseDate(date1, DateOp.PATTERN_dd_MM_yyyy, true);
-                            } catch (Exception e5) {
-                                try {
-                                    return parseDate(date1, DateOp.PATTERN_yyyy_MM_dd_T_HH_mm_ssz, true);
-                                } catch (Exception e6) {
-                                    if (throwException) {
-                                        throw new IllegalArgumentException("Date does't match any date format");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return setTimeZone("Etc/UTC");
+        } catch (Exception e) {
+            setTimeZone(0);
         }
-
         return this;
     }
 
-    public DateOp setDate(int year, int month, int date) {
+    public DateOp setTimeInMillis(long timeInMillis) {
+        calendar.setTimeInMillis(timeInMillis);
+        return this;
+    }
+
+    public DateOp setDate(int date, int month, int year) {
         calendar.set(year, month - 1, date);
         return this;
     }
@@ -957,6 +869,10 @@ public class DateOp implements Serializable {
 
     public long getTimeInMillis() {
         return calendar.getTimeInMillis();
+    }
+
+    public long getUTCTimeInMillis() {
+        return calendar.getTimeInMillis() - TimeZone.getDefault().getRawOffset();
     }
 
     public int getHour24() {
@@ -983,7 +899,7 @@ public class DateOp implements Serializable {
         return DateOp.getDayName(calendar.get(Calendar.DAY_OF_WEEK), true);
     }
 
-    public int getDayPosition() {
+    public int getDayOfWeek() {
         return calendar.get(Calendar.DAY_OF_WEEK);
     }
 
@@ -1003,17 +919,16 @@ public class DateOp implements Serializable {
         return calendar.get(Calendar.YEAR);
     }
 
-    public String getTime() {
-        return String.format(
-                currentLocale,
-                "%02d:%02d",
-                getHour24(),
-                getMinute()
-        );
-    }
-
     public int getLastDayOfMonth() {
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    //--------------------------------------------------------------------------------------------//
+
+    public String formatDate(String pattern, boolean forceEnglish) {
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern, forceEnglish ? Locale.ENGLISH : currentLocale);
+        String format = sdf.format(calendar.getTime());
+        return format;
     }
 
 
@@ -1116,46 +1031,17 @@ public class DateOp implements Serializable {
 
     //--------------------------------------------------------------------------------------------//
 
-    public String formatDate(String pattern, boolean forceEnglish) {
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern, forceEnglish ? Locale.ENGLISH : currentLocale);
-        String format = sdf.format(calendar.getTime());
-        return format;
+    public void showDateThenTimePickerDialog(final Context context, final DatePickingListener listener) {
+        showDateThenTimePickerDialog(context, null, null, listener);
     }
 
-    //--------------------------------------------------------------------------------------------//
-
-    public void showDateTimePickerDialog(final Context context, final DatePickingListener listener) {
-        showDateTimePickerDialog(context, null, null, listener);
-    }
-
-    public void showDateTimePickerDialog(final Context context, @Nullable Long minDate, @Nullable Long maxDate, final DatePickingListener listener) {
+    public void showDateThenTimePickerDialog(final Context context, @Nullable Long minDate, @Nullable Long maxDate, final DatePickingListener listener) {
         showDatePickerDialog(context, minDate, maxDate, new DatePickingListener() {
             @Override
             public void onDatePicked(DateOp dateOp) {
                 showTimePickerDialog(context, listener);
             }
         });
-    }
-
-    public void showTimePickerDialog(Context context, final DatePickingListener listener) {
-        int h = calendar.get(Calendar.HOUR_OF_DAY);
-        int m = calendar.get(Calendar.MINUTE);
-
-        new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
-                if (listener != null) {
-                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                    calendar.set(Calendar.MINUTE, minute);
-
-                    listener.onDatePicked(DateOp.this);
-                }
-            }
-        }, h, m, false);
-    }
-
-    public void showDatePickerDialog(Context context, DatePickingListener listener) {
-        showDatePickerDialog(context, null, null, listener);
     }
 
     public void showDatePickerDialog(Context context, @Nullable Long minDate, @Nullable Long maxDate, DatePickingListener listener) {
@@ -1189,6 +1075,27 @@ public class DateOp implements Serializable {
         }
 
         dialog.show();
+    }
+
+    public void showTimePickerDialog(Context context, final DatePickingListener listener) {
+        int h = calendar.get(Calendar.HOUR_OF_DAY);
+        int m = calendar.get(Calendar.MINUTE);
+
+        new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
+                if (listener != null) {
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    calendar.set(Calendar.MINUTE, minute);
+
+                    listener.onDatePicked(DateOp.this);
+                }
+            }
+        }, h, m, false);
+    }
+
+    public void showDatePickerDialog(Context context, DatePickingListener listener) {
+        showDatePickerDialog(context, null, null, listener);
     }
 
     public interface DatePickingListener {
@@ -1265,20 +1172,71 @@ public class DateOp implements Serializable {
 
     //--------------------------------------------------------------------------------------------//
 
-    @Nullable
-    public static Long parseDateTime(String time, String pattern) throws Exception {
+    public static Long parseDate(String time, String pattern) throws Exception {
         Date date = null;
+
         try {
             date = new SimpleDateFormat(pattern, Locale.ENGLISH).parse(time);
         } catch (Exception e1) {
+            time = insureDateSeparatorIsDash(time);
+            date = new SimpleDateFormat(pattern, Locale.ENGLISH).parse(time);
+        }
+
+        return date.getTime();
+    }
+
+    public static Long tryParseDate(String date) {
+        String date1 =
+                date.replace("'T'", " ")
+                        .replace("T", " ");
+
+        String[] patterns;
+        if ("yyyy-MM-dd HH:mm:ss".length() < date1.length()) {
+            patterns = new String[]{
+                    PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX,
+                    PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ,
+                    PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z,
+                    PATTERN_yyyy_MM_dd_HH_mm_ssXXX,
+                    PATTERN_yyyy_MM_dd_HH_mm_ssZ,
+                    PATTERN_yyyy_MM_dd_HH_mm_ss_z,
+
+                    PATTERN_dd_MM_yyyy_HH_mm_ss_SSSXXX,
+                    PATTERN_dd_MM_yyyy_HH_mm_ss_SSSZ,
+                    PATTERN_dd_MM_yyyy_HH_mm_ss_SSS_z,
+                    PATTERN_dd_MM_yyyy_HH_mm_ssXXX,
+                    PATTERN_dd_MM_yyyy_HH_mm_ssZ,
+                    PATTERN_dd_MM_yyyy_HH_mm_ss_z,
+            };
+        } else {
+            patterns = new String[]{
+                    PATTERN_yyyy_MM_dd_HH_mm_ss,
+                    PATTERN_yyyy_MM_dd_HH_mm,
+                    PATTERN_yyyy_MM_dd,
+
+                    PATTERN_dd_MM_yyyy_HH_mm_ss,
+                    PATTERN_dd_MM_yyyy_HH_mm,
+                    PATTERN_dd_MM_yyyy,
+
+                    PATTERN_HH_mm_ss_SSS_XXX,
+                    PATTERN_HH_mm_ss_SSS_Z,
+                    PATTERN_HH_mm_ss_SSS_z,
+                    PATTERN_HH_mm_ss_SSS,
+                    PATTERN_hh_mm_ss_a,
+                    PATTERN_HH_mm_ss,
+                    PATTERN_hh_mm_a,
+                    PATTERN_HH_mm
+            };
+
+        }
+
+        for (int i = 0; i < patterns.length; i++) {
             try {
-                time = insureDateSeparatorIsDash(time);
-                date = new SimpleDateFormat(pattern, Locale.ENGLISH).parse(time);
-            } catch (Exception e2) {
-                return null;
+                return parseDate(date1, patterns[i]);
+            } catch (Exception ignored) {
             }
         }
-        return date.getTime();
+
+        return null;
     }
 
     public static String insureDateSeparatorIsDash(String date) {

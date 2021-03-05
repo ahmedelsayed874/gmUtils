@@ -1,39 +1,28 @@
 package com.blogspot.gm4s.gmutileexample
 
 import android.Manifest
-import android.accounts.Account
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.*
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.RecyclerView
-import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s1.gmutils.Activities
-import com.blogspot.gm4s1.gmutils.ImageLoader
 import com.blogspot.gm4s1.gmutils.Logger
 import com.blogspot.gm4s1.gmutils.geography.LocationTracker
 import com.blogspot.gm4s1.gmutils.geography.MapController
 import com.blogspot.gm4s1.gmutils.storage.AccountStorage
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.ui._bases.BaseActivity
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseViewModel
 import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.Marker
-import org.w3c.dom.Text
-import java.io.File
-import java.util.HashMap
 
 class MapAndLocationExample : BaseActivity() {
 
@@ -193,7 +182,7 @@ class MapAndLocationExample : BaseActivity() {
                     location.latitude,
                     location.longitude
                 ).also {
-                    it.setName(AccountStorage.ACCOUNT._full_name)
+                    it.setName(AccountStorage.ACCOUNT._fullName())
                     it.setExtraData(AccountStorage.ACCOUNT)
                     //it.setIcon()
                 }

@@ -75,13 +75,34 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
         this.onResponseReady = onResponseReady;
     }
 
-    public void setExtra(Object extra) {
-        this.callbackOperations.setExtra(extra);
+    private void setResult(R result) {
+        onResponseReady.invoke(result);
+        onResponseReady = null;
     }
 
-    public void setErrorListener(CallbackErrorHandler errorListener) {
-        this.callbackOperations.setErrorListener(errorListener);
+    //----------------------------------------------------------------------------------------------
+
+    public Callback<R> setExtra(Object extra) {
+        this.callbackOperations.setExtra(extra);
+        return this;
     }
+
+    public Callback<R> setErrorListener(CallbackErrorHandler errorListener) {
+        this.callbackOperations.setErrorListener(errorListener);
+        return this;
+    }
+
+    public Callback<R> includeRawResponse() {
+        this.callbackOperations.includeRawResponse();
+        return this;
+    }
+
+    public Callback<R> printRawResponse() {
+        this.callbackOperations.printRawResponse();
+        return this;
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public void onResponse(@NonNull Call<R> call, @NonNull retrofit2.Response<R> response) {
@@ -91,11 +112,6 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     @Override
     public void onFailure(@NonNull Call<R> call, @NonNull Throwable t) {
         callbackOperations.onFailure(call, t);
-    }
-
-    private void setResult(R result) {
-        onResponseReady.invoke(result);
-        onResponseReady = null;
     }
 
 }

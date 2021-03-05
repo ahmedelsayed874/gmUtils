@@ -24,17 +24,16 @@ import java.util.Map;
 public class AccountStorage {
 
     public interface IAccount {
-        String get_id();
-        String get_identifier(); //user name | email | phone number
-        default String get_full_name() {
-            return get_first_name() + " " + get_last_name();
+        String _id();
+        String _loginUserName(); //user name | email | phone number
+        default String _fullName() {
+            return _firstName() + " " + _lastName();
         }
-        String get_first_name();
-        String get_last_name();
-        String get_email();
-        String get_mobile_number();
-        String get_photo();
-        String get_token();
+        String _firstName();
+        String _lastName();
+        String _contactInfo();
+        String _photo();
+        String _token();
     }
 
     private static class EncryptionUtil {

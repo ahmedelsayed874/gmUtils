@@ -329,6 +329,10 @@ public class Logger {
         }
     }
 
+    public static LogFileWriter createLogFileWriter(String destinationFilePath) {
+        return createLogFileWriter(new File(destinationFilePath));
+    }
+
     public static LogFileWriter createLogFileWriter(File destinationFile) {
         return new LogFileWriter(destinationFile);
     }
@@ -366,6 +370,19 @@ public class Logger {
         } else {
             if (!IS_WRITE_TO_FILE_ENABLED() || !IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
                 deleteSavedFiles(context, dirName);
+            }
+        }
+    }
+
+    public static void writeToFile(String filePath, String text) {
+        if (IS_WRITE_TO_FILE_ENABLED() || IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+            createLogFileWriter(filePath).append(text);
+        } else {
+            if (!IS_WRITE_TO_FILE_ENABLED() || !IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+                try {
+                    File f = new File(filePath);
+                    f.deleteOnExit();
+                } catch (Exception ignored){}
             }
         }
     }
@@ -578,9 +595,14 @@ public class Logger {
     }
 
     private synchronized static File getLogDirector(Context context, String dirName) {
+        File filesDir = context.getExternalFilesDir(null);
+        return getLogDirector(filesDir.getPath() + "/" + dirName);
+    }
+
+    private synchronized static File getLogDirector(String dirPath) {
         try {
-            File filesDir = context.getExternalFilesDir(null);
-            File logFiles = new File(filesDir.getPath() + "/" + dirName);
+
+            File logFiles = new File(dirPath);
             if (!logFiles.exists()) {
                 logFiles.mkdirs();
             }

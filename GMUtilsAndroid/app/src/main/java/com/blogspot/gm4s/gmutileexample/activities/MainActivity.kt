@@ -4,15 +4,20 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.blogspot.gm4s.gmutileexample.ContactEditorActivity
 import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.ReadLogFileActivity
+import com.blogspot.gm4s1.gmutils.DateOp
+import com.blogspot.gm4s1.gmutils.net.HTTPRequest
+import com.blogspot.gm4s1.gmutils.net.volley.example.URLs.TimeURLs
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,10 +25,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        btn1.text = "Show contact editor"
+        btn1.text = "calc size"
         btn1.setOnClickListener {
-            val intent = Intent(this, ContactEditorActivity::class.java)
-            startActivity(intent)
+            val x = Utils.createInstance().calculatePixelInCm(this, 1.0)
+            log("", "x = $x")
         }
 
         btn2.text = "read log file"
@@ -65,7 +70,11 @@ class MainActivity : AppCompatActivity() {
             val checkSelfPermission =
                 ActivityCompat.checkSelfPermission(this, "android.permission.WRITE_SETTINGS")
             if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf("android.permission.WRITE_SETTINGS"), 10)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf("android.permission.WRITE_SETTINGS"),
+                    10
+                )
                 return@setOnClickListener
             }
 
@@ -80,6 +89,80 @@ class MainActivity : AppCompatActivity() {
             btn7.text = "change device brightness (C: $bn)"
         }
 
+        btn8.text = "DateOp"
+        btn8.setOnClickListener {
+            val d1 = DateOp.getInstance()
+            log("*****", "------------------------------")
+            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
+            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
+            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
+            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
+            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
+            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
+
+            val d11 = DateOp.getInstance("2021-03-01 11:12:13", false)
+            log("*****", "------------------------------")
+            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
+            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
+            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
+            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
+            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
+            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
+
+            val d2 = DateOp.getInstance("2021-03-01 11:12", false)
+            log("*****", "------------------------------")
+            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
+            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
+            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
+            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
+            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
+            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
+
+            val d = DateOp.getInstance("2021-03-01", false)
+            log("*****", "------------------------------")
+            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
+            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
+            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
+            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
+            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
+            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
+
+        }
+
+        btn9.text = "time api"
+        btn9.setOnClickListener {
+            val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
+            log("api", "getting time from: $url")
+            HTTPRequest.get(url) { request, response ->
+                log("api", response.code.toString())
+                log("api", response.text)
+                log("api", "Exception: ${response.exception}")
+            }
+        }
+        
+        btn10.text = ""
+        btn10.setOnClickListener {}
+
+        //------------------------------------------------------------------------------------------
+
+        logTv.viewTreeObserver.addOnGlobalLayoutListener {
+            logSection.scrollTo(0, logTv.height - 1)
+        }
+    }
+
+    fun log(tag: String, text: String?) {
+        logTv.append("$tag: $text\n")
+    }
+    
+    fun onShowOrHideLogClick(view: View) {
+        if (logSection.visibility == View.GONE) {
+            logSection.visibility = View.VISIBLE
+            (view as TextView).text = "Hide Log"
+            
+        } else {
+            logSection.visibility = View.GONE
+            (view as TextView).text = "Show Log"
+        }
     }
 
 }

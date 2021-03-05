@@ -1,5 +1,7 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit;
 
+import android.text.TextUtils;
+
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 import java.security.KeyStore;
@@ -100,6 +102,7 @@ public class RetrofitService {
     //----------------------------------------------------------------------------------------------
 
     public static <T> T create(Class<T> serviceClass) {
+        if (TextUtils.isEmpty(baseUrl)) throw new IllegalArgumentException("RetrofitService.baseUrl is empty, ether assign value to it or user create(String, Class<T>)");
         return create(baseUrl, serviceClass);
     }
 

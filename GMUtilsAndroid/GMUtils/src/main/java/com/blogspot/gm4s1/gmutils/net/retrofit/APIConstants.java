@@ -20,7 +20,7 @@ public final class APIConstants {
 
     public static String TOKEN() {
         try {
-            return "Bearer " + AccountStorage.ACCOUNT.get_token();
+            return "Bearer " + AccountStorage.ACCOUNT._token();
         } catch (Exception e) {
             return "";
         }

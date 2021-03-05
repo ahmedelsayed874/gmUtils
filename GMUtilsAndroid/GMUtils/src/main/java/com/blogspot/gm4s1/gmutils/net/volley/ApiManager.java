@@ -10,6 +10,10 @@ import androidx.collection.ArrayMap;
 import androidx.fragment.app.Fragment;
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -136,6 +140,26 @@ public class ApiManager {
     }
 
     //--------------------------------------------------------------------------------------------//
+
+    protected synchronized <T> void doRequest(ApiURL.IURL url, @NotNull TypeToken<List<T>> typeToken, Listener2<List<T>> listener) {
+        doRequest(url, new Listener() {
+            @Override
+            public boolean onDataFetchingFinished(Request request, String response, ResponseStatus responseStatus, int statusCode) {
+                List<T> items = new Gson().fromJson(response, typeToken.getType());
+                return listener.onDataFetchingFinished(request, items, responseStatus, statusCode);
+            }
+        });
+    }
+
+    protected synchronized <T> void doRequest(ApiURL.IURL url, Class<T> objectClass, Listener2<T> listener) {
+        doRequest(url, new Listener() {
+            @Override
+            public boolean onDataFetchingFinished(Request request, String response, ResponseStatus responseStatus, int statusCode) {
+                T item = new Gson().fromJson(response, objectClass);
+                return listener.onDataFetchingFinished(request, item, responseStatus, statusCode);
+            }
+        });
+    }
 
     protected synchronized void doRequest(ApiURL.IURL url, Listener listener) {
         doRequest(url, listener, false);
@@ -499,5 +523,12 @@ public class ApiManager {
          * @return if false, the request will remove (not cached)
          */
         boolean onDataFetchingFinished(Request request, String response, ResponseStatus responseStatus, int statusCode);
+    }
+
+    protected interface Listener2<T> {
+        /**
+         * @return if false, the request will remove (not cached)
+         */
+        boolean onDataFetchingFinished(Request request, T response, ResponseStatus responseStatus, int statusCode);
     }
 }

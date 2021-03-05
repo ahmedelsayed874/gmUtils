@@ -71,6 +71,10 @@ dependencies {
 
     implementation 'dev.samstevens.totp:totp:1.6'
     implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
+
+    // Room components
+    def room_version = "2.2.6"
+    implementation "androidx.room:room-runtime:$room_version"
 }
 
 

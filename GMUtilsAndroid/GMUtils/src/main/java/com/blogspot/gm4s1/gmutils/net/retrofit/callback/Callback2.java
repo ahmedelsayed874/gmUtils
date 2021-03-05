@@ -65,7 +65,7 @@ public class Callback2<DT, R extends Response<DT>> implements retrofit2.Callback
             Class<R> RClass,
             OnResponseReady2<DT> onResponseReady,
             String requestId
-    ){
+    ) {
         init(request.toString(), RClass, onResponseReady, requestId);
     }
 
@@ -79,13 +79,34 @@ public class Callback2<DT, R extends Response<DT>> implements retrofit2.Callback
         this.onResponseReady = onResponseReady;
     }
 
-    public void setExtra(Object extra) {
-        this.callbackOperations.setExtra(extra);
+    private void setResult(R result) {
+        onResponseReady.invoke(result);
+        onResponseReady = null;
     }
 
-    public void setErrorListener(CallbackErrorHandler errorListener) {
-        this.callbackOperations.setErrorListener(errorListener);
+    //----------------------------------------------------------------------------------------------
+
+    public Callback2<DT, R> setExtra(Object extra) {
+        this.callbackOperations.setExtra(extra);
+        return this;
     }
+
+    public Callback2<DT, R> setErrorListener(CallbackErrorHandler errorListener) {
+        this.callbackOperations.setErrorListener(errorListener);
+        return this;
+    }
+
+    public Callback2<DT, R> includeRawResponse() {
+        this.callbackOperations.includeRawResponse();
+        return this;
+    }
+
+    public Callback2<DT, R> printRawResponse() {
+        this.callbackOperations.printRawResponse();
+        return this;
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public void onResponse(@NonNull Call<R> call, @NonNull retrofit2.Response<R> response) {
@@ -95,11 +116,6 @@ public class Callback2<DT, R extends Response<DT>> implements retrofit2.Callback
     @Override
     public void onFailure(@NonNull Call<R> call, @NonNull Throwable t) {
         callbackOperations.onFailure(call, t);
-    }
-
-    private void setResult(R result) {
-        onResponseReady.invoke(result);
-        onResponseReady = null;
     }
 
 }

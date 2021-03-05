@@ -24,7 +24,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ContactEditorActivity" />
         <activity android:name=".ReadLogFileActivity" />
     </application>
 
