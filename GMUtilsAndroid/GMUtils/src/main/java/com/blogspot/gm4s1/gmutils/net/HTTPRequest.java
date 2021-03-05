@@ -22,7 +22,9 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 /*
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -51,6 +53,9 @@ public class HTTPRequest {
         private int connectionTimeOut = 15000;
         private int readTimeOut = 15000;
         private String charEncoding = "UTF-8";
+        public boolean allowCaching;
+        private HostnameVerifier hostnameVerifier;
+        private SSLSocketFactory sslSocketFactory;
 
         public void setConnectionTimeOut(int connectionTimeOut) {
             this.connectionTimeOut = connectionTimeOut;
@@ -62,6 +67,18 @@ public class HTTPRequest {
 
         public void setCharEncoding(String charEncoding) {
             this.charEncoding = charEncoding;
+        }
+
+        public void setAllowCaching(boolean allowCaching) {
+            this.allowCaching = allowCaching;
+        }
+
+        public void setHostnameVerifier(HostnameVerifier hostnameVerifier) {
+            this.hostnameVerifier = hostnameVerifier;
+        }
+
+        public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
+            this.sslSocketFactory = sslSocketFactory;
         }
     }
 
@@ -391,12 +408,23 @@ public class HTTPRequest {
                 urlConnection = (HttpURLConnection) connection;
 
             } else {
-                urlConnection = (HttpsURLConnection) connection;
+                HttpsURLConnection urlConnectionSecure = (HttpsURLConnection) connection;
+                urlConnection = urlConnectionSecure;
+
+                if (configurations.hostnameVerifier != null) {
+                    urlConnectionSecure.setHostnameVerifier(configurations.hostnameVerifier);
+                }
+
+                if (configurations.sslSocketFactory != null) {
+                    urlConnectionSecure.setSSLSocketFactory(configurations.sslSocketFactory);
+                }
+
             }
 
             urlConnection.setRequestMethod(request.method.name());
             urlConnection.setConnectTimeout(configurations.connectionTimeOut);
             urlConnection.setReadTimeout(configurations.readTimeOut);
+            urlConnection.setUseCaches(configurations.allowCaching);
 
             byte[] postDataBytes = null;
 
