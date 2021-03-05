@@ -37,7 +37,7 @@ import javax.net.ssl.SSLSocketFactory;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class HTTPRequest {
+public class SimpleHTTPRequest {
     /**
      * HTTP request header constants
      */
@@ -120,6 +120,10 @@ public class HTTPRequest {
             this.postBody = postBody;
         }
 
+
+        public long getTime() {
+            return time;
+        }
 
         public String getUrl() {
             return url;
@@ -233,43 +237,43 @@ public class HTTPRequest {
     //==============================================================================================
 
     public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(new Request(url, Method.GET, null), callback);
+        new SimpleHTTPRequest(new Request(url, Method.GET, null), callback);
     }
 
     public static void get(String url, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(new Request(url, Method.GET, null), configurations, callback);
+        new SimpleHTTPRequest(new Request(url, Method.GET, null), configurations, callback);
     }
 
     public static void getFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new HTTPRequest(new Request(url, Method.GET, null), destFile, callback);
+        new SimpleHTTPRequest(new Request(url, Method.GET, null), destFile, callback);
     }
 
     public static void getFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new HTTPRequest(new Request(url, Method.GET, null), destFile, configurations, callback);
+        new SimpleHTTPRequest(new Request(url, Method.GET, null), destFile, configurations, callback);
     }
 
     public static void post(String url, Map<String, Object> parameters, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(new Request(url, Method.POST, null, parameters), callback);
+        new SimpleHTTPRequest(new Request(url, Method.POST, null, parameters), callback);
     }
 
     public static void post(String url, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(new Request(url, Method.POST, null, parameters), configurations, callback);
+        new SimpleHTTPRequest(new Request(url, Method.POST, null, parameters), configurations, callback);
     }
 
     public static void post(String url, String body, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(new Request(url, Method.POST, null, body), callback);
+        new SimpleHTTPRequest(new Request(url, Method.POST, null, body), callback);
     }
 
     public static void post(String url, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(new Request(url, Method.POST, null, body), configurations, callback);
+        new SimpleHTTPRequest(new Request(url, Method.POST, null, body), configurations, callback);
     }
 
     public static void create(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(request, callback);
+        new SimpleHTTPRequest(request, callback);
     }
 
     public static void create(@NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new HTTPRequest(request, configurations, callback);
+        new SimpleHTTPRequest(request, configurations, callback);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -280,23 +284,23 @@ public class HTTPRequest {
     private ResultCallback2<Request, TextResponse> textCallback;
     private ResultCallback2<Request, FileResponse> fileCallback;
 
-    public HTTPRequest(Request request, ResultCallback2<Request, TextResponse> textCallback) {
+    public SimpleHTTPRequest(Request request, ResultCallback2<Request, TextResponse> textCallback) {
         this(request, null, new Configurations(), textCallback, null);
     }
 
-    public HTTPRequest(Request request, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback) {
+    public SimpleHTTPRequest(Request request, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback) {
         this(request, null, configurations, textCallback, null);
     }
 
-    public HTTPRequest(Request request, File destFile, ResultCallback2<Request, FileResponse> fileCallback) {
+    public SimpleHTTPRequest(Request request, File destFile, ResultCallback2<Request, FileResponse> fileCallback) {
         this(request, destFile, new Configurations(), null, fileCallback);
     }
 
-    public HTTPRequest(Request request, File destFile, Configurations configurations, ResultCallback2<Request, FileResponse> fileCallback) {
+    public SimpleHTTPRequest(Request request, File destFile, Configurations configurations, ResultCallback2<Request, FileResponse> fileCallback) {
         this(request, destFile, configurations, null, fileCallback);
     }
 
-    private HTTPRequest(Request request, File destFile, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback, ResultCallback2<Request, FileResponse> fileCallback) {
+    private SimpleHTTPRequest(Request request, File destFile, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback, ResultCallback2<Request, FileResponse> fileCallback) {
         this.request = request;
         this.destFile = destFile;
 

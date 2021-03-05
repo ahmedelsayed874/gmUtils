@@ -12,7 +12,7 @@ import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.ReadLogFileActivity
 import com.blogspot.gm4s1.gmutils.DateOp
-import com.blogspot.gm4s1.gmutils.net.HTTPRequest
+import com.blogspot.gm4s1.gmutils.net.SimpleHTTPRequest
 import com.blogspot.gm4s1.gmutils.net.volley.example.URLs.TimeURLs
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.utils.Utils
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         btn9.setOnClickListener {
             val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
             log("api", "getting time from: $url")
-            HTTPRequest.get(url) { request, response ->
+            SimpleHTTPRequest.get(url) { request, response ->
                 log("api", response.code.toString())
                 log("api", response.text)
                 log("api", "Exception: ${response.exception}")
