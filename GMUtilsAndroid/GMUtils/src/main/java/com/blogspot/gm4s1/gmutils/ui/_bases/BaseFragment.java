@@ -188,6 +188,14 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (viewModels != null) viewModels.clear();
+    }
+
+
+    //----------------------------------------------------------------------------------------------
 
     public interface Listener {
         void setKeyboardAutoHidden();
