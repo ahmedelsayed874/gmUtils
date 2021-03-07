@@ -1,6 +1,8 @@
 package com.blogspot.gm4s1.gmutils.ui._bases;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.lifecycle.AndroidViewModel;
 
@@ -20,9 +22,21 @@ import org.jetbrains.annotations.NotNull;
  */
 public class BaseViewModel extends AndroidViewModel {
 
+    private Handler handler = null;
+
     public BaseViewModel(@NotNull Application application) {
         super(application);
 
+    }
+
+    public void runOnUIThread(Runnable runnable) {
+        if (handler == null) handler = new Handler(Looper.getMainLooper());
+        handler.post(runnable);
+    }
+
+    public void runOnUIThread(Runnable runnable, long delay) {
+        if (handler == null) handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(runnable, delay);
     }
 
     @Override

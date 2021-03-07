@@ -175,7 +175,7 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    public void showFragment(BaseFragment fragment, String stackName) {
+    public void showFragment(Fragment fragment, String stackName) {
         listener.showFragment(fragment, stackName);
     }
 
@@ -197,8 +197,8 @@ public abstract class BaseFragment extends Fragment {
                 RetryPromptDialog.Listener onCancel
         );
 
-        void showFragment(BaseFragment fragment, String stackName);
+        void showFragment(Fragment fragment, @Nullable String stackName);
 
-        void showFragment(BaseFragment fragment, String stackName, int fragmentContainerId);
+        void showFragment(Fragment fragment, @Nullable String stackName, int fragmentContainerId);
     }
 }

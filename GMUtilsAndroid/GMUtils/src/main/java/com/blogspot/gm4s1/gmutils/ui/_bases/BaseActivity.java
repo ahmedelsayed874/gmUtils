@@ -264,18 +264,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         showFragment(fragment, addToBackStack, null, R.id.layout_fragment_container);
     }
 
-    public void showFragment(Fragment fragment, String stackName) {
-        showFragment(fragment, true, stackName, R.id.layout_fragment_container);
+    public void showFragment(Fragment fragment, @Nullable String stackName) {
+        showFragment(fragment, !TextUtils.isEmpty(stackName), stackName, R.id.layout_fragment_container);
     }
 
     @Override
-    public void showFragment(BaseFragment fragment, String stackName) {
-        showFragment(fragment, true, stackName, R.id.layout_fragment_container);
-    }
-
-    @Override
-    public void showFragment(BaseFragment fragment, String stackName, int fragmentContainerId) {
-        showFragment(fragment, true, stackName, fragmentContainerId);
+    public void showFragment(Fragment fragment, @Nullable String stackName, int fragmentContainerId) {
+        showFragment(fragment, !TextUtils.isEmpty(stackName), stackName, fragmentContainerId);
     }
 
     public void showFragment(Fragment fragment, Boolean addToBackStack, String stackName, int fragmentContainerId) {
