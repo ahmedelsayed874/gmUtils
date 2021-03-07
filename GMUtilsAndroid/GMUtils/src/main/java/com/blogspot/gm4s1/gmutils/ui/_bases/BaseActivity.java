@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -264,19 +265,17 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         showFragment(fragment, addToBackStack, null, R.id.layout_fragment_container);
     }
 
-    public void showFragment(Fragment fragment, @Nullable String stackName) {
-        showFragment(fragment, !TextUtils.isEmpty(stackName), stackName, R.id.layout_fragment_container);
+    public void showFragment(Fragment fragment, boolean addToBackStack, String stackName) {
+        showFragment(fragment, addToBackStack, null, R.id.layout_fragment_container);
     }
 
-    @Override
-    public void showFragment(Fragment fragment, @Nullable String stackName, int fragmentContainerId) {
-        showFragment(fragment, !TextUtils.isEmpty(stackName), stackName, fragmentContainerId);
-    }
-
-    public void showFragment(Fragment fragment, Boolean addToBackStack, String stackName, int fragmentContainerId) {
+    public void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId) {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager()
                 .beginTransaction()
-                .replace(fragmentContainerId, fragment);
+                .replace(
+                        fragmentContainerId != null ? fragmentContainerId : R.id.layout_fragment_container,
+                        fragment
+                );
 
         if (addToBackStack) {
             fragmentTransaction.addToBackStack(stackName);
@@ -300,7 +299,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 boolean pop = fragmentManager.popBackStackImmediate(stackName, 0);
 
                 if (!pop) {
-                    showFragment(fragment, stackName);
+                    showFragment(fragment, true, stackName);
 
                 } else {
                     try {
@@ -314,7 +313,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 currentFragment.setArguments(fragment.getArguments());
             }
         } else {
-            showFragment(fragment, stackName);
+            showFragment(fragment, true, stackName);
         }
     }
 
@@ -324,6 +323,25 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
             return fragments.get(fragments.size() - 1);
         else
             return null;
+    }
+
+    @Override
+    public void onFragmentStarted(BaseFragment fragment) {
+
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (waitDialog != null) waitDialog.dismiss();
+        waitDialogCount = 0;
+        waitDialog = null;
+
+        if (viewModels != null) viewModels.clear();
     }
 
 

@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 
 /**
@@ -59,8 +61,13 @@ public abstract class BaseFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        listener.onFragmentStarted(this);
+    }
 
-    //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 
     protected HashMap<Integer, Class<? extends BaseViewModel>> getViewModelClasses() {
         return null;
@@ -175,8 +182,8 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    public void showFragment(Fragment fragment, String stackName) {
-        listener.showFragment(fragment, stackName);
+    protected void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId) {
+        listener.showFragment(fragment, addToBackStack, stackName, fragmentContainerId);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -197,8 +204,8 @@ public abstract class BaseFragment extends Fragment {
                 RetryPromptDialog.Listener onCancel
         );
 
-        void showFragment(Fragment fragment, @Nullable String stackName);
+        void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId);
 
-        void showFragment(Fragment fragment, @Nullable String stackName, int fragmentContainerId);
+        void onFragmentStarted(BaseFragment fragment);
     }
 }
