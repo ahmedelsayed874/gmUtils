@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.Response;
 
+import java.util.Map;
+
 import okhttp3.Request;
 import retrofit2.Call;
 
@@ -29,65 +31,33 @@ public class Callback2<DT, R extends Response<DT>> implements retrofit2.Callback
 
 
     public Callback2(
-            Class<R> RClass,
+            Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady
     ) {
-        init("", RClass, onResponseReady, null);
-    }
-
-    public Callback2(
-            String requestDetails,
-            Class<R> RClass,
-            OnResponseReady2<DT> onResponseReady
-    ) {
-        init(requestDetails, RClass, onResponseReady, null);
-    }
-
-    public Callback2(
-            String requestDetails,
-            Class<R> RClass,
-            OnResponseReady2<DT> onResponseReady,
-            String requestId
-    ) {
-        init(requestDetails, RClass, onResponseReady, requestId);
-    }
-
-    public Callback2(
-            Request request,
-            Class<R> RClass,
-            OnResponseReady2<DT> onResponseReady
-    ) {
-        init(request.toString(), RClass, onResponseReady, null);
-    }
-
-    public Callback2(
-            Request request,
-            Class<R> RClass,
-            OnResponseReady2<DT> onResponseReady,
-            String requestId
-    ) {
-        init(request.toString(), RClass, onResponseReady, requestId);
-    }
-
-    private void init(
-            String requestDetails,
-            Class<R> RClass,
-            OnResponseReady2<DT> onResponseReady,
-            String requestId
-    ) {
-        this.callbackOperations = new CallbackOperations<>(RClass, requestDetails, requestId, Callback2.this::setResult);
+        this.callbackOperations = new CallbackOperations<>(responseClass, Callback2.this::setResult);
         this.onResponseReady = onResponseReady;
     }
 
     private void setResult(R result) {
         onResponseReady.invoke(result);
         onResponseReady = null;
+        callbackOperations = null;
     }
 
     //----------------------------------------------------------------------------------------------
 
-    public Callback2<DT, R> setExtra(Object extra) {
-        this.callbackOperations.setExtra(extra);
+    public Callback2<DT, R> setExtras(Map<String, Object> extras) {
+        this.callbackOperations.setExtras(extras);
+        return this;
+    }
+
+    public Callback2<DT, R> printRequestInfo(Request request) {
+        this.callbackOperations.printRequestInfo(request.toString());
+        return this;
+    }
+
+    public Callback2<DT, R> printRequestInfo(String requestInfo) {
+        this.callbackOperations.printRequestInfo(requestInfo);
         return this;
     }
 

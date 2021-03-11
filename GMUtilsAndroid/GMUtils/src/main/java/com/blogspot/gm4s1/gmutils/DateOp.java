@@ -1248,4 +1248,70 @@ public class DateOp implements Serializable {
         return date;
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    public static String convertTimeToString(long timeInMillis, boolean en) {
+        StringBuilder string = new StringBuilder();
+
+        long[] standardIntervals = new long[]{
+                DateOp.ONE_DAY_MILLIS,
+                DateOp.ONE_HOUR_MILLIS,
+                DateOp.ONE_MINUTE_MILLIS,
+                DateOp.ONE_SECOND_MILLIS
+        };
+        String[] intervalNamesEn = new String[]{
+                "day",
+                "hour",
+                "minute",
+                "second"
+        };
+        String[][] intervalNamesAr = new String[][]{
+                new String[]{"يوم", "يومان", "أيام"},
+                new String[]{"ساعة", "ساعتان", "ساعات"},
+                new String[]{"دقيقة", "دقيقتان", "دقائق"},
+                new String[]{"ثانية", "ثانيتين", "ثواني"}
+        };
+
+        boolean isNeg = false;
+
+        if (timeInMillis < 0) {
+            isNeg = true;
+            timeInMillis *= -1;
+        }
+
+        for (int i = 0; i < standardIntervals.length; i++) {
+            int x = (int) (timeInMillis / standardIntervals[i]);
+
+            if (x > 0) {
+                if (string.length() > 0) {
+                    if (en)
+                        string.append(", ");
+                    else
+                        string.append(" و");
+                }
+
+                if (en) {
+                    string.append(String.format(Locale.ENGLISH, "%d", x));
+                    string.append(" ").append(intervalNamesEn[i]);
+                    if (x > 1) {
+                        string.append("s");
+                    }
+                } else {
+                    if (x == 1) {
+                        string.append(" ").append(intervalNamesAr[i][0]);
+                    } else if (x == 2) {
+                        string.append(" ").append(intervalNamesAr[i][1]);
+                    } else {
+                        string.append(String.format(new Locale("ar"), "%d", x));
+                        string.append(" ").append(intervalNamesAr[i][2]);
+                    }
+                }
+
+                timeInMillis -= x * standardIntervals[i];
+            }
+        }
+
+        return (isNeg? "(-) " :"(+) ") + string.toString();
+    }
+
 }

@@ -7,6 +7,9 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.callback.Callback;
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady;
 import com.blogspot.gm4s1.gmutils.net.retrofit.RetrofitService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import retrofit2.Call;
 
 /**
@@ -14,9 +17,9 @@ import retrofit2.Call;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -28,23 +31,27 @@ public class TimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.example
     public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback) {
         TimeAPIsRequests request = RetrofitService.create(baseURL, TimeAPIsRequests.class);
         Call<TimeZones> call = request.geTimeZoneList(ofSpecificArea);
+
+        Map<String, Object> extras= new HashMap<>();
+        extras.put("ofSpecificArea", ofSpecificArea);
+
         call.enqueue(new Callback<>(
-                call.request().url().toString(),
                 TimeZones.class,
-                callback,
-                "" + ofSpecificArea //it's optional
-        ));
+                callback
+        ).setExtras(extras).printRequestInfo(call.request().url().toString()));
     }
 
     @Override
     public void getCurrentTime(String zone, OnResponseReady<TimeOfArea> callback) {
         TimeAPIsRequests request = RetrofitService.create(baseURL, TimeAPIsRequests.class);
         Call<TimeOfArea> call = request.getCurrentTime(zone);
+
+        Map<String, Object> extras= new HashMap<>();
+        extras.put("zone", zone);
+
         call.enqueue(new Callback<>(
-                call.request().url().toString(),
                 TimeOfArea.class,
-                callback,
-                "" + zone //it's optional
-        ));
+                callback
+        ).setExtras(extras).printRequestInfo(call.request().url().toString()));
     }
 }

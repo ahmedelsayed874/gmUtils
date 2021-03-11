@@ -319,7 +319,7 @@ public class ApiManager {
         request.listener = listener;
         request.requestCallback = new RequestCallback(this, request);
 
-        OnResponseReadyCallback<String> callback = new OnResponseReadyCallback<String>() {
+        ApiRequestCreator.OnResponseReadyCallback<String> callback = new ApiRequestCreator.OnResponseReadyCallback<String>() {
             @Override
             public void onResponseFetched(String response) {
                 if (request.requestCallback != null) {
@@ -384,7 +384,7 @@ public class ApiManager {
 
     //--------------------------------------------------------------------------------------------//
 
-    private static class RequestCallback implements OnResponseReadyCallback<String> {
+    private static class RequestCallback implements ApiRequestCreator.OnResponseReadyCallback<String> {
         private final ApiManager apiManager;
         private final Request request;
 

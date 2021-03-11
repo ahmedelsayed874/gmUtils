@@ -262,13 +262,18 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
 
     public void showFragment(Fragment fragment, boolean addToBackStack) {
-        showFragment(fragment, addToBackStack, null, R.id.layout_fragment_container);
+        showFragment(fragment, addToBackStack, fragment.getClass().getName(), null);
     }
 
     public void showFragment(Fragment fragment, boolean addToBackStack, String stackName) {
-        showFragment(fragment, addToBackStack, null, R.id.layout_fragment_container);
+        showFragment(fragment, addToBackStack, stackName, null);
     }
 
+    public void showFragment(Fragment fragment, boolean addToBackStack, Integer fragmentContainerId) {
+        showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
+    }
+
+    @Override
     public void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId) {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager()
                 .beginTransaction()

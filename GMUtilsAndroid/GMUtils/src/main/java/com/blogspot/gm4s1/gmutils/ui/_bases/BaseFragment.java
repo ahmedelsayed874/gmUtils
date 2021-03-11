@@ -182,7 +182,15 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    protected void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId) {
+    protected void showFragment(Fragment fragment) {
+        showFragment(fragment, false, null, null);
+    }
+
+    protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable Integer fragmentContainerId) {
+        listener.showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
+    }
+
+    protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable String stackName, @Nullable Integer fragmentContainerId) {
         listener.showFragment(fragment, addToBackStack, stackName, fragmentContainerId);
     }
 
@@ -212,7 +220,7 @@ public abstract class BaseFragment extends Fragment {
                 RetryPromptDialog.Listener onCancel
         );
 
-        void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId);
+        void showFragment(Fragment fragment, boolean addToBackStack, @Nullable String stackName, @Nullable Integer fragmentContainerId);
 
         void onFragmentStarted(BaseFragment fragment);
     }

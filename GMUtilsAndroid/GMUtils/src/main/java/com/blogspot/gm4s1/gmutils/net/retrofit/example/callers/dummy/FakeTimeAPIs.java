@@ -5,6 +5,9 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeZones;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.TimeAPIs;
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -20,8 +23,11 @@ public class FakeTimeAPIs implements TimeAPIs {
 
     @Override
     public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback) {
+        Map<String, Object> extras = new HashMap<>();
+        extras.put("ofSpecificArea", ofSpecificArea);
+
         FakeData.run1(TimeZones.class, (d, r) -> {
-            r._requestId = ofSpecificArea;
+            r._extras = extras;
             r.add(d.timeZones().toArray(new String[0])[0]);
             if (callback != null) callback.invoke(r);
         });
@@ -29,8 +35,11 @@ public class FakeTimeAPIs implements TimeAPIs {
 
     @Override
     public void getCurrentTime(String zone, OnResponseReady<TimeOfArea> callback) {
+        Map<String, Object> extras = new HashMap<>();
+        extras.put("zone", zone);
+
         FakeData.run1(TimeOfArea.class, (d, r) -> {
-            r._requestId = zone;
+            r._extras = extras;
             r.setDatetime(d.timeOfArea().getDatetime());
             if (callback != null) callback.invoke(r);
         });

@@ -39,10 +39,9 @@ public class ImageAPI implements ImageAPIs {
         );
 
         call.enqueue(new Callback2<>(
-                call.request().url().toString(),
                 ImageResponse.class,
                 callback
-        ));
+        ).printRequestInfo(call.request().url().toString()));
     }
 
 }

@@ -133,6 +133,7 @@ public class Logger {
     public static DateOp GET_FILE_CONTENT_ENCRYPT_DEADLINE() {
         return FILE_CONTENT_ENCRYPT_DEADLINE;
     }
+
     public static Integer GET_FILE_CONTENT_ENCRYPT_KEY() {
         return FILE_CONTENT_ENCRYPT_KEY;
     }
@@ -222,7 +223,8 @@ public class Logger {
             if (BaseApplication.current() != null) {
                 try {
                     writeToFile(BaseApplication.current(), msg, "APP_LOGS");
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
         }
     }
@@ -303,7 +305,8 @@ public class Logger {
 
                     try {
                         if (IS_FILE_CONTENT_ENCRYPT_ENABLED()) {
-                            if (FILE_CONTENT_ENCRYPT_KEY == null) FILE_CONTENT_ENCRYPT_KEY = DEF_ENC_KEY;
+                            if (FILE_CONTENT_ENCRYPT_KEY == null)
+                                FILE_CONTENT_ENCRYPT_KEY = DEF_ENC_KEY;
                             String encText = Security.getSimpleInstance(FILE_CONTENT_ENCRYPT_KEY).encrypt(text);
                             sw.write(encText);
                         } else {
@@ -382,7 +385,8 @@ public class Logger {
                 try {
                     File f = new File(filePath);
                     f.deleteOnExit();
-                } catch (Exception ignored){}
+                } catch (Exception ignored) {
+                }
             }
         }
     }

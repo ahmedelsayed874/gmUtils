@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseResponse;
 
+import java.util.Map;
+
 import okhttp3.Request;
 import retrofit2.Call;
 
@@ -25,65 +27,33 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     private OnResponseReady<R> onResponseReady;
 
     public Callback(
-            Class<R> RClass,
+            Class<R> responseClass,
             OnResponseReady<R> onResponseReady
     ) {
-        init("", RClass, onResponseReady, null);
-    }
-
-    public Callback(
-            String requestDetails,
-            Class<R> RClass,
-            OnResponseReady<R> onResponseReady
-    ) {
-        init(requestDetails, RClass, onResponseReady, null);
-    }
-
-    public Callback(
-            String requestDetails,
-            Class<R> RClass,
-            OnResponseReady<R> onResponseReady,
-            String requestId
-    ) {
-        init(requestDetails, RClass, onResponseReady, requestId);
-    }
-
-    public Callback(
-            Request request,
-            Class<R> RClass,
-            OnResponseReady<R> onResponseReady
-    ) {
-        init(request.toString(), RClass, onResponseReady, null);
-    }
-
-    public Callback(
-            Request request,
-            Class<R> RClass,
-            OnResponseReady<R> onResponseReady,
-            String requestId
-    ) {
-        init(request.toString(), RClass, onResponseReady, requestId);
-    }
-
-    private void init(
-            String requestDetails,
-            Class<R> RClass,
-            OnResponseReady<R> onResponseReady,
-            String requestId
-    ) {
-        this.callbackOperations = new CallbackOperations<R>(RClass, requestDetails, requestId, Callback.this::setResult);
+        this.callbackOperations = new CallbackOperations<R>(responseClass, Callback.this::setResult);
         this.onResponseReady = onResponseReady;
     }
 
     private void setResult(R result) {
         onResponseReady.invoke(result);
         onResponseReady = null;
+        callbackOperations = null;
     }
 
     //----------------------------------------------------------------------------------------------
 
-    public Callback<R> setExtra(Object extra) {
-        this.callbackOperations.setExtra(extra);
+    public Callback<R> setExtras(Map<String, Object> extras) {
+        this.callbackOperations.setExtras(extras);
+        return this;
+    }
+
+    public Callback<R> printRequestInfo(Request request) {
+        this.callbackOperations.printRequestInfo(request.toString());
+        return this;
+    }
+
+    public Callback<R> printRequestInfo(String requestInfo) {
+        this.callbackOperations.printRequestInfo(requestInfo);
         return this;
     }
 
@@ -113,5 +83,4 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     public void onFailure(@NonNull Call<R> call, @NonNull Throwable t) {
         callbackOperations.onFailure(call, t);
     }
-
 }

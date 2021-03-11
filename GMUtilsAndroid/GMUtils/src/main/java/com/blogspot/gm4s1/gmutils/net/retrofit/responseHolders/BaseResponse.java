@@ -3,6 +3,10 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders;
 import androidx.annotation.Nullable;
 import androidx.room.Ignore;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -70,16 +74,13 @@ public abstract class BaseResponse {
     private String _internalStatus = null;
 
     @Ignore
-    public String _requestId;
-
-    @Ignore
     public Integer _code;
 
     @Ignore
-    public Object extra;
+    public Map<String, Object> _extras;
 
     @Ignore
-    public byte[] rawResponse;
+    public byte[] _rawResponse;
 
     //----------------------------------------------------------------------------------------------
 
@@ -108,11 +109,11 @@ public abstract class BaseResponse {
         return getFinalStatus() == Statuses.Error;
     }
 
-    public void copyResponseStatus(BaseResponse otherResponse) {
+    public void cloneResponseStatus(@NotNull BaseResponse otherResponse) {
         _internalMessage = otherResponse._internalMessage;
         _internalStatus = otherResponse._internalStatus;
-        _requestId = otherResponse._requestId;
         _code = otherResponse._code;
-
+        _extras = otherResponse._extras;
+        _rawResponse = otherResponse._rawResponse;
     }
 }

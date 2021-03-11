@@ -503,4 +503,15 @@ public class ApiRequestCreator {
             return byteArrayOutputStream.toByteArray();
         }
     }
+
+    //-------------------------------------------------------------------------//
+
+    public interface OnResponseReadyCallback<T> {
+        int StatusCode_NotConnected = 0;
+        int StatusCode_Timeout = -1;
+
+        void onResponseFetched(T response);
+
+        void onResponseFetchedFailed(String msg, String response, int statusCode);
+    }
 }

@@ -4,7 +4,7 @@ import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.Response;
 
-import java.io.IOException;
+import java.util.Map;
 
 import retrofit2.Call;
 
@@ -24,35 +24,37 @@ final class CallbackOperations<R extends BaseResponse> {
         void onResponseReady(R response);
     }
 
-    private final Class<R> TClass;
-    private String requestId = null;
-    private Object extra;
+    private final Class<R> responseClass;
     private Listener<R> listener;
+    private Map<String, Object> extras;
     private CallbackErrorHandler errorListener;
     private boolean includeRawResponse = false;
     private boolean printRawResponse = false;
 
-    public CallbackOperations(Class<R> TClass, String requestDetails, String requestId, Listener<R> listener) {
-        this.TClass = TClass;
-        this.requestId = requestId;
+    public CallbackOperations(Class<R> responseClass, Listener<R> listener) {
+        this.responseClass = responseClass;
         this.listener = listener;
 
         try {
-            Logger.print("API:Request:", requestDetails);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            TClass.newInstance();
+            responseClass.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
-    void setExtra(Object extra) {
-        this.extra = extra;
+    //----------------------------------------------------------------------------------------------
+
+    void printRequestInfo(String requestInfo) {
+        try {
+            Logger.print("API:Request:", requestInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void setExtras(Map<String, Object> extras) {
+        this.extras = extras;
     }
 
     void setErrorListener(CallbackErrorHandler errorListener) {
@@ -82,19 +84,15 @@ final class CallbackOperations<R extends BaseResponse> {
         if (response.isSuccessful()) {
             R body = response.body();
             if (body != null) {
-                if (requestId != null) {
-                    body._requestId = requestId;
-                }
-
-                if (extra != null) {
-                    body.extra = extra;
+                if (extras != null) {
+                    body._extras = extras;
                 }
 
                 body._code = response.code();
 
                 if (includeRawResponse) {
                     try {
-                        body.rawResponse = response.raw().body().bytes();
+                        body._rawResponse = response.raw().body().bytes();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -120,15 +118,14 @@ final class CallbackOperations<R extends BaseResponse> {
 
     private void setResult(R result) {
         listener.onResponseReady(result);
-        listener = null;
-        errorListener = null;
+        destroyReferences();
     }
 
     private void setError(String error, int code) {
         R response = null;
 
         try {
-            response = TClass.newInstance();
+            response = responseClass.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -160,18 +157,20 @@ final class CallbackOperations<R extends BaseResponse> {
                 }
             }
 
-            if (requestId != null) {
-                response._requestId = requestId;
-            }
-
-            if (extra != null) {
-                response.extra = extra;
+            if (extras != null) {
+                response._extras = extras;
             }
 
             response._code = code;
         }
 
         setResult(response);
+    }
+
+    void destroyReferences() {
+        listener = null;
+        extras = null;
+        errorListener = null;
     }
 
     //----------------------------------------------------------------------------------------------
