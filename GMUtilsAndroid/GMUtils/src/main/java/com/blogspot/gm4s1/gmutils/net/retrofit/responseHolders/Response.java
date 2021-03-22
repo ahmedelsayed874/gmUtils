@@ -96,14 +96,12 @@ public abstract class Response<T> extends BaseResponse {
             }
 
             @Override
-            public Statuses getExternalStatus() {
+            public Statuses getResponseStatus() {
                 return d != null ? Statuses.Succeeded : Statuses.Error;
             }
         };
 
         return response;
     }
-
-
 
 }

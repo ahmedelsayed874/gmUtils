@@ -29,7 +29,7 @@ public class ImageResponse extends Response<Object> {
     }
 
     @Override
-    public Statuses getExternalStatus() {
+    public Statuses getResponseStatus() {
         return null;
     }
 }

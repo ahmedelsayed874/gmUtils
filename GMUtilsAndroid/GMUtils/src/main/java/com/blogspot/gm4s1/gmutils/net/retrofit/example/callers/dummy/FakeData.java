@@ -47,17 +47,17 @@ public class FakeData {
 
             if (r == 0) {
                 response._code = 0;
-                response.setInternalStatus(BaseResponse.Statuses.ConnectionFailed);
+                response.setCallbackStatus(BaseResponse.Statuses.ConnectionFailed);
                 result.invoke(instance(), response);
 
             } else if (r == 1) {
                 response._code = 400;
-                response.setInternalStatus(BaseResponse.Statuses.Error);
+                response.setCallbackStatus(BaseResponse.Statuses.Error);
                 result.invoke(instance(), response);
 
             } else {
                 response._code = 200;
-                response.setInternalStatus(BaseResponse.Statuses.Succeeded);
+                response.setCallbackStatus(BaseResponse.Statuses.Succeeded);
                 result.invoke(instance(), response);
             }
         } catch (Exception e) {
@@ -74,17 +74,17 @@ public class FakeData {
 
                 if (r == 0) {
                     response._code = 0;
-                    response.setInternalStatus(BaseResponse.Statuses.ConnectionFailed);
+                    response.setCallbackStatus(BaseResponse.Statuses.ConnectionFailed);
                     result.invoke(instance(), response);
 
                 } else if (r == 1) {
                     response._code = 400;
-                    response.setInternalStatus(BaseResponse.Statuses.Error);
+                    response.setCallbackStatus(BaseResponse.Statuses.Error);
                     result.invoke(instance(), response);
 
                 } else {
                     response._code = 200;
-                    response.setInternalStatus(BaseResponse.Statuses.Succeeded);
+                    response.setCallbackStatus(BaseResponse.Statuses.Succeeded);
                     result.invoke(instance(), response);
                 }
             } catch (Exception e) {

@@ -572,6 +572,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             return mList.get(itemPosition);
         }
 
+        public int getItemPosition() {
+            return itemPosition;
+        }
+
         @Override
         public void onClick(View v) {
             if (mClickListener != null)

@@ -12,6 +12,8 @@ import android.widget.Toast;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -132,14 +134,14 @@ public class MyToast {
         show(context, msg, null, null);
     }
 
-    public static void show(Context context, CharSequence msg, Integer bgRes) {
+    public static void show(Context context, CharSequence msg, @Nullable Integer bgRes) {
         show(context, msg, bgRes, null);
     }
 
-    public static void show(Context context, CharSequence msg, Integer bg, Integer textColorRes) {
+    public static void show(Context context, CharSequence msg, @Nullable Integer bgRes, @Nullable Integer textColorRes) {
         MyToast toast = new MyToast(context, msg, DEFAULT_STYLE);
-        if (bg != null) {
-            toast.setBackground(bg);
+        if (bgRes != null) {
+            toast.setBackground(bgRes);
         }
         if (textColorRes != null) {
             toast.setTextColor(textColorRes);

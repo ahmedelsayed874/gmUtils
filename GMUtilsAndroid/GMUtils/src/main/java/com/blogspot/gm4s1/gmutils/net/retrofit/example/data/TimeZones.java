@@ -29,7 +29,7 @@ public class TimeZones extends BaseResponse implements Collection<String> {
     private final List<String> list = new ArrayList<>();
 
     @Override
-    public Statuses getExternalStatus() {
+    public Statuses getResponseStatus() {
         return list.size() > 0 ? Statuses.Succeeded : Statuses.Error;
     }
 

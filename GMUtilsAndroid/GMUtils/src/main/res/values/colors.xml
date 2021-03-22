@@ -18,6 +18,8 @@
 
     <color name="ratingBar">@color/yellow</color>
 
+    <color name="dialog_text_color">#fff</color>
+
     <!-- ****************************************** -->
 
     <color name="transparent">#00ffffff</color>
@@ -69,5 +71,6 @@
     <color name="plural0">#9C27B0</color>
 
     <color name="yellow">#FFC107</color>
+
 
 </resources>

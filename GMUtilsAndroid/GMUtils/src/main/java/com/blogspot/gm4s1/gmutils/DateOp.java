@@ -847,8 +847,8 @@ public class DateOp implements Serializable {
         return this;
     }
 
-    public DateOp setDate(int date, int month, int year) {
-        calendar.set(year, month - 1, date);
+    public DateOp setDate(int day, int month, int year) {
+        calendar.set(year, month - 1, day);
         return this;
     }
 

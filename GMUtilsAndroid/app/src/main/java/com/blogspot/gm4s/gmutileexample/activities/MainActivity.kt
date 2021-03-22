@@ -15,6 +15,7 @@ import com.blogspot.gm4s1.gmutils.DateOp
 import com.blogspot.gm4s1.gmutils.net.SimpleHTTPRequest
 import com.blogspot.gm4s1.gmutils.net.volley.example.URLs.TimeURLs
 import com.blogspot.gm4s1.gmutils.ui.MyToast
+import com.blogspot.gm4s1.gmutils.ui.MyToast2
 import com.blogspot.gm4s1.gmutils.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -37,9 +38,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        btn3.text = "show my toast"
+        btn3.text = "show my toast2"
         btn3.setOnClickListener {
-            MyToast.show(this, "test my toast")
+            MyToast2.show(this, "test my toast", R.drawable.shape_solid_round_accent)
         }
 
         btn4.text = "show original toast"

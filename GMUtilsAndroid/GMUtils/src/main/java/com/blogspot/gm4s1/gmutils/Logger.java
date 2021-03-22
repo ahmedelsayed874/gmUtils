@@ -50,7 +50,7 @@ public class Logger {
 
     public static void SET_LOG_DEADLINE(int d, int M, int y, int h, int m) {
         LOG_DEADLINE = DateOp.getInstance()
-                .setDate(y, M, d)
+                .setDate(d, M, y)
                 .setTime(h, m, 0);
     }
 
@@ -66,7 +66,7 @@ public class Logger {
 
     public static void SET_WRITE_TO_FILE_DEADLINE(int d, int M, int y, int h, int m) {
         WRITE_TO_FILE_DEADLINE = DateOp.getInstance()
-                .setDate(y, M, d)
+                .setDate(d, M, y)
                 .setTime(h, m, 0);
     }
 
@@ -82,7 +82,7 @@ public class Logger {
 
     public static void SET_WRITE_LOGS_TO_FILE_DEADLINE(int d, int M, int y, int h, int m) {
         WRITE_LOGS_TO_FILE_DEADLINE = DateOp.getInstance()
-                .setDate(y, M, d)
+                .setDate(d, M, y)
                 .setTime(h, m, 0);
     }
 
@@ -98,7 +98,7 @@ public class Logger {
 
     public static void SET_FILE_CONTENT_ENCRYPT_DEADLINE(int encryptKey, int d, int M, int y, int h, int m) {
         FILE_CONTENT_ENCRYPT_DEADLINE = DateOp.getInstance()
-                .setDate(y, M, d)
+                .setDate(d, M, y)
                 .setTime(h, m, 0);
         FILE_CONTENT_ENCRYPT_KEY = encryptKey;
     }

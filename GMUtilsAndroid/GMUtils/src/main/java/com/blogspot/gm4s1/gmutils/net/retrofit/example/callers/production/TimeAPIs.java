@@ -36,9 +36,10 @@ public class TimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.example
         extras.put("ofSpecificArea", ofSpecificArea);
 
         call.enqueue(new Callback<>(
+                call.request(),
                 TimeZones.class,
                 callback
-        ).setExtras(extras).printRequestInfo(call.request().url().toString()));
+        ).setExtras(extras));
     }
 
     @Override
@@ -50,8 +51,9 @@ public class TimeAPIs implements com.blogspot.gm4s1.gmutils.net.retrofit.example
         extras.put("zone", zone);
 
         call.enqueue(new Callback<>(
+                call.request(),
                 TimeOfArea.class,
                 callback
-        ).setExtras(extras).printRequestInfo(call.request().url().toString()));
+        ).setExtras(extras));
     }
 }

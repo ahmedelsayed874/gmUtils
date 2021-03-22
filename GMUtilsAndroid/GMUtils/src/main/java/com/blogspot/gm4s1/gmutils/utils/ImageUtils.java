@@ -54,6 +54,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 import static android.os.Environment.DIRECTORY_PICTURES;
+//import okhttp3.RequestBody.Companion.toRequestBody;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -742,6 +743,7 @@ public class ImageUtils {
             ByteArrayOutputStream bs = new ByteArrayOutputStream();
             image.compress(Bitmap.CompressFormat.PNG, 100, bs);
 
+            //bs.toByteArray().
             RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), bs.toByteArray());
             try {
                 bs.close();

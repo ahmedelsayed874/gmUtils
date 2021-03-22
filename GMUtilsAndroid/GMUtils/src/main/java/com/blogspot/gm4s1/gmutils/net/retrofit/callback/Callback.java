@@ -27,10 +27,20 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     private OnResponseReady<R> onResponseReady;
 
     public Callback(
+            Request request,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady
     ) {
-        this.callbackOperations = new CallbackOperations<R>(responseClass, Callback.this::setResult);
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult);
+        this.onResponseReady = onResponseReady;
+    }
+
+    public Callback(
+            String requestInfo,
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult);
         this.onResponseReady = onResponseReady;
     }
 
@@ -47,28 +57,8 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
         return this;
     }
 
-    public Callback<R> printRequestInfo(Request request) {
-        this.callbackOperations.printRequestInfo(request.toString());
-        return this;
-    }
-
-    public Callback<R> printRequestInfo(String requestInfo) {
-        this.callbackOperations.printRequestInfo(requestInfo);
-        return this;
-    }
-
     public Callback<R> setErrorListener(CallbackErrorHandler errorListener) {
         this.callbackOperations.setErrorListener(errorListener);
-        return this;
-    }
-
-    public Callback<R> includeRawResponse() {
-        this.callbackOperations.includeRawResponse();
-        return this;
-    }
-
-    public Callback<R> printRawResponse() {
-        this.callbackOperations.printRawResponse();
         return this;
     }
 

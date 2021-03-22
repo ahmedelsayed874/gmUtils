@@ -153,9 +153,9 @@ class MapAndLocationExample : BaseActivity() {
 
     @SuppressLint("MissingPermission")
     private fun setMyLocationButtonEnabled() {
-        if (requiredPermissionGranted) {
+        /*if (requiredPermissionGranted) {
 //            mMapController?.showMyLocationButton()
-        }
+        }*/
     }
 
     private fun createMapInfoWindowView(info: String?): View? {

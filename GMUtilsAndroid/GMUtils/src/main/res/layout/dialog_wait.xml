@@ -10,21 +10,21 @@
             android:orientation="horizontal"
             android:layout_gravity="center"
             android:gravity="center_vertical"
-            android:background="@drawable/shape_solid_round_primary"
+            android:background="@drawable/dialog_background"
             android:padding="@dimen/size_7">
 
         <ProgressBar
                 android:layout_width="@dimen/size_25"
                 android:layout_height="@dimen/size_25"
                 android:id="@+id/progressBar"
-                android:indeterminateTint="@color/white"
+                android:indeterminateTint="@color/dialog_text_color"
         />
 
         <TextView
                 android:id="@+id/tv_msg"
                 style="@style/textView"
                 android:text="@string/wait_moments"
-                android:textColor="@color/white"
+                android:textColor="@color/dialog_text_color"
         />
 
     </LinearLayout>

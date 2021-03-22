@@ -200,6 +200,7 @@ public abstract class BaseFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         if (viewModels != null) viewModels.clear();
+        hideWaitView();
     }
 
 

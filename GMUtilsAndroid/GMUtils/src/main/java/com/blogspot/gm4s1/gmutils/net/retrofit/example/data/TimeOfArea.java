@@ -36,7 +36,7 @@ public class TimeOfArea extends BaseResponse {
     }
 
     @Override
-    public Statuses getExternalStatus() {
+    public Statuses getResponseStatus() {
         return TextUtils.isEmpty(datetime) ? Statuses.Error : Statuses.Succeeded;
     }
 }

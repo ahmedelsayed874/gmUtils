@@ -16,9 +16,9 @@ import java.util.List;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -46,6 +46,7 @@ public class LooperThread extends Thread {
             return totalMessageCount;
         }
     }
+
     public interface MessageHandler {
         //void onMessageHandled(Message msg, int handledMessageCount, int totalMessageCount);
         void onMessageHandled(MessageArgs args);
@@ -75,8 +76,11 @@ public class LooperThread extends Thread {
         Looper.prepare();
 
         handler = new MyHandler(msg -> {
-            handledMsgCount++;
-            onMessageHandled.onMessageHandled(new MessageArgs(msg, handledMsgCount, totalMsgCount));
+            MessageHandler handler = onMessageHandled;
+            if (handler != null) {
+                handledMsgCount++;
+                handler.onMessageHandled(new MessageArgs(msg, handledMsgCount, totalMsgCount));
+            }
         });
 
         try {
@@ -117,13 +121,15 @@ public class LooperThread extends Thread {
 
         private MessageHandler onMessageHandled;
 
-        MyHandler(MessageHandler onMessageHandled){
+        MyHandler(MessageHandler onMessageHandled) {
+            super(Looper.getMainLooper());
             this.onMessageHandled = onMessageHandled;
         }
 
         @Override
         public void handleMessage(@NonNull Message msg) {
-            onMessageHandled.onMessageHandled(msg);
+            if (onMessageHandled != null)
+                onMessageHandled.onMessageHandled(msg);
         }
 
         void destroy() {
@@ -133,7 +139,9 @@ public class LooperThread extends Thread {
                 } else {
                     getLooper().quit();
                 }
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             onMessageHandled = null;
         }

@@ -5,6 +5,7 @@ import androidx.room.Ignore;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -68,52 +69,52 @@ public abstract class BaseResponse {
     public enum Statuses { Succeeded, Error, ConnectionFailed }
 
     @Ignore
-    public String _internalMessage;
-
-    @Ignore
-    private String _internalStatus = null;
+    private String _callbackStatus = null;
 
     @Ignore
     public Integer _code;
 
     @Ignore
-    public Map<String, Object> _extras;
+    public String _error;
 
     @Ignore
-    public byte[] _rawResponse;
+    public Map<String, Object> _extras;
+
 
     //----------------------------------------------------------------------------------------------
 
-    public void setInternalStatus(@Nullable Statuses status) {
-        this._internalStatus = status.name();
+    public void setCallbackStatus(@Nullable Statuses status) {
+        this._callbackStatus = status.name();
     }
 
     @Nullable
-    public final Statuses getInternalStatus() {
-        if (_internalStatus == null) return null;
-        else return Statuses.valueOf(_internalStatus);
+    public final Statuses getCallbackStatus() {
+        if (_callbackStatus == null) return null;
+        else return Statuses.valueOf(_callbackStatus);
     }
 
-    public abstract Statuses getExternalStatus();
+    public abstract Statuses getResponseStatus();
 
-    private Statuses getFinalStatus() {
+    /*private Statuses getFinalStatus() {
         if (_internalStatus == null) return getExternalStatus();
         else return Statuses.valueOf(_internalStatus);
-    }
+    }*/
 
     public boolean isSuccess() {
-        return getFinalStatus() == Statuses.Succeeded;
+        //return getFinalStatus() == Statuses.Succeeded;
+        return getResponseStatus() == Statuses.Succeeded;
     }
 
     public boolean hasErrors() {
-        return getFinalStatus() == Statuses.Error;
+        //return getFinalStatus() == Statuses.Error;
+        return getResponseStatus() == Statuses.Error;
     }
 
     public void cloneResponseStatus(@NotNull BaseResponse otherResponse) {
-        _internalMessage = otherResponse._internalMessage;
-        _internalStatus = otherResponse._internalStatus;
+        _error = otherResponse._error;
+        _callbackStatus = otherResponse._callbackStatus;
         _code = otherResponse._code;
         _extras = otherResponse._extras;
-        _rawResponse = otherResponse._rawResponse;
     }
+
 }
