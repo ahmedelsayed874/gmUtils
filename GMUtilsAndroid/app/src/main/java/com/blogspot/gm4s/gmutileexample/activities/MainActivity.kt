@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Message
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -12,6 +14,7 @@ import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.ReadLogFileActivity
 import com.blogspot.gm4s1.gmutils.DateOp
+import com.blogspot.gm4s1.gmutils.LooperThread
 import com.blogspot.gm4s1.gmutils.net.SimpleHTTPRequest
 import com.blogspot.gm4s1.gmutils.net.volley.example.URLs.TimeURLs
 import com.blogspot.gm4s1.gmutils.ui.MyToast
@@ -141,8 +144,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        btn10.text = ""
-        btn10.setOnClickListener {}
+        btn10.text = "LooperThread"
+        var x = 1
+        btn10.setOnClickListener {
+            LooperThread("MyLooperThread") {args ->
+                btn10.postDelayed({
+                    btn10.text = "LooperThread ${args.msg.arg1}"
+                }, 1000)
+                Log.e("***", Thread.currentThread().name)
+            }.sendMessage(Message().also { it.arg1 = x++ })
+        }
 
         //------------------------------------------------------------------------------------------
 

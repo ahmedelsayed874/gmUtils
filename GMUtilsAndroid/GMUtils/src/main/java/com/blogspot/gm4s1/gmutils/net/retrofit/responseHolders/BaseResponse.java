@@ -95,18 +95,11 @@ public abstract class BaseResponse {
 
     public abstract Statuses getResponseStatus();
 
-    /*private Statuses getFinalStatus() {
-        if (_internalStatus == null) return getExternalStatus();
-        else return Statuses.valueOf(_internalStatus);
-    }*/
-
     public boolean isSuccess() {
-        //return getFinalStatus() == Statuses.Succeeded;
         return getResponseStatus() == Statuses.Succeeded;
     }
 
     public boolean hasErrors() {
-        //return getFinalStatus() == Statuses.Error;
         return getResponseStatus() == Statuses.Error;
     }
 

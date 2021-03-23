@@ -555,6 +555,10 @@ public class Logger {
     //endregion delete files
 
     //region create file
+    public static String getLogFilesPath(Context context) {
+        return getLogDirector(context).getAbsolutePath();
+    }
+
     private static String sessionId;
 
     private synchronized static File createOrGetLogFile(Context context) {

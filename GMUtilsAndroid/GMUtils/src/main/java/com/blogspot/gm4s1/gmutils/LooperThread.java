@@ -122,7 +122,7 @@ public class LooperThread extends Thread {
         private MessageHandler onMessageHandled;
 
         MyHandler(MessageHandler onMessageHandled) {
-            super(Looper.getMainLooper());
+            super(Looper.myLooper());
             this.onMessageHandled = onMessageHandled;
         }
 

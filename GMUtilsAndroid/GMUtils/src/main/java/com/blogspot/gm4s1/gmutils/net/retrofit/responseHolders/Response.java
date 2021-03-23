@@ -76,6 +76,7 @@ public abstract class Response<T> extends BaseResponse {
 
     public abstract void setData(@Nullable T data);
 
+    @Nullable
     public abstract T getData();
 
     //----------------------------------------------------------------------------------------------
