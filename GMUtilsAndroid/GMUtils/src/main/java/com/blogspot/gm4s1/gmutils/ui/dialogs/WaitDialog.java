@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseDialog;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -49,8 +48,8 @@ public class WaitDialog extends BaseDialog {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onViewCreated(View view) {
+        super.onViewCreated(view);
         getDialog().setCanceledOnTouchOutside(false);
     }
 

@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.ui._bases;
+package com.blogspot.gm4s1.gmutils.ui.activities;
 
 
 import android.annotation.SuppressLint;
@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -27,6 +26,8 @@ import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
 import com.blogspot.gm4s1.gmutils.ui.MyToast;
 import com.blogspot.gm4s1.gmutils.R;
+import com.blogspot.gm4s1.gmutils.ui.fragments.BaseFragment;
+import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;

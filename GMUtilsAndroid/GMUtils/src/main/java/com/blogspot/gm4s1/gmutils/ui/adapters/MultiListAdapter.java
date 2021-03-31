@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.ui._bases.adapters;
+package com.blogspot.gm4s1.gmutils.ui.adapters;
 
 import android.content.Context;
 import android.text.TextUtils;

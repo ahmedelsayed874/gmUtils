@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.ui._bases.compat;
+package com.blogspot.gm4s1.gmutils.ui.activities.compat;
 
 
 import android.annotation.SuppressLint;

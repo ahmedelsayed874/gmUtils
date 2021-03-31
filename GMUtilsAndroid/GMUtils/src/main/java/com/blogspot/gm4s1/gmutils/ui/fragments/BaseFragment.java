@@ -1,7 +1,6 @@
-package com.blogspot.gm4s1.gmutils.ui._bases.compat;
+package com.blogspot.gm4s1.gmutils.ui.fragments;
 
 
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,9 +9,14 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.blogspot.gm4s1.gmutils.R;
+import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
+
+import java.util.HashMap;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -25,10 +29,11 @@ import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public abstract class BaseCompatFragment extends Fragment {
+public abstract class BaseFragment extends Fragment {
     private Listener listener = null;
+    private HashMap<Integer, BaseViewModel> viewModels;
 
-    public BaseCompatFragment() {
+    public BaseFragment() {
         super();
     }
 
@@ -55,12 +60,61 @@ public abstract class BaseCompatFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        listener.onFragmentStarted(this);
+    }
+
+//----------------------------------------------------------------------------------------------
+
+    protected HashMap<Integer, Class<? extends BaseViewModel>> getViewModelClasses() {
+        return null;
+    }
+
+    protected ViewModelProvider.Factory onCreateViewModelFactory(int id) {
+        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
+                .AndroidViewModelFactory
+                .getInstance(getActivity().getApplication());
+        return viewModelFactory;
+    }
+
+    public BaseViewModel getViewModel() {
+        if (viewModels.size() == 1) {
+            return viewModels.values().toArray(new BaseViewModel[0])[0];
+        }
+
+        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
+    }
+
+    public BaseViewModel getViewModel(int id) {
+        return viewModels.get(id);
+    }
+
     //----------------------------------------------------------------------------------------------
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+        //------------------------------------------------------------------------------------------
+
+        HashMap<Integer, Class<? extends BaseViewModel>> viewModelClasses = getViewModelClasses();
+        if (viewModelClasses != null) {
+            viewModels = new HashMap<>();
+
+            for (Integer id : viewModelClasses.keySet()) {
+                ViewModelProvider viewModelProvider = new ViewModelProvider(
+                        this,
+                        onCreateViewModelFactory(id)
+                );
+
+                Class<? extends BaseViewModel> viewModelClass = viewModelClasses.get(id);
+                assert viewModelClass != null;
+                viewModels.put(id, viewModelProvider.get(viewModelClass));
+            }
+        }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -127,12 +181,29 @@ public abstract class BaseCompatFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    public void showFragment(BaseCompatFragment fragment, String stackName) {
-        listener.showFragment(fragment, stackName);
+    protected void showFragment(Fragment fragment) {
+        showFragment(fragment, false, null, null);
+    }
+
+    protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable Integer fragmentContainerId) {
+        listener.showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
+    }
+
+    protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable String stackName, @Nullable Integer fragmentContainerId) {
+        listener.showFragment(fragment, addToBackStack, stackName, fragmentContainerId);
     }
 
     //----------------------------------------------------------------------------------------------
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (viewModels != null) viewModels.clear();
+        hideWaitView();
+    }
+
+
+    //----------------------------------------------------------------------------------------------
 
     public interface Listener {
         void setKeyboardAutoHidden();
@@ -149,8 +220,8 @@ public abstract class BaseCompatFragment extends Fragment {
                 RetryPromptDialog.Listener onCancel
         );
 
-        void showFragment(BaseCompatFragment fragment, String stackName);
+        void showFragment(Fragment fragment, boolean addToBackStack, @Nullable String stackName, @Nullable Integer fragmentContainerId);
 
-        void showFragment(BaseCompatFragment fragment, String stackName, int fragmentContainerId);
+        void onFragmentStarted(BaseFragment fragment);
     }
 }

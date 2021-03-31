@@ -11,7 +11,7 @@ import android.util.Log;
 import com.blogspot.gm4s1.gmutils.database.sqlitecommands.CreateTable;
 import com.blogspot.gm4s1.gmutils.database.sqlitecommands.DropTable;
 import com.blogspot.gm4s1.gmutils.database.sqlitecommands.WhereClause;
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseApplication;
+import com.blogspot.gm4s1.gmutils.ui.app.BaseApplication;
 import com.blogspot.gm4s1.gmutils.database.annotations.AutoIncrement;
 import com.blogspot.gm4s1.gmutils.database.annotations.Default;
 import com.blogspot.gm4s1.gmutils.database.annotations.Entity;

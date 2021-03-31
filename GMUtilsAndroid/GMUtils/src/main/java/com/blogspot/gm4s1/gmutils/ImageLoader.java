@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseApplication;
+import com.blogspot.gm4s1.gmutils.ui.app.BaseApplication;
 import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;

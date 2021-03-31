@@ -1,11 +1,8 @@
 package com.blogspot.gm4s1.gmutils.listeners;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.blogspot.gm4s1.gmutils.ui._bases.adapters.BaseRecyclerAdapter;
 
 public abstract class RecyclerViewPaginationListener extends RecyclerView.OnScrollListener {
 

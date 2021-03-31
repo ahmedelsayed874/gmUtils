@@ -15,8 +15,7 @@ import java.util.ArrayList;
 
 import com.blogspot.gm4s1.gmutils.CountryPhoneCodes;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseDialog;
-import com.blogspot.gm4s1.gmutils.ui._bases.adapters.BaseRecyclerAdapter;
+import com.blogspot.gm4s1.gmutils.ui.adapters.BaseRecyclerAdapter;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener;
 

@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.ui._bases;
+package com.blogspot.gm4s1.gmutils.ui.dialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,9 +17,9 @@ import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -41,13 +41,11 @@ public abstract class BaseDialog {
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         if (view != null) {
-            //setBackgroundRes(R.color.black_trans2);
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 view.getViewTreeObserver().addOnWindowAttachListener(new SimpleWindowAttachListener() {
                     @Override
                     public void onWindowAttached() {
-                        onStart();
+                        onViewCreated(view);
                     }
 
                     @Override
@@ -59,7 +57,7 @@ public abstract class BaseDialog {
         }
     }
 
-    protected void onStart() {
+    protected void onViewCreated(View view) {
     }
 
     private void destroy() {

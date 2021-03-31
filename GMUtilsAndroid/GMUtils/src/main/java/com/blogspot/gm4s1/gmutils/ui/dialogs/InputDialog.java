@@ -12,7 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback2;
 

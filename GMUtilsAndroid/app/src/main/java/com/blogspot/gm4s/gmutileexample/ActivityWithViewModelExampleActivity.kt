@@ -2,8 +2,8 @@ package com.blogspot.gm4s.gmutileexample
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseActivity
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseViewModel
+import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
+import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel
 import java.util.HashMap
 
 class ActivityWithViewModelExampleActivity : BaseActivity() {

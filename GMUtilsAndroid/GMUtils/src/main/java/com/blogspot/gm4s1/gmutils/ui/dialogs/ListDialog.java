@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.blogspot.gm4s1.gmutils.Animations;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
 import com.blogspot.gm4s1.gmutils.R;
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseDialog;
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener;
 
 import java.util.ArrayList;

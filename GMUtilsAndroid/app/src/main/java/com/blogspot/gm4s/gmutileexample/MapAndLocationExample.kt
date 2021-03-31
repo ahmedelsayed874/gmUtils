@@ -18,7 +18,7 @@ import com.blogspot.gm4s1.gmutils.geography.LocationTracker
 import com.blogspot.gm4s1.gmutils.geography.MapController
 import com.blogspot.gm4s1.gmutils.storage.AccountStorage
 import com.blogspot.gm4s1.gmutils.ui.MyToast
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseActivity
+import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
 import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment

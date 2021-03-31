@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseApplication;
+import com.blogspot.gm4s1.gmutils.ui.app.BaseApplication;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +37,7 @@ public class Logger {
     private static DateOp FILE_CONTENT_ENCRYPT_DEADLINE = null;
 
     private static Integer FILE_CONTENT_ENCRYPT_KEY = null;
-    private static final int DEF_ENC_KEY = 13579;
+    private static final int DEF_ENC_KEY = 112439;
 
     public static int MAX_LOG_FILES_COUNT = 50;
 
@@ -199,6 +199,10 @@ public class Logger {
     }
 
     public static void print(String title, String msg) {
+        print(title, msg, IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED());
+    }
+
+    public static void print(String title, String msg, boolean writeToFileAlso) {
         if (IS_LOG_ENABLED()) {
             String[] t = refineTitle("**** " + title);
             String[] m = divideLogMsg(msg, t.length > 1 ? t[1].length() : 0);
@@ -219,7 +223,7 @@ public class Logger {
             }
         }
 
-        if (IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
+        if (writeToFileAlso) {
             if (BaseApplication.current() != null) {
                 try {
                     writeToFile(BaseApplication.current(), msg, "APP_LOGS");

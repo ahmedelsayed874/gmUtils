@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.ui._bases;
+package com.blogspot.gm4s1.gmutils.ui.viewModels;
 
 import android.app.Application;
 import android.os.Handler;

@@ -4,10 +4,9 @@ import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.FloatRange
-import androidx.annotation.IntRange
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.blogspot.gm4s1.gmutils.ui._bases.BaseViewModel
+import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel
 import com.blogspot.gm4s1.gmutils.utils.Utils
 
 class ActivityWithViewModelExampleViewModel1(
