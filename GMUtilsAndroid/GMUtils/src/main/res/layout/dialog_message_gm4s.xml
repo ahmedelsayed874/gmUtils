@@ -26,7 +26,7 @@
             android:text="Title"
             android:visibility="gone"
             tools:visibility="visible"
-            android:textColor="@color/dialog_text_color"
+            android:textColor="@color/gmDialogText"
             android:textStyle="bold" />
 
         <ScrollView
@@ -45,7 +45,7 @@
                 android:paddingStart="@dimen/size_10"
                 android:paddingEnd="@dimen/size_10"
                 android:text="MSG"
-                android:textColor="@color/dialog_text_color" />
+                android:textColor="@color/gmDialogText" />
 
         </ScrollView>
 
@@ -60,7 +60,7 @@
 
             <CheckBox
                 android:id="@+id/chkDontShowAgain"
-                android:buttonTint="@color/dialog_text_color"
+                android:buttonTint="@color/gmDialogText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -68,7 +68,7 @@
                 android:id="@+id/tvDontShowAgain"
                 style="@style/textView"
                 android:text="@string/dontShowAgain"
-                android:textColor="@color/dialog_text_color"
+                android:textColor="@color/gmDialogText"
                 android:textSize="@dimen/font_11" />
 
         </LinearLayout>
@@ -95,7 +95,7 @@
                 android:minWidth="@dimen/size_80"
                 android:minHeight="@dimen/size_30"
                 android:text="@string/yes"
-                android:textColor="@color/dialog_text_color"
+                android:textColor="@color/gmDialogText"
                 android:textSize="@dimen/font_13"
                 android:textStyle="bold"
                 android:visibility="gone"
@@ -110,7 +110,7 @@
                 android:minWidth="@dimen/size_80"
                 android:minHeight="@dimen/size_30"
                 android:text="@string/no"
-                android:textColor="@color/dialog_text_color"
+                android:textColor="@color/gmDialogText"
                 android:textSize="@dimen/font_13"
                 android:textStyle="bold"
                 android:visibility="gone"
@@ -124,7 +124,7 @@
                 android:minWidth="@dimen/size_80"
                 android:minHeight="@dimen/size_30"
                 android:text="@string/cancel"
-                android:textColor="@color/dialog_text_color"
+                android:textColor="@color/gmDialogText"
                 android:textSize="@dimen/font_13"
                 android:textStyle="bold"
                 android:visibility="gone"

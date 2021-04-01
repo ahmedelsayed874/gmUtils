@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:layout_margin="@dimen/size_10"
         android:background="@drawable/dialog_background"
-        android:minWidth="@dimen/size_130"
+        android:minWidth="@dimen/size_250"
         android:orientation="vertical"
         android:paddingTop="@dimen/size_10">
 
@@ -24,7 +24,7 @@
             android:paddingStart="@dimen/size_10"
             android:paddingEnd="@dimen/size_10"
             android:text="Title"
-            android:textColor="@color/dialog_text_color"
+            android:textColor="@color/gmDialogText"
             android:textStyle="bold"
             android:visibility="gone"
             tools:visibility="visible" />
@@ -36,11 +36,14 @@
             android:layout_marginStart="@dimen/size_10"
             android:layout_marginEnd="@dimen/size_10"
             android:text="MSG"
-            android:textColor="@color/dialog_text_color" />
+            android:textColor="@color/gmDialogText" />
 
         <EditText
             android:id="@+id/tv_input"
-            style="@style/editText.frame"
+            style="@style/editText"
+            android:background="@drawable/shape_frame_round_edittext_textcolor"
+            android:paddingStart="@dimen/size_10"
+            android:paddingEnd="@dimen/size_10"
             android:layout_marginStart="@dimen/size_10"
             android:layout_marginEnd="@dimen/size_10"
             android:layout_marginBottom="@dimen/size_5"
@@ -69,7 +72,7 @@
                 android:minWidth="@dimen/size_80"
                 android:minHeight="@dimen/size_30"
                 android:text="@string/done"
-                android:textColor="@color/dialog_text_color"
+                android:textColor="@color/gmDialogText"
                 android:textSize="@dimen/font_13"
                 android:textStyle="bold"
                 android:visibility="gone"
@@ -82,7 +85,7 @@
                 android:minWidth="@dimen/size_80"
                 android:minHeight="@dimen/size_30"
                 android:text="@string/cancel"
-                android:textColor="@color/dialog_text_color"
+                android:textColor="@color/gmDialogText"
                 android:textSize="@dimen/font_13"
                 android:textStyle="bold"
                 android:visibility="gone"

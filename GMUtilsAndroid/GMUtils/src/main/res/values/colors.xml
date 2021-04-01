@@ -4,21 +4,23 @@
     <color name="colorPrimary">@color/orange</color>
     <color name="colorAccent">@color/red1</color>
 
-    <color name="brandColor">@color/orange</color>
-    <color name="background">@color/white</color>
-    <color name="text">@color/black</color>
-    <color name="hint">@color/gray1</color>
-    <color name="title">@color/black</color>
-    <color name="screenTitle">@color/gray5</color>
+    <color name="gmBackground">@color/white</color>
+    <color name="gmText">@color/black</color>
+    <color name="gmHint">@color/gray1</color>
+    <color name="gmTitle">@color/black</color>
+    <color name="gmScreenTitle">@color/gray5</color>
 
-    <color name="button_color1">@color/blue0</color>
-    <color name="button_color2">@color/black</color>
-    <color name="button_color3">@color/green5</color>
-    <color name="button_color4">@color/red</color>
+    <color name="gmButtonLink">@color/blue0</color>
+    <color name="gmButtonActive">@color/green5</color>
+    <color name="gmButtonDestructive">@color/red1</color>
+    <color name="gmButtonDark">@color/black</color>
 
-    <color name="ratingBar">@color/yellow</color>
+    <color name="gmDialogBackground">@color/colorPrimary</color>
+    <color name="gmDialogText">#fff</color>
 
-    <color name="dialog_text_color">#fff</color>
+    <color name="gmSeparateLine">@color/gray1</color>
+    <color name="gmRatingBar">@color/colorPrimary</color>
+    <color name="gmEditTextBackground">@color/white</color>
 
     <!-- ****************************************** -->
 
@@ -57,7 +59,7 @@
     <color name="red2">#CC390E</color>
     <color name="red3">#BC350E</color>
 
-    <color name="orange">#FE8102</color>
+    <color name="orange">#FF9800</color>
     <color name="orange1">#EA7703</color>
 
     <color name="blue0">#0000FF</color>
@@ -68,7 +70,7 @@
     <color name="lightblue1">#2196F3</color>
     <color name="lightblue2">#177FD1</color>
 
-    <color name="plural0">#9C27B0</color>
+    <color name="plural">#9C27B0</color>
 
     <color name="yellow">#FFC107</color>
 

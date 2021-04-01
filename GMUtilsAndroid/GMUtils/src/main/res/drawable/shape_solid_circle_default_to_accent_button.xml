@@ -2,6 +2,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_pressed="true" android:drawable="@drawable/shape_solid_circle_accent" />
-    <item android:state_enabled="false" android:drawable="@drawable/shape_solid_circle_brand" />
-    <item android:drawable="@drawable/shape_solid_circle_brand" />
+    <item android:state_enabled="false" android:drawable="@drawable/shape_solid_circle_primary" />
+    <item android:drawable="@drawable/shape_solid_circle_primary" />
 </selector>

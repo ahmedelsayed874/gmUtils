@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <drawable name="dialog_background">@drawable/shape_solid_round_primary</drawable>
-
-</resources>

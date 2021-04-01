@@ -359,10 +359,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     public boolean onCreateOptionsMenu(Menu menu) {
         if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
             if (showBugsMenuItemId == 0) {
-                showBugsMenuItemId = "Show Bug Log".hashCode();
+                showBugsMenuItemId = "Show Log".hashCode();
                 if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
             }
-            menu.add(0, showBugsMenuItemId, 10, "Show Bug Log");
+            menu.add(0, showBugsMenuItemId, 10, "Show Log");
         }
 
         return super.onCreateOptionsMenu(menu);

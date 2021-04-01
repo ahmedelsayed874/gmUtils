@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimaryDark">@color/white</color>
+    <color name="colorPrimary">@color/white</color>
+    <color name="colorAccent">@color/red1</color>
+
+    <color name="gmBackground">@color/white</color>
+    <color name="gmText">@color/black</color>
+    <color name="gmHint">@color/gray1</color>
+    <color name="gmTitle">@color/black</color>
+    <color name="gmScreenTitle">@color/gray5</color>
+
+    <color name="gmButtonLink">@color/blue0</color>
+    <color name="gmButtonActive">@color/green5</color>
+    <color name="gmButtonDestructive">@color/red1</color>
+
+    <color name="gmDialogBackground">@color/colorPrimary</color>
+    <color name="gmDialogText">#fff</color>
+
+    <!-- ****************************************** -->
+
+
+    <color name="white">#000</color>
+
+    <color name="black">#fff</color>
+    <color name="black_trans1">#40ffffff</color>
+    <color name="black_trans2">#59ffffff</color>
+    <color name="black_trans3">#74ffffff</color>
+    <color name="black_trans4">#9Affffff</color>
+
+</resources>

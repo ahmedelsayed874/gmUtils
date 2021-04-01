@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="default_margin">@dimen/size_15</dimen>
-    <dimen name="default_margin2">@dimen/size_20</dimen>
-    <dimen name="default_text_size">@dimen/font_15</dimen>
-    <dimen name="default_page_title_size">@dimen/font_18</dimen>
+    <dimen name="gmDefaultMargin">@dimen/size_15</dimen>
+    <dimen name="gmDefaultMargin2">@dimen/size_20</dimen>
+    <dimen name="gmDefaultTextSize">@dimen/font_16</dimen>
+    <dimen name="gmDefaultPageTitleSize">@dimen/font_18</dimen>
 
-    <dimen name="icon_size">@dimen/size_50</dimen>
-    <dimen name="icon_margin">@dimen/size_3</dimen>
+    <dimen name="iconSize">@dimen/size_50</dimen>
+    <dimen name="iconMargin">@dimen/size_3</dimen>
 
 
     <dimen name="size_0">0dp</dimen>
