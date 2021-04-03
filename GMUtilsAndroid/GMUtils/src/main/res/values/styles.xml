@@ -286,6 +286,11 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="button.accent">
+        <item name="android:background">@color/colorAccent</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="button.red">
         <item name="android:background">@color/red</item>
         <item name="android:textColor">@color/white</item>

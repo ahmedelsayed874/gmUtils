@@ -12,6 +12,8 @@ import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.storage.StorageManager;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -29,9 +31,9 @@ import java.util.Set;
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
     public interface Callbacks {
-        void onApplicationStartedFirstActivity();
+        void onApplicationStartedFirstActivity(String key);
 
-        void onApplicationFinishedLastActivity();
+        void onApplicationFinishedLastActivity(String key);
 
     }
 
@@ -74,6 +76,9 @@ public abstract class BaseApplication extends Application implements Application
             this.globalInstances.clear();
         }
 
+        public int size() {
+            return globalInstances.size();
+        }
     }
 
     private static BaseApplication current;
@@ -97,19 +102,31 @@ public abstract class BaseApplication extends Application implements Application
         return current;
     }
 
+    /**
+     * it will help in case app inforced to use Application class from other type
+     * and need to get benefits of this class
+     * just override and change returned value
+     * @return
+     */
+    @NotNull
+    protected Application thisInstance() {
+        return this;
+    }
+
     protected abstract void onPreCreate();
 
     @Override
     public void onCreate() {
         onPreCreate();
 
-        super.onCreate();
+        if (thisInstance() == this)
+            super.onCreate();
 
-        StorageManager.registerCallback(() -> BaseApplication.this);
+        StorageManager.registerCallback(this::thisInstance);
 
         registerDefaultUncaughtExceptionHandler();
 
-        registerActivityLifecycleCallbacks(this);
+        thisInstance().registerActivityLifecycleCallbacks(this);
 
         onPostCreate();
     }
@@ -124,7 +141,7 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     public MessagingCenter messagingCenter() {
-        if (messagingCenter == null) MessagingCenter.createInstance();
+        if (messagingCenter == null) messagingCenter = MessagingCenter.createInstance();
         return messagingCenter;
     }
 
@@ -157,7 +174,7 @@ public abstract class BaseApplication extends Application implements Application
                 t = t.getCause();
             }
 
-            Logger.writeToFile(this, stack.toString(), bugFileName);
+            Logger.writeToFile(thisInstance(), stack.toString(), bugFileName);
             Logger.print(stack.toString());
 
             if (defaultHandler != null) {
@@ -192,7 +209,6 @@ public abstract class BaseApplication extends Application implements Application
         mCallbacks.remove(name);
     }
 
-
     //----------------------------------------------------------------------------------------------
 
     public boolean hasBugs() {
@@ -200,12 +216,12 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     public String getReportedBugs() {
-        return Logger.readFile(this, bugFileName);
+        return Logger.readFile(thisInstance(), bugFileName);
     }
 
     public void deleteBugs() {
         try {
-            Logger.deleteSavedFile(this, bugFileName);
+            Logger.deleteSavedFile(thisInstance(), bugFileName);
         } catch (Exception e) {}
     }
 
@@ -220,6 +236,11 @@ public abstract class BaseApplication extends Application implements Application
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (activityCount == 1) {
                 onApplicationStartedFirstActivity();
+                if (mCallbacks != null) {
+                    for (Map.Entry<String, Callbacks> entry : mCallbacks.entrySet()) {
+                        entry.getValue().onApplicationStartedFirstActivity(entry.getKey());
+                    }
+                }
 
                 if (bugs.length() != 0 && Logger.IS_WRITE_TO_FILE_ENABLED()) {
                     hasBugs = true;
@@ -276,6 +297,13 @@ public abstract class BaseApplication extends Application implements Application
             if (activityCount <= 0) {
                 onApplicationFinishedLastActivity();
                 activityCount = 0;
+
+                if (mCallbacks != null) {
+                    for (Map.Entry<String, Callbacks> entry : mCallbacks.entrySet()) {
+                        entry.getValue().onApplicationFinishedLastActivity(entry.getKey());
+                    }
+                }
+
                 dispose();
             }
         }, delayAmount);

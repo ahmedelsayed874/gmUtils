@@ -1,8 +1,8 @@
-package com.blogspot.gm4s.gmutileexample
+package com.blogspot.gm4s.gmutileexample.app
 
 import com.blogspot.gm4s1.gmutils.ui.app.BaseApplication
 
-class App : BaseApplication() {
+class BaseApplicationExample : BaseApplication() {
 
     override fun onPreCreate() {
 

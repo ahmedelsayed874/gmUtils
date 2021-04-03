@@ -31,6 +31,11 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="button.accent">
+        <item name="android:backgroundTint">@color/colorAccent</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="button.red">
         <item name="android:backgroundTint">@color/red</item>
         <item name="android:textColor">@color/white</item>

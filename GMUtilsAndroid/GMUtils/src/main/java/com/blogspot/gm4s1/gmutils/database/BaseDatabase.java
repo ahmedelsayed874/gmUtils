@@ -101,11 +101,11 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         if (BaseApplication.current() != null) {
             BaseApplication.current().addCallback(BaseDatabase.class.getName(), new BaseApplication.Callbacks() {
                 @Override
-                public void onApplicationStartedFirstActivity() {
+                public void onApplicationStartedFirstActivity(String key) {
                 }
 
                 @Override
-                public void onApplicationFinishedLastActivity() {
+                public void onApplicationFinishedLastActivity(String key) {
                     try {
                         db().close();
                     } catch (Exception e) {
