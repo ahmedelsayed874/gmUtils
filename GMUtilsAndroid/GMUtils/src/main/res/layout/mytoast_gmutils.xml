@@ -12,7 +12,7 @@
         android:layout_marginStart="@dimen/size_20"
         android:layout_marginEnd="@dimen/size_20"
         android:layout_marginBottom="@dimen/size_40"
-        android:background="@android:drawable/toast_frame"
+        android:background="@drawable/toast_frame"
         android:minWidth="@dimen/size_20"
         android:minHeight="@dimen/size_20">
 
