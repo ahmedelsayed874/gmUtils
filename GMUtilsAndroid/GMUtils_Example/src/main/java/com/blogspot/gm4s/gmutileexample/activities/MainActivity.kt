@@ -12,12 +12,10 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
-import com.blogspot.gm4s.gmutileexample.ReadLogFileActivity
 import com.blogspot.gm4s1.gmutils.DateOp
 import com.blogspot.gm4s1.gmutils.LooperThread
 import com.blogspot.gm4s1.gmutils.net.SimpleHTTPRequest
 import com.blogspot.gm4s1.gmutils.net.volley.example.URLs.TimeURLs
-import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.ui.MyToast2
 import com.blogspot.gm4s1.gmutils.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*

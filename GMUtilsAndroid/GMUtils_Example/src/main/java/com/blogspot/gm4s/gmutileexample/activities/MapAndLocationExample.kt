@@ -1,4 +1,4 @@
-package com.blogspot.gm4s.gmutileexample
+package com.blogspot.gm4s.gmutileexample.activities
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -12,6 +12,7 @@ import android.provider.Settings
 import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
+import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s1.gmutils.Activities
 import com.blogspot.gm4s1.gmutils.Logger
 import com.blogspot.gm4s1.gmutils.geography.LocationTracker

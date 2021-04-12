@@ -1,4 +1,4 @@
-package com.blogspot.gm4s.gmutileexample
+package com.blogspot.gm4s.gmutileexample.activities
 
 import android.app.Application
 import android.os.Handler

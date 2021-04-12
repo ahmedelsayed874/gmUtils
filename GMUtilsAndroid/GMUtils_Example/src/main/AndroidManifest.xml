@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ReadLogFileActivity" />
+        <activity android:name=".activities.ReadLogFileActivity" />
     </application>
 
 </manifest>

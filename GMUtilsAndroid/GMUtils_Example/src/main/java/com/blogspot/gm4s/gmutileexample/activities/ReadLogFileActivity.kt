@@ -1,10 +1,11 @@
-package com.blogspot.gm4s.gmutileexample
+package com.blogspot.gm4s.gmutileexample.activities
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.Security
 import com.blogspot.gm4s1.gmutils.ui.dialogs.WaitDialog
