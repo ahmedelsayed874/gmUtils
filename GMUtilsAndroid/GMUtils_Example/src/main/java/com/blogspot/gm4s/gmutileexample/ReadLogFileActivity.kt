@@ -7,6 +7,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.Security
+import com.blogspot.gm4s1.gmutils.ui.dialogs.WaitDialog
 import com.blogspot.gm4s1.gmutils.utils.FileUtils
 import kotlinx.android.synthetic.main.activity_read_log_file.*
 import java.io.OutputStreamWriter
@@ -14,6 +15,8 @@ import java.nio.charset.Charset
 import java.util.*
 
 class ReadLogFileActivity : AppCompatActivity() {
+
+    private var text: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,12 +49,22 @@ class ReadLogFileActivity : AppCompatActivity() {
     }
 
     fun readFile(uri: Uri) {
-        val inputStream = contentResolver.openInputStream(uri)!!
-        val s = inputStream.available()
-        val bytes = ByteArray(s)
-        inputStream.read(bytes)
-        textView.text = String(bytes)
-        inputStream.close()
+        val waitDialog = WaitDialog.show(this)
+
+        Thread {
+            val inputStream = contentResolver.openInputStream(uri)!!
+            val s = inputStream.available()
+            val bytes = ByteArray(s)
+            inputStream.read(bytes)
+            inputStream.close()
+
+            text = String(bytes)
+
+            runOnUiThread {
+                textView.text = text
+                waitDialog.dismiss()
+            }
+        }.start()
     }
 
     //----------------------------------------------------------------------------------------------
@@ -65,7 +78,7 @@ class ReadLogFileActivity : AppCompatActivity() {
         }
 
         try {
-            val text = Security.getSimpleInstance(key).decrypt(textView.text.toString())
+            val text = Security.getSimpleInstance(key).decrypt(text)
             textView.text = text
         } catch (e: Exception) {
             MyToast.show(this, "error: ${e.message}")
@@ -85,14 +98,22 @@ class ReadLogFileActivity : AppCompatActivity() {
     }
 
     fun saveFile(uri: Uri) {
-        val os = contentResolver.openOutputStream(uri)
-        val sw = OutputStreamWriter(os, Charset.forName("utf-8"))
+        val waitDialog = WaitDialog.show(this)
 
-        sw.write(textView.text.toString())
+        Thread {
+            val os = contentResolver.openOutputStream(uri)
+            val sw = OutputStreamWriter(os, Charset.forName("utf-8"))
 
-        sw.flush()
-        sw.close()
-        os?.close()
+            sw.write(textView.text.toString())
+
+            sw.flush()
+            sw.close()
+            os?.close()
+
+            runOnUiThread {
+                waitDialog.dismiss()
+            }
+        }.start()
     }
 
 }
