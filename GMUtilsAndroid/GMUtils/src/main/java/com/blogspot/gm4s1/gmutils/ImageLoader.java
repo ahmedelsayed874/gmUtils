@@ -15,11 +15,13 @@ import com.blogspot.gm4s1.gmutils.ui.app.BaseApplication;
 import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Protocol;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -46,6 +48,8 @@ import javax.net.ssl.X509TrustManager;
 public class ImageLoader {
     @SuppressLint("StaticFieldLeak")
     private static volatile Picasso INSTANCE;
+
+    //todo add dictionary of requests and corresponding callbacks
 
     public static Integer MIN_IMAGE_SIZE; //will initialize later, it's important to reduce image size
     public static int DEFAULT_LOADING_PLACEHOLDER = android.R.drawable.stat_sys_download;
@@ -167,6 +171,7 @@ public class ImageLoader {
 
     private static Picasso createPicassoInstance(Context context) {
         OkHttpClient client = new OkHttpClient();
+        client.setProtocols(Arrays.asList(Protocol.HTTP_1_1)); //i added this to solve "stream was reset:PROTOCOL_ERROR" error
         client.setHostnameVerifier((s, sslSession) -> true);
 
         TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
