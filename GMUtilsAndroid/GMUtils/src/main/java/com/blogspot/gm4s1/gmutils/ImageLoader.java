@@ -58,8 +58,6 @@ public class ImageLoader {
     private static volatile Picasso INSTANCE;
     private static final Map<String, List<LoaderCallback>> currentRequests = new HashMap<>();
 
-    //todo add dictionary of requests and corresponding callbacks
-
     public static Integer MIN_IMAGE_SIZE; //will initialize later, it's important to reduce image size
     public static int DEFAULT_LOADING_PLACEHOLDER = android.R.drawable.stat_sys_download;
     public static int DEFAULT_ERROR_PLACEHOLDER = android.R.drawable.stat_notify_error;
@@ -277,6 +275,7 @@ public class ImageLoader {
 
         @Override
         public void onSuccess() {
+            Logger.print(ImageLoader.class.getSimpleName(), "image from " + imgUrl + " COMPLETED");
             onComplete(true);
 
             try {
@@ -295,6 +294,7 @@ public class ImageLoader {
 
         @Override
         public void onError() {
+            Logger.print(ImageLoader.class.getSimpleName(), "image from " + imgUrl + " FAILED");
             onComplete(false);
 
             try {
@@ -319,6 +319,7 @@ public class ImageLoader {
 
             if (successfully && pendingCallbacks != null) {
                 Drawable imageViewDrawable = imageView.getDrawable();
+                Logger.print(ImageLoader.class.getSimpleName(), "image from " + imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
 
                 for (LoaderCallback pendingCallback : pendingCallbacks) {
                     pendingCallback.imageView.setImageDrawable(imageViewDrawable);
