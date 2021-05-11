@@ -3,6 +3,7 @@ package com.blogspot.gm4s1.gmutils;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -16,12 +17,19 @@ import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Protocol;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -48,6 +56,7 @@ import javax.net.ssl.X509TrustManager;
 public class ImageLoader {
     @SuppressLint("StaticFieldLeak")
     private static volatile Picasso INSTANCE;
+    private static final Map<String, List<LoaderCallback>> currentRequests = new HashMap<>();
 
     //todo add dictionary of requests and corresponding callbacks
 
@@ -74,7 +83,12 @@ public class ImageLoader {
     }
 
     public static void load(String url, ImageView imageView, Options options, Callback callback) {
-        if (imageView == null) return;
+        if (imageView == null) {
+            if (callback != null)
+                callback.onComplete(url, imageView, false);
+
+            return;
+        }
 
         if (MIN_IMAGE_SIZE == null) {
             DisplayMetrics displayMetrics = imageView.getResources().getDisplayMetrics();
@@ -123,6 +137,23 @@ public class ImageLoader {
             }
         }
 
+
+        LoaderCallback picassoCallback = new LoaderCallback(url, imageView, options, callback);
+
+        if (currentRequests.containsKey(url)) {
+            Logger.print(ImageLoader.class.getSimpleName(), "loading image from " + url + " already IN-PROGRESS");
+
+            List<LoaderCallback> pendingRequests = currentRequests.get(url);
+            if (pendingRequests == null) pendingRequests = new ArrayList<>();
+            pendingRequests.add(picassoCallback);
+
+            currentRequests.put(url, pendingRequests);
+
+        } else {
+            currentRequests.put(url, null);
+            Logger.print(ImageLoader.class.getSimpleName(), "loading image from " + url + " will start");
+        }
+
         RequestCreator request = picasso.load(url);
 
         if (options.minWidth != null && options.minWidth > 0) {
@@ -142,9 +173,7 @@ public class ImageLoader {
             request.error(options.errorPlaceHolderRes);
         }
 
-        request.into(
-                imageView,
-                createPicassoCallback(url, imageView, options, callback));
+        request.into(imageView, picassoCallback);
     }
 
     public static void load(Context context, String url, Callback2 callback) {
@@ -155,13 +184,17 @@ public class ImageLoader {
                 .setLoadingPlaceHolderRes(0)
                 .setErrorPlaceHolderRes(0);
 
+        Callback2[] callback2 = new Callback2[]{callback};
+
         Callback innerCallback = (imgUrl, imageView1, success) -> {
             if (success) {
                 Bitmap image = ImageUtils.createInstance().getBitmap(imageView1);
-                callback.onComplete(imgUrl, image, true);
+                callback2[0].onComplete(imgUrl, image, true);
             } else {
-                callback.onComplete(imgUrl, null, false);
+                callback2[0].onComplete(imgUrl, null, false);
             }
+
+            callback2[0] = null;
         };
 
         load(url, imageView, options, innerCallback);
@@ -220,71 +253,88 @@ public class ImageLoader {
         return instance;
     }
 
-    private static com.squareup.picasso.Callback createPicassoCallback(
-            String imgUrl, ImageView imageView,
-            Options options, Callback otherCallback) {
+    //----------------------------------------------------------------------------------------------
 
-        class PicassoCallback implements com.squareup.picasso.Callback {
-            String imgUrl;
-            ImageView imageView;
-            Options options;
-            Callback outerCallback;
+    private static class LoaderCallback implements com.squareup.picasso.Callback {
+        String imgUrl;
+        ImageView imageView;
+        Options options;
+        Callback outerCallback;
 
-            public PicassoCallback(String imgUrl, ImageView imageView, Options options, Callback outerCallback) {
-                this.imgUrl = imgUrl;
-                this.imageView = imageView;
-                this.options = options;
-                this.outerCallback = outerCallback;
+        public LoaderCallback(String imgUrl, ImageView imageView, Options options, Callback outerCallback) {
+            this.imgUrl = imgUrl;
+            this.imageView = imageView;
+            this.options = options;
+            this.outerCallback = outerCallback;
 
-                try {
-                    imageView.setScaleType(options.loadingScaleType);
-                } catch (Exception e) {
-                    //e.printStackTrace();
-                    Logger.print(e.getMessage());
-                }
-            }
-
-            @Override
-            public void onSuccess() {
-                try {
-                    imageView.setScaleType(options.successScaleType);
-                } catch (Exception e) {
-                    //e.printStackTrace();
-                    Logger.print(e.getMessage());
-                }
-
-                if (outerCallback != null) {
-                    outerCallback.onComplete(imgUrl, imageView, true);
-                }
-
-                PicassoCallback.this.imgUrl = null;
-                PicassoCallback.this.imageView = null;
-                PicassoCallback.this.options = null;
-                PicassoCallback.this.outerCallback = null;
-            }
-
-            @Override
-            public void onError() {
-                try {
-                    imageView.setScaleType(options.errorScaleType);
-                } catch (Exception e) {
-                    //e.printStackTrace();
-                    Logger.print(e.getMessage());
-                }
-
-                if (outerCallback != null) {
-                    outerCallback.onComplete(imgUrl, imageView, false);
-                }
-
-                PicassoCallback.this.imgUrl = null;
-                PicassoCallback.this.imageView = null;
-                PicassoCallback.this.options = null;
-                PicassoCallback.this.outerCallback = null;
+            try {
+                imageView.setScaleType(options.loadingScaleType);
+            } catch (Exception e) {
+                //e.printStackTrace();
+                Logger.print(e.getMessage());
             }
         }
 
-        return new PicassoCallback(imgUrl, imageView, options, otherCallback);
+        @Override
+        public void onSuccess() {
+            onComplete(true);
 
+            try {
+                imageView.setScaleType(options.successScaleType);
+            } catch (Exception e) {
+                //e.printStackTrace();
+                Logger.print(e.getMessage());
+            }
+
+            if (outerCallback != null) {
+                outerCallback.onComplete(imgUrl, imageView, true);
+            }
+
+            dispose();
+        }
+
+        @Override
+        public void onError() {
+            onComplete(false);
+
+            try {
+                imageView.setScaleType(options.errorScaleType);
+            } catch (Exception e) {
+                //e.printStackTrace();
+                Logger.print(e.getMessage());
+            }
+
+            if (outerCallback != null) {
+                outerCallback.onComplete(imgUrl, imageView, false);
+            }
+
+            dispose();
+        }
+
+        void onComplete(boolean successfully) {
+            if (!currentRequests.containsKey(imgUrl)) return;
+
+            List<LoaderCallback> pendingCallbacks = currentRequests.get(imgUrl);
+            currentRequests.remove(imgUrl);
+
+            if (successfully && pendingCallbacks != null) {
+                Drawable imageViewDrawable = imageView.getDrawable();
+
+                for (LoaderCallback pendingCallback : pendingCallbacks) {
+                    pendingCallback.imageView.setImageDrawable(imageViewDrawable);
+                    pendingCallback.onSuccess();
+                }
+
+                pendingCallbacks.clear();
+            }
+        }
+
+        void dispose() {
+            this.imgUrl = null;
+            this.imageView = null;
+            this.options = null;
+            this.outerCallback = null;
+        }
     }
 
     //----------------------------------------------------------------------------------------------
