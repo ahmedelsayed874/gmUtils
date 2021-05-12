@@ -3,7 +3,7 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.callback;
 import androidx.annotation.NonNull;
 
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.Response;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import retrofit2.Call;
 /*
     use this when Response hold data inside it
  */
-public class Callback2<DT, R extends Response<DT>> implements retrofit2.Callback<R> {
+public class Callback2<DT, R extends BaseDataWrapperResponse<DT>> implements retrofit2.Callback<R> {
 
     private CallbackOperations<R> callbackOperations;
     private OnResponseReady2<DT> onResponseReady;

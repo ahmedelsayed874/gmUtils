@@ -1,6 +1,6 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.Response;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -14,5 +14,5 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.Response;
  * +201022663988
  */
 public interface OnResponseReady2<T> {
-    void invoke(Response<T> response);
+    void invoke(BaseDataWrapperResponse<T> response);
 }
