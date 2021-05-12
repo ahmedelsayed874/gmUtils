@@ -13,8 +13,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.blogspot.gm4s1.gmutils.R;
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource;
 import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
@@ -51,12 +54,35 @@ public abstract class BaseFragment extends Fragment {
         listener = null;
     }
 
+    @NotNull
+    protected abstract ViewSource getViewReference();
+
     protected abstract int getFragmentLayout();
+
+    @Nullable
+    protected abstract View getFragmentView(LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(getFragmentLayout(), container, false);
+        ViewSource viewSource = getViewReference();
+        assert viewSource != null;
+        View view;
+
+        switch (viewSource) {
+            case LayoutResource:
+                view = inflater.inflate(getFragmentLayout(), container, false);
+                break;
+
+            case ViewObject:
+                view = getFragmentView(inflater, container, false);
+                break;
+
+            default:
+                view = null;
+                break;
+        }
+
         return view;
     }
 

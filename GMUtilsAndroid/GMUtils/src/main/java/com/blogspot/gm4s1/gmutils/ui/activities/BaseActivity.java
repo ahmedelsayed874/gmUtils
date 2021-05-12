@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,12 +28,15 @@ import com.blogspot.gm4s1.gmutils.KeypadOp;
 import com.blogspot.gm4s1.gmutils.ui.MyToast;
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.ui.fragments.BaseFragment;
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource;
 import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.WaitDialog;
 import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +59,17 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     private int waitDialogCount = 0;
     private HashMap<Integer, BaseViewModel> viewModels;
 
+    //----------------------------------------------------------------------------------------------
 
-    public abstract int getActivityLayout();
+    @NotNull
+    protected abstract ViewSource getViewReference();
+
+    protected abstract int getActivityLayout();
+
+    @Nullable
+    protected abstract View getActivityView(LayoutInflater inflater);
+
+    //----------------------------------------------------------------------------------------------
 
     public CharSequence getActivityTitle() {
         return "";
@@ -123,7 +136,19 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         onPreCreate();
 
         super.onCreate(savedInstanceState);
-        setContentView(getActivityLayout());
+
+        ViewSource viewSource = getViewReference();
+        assert viewSource != null;
+
+        switch (viewSource) {
+            case LayoutResource:
+                setContentView(getActivityLayout());
+                break;
+
+            case ViewObject:
+                setContentView(getActivityView(getLayoutInflater()));
+                break;
+        }
 
         onPostCreate();
 

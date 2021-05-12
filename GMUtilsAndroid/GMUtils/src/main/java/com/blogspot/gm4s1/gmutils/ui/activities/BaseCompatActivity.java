@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.ui.activities.compat;
+package com.blogspot.gm4s1.gmutils.ui.activities;
 
 
 import android.annotation.SuppressLint;
@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +31,11 @@ import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.WaitDialog;
 import com.blogspot.gm4s1.gmutils.storage.SettingsStorage;
+import com.blogspot.gm4s1.gmutils.ui.fragments.BaseCompatFragment;
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource;
 import com.blogspot.gm4s1.gmutils.utils.Utils;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -52,7 +57,16 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
     private int waitDialogCount = 0;
 
 
-    public abstract int getActivityLayout();
+    @NotNull
+    protected abstract ViewSource getViewReference();
+
+    protected abstract int getActivityLayout();
+
+    @Nullable
+    protected abstract View getActivityView(LayoutInflater inflater);
+
+    //----------------------------------------------------------------------------------------------
+
 
     public CharSequence getActivityTitle() {
         return "";
@@ -94,7 +108,19 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
         onPreCreate();
 
         super.onCreate(savedInstanceState);
-        setContentView(getActivityLayout());
+
+        ViewSource viewSource = getViewReference();
+        assert viewSource != null;
+
+        switch (viewSource) {
+            case LayoutResource:
+                setContentView(getActivityLayout());
+                break;
+
+            case ViewObject:
+                setContentView(getActivityView(getLayoutInflater()));
+                break;
+        }
 
         onPostCreate();
 

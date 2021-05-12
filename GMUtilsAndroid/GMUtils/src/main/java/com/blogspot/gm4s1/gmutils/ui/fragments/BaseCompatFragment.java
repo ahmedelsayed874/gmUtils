@@ -1,4 +1,4 @@
-package com.blogspot.gm4s1.gmutils.ui.activities.compat;
+package com.blogspot.gm4s1.gmutils.ui.fragments;
 
 
 import android.app.Fragment;
@@ -13,6 +13,9 @@ import androidx.annotation.Nullable;
 
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -46,12 +49,35 @@ public abstract class BaseCompatFragment extends Fragment {
         listener = null;
     }
 
+    @NotNull
+    protected abstract ViewSource getViewReference();
+
     protected abstract int getFragmentLayout();
+
+    @Nullable
+    protected abstract View getFragmentView(LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(getFragmentLayout(), container, false);
+        ViewSource viewSource = getViewReference();
+        assert viewSource != null;
+        View view;
+
+        switch (viewSource) {
+            case LayoutResource:
+                view = inflater.inflate(getFragmentLayout(), container, false);
+                break;
+
+            case ViewObject:
+                view = getFragmentView(inflater, container, false);
+                break;
+
+            default:
+                view = null;
+                break;
+        }
+
         return view;
     }
 
