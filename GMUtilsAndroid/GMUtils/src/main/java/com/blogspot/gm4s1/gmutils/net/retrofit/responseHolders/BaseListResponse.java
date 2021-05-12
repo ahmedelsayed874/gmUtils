@@ -24,7 +24,7 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
     }
 
     @Override
-    public boolean contains(@Nullable @org.jetbrains.annotations.Nullable Object o) {
+    public boolean contains(@Nullable Object o) {
         return list.contains(o);
     }
 
@@ -107,12 +107,12 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
     }
 
     @Override
-    public int indexOf(@Nullable @org.jetbrains.annotations.Nullable Object o) {
+    public int indexOf(@Nullable Object o) {
         return list.indexOf(o);
     }
 
     @Override
-    public int lastIndexOf(@Nullable @org.jetbrains.annotations.Nullable Object o) {
+    public int lastIndexOf(@Nullable Object o) {
         return list.lastIndexOf(o);
     }
 
