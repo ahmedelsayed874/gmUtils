@@ -11,7 +11,7 @@ import java.util.ListIterator;
 
 public abstract class BaseListResponse<T> extends BaseResponse implements java.util.List<T> {
 
-    private final ArrayList<T> list = new ArrayList<>();
+    public final ArrayList<T> list = new ArrayList<>();
 
     @Override
     public int size() {
