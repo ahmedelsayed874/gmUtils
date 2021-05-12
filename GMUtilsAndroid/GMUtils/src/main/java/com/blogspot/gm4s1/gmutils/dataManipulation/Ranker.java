@@ -1,4 +1,4 @@
-package com.blogspot.gm4s.gmutileexample;
+package com.blogspot.gm4s1.gmutils.dataManipulation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,11 +10,6 @@ import java.util.Set;
 
 public class Ranker {
 
-    /**
-     *
-     * @param scores greater than 0 and lest than or equal 100
-     * @return
-     */
     public Integer[] rank(List<Integer> scores) {
         if (scores == null || scores.size() == 0) return null;
 

@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.viewbinding.ViewBinding;
 
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.KeypadOp;
@@ -61,13 +62,19 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
+    private ViewBinding activityViewBinding;
+
     @NotNull
-    protected abstract ViewSource getViewReference();
+    protected abstract ViewSource getViewSource();
 
     protected abstract int getActivityLayout();
 
     @Nullable
-    protected abstract View getActivityView(LayoutInflater inflater);
+    protected abstract ViewBinding createActivityViewBinding(@NotNull LayoutInflater inflater);
+
+    public ViewBinding getActivityViewBinding() {
+        return activityViewBinding;
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -137,7 +144,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         super.onCreate(savedInstanceState);
 
-        ViewSource viewSource = getViewReference();
+        ViewSource viewSource = getViewSource();
         assert viewSource != null;
 
         switch (viewSource) {
@@ -145,8 +152,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 setContentView(getActivityLayout());
                 break;
 
-            case ViewObject:
-                setContentView(getActivityView(getLayoutInflater()));
+            case ViewBinding:
+                activityViewBinding = createActivityViewBinding(getLayoutInflater());
+                setContentView(activityViewBinding.getRoot());
                 break;
         }
 

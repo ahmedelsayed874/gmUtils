@@ -9,9 +9,11 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
+import androidx.viewbinding.ViewBinding
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s1.gmutils.Activities
 import com.blogspot.gm4s1.gmutils.Logger
@@ -21,6 +23,7 @@ import com.blogspot.gm4s1.gmutils.storage.AccountStorage
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
 import com.blogspot.gm4s1.gmutils.ui.dialogs.MessageDialog
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.Marker
@@ -41,8 +44,11 @@ class MapAndLocationExample : BaseActivity() {
 
     private var mapPinId = 1 //important for tracking
 
+    override fun getViewSource() = ViewSource.LayoutResource
+
     override fun getActivityLayout() = R.layout.activity_map_and_location
 
+    override fun createActivityViewBinding(inflater: LayoutInflater): ViewBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

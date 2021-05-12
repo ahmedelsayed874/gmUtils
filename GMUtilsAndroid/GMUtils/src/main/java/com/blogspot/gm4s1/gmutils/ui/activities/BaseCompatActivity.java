@@ -22,6 +22,7 @@ import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.viewbinding.ViewBinding;
 
 import com.blogspot.gm4s1.gmutils.KeypadOp;
 import com.blogspot.gm4s1.gmutils.Logger;
@@ -56,14 +57,21 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
 
+    //----------------------------------------------------------------------------------------------
+
+    private ViewBinding activityViewBinding;
 
     @NotNull
-    protected abstract ViewSource getViewReference();
+    protected abstract ViewSource getViewSource();
 
     protected abstract int getActivityLayout();
 
     @Nullable
-    protected abstract View getActivityView(LayoutInflater inflater);
+    protected abstract ViewBinding createActivityViewBinding(@NotNull LayoutInflater inflater);
+
+    public ViewBinding getActivityViewBinding() {
+        return activityViewBinding;
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -109,7 +117,7 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
 
         super.onCreate(savedInstanceState);
 
-        ViewSource viewSource = getViewReference();
+        ViewSource viewSource = getViewSource();
         assert viewSource != null;
 
         switch (viewSource) {
@@ -117,8 +125,9 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
                 setContentView(getActivityLayout());
                 break;
 
-            case ViewObject:
-                setContentView(getActivityView(getLayoutInflater()));
+            case ViewBinding:
+                activityViewBinding = createActivityViewBinding(getLayoutInflater());
+                setContentView(activityViewBinding.getRoot());
                 break;
         }
 

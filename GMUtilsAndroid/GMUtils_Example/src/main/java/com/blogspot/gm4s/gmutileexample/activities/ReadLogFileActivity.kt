@@ -3,27 +3,36 @@ package com.blogspot.gm4s.gmutileexample.activities
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewbinding.ViewBinding
 import com.blogspot.gm4s.gmutileexample.R
+import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
 import com.blogspot.gm4s1.gmutils.ui.MyToast
 import com.blogspot.gm4s1.gmutils.Security
+import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
 import com.blogspot.gm4s1.gmutils.ui.dialogs.WaitDialog
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource
 import com.blogspot.gm4s1.gmutils.utils.FileUtils
-import kotlinx.android.synthetic.main.activity_read_log_file.*
 import java.io.OutputStreamWriter
 import java.nio.charset.Charset
 import java.util.*
 
-class ReadLogFileActivity : AppCompatActivity() {
+class ReadLogFileActivity : BaseActivity() {
 
     private var text: String = ""
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_read_log_file)
+    override fun getViewSource() = ViewSource.ViewBinding
 
-    }
+    override fun getActivityLayout() = 0
+
+    override fun createActivityViewBinding(inflater: LayoutInflater) =
+        ActivityReadLogFileBinding.inflate(inflater)
+
+    private val view: ActivityReadLogFileBinding get() = activityViewBinding as ActivityReadLogFileBinding
+
+    //----------------------------------------------------------------------------------------------
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -62,7 +71,7 @@ class ReadLogFileActivity : AppCompatActivity() {
             text = String(bytes)
 
             runOnUiThread {
-                textView.text = text
+                this.view.textView.text = text
                 waitDialog.dismiss()
             }
         }.start()
@@ -71,7 +80,7 @@ class ReadLogFileActivity : AppCompatActivity() {
     //----------------------------------------------------------------------------------------------
 
     fun onEncryptClick(view: View) {
-        val key = etKey.text.toString().toIntOrNull()
+        val key = this.view.etKey.text.toString().toIntOrNull()
 
         if (key == null) {
             MyToast.show(this, "key?")
@@ -80,7 +89,7 @@ class ReadLogFileActivity : AppCompatActivity() {
 
         try {
             val text = Security.getSimpleInstance(key).decrypt(text)
-            textView.text = text
+            this.view.textView.text = text
         } catch (e: Exception) {
             MyToast.show(this, "error: ${e.message}")
         }
@@ -105,7 +114,7 @@ class ReadLogFileActivity : AppCompatActivity() {
             val os = contentResolver.openOutputStream(uri)
             val sw = OutputStreamWriter(os, Charset.forName("utf-8"))
 
-            sw.write(textView.text.toString())
+            sw.write(this.view.textView.text.toString())
 
             sw.flush()
             sw.close()

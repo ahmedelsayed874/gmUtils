@@ -1,8 +1,12 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
+import android.view.LayoutInflater
+import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.viewbinding.ViewBinding
 import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource
 import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel
 import java.util.HashMap
 
@@ -13,9 +17,11 @@ class ActivityWithViewModelExampleActivity : BaseActivity() {
         const val VM2_ID = 1
     }
 
-    override fun getActivityLayout(): Int {
-        TODO("Not yet implemented")
-    }
+    override fun getViewSource() = ViewSource.LayoutResource
+
+    override fun getActivityLayout() = 0
+
+    override fun createActivityViewBinding(inflater: LayoutInflater): ViewBinding? = null
 
     override fun getViewModelClasses(): HashMap<Int, Class<out BaseViewModel>> {
         return hashMapOf(

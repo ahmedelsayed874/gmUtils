@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.viewbinding.ViewBinding;
 
 import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.ui.dialogs.RetryPromptDialog;
@@ -49,18 +50,29 @@ public abstract class BaseCompatFragment extends Fragment {
         listener = null;
     }
 
+
+    //----------------------------------------------------------------------------------------------
+
+    private ViewBinding fragmentViewBinding;
+
     @NotNull
-    protected abstract ViewSource getViewReference();
+    protected abstract ViewSource getViewSource();
 
     protected abstract int getFragmentLayout();
 
     @Nullable
-    protected abstract View getFragmentView(LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
+    protected abstract ViewBinding createActivityViewBinding(@NotNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
+
+    public ViewBinding getFragmentViewBinding() {
+        return fragmentViewBinding;
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ViewSource viewSource = getViewReference();
+        ViewSource viewSource = getViewSource();
         assert viewSource != null;
         View view;
 
@@ -69,8 +81,9 @@ public abstract class BaseCompatFragment extends Fragment {
                 view = inflater.inflate(getFragmentLayout(), container, false);
                 break;
 
-            case ViewObject:
-                view = getFragmentView(inflater, container, false);
+            case ViewBinding:
+                fragmentViewBinding = createActivityViewBinding(inflater, container, false);
+                view = fragmentViewBinding.getRoot();
                 break;
 
             default:
@@ -155,6 +168,15 @@ public abstract class BaseCompatFragment extends Fragment {
 
     public void showFragment(BaseCompatFragment fragment, String stackName) {
         listener.showFragment(fragment, stackName);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        hideWaitView();
+        fragmentViewBinding = null;
     }
 
     //----------------------------------------------------------------------------------------------
