@@ -14,17 +14,6 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
     private final ArrayList<T> list = new ArrayList<>();
 
     @Override
-    public void cloneResponseStatus(@NonNull BaseResponse otherResponse) {
-        super.cloneResponseStatus(otherResponse);
-        if (otherResponse instanceof BaseListResponse) {
-            this.list.clear();
-            try {
-                this.list.addAll(((BaseListResponse) otherResponse).list);
-            } catch (Throwable ignored) {}
-        }
-    }
-
-    @Override
     public int size() {
         return list.size();
     }
