@@ -4,11 +4,14 @@ import android.content.Context;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewbinding.ViewBinding;
 
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import java.util.ArrayList;
@@ -18,6 +21,7 @@ import com.blogspot.gm4s1.gmutils.R;
 import com.blogspot.gm4s1.gmutils.ui.adapters.BaseRecyclerAdapter;
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback;
 import com.blogspot.gm4s1.gmutils.listeners.SearchTextChangeListener;
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -104,14 +108,26 @@ public class CountryCodeDialog extends BaseDialog {
             mHideDialCode = hideDialCode;
         }
 
+        @NonNull
+        @Override
+        protected ViewSource getViewSource(int viewType) {
+            return ViewSource.LayoutResource;
+        }
+
         @Override
         protected int getLayoutRes(int viewType) {
             return R.layout.adapter_country_codes;
         }
 
+        @Nullable
         @Override
-        protected CViewHolder getViewHolder(View v, int viewType) {
-            return new CViewHolder(v);
+        protected ViewBinding createAdapterViewBinding(int viewType, @NonNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot) {
+            return null;
+        }
+
+        @Override
+        protected ViewHolder getViewHolder(ViewBinding viewBinding, int viewType) {
+            return new CViewHolder(viewBinding);
         }
 
         @Override
@@ -121,11 +137,11 @@ public class CountryCodeDialog extends BaseDialog {
         private class CViewHolder extends BaseRecyclerAdapter<CountryPhoneCodes.CountryCode>.ViewHolder {
             TextView txtCode, txtName;
 
-            public CViewHolder(View v) {
-                super(v);
+            public CViewHolder(ViewBinding viewBinding) {
+                super(viewBinding);
 
-                txtCode = v.findViewById(R.id.text_code);
-                txtName = v.findViewById(R.id.text_name);
+                txtCode = viewBinding.getRoot().findViewById(R.id.text_code);
+                txtName = viewBinding.getRoot().findViewById(R.id.text_name);
             }
 
             @Override

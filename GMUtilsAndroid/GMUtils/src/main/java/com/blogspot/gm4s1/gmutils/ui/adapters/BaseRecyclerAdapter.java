@@ -13,10 +13,15 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewbinding.ViewBinding;
 
 import com.blogspot.gm4s1.gmutils.listeners.ActionCallback;
 import com.blogspot.gm4s1.gmutils.listeners.RecyclerViewPaginationListener;
 import com.blogspot.gm4s1.gmutils.listeners.SimpleWindowAttachListener;
+import com.blogspot.gm4s1.gmutils.ui.utils.DumbViewBinding;
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -500,17 +505,43 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         return 0;
     }
 
+    //----------------------------------------------------------------------------------------------
+
+    @NotNull
+    protected abstract ViewSource getViewSource(int viewType);
+
     @LayoutRes
     protected abstract int getLayoutRes(int viewType);
 
-    protected abstract ViewHolder getViewHolder(View v, int viewType);
+    @Nullable
+    protected abstract ViewBinding createAdapterViewBinding(int viewType, @NotNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
+
+    protected abstract ViewHolder getViewHolder(ViewBinding viewBinding, int viewType);
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(getLayoutRes(viewType), parent, false);
+        ViewSource viewSource = getViewSource(viewType);
+        assert viewSource != null;
 
-        return getViewHolder(view, viewType);
+        ViewBinding viewBinding;
+
+        switch (viewSource) {
+            case LayoutResource:
+                View view = LayoutInflater.from(parent.getContext()).inflate(getLayoutRes(viewType), parent, false);
+                viewBinding = new DumbViewBinding(view);
+                break;
+
+            case ViewBinding:
+                viewBinding = createAdapterViewBinding(viewType, LayoutInflater.from(parent.getContext()), parent, false);
+                break;
+
+            default:
+                viewBinding = null;
+                break;
+        }
+
+        return getViewHolder(viewBinding, viewType);
     }
 
     @Override
@@ -538,15 +569,18 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     //------------------------------------------------------------------------------------------------------------------
 
     public abstract class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        private ViewBinding viewBinding;
         private int itemPosition;
 
-        public ViewHolder(View v) {
-            super(v);
-            v.setOnClickListener(this);
-            v.setOnLongClickListener(this);
+        public ViewHolder(ViewBinding viewBinding) {
+            super(viewBinding.getRoot());
+            this.viewBinding = viewBinding;
+
+            viewBinding.getRoot().setOnClickListener(this);
+            viewBinding.getRoot().setOnLongClickListener(this);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                v.getViewTreeObserver().addOnWindowAttachListener(
+                viewBinding.getRoot().getViewTreeObserver().addOnWindowAttachListener(
                         new SimpleWindowAttachListener() {
                             @Override
                             public void onWindowAttached() {
@@ -554,6 +588,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
                             @Override
                             public void onWindowDetached() {
+                                if (BaseRecyclerAdapter.ViewHolder.this.viewBinding instanceof DumbViewBinding) {
+                                    ((DumbViewBinding) BaseRecyclerAdapter.ViewHolder.this.viewBinding).dispose();
+                                }
+                                BaseRecyclerAdapter.ViewHolder.this.viewBinding = null;
                                 dispose();
                             }
                         }

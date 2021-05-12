@@ -241,6 +241,14 @@ public abstract class MultiListAdapter extends RecyclerView.Adapter<MultiListAda
         }
     }
 
+    //----------------------------------------------------------------------------------------------
+
+    @LayoutRes
+    protected abstract int getTitleLayoutRes();
+
+    @LayoutRes
+    protected abstract int getContentLayoutRes();
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layoutRes = 0;
@@ -251,12 +259,6 @@ public abstract class MultiListAdapter extends RecyclerView.Adapter<MultiListAda
 
         return getViewHolder(view, viewType == VIEW_TYPE_TITLE);
     }
-
-    @LayoutRes
-    protected abstract int getTitleLayoutRes();
-
-    @LayoutRes
-    protected abstract int getContentLayoutRes();
 
     protected abstract ViewHolder getViewHolder(View view, boolean viewTypeTitle);
 

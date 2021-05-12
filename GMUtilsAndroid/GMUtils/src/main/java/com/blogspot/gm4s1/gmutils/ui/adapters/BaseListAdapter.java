@@ -6,7 +6,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.viewbinding.ViewBinding;
+
+import com.blogspot.gm4s1.gmutils.ui.utils.DumbViewBinding;
+import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource;
 import com.blogspot.gm4s1.gmutils.utils.UIUtils;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -94,13 +102,42 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         return position;
     }
 
+    //----------------------------------------------------------------------------------------------
+
+    @NotNull
+    protected abstract ViewSource getViewSource();
+
+    protected abstract int getLayoutResId();
+
+    @Nullable
+    protected abstract ViewBinding createAdapterViewBinding(@NotNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
+
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder<T> holder;
 
         if (view == null) {
-            view = LayoutInflater.from(parent.getContext()).inflate(getLayoutResId(), parent, false);
-            holder = getViewHolder(view);
+            ViewSource viewSource = getViewSource();
+            assert viewSource != null;
+
+            switch (viewSource) {
+                case LayoutResource:
+                    view = LayoutInflater.from(parent.getContext()).inflate(getLayoutResId(), parent, false);
+                    holder = getViewHolder(new DumbViewBinding(view));
+                    break;
+
+                case ViewBinding:
+                    ViewBinding viewBinding = createAdapterViewBinding(LayoutInflater.from(parent.getContext()), parent, false);
+                    view = viewBinding.getRoot();
+                    holder = getViewHolder(viewBinding);
+                    break;
+
+                default:
+                    view = null;
+                    holder = null;
+                    break;
+            }
+
             view.setTag(holder);
 
         } else {
@@ -112,24 +149,33 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         return view;
     }
 
-    protected abstract int getLayoutResId();
-
-    protected abstract ViewHolder<T> getViewHolder(View view);
+    protected abstract ViewHolder<T> getViewHolder(ViewBinding viewBinding);
 
     public abstract static class ViewHolder<T> {
+        private ViewBinding viewBinding;
         private int itemPosition;
         private T item;
 
-        public ViewHolder(View view) {
+        public ViewHolder(ViewBinding viewBinding) {
+            this.viewBinding = viewBinding;
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                UIUtils.createInstance().setViewDetachedObserver(view, new Runnable() {
+                UIUtils.createInstance().setViewDetachedObserver(viewBinding.getRoot(), new Runnable() {
                     @Override
                     public void run() {
-                        item = null;
-                        onDispose();
+                        if (ViewHolder.this.viewBinding instanceof DumbViewBinding) {
+                            ((DumbViewBinding) ViewHolder.this.viewBinding).dispose();
+                        }
+                        ViewHolder.this.viewBinding = null;
+                        ViewHolder.this.item = null;
+                        ViewHolder.this.onDispose();
                     }
                 });
             }
+        }
+
+        public ViewBinding getViewBinding() {
+            return viewBinding;
         }
 
         private void setValues(T item, int position) {
