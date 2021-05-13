@@ -105,39 +105,32 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
     //----------------------------------------------------------------------------------------------
 
     @NotNull
-    protected abstract ViewSource getViewSource();
-
-    protected abstract int getLayoutResId();
-
-    @Nullable
-    protected abstract ViewBinding createAdapterViewBinding(@NotNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
+    protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater, ViewGroup container);
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        ViewHolder<T> holder;
+        ViewHolder<T> holder = null;
 
         if (view == null) {
-            ViewSource viewSource = getViewSource();
+            ViewSource viewSource = getViewSource(LayoutInflater.from(parent.getContext()), parent);
             assert viewSource != null;
 
-            switch (viewSource) {
-                case LayoutResource:
-                    view = LayoutInflater.from(parent.getContext()).inflate(getLayoutResId(), parent, false);
-                    holder = getViewHolder(new DumbViewBinding(view));
-                    break;
+            if (viewSource instanceof ViewSource.LayoutResource) {
+                int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
+                view = LayoutInflater.from(parent.getContext()).inflate(resId, parent, false);
+                holder = getViewHolder(new DumbViewBinding(view));
 
-                case ViewBinding:
-                    ViewBinding viewBinding = createAdapterViewBinding(LayoutInflater.from(parent.getContext()), parent, false);
-                    view = viewBinding.getRoot();
-                    holder = getViewHolder(viewBinding);
-                    break;
+            } else if (viewSource instanceof ViewSource.ViewBinding) {
+                ViewBinding viewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+                view = viewBinding.getRoot();
+                holder = getViewHolder(viewBinding);
 
-                default:
-                    view = null;
-                    holder = null;
-                    break;
+            } else if (viewSource instanceof ViewSource.View) {
+                view = ((ViewSource.View) viewSource).getView();
+                holder = getViewHolder(new DumbViewBinding(view));
             }
 
+                assert view != null;
             view.setTag(holder);
 
         } else {

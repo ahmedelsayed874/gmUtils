@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.viewbinding.ViewBinding;
@@ -62,12 +63,7 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
     private ViewBinding activityViewBinding;
 
     @NotNull
-    protected abstract ViewSource getViewSource();
-
-    protected abstract int getActivityLayout();
-
-    @Nullable
-    protected abstract ViewBinding createActivityViewBinding(@NotNull LayoutInflater inflater);
+    protected abstract ViewSource getViewSource(@NonNull LayoutInflater inflater);
 
     public ViewBinding getActivityViewBinding() {
         return activityViewBinding;
@@ -117,18 +113,18 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
 
         super.onCreate(savedInstanceState);
 
-        ViewSource viewSource = getViewSource();
+        ViewSource viewSource = getViewSource(getLayoutInflater());
         assert viewSource != null;
 
-        switch (viewSource) {
-            case LayoutResource:
-                setContentView(getActivityLayout());
-                break;
+        if (viewSource instanceof ViewSource.LayoutResource) {
+            setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
+        }
+        else if (viewSource instanceof ViewSource.ViewBinding) {
+            activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+            setContentView(activityViewBinding.getRoot());
 
-            case ViewBinding:
-                activityViewBinding = createActivityViewBinding(getLayoutInflater());
-                setContentView(activityViewBinding.getRoot());
-                break;
+        } else if (viewSource instanceof ViewSource.View) {
+            setContentView(((ViewSource.View) viewSource).getView());
         }
 
         onPostCreate();

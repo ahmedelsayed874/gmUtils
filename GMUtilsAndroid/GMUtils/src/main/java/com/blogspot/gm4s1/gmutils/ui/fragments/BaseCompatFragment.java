@@ -56,12 +56,7 @@ public abstract class BaseCompatFragment extends Fragment {
     private ViewBinding fragmentViewBinding;
 
     @NotNull
-    protected abstract ViewSource getViewSource();
-
-    protected abstract int getFragmentLayout();
-
-    @Nullable
-    protected abstract ViewBinding createActivityViewBinding(@NotNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
+    protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater, ViewGroup container);
 
     public ViewBinding getFragmentViewBinding() {
         return fragmentViewBinding;
@@ -72,23 +67,20 @@ public abstract class BaseCompatFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ViewSource viewSource = getViewSource();
+        ViewSource viewSource = getViewSource(inflater, container);
         assert viewSource != null;
-        View view;
+        View view = null;
 
-        switch (viewSource) {
-            case LayoutResource:
-                view = inflater.inflate(getFragmentLayout(), container, false);
-                break;
+        if (viewSource instanceof ViewSource.LayoutResource) {
+            int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
+            view = inflater.inflate(resId, container, false);
+        }
+        else if (viewSource instanceof ViewSource.ViewBinding) {
+            fragmentViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+            view = fragmentViewBinding.getRoot();
 
-            case ViewBinding:
-                fragmentViewBinding = createActivityViewBinding(inflater, container, false);
-                view = fragmentViewBinding.getRoot();
-                break;
-
-            default:
-                view = null;
-                break;
+        } else if (viewSource instanceof ViewSource.View) {
+            view = ((ViewSource.View) viewSource).getView();
         }
 
         return view;

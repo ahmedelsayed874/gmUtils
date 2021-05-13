@@ -44,11 +44,7 @@ class MapAndLocationExample : BaseActivity() {
 
     private var mapPinId = 1 //important for tracking
 
-    override fun getViewSource() = ViewSource.LayoutResource
-
-    override fun getActivityLayout() = R.layout.activity_map_and_location
-
-    override fun createActivityViewBinding(inflater: LayoutInflater): ViewBinding? = null
+    override fun getViewSource(inflater: LayoutInflater) = ViewSource.LayoutResource(R.layout.activity_map_and_location)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

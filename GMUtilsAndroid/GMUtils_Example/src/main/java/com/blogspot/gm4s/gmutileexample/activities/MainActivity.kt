@@ -27,15 +27,11 @@ import java.util.*
 
 class MainActivity : BaseActivity() {
 
-    override fun getViewSource() = ViewSource.ViewBinding
-
-    override fun getActivityLayout() = 0
-
-    override fun createActivityViewBinding(inflater: LayoutInflater) =
-        ActivityReadLogFileBinding.inflate(inflater)
+    override fun getViewSource(inflater: LayoutInflater) =
+        ViewSource.ViewBinding(ActivityReadLogFileBinding.inflate(inflater))
 
     private val view: ActivityMainBinding get() = activityViewBinding as ActivityMainBinding
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -67,7 +63,8 @@ class MainActivity : BaseActivity() {
             DB(this).test()
         }
 
-        this.view.btn6.text = "change screen brightness ${Utils.createInstance().getScreenBrightness(this)}"
+        this.view.btn6.text =
+            "change screen brightness ${Utils.createInstance().getScreenBrightness(this)}"
         this.view.btn6.setOnClickListener {
             var bn = Utils.createInstance().getScreenBrightness(this)
 
@@ -80,7 +77,8 @@ class MainActivity : BaseActivity() {
             this.view.btn6.text = "change screen brightness (C: $bn)"
         }
 
-        this.view.btn7.text = "change device brightness ${Utils.createInstance().getDeviceBrightness(this)}"
+        this.view.btn7.text =
+            "change device brightness ${Utils.createInstance().getDeviceBrightness(this)}"
         this.view.btn7.setOnClickListener {
             val checkSelfPermission =
                 ActivityCompat.checkSelfPermission(this, "android.permission.WRITE_SETTINGS")
@@ -154,11 +152,11 @@ class MainActivity : BaseActivity() {
                 log("api", "Exception: ${response.exception}")
             }
         }
-        
+
         this.view.btn10.text = "LooperThread"
         var x = 1
         this.view.btn10.setOnClickListener {
-            LooperThread("MyLooperThread") {args ->
+            LooperThread("MyLooperThread") { args ->
                 this.view.btn10.postDelayed({
                     this.view.btn10.text = "LooperThread ${args.msg.arg1}"
                 }, 1000)
@@ -176,12 +174,12 @@ class MainActivity : BaseActivity() {
     fun log(tag: String, text: String?) {
         this.view.logTv.append("$tag: $text\n")
     }
-    
+
     fun onShowOrHideLogClick(view: View) {
         if (this.view.logSection.visibility == View.GONE) {
             this.view.logSection.visibility = View.VISIBLE
             (view as TextView).text = "Hide Log"
-            
+
         } else {
             this.view.logSection.visibility = View.GONE
             (view as TextView).text = "Show Log"

@@ -23,12 +23,9 @@ class ReadLogFileActivity : BaseActivity() {
 
     private var text: String = ""
 
-    override fun getViewSource() = ViewSource.ViewBinding
-
-    override fun getActivityLayout() = 0
-
-    override fun createActivityViewBinding(inflater: LayoutInflater) =
+    override fun getViewSource(inflater: LayoutInflater) = ViewSource.ViewBinding(
         ActivityReadLogFileBinding.inflate(inflater)
+    )
 
     private val view: ActivityReadLogFileBinding get() = activityViewBinding as ActivityReadLogFileBinding
 

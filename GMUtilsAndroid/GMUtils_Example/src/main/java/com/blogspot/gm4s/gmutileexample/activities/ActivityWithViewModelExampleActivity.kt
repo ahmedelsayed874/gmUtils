@@ -17,11 +17,7 @@ class ActivityWithViewModelExampleActivity : BaseActivity() {
         const val VM2_ID = 1
     }
 
-    override fun getViewSource() = ViewSource.LayoutResource
-
-    override fun getActivityLayout() = 0
-
-    override fun createActivityViewBinding(inflater: LayoutInflater): ViewBinding? = null
+    override fun getViewSource(inflater: LayoutInflater) = ViewSource.LayoutResource(0)
 
     override fun getViewModelClasses(): HashMap<Int, Class<out BaseViewModel>> {
         return hashMapOf(

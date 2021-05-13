@@ -110,19 +110,8 @@ public class CountryCodeDialog extends BaseDialog {
 
         @NonNull
         @Override
-        protected ViewSource getViewSource(int viewType) {
-            return ViewSource.LayoutResource;
-        }
-
-        @Override
-        protected int getLayoutRes(int viewType) {
-            return R.layout.adapter_country_codes;
-        }
-
-        @Nullable
-        @Override
-        protected ViewBinding createAdapterViewBinding(int viewType, @NonNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot) {
-            return null;
+        protected ViewSource getViewSource(int viewType, @NonNull LayoutInflater inflater, ViewGroup container) {
+            return new ViewSource.LayoutResource(R.layout.adapter_country_codes);
         }
 
         @Override

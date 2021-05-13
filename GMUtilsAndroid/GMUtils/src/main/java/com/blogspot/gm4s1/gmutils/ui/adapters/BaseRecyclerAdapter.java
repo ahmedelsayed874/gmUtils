@@ -508,37 +508,29 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     //----------------------------------------------------------------------------------------------
 
     @NotNull
-    protected abstract ViewSource getViewSource(int viewType);
-
-    @LayoutRes
-    protected abstract int getLayoutRes(int viewType);
-
-    @Nullable
-    protected abstract ViewBinding createAdapterViewBinding(int viewType, @NotNull LayoutInflater inflater, ViewGroup container, boolean attachToRoot);
+    protected abstract ViewSource getViewSource(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
 
     protected abstract ViewHolder getViewHolder(ViewBinding viewBinding, int viewType);
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ViewSource viewSource = getViewSource(viewType);
+        ViewSource viewSource = getViewSource(viewType, LayoutInflater.from(parent.getContext()), parent);
         assert viewSource != null;
 
-        ViewBinding viewBinding;
+        ViewBinding viewBinding = null;
 
-        switch (viewSource) {
-            case LayoutResource:
-                View view = LayoutInflater.from(parent.getContext()).inflate(getLayoutRes(viewType), parent, false);
-                viewBinding = new DumbViewBinding(view);
-                break;
+        if (viewSource instanceof ViewSource.LayoutResource) {
+            int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
+            View view = LayoutInflater.from(parent.getContext()).inflate(resId, parent, false);
+            viewBinding = new DumbViewBinding(view);
 
-            case ViewBinding:
-                viewBinding = createAdapterViewBinding(viewType, LayoutInflater.from(parent.getContext()), parent, false);
-                break;
+        } else if (viewSource instanceof ViewSource.ViewBinding) {
+            viewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
 
-            default:
-                viewBinding = null;
-                break;
+        } else if (viewSource instanceof ViewSource.View) {
+            View view = ((ViewSource.View) viewSource).getView();
+            viewBinding = new DumbViewBinding(view);
         }
 
         return getViewHolder(viewBinding, viewType);
