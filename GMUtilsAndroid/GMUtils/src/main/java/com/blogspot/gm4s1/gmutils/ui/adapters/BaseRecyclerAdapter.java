@@ -591,6 +591,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             }
         }
 
+        public ViewBinding getViewBinding() {
+            return viewBinding;
+        }
+
         private void setValuesInner(T item, int position) {
             this.itemPosition = position;
             setValues(item);
