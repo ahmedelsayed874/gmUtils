@@ -80,15 +80,22 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
             if (stcl == null || !stcl.started) return;
 
             if (!TextUtils.equals(stcl.currentInput, stcl.lastInput)) {
-                Logger.print("CurrentInput: " + stcl.currentInput + ", PreviousInput: " + stcl.lastInput);
-
-                stcl.lastInput = stcl.currentInput;
-
-                stcl.onSearchTextUpdated(stcl.currentInput);
+                post();
                 stcl.start();
             }
 
             stcl.started = false;
+        }
+
+        void post() {
+            SearchTextChangeListener stcl = stclRef.get();
+            if (stcl == null || !stcl.started) return;
+
+            Logger.print("CurrentInput: " + stcl.currentInput + ", PreviousInput: " + stcl.lastInput);
+
+            stcl.lastInput = stcl.currentInput;
+
+            stcl.onSearchTextUpdated(stcl.currentInput);
         }
 
         private boolean isCorrupted() {
@@ -119,9 +126,18 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
     @Override
     public void onTextChanged(String text) {
         if (!enabled) return;
-        if (!started) start();
+
+        boolean isStarted = false;
+        if (!started) {
+            start();
+            isStarted = true;
+        }
+
         if (taskRunnable.isCorrupted()) started = false;
+
         currentInput = text;
+
+        if (isStarted) taskRunnable.post();
     }
 
     public abstract void onSearchTextUpdated(String text);
