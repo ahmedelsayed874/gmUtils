@@ -1,10 +1,8 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
 import android.view.LayoutInflater
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.viewbinding.ViewBinding
 import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
 import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource
 import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel
@@ -19,16 +17,16 @@ class ActivityWithViewModelExampleActivity : BaseActivity() {
 
     override fun getViewSource(inflater: LayoutInflater) = ViewSource.LayoutResource(0)
 
-    override fun getViewModelClasses(): HashMap<Int, Class<out BaseViewModel>> {
+    override fun onPreparingViewModels(): HashMap<Int, Class<out BaseViewModel>> {
         return hashMapOf(
             VM1_ID to ActivityWithViewModelExampleViewModel1::class.java,
             VM2_ID to ActivityWithViewModelExampleViewModel2::class.java,
         )
     }
 
-    override fun getViewModelFactory(id: Int): ViewModelProvider.Factory {
+    override fun onCreateViewModelFactory(id: Int): ViewModelProvider.Factory {
         return if (VM1_ID == id) {
-            super.getViewModelFactory(id)
+            super.onCreateViewModelFactory(id)
 
         } else {
             object : ViewModelProvider.Factory {

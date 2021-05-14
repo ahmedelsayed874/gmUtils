@@ -5,6 +5,7 @@ import android.app.Application;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.MessagingCenter;
@@ -106,6 +107,7 @@ public abstract class BaseApplication extends Application implements Application
      * it will help in case app inforced to use Application class from other type
      * and need to get benefits of this class
      * just override and change returned value
+     *
      * @return
      */
     @NotNull
@@ -129,9 +131,39 @@ public abstract class BaseApplication extends Application implements Application
         thisInstance().registerActivityLifecycleCallbacks(this);
 
         onPostCreate();
+
+        printRecommendedResources();
     }
 
     protected abstract void onPostCreate();
+
+    private void printRecommendedResources() {
+        String colors =
+                "It's recommend to override those resources in color (normal & night):\n\n" +
+                        "    <color name=\"gmUtilsPrimaryDark\">@color/black</color>\n" +
+                        "    <color name=\"gmUtilsPrimary\">@color/orange</color>\n" +
+                        "    <color name=\"gmUtilsAccent\">@color/red1</color>\n" +
+                        "\n" +
+                        "    <color name=\"gmUtilsBackground\">@color/white</color>\n" +
+                        "    <color name=\"gmUtilsText\">@color/black</color>\n" +
+                        "    <color name=\"gmUtilsHint\">@color/gray1</color>\n" +
+                        "    <color name=\"gmUtilsTitle\">@color/black</color>\n" +
+                        "    <color name=\"gmUtilsScreenTitle\">@color/gray5</color>\n" +
+                        "\n" +
+                        "    <color name=\"gmUtilsButtonLink\">@color/blue0</color>\n" +
+                        "    <color name=\"gmUtilsButtonActive\">@color/green5</color>\n" +
+                        "    <color name=\"gmUtilsButtonDestructive\">@color/red1</color>\n" +
+                        "    <color name=\"gmUtilsButtonDark\">@color/black</color>\n" +
+                        "\n" +
+                        "    <color name=\"gmUtilsDialogBackground\">@color/gmUtilsPrimary</color>\n" +
+                        "    <color name=\"gmUtilsDialogText\">#fff</color>\n" +
+                        "\n" +
+                        "    <color name=\"gmUtilsSeparateLine\">@color/gray1</color>\n" +
+                        "    <color name=\"gmUtilsRatingBar\">@color/gmUtilsPrimary</color>\n" +
+                        "    <color name=\"gmUtilsEditTextBackground\">@color/white</color>";
+
+        Log.i("*** " + thisInstance().getClass().getSimpleName(), colors);
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -222,7 +254,8 @@ public abstract class BaseApplication extends Application implements Application
     public void deleteBugs() {
         try {
             Logger.deleteSavedFile(thisInstance(), bugFileName);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
 

@@ -24,7 +24,7 @@
             android:paddingStart="@dimen/size_10"
             android:paddingEnd="@dimen/size_10"
             android:text="Title"
-            android:textColor="@color/gmDialogText"
+            android:textColor="@color/gmUtilsDialogText"
             android:textStyle="bold"
             android:visibility="gone"
             tools:visibility="visible" />
@@ -36,7 +36,7 @@
             android:layout_marginStart="@dimen/size_10"
             android:layout_marginEnd="@dimen/size_10"
             android:text="MSG"
-            android:textColor="@color/gmDialogText" />
+            android:textColor="@color/gmUtilsDialogText" />
 
         <EditText
             android:id="@+id/tv_input"
@@ -72,7 +72,7 @@
                 android:minWidth="@dimen/size_80"
                 android:minHeight="@dimen/size_30"
                 android:text="@string/done"
-                android:textColor="@color/gmDialogText"
+                android:textColor="@color/gmUtilsDialogText"
                 android:textSize="@dimen/font_13"
                 android:textStyle="bold"
                 android:visibility="gone"
@@ -85,7 +85,7 @@
                 android:minWidth="@dimen/size_80"
                 android:minHeight="@dimen/size_30"
                 android:text="@string/cancel"
-                android:textColor="@color/gmDialogText"
+                android:textColor="@color/gmUtilsDialogText"
                 android:textSize="@dimen/font_13"
                 android:textStyle="bold"
                 android:visibility="gone"

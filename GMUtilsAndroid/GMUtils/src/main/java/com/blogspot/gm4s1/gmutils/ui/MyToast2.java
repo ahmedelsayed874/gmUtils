@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 public class MyToast2 {
     public static Boolean DEFAULT_STYLE = true;
 
-    public static Integer BACKGROUND_RES = R.color.colorPrimary; //android.R.color.black;
+    public static Integer BACKGROUND_RES = R.color.gmUtilsPrimary; //android.R.color.black;
     public static Integer TEXT_COLOR_RES = Color.WHITE;
 
     public static Integer ERROR_BACKGROUND_RES = android.R.color.holo_red_dark;

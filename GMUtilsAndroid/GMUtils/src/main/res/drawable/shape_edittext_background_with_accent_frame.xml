@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <stroke android:color="@color/colorAccent" android:width="@dimen/size_1"/>
-    <solid android:color="@color/gmEditTextBackground" />
+    <stroke android:color="@color/gmUtilsAccent" android:width="@dimen/size_1"/>
+    <solid android:color="@color/gmUtilsEditTextBackground" />
     <corners
             android:topRightRadius="@dimen/size_10"
             android:topLeftRadius="@dimen/size_10"
