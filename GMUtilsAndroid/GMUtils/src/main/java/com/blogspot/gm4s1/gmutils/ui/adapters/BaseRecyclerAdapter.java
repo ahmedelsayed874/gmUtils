@@ -258,7 +258,11 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void add(T item, boolean refresh) {
-        if (item == null) return;
+        if (item == null) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
+
         mList.add(item);
         if (refresh) notifyDataSetChanged();
 
@@ -267,7 +271,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void add(List<T> items, boolean refresh) {
-        if (items == null || items.size() == 0) return;
+        if (items == null || items.size() == 0) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
         mList.addAll(items);
         if (refresh) notifyDataSetChanged();
 
@@ -276,8 +283,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void addOnTop(T item, boolean refresh) {
-        if (item == null) return;
-//        isFirstItemInitialized = false;
+        if (item == null) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
 
         mList.add(0, item);
         if (refresh) notifyDataSetChanged();
@@ -287,8 +296,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void addOnTop(List<T> items, boolean refresh) {
-        if (items == null || items.size() == 0) return;
-//        isFirstItemInitialized = false;
+        if (items == null || items.size() == 0) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
 
         mList.addAll(0, items);
         if (refresh) notifyDataSetChanged();
@@ -298,8 +309,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void replace(T oldItem, T newItem, boolean refresh) {
-        if (oldItem == null) return;
-        if (newItem == null) return;
+        if (oldItem == null || newItem == null) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
 
         int i = mList.indexOf(oldItem);
         if (i >= 0) mList.remove(i);
@@ -315,8 +328,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void insert(int position, T item, boolean refresh) {
-        if (item == null) return;
-//        if (position == 0) isFirstItemInitialized = false;
+        if (item == null) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
 
         mList.add(position, item);
         if (refresh) notifyDataSetChanged();
@@ -326,7 +341,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void remove(T item, boolean refresh) {
-        if (item == null) return;
+        if (item == null) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
         int position = mList.indexOf(item);
         mList.remove(position);
         if (refresh) notifyDataSetChanged();
@@ -345,11 +363,15 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                 mOnListItemsChangedListener.onItemRemoved(this, item, position);
         } catch (Exception e) {
             e.printStackTrace();
+            if (refresh) notifyDataSetChanged();
         }
     }
 
     public void remove(List<T> items, boolean refresh) {
-        if (items == null || items.size() == 0) return;
+        if (items == null || items.size() == 0) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
         mList.removeAll(items);
         if (refresh) notifyDataSetChanged();
 
@@ -366,7 +388,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void removeRange(int firstIndex, int lastIndex, boolean refresh) {
-        if (getItemCount() == 0) return;
+        if (getItemCount() == 0) {
+            if (refresh) notifyDataSetChanged();
+            return;
+        }
         if (firstIndex < 0) firstIndex = 0;
         if (lastIndex >= getItemCount()) lastIndex = getItemCount() - 1;
         if (firstIndex > lastIndex) {
