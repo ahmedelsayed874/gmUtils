@@ -1,7 +1,7 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.example.data;
 
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -18,7 +18,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperRe
     it's not suitable to declare this class in this package which is dedicated to retrofit requests only
     but I added it here for demonstration purpose
  */
-public class ImageResponse extends BaseDataWrapperResponse<Object> {
+public class ImageResponse extends BaseObjectResponse<Object> {
     @Override
     public void setData(Object data) {
     }

@@ -3,6 +3,8 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces;
 import android.graphics.Bitmap;
 
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.ImageResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -17,6 +19,6 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
  */
 public interface ImageAPIs {
 
-    void post(String text, Bitmap image, OnResponseReady2<Object> callback);
+    void post(String text, Bitmap image, OnResponseReady2<Object, ImageResponse> callback);
 
 }

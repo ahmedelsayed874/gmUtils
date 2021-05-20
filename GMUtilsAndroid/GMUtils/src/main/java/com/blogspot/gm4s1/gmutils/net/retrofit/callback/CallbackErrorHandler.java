@@ -1,6 +1,6 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit.callback;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -14,6 +14,6 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperRe
  * +201022663988
  */
 public interface CallbackErrorHandler {
-    BaseDataWrapperResponse.Statuses getInternalStatus(int code, String error);
+    BaseObjectResponse.Statuses getInternalStatus(int code, String error);
     String getErrorMessage(int code, String error);
 }

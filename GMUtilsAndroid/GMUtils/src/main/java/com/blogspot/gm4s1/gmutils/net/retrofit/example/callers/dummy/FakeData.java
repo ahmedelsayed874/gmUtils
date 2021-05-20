@@ -8,7 +8,7 @@ import com.blogspot.gm4s1.gmutils.listeners.ResultCallback2;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeOfArea;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.TimeZones;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseResponse;
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 import java.util.Random;
 
@@ -65,12 +65,12 @@ public class FakeData {
         }
     }
 
-    public static <T> void run2(Class<BaseDataWrapperResponse<T>> cls, ResultCallback2<FakeData, BaseDataWrapperResponse<T>> result) {
+    public static <T> void run2(Class<BaseObjectResponse<T>> cls, ResultCallback2<FakeData, BaseObjectResponse<T>> result) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             int r = new Random().nextInt(10);
 
             try {
-                BaseDataWrapperResponse<T> response = cls.newInstance();
+                BaseObjectResponse<T> response = cls.newInstance();
 
                 if (r == 0) {
                     response._code = 0;

@@ -1,6 +1,6 @@
 package com.blogspot.gm4s1.gmutils.net.retrofit;
 
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -13,6 +13,6 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperRe
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public interface OnResponseReady2<T> {
-    void invoke(BaseDataWrapperResponse<T> response);
+public interface OnResponseReady2<T, R extends BaseObjectResponse<T>> {
+    void invoke(R response);
 }

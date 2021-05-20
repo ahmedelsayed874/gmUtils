@@ -6,6 +6,7 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.example.apiServices.ImageRequest;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.ImageAPIs;
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.ImageResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.APIConstants;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import com.blogspot.gm4s1.gmutils.utils.ImageUtils;
 import com.blogspot.gm4s1.gmutils.net.retrofit.callback.Callback2;
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
@@ -30,7 +31,7 @@ import retrofit2.Call;
 public class ImageAPI implements ImageAPIs {
     public static String URL = "BASE URL OF API";
 
-    public void post(String text, Bitmap image, OnResponseReady2<Object> callback) {
+    public void post(String text, Bitmap image, OnResponseReady2<Object, ImageResponse> callback) {
         ImageRequest request = RetrofitService.create(URL, ImageRequest.class);
         Call<ImageResponse> call = request.post(
                 APIConstants.TOKEN(),

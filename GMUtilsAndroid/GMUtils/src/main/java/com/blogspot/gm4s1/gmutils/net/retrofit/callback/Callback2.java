@@ -3,7 +3,7 @@ package com.blogspot.gm4s1.gmutils.net.retrofit.callback;
 import androidx.annotation.NonNull;
 
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 import java.util.Map;
 
@@ -24,16 +24,16 @@ import retrofit2.Call;
 /*
     use this when Response hold data inside it
  */
-public class Callback2<DT, R extends BaseDataWrapperResponse<DT>> implements retrofit2.Callback<R> {
+public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit2.Callback<R> {
 
     private CallbackOperations<R> callbackOperations;
-    private OnResponseReady2<DT> onResponseReady;
+    private OnResponseReady2<DT, R> onResponseReady;
 
 
     public Callback2(
             Request request,
             Class<R> responseClass,
-            OnResponseReady2<DT> onResponseReady
+            OnResponseReady2<DT, R> onResponseReady
     ) {
         this.callbackOperations = new CallbackOperations<>(request, responseClass, Callback2.this::setResult);
         this.onResponseReady = onResponseReady;
@@ -42,7 +42,7 @@ public class Callback2<DT, R extends BaseDataWrapperResponse<DT>> implements ret
     public Callback2(
             String requestInfo,
             Class<R> responseClass,
-            OnResponseReady2<DT> onResponseReady
+            OnResponseReady2<DT, R> onResponseReady
     ) {
         this.callbackOperations = new CallbackOperations<>(requestInfo, responseClass, Callback2.this::setResult);
         this.onResponseReady = onResponseReady;

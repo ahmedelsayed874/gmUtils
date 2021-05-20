@@ -4,7 +4,7 @@ import android.text.TextUtils;
 
 import com.blogspot.gm4s1.gmutils.Logger;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseResponse;
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 import java.util.Map;
 import java.util.Set;
@@ -134,9 +134,9 @@ final class CallbackOperations<R extends BaseResponse> {
                 response.setCallbackStatus(errorListener.getInternalStatus(code, error));
             } else {
                 if (code == 0)
-                    response.setCallbackStatus(BaseDataWrapperResponse.Statuses.ConnectionFailed);
+                    response.setCallbackStatus(BaseObjectResponse.Statuses.ConnectionFailed);
                 else
-                    response.setCallbackStatus(BaseDataWrapperResponse.Statuses.Error);
+                    response.setCallbackStatus(BaseObjectResponse.Statuses.Error);
             }
 
             if (errorListener != null) {

@@ -72,7 +72,7 @@ import androidx.annotation.Nullable;
     }
 */
 
-public abstract class BaseDataWrapperResponse<T> extends BaseResponse {
+public abstract class BaseObjectResponse<T> extends BaseResponse {
 
     public abstract void setData(@Nullable T data);
 
@@ -81,9 +81,9 @@ public abstract class BaseDataWrapperResponse<T> extends BaseResponse {
 
     //----------------------------------------------------------------------------------------------
 
-    public static <T> BaseDataWrapperResponse<T> createInstance(Class<T> c) {
+    public static <T> BaseObjectResponse<T> createInstance(Class<T> c) {
 
-        BaseDataWrapperResponse<T> response = new BaseDataWrapperResponse<T>() {
+        BaseObjectResponse<T> response = new BaseObjectResponse<T>() {
             T d;
 
             @Override

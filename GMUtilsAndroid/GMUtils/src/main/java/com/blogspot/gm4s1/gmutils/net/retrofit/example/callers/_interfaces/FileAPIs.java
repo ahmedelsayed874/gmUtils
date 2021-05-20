@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 
 import com.blogspot.gm4s1.gmutils.listeners.ResultCallback3;
-import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
 
 import java.io.File;
 import java.io.FileNotFoundException;

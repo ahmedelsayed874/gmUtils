@@ -4,8 +4,9 @@ import android.graphics.Bitmap;
 
 import com.blogspot.gm4s1.gmutils.net.retrofit.example.callers._interfaces.ImageAPIs;
 import com.blogspot.gm4s1.gmutils.net.retrofit.OnResponseReady2;
+import com.blogspot.gm4s1.gmutils.net.retrofit.example.data.ImageResponse;
 import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseResponse;
-import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperResponse;
+import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -20,9 +21,9 @@ import com.blogspot.gm4s1.gmutils.net.retrofit.responseHolders.BaseDataWrapperRe
  */
 public class FakeImageAPI implements ImageAPIs {
 
-    public void post(String text, Bitmap image, OnResponseReady2<Object> callback) {
+    public void post(String text, Bitmap image, OnResponseReady2<Object, ImageResponse> callback) {
         FakeData.run0((s) -> {
-            BaseDataWrapperResponse<Object> r = BaseDataWrapperResponse.createInstance(Object.class);
+            ImageResponse r = new ImageResponse();
 
             if (s == null) {
                 r.setCallbackStatus(BaseResponse.Statuses.ConnectionFailed);
