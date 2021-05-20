@@ -219,6 +219,13 @@ public abstract class BaseCompatActivity extends Activity implements BaseCompatF
     }
 
     @Override
+    public void hideWaitViewImmediately() {
+        onHidingWaitView();
+        waitDialog = null;
+        waitDialogCount = 0;
+    }
+
+    @Override
     public void updateWaitViewMsg(CharSequence msg) {
         if (waitDialog != null) waitDialog.textView().setText(msg);
     }

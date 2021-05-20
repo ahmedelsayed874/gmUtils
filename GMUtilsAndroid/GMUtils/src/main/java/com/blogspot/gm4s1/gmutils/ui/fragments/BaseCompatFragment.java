@@ -126,6 +126,11 @@ public abstract class BaseCompatFragment extends Fragment {
         if (waitViewShowCount < 0) waitViewShowCount = 0;
     }
 
+    public void hideWaitViewImmediately() {
+        listener.hideWaitViewImmediately();
+        waitViewShowCount = 0;
+    }
+
     public void onWaitViewWillShow() {
         onWaitViewWillShow(R.string.wait_moments);
     }
@@ -180,6 +185,8 @@ public abstract class BaseCompatFragment extends Fragment {
         void showWaitView(int msg); //R.string.wait_moments
 
         void hideWaitView();
+
+        void hideWaitViewImmediately();
 
         void updateWaitViewMsg(CharSequence msg);
 

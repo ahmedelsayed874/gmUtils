@@ -264,6 +264,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     @Override
+    public void hideWaitViewImmediately() {
+        onHidingWaitView();
+        waitDialog = null;
+        waitDialogCount = 0;
+    }
+
+    @Override
     public void updateWaitViewMsg(CharSequence msg) {
         if (waitDialog != null) waitDialog.textView().setText(msg);
     }

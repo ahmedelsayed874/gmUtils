@@ -17,7 +17,7 @@ class ActivityWithViewModelExampleActivity : BaseActivity() {
 
     override fun getViewSource(inflater: LayoutInflater) = ViewSource.LayoutResource(0)
 
-    override fun onPreparingViewModels(): HashMap<Int, Class<out BaseViewModel>> {
+    override fun onPreparingViewModels(): HashMap<Int, Class<out ViewModel>> {
         return hashMapOf(
             VM1_ID to ActivityWithViewModelExampleViewModel1::class.java,
             VM2_ID to ActivityWithViewModelExampleViewModel2::class.java,
