@@ -11,7 +11,7 @@
         android:layout_width="@dimen/size_70"
         android:text="00000"
         android:textStyle="bold"
-        android:textColor="@color/gmUtilsText"
+        android:textColor="@color/gmText"
         android:textSize="@dimen/font_16" />
 
     <TextView
@@ -19,6 +19,6 @@
         style="@style/textView"
         android:layout_width="match_parent"
         android:text="Text"
-        android:textColor="@color/gmUtilsText"
+        android:textColor="@color/gmText"
         android:textSize="@dimen/font_16" />
 </LinearLayout>

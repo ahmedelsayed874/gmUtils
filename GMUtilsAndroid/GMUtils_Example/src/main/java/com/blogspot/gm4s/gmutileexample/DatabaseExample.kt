@@ -3,11 +3,11 @@ package com.blogspot.gm4s.gmutileexample
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
-import com.blogspot.gm4s1.gmutils.database.BaseDatabase
-import com.blogspot.gm4s1.gmutils.database.annotations.Default
-import com.blogspot.gm4s1.gmutils.database.annotations.Ignore
-import com.blogspot.gm4s1.gmutils.database.annotations.PrimaryKey
-import com.blogspot.gm4s1.gmutils.database.sqlitecommands.WhereClause
+import gmutils.database.BaseDatabase
+import gmutils.database.annotations.Default
+import gmutils.database.annotations.Ignore
+import gmutils.database.annotations.PrimaryKey
+import gmutils.database.sqlitecommands.WhereClause
 import com.google.gson.reflect.TypeToken
 
 

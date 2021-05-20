@@ -3,9 +3,9 @@ package com.blogspot.gm4s.gmutileexample.activities
 import android.view.LayoutInflater
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
-import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource
-import com.blogspot.gm4s1.gmutils.ui.viewModels.BaseViewModel
+import gmutils.ui.activities.BaseActivity
+import gmutils.ui.utils.ViewSource
+import gmutils.ui.viewModels.BaseViewModel
 import java.util.HashMap
 
 class ActivityWithViewModelExampleActivity : BaseActivity() {

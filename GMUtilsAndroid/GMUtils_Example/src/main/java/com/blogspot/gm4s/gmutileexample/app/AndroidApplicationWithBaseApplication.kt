@@ -2,8 +2,8 @@ package com.blogspot.gm4s.gmutileexample.app
 
 import android.app.Application
 import android.util.Log
-import com.blogspot.gm4s1.gmutils.Logger
-import com.blogspot.gm4s1.gmutils.ui.app.BaseApplication
+import gmutils.Logger
+import gmutils.ui.app.BaseApplication
 
 class AndroidApplicationAndBaseApplication : Application() {
 

@@ -18,14 +18,14 @@
             android:id="@+id/progressBar"
             android:layout_width="@dimen/size_25"
             android:layout_height="@dimen/size_25"
-            android:indeterminateTint="@color/gmUtilsDialogText"
+            android:indeterminateTint="@color/gmDialogText"
             tools:targetApi="lollipop" />
 
         <TextView
             android:id="@+id/tv_msg"
             style="@style/textView"
             android:text="@string/wait_moments"
-            android:textColor="@color/gmUtilsDialogText" />
+            android:textColor="@color/gmDialogText" />
 
     </LinearLayout>
 </FrameLayout>

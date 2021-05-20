@@ -15,14 +15,14 @@ import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
-import com.blogspot.gm4s1.gmutils.DateOp
-import com.blogspot.gm4s1.gmutils.LooperThread
-import com.blogspot.gm4s1.gmutils.net.SimpleHTTPRequest
-import com.blogspot.gm4s1.gmutils.net.volley.example.URLs.TimeURLs
-import com.blogspot.gm4s1.gmutils.ui.MyToast2
-import com.blogspot.gm4s1.gmutils.ui.activities.BaseActivity
-import com.blogspot.gm4s1.gmutils.ui.utils.ViewSource
-import com.blogspot.gm4s1.gmutils.utils.Utils
+import gmutils.DateOp
+import gmutils.LooperThread
+import gmutils.net.SimpleHTTPRequest
+import gmutils.net.volley.example.URLs.TimeURLs
+import gmutils.ui.MyToast2
+import gmutils.ui.activities.BaseActivity
+import gmutils.ui.utils.ViewSource
+import gmutils.utils.Utils
 import java.util.*
 
 class MainActivity : BaseActivity() {

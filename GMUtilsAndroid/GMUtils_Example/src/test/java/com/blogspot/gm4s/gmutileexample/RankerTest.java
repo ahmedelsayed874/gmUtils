@@ -1,6 +1,6 @@
 package com.blogspot.gm4s.gmutileexample;
 
-import com.blogspot.gm4s1.gmutils.dataManipulation.Ranker;
+import gmutils.dataManipulation.Ranker;
 
 import org.junit.Test;
 

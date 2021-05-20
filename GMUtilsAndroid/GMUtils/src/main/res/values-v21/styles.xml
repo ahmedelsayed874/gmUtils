@@ -2,12 +2,12 @@
 <resources>
 
     <style name="button.black">
-        <item name="android:backgroundTint">@color/gmUtilsButtonDark</item>
+        <item name="android:backgroundTint">@color/gmButtonDark</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="button.active">
-        <item name="android:backgroundTint">@color/gmUtilsButtonActive</item>
+        <item name="android:backgroundTint">@color/gmButtonActive</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
@@ -17,22 +17,22 @@
     </style>
 
     <style name="button.link">
-        <item name="android:backgroundTint">@color/gmUtilsButtonLink</item>
+        <item name="android:backgroundTint">@color/gmButtonLink</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="button.primaryDark">
-        <item name="android:backgroundTint">@color/gmUtilsPrimaryDark</item>
+        <item name="android:backgroundTint">@color/gmPrimaryDark</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="button.primary">
-        <item name="android:backgroundTint">@color/gmUtilsPrimary</item>
+        <item name="android:backgroundTint">@color/gmPrimary</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="button.accent">
-        <item name="android:backgroundTint">@color/gmUtilsAccent</item>
+        <item name="android:backgroundTint">@color/gmAccent</item>
         <item name="android:textColor">@color/white</item>
     </style>
 
@@ -42,7 +42,7 @@
     </style>
 
     <style name="button.destructive">
-        <item name="android:backgroundTint">@color/gmUtilsButtonDestructive</item>
+        <item name="android:backgroundTint">@color/gmButtonDestructive</item>
         <item name="android:textColor">@color/white</item>
     </style>
 

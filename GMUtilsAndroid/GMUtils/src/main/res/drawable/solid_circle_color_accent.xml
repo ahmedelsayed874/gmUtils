@@ -12,7 +12,7 @@
     <item>
         <shape android:shape="oval" >
 
-            <solid android:color="@color/gmUtilsAccent" />
+            <solid android:color="@color/gmAccent" />
 
         </shape>
     </item>

@@ -1,6 +1,6 @@
 package com.blogspot.gm4s.gmutileexample.app
 
-import com.blogspot.gm4s1.gmutils.ui.app.BaseApplication
+import gmutils.ui.app.BaseApplication
 
 class BaseApplicationExample : BaseApplication() {
 

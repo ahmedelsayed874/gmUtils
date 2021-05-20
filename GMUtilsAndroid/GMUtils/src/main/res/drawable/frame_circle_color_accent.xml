@@ -13,7 +13,7 @@
     <item>
         <shape android:shape="oval" >
 
-            <stroke android:color="@color/gmUtilsAccent" android:width="@dimen/size_1" />
+            <stroke android:color="@color/gmAccent" android:width="@dimen/size_1" />
 
         </shape>
     </item>
