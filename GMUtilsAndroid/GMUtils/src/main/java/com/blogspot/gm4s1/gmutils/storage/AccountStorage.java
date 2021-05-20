@@ -79,6 +79,7 @@ public class AccountStorage {
     //----------------------------------------------------------------------------------------------
 
     private static final String KEY_USER = "KEY_USER";
+    private static final String KEY_USER_NAME = "KEY_USER_NAME";
     private static final String KEY_PASSWORD = "KEY_PASSWORD";
     private static final String KEY_DATE = "KEY_DATE";
 
@@ -189,7 +190,7 @@ public class AccountStorage {
         }
     }
 
-    public void savePassword(String password) {
+    public void saveCredentials(String userName, String password) {
         password = tryEncrypt(password);
 
         sharedPreferences
@@ -219,6 +220,15 @@ public class AccountStorage {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String getUserName() {
+        String un = sharedPreferences.getString(KEY_USER_NAME, "");
+        if (un == null) un = "";
+
+        un = tryDecrypt(un);
+
+        return un;
     }
 
     public String getPassword() {
