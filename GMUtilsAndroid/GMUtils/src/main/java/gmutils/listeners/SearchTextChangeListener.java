@@ -38,8 +38,19 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
         };
     }
 
+    public static SearchTextChangeListener create(int delayOffset, boolean waitFirstInput, OnChange change) {
+        return new SearchTextChangeListener(delayOffset, waitFirstInput) {
 
-    public int delayOffset = 1500;
+            @Override
+            public void onSearchTextUpdated(String text) {
+                change.onChange(text);
+            }
+        };
+    }
+
+
+    public final int delayOffset;
+    private final boolean waitFirstInput;
 
     private Handler handler;
     private TaskRunnable taskRunnable;
@@ -49,11 +60,16 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
     private boolean enabled = true;
 
     public SearchTextChangeListener() {
-        this(null);
+        this(1500);
     }
 
-    public SearchTextChangeListener(@Nullable Integer delayOffset) {
-        if (delayOffset != null) this.delayOffset = delayOffset;
+    public SearchTextChangeListener(int delayOffset) {
+        this(delayOffset, true);
+    }
+
+    public SearchTextChangeListener(int delayOffset, boolean waitFirstInput) {
+        this.delayOffset = delayOffset;
+        this.waitFirstInput = waitFirstInput;
 
         handler = new Handler(Looper.getMainLooper());
 
@@ -137,7 +153,11 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
 
         currentInput = text;
 
-        if (isStarted) taskRunnable.post();
+        if (isStarted) {
+            if (lastInput.length() == 0 && !waitFirstInput) {
+                taskRunnable.post();
+            }
+        }
     }
 
     public abstract void onSearchTextUpdated(String text);
