@@ -2,6 +2,8 @@ package gmutils.net.retrofit.callback;
 
 import android.text.TextUtils;
 
+import androidx.room.Ignore;
+
 import gmutils.Logger;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
@@ -33,6 +35,8 @@ final class CallbackOperations<R extends BaseResponse> {
     private Map<String, Object> extras;
     private CallbackErrorHandler errorListener;
 
+    private final long requestTime;
+
 
     public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener) {
         this("", responseClass, listener);
@@ -47,6 +51,8 @@ final class CallbackOperations<R extends BaseResponse> {
     public CallbackOperations(String requestInfo, Class<R> responseClass, Listener<R> listener) {
         this.responseClass = responseClass;
         this.listener = listener;
+
+        this.requestTime = System.currentTimeMillis();
 
         if (requestInfo != null && !"".equals(requestInfo))
             if (Logger.IS_LOG_ENABLED())
@@ -107,18 +113,6 @@ final class CallbackOperations<R extends BaseResponse> {
         setError(t.getMessage(), 0);
     }
 
-    private void setResult(R result) {
-        if (Logger.IS_LOG_ENABLED()) {
-            Logger.print(
-                    "EXTRA_INFO:",
-                    "[callbackStatus=" + result.getCallbackStatus() +
-                            ", responseStatus=" + result.getResponseStatus() + "]"
-            );
-        }
-        listener.onResponseReady(result);
-        destroyReferences();
-    }
-
     private void setError(String error, int code) {
         R response = null;
 
@@ -165,6 +159,22 @@ final class CallbackOperations<R extends BaseResponse> {
         }
 
         setResult(response);
+    }
+
+    private void setResult(R result) {
+        if (Logger.IS_LOG_ENABLED()) {
+            Logger.print(
+                    "EXTRA_INFO:",
+                    "[callbackStatus=" + result.getCallbackStatus() +
+                            ", responseStatus=" + result.getResponseStatus() + "]"
+            );
+        }
+
+        result._requestTime = requestTime;
+        result._responseTime = System.currentTimeMillis();
+        listener.onResponseReady(result);
+
+        destroyReferences();
     }
 
     void destroyReferences() {

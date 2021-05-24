@@ -80,6 +80,11 @@ public abstract class BaseResponse {
     @Ignore
     public Map<String, Object> _extras;
 
+    @Ignore
+    public long _requestTime;
+
+    @Ignore
+    public long _responseTime;
 
     //----------------------------------------------------------------------------------------------
 
@@ -108,6 +113,9 @@ public abstract class BaseResponse {
         _callbackStatus = otherResponse._callbackStatus;
         _code = otherResponse._code;
         _extras = otherResponse._extras;
+
+        _requestTime = otherResponse._requestTime;
+        _responseTime = otherResponse._responseTime;
     }
 
 }
