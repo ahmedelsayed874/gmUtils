@@ -123,40 +123,39 @@ final class CallbackOperations<R extends BaseResponse> {
             throw new RuntimeException(e);
         }
 
-        if (response != null) {
-            if (errorListener != null) {
-                response.setCallbackStatus(errorListener.getInternalStatus(code, error));
-            } else {
-                if (code == 0)
-                    response.setCallbackStatus(BaseObjectResponse.Statuses.ConnectionFailed);
-                else
-                    response.setCallbackStatus(BaseObjectResponse.Statuses.Error);
-            }
 
-            if (errorListener != null) {
-                response._error = errorListener.getErrorMessage(code, error);
-
-            } else {
-                if (TextUtils.isEmpty(error)) {
-                    if (code == 0) {
-                        response._error = "Connection Timeout, Please check your connection";
-                    } else if (code == 401) {
-                        response._error = "Your session has been expired, Please close application and open again";
-                    } else {
-                        response._error = "Error (" + code + ")";
-                    }
-                } else {
-                    response._error = error;
-                }
-            }
-
-            if (extras != null) {
-                response._extras = extras;
-            }
-
-            response._code = code;
-
+        if (errorListener != null) {
+            response.setCallbackStatus(errorListener.getInternalStatus(code, error));
+        } else {
+            if (code == 0)
+                response.setCallbackStatus(BaseObjectResponse.Statuses.ConnectionFailed);
+            else
+                response.setCallbackStatus(BaseObjectResponse.Statuses.Error);
         }
+
+        if (errorListener != null) {
+            response._error = errorListener.getErrorMessage(code, error);
+
+        } else {
+            if (TextUtils.isEmpty(error)) {
+                if (code == 0) {
+                    response._error = "Connection Timeout, Please check your connection";
+                } else if (code == 401) {
+                    response._error = "Your session has been expired, Please close application and open again";
+                } else {
+                    response._error = "Error (" + code + ")";
+                }
+            } else {
+                response._error = error;
+            }
+        }
+
+        if (extras != null) {
+            response._extras = extras;
+        }
+
+        response._code = code;
+
 
         setResult(response);
     }

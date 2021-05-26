@@ -8,15 +8,19 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import gmutils.net.retrofit.responseHolders.StringResponse;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
-public class StringConverterFactory extends Converter.Factory {
+/**
+ * this class depend on {@link StringResponse}
+ */
+public class StringResponseConverterFactory extends Converter.Factory {
 
-    public StringConverterFactory() {
+    public StringResponseConverterFactory() {
         super();
     }
 
@@ -24,7 +28,15 @@ public class StringConverterFactory extends Converter.Factory {
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
         if (String.class.equals(type)) {
-            return (Converter<ResponseBody, String>) ResponseBody::string;
+            //return (Converter<ResponseBody, String>) ResponseBody::string;
+            return new Converter<ResponseBody, StringResponse>() {
+                @Nullable
+                @Override
+                public StringResponse convert(ResponseBody value) throws IOException {
+                    StringResponse response = new StringResponse(value.string());
+                    return response;
+                }
+            };
         }
         return null;
     }

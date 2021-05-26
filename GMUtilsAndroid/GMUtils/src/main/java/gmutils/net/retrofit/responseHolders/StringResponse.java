@@ -14,29 +14,21 @@ import java.util.stream.IntStream;
 
 import gmutils.net.retrofit.RetrofitService;
 
-public abstract class BaseStringResponse extends BaseResponse implements CharSequence {
+public final class StringResponse extends BaseResponse {
     private String text;
 
-    public BaseStringResponse() {
-        Log.d(BaseStringResponse.class.getSimpleName(), "Please make sure of enable " +
+    public StringResponse(String text) {
+        Log.d(StringResponse.class.getSimpleName(), "Please make sure of enable " +
                 "String Response Converter when calling " +
                 "\"" + RetrofitService.class.getName() + "\" through \"" + RetrofitService.Parameters.class.getName() + "\"");
     }
 
-    @Override
-    public int length() {
-        return text.length();
+    public String getText() {
+        return text;
     }
 
     @Override
-    public char charAt(int index) {
-        return text.charAt(index);
+    public Statuses getResponseStatus() {
+        return null;
     }
-
-    @NonNull
-    @Override
-    public CharSequence subSequence(int start, int end) {
-        return text.subSequence(start, end);
-    }
-
 }

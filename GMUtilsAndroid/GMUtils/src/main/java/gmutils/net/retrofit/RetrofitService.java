@@ -118,7 +118,7 @@ public class RetrofitService {
                 .baseUrl(parameters.baseUrl);
 
         if (parameters.enableStringResponseConverter)
-            retrofitBuilder.addConverterFactory(new StringConverterFactory());
+            retrofitBuilder.addConverterFactory(new StringResponseConverterFactory());
 
         mRetrofit = retrofitBuilder
                 .addConverterFactory(GsonConverterFactory.create())
