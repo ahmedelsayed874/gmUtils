@@ -15,9 +15,12 @@ import java.util.stream.IntStream;
 import gmutils.net.retrofit.RetrofitService;
 
 public final class StringResponse extends BaseResponse {
-    private String text;
+
+    private final String text;
 
     public StringResponse(String text) {
+        this.text = text;
+
         Log.d(StringResponse.class.getSimpleName(), "Please make sure of enable " +
                 "String Response Converter when calling " +
                 "\"" + RetrofitService.class.getName() + "\" through \"" + RetrofitService.Parameters.class.getName() + "\"");
@@ -29,6 +32,11 @@ public final class StringResponse extends BaseResponse {
 
     @Override
     public Statuses getResponseStatus() {
-        return null;
+        Statuses callbackStatus = getCallbackStatus();
+        if (callbackStatus != Statuses.Succeeded) {
+            return callbackStatus != null ? callbackStatus : Statuses.Succeeded;
+        } else {
+            return Statuses.Succeeded;
+        }
     }
 }
