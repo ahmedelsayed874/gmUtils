@@ -46,7 +46,7 @@ public class FileAPIs implements gmutils.net.retrofit.example.callers._interface
     }
 
     private void goDownloadFile(String fileURL, OutputStream outputStream, ResultCallback2<Boolean, String> callback) {
-        FileDownloadRequest service = RetrofitService.create(FileDownloadRequest.class);
+        FileDownloadRequest service = RetrofitService.create("http://", FileDownloadRequest.class);
 
         Call<ResponseBody> call = service.downloadFile(fileURL);
 

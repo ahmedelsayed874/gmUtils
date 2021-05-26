@@ -2,6 +2,10 @@ package gmutils.net.retrofit;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 import java.security.KeyStore;
@@ -23,12 +27,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
+
 /**
  * https://square.github.io/retrofit/
  *
@@ -42,28 +47,89 @@ public class RetrofitService {
         void config(OkHttpClient.Builder httpClient);
     }
 
-    public static String baseUrl = "";
-    public static boolean allowAllHostname = true;
-    public static Callback tmpCallback = null;
+    public static class Parameters {
+        private final String baseUrl;
+        private boolean enableResponseStringConverter = false; //to enable handling non-json response
+        private boolean allowAllHostname = true;
 
-    private static RetrofitService sInstance;
+        private int connectionTimeoutInMinutes = 5;
+        private int readTimeoutInMinutes = 5;
+
+        public Parameters(@NonNull String baseUrl) {
+            this.baseUrl = baseUrl;
+        }
+
+        public Parameters setEnableResponseStringConverter(boolean enableResponseStringConverter) {
+            this.enableResponseStringConverter = enableResponseStringConverter;
+            return this;
+        }
+
+        public Parameters setAllowAllHostname(boolean allowAllHostname) {
+            this.allowAllHostname = allowAllHostname;
+            return this;
+        }
+
+        public Parameters setConnectionTimeoutInMinutes(int connectionTimeoutInMinutes) {
+            this.connectionTimeoutInMinutes = connectionTimeoutInMinutes;
+            return this;
+        }
+
+        public Parameters setReadTimeoutInMinutes(int readTimeoutInMinutes) {
+            this.readTimeoutInMinutes = readTimeoutInMinutes;
+            return this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Parameters that = (Parameters) o;
+
+            if (enableResponseStringConverter != that.enableResponseStringConverter) return false;
+            if (allowAllHostname != that.allowAllHostname) return false;
+            if (connectionTimeoutInMinutes != that.connectionTimeoutInMinutes) return false;
+            if (readTimeoutInMinutes != that.readTimeoutInMinutes) return false;
+            return baseUrl.equals(that.baseUrl);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = baseUrl.hashCode();
+            result = 31 * result + (enableResponseStringConverter ? 1 : 0);
+            result = 31 * result + (allowAllHostname ? 1 : 0);
+            result = 31 * result + connectionTimeoutInMinutes;
+            result = 31 * result + readTimeoutInMinutes;
+            return result;
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     private Retrofit mRetrofit;
+    private final Parameters parameters;
 
-    private RetrofitService(String url) {
-        //OkHttpClient client = new OkHttpClient.Builder()
-        OkHttpClient client = createOkHttpClient()
-                .readTimeout(5, TimeUnit.MINUTES)
-                .connectTimeout(5, TimeUnit.MINUTES)
+    public RetrofitService(@NonNull Parameters parameters, @Nullable Callback tmpBuildCallback) {
+        this.parameters = parameters;
+
+        OkHttpClient client = createOkHttpClient(parameters, tmpBuildCallback)
+                .readTimeout(parameters.readTimeoutInMinutes, TimeUnit.MINUTES)
+                .connectTimeout(parameters.connectionTimeoutInMinutes, TimeUnit.MINUTES)
                 .build();
 
-        mRetrofit = new Retrofit.Builder()
-                .baseUrl(url)
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
+                .baseUrl(parameters.baseUrl);
+
+        if (parameters.enableResponseStringConverter)
+            retrofitBuilder.addConverterFactory(new StringConverterFactory());
+
+        mRetrofit = retrofitBuilder
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
     }
 
-    private static OkHttpClient.Builder createOkHttpClient() {
+    private OkHttpClient.Builder createOkHttpClient(@NonNull Parameters parameters, Callback tmpBuildCallback) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
         try {
@@ -86,10 +152,11 @@ public class RetrofitService {
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
             builder.sslSocketFactory(sslSocketFactory, trustManager);
-            if (allowAllHostname) builder.hostnameVerifier(new AllowAllHostnameVerifier());
+            if (parameters.allowAllHostname)
+                builder.hostnameVerifier(new AllowAllHostnameVerifier());
 
-            if (tmpCallback != null) tmpCallback.config(builder);
-            tmpCallback = null;
+            if (tmpBuildCallback != null) tmpBuildCallback.config(builder);
+            tmpBuildCallback = null;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,17 +168,22 @@ public class RetrofitService {
 
     //----------------------------------------------------------------------------------------------
 
-    public static <T> T create(Class<T> serviceClass) {
-        if (TextUtils.isEmpty(baseUrl)) throw new IllegalArgumentException("RetrofitService.baseUrl is empty, ether assign value to it or user create(String, Class<T>)");
-        return create(baseUrl, serviceClass);
+    private static RetrofitService sInstance; //singleton
+
+    public static <T> T create(@NonNull String baseURL, Class<T> serviceClass) {
+        return create(new Parameters(baseURL), serviceClass);
     }
 
-    public static <T> T create(String baseURL, Class<T> serviceClass) {
+    public static <T> T create(@NonNull Parameters parameters, Class<T> serviceClass) {
+        return create(parameters, null, serviceClass);
+    }
+
+    public static <T> T create(@NonNull Parameters parameters, @Nullable Callback tmpBuildCallback, Class<T> serviceClass) {
         if (sInstance == null) {
-            sInstance = new RetrofitService(baseURL);
+            sInstance = new RetrofitService(parameters, tmpBuildCallback);
 
         } else {
-            String usedURL = "";
+            /*String usedURL = "";
 
             try {
                 usedURL = sInstance.mRetrofit.baseUrl().toString();
@@ -119,9 +191,14 @@ public class RetrofitService {
             } catch (Exception e) {
             }
 
-            if (!baseURL.equals(usedURL)) {
+            if (!parameters.baseUrl.equals(usedURL)) {
                 destroy();
-                sInstance = new RetrofitService(baseURL);
+                sInstance = new RetrofitService(parameters, tmpBuildCallback);
+            }*/
+
+            if (parameters.equals(sInstance.parameters)) {
+                destroy();
+                sInstance = new RetrofitService(parameters, tmpBuildCallback);
             }
         }
 
@@ -131,6 +208,5 @@ public class RetrofitService {
     public static void destroy() {
         if (sInstance != null) sInstance.mRetrofit = null;
     }
-
 
 }
