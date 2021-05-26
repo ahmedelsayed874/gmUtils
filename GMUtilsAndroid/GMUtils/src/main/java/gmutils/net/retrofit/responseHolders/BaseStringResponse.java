@@ -1,5 +1,7 @@
 package gmutils.net.retrofit.responseHolders;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -10,8 +12,16 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.IntStream;
 
+import gmutils.net.retrofit.RetrofitService;
+
 public abstract class BaseStringResponse extends BaseResponse implements CharSequence {
     private String text;
+
+    public BaseStringResponse() {
+        Log.d(BaseStringResponse.class.getSimpleName(), "Please make sure of enable " +
+                "String Response Converter when calling " +
+                "\"" + RetrofitService.class.getName() + "\" through \"" + RetrofitService.Parameters.class.getName() + "\"");
+    }
 
     @Override
     public int length() {
