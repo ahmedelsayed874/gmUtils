@@ -18,6 +18,10 @@ public final class StringResponse extends BaseResponse {
 
     private final String text;
 
+    public StringResponse() {
+        this(null);
+    }
+
     public StringResponse(String text) {
         this.text = text;
 
@@ -33,10 +37,9 @@ public final class StringResponse extends BaseResponse {
     @Override
     public Statuses getResponseStatus() {
         Statuses callbackStatus = getCallbackStatus();
-        if (callbackStatus != Statuses.Succeeded) {
-            return callbackStatus != null ? callbackStatus : Statuses.Succeeded;
-        } else {
-            return Statuses.Succeeded;
-        }
+        if (callbackStatus == null) {
+            return null != text ? Statuses.Succeeded : Statuses.Error;
+
+        } else return callbackStatus;
     }
 }

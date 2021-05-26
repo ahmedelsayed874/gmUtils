@@ -27,14 +27,13 @@ public class StringResponseConverterFactory extends Converter.Factory {
     @Nullable
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
-        if (String.class.equals(type)) {
-            //return (Converter<ResponseBody, String>) ResponseBody::string;
+        if (StringResponse.class.equals(type)) {
             return new Converter<ResponseBody, StringResponse>() {
                 @Nullable
                 @Override
                 public StringResponse convert(ResponseBody value) throws IOException {
-                    StringResponse response = new StringResponse(value.string());
-                    return response;
+                    String text = value.string();
+                    return new StringResponse(text);
                 }
             };
         }
