@@ -1,10 +1,7 @@
 package gmutils.net.retrofit;
 
-import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
 
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
@@ -49,7 +46,7 @@ public class RetrofitService {
 
     public static class Parameters {
         private final String baseUrl;
-        private boolean enableResponseStringConverter = false; //to enable handling non-json response
+        private boolean enableStringResponseConverter = false; //to enable handling non-json response
         private boolean allowAllHostname = true;
 
         private int connectionTimeoutInMinutes = 5;
@@ -59,8 +56,8 @@ public class RetrofitService {
             this.baseUrl = baseUrl;
         }
 
-        public Parameters setEnableResponseStringConverter(boolean enableResponseStringConverter) {
-            this.enableResponseStringConverter = enableResponseStringConverter;
+        public Parameters setEnableStringResponseConverter(boolean enableStringResponseConverter) {
+            this.enableStringResponseConverter = enableStringResponseConverter;
             return this;
         }
 
@@ -86,7 +83,7 @@ public class RetrofitService {
 
             Parameters that = (Parameters) o;
 
-            if (enableResponseStringConverter != that.enableResponseStringConverter) return false;
+            if (enableStringResponseConverter != that.enableStringResponseConverter) return false;
             if (allowAllHostname != that.allowAllHostname) return false;
             if (connectionTimeoutInMinutes != that.connectionTimeoutInMinutes) return false;
             if (readTimeoutInMinutes != that.readTimeoutInMinutes) return false;
@@ -96,7 +93,7 @@ public class RetrofitService {
         @Override
         public int hashCode() {
             int result = baseUrl.hashCode();
-            result = 31 * result + (enableResponseStringConverter ? 1 : 0);
+            result = 31 * result + (enableStringResponseConverter ? 1 : 0);
             result = 31 * result + (allowAllHostname ? 1 : 0);
             result = 31 * result + connectionTimeoutInMinutes;
             result = 31 * result + readTimeoutInMinutes;
@@ -120,7 +117,7 @@ public class RetrofitService {
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
                 .baseUrl(parameters.baseUrl);
 
-        if (parameters.enableResponseStringConverter)
+        if (parameters.enableStringResponseConverter)
             retrofitBuilder.addConverterFactory(new StringConverterFactory());
 
         mRetrofit = retrofitBuilder
