@@ -46,7 +46,6 @@ public class RetrofitService {
 
     public static class Parameters {
         private final String baseUrl;
-        private boolean enableStringResponseConverter = false; //to enable handling non-json response
         private boolean allowAllHostname = true;
 
         private int connectionTimeoutInMinutes = 5;
@@ -56,10 +55,6 @@ public class RetrofitService {
             this.baseUrl = baseUrl;
         }
 
-        public Parameters setEnableStringResponseConverter(boolean enableStringResponseConverter) {
-            this.enableStringResponseConverter = enableStringResponseConverter;
-            return this;
-        }
 
         public Parameters setAllowAllHostname(boolean allowAllHostname) {
             this.allowAllHostname = allowAllHostname;
@@ -83,7 +78,6 @@ public class RetrofitService {
 
             Parameters that = (Parameters) o;
 
-            if (enableStringResponseConverter != that.enableStringResponseConverter) return false;
             if (allowAllHostname != that.allowAllHostname) return false;
             if (connectionTimeoutInMinutes != that.connectionTimeoutInMinutes) return false;
             if (readTimeoutInMinutes != that.readTimeoutInMinutes) return false;
@@ -93,7 +87,6 @@ public class RetrofitService {
         @Override
         public int hashCode() {
             int result = baseUrl.hashCode();
-            result = 31 * result + (enableStringResponseConverter ? 1 : 0);
             result = 31 * result + (allowAllHostname ? 1 : 0);
             result = 31 * result + connectionTimeoutInMinutes;
             result = 31 * result + readTimeoutInMinutes;
@@ -114,13 +107,9 @@ public class RetrofitService {
                 .connectTimeout(parameters.connectionTimeoutInMinutes, TimeUnit.MINUTES)
                 .build();
 
-        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
-                .baseUrl(parameters.baseUrl);
-
-        if (parameters.enableStringResponseConverter)
-            retrofitBuilder.addConverterFactory(new StringResponseConverterFactory());
-
-        mRetrofit = retrofitBuilder
+        mRetrofit = new Retrofit.Builder()
+                .baseUrl(parameters.baseUrl)
+                .addConverterFactory(new StringResponseConverterFactory())
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
