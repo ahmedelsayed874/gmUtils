@@ -193,7 +193,7 @@ public class RetrofitService {
                 sInstance = new RetrofitService(parameters, tmpBuildCallback);
             }*/
 
-            if (parameters.equals(sInstance.parameters)) {
+            if (!parameters.equals(sInstance.parameters)) {
                 destroy();
                 sInstance = new RetrofitService(parameters, tmpBuildCallback);
             }
