@@ -110,13 +110,8 @@ public class CountryCodeDialog extends BaseDialog {
 
         @NonNull
         @Override
-        protected ViewSource getViewSource(int viewType, @NonNull LayoutInflater inflater, ViewGroup container) {
-            return new ViewSource.LayoutResource(R.layout.adapter_country_codes);
-        }
-
-        @Override
-        protected ViewHolder getViewHolder(ViewBinding viewBinding, int viewType) {
-            return new CViewHolder(viewBinding);
+        protected ViewHolder getViewHolder(int viewType, @NonNull LayoutInflater inflater, ViewGroup container) {
+            return new CViewHolder(R.layout.adapter_country_codes, inflater, container);
         }
 
         @Override
@@ -126,11 +121,11 @@ public class CountryCodeDialog extends BaseDialog {
         private class CViewHolder extends BaseRecyclerAdapter<CountryPhoneCodes.CountryCode>.ViewHolder {
             TextView txtCode, txtName;
 
-            public CViewHolder(ViewBinding viewBinding) {
-                super(viewBinding);
+            public CViewHolder(int resId, @NonNull LayoutInflater inflater, ViewGroup container) {
+                super(resId, inflater, container);
 
-                txtCode = viewBinding.getRoot().findViewById(R.id.text_code);
-                txtName = viewBinding.getRoot().findViewById(R.id.text_name);
+                txtCode = findViewById(R.id.text_code);
+                txtName = findViewById(R.id.text_name);
             }
 
             @Override

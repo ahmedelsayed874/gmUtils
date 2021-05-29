@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import androidx.annotation.IdRes;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
@@ -16,7 +18,9 @@ import gmutils.utils.UIUtils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -104,15 +108,20 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
 
     //----------------------------------------------------------------------------------------------
 
+//    @NotNull
+//    protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater, ViewGroup container);
+//    @NotNull
+//    protected abstract ViewHolder<T> getViewHolder(ViewBinding viewBinding);
+
     @NotNull
-    protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater, ViewGroup container);
+    protected abstract ViewHolder<T> getViewHolder(@NotNull LayoutInflater inflater, ViewGroup container);
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder<T> holder = null;
 
         if (view == null) {
-            ViewSource viewSource = getViewSource(LayoutInflater.from(parent.getContext()), parent);
+            /*ViewSource viewSource = getViewSource(LayoutInflater.from(parent.getContext()), parent);
             assert viewSource != null;
 
             if (viewSource instanceof ViewSource.LayoutResource) {
@@ -130,7 +139,12 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
                 holder = getViewHolder(new DumbViewBinding(view));
             }
 
-                assert view != null;
+            assert view != null;
+
+            view.setTag(holder);*/
+
+            holder = getViewHolder(LayoutInflater.from(parent.getContext()), parent);
+            view = holder.itemView;
             view.setTag(holder);
 
         } else {
@@ -142,23 +156,32 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         return view;
     }
 
-    protected abstract ViewHolder<T> getViewHolder(ViewBinding viewBinding);
-
     public abstract static class ViewHolder<T> {
+        private View itemView;
         private ViewBinding viewBinding;
         private int itemPosition;
         private T item;
 
+        public ViewHolder(@LayoutRes int resId, @NotNull LayoutInflater inflater, ViewGroup container) {
+            this(inflater.inflate(resId, container, false));
+        }
+
         public ViewHolder(ViewBinding viewBinding) {
+            this(viewBinding.getRoot());
             this.viewBinding = viewBinding;
+        }
+
+        public ViewHolder(View view) {
+            this.itemView = view;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                UIUtils.createInstance().setViewDetachedObserver(viewBinding.getRoot(), new Runnable() {
+                UIUtils.createInstance().setViewDetachedObserver(view, new Runnable() {
                     @Override
                     public void run() {
                         if (ViewHolder.this.viewBinding instanceof DumbViewBinding) {
                             ((DumbViewBinding) ViewHolder.this.viewBinding).dispose();
                         }
+                        ViewHolder.this.itemView = null;
                         ViewHolder.this.viewBinding = null;
                         ViewHolder.this.item = null;
                         ViewHolder.this.onDispose();
@@ -167,19 +190,26 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
             }
         }
 
+        public <V extends View> V findViewById(@IdRes int resId) {
+            return itemView.findViewById(resId);
+        }
+
         public ViewBinding getViewBinding() {
             return viewBinding;
         }
+
 
         private void setValues(T item, int position) {
             this.itemPosition = position;
             this.item = item;
             setValues(item);
-         }
+        }
 
         public abstract void setValues(T item);
 
-        public int getItemPosition() { return itemPosition; }
+        public int getItemPosition() {
+            return itemPosition;
+        }
 
         protected T getItem() {
             return item;

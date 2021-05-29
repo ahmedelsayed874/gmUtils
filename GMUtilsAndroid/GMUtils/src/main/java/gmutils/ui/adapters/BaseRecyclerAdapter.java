@@ -1,10 +1,12 @@
 package gmutils.ui.adapters;
 
 import android.os.Build;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -533,14 +535,17 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     //----------------------------------------------------------------------------------------------
 
     @NotNull
-    protected abstract ViewSource getViewSource(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
+    protected abstract ViewHolder getViewHolder(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
 
-    protected abstract ViewHolder getViewHolder(ViewBinding viewBinding, int viewType);
+//    @NotNull
+//    protected abstract ViewSource getViewSource(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
+//    protected abstract ViewHolder getViewHolder(View view, int viewType);
+//    protected ViewHolder getViewHolder(ViewBinding viewBinding, int viewType) { return null; }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ViewSource viewSource = getViewSource(viewType, LayoutInflater.from(parent.getContext()), parent);
+        /*ViewSource viewSource = getViewSource(viewType, LayoutInflater.from(parent.getContext()), parent);
         assert viewSource != null;
 
         ViewBinding viewBinding = null;
@@ -558,7 +563,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             viewBinding = new DumbViewBinding(view);
         }
 
-        return getViewHolder(viewBinding, viewType);
+        return getViewHolder(viewBinding, viewType);*/
+
+        return getViewHolder(viewType, LayoutInflater.from(parent.getContext()), parent);
     }
 
     @Override
@@ -589,15 +596,18 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         private ViewBinding viewBinding;
         private int itemPosition;
 
-        public ViewHolder(ViewBinding viewBinding) {
-            super(viewBinding.getRoot());
-            this.viewBinding = viewBinding;
+        public ViewHolder(@LayoutRes int resId, @NotNull LayoutInflater inflater, ViewGroup container) {
+            this(inflater.inflate(resId, container, false));
+        }
 
-            viewBinding.getRoot().setOnClickListener(this);
-            viewBinding.getRoot().setOnLongClickListener(this);
+        public ViewHolder(View view) {
+            super(view);
+
+            view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                viewBinding.getRoot().getViewTreeObserver().addOnWindowAttachListener(
+                view.getViewTreeObserver().addOnWindowAttachListener(
                         new SimpleWindowAttachListener() {
                             @Override
                             public void onWindowAttached() {
@@ -616,6 +626,16 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             }
         }
 
+        public ViewHolder(ViewBinding viewBinding) {
+            this(viewBinding.getRoot());
+            this.viewBinding = viewBinding;
+        }
+
+        public <V extends View> V findViewById(@IdRes int resId) {
+            return itemView.findViewById(resId);
+        }
+
+        @Nullable
         public ViewBinding getViewBinding() {
             return viewBinding;
         }
