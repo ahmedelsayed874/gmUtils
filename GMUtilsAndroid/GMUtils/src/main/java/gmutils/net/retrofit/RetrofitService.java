@@ -1,9 +1,8 @@
 package gmutils.net.retrofit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.security.KeyStore;
 import java.util.Arrays;
@@ -48,10 +47,10 @@ public class RetrofitService {
         private final String baseUrl;
         private boolean allowAllHostname = true;
 
-        private int connectionTimeoutInMinutes = 5;
-        private int readTimeoutInMinutes = 5;
+        private int connectionTimeoutInSeconds = 30;
+        private int readTimeoutInSeconds = 60;
 
-        public Parameters(@NonNull String baseUrl) {
+        public Parameters(@NotNull String baseUrl) {
             this.baseUrl = baseUrl;
         }
 
@@ -61,13 +60,13 @@ public class RetrofitService {
             return this;
         }
 
-        public Parameters setConnectionTimeoutInMinutes(int connectionTimeoutInMinutes) {
-            this.connectionTimeoutInMinutes = connectionTimeoutInMinutes;
+        public Parameters setConnectionTimeoutInSeconds(int connectionTimeoutInSeconds) {
+            this.connectionTimeoutInSeconds = connectionTimeoutInSeconds;
             return this;
         }
 
-        public Parameters setReadTimeoutInMinutes(int readTimeoutInMinutes) {
-            this.readTimeoutInMinutes = readTimeoutInMinutes;
+        public Parameters setReadTimeoutInSeconds(int readTimeoutInSeconds) {
+            this.readTimeoutInSeconds = readTimeoutInSeconds;
             return this;
         }
 
@@ -79,8 +78,8 @@ public class RetrofitService {
             Parameters that = (Parameters) o;
 
             if (allowAllHostname != that.allowAllHostname) return false;
-            if (connectionTimeoutInMinutes != that.connectionTimeoutInMinutes) return false;
-            if (readTimeoutInMinutes != that.readTimeoutInMinutes) return false;
+            if (connectionTimeoutInSeconds != that.connectionTimeoutInSeconds) return false;
+            if (readTimeoutInSeconds != that.readTimeoutInSeconds) return false;
             return baseUrl.equals(that.baseUrl);
         }
 
@@ -88,8 +87,8 @@ public class RetrofitService {
         public int hashCode() {
             int result = baseUrl.hashCode();
             result = 31 * result + (allowAllHostname ? 1 : 0);
-            result = 31 * result + connectionTimeoutInMinutes;
-            result = 31 * result + readTimeoutInMinutes;
+            result = 31 * result + connectionTimeoutInSeconds;
+            result = 31 * result + readTimeoutInSeconds;
             return result;
         }
     }
@@ -99,12 +98,25 @@ public class RetrofitService {
     private Retrofit mRetrofit;
     private final Parameters parameters;
 
-    public RetrofitService(@NonNull Parameters parameters, @Nullable Callback tmpBuildCallback) {
+    public RetrofitService(@NotNull Parameters parameters, @Nullable Callback tmpBuildCallback) {
+        try {
+            Class.forName("retrofit2.Retrofit");
+            Class.forName("okhttp3.OkHttpClient");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("add those lines to gradle script file:\n" +
+                    "implementation 'com.squareup.retrofit2:retrofit:2.7.1'\n" +
+                    "implementation 'com.squareup.retrofit2:converter-gson:2.7.1'\n" +
+                    "implementation 'com.squareup.okhttp:okhttp:2.4.0'\n" +
+                    "implementation 'com.squareup.okhttp3:okhttp:4.9.0'\n" +
+                    "implementation 'com.google.code.gson:gson:2.8.6' //preferred");
+        }
+
         this.parameters = parameters;
 
         OkHttpClient client = createOkHttpClient(parameters, tmpBuildCallback)
-                .readTimeout(parameters.readTimeoutInMinutes, TimeUnit.MINUTES)
-                .connectTimeout(parameters.connectionTimeoutInMinutes, TimeUnit.MINUTES)
+                .readTimeout(parameters.readTimeoutInSeconds, TimeUnit.SECONDS)
+                .connectTimeout(parameters.connectionTimeoutInSeconds, TimeUnit.SECONDS)
                 .build();
 
         mRetrofit = new Retrofit.Builder()
@@ -115,7 +127,7 @@ public class RetrofitService {
                 .build();
     }
 
-    private OkHttpClient.Builder createOkHttpClient(@NonNull Parameters parameters, Callback tmpBuildCallback) {
+    private OkHttpClient.Builder createOkHttpClient(@NotNull Parameters parameters, Callback tmpBuildCallback) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
         try {
@@ -156,15 +168,15 @@ public class RetrofitService {
 
     private static RetrofitService sInstance; //singleton
 
-    public static <T> T create(@NonNull String baseURL, Class<T> serviceClass) {
+    public static <T> T create(@NotNull String baseURL, Class<T> serviceClass) {
         return create(new Parameters(baseURL), serviceClass);
     }
 
-    public static <T> T create(@NonNull Parameters parameters, Class<T> serviceClass) {
+    public static <T> T create(@NotNull Parameters parameters, Class<T> serviceClass) {
         return create(parameters, null, serviceClass);
     }
 
-    public static <T> T create(@NonNull Parameters parameters, @Nullable Callback tmpBuildCallback, Class<T> serviceClass) {
+    public static <T> T create(@NotNull Parameters parameters, @Nullable Callback tmpBuildCallback, Class<T> serviceClass) {
         if (sInstance == null) {
             sInstance = new RetrofitService(parameters, tmpBuildCallback);
 

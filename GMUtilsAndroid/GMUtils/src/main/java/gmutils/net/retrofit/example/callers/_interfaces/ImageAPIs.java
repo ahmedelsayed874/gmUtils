@@ -2,9 +2,8 @@ package gmutils.net.retrofit.example.callers._interfaces;
 
 import android.graphics.Bitmap;
 
-import gmutils.net.retrofit.OnResponseReady2;
+import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.example.data.ImageResponse;
-import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -19,6 +18,6 @@ import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
  */
 public interface ImageAPIs {
 
-    void post(String text, Bitmap image, OnResponseReady2<Object, ImageResponse> callback);
+    void post(String text, Bitmap image, OnResponseReady2o<Object, ImageResponse> callback);
 
 }

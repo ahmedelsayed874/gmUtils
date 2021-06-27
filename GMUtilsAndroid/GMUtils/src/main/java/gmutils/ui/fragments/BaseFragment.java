@@ -7,8 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -19,6 +17,7 @@ import gmutils.ui.utils.ViewSource;
 import gmutils.ui.dialogs.RetryPromptDialog;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -42,7 +41,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         if (context instanceof Listener) {
             listener = (Listener) context;
@@ -70,7 +69,7 @@ public abstract class BaseFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewSource viewSource = getViewSource(inflater, container);
         assert viewSource != null;
         View view = null;
@@ -78,13 +77,13 @@ public abstract class BaseFragment extends Fragment {
         if (viewSource instanceof ViewSource.LayoutResource) {
             int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
             view = inflater.inflate(resId, container, false);
-        }
-        else if (viewSource instanceof ViewSource.ViewBinding) {
-            fragmentViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-            view = fragmentViewBinding.getRoot();
 
         } else if (viewSource instanceof ViewSource.View) {
             view = ((ViewSource.View) viewSource).getView();
+
+        } else if (viewSource instanceof ViewSource.ViewBinding) {
+            fragmentViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+            view = fragmentViewBinding.getRoot();
         }
 
         return view;
@@ -124,7 +123,7 @@ public abstract class BaseFragment extends Fragment {
     //----------------------------------------------------------------------------------------------
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
 

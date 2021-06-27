@@ -1,7 +1,7 @@
 package gmutils.net.retrofit.example.data;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 
@@ -48,21 +48,21 @@ public class TimeZones extends BaseResponse implements Collection<String> {
         return list.contains(o);
     }
 
-    @NonNull
+    @NotNull
     @Override
     public Iterator<String> iterator() {
         return list.iterator();
     }
 
-    @NonNull
+    @NotNull
     @Override
     public Object[] toArray() {
         return list.toArray();
     }
 
-    @NonNull
+    @NotNull
     @Override
-    public <T> T[] toArray(@NonNull T[] a) {
+    public <T> T[] toArray(@NotNull T[] a) {
         return list.toArray(a);
     }
 
@@ -77,22 +77,22 @@ public class TimeZones extends BaseResponse implements Collection<String> {
     }
 
     @Override
-    public boolean containsAll(@NonNull Collection<?> c) {
+    public boolean containsAll(@NotNull Collection<?> c) {
         return list.containsAll(c);
     }
 
     @Override
-    public boolean addAll(@NonNull Collection<? extends String> c) {
+    public boolean addAll(@NotNull Collection<? extends String> c) {
         return list.addAll(c);
     }
 
     @Override
-    public boolean removeAll(@NonNull Collection<?> c) {
+    public boolean removeAll(@NotNull Collection<?> c) {
         return list.removeAll(c);
     }
 
     @Override
-    public boolean retainAll(@NonNull Collection<?> c) {
+    public boolean retainAll(@NotNull Collection<?> c) {
         return list.retainAll(c);
     }
 

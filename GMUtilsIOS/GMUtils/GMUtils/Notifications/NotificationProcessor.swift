@@ -18,7 +18,7 @@ class NotificationProcessor {
     static var tappedNotification: Notification?  = nil
     
     static func openCorrespondingViewController(vc: UIViewController, notification: Notification) {
-        let objectId = notification.Payload!.ObjectId
+        /*let objectId = notification.Payload!.ObjectId
         let notificationType = notification.Payload!.NotificationType
         
         if (notificationType != 0) {
@@ -69,13 +69,13 @@ class NotificationProcessor {
         }
         
         let notificationReceiverId = notification.Payload!.NotificationReceiverId
-        updateNotificationStatus(notificationReceiverId)
+        updateNotificationStatus(notificationReceiverId)*/
     }
     
     static func updateNotificationStatus(_ id: Int) {
-        APIsPool.newInstance.broadcastAPIs.updateNotificationReadStatus(notificationReceiverIds: [id]) { (response) in
+        /*APIsPool.newInstance.broadcastAPIs.updateNotificationReadStatus(notificationReceiverIds: [id]) { (response) in
             if !response.isSuccess { Log.p(response.Message ?? "updateNotificationStatus - err") }
-        }
+        }*/
     }
     
     static func handlePushNotification(userInfo: [AnyHashable: Any]) {
@@ -100,7 +100,7 @@ class NotificationProcessor {
     }
     
     static func createNotificationObject(objectId: Int, notificationId: Int, notificationType: Int) -> Notification {
-        let payload = Payload(
+        /*let payload = Payload(
             ObjectId: objectId,
             NotificationReceiverId: notificationId,
             NotificationType: notificationType
@@ -114,7 +114,8 @@ class NotificationProcessor {
             isSeen: false
         )
         
-        return notification
+        return notification*/
+        return .init(name: .init(""))
     }
     
     static func updateAppIconBadgeCount(count: Int) {

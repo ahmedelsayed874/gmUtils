@@ -1,6 +1,7 @@
 package gmutils.net.retrofit.responseHolders;
 
-import androidx.annotation.Nullable;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -105,4 +106,19 @@ public abstract class BaseObjectResponse<T> extends BaseResponse {
         return response;
     }
 
+    //----------------------------------------------------------------------------------------------
+
+
+    @Override
+    public String toString() {
+        return "BaseObjectResponse{" +
+                "data='" + getData() + '\'' +
+                ", _callbackStatus='" + getCallbackStatus() + '\'' +
+                ", _code=" + _code +
+                ", _error='" + _error + '\'' +
+                ", _extras=" + _extras +
+                ", _requestTime=" + _requestTime +
+                ", _responseTime=" + _responseTime +
+                '}';
+    }
 }

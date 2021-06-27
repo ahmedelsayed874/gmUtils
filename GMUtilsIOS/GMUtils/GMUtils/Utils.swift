@@ -40,16 +40,6 @@ class Utils {
             .replacingOccurrences(of: "9", with: "٩")
     }
     
-    static func formatNumber(number: Double) -> String {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .decimal
-        numberFormatter.groupingSize = 3
-        numberFormatter.maximumFractionDigits = 2
-        numberFormatter.minimumFractionDigits = 2
-        let formattedNumber = numberFormatter.string(from: NSNumber(value:number))
-        return formattedNumber ?? "\(number)"
-    }
-    
     static func parseHTML(html: String) throws -> NSAttributedString {
         guard let data = html.data(using: .utf8) else { fatalError("Can't get data from sent text") }
         do {
@@ -222,5 +212,9 @@ class Utils {
                 Log.p("Settings opened: \(success)") // Prints true
             })
         }
+    }
+    
+    static func updateAppIconBadgeCount(count: Int) {
+        UIApplication.shared.applicationIconBadgeNumber = count
     }
 }

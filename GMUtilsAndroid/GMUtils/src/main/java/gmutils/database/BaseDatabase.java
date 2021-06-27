@@ -11,7 +11,7 @@ import android.util.Log;
 import gmutils.database.sqlitecommands.CreateTable;
 import gmutils.database.sqlitecommands.DropTable;
 import gmutils.database.sqlitecommands.WhereClause;
-import gmutils.ui.app.BaseApplication;
+import gmutils.app.BaseApplication;
 import gmutils.database.annotations.AutoIncrement;
 import gmutils.database.annotations.Default;
 import gmutils.database.annotations.Entity;
@@ -96,23 +96,24 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     private Database database;
 
     public BaseDatabase(@NotNull Context context) {
+        try {
+            Class.forName("com.google.gson.Gson");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("add this line to gradle script file:\n" +
+                    "implementation 'com.google.code.gson:gson:2.8.6'");
+        }
+
         database = new Database(context, databaseName(), databaseVersion(), this);
 
         if (BaseApplication.current() != null) {
-            BaseApplication.current().addCallback(BaseDatabase.class.getName(), new BaseApplication.Callbacks() {
-                @Override
-                public void onApplicationStartedFirstActivity(String key) {
+            BaseApplication.current().setOnApplicationFinishedLastActivity(() -> {
+                try {
+                    db().close();
+                } catch (Exception e) {
                 }
 
-                @Override
-                public void onApplicationFinishedLastActivity(String key) {
-                    try {
-                        db().close();
-                    } catch (Exception e) {
-                    }
-
-                    database = null;
-                }
+                database = null;
             });
         }
     }

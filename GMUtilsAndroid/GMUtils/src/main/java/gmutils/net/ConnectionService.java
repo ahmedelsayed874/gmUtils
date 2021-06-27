@@ -5,9 +5,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
+
+import org.jetbrains.annotations.Nullable;
+
 import java.net.InetAddress;
 
 /*

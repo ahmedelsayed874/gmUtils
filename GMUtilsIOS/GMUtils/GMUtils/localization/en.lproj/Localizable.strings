@@ -1,0 +1,11 @@
+/* 
+  Strings.strings (en)
+*/
+
+"Lang" = "en";
+"Ok" = "Ok";
+"Retry" = "Retry";
+"Cancel" = "Cancel";
+"Dissmiss" = "Dissmiss";
+"PleaseWait" = "Please wait...";
+"all" = "All";

@@ -3,7 +3,7 @@ package com.blogspot.gm4s.gmutileexample.app
 import android.app.Application
 import android.util.Log
 import gmutils.Logger
-import gmutils.ui.app.BaseApplication
+import gmutils.app.BaseApplication
 
 class AndroidApplicationAndBaseApplication : Application() {
 
@@ -49,17 +49,6 @@ class AndroidApplicationAndBaseApplication : Application() {
         }
 
         app.messagingCenter().post("zxc", "asd")
-
-        app.addCallback("asd", object: BaseApplication.Callbacks {
-            override fun onApplicationStartedFirstActivity(key: String?) {
-                Log.d("*****", "BaseApplication.Callbacks.onApplicationStartedFirstActivity($key)")
-            }
-
-            override fun onApplicationFinishedLastActivity(key: String?) {
-                Log.d("*****", "BaseApplication.Callbacks.onApplicationFinishedLastActivity($key)")
-            }
-
-        })
 
     }
 }

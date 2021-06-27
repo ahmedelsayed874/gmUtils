@@ -8,19 +8,13 @@ import android.widget.BaseAdapter;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
 
 import gmutils.ui.utils.DumbViewBinding;
-import gmutils.ui.utils.ViewSource;
 import gmutils.utils.UIUtils;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -108,10 +102,6 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
 
     //----------------------------------------------------------------------------------------------
 
-//    @NotNull
-//    protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater, ViewGroup container);
-//    @NotNull
-//    protected abstract ViewHolder<T> getViewHolder(ViewBinding viewBinding);
 
     @NotNull
     protected abstract ViewHolder<T> getViewHolder(@NotNull LayoutInflater inflater, ViewGroup container);
@@ -121,28 +111,6 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         ViewHolder<T> holder = null;
 
         if (view == null) {
-            /*ViewSource viewSource = getViewSource(LayoutInflater.from(parent.getContext()), parent);
-            assert viewSource != null;
-
-            if (viewSource instanceof ViewSource.LayoutResource) {
-                int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
-                view = LayoutInflater.from(parent.getContext()).inflate(resId, parent, false);
-                holder = getViewHolder(new DumbViewBinding(view));
-
-            } else if (viewSource instanceof ViewSource.ViewBinding) {
-                ViewBinding viewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-                view = viewBinding.getRoot();
-                holder = getViewHolder(viewBinding);
-
-            } else if (viewSource instanceof ViewSource.View) {
-                view = ((ViewSource.View) viewSource).getView();
-                holder = getViewHolder(new DumbViewBinding(view));
-            }
-
-            assert view != null;
-
-            view.setTag(holder);*/
-
             holder = getViewHolder(LayoutInflater.from(parent.getContext()), parent);
             view = holder.itemView;
             view.setTag(holder);
@@ -166,11 +134,6 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
             this(inflater.inflate(resId, container, false));
         }
 
-        public ViewHolder(ViewBinding viewBinding) {
-            this(viewBinding.getRoot());
-            this.viewBinding = viewBinding;
-        }
-
         public ViewHolder(View view) {
             this.itemView = view;
 
@@ -178,11 +141,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
                 UIUtils.createInstance().setViewDetachedObserver(view, new Runnable() {
                     @Override
                     public void run() {
-                        if (ViewHolder.this.viewBinding instanceof DumbViewBinding) {
-                            ((DumbViewBinding) ViewHolder.this.viewBinding).dispose();
-                        }
                         ViewHolder.this.itemView = null;
-                        ViewHolder.this.viewBinding = null;
                         ViewHolder.this.item = null;
                         ViewHolder.this.onDispose();
                     }
@@ -190,12 +149,30 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
             }
         }
 
-        public <V extends View> V findViewById(@IdRes int resId) {
-            return itemView.findViewById(resId);
+        public ViewHolder(ViewBinding viewBinding) {
+            this(viewBinding.getRoot());
+            this.viewBinding = viewBinding;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                UIUtils.createInstance().setViewDetachedObserver(viewBinding.getRoot(), new Runnable() {
+                    @Override
+                    public void run() {
+                        if (ViewHolder.this.viewBinding instanceof DumbViewBinding) {
+                            ((DumbViewBinding) ViewHolder.this.viewBinding).dispose();
+                        }
+
+                        ViewHolder.this.viewBinding = null;
+                    }
+                });
+            }
         }
 
         public ViewBinding getViewBinding() {
             return viewBinding;
+        }
+
+        public <V extends View> V findViewById(@IdRes int resId) {
+            return itemView.findViewById(resId);
         }
 
 

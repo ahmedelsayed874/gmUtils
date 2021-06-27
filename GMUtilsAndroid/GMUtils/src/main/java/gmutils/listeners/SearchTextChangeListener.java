@@ -3,12 +3,7 @@ package gmutils.listeners;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-
-import androidx.annotation.Nullable;
-
 import gmutils.Logger;
-import gmutils.listeners.TextChangedListener;
-
 import java.lang.ref.WeakReference;
 
 /**

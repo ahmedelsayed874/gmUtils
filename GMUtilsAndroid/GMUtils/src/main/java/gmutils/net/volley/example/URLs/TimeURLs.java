@@ -1,7 +1,7 @@
 package gmutils.net.volley.example.URLs;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import gmutils.net.volley.ApiURL;
 
@@ -41,7 +41,7 @@ public class TimeURLs {
     public static class CurrentTimeURL extends ApiURL.getURL {
         private String zone = "";
 
-        public CurrentTimeURL(@NonNull String zone) {
+        public CurrentTimeURL(@NotNull String zone) {
             this.zone = zone;
         }
 

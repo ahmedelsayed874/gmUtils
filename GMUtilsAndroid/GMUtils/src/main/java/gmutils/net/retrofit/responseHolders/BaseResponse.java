@@ -1,11 +1,8 @@
 package gmutils.net.retrofit.responseHolders;
 
-import androidx.annotation.Nullable;
 import androidx.room.Ignore;
-
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
+import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 /**
@@ -118,4 +115,18 @@ public abstract class BaseResponse {
         _responseTime = otherResponse._responseTime;
     }
 
+    //----------------------------------------------------------------------------------------------
+
+
+    @Override
+    public String toString() {
+        return "BaseResponse{" +
+                "_callbackStatus='" + _callbackStatus + '\'' +
+                ", _code=" + _code +
+                ", _error='" + _error + '\'' +
+                ", _extras=" + _extras +
+                ", _requestTime=" + _requestTime +
+                ", _responseTime=" + _responseTime +
+                '}';
+    }
 }

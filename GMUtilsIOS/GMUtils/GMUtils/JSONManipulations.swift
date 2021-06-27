@@ -15,10 +15,9 @@ import Foundation
  */
 class JSONManipulations {
     
-    static func parseByJSONSerialization(response : Data) -> Any? {
+    static func parseByJSONSerialization(data : Data) -> Any? {
         do{
-            //here dataResponse received from a network request
-            let jsonResponse = try JSONSerialization.jsonObject(with: response, options: [])
+            let jsonResponse = try JSONSerialization.jsonObject(with: data, options: [])
             Log.p(jsonResponse) //Response result
             
             return jsonResponse
@@ -28,7 +27,7 @@ class JSONManipulations {
         }
     }
     
-    //--------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------
     
     static func encode<T : Codable>(_ value: T) -> Data? {
         let jsonEncoder = JSONEncoder()

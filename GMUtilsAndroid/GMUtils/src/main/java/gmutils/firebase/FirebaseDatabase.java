@@ -38,6 +38,15 @@ public class FirebaseDatabase<T> {
     private Map<ResultCallback2<T, String>, ValueEventListener> readObservers;
 
     private FirebaseDatabase(String path, Class<T> valueType) {
+        try {
+            Class.forName("com.google.firebase.database.FirebaseDatabase");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("add this line to gradle script file:\n" +
+                    "//https://firebase.google.com/docs/database/android/start\n" +
+                    "implementation 'com.google.firebase:firebase-database:19.6.0'");
+        }
+
         com.google.firebase.database.FirebaseDatabase database;
         database = com.google.firebase.database.FirebaseDatabase.getInstance();
 

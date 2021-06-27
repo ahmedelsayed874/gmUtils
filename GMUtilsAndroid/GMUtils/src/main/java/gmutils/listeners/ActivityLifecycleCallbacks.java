@@ -4,40 +4,41 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 
 public interface ActivityLifecycleCallbacks extends Application.ActivityLifecycleCallbacks {
     @Override
-    default void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+    default void onActivityCreated(@NotNull Activity activity, @Nullable Bundle savedInstanceState) {
     }
 
     @Override
-    default void onActivityStarted(@NonNull Activity activity) {
+    default void onActivityStarted(@NotNull Activity activity) {
     }
 
     @Override
-    default void onActivityResumed(@NonNull Activity activity) {
-
-    }
-
-    @Override
-    default void onActivityPaused(@NonNull Activity activity) {
+    default void onActivityResumed(@NotNull Activity activity) {
 
     }
 
     @Override
-    default void onActivityStopped(@NonNull Activity activity) {
+    default void onActivityPaused(@NotNull Activity activity) {
 
     }
 
     @Override
-    default void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+    default void onActivityStopped(@NotNull Activity activity) {
 
     }
 
     @Override
-    default void onActivityDestroyed(@NonNull Activity activity) {
+    default void onActivitySaveInstanceState(@NotNull Activity activity, @NotNull Bundle outState) {
+
+    }
+
+    @Override
+    default void onActivityDestroyed(@NotNull Activity activity) {
 
     }
 }

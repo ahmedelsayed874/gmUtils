@@ -24,7 +24,7 @@ class ValidationChecker {
     }
     
     func isNameValid(_ name: String) -> Bool {
-        return name.count >= 3
+        return name.count >= 2
     }
     
     func isFullNameValid(_ name: String) -> Bool {

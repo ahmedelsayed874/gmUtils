@@ -2,14 +2,10 @@ package com.blogspot.gm4s.gmutileexample.activities
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.viewbinding.ViewBinding
-import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
-import gmutils.ui.MyToast
+import gmutils.ui.toast.MyToast
 import gmutils.Security
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.WaitDialog

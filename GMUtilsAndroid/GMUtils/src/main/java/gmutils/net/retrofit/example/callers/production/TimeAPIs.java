@@ -4,7 +4,7 @@ import gmutils.net.retrofit.example.apiServices.TimeAPIsRequests;
 import gmutils.net.retrofit.example.data.TimeOfArea;
 import gmutils.net.retrofit.example.data.TimeZones;
 import gmutils.net.retrofit.callback.Callback;
-import gmutils.net.retrofit.OnResponseReady;
+import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.RetrofitService;
 
 import java.util.HashMap;

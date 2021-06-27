@@ -44,7 +44,7 @@ class SharingHelper {
         }
         
         if c == 0 {
-            vc.showErrorMessage(msg: StringResource.CantShareData)
+            vc.showErrorMessage(msg: "Can't Share")
             
         } else {
             if images.count == 1 {
@@ -54,8 +54,8 @@ class SharingHelper {
             } else {
                 SharingHelper.shareSingleImageWithAlert(
                     vc: vc,
-                    alertTitle: StringResource.visitRequest,
-                    alertMessage: StringResource.doYouWantToShareQR_Barcode,
+                    alertTitle: alertTitle,
+                    alertMessage: alertMessage,
                     sharedText: sharedText,
                     images: images)
             }

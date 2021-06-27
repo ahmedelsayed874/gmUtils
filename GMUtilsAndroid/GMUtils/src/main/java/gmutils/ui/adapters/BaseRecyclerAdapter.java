@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -24,6 +22,7 @@ import gmutils.ui.utils.DumbViewBinding;
 import gmutils.ui.utils.ViewSource;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -168,12 +167,12 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                     0,
                     ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
                 @Override
-                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                public boolean onMove(@NotNull RecyclerView recyclerView, @NotNull RecyclerView.ViewHolder viewHolder, @NotNull RecyclerView.ViewHolder target) {
                     return false;
                 }
 
                 @Override
-                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int direction) {
                     int position = viewHolder.getAdapterPosition();
                     remove(position, true);
                 }
@@ -435,7 +434,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         return null;
     }
 
-    public boolean hasItem(@NonNull ActionCallback<T, Boolean> comparator) {
+    public boolean hasItem(@NotNull ActionCallback<T, Boolean> comparator) {
         for (T it : mList) {
             if (comparator.invoke(it)) return true;
         }
@@ -542,9 +541,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 //    protected abstract ViewHolder getViewHolder(View view, int viewType);
 //    protected ViewHolder getViewHolder(ViewBinding viewBinding, int viewType) { return null; }
 
-    @NonNull
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         /*ViewSource viewSource = getViewSource(viewType, LayoutInflater.from(parent.getContext()), parent);
         assert viewSource != null;
 
@@ -569,7 +568,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NotNull ViewHolder holder, int position) {
         holder.setValuesInner(mList.get(position), position);
 
         if (mOnLoadMoreListener != null) {
@@ -615,10 +614,6 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
                             @Override
                             public void onWindowDetached() {
-                                if (BaseRecyclerAdapter.ViewHolder.this.viewBinding instanceof DumbViewBinding) {
-                                    ((DumbViewBinding) BaseRecyclerAdapter.ViewHolder.this.viewBinding).dispose();
-                                }
-                                BaseRecyclerAdapter.ViewHolder.this.viewBinding = null;
                                 dispose();
                             }
                         }
@@ -629,15 +624,42 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         public ViewHolder(ViewBinding viewBinding) {
             this(viewBinding.getRoot());
             this.viewBinding = viewBinding;
-        }
 
-        public <V extends View> V findViewById(@IdRes int resId) {
-            return itemView.findViewById(resId);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                SimpleWindowAttachListener listener = new SimpleWindowAttachListener() {
+                    @Override
+                    public void onWindowAttached() {
+                    }
+
+                    @Override
+                    public void onWindowDetached() {
+                        try {
+                            if (BaseRecyclerAdapter.ViewHolder.this.viewBinding instanceof DumbViewBinding) {
+                                ((DumbViewBinding) BaseRecyclerAdapter.ViewHolder.this.viewBinding).dispose();
+                            }
+                        } catch (Exception ignored) {}
+
+                        try {
+                            BaseRecyclerAdapter.ViewHolder.this.viewBinding = null;
+                        } catch (Exception ignored) {}
+
+                        dispose();
+                    }
+                };
+
+                try {
+                    viewBinding.getRoot().getViewTreeObserver().addOnWindowAttachListener(listener);
+                } catch (Exception ignored) {}
+            }
         }
 
         @Nullable
         public ViewBinding getViewBinding() {
             return viewBinding;
+        }
+
+        public <V extends View> V findViewById(@IdRes int resId) {
+            return itemView.findViewById(resId);
         }
 
         private void setValuesInner(T item, int position) {

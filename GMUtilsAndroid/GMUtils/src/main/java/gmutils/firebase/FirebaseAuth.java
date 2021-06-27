@@ -29,6 +29,15 @@ public class FirebaseAuth {
     }
 
     private FirebaseAuth() {
+        try {
+            Class.forName("com.google.firebase.auth.FirebaseAuth");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("add this line to gradle script file:\n" +
+                    "//https://firebase.google.com/docs/auth/android/\n" +
+                    "implementation 'com.google.firebase:firebase-auth:20.0.2'");
+        }
+
         // Initialize Firebase Auth
         mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     }

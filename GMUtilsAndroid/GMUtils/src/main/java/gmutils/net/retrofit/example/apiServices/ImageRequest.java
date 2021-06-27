@@ -1,6 +1,5 @@
 package gmutils.net.retrofit.example.apiServices;
 
-import gmutils.net.retrofit.APIConstants;
 import gmutils.net.retrofit.example.data.ImageResponse;
 
 import okhttp3.MultipartBody;
@@ -28,7 +27,6 @@ public interface ImageRequest {
     @Multipart
     @POST("post")
     Call<ImageResponse> post(
-            @Header(APIConstants.AUTHORIZATION) String token,
             @Part("text") RequestBody text,
             @Part MultipartBody.Part image
     );

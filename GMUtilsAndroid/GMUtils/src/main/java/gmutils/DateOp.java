@@ -5,10 +5,8 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -155,7 +153,7 @@ public class DateOp implements Serializable {
         this.currentLocale = locale;
     }
 
-    @NonNull
+    @NotNull
     @Override
     public String toString() {
         return formatDate("E dd-MMMM'('MM')'-yyyy HH:mm:ss.SSSXXX", false) + " / " + getTimeInMillis();
@@ -840,6 +838,16 @@ public class DateOp implements Serializable {
             setTimeZone(0);
         }
         return this;
+    }
+
+    public DateOp setTimeToUTC() {
+        long t = getUTCTimeInMillis();
+        return setTimeInMillis(t);
+    }
+
+    public DateOp setTimeToLocale() {
+        long t = calendar.getTimeInMillis() + TimeZone.getDefault().getRawOffset();
+        return setTimeInMillis(t);
     }
 
     public DateOp setTimeInMillis(long timeInMillis) {

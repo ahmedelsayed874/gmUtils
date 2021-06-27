@@ -12,10 +12,11 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.DimenRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import gmutils.Logger;
 import gmutils.Intents;
@@ -107,7 +108,7 @@ public class ImageSlider {
                     }
                 });
             } else {
-                gmutils.ImageLoader.load(
+                gmutils.images.ImageLoader.load(
                         url,
                         imageView,
                         (imgUrl, imageView1, success) -> {
@@ -159,7 +160,7 @@ public class ImageSlider {
 
     //----------------------------------------------------------------------------------------------
 
-    public void setImageLoaderListener(@NonNull ImageLoader imageLoader) {
+    public void setImageLoaderListener(@NotNull ImageLoader imageLoader) {
         mImageLoader = imageLoader;
     }
 
@@ -266,7 +267,7 @@ public class ImageSlider {
     /**
      * using this will ignore other methods
      */
-    public ImageSlider setImageSliderAdapter(@NonNull ImageSliderAdapter sliderAdapter) {
+    public ImageSlider setImageSliderAdapter(@NotNull ImageSliderAdapter sliderAdapter) {
         imageAdapter.setImageSliderAdapter(sliderAdapter);
 
         viewPager.getAdapter().notifyDataSetChanged();
@@ -419,7 +420,7 @@ public class ImageSlider {
         //------------------------------------------------------------------------------------------
 
 
-        public void setImageSliderAdapter(@NonNull ImageSliderAdapter sliderAdapter) {
+        public void setImageSliderAdapter(@NotNull ImageSliderAdapter sliderAdapter) {
             this.sliderAdapter = sliderAdapter;
             if (sliderAdapter == null) throw new IllegalArgumentException("sliderAdapter = null");
         }
@@ -544,7 +545,7 @@ public class ImageSlider {
             return v == obj;
         }
 
-        @NonNull
+        @NotNull
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public Object instantiateItem(ViewGroup container, int i) {

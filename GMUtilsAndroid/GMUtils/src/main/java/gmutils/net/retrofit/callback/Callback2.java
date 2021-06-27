@@ -2,7 +2,7 @@ package gmutils.net.retrofit.callback;
 
 import androidx.annotation.NonNull;
 
-import gmutils.net.retrofit.OnResponseReady2;
+import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 import java.util.Map;
@@ -27,13 +27,13 @@ import retrofit2.Call;
 public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit2.Callback<R> {
 
     private CallbackOperations<R> callbackOperations;
-    private OnResponseReady2<DT, R> onResponseReady;
+    private OnResponseReady2<DT> onResponseReady;
 
 
     public Callback2(
             Request request,
             Class<R> responseClass,
-            OnResponseReady2<DT, R> onResponseReady
+            OnResponseReady2<DT> onResponseReady
     ) {
         this.callbackOperations = new CallbackOperations<>(request, responseClass, Callback2.this::setResult);
         this.onResponseReady = onResponseReady;
@@ -42,7 +42,7 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
     public Callback2(
             String requestInfo,
             Class<R> responseClass,
-            OnResponseReady2<DT, R> onResponseReady
+            OnResponseReady2<DT> onResponseReady
     ) {
         this.callbackOperations = new CallbackOperations<>(requestInfo, responseClass, Callback2.this::setResult);
         this.onResponseReady = onResponseReady;

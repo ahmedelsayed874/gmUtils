@@ -1,7 +1,7 @@
 package gmutils.net.retrofit.responseHolders;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,21 +28,21 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
         return list.contains(o);
     }
 
-    @NonNull
+    @NotNull
     @Override
     public Iterator<T> iterator() {
         return list.iterator();
     }
 
-    @NonNull
+    @NotNull
     @Override
     public Object[] toArray() {
         return list.toArray();
     }
 
-    @NonNull
+    @NotNull
     @Override
-    public <T1> T1[] toArray(@NonNull T1[] a) {
+    public <T1> T1[] toArray(@NotNull T1[] a) {
         return list.toArray(a);
     }
 
@@ -52,32 +52,32 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
     }
 
     @Override
-    public boolean remove(@Nullable @org.jetbrains.annotations.Nullable Object o) {
+    public boolean remove(@Nullable Object o) {
         return list.remove(o);
     }
 
     @Override
-    public boolean containsAll(@NonNull Collection<?> c) {
+    public boolean containsAll(@NotNull Collection<?> c) {
         return list.containsAll(c);
     }
 
     @Override
-    public boolean addAll(@NonNull Collection<? extends T> c) {
+    public boolean addAll(@NotNull Collection<? extends T> c) {
         return list.addAll(c);
     }
 
     @Override
-    public boolean addAll(int index, @NonNull Collection<? extends T> c) {
+    public boolean addAll(int index, @NotNull Collection<? extends T> c) {
         return list.addAll(index, c);
     }
 
     @Override
-    public boolean removeAll(@NonNull Collection<?> c) {
+    public boolean removeAll(@NotNull Collection<?> c) {
         return list.removeAll(c);
     }
 
     @Override
-    public boolean retainAll(@NonNull Collection<?> c) {
+    public boolean retainAll(@NotNull Collection<?> c) {
         return list.retainAll(c);
     }
 
@@ -116,21 +116,46 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
         return list.lastIndexOf(o);
     }
 
-    @NonNull
+    @NotNull
     @Override
     public ListIterator<T> listIterator() {
         return list.listIterator();
     }
 
-    @NonNull
+    @NotNull
     @Override
     public ListIterator<T> listIterator(int index) {
         return list.listIterator(index);
     }
 
-    @NonNull
+    @NotNull
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
         return list.subList(fromIndex, toIndex);
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for (T t : list) {
+            if (s.length() > 0)
+                s.append(", ");
+
+            if (t != null)
+                s.append(t.toString());
+        }
+        return "BaseListResponse{" +
+                "list=' [" + list.size() + "-items] [" + s.toString() + "]" + '\'' +
+                ", _callbackStatus='" + getCallbackStatus() + '\'' +
+                ", _code=" + _code +
+                ", _error='" + _error + '\'' +
+                ", _extras=" + _extras +
+                ", _requestTime=" + _requestTime +
+                ", _responseTime=" + _responseTime +
+                '}';
     }
 }

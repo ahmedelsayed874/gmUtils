@@ -88,7 +88,7 @@ class ImageUtils {
     }
     
     static func drawImage(image: UIImage, destWidth: Int, destHeight: Int, dx: Float = 0.5, dy: Float = 0.5) -> UIImage {
-        let bottomImage = UIImage()
+        let backImage = UIImage()
         let topImage = image
         
         let scrBounds = UIScreen.main.bounds
@@ -100,7 +100,7 @@ class ImageUtils {
         
         UIGraphicsBeginImageContext(CGSize(width: scrBounds.width, height: scrBounds.height))
         
-        bottomImage.draw(in: scrBounds)
+        backImage.draw(in: scrBounds)
         topImage.draw(in: topImgBounds)
         
         let newImage = UIGraphicsGetImageFromCurrentImageContext()

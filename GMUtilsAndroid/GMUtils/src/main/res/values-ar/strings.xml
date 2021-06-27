@@ -90,5 +90,10 @@
     <string name="type_valid_first_name">أكتب الإسم الأول صحيحا.</string>
     <string name="type_valid_last_name">أكتب الإسم الأخير صحيحا.</string>
     <string name="done">تم</string>
+    <string name="Red">Red</string>
+    <string name="Green">Green</string>
+    <string name="Blue">Blue</string>
+    <string name="Alpha">Alpha</string>
+    <string name="Hex">Hex</string>
 
 </resources>

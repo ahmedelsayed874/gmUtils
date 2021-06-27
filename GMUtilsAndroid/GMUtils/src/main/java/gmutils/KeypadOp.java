@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import androidx.fragment.app.Fragment;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -25,7 +24,13 @@ public class KeypadOp {
         hide(activity.getCurrentFocus());
     }
 
-    public static void hide(Fragment fragment) {
+    /*public static void hide(Fragment fragment) {
+        if (fragment.getView() != null) {
+            KeypadOp.hide(fragment.getView().findFocus());
+        }
+    }*/
+
+    public static void hide(android.app.Fragment fragment) {
         if (fragment.getView() != null) {
             KeypadOp.hide(fragment.getView().findFocus());
         }

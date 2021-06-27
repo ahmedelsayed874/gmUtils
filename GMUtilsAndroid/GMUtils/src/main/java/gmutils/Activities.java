@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.AnimRes;
 import androidx.fragment.app.Fragment;
 
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -137,6 +138,15 @@ public class Activities {
         Intent intent = createIntent(activity, fragment.getContext(), extraData);
         Bundle bundle = createAnimationBundle(
                 fragment.getContext(),
+                DEFAULT_TRANSITION_RES,
+                0);
+        fragment.startActivityForResult(intent, requestCode, bundle);
+    }
+
+    public static void startForResult(Class<?> activity, android.app.Fragment fragment, Bundle extraData, int requestCode) {
+        Intent intent = createIntent(activity, fragment.getActivity(), extraData);
+        Bundle bundle = createAnimationBundle(
+                fragment.getActivity(),
                 DEFAULT_TRANSITION_RES,
                 0);
         fragment.startActivityForResult(intent, requestCode, bundle);

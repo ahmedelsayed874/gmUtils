@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import gmutils.ui.app.BaseApplication;
+import gmutils.app.BaseApplication;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -233,6 +233,28 @@ public class Logger {
         }
     }
 
+    public static void printMethod(String moreInfo) {
+        printMethod(moreInfo, IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED());
+    }
+
+    public static void printMethod(String moreInfo, boolean writeToFileAlso) {
+        try {
+            StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
+            StackTraceElement stackTrace = null;
+            stackTrace = stackTraceList[2];
+
+            String msg = stackTrace.getFileName() +
+                    "\n" +
+                    stackTrace.getMethodName() +
+                    " -> line: " + stackTrace.getLineNumber() +
+                    (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));
+
+            print("", msg, writeToFileAlso);
+        } catch (Exception e) {
+            print("", moreInfo, writeToFileAlso);
+        }
+    }
+
     //----------------------------------------------------------------------------------------------
 
     private static String[] refineTitle(String title) {
@@ -332,6 +354,28 @@ public class Logger {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+
+        public void appendHere() {
+            appendHere("");
+        }
+
+        public void appendHere(String moreInfo) {
+            try {
+                StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
+                StackTraceElement stackTrace = null;
+                stackTrace = stackTraceList[2];
+
+                append(
+                        stackTrace.getFileName() +
+                        "\n" +
+                        stackTrace.getMethodName() +
+                                " -> line: " + stackTrace.getLineNumber() +
+                                (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo))
+                );
+            } catch (Exception e) {
+                append(moreInfo);
             }
         }
     }

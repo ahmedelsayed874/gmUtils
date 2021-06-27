@@ -21,7 +21,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import gmutils.storage.SettingsStorage;
-import gmutils.utils.ImageUtils;
+import gmutils.images.ImageUtils;
 import gmutils.utils.Utils;
 
 import java.io.File;

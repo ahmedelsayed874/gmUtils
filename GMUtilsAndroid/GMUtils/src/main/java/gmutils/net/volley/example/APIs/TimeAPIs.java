@@ -1,17 +1,15 @@
 package gmutils.net.volley.example.APIs;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import gmutils.net.volley.example.URLs.TimeURLs;
 import gmutils.net.volley.ApiManager;
 import gmutils.net.volley.utils.OnDataFetchedListener;
 import gmutils.net.volley.utils.Result;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -35,15 +33,15 @@ public class TimeAPIs extends ApiManager {
         use one of those constructor
      */
 
-    public TimeAPIs(@NonNull Activity activity) {
+    public TimeAPIs(@NotNull Activity activity) {
         super(activity);
     }
 
-    public TimeAPIs(@NonNull Fragment fragment) {
+    public TimeAPIs(@NotNull Fragment fragment) {
         super(fragment);
     }
 
-    public TimeAPIs(@NonNull Context context) {
+    public TimeAPIs(@NotNull Context context) {
         super(context);
     }
 
@@ -81,7 +79,7 @@ public class TimeAPIs extends ApiManager {
         });
     }
 
-    public void CurrentTimeURL(@NonNull String zone, final OnDataFetchedListener<Result<String>> callback) {
+    public void CurrentTimeURL(@NotNull String zone, final OnDataFetchedListener<Result<String>> callback) {
         TimeURLs.CurrentTimeURL url = new TimeURLs.CurrentTimeURL(zone);
 
         doRequest(url, (request, response, responseStatus, statusCode) -> {

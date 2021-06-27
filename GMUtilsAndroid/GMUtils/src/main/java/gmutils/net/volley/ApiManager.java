@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 import androidx.fragment.app.Fragment;
 import gmutils.Logger;
@@ -44,6 +42,7 @@ import java.util.Map;
 public class ApiManager {
     private WeakReference<Activity> mActivity;
     private WeakReference<Fragment> mFragment;
+    private WeakReference<android.app.Fragment> mFragment2;
     private Context mAppContext; //to avoid memory leak
     private static final List<Request> mRequests = new ArrayList<>();
     private final Map<ApiURL.IURL, ApiRequestCreator.BaseRequest<?>> apiRequests = new ArrayMap<>();
@@ -57,7 +56,7 @@ public class ApiManager {
     @Deprecated
     public ApiManager() {}
 
-    public ApiManager(@NonNull Activity activity) {
+    public ApiManager(@NotNull Activity activity) {
         this.mActivity = new WeakReference<>(activity);
         try {
             this.mAppContext = activity.getApplicationContext();
@@ -65,7 +64,7 @@ public class ApiManager {
         }
     }
 
-    public ApiManager(@NonNull Fragment fragment) {
+    public ApiManager(@NotNull Fragment fragment) {
         this.mFragment = new WeakReference<>(fragment);
         try {
             this.mAppContext = fragment.getContext().getApplicationContext();
@@ -73,7 +72,15 @@ public class ApiManager {
         }
     }
 
-    public ApiManager(@NonNull Context context) {
+    public ApiManager(@NotNull android.app.Fragment fragment) {
+        this.mFragment2 = new WeakReference<>(fragment);
+        try {
+            this.mAppContext = fragment.getActivity().getApplicationContext();
+        } catch (Exception e) {
+        }
+    }
+
+    public ApiManager(@NotNull Context context) {
         this.mAppContext = context.getApplicationContext();
     }
 
@@ -84,6 +91,10 @@ public class ApiManager {
         } else if (mFragment != null) {
             Fragment fragment = mFragment.get();
             if (fragment != null) return fragment.getContext();
+
+        } else if (mFragment2 != null) {
+            android.app.Fragment fragment = mFragment2.get();
+            if (fragment != null) return fragment.getActivity();
         }
 
         return mAppContext;
@@ -97,6 +108,13 @@ public class ApiManager {
             }
         } else if (mFragment != null) {
             Fragment fragment = mFragment.get();
+            if (fragment != null) {
+                if (fragment.getActivity() != null && !fragment.getActivity().isDestroyed()) {
+                    return !fragment.isDetached();
+                }
+            }
+        } else if (mFragment2 != null) {
+            android.app.Fragment fragment = mFragment2.get();
             if (fragment != null) {
                 if (fragment.getActivity() != null && !fragment.getActivity().isDestroyed()) {
                     return !fragment.isDetached();
@@ -117,6 +135,10 @@ public class ApiManager {
 
         } else if (mFragment != null) {
             Fragment fragment = mFragment.get();
+            if (fragment != null) return fragment.toString();
+
+        } else if (mFragment2 != null) {
+            android.app.Fragment fragment = mFragment2.get();
             if (fragment != null) return fragment.toString();
 
         }

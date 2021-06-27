@@ -2,12 +2,9 @@
 //  TOTPGenerator.swift
 //  Ahmed El-Sayed
 //
-//  Created by Imac on 2/12/20.
-//  Copyright © 2020 OGTech. All rights reserved.
-//
 
 import UIKit
-import SwiftOTP
+/*import SwiftOTP
 
 //https://github.com/lachlanbell/SwiftOTP
 class TOTPGenerator: NSObject {
@@ -81,4 +78,4 @@ class TOTPGenerator: NSObject {
             default: return "SHA1"
         }
     }
-}
+}*/

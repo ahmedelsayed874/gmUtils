@@ -1,6 +1,6 @@
 //
 //  AccountResource.swift
-//  Ahmed El-Sayed
+//  Choueifat
 //
 //  Created by Imac on 8/27/19.
 //  Copyright © 2019 OGTech. All rights reserved.
@@ -8,11 +8,14 @@
 
 import UIKit
 
-typealias AccountResourceDelegate = (String/*Id*/, AccountResource, String/*KEY*/, Any?/*Data*/) -> Void
 
-class AccountResource: NSObject {
-    static let KEY_ACCOUNT = "ACCOUNT"
-    static let KEY_PASSWORD = "PASSWORD"
+/*class AccountResource<T : Codable> {
+
+    typealias AccountResourceDelegate = (String/*Id*/, AccountResource<T>, String/*KEY*/, Any?/*Data*/) -> Void
+    
+    let KEY_ACCOUNT = "ACCOUNT"
+    let KEY_USER_NAME = "USER_NAME"
+    let KEY_PASSWORD = "PASSWORD"
     
     private static var observer : [String : AccountResourceDelegate]? = [String : AccountResourceDelegate]()
     
@@ -43,7 +46,7 @@ class AccountResource: NSObject {
     }
     
     
-    func save(account : Account, password: String? = nil) {
+    func saveAccount(account : Account) -> AccountResource {
         let oldAccount = retriveAccount()
         
         AccountResource.accountObj = account
@@ -56,21 +59,27 @@ class AccountResource: NSObject {
             AccountResource.callObserver(accRes: self, key: AccountResource.KEY_ACCOUNT, data: account)
         }
         
-        if password != nil {
-            savePassword(password: password!)
-        }
-        
         FirebaseNotificationService.subscripeToTopics(oldTopics: oldAccount?.topics, newTopics: account.topics)
+        
+        return self
     }
     
-    func savePassword(password: String) {
+    func saveCredentials(userName: String, password: String) -> AccountResource {
+        let kc = KeychainService()
         
-        let successful = KeychainService()//(servicePath: ServicePath(serviceName: "ACC", accessGroup: "UPW"))
-            .save(key: AccountResource.KEY_PASSWORD, value: password)
-        if !successful { DB.set(password, forKey: AccountResource.KEY_PASSWORD) }
+        if !kc.save(key: AccountResource.KEY_USER_NAME, value: userName) {
+            DB.set(userName, forKey: AccountResource.KEY_USER_NAME)
+        }
         
-        AccountResource.callObserver(accRes: self, key: AccountResource.KEY_PASSWORD, data: password)
+        if !kc.save(key: AccountResource.KEY_PASSWORD, value: password) {
+            DB.set(password, forKey: AccountResource.KEY_PASSWORD)
+        }
+        
+        AccountResource.callObserver(accRes: self, key: "Credentials", data: [userName, password])
+        
+        return self
     }
+    
     
     func retriveAccount() -> Account? {
         if (AccountResource.accountObj != nil) {return AccountResource.accountObj}
@@ -84,6 +93,16 @@ class AccountResource: NSObject {
         AccountResource.accountObj = res
         
         return AccountResource.accountObj
+    }
+    
+    func retriveUserName() -> String {
+        
+        var userName = KeychainService()
+            .retrieve(key: AccountResource.KEY_USER_NAME)
+        
+        if userName == nil { userName = DB.string(forKey: AccountResource.KEY_USER_NAME) }
+        
+        return userName ?? ""
     }
     
     func retrivePassword() -> String {
@@ -101,8 +120,10 @@ class AccountResource: NSObject {
         
         AccountResource.accountObj = nil
         DB.set(nil, forKey: AccountResource.KEY_ACCOUNT)
+        DB.set(nil, forKey: AccountResource.KEY_USER_NAME)
         DB.set(nil, forKey: AccountResource.KEY_PASSWORD)
-        savePassword(password: "")
+        
+        let _ = saveCredentials(userName: "", password: "")
         
         if allowObserver {
             AccountResource.callObserver(accRes: self, key: "", data: nil)
@@ -233,4 +254,4 @@ class AccountResource: NSObject {
         
     }
     
-}
+}*/

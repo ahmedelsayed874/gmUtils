@@ -2,11 +2,10 @@ package gmutils.net.retrofit.example.callers.dummy;
 
 import android.graphics.Bitmap;
 
+import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.example.callers._interfaces.ImageAPIs;
-import gmutils.net.retrofit.OnResponseReady2;
 import gmutils.net.retrofit.example.data.ImageResponse;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
-import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -21,7 +20,7 @@ import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
  */
 public class FakeImageAPI implements ImageAPIs {
 
-    public void post(String text, Bitmap image, OnResponseReady2<Object, ImageResponse> callback) {
+    public void post(String text, Bitmap image, OnResponseReady2o<Object, ImageResponse> callback) {
         FakeData.run0((s) -> {
             ImageResponse r = new ImageResponse();
 

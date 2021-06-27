@@ -2,7 +2,6 @@ package com.blogspot.gm4s.gmutileexample.activities
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Message
 import android.util.Log
@@ -15,12 +14,13 @@ import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
+import gmutils.Activities
 import gmutils.DateOp
 import gmutils.LooperThread
 import gmutils.net.SimpleHTTPRequest
 import gmutils.net.volley.example.URLs.TimeURLs
-import gmutils.ui.MyToast2
 import gmutils.ui.activities.BaseActivity
+import gmutils.ui.toast.MyToast
 import gmutils.ui.utils.ViewSource
 import gmutils.utils.Utils
 import java.util.*
@@ -28,7 +28,7 @@ import java.util.*
 class MainActivity : BaseActivity() {
 
     override fun getViewSource(inflater: LayoutInflater) =
-        ViewSource.ViewBinding(ActivityReadLogFileBinding.inflate(inflater))
+        ViewSource.ViewBinding(ActivityMainBinding.inflate(inflater))
 
     private val view: ActivityMainBinding get() = activityViewBinding as ActivityMainBinding
 
@@ -50,7 +50,7 @@ class MainActivity : BaseActivity() {
 
         this.view.btn3.text = "show my toast2"
         this.view.btn3.setOnClickListener {
-            MyToast2.show(this, "test my toast", R.drawable.shape_solid_round_accent)
+            MyToast.show(this, "test my toast", R.drawable.shape_solid_round_accent)
         }
 
         this.view.btn4.text = "show original toast"
@@ -163,6 +163,14 @@ class MainActivity : BaseActivity() {
                 Log.e("***", Thread.currentThread().name)
             }.sendMessage(Message().also { it.arg1 = x++ })
         }
+
+        this.view.btn11.text = "ColorPickerActivity"
+        this.view.btn11.setOnClickListener {
+            Activities.start(ColorPickerActivity::class.java, thisActivity())
+        }
+
+        Activities.start(ColorPickerActivity::class.java, thisActivity())
+        //Activities.start(ColorPicker2Activity::class.java, thisActivity())
 
         //------------------------------------------------------------------------------------------
 

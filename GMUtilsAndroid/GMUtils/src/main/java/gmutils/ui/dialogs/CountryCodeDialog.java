@@ -3,17 +3,17 @@ package gmutils.ui.dialogs;
 import android.content.Context;
 
 import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewbinding.ViewBinding;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 import gmutils.CountryPhoneCodes;
@@ -75,7 +75,7 @@ public class CountryCodeDialog extends BaseDialog {
         }));
     }
 
-    @NonNull
+    @NotNull
     @Override
     protected View createView(LayoutInflater layoutInflater) {
         return layoutInflater.inflate(R.layout.dialog_country_code, null);
@@ -103,14 +103,14 @@ public class CountryCodeDialog extends BaseDialog {
     public static class CountryCodesAdapter extends BaseRecyclerAdapter<CountryPhoneCodes.CountryCode> {
         private final boolean mHideDialCode;
 
-        public CountryCodesAdapter(@NonNull RecyclerView recyclerView, boolean hideDialCode) {
+        public CountryCodesAdapter(@NotNull RecyclerView recyclerView, boolean hideDialCode) {
             super(recyclerView, new ArrayList<CountryPhoneCodes.CountryCode>());
             mHideDialCode = hideDialCode;
         }
 
-        @NonNull
+        @NotNull
         @Override
-        protected ViewHolder getViewHolder(int viewType, @NonNull LayoutInflater inflater, ViewGroup container) {
+        protected ViewHolder getViewHolder(int viewType, @NotNull LayoutInflater inflater, ViewGroup container) {
             return new CViewHolder(R.layout.adapter_country_codes, inflater, container);
         }
 
@@ -121,7 +121,7 @@ public class CountryCodeDialog extends BaseDialog {
         private class CViewHolder extends BaseRecyclerAdapter<CountryPhoneCodes.CountryCode>.ViewHolder {
             TextView txtCode, txtName;
 
-            public CViewHolder(int resId, @NonNull LayoutInflater inflater, ViewGroup container) {
+            public CViewHolder(int resId, @NotNull LayoutInflater inflater, ViewGroup container) {
                 super(resId, inflater, container);
 
                 txtCode = findViewById(R.id.text_code);

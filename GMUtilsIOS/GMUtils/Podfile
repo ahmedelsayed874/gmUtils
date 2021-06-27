@@ -9,11 +9,11 @@ target 'GMUtils' do
 pod 'Alamofire', '~> 5.2'
 pod 'SideMenu', '~> 6.0'
 pod 'Kingfisher', '~> 5.0'
+pod 'SwiftKeychainWrapper'
+pod 'Firebase/Messaging'
 # pod 'SwiftOTP'
-# pod 'SwiftKeychainWrapper'
 # pod 'LanguageManager-iOS'
 # pod 'Firebase/Analytics'
-# pod 'Firebase/Messaging'
 # pod 'Firebase/RemoteConfig'
 end
 

@@ -2,7 +2,7 @@ package gmutils.net.retrofit.callback;
 
 import androidx.annotation.NonNull;
 
-import gmutils.net.retrofit.OnResponseReady;
+import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 
 import java.util.Map;

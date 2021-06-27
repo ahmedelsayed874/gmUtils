@@ -91,6 +91,11 @@
     <string name="type_valid_first_name">Type valid first name</string>
     <string name="type_valid_last_name">Type valid last name.</string>
     <string name="done">Done</string>
+    <string name="Red">Red</string>
+    <string name="Green">Green</string>
+    <string name="Blue">Blue</string>
+    <string name="Alpha">Alpha</string>
+    <string name="Hex">Hex</string>
 
 
 </resources>

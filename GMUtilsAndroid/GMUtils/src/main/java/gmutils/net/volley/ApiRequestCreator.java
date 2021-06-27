@@ -6,9 +6,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
-
-import androidx.annotation.Nullable;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.DefaultRetryPolicy;
@@ -28,6 +25,7 @@ import com.android.volley.toolbox.Volley;
 import gmutils.Logger;
 import gmutils.storage.SettingsStorage;
 
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -59,7 +57,7 @@ public class ApiRequestCreator {
     private static ApiRequestCreator mInstance;
     private final RequestQueue mRequestQueue;
     private boolean disableCache = true; //use this boolean to enable or disable cache feature
-    private int timeout = 30000;
+    private int timeout = 60_000;
 
     @SuppressLint("ShowToast")
     public static synchronized ApiRequestCreator getInstance(Context context) {
@@ -71,6 +69,13 @@ public class ApiRequestCreator {
     }
 
     private ApiRequestCreator(Context context) {
+        try {
+            Class.forName("com.android.volley.toolbox.Volley");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("add this line to gradle script file:\n" +
+                    "implementation 'com.android.volley:volley:1.2.0'");
+        }
         // getApplicationContext() is key, it keeps you from leaking the
         // Activity or BroadcastReceiver if someone passes one in.
         Context applicationContext = context.getApplicationContext();

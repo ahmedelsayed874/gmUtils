@@ -187,4 +187,73 @@ public class TextHelper {
         }
     }
 
+    //----------------------------------------------------------------------------------------------
+
+    public String capitalizeVariableName(String text) {
+        StringBuilder newText = new StringBuilder();
+        String part = "";
+
+        for (char it : text.toCharArray()) {
+            if (part.isEmpty()) {
+                if (it >= 'a' && it <= 'z') {
+                    part += ("" + it).toUpperCase();
+
+                } else if (it == '_' || it == '.' || it == ' ') {
+                    part += "";
+
+                } else {
+                    part += it;
+                }
+            } else {
+                if (it >= '0' && it <= '9') {
+                    try {
+                        Integer.parseInt(part);
+                        part += it;
+                    } catch (Exception e) {
+                        if (part.isEmpty()) {
+                            part = "" + it;
+                        } else {
+                            newText.append(part).append(" ");
+                            part = "" + it;
+                        }
+                    }
+
+                } else {
+                    char it2 = it;
+
+                    try {
+                        Integer.parseInt(part);
+                        newText.append(part).append(" ");
+                        it2 = ("" + it2).toUpperCase().charAt(0);
+                        part = "";
+                    } catch (Exception e) {}
+
+                    if (it2 >= 'a' && it2 <= 'z') {
+                        part += it2;
+
+                    } else if (it2 == '_' || it2 == '.' || it2 == ' ') {
+                        if (part.length() > 0) newText.append(part).append(" ");
+                        part = "";
+
+                    } else if (it2 >= 'A' && it2 <= 'Z') {
+                        if (part.length() > 0) newText.append(part).append(" ");
+                        part = "" + it2;
+
+                    } else {
+                        part += it2;
+                    }
+                }
+            }
+        }
+
+        if (part.length() > 0) {
+            newText.append(part).append(" ");
+        }
+
+        if (newText.length() > 0) {
+            newText = new StringBuilder(newText.substring(0, newText.length() - 1));
+        }
+
+        return newText.toString();
+    }
 }

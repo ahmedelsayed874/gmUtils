@@ -16,8 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -28,7 +26,7 @@ import androidx.viewbinding.ViewBinding;
 
 import gmutils.Logger;
 import gmutils.KeypadOp;
-import gmutils.ui.MyToast;
+import gmutils.ui.toast.MyToast;
 import gmutils.R;
 import gmutils.ui.fragments.BaseFragment;
 import gmutils.ui.utils.ViewSource;
@@ -39,6 +37,7 @@ import gmutils.ui.dialogs.WaitDialog;
 import gmutils.storage.SettingsStorage;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +65,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     private ViewBinding activityViewBinding;
 
     @NotNull
-    protected abstract ViewSource getViewSource(@NonNull LayoutInflater inflater);
+    protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
     public ViewBinding getActivityViewBinding() {
         return activityViewBinding;
@@ -145,13 +144,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         if (viewSource instanceof ViewSource.LayoutResource) {
             setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
-        }
-        else if (viewSource instanceof ViewSource.ViewBinding) {
-            activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-            setContentView(activityViewBinding.getRoot());
 
         } else if (viewSource instanceof ViewSource.View) {
             setContentView(((ViewSource.View) viewSource).getView());
+
+        } else if (viewSource instanceof ViewSource.ViewBinding) {
+            activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+            setContentView(activityViewBinding.getRoot());
         }
 
         onPostCreate();

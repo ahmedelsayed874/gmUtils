@@ -13,14 +13,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
-import androidx.viewbinding.ViewBinding
 import com.blogspot.gm4s.gmutileexample.R
 import gmutils.Activities
 import gmutils.Logger
 import gmutils.geography.LocationTracker
 import gmutils.geography.MapController
 import gmutils.storage.AccountStorage
-import gmutils.ui.MyToast
+import gmutils.ui.toast.MyToast
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.MessageDialog
 import gmutils.ui.utils.ViewSource

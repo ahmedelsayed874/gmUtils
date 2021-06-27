@@ -50,8 +50,8 @@ public class SimpleHTTPRequest {
     public static final String MIME_TEXT_PLAIN = "text/plain";
 
     public static class Configurations {
-        private int connectionTimeOut = 15000;
-        private int readTimeOut = 15000;
+        private int connectionTimeOut = 30_000;
+        private int readTimeOut = 60_000;
         private String charEncoding = "UTF-8";
         public boolean allowCaching;
         private HostnameVerifier hostnameVerifier;
@@ -244,6 +244,7 @@ public class SimpleHTTPRequest {
         new SimpleHTTPRequest(new Request(url, Method.GET, null), configurations, callback);
     }
 
+
     public static void getFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
         new SimpleHTTPRequest(new Request(url, Method.GET, null), destFile, callback);
     }
@@ -251,6 +252,7 @@ public class SimpleHTTPRequest {
     public static void getFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
         new SimpleHTTPRequest(new Request(url, Method.GET, null), destFile, configurations, callback);
     }
+
 
     public static void post(String url, Map<String, Object> parameters, @NotNull ResultCallback2<Request, TextResponse> callback) {
         new SimpleHTTPRequest(new Request(url, Method.POST, null, parameters), callback);
@@ -260,6 +262,7 @@ public class SimpleHTTPRequest {
         new SimpleHTTPRequest(new Request(url, Method.POST, null, parameters), configurations, callback);
     }
 
+
     public static void post(String url, String body, @NotNull ResultCallback2<Request, TextResponse> callback) {
         new SimpleHTTPRequest(new Request(url, Method.POST, null, body), callback);
     }
@@ -267,6 +270,7 @@ public class SimpleHTTPRequest {
     public static void post(String url, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
         new SimpleHTTPRequest(new Request(url, Method.POST, null, body), configurations, callback);
     }
+
 
     public static void create(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
         new SimpleHTTPRequest(request, callback);
@@ -285,22 +289,24 @@ public class SimpleHTTPRequest {
     private ResultCallback2<Request, FileResponse> fileCallback;
 
     public SimpleHTTPRequest(Request request, ResultCallback2<Request, TextResponse> textCallback) {
-        this(request, null, new Configurations(), textCallback, null);
+        constructor(request, null, new Configurations(), textCallback, null);
     }
 
     public SimpleHTTPRequest(Request request, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback) {
-        this(request, null, configurations, textCallback, null);
+        constructor(request, null, configurations, textCallback, null);
     }
 
+
     public SimpleHTTPRequest(Request request, File destFile, ResultCallback2<Request, FileResponse> fileCallback) {
-        this(request, destFile, new Configurations(), null, fileCallback);
+        constructor(request, destFile, new Configurations(), null, fileCallback);
     }
 
     public SimpleHTTPRequest(Request request, File destFile, Configurations configurations, ResultCallback2<Request, FileResponse> fileCallback) {
-        this(request, destFile, configurations, null, fileCallback);
+        constructor(request, destFile, configurations, null, fileCallback);
     }
 
-    private SimpleHTTPRequest(Request request, File destFile, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback, ResultCallback2<Request, FileResponse> fileCallback) {
+
+    private void constructor(Request request, File destFile, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback, ResultCallback2<Request, FileResponse> fileCallback) {
         this.request = request;
         this.destFile = destFile;
 

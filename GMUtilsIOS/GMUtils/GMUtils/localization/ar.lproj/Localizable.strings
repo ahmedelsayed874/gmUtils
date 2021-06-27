@@ -1,0 +1,11 @@
+/* 
+  Strings.strings (ar)
+*/
+
+"Lang" = "ar";
+"Ok" = "حسنا";
+"Retry" = "إعادة";
+"Cancel" = "إلغاء";
+"Dissmiss" = "إغلاق";
+"PleaseWait" = "برجاء الإنتظار...";
+"all" = "الكل";

@@ -2,14 +2,12 @@ package gmutils.net.retrofit.example.callers.production;
 
 import android.graphics.Bitmap;
 
+import gmutils.net.retrofit.listeners.OnResponseReady2o;
+import gmutils.net.retrofit.callback.Callback2o;
 import gmutils.net.retrofit.example.apiServices.ImageRequest;
 import gmutils.net.retrofit.example.callers._interfaces.ImageAPIs;
 import gmutils.net.retrofit.example.data.ImageResponse;
-import gmutils.net.retrofit.APIConstants;
-import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
-import gmutils.utils.ImageUtils;
-import gmutils.net.retrofit.callback.Callback2;
-import gmutils.net.retrofit.OnResponseReady2;
+import gmutils.images.ImageUtils;
 import gmutils.net.retrofit.RetrofitService;
 
 import okhttp3.MediaType;
@@ -31,19 +29,21 @@ import retrofit2.Call;
 public class ImageAPI implements ImageAPIs {
     public static String URL = "BASE URL OF API";
 
-    public void post(String text, Bitmap image, OnResponseReady2<Object, ImageResponse> callback) {
+    public void post(String text, Bitmap image, OnResponseReady2o<Object, ImageResponse> callback) {
         ImageRequest request = RetrofitService.create(URL, ImageRequest.class);
+
         Call<ImageResponse> call = request.post(
-                APIConstants.TOKEN(),
                 RequestBody.create(MediaType.parse("text/plain"), text),
                 ImageUtils.createInstance().createRetrofitMultipartBodyForImage(image, "image")
         );
 
-        call.enqueue(new Callback2<>(
+        Callback2o<Object, ImageResponse> callback2 = new Callback2o<>(
                 call.request(),
                 ImageResponse.class,
                 callback
-        ));
+        );
+
+        call.enqueue(callback2);
     }
 
 }

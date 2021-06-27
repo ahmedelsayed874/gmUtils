@@ -29,9 +29,9 @@ class DateOp {
     
     static let ONE_DAY_MILLIS = 86_400_000; // (1d * 24h * 60m * 60s * 1000ms);
     static let ONE_HOUR_MILLIS = 3_600_000; // (0d * 01h * 60m * 60s * 1000ms);
-    static let ONE_MINUTE_MILLIS = 60_000; //  (0d * 00h * 01m * 60s * 1000ms);
-    static let TEN_SECOND_MILLIS = 10_000; //  (0d * 00h * 00m * 10s * 1000ms);
-    static let ONE_SECOND_MILLIS = 1_000; //   (0d * 00h * 00m * 01s * 1000ms);
+    static let ONE_MINUTE_MILLIS = 60_000;  // (0d * 00h * 01m * 60s * 1000ms);
+    static let TEN_SECOND_MILLIS = 10_000;  // (0d * 00h * 00m * 10s * 1000ms);
+    static let ONE_SECOND_MILLIS = 1_000;   // (0d * 00h * 00m * 01s * 1000ms);
     
     
     

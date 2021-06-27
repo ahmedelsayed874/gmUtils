@@ -1,17 +1,6 @@
 package gmutils.net.retrofit.responseHolders;
 
 import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.stream.IntStream;
-
 import gmutils.net.retrofit.RetrofitService;
 
 public final class StringResponse extends BaseResponse {
@@ -41,5 +30,17 @@ public final class StringResponse extends BaseResponse {
             return null != text ? Statuses.Succeeded : Statuses.Error;
 
         } else return callbackStatus;
+    }
+
+    @Override
+    public String toString() {
+        return "StringResponse{" +
+                "text='" + text + '\'' +
+                ", _code=" + _code +
+                ", _error='" + _error + '\'' +
+                ", _extras=" + _extras +
+                ", _requestTime=" + _requestTime +
+                ", _responseTime=" + _responseTime +
+                '}';
     }
 }

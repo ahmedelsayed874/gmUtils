@@ -1,8 +1,9 @@
 package gmutils.ui.dialogs;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+
+import org.jetbrains.annotations.Nullable;
 
 import gmutils.R;
 

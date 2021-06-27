@@ -12,10 +12,8 @@ import android.text.TextUtils;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
 
-import gmutils.utils.ImageUtils;
+import gmutils.images.ImageUtils;
 import gmutils.utils.UIUtils;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,12 +25,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -303,6 +298,7 @@ public class MapController {
     }
 
     public MapController(SupportMapFragment fragment, InitListener initListener) {
+        checkRequiredClasses();
         fragment.getMapAsync(new OnMapReadyCallbackImp(initListener));
         mAppContext = fragment.getContext().getApplicationContext();
 
@@ -314,11 +310,21 @@ public class MapController {
     }
 
     public MapController(Context context, @NonNull GoogleMap map, InitListener initListener) {
+        checkRequiredClasses();
         if (map == null) throw new NullPointerException("MapController.GoogleMap");
         mAppContext = context.getApplicationContext();
 
         new OnMapReadyCallbackImp(initListener).onMapReady(map);
+    }
 
+    private void checkRequiredClasses() {
+        try {
+            Class.forName("com.google.android.gms.maps.GoogleMap");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("add this line to gradle script file:\n" +
+                    "implementation 'com.google.android.gms:play-services-maps:17.0.0'");
+        }
     }
 
     private class OnMapReadyCallbackImp implements OnMapReadyCallback {
