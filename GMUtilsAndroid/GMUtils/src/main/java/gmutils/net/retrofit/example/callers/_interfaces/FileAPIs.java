@@ -1,13 +1,12 @@
 package gmutils.net.retrofit.example.callers._interfaces;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
-
-import gmutils.listeners.ResultCallback3;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+
+import gmutils.listeners.ResultCallback3;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

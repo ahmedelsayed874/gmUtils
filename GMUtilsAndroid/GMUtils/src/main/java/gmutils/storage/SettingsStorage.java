@@ -5,9 +5,9 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
-import gmutils.ContextWrapper;
+import java.util.Locale;
 
-import java.util.*;
+import gmutils.ContextWrapper;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

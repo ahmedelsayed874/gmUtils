@@ -3,24 +3,17 @@ package gmutils.ui.dialogs;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Typeface;
 import android.os.Build;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-import gmutils.R;
-import gmutils.databinding.DialogMessageGm4sBinding;
-import gmutils.listeners.ResultCallback2;
-import gmutils.storage.GeneralStorage;
-
 import org.json.JSONArray;
+
+import gmutils.R;
+import gmutils.listeners.ResultCallback2;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

@@ -3,9 +3,6 @@ package gmutils.net;
 import android.os.Handler;
 import android.os.Looper;
 
-import gmutils.listeners.ResultCallback;
-import gmutils.listeners.ResultCallback2;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -25,6 +22,9 @@ import java.util.Set;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
+
+import gmutils.listeners.ResultCallback;
+import gmutils.listeners.ResultCallback2;
 
 /*
  * Created by Ahmed El-Sayed (Glory Maker)

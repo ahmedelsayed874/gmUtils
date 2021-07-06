@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 import android.widget.Toast;
+
 import androidx.collection.ArrayMap;
 import androidx.fragment.app.Fragment;
-import gmutils.Logger;
-import gmutils.utils.Utils;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -17,6 +17,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import gmutils.Logger;
+import gmutils.utils.Utils;
 
 /*
  * Created by Ahmed El-Sayed (Glory Maker)

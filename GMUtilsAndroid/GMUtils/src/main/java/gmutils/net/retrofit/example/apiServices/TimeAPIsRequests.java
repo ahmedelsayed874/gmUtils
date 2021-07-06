@@ -2,7 +2,6 @@ package gmutils.net.retrofit.example.apiServices;
 
 import gmutils.net.retrofit.example.data.TimeOfArea;
 import gmutils.net.retrofit.example.data.TimeZones;
-
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;

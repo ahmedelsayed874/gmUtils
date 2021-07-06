@@ -12,14 +12,14 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
 
-import gmutils.R;
-import gmutils.ui.utils.ViewSource;
-import gmutils.ui.dialogs.RetryPromptDialog;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+
+import gmutils.R;
+import gmutils.ui.dialogs.RetryPromptDialog;
+import gmutils.ui.utils.ViewSource;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -33,7 +33,8 @@ import java.util.HashMap;
  * +201022663988
  */
 public abstract class BaseFragment extends Fragment {
-    private Listener listener = null;
+    private BaseFragmentListener listener = null;
+    private BaseFragmentListenerX listenerX = null;
     private HashMap<Integer, ViewModel> viewModels;
 
     public BaseFragment() {
@@ -43,8 +44,11 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onAttach(@NotNull Context context) {
         super.onAttach(context);
-        if (context instanceof Listener) {
-            listener = (Listener) context;
+        if (context instanceof BaseFragmentListener) {
+            listener = (BaseFragmentListener) context;
+        }
+        if (context instanceof BaseFragmentListenerX) {
+            listenerX = (BaseFragmentListenerX) context;
         }
     }
 
@@ -52,6 +56,7 @@ public abstract class BaseFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         listener = null;
+        listenerX = null;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -92,7 +97,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        listener.onFragmentStarted(this);
+        listenerX.onFragmentStarted(this);
     }
 
 //----------------------------------------------------------------------------------------------
@@ -149,50 +154,35 @@ public abstract class BaseFragment extends Fragment {
     //----------------------------------------------------------------------------------------------
 
     public void setKeyboardAutoHidden() {
-        listener.setKeyboardAutoHidden();
+        listener.setKeyboardAutoHidden(getActivity());
     }
 
     //----------------------------------------------------------------------------------------------
 
-    public Listener getListener() {
+    public BaseFragmentListener getListener() {
         return listener;
     }
 
+    public BaseFragmentListenerX getListenerX() {
+        return listenerX;
+    }
 
     //----------------------------------------------------------------------------------------------
-
-    private int waitViewShowCount = 0;
 
     public void showWaitView() {
         showWaitView(R.string.wait_moments);
     }
 
     public void showWaitView(int msg) {
-        if (waitViewShowCount == 0) onWaitViewWillShow(msg);
-        waitViewShowCount++;
+        listener.showWaitView(getContext(), msg);
     }
 
     public void hideWaitView() {
-        if (waitViewShowCount == 1) onWaitViewWillHide();
-        waitViewShowCount--;
-        if (waitViewShowCount < 0) waitViewShowCount = 0;
+        listener.hideWaitView();
     }
 
     public void hideWaitViewImmediately() {
         listener.hideWaitViewImmediately();
-        waitViewShowCount = 0;
-    }
-
-    public void onWaitViewWillShow() {
-        onWaitViewWillShow(R.string.wait_moments);
-    }
-
-    public void onWaitViewWillShow(int msg) {
-        listener.showWaitView(msg);
-    }
-
-    public void onWaitViewWillHide() {
-        listener.hideWaitView();
     }
 
     public void updateWaitViewMsg(int msg) {
@@ -210,7 +200,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
-        return listener.showRetryPromptDialog(msg, onRetry, onCancel);
+        return listener.showRetryPromptDialog(getActivity(), msg, onRetry, onCancel);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -220,11 +210,11 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable Integer fragmentContainerId) {
-        listener.showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
+        listenerX.showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
     }
 
     protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable String stackName, @Nullable Integer fragmentContainerId) {
-        listener.showFragment(fragment, addToBackStack, stackName, fragmentContainerId);
+        listenerX.showFragment(fragment, addToBackStack, stackName, fragmentContainerId);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -242,27 +232,4 @@ public abstract class BaseFragment extends Fragment {
         if (viewModels != null) viewModels.clear();
     }
 
-    //----------------------------------------------------------------------------------------------
-
-    public interface Listener {
-        void setKeyboardAutoHidden();
-
-        void showWaitView(int msg); //R.string.wait_moments
-
-        void hideWaitView();
-
-        void hideWaitViewImmediately();
-
-        void updateWaitViewMsg(CharSequence msg);
-
-        RetryPromptDialog showRetryPromptDialog(
-                CharSequence msg,
-                RetryPromptDialog.Listener onRetry,
-                RetryPromptDialog.Listener onCancel
-        );
-
-        void showFragment(Fragment fragment, boolean addToBackStack, @Nullable String stackName, @Nullable Integer fragmentContainerId);
-
-        void onFragmentStarted(BaseFragment fragment);
-    }
 }

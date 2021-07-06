@@ -11,31 +11,18 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Base64;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ProgressBar;
-import android.widget.RatingBar;
 
-import androidx.annotation.FloatRange;
-import androidx.annotation.IntRange;
 import androidx.annotation.RequiresPermission;
-
-import gmutils.DateOp;
-import gmutils.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -245,7 +232,10 @@ public class Utils {
         return attributes.screenBrightness;
     }
 
-    public void setScreenBrightness(Activity activity, @FloatRange(from = -1, to = 1) float value) {
+    /**
+     * @param value from = -1, to = 1
+     */
+    public void setScreenBrightness(Activity activity, /*@FloatRange(from = -1, to = 1)*/ float value) {
         Window window = activity.getWindow();
         WindowManager.LayoutParams attributes = window.getAttributes();
         attributes.screenBrightness = value;
@@ -262,9 +252,10 @@ public class Utils {
      * <uses-permission
      *       android:name="android.permission.WRITE_SETTINGS"
      *       tools:ignore="ProtectedPermissions" />
+     * @param value from = 0, to = 100
      */
     @RequiresPermission("android.permission.WRITE_SETTINGS")
-    public void setDeviceBrightness(Context context, @IntRange(from = 0, to = 100) int value) {
+    public void setDeviceBrightness(Context context, /*@IntRange(from = 0, to = 100)*/ int value) {
         Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, value);
     }
 

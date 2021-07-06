@@ -7,14 +7,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import gmutils.listeners.ResultCallback;
-import gmutils.storage.SettingsStorage;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
+
+import gmutils.listeners.ResultCallback;
+import gmutils.storage.SettingsStorage;
 
 
 /**

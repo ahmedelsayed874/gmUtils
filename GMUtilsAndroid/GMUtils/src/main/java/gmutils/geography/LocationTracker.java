@@ -18,10 +18,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 import androidx.fragment.app.Fragment;
 
+import java.util.List;
+
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.utils.UIUtils;
-
-import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;

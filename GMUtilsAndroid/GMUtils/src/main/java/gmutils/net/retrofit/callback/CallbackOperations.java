@@ -2,15 +2,12 @@ package gmutils.net.retrofit.callback;
 
 import android.text.TextUtils;
 
-import androidx.room.Ignore;
-
-import gmutils.Logger;
-import gmutils.net.retrofit.responseHolders.BaseResponse;
-import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
-
 import java.util.Map;
 import java.util.Set;
 
+import gmutils.Logger;
+import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
+import gmutils.net.retrofit.responseHolders.BaseResponse;
 import okhttp3.Request;
 import retrofit2.Call;
 

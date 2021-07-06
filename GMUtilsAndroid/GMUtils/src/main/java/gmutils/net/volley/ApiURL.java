@@ -8,10 +8,12 @@ import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 
 import com.android.volley.Request;
-import gmutils.TextHelper;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+
+import gmutils.TextHelper;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

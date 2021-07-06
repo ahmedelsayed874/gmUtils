@@ -2,9 +2,10 @@ package gmutils.net.retrofit.example.data;
 
 import android.text.TextUtils;
 
-import gmutils.net.retrofit.responseHolders.BaseResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import gmutils.net.retrofit.responseHolders.BaseResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

@@ -8,17 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
-import gmutils.database.sqlitecommands.CreateTable;
-import gmutils.database.sqlitecommands.DropTable;
-import gmutils.database.sqlitecommands.WhereClause;
-import gmutils.app.BaseApplication;
-import gmutils.database.annotations.AutoIncrement;
-import gmutils.database.annotations.Default;
-import gmutils.database.annotations.Entity;
-import gmutils.database.annotations.Ignore;
-import gmutils.database.annotations.Not_Null;
-import gmutils.database.annotations.PrimaryKey;
-import gmutils.database.annotations.Unique;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +27,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import gmutils.app.BaseApplication;
+import gmutils.database.annotations.AutoIncrement;
+import gmutils.database.annotations.Default;
+import gmutils.database.annotations.Entity;
+import gmutils.database.annotations.Ignore;
+import gmutils.database.annotations.Not_Null;
+import gmutils.database.annotations.PrimaryKey;
+import gmutils.database.annotations.Unique;
+import gmutils.database.sqlitecommands.CreateTable;
+import gmutils.database.sqlitecommands.DropTable;
+import gmutils.database.sqlitecommands.WhereClause;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

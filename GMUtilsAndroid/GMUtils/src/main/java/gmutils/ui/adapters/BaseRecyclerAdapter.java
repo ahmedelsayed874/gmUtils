@@ -1,7 +1,6 @@
 package gmutils.ui.adapters;
 
 import android.os.Build;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,18 +14,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
-import gmutils.listeners.ActionCallback;
-import gmutils.listeners.RecyclerViewPaginationListener;
-import gmutils.listeners.SimpleWindowAttachListener;
-import gmutils.ui.utils.DumbViewBinding;
-import gmutils.ui.utils.ViewSource;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import gmutils.listeners.ActionCallback;
+import gmutils.listeners.RecyclerViewPaginationListener;
+import gmutils.listeners.SimpleWindowAttachListener;
+import gmutils.ui.utils.DumbViewBinding;
 
 
 /**

@@ -20,10 +20,8 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import java.io.IOException;
@@ -36,7 +34,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.concurrent.Executor;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -44,13 +41,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-
-/*
-    https://blog.mindorks.com/authentication-using-fingerprint-in-android-tutorial
-    https://developer.android.com/training/sign-in/biometric-auth#java
-*/
-
-import androidx.annotation.RequiresApi;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

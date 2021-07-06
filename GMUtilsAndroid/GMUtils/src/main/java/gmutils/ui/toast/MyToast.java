@@ -1,20 +1,13 @@
 package gmutils.ui.toast;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-import gmutils.R;
-import gmutils.listeners.SimpleWindowAttachListener;
 
 import org.jetbrains.annotations.Nullable;
+
+import gmutils.R;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

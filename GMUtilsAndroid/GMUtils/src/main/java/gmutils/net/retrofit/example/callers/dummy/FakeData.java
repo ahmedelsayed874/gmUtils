@@ -3,14 +3,14 @@ package gmutils.net.retrofit.example.callers.dummy;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.Random;
+
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.net.retrofit.example.data.TimeOfArea;
 import gmutils.net.retrofit.example.data.TimeZones;
-import gmutils.net.retrofit.responseHolders.BaseResponse;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
-
-import java.util.Random;
+import gmutils.net.retrofit.responseHolders.BaseResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

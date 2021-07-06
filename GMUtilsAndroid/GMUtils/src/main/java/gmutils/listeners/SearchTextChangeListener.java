@@ -3,8 +3,10 @@ package gmutils.listeners;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import gmutils.Logger;
+
 import java.lang.ref.WeakReference;
+
+import gmutils.Logger;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

@@ -13,8 +13,6 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 
-import gmutils.images.ImageUtils;
-import gmutils.utils.UIUtils;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import gmutils.images.ImageUtils;
+import gmutils.utils.UIUtils;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

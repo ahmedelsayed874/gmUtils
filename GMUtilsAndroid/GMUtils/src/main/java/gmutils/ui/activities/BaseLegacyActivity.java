@@ -1,44 +1,32 @@
 package gmutils.ui.activities;
 
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import androidx.annotation.RequiresApi;
 import androidx.viewbinding.ViewBinding;
 
-import gmutils.KeypadOp;
-import gmutils.Logger;
-import gmutils.ui.toast.MyToast;
-import gmutils.R;
-import gmutils.ui.dialogs.MessageDialog;
-import gmutils.ui.dialogs.RetryPromptDialog;
-import gmutils.ui.dialogs.WaitDialog;
-import gmutils.storage.SettingsStorage;
-import gmutils.ui.fragments.BaseLegacyFragment;
-import gmutils.ui.utils.ViewSource;
-import gmutils.utils.Utils;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import gmutils.Logger;
+import gmutils.R;
+import gmutils.ui.dialogs.RetryPromptDialog;
+import gmutils.ui.fragments.BaseLegacyFragment;
+import gmutils.ui.utils.ViewSource;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -54,8 +42,13 @@ import java.util.List;
 @SuppressLint("Registered")
 public abstract class BaseLegacyActivity extends Activity implements BaseLegacyFragment.Listener {
 
-    private WaitDialog waitDialog = null;
-    private int waitDialogCount = 0;
+    private ActivityFunctions mActivityFunctions;
+
+    //----------------------------------------------------------------------------------------------
+
+    public final ActivityFunctions getActivityFunctions() {
+        return mActivityFunctions;
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -64,12 +57,11 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
-    public ViewBinding getActivityViewBinding() {
+    public final ViewBinding getActivityViewBinding() {
         return activityViewBinding;
     }
 
     //----------------------------------------------------------------------------------------------
-
 
     public CharSequence getActivityTitle() {
         return "";
@@ -91,29 +83,40 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     //----------------------------------------------------------------------------------------------
 
     protected void onPreCreate() {
-        if (allowApplyingPreferenceLocale()) {
-            SettingsStorage.getInstance().languagePref().applySavedLanguage(thisActivity());
-        }
-
-        if (isOrientationDisabled())
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        try {
-            getWindow().setSoftInputMode(initialKeyboardState());
-        } catch (Exception e) {
-        }
-
+        mActivityFunctions.onPreCreate(thisActivity());
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        mActivityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
+            @Override
+            public CharSequence getActivityTitle() {
+                return BaseLegacyActivity.this.getActivityTitle();
+            }
+
+            @Override
+            public boolean allowApplyingPreferenceLocale() {
+                return BaseLegacyActivity.this.allowApplyingPreferenceLocale();
+            }
+
+            @Override
+            public boolean isOrientationDisabled() {
+                return BaseLegacyActivity.this.isOrientationDisabled();
+            }
+
+            @Override
+            public int initialKeyboardState() {
+                return BaseLegacyActivity.this.initialKeyboardState();
+            }
+        });
 
         onPreCreate();
 
         super.onCreate(savedInstanceState);
 
+        mActivityFunctions.onCreate(thisActivity(), savedInstanceState);
+
         ViewSource viewSource = getViewSource(getLayoutInflater());
-        assert viewSource != null;
 
         if (viewSource instanceof ViewSource.LayoutResource) {
             setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
@@ -131,33 +134,26 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     }
 
     protected void onPostCreate() {
-
+        mActivityFunctions.onPostCreate(thisActivity());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
-        if (!TextUtils.isEmpty(getActivityTitle())) setTitle(getActivityTitle());
+        mActivityFunctions.onStart(thisActivity());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        SettingsStorage.getInstance().languagePref().applySavedLanguage(thisActivity());
+        mActivityFunctions.onConfigurationChanged(thisActivity(), newConfig);
     }
 
     public void attachBaseContext(Context newBase) {
-        if (allowApplyingPreferenceLocale()) {
-            super.attachBaseContext(
-                    SettingsStorage.getInstance().languagePref().createNewContext(newBase)
-            );
-        } else {
-            super.attachBaseContext(newBase);
-        }
+        super.attachBaseContext(mActivityFunctions.getAttachBaseContext(newBase));
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public Activity thisActivity() {
         return this;
@@ -165,103 +161,62 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @SuppressLint("ClickableViewAccessibility")
     public void setKeyboardAutoHidden() {
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-
-        View topView = new View(thisActivity());
-        topView.setLayoutParams(layoutParams);
-        topView.setOnTouchListener((v, e) -> {
-            if (keyboardShouldAutoHide(e.getRawX(), e.getRawY())) {
-                KeypadOp.hide(thisActivity());
-                View currentFocus = getCurrentFocus();
-                if (currentFocus != null) currentFocus.clearFocus();
-                keyboardDidHide();
-            }
-            return false;
-        });
-
-        ViewGroup contentView = findViewById(android.R.id.content);
-        contentView.addView(topView);
+        mActivityFunctions.setKeyboardAutoHidden(thisActivity());
     }
 
     public boolean keyboardShouldAutoHide(float rawX, float rawY) {
-        return true;
+        return mActivityFunctions.keyboardShouldAutoHide(rawX, rawY);
     }
 
     public void keyboardDidHide() {
+        mActivityFunctions.keyboardDidHide();
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public void showWaitView() {
         showWaitView(0);
     }
 
-    @Override
     public void showWaitView(int msg) {
-        if (waitDialogCount == 0) onPreparingWaitView(msg == 0 ? R.string.wait_moments : msg);
-
-        waitDialogCount++;
+        mActivityFunctions.showWaitView(thisActivity(), msg);
     }
 
-    @Override
     public void hideWaitView() {
-        if (waitDialogCount == 1) {
-            onHidingWaitView();
-            waitDialog = null;
-        }
-
-        waitDialogCount--;
-        if (waitDialogCount < 0) waitDialogCount = 0;
+        mActivityFunctions.hideWaitView();
     }
 
-    @Override
     public void hideWaitViewImmediately() {
-        onHidingWaitView();
-        waitDialog = null;
-        waitDialogCount = 0;
+        mActivityFunctions.hideWaitViewImmediately();
     }
 
-    @Override
     public void updateWaitViewMsg(CharSequence msg) {
-        if (waitDialog != null) waitDialog.textView().setText(msg);
+        mActivityFunctions.updateWaitViewMsg(msg);
     }
 
-    public void onPreparingWaitView(int msg) {
-        if (msg == 0) msg = R.string.wait_moments;
-        waitDialog = WaitDialog.show(thisActivity(), msg);
+    public boolean isWaitViewShown() {
+        return mActivityFunctions.isWaitViewShown();
     }
 
-    public void onHidingWaitView() {
-        if (waitDialog != null) waitDialog.dismiss();
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry) {
-        return RetryPromptDialog.show(thisActivity(), msg, onRetry, null);
+        return mActivityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, null);
     }
 
-    @Override
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
-        return RetryPromptDialog.show(thisActivity(), msg, onRetry, onCancel);
+        return mActivityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
     }
 
-    //------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
 
     public void showFragment(Fragment fragment, boolean addToBackStack) {
         showFragment(fragment, addToBackStack, null, R.id.layout_fragment_container);
     }
 
-    public void showFragment(Fragment fragment, String stackName) {
-        showFragment(fragment, true, stackName, R.id.layout_fragment_container);
-    }
-
     @Override
-    public void showFragment(BaseLegacyFragment fragment, String stackName) {
+    public void showFragment(Fragment fragment, String stackName) {
         showFragment(fragment, true, stackName, R.id.layout_fragment_container);
     }
 
@@ -327,53 +282,27 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
             return null;
     }
 
+    //----------------------------------------------------------------------------------------------
 
-    //------------------------------------------------------------------------------------------------------------------
 
-    private int showBugsMenuItemId = 0;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mActivityFunctions.onDestroy();
+    }
+
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
-            if (showBugsMenuItemId == 0) {
-                showBugsMenuItemId = "Show Bug Log".hashCode();
-                if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
-            }
-            menu.add(0, showBugsMenuItemId, 10, "Show Bug Log");
-        }
-
+        mActivityFunctions.onCreateOptionsMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            try {
-                thisActivity().onBackPressed();
-            } catch (Exception e) {
-            }
-        }
-
-        if (item.getItemId() == showBugsMenuItemId) {
-            String txt = Logger.readAllFilesContents(thisActivity());
-
-            MessageDialog.create(thisActivity())
-                    .setMessage(txt)
-                    .setMessageGravity(Gravity.START)
-                    .setButton1(R.string.copy, (d) -> {
-                        if (Utils.createInstance().copyText(thisActivity(), txt)) {
-                            MyToast.showError(thisActivity(), "copied");
-                        } else {
-                            MyToast.showError(thisActivity(), "failed");
-                        }
-                    })
-                    .setButton2(R.string.delete, (d) -> {
-                        Logger.deleteSavedFiles(thisActivity());
-                    })
-                    .show();
-
-        }
-
+        if (mActivityFunctions.onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
     }
 }

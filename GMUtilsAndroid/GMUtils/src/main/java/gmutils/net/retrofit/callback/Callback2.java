@@ -2,11 +2,10 @@ package gmutils.net.retrofit.callback;
 
 import androidx.annotation.NonNull;
 
-import gmutils.net.retrofit.listeners.OnResponseReady2;
-import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
-
 import java.util.Map;
 
+import gmutils.net.retrofit.listeners.OnResponseReady2;
+import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import okhttp3.Request;
 import retrofit2.Call;
 

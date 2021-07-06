@@ -2,12 +2,10 @@ package gmutils.ui.dialogs;
 
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -19,7 +17,6 @@ import org.json.JSONArray;
 
 import gmutils.R;
 import gmutils.listeners.ResultCallback;
-import gmutils.listeners.ResultCallback2;
 import gmutils.storage.GeneralStorage;
 
 /**

@@ -4,22 +4,21 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
-import gmutils.Logger;
-import gmutils.listeners.ResultCallback2;
-import gmutils.listeners.ResultCallback3;
-import gmutils.net.retrofit.example.apiServices.FileDownloadRequest;
-import gmutils.net.retrofit.RetrofitService;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+
+import gmutils.Logger;
+import gmutils.listeners.ResultCallback2;
+import gmutils.listeners.ResultCallback3;
+import gmutils.net.retrofit.RetrofitService;
+import gmutils.net.retrofit.example.apiServices.FileDownloadRequest;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class FileAPIs implements gmutils.net.retrofit.example.callers._interfaces.FileAPIs {

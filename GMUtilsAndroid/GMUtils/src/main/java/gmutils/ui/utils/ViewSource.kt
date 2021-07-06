@@ -1,6 +1,5 @@
 package gmutils.ui.utils
 
-import android.view.View
 import androidx.annotation.LayoutRes
 
 sealed class ViewSource {

@@ -18,14 +18,14 @@ import androidx.viewpager.widget.ViewPager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import gmutils.Logger;
-import gmutils.Intents;
-import gmutils.listeners.SimpleWindowAttachListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import gmutils.Intents;
+import gmutils.Logger;
+import gmutils.listeners.SimpleWindowAttachListener;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

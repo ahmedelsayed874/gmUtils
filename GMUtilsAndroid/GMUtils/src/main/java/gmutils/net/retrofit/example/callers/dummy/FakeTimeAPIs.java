@@ -1,12 +1,12 @@
 package gmutils.net.retrofit.example.callers.dummy;
 
-import gmutils.net.retrofit.example.data.TimeOfArea;
-import gmutils.net.retrofit.example.data.TimeZones;
-import gmutils.net.retrofit.example.callers._interfaces.TimeAPIs;
-import gmutils.net.retrofit.listeners.OnResponseReady;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import gmutils.net.retrofit.example.callers._interfaces.TimeAPIs;
+import gmutils.net.retrofit.example.data.TimeOfArea;
+import gmutils.net.retrofit.example.data.TimeZones;
+import gmutils.net.retrofit.listeners.OnResponseReady;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

@@ -3,12 +3,12 @@ package gmutils.net.retrofit.example.data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import gmutils.net.retrofit.responseHolders.BaseResponse;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import gmutils.net.retrofit.responseHolders.BaseResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

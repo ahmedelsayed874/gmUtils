@@ -1,26 +1,21 @@
 package gmutils
 
-import android.content.Context;
-import android.graphics.Bitmap;
-
-import androidx.annotation.DimenRes;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitArray;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
-
-import dev.samstevens.totp.code.CodeGenerator;
-import dev.samstevens.totp.code.DefaultCodeGenerator;
-import dev.samstevens.totp.code.DefaultCodeVerifier;
-import dev.samstevens.totp.code.HashingAlgorithm;
-import dev.samstevens.totp.exceptions.TimeProviderException;
-import dev.samstevens.totp.qr.QrData;
-import dev.samstevens.totp.secret.DefaultSecretGenerator;
-import dev.samstevens.totp.secret.SecretGenerator;
-import dev.samstevens.totp.time.TimeProvider;
-import kotlin.jvm.Throws;
-
+import android.content.Context
+import android.graphics.Bitmap
+import androidx.annotation.DimenRes
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.common.BitArray
+import com.journeyapps.barcodescanner.BarcodeEncoder
+import dev.samstevens.totp.code.CodeGenerator
+import dev.samstevens.totp.code.DefaultCodeGenerator
+import dev.samstevens.totp.code.DefaultCodeVerifier
+import dev.samstevens.totp.code.HashingAlgorithm
+import dev.samstevens.totp.exceptions.TimeProviderException
+import dev.samstevens.totp.qr.QrData
+import dev.samstevens.totp.secret.DefaultSecretGenerator
+import dev.samstevens.totp.secret.SecretGenerator
+import dev.samstevens.totp.time.TimeProvider
 import java.lang.Math.floor
 
 /**

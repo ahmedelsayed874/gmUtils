@@ -3,10 +3,6 @@ package gmutils.net.volley.example.APIs;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import gmutils.net.volley.example.URLs.TimeURLs;
-import gmutils.net.volley.ApiManager;
-import gmutils.net.volley.utils.OnDataFetchedListener;
-import gmutils.net.volley.utils.Result;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +11,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import gmutils.net.volley.ApiManager;
+import gmutils.net.volley.example.URLs.TimeURLs;
+import gmutils.net.volley.utils.OnDataFetchedListener;
+import gmutils.net.volley.utils.Result;
 
 /*
  * Created by Ahmed El-Sayed (Glory Maker)

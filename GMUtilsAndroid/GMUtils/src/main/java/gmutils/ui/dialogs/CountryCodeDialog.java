@@ -1,16 +1,15 @@
 package gmutils.ui.dialogs;
 
 import android.content.Context;
-
-import androidx.annotation.DrawableRes;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.annotation.DrawableRes;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -18,10 +17,9 @@ import java.util.ArrayList;
 
 import gmutils.CountryPhoneCodes;
 import gmutils.R;
-import gmutils.ui.adapters.BaseRecyclerAdapter;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.SearchTextChangeListener;
-import gmutils.ui.utils.ViewSource;
+import gmutils.ui.adapters.BaseRecyclerAdapter;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

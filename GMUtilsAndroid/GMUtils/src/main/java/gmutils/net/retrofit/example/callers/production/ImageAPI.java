@@ -2,14 +2,13 @@ package gmutils.net.retrofit.example.callers.production;
 
 import android.graphics.Bitmap;
 
-import gmutils.net.retrofit.listeners.OnResponseReady2o;
+import gmutils.images.ImageUtils;
+import gmutils.net.retrofit.RetrofitService;
 import gmutils.net.retrofit.callback.Callback2o;
 import gmutils.net.retrofit.example.apiServices.ImageRequest;
 import gmutils.net.retrofit.example.callers._interfaces.ImageAPIs;
 import gmutils.net.retrofit.example.data.ImageResponse;
-import gmutils.images.ImageUtils;
-import gmutils.net.retrofit.RetrofitService;
-
+import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;

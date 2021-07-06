@@ -13,9 +13,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.DrawableRes;
 
-import gmutils.Logger;
-import gmutils.app.BaseApplication;
-
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Protocol;
@@ -36,6 +33,9 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import gmutils.Logger;
+import gmutils.app.BaseApplication;
 
 
 /**

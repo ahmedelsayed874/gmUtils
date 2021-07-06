@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.DefaultRetryPolicy;
@@ -22,8 +23,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import gmutils.Logger;
-import gmutils.storage.SettingsStorage;
 
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -36,6 +35,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.net.ssl.SSLSocketFactory;
+
+import gmutils.Logger;
+import gmutils.storage.SettingsStorage;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

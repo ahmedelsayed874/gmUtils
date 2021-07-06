@@ -2,12 +2,14 @@ package gmutils.firebase;
 
 import android.net.Uri;
 import android.util.Pair;
-import gmutils.listeners.ResultCallback;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+
+import gmutils.listeners.ResultCallback;
 
 /**
  * https://firebase.google.com/docs/auth/android/

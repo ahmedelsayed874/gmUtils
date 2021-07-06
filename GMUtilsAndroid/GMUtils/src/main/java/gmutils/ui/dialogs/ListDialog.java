@@ -1,10 +1,6 @@
 package gmutils.ui.dialogs;
 
 import android.content.Context;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,13 +10,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import gmutils.Animations;
 import gmutils.KeypadOp;
 import gmutils.R;
 import gmutils.listeners.SearchTextChangeListener;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**

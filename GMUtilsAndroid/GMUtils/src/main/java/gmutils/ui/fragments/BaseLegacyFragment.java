@@ -10,12 +10,12 @@ import android.view.ViewGroup;
 
 import androidx.viewbinding.ViewBinding;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import gmutils.R;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.utils.ViewSource;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -195,7 +195,7 @@ public abstract class BaseLegacyFragment extends Fragment {
                 RetryPromptDialog.Listener onCancel
         );
 
-        void showFragment(BaseLegacyFragment fragment, String stackName);
+        void showFragment(Fragment fragment, String stackName);
 
         void showFragment(BaseLegacyFragment fragment, String stackName, int fragmentContainerId);
     }

@@ -10,11 +10,12 @@ import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.viewbinding.ViewBinding;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
 import gmutils.ui.utils.DumbViewBinding;
 import gmutils.utils.UIUtils;
-
-import org.jetbrains.annotations.NotNull;
-import java.util.List;
 
 
 /**

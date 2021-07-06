@@ -7,17 +7,17 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import gmutils.Logger;
-import gmutils.MessagingCenter;
-import gmutils.R;
-import gmutils.ui.dialogs.MessageDialog;
-import gmutils.storage.StorageManager;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import gmutils.Logger;
+import gmutils.MessagingCenter;
+import gmutils.R;
+import gmutils.storage.StorageManager;
+import gmutils.ui.dialogs.MessageDialog;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

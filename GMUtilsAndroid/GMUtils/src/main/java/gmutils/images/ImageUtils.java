@@ -28,9 +28,6 @@ import android.widget.ImageView;
 
 import org.jetbrains.annotations.Nullable;
 
-import gmutils.R;
-import gmutils.listeners.ActionCallback;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -44,6 +41,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import gmutils.R;
+import gmutils.listeners.ActionCallback;
 import gmutils.utils.FileUtils;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;

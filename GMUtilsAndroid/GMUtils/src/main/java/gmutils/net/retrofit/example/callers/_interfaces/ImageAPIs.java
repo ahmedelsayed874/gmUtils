@@ -2,8 +2,8 @@ package gmutils.net.retrofit.example.callers._interfaces;
 
 import android.graphics.Bitmap;
 
-import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.example.data.ImageResponse;
+import gmutils.net.retrofit.listeners.OnResponseReady2o;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

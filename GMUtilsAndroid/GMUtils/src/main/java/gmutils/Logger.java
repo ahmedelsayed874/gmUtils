@@ -4,8 +4,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import gmutils.app.BaseApplication;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -18,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import gmutils.app.BaseApplication;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

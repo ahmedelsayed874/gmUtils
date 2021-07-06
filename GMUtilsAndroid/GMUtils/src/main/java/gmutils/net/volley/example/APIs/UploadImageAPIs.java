@@ -7,8 +7,8 @@ import android.graphics.Bitmap;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import gmutils.net.volley.example.URLs.UploadImageURL;
 import gmutils.net.volley.ApiManager;
+import gmutils.net.volley.example.URLs.UploadImageURL;
 import gmutils.net.volley.utils.OnDataFetchedListener;
 import gmutils.net.volley.utils.Result;
 
