@@ -13,6 +13,6 @@ import gmutils.net.retrofit.responseHolders.BaseResponse;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public interface OnResponseReady<R extends BaseResponse> {
-    void invoke(R response);
+public interface OnResponseReady<BR extends BaseResponse> {
+    void invoke(BR response);
 }

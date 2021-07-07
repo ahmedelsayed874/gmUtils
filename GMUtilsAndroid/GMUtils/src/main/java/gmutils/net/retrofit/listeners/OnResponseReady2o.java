@@ -1,5 +1,6 @@
 package gmutils.net.retrofit.listeners;
 
+import gmutils.R;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 
 /**
@@ -13,6 +14,6 @@ import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public interface OnResponseReady2o<T, R extends BaseObjectResponse<T>> {
-    void invoke(R response);
+public interface OnResponseReady2o<DataType, BRSubclass extends BaseObjectResponse<DataType>> {
+    void invoke(BRSubclass response);
 }
