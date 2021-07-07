@@ -292,12 +292,22 @@ public class ImageLoader {
             currentRequests.remove(loaderCallback2.imgUrl);
 
             if (successfully && pendingCallbacks != null) {
-                Drawable imageViewDrawable = loaderCallback2.imageView.getDrawable();
-                Logger.print(ImageLoader.class.getSimpleName(), "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
+                Drawable imageViewDrawable = null;
 
-                for (LoaderCallback pendingCallback : pendingCallbacks) {
-                    pendingCallback.loaderCallback2.imageView.setImageDrawable(imageViewDrawable);
-                    pendingCallback.onSuccess();
+                if (loaderCallback2.imageView != null) {
+                    imageViewDrawable = loaderCallback2.imageView.getDrawable();
+                    Logger.print(ImageLoader.class.getSimpleName(), "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
+                }
+
+                if (imageViewDrawable != null) {
+                    for (LoaderCallback pendingCallback : pendingCallbacks) {
+                        if (pendingCallback != null) {
+                            if (pendingCallback.loaderCallback2.imageView != null) {
+                                pendingCallback.loaderCallback2.imageView.setImageDrawable(imageViewDrawable);
+                            }
+                            pendingCallback.onSuccess();
+                        }
+                    }
                 }
 
                 pendingCallbacks.clear();
@@ -313,6 +323,7 @@ public class ImageLoader {
     private static class LoaderCallback2 {
         interface Delegate {
             void onComplete(boolean successfully);
+
             void dispose();
         }
 
