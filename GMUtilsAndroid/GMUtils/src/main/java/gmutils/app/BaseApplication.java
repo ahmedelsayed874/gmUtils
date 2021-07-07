@@ -128,9 +128,9 @@ public abstract class BaseApplication extends Application implements Application
 
         thisInstance().registerActivityLifecycleCallbacks(this);
 
-        onPostCreate();
-
         printRecommendedResources();
+
+        onPostCreate();
     }
 
     protected abstract void onPostCreate();

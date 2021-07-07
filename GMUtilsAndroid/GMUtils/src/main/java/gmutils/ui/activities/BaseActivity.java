@@ -28,6 +28,7 @@ import gmutils.Logger;
 import gmutils.R;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.fragments.BaseFragment;
+import gmutils.ui.fragments.BaseFragmentListener;
 import gmutils.ui.fragments.BaseFragmentListenerX;
 import gmutils.ui.utils.ViewSource;
 
@@ -43,7 +44,7 @@ import gmutils.ui.utils.ViewSource;
  * +201022663988
  */
 @SuppressLint("Registered")
-public abstract class BaseActivity extends AppCompatActivity implements BaseFragmentListenerX {
+public abstract class BaseActivity extends AppCompatActivity implements BaseFragmentListener, BaseFragmentListenerX {
 
     private ActivityFunctions mActivityFunctions;
     private HashMap<Integer, ViewModel> viewModels;
@@ -51,6 +52,29 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     //----------------------------------------------------------------------------------------------
 
     public final ActivityFunctions getActivityFunctions() {
+        if (mActivityFunctions == null) {
+            mActivityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
+                @Override
+                public CharSequence getActivityTitle() {
+                    return BaseActivity.this.getActivityTitle();
+                }
+
+                @Override
+                public boolean allowApplyingPreferenceLocale() {
+                    return BaseActivity.this.allowApplyingPreferenceLocale();
+                }
+
+                @Override
+                public boolean isOrientationDisabled() {
+                    return BaseActivity.this.isOrientationDisabled();
+                }
+
+                @Override
+                public int initialKeyboardState() {
+                    return BaseActivity.this.initialKeyboardState();
+                }
+            });
+        }
         return mActivityFunctions;
     }
 
@@ -112,38 +136,18 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     //----------------------------------------------------------------------------------------------
 
     protected void onPreCreate() {
-        mActivityFunctions.onPreCreate(thisActivity());
+        getActivityFunctions().onPreCreate(thisActivity());
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        mActivityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
-            @Override
-            public CharSequence getActivityTitle() {
-                return BaseActivity.this.getActivityTitle();
-            }
-
-            @Override
-            public boolean allowApplyingPreferenceLocale() {
-                return BaseActivity.this.allowApplyingPreferenceLocale();
-            }
-
-            @Override
-            public boolean isOrientationDisabled() {
-                return BaseActivity.this.isOrientationDisabled();
-            }
-
-            @Override
-            public int initialKeyboardState() {
-                return BaseActivity.this.initialKeyboardState();
-            }
-        });
+        getActivityFunctions();//to create the object
 
         onPreCreate();
 
         super.onCreate(savedInstanceState);
 
-        mActivityFunctions.onCreate(thisActivity(), savedInstanceState);
+        getActivityFunctions().onCreate(thisActivity(), savedInstanceState);
 
         ViewSource viewSource = getViewSource(getLayoutInflater());
 
@@ -163,7 +167,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     protected void onPostCreate() {
-        mActivityFunctions.onPostCreate(thisActivity());
+        getActivityFunctions().onPostCreate(thisActivity());
 
         HashMap<Integer, Class<? extends ViewModel>> viewModelClasses = onPreparingViewModels();
         if (viewModelClasses != null) {
@@ -184,17 +188,17 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     public void onStart() {
         super.onStart();
-        mActivityFunctions.onStart(thisActivity());
+        getActivityFunctions().onStart(thisActivity());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mActivityFunctions.onConfigurationChanged(thisActivity(), newConfig);
+        getActivityFunctions().onConfigurationChanged(thisActivity(), newConfig);
     }
 
     public void attachBaseContext(Context newBase) {
-        super.attachBaseContext(mActivityFunctions.getAttachBaseContext(newBase));
+        super.attachBaseContext(getActivityFunctions().getAttachBaseContext(newBase));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -207,17 +211,21 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         return this;
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public void setKeyboardAutoHidden(Activity activity) {
+        getActivityFunctions().setKeyboardAutoHidden(activity);
+    }
+
     public void setKeyboardAutoHidden() {
-        mActivityFunctions.setKeyboardAutoHidden(thisActivity());
+        setKeyboardAutoHidden(thisActivity());
     }
 
     public boolean keyboardShouldAutoHide(float rawX, float rawY) {
-        return mActivityFunctions.keyboardShouldAutoHide(rawX, rawY);
+        return getActivityFunctions().keyboardShouldAutoHide(rawX, rawY);
     }
 
     public void keyboardDidHide() {
-        mActivityFunctions.keyboardDidHide();
+        getActivityFunctions().keyboardDidHide();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -227,33 +235,46 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     public void showWaitView(int msg) {
-        mActivityFunctions.showWaitView(thisActivity(), msg);
+        showWaitView(thisActivity(), msg);
     }
 
+    @Override
+    public void showWaitView(Context context, int msg) {
+        getActivityFunctions().showWaitView(context, msg);
+    }
+
+    @Override
     public void hideWaitView() {
-        mActivityFunctions.hideWaitView();
+        getActivityFunctions().hideWaitView();
     }
 
+    @Override
     public void hideWaitViewImmediately() {
-        mActivityFunctions.hideWaitViewImmediately();
+        getActivityFunctions().hideWaitViewImmediately();
     }
 
+    @Override
     public void updateWaitViewMsg(CharSequence msg) {
-        mActivityFunctions.updateWaitViewMsg(msg);
+        getActivityFunctions().updateWaitViewMsg(msg);
     }
 
     public boolean isWaitViewShown() {
-        return mActivityFunctions.isWaitViewShown();
+        return getActivityFunctions().isWaitViewShown();
     }
 
     //----------------------------------------------------------------------------------------------
 
+    @Override
+    public RetryPromptDialog showRetryPromptDialog(Context context, CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
+        return getActivityFunctions().showRetryPromptDialog(context, msg, onRetry, onCancel);
+    }
+
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry) {
-        return mActivityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, null);
+        return showRetryPromptDialog(thisActivity(), msg, onRetry, null);
     }
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
-        return mActivityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
+        return showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -335,26 +356,24 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mActivityFunctions.onDestroy();
+        getActivityFunctions().onDestroy();
         if (viewModels != null) viewModels.clear();
     }
-
 
     //----------------------------------------------------------------------------------------------
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        mActivityFunctions.onCreateOptionsMenu(menu);
+        getActivityFunctions().onCreateOptionsMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mActivityFunctions.onOptionsItemSelected(thisActivity(), item)) return true;
+        if (getActivityFunctions().onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
     }
 }

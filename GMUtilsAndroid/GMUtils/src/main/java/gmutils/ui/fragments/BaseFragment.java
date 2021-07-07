@@ -3,6 +3,7 @@ package gmutils.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,9 +47,14 @@ public abstract class BaseFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof BaseFragmentListener) {
             listener = (BaseFragmentListener) context;
+        } else {
+            Log.e("****", context.getClass().getSimpleName() + " isn't implement " + BaseFragmentListener.class.getSimpleName());
         }
+
         if (context instanceof BaseFragmentListenerX) {
             listenerX = (BaseFragmentListenerX) context;
+        } else {
+            Log.e("****", context.getClass().getSimpleName() + " isn't implement " + BaseFragmentListenerX.class.getSimpleName());
         }
     }
 
