@@ -143,26 +143,28 @@ public class Intents {
         //------------------------------------------------------------------------------------------
 
         public boolean checkPermissionForCamera(Activity activity, int requestCode) {
-            boolean isCameraPermitted = ActivityCompat.checkSelfPermission(
-                    activity, Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED;
+            String[] neededPermissions = {
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
 
-            boolean isWriteExternalPermitted = ActivityCompat.checkSelfPermission(
-                    activity, Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED;
+            List<String> nonPermittedPermissions = new ArrayList<>();
 
-            List<String> permissions = new ArrayList<>();
+            for (String neededPermission : neededPermissions) {
+                boolean isPermitted = ActivityCompat.checkSelfPermission(
+                        activity,
+                        neededPermission
+                ) == PackageManager.PERMISSION_GRANTED;
 
-            if (!isCameraPermitted)
-                permissions.add(Manifest.permission.CAMERA);
+                if (!isPermitted) {
+                    nonPermittedPermissions.add(neededPermission);
+                }
+            }
 
-            if (!isWriteExternalPermitted)
-                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-            if (permissions.size() > 0) {
+            if (nonPermittedPermissions.size() > 0) {
                 ActivityCompat.requestPermissions(
                         activity,
-                        permissions.toArray(new String[0]),
+                        nonPermittedPermissions.toArray(new String[0]),
                         requestCode);
 
                 return false;
