@@ -172,7 +172,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                 @Override
                 public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int direction) {
                     int position = viewHolder.getAdapterPosition();
-                    remove(position, true);
+                    removeAt(position, true);
                 }
             });
 
@@ -352,7 +352,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             mOnListItemsChangedListener.onItemRemoved(this, item, position);
     }
 
-    public void remove(int position, boolean refresh) {
+    public void removeAt(int position, boolean refresh) {
         try {
             T item = mList.get(position);
             mList.remove(position);
