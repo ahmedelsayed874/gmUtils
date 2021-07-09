@@ -164,19 +164,23 @@ public class RetrofitService {
         return builder;
     }
 
+    public <T> T create(Class<T> servicesInterface) {
+        return mRetrofit.create(servicesInterface);
+    }
+
     //----------------------------------------------------------------------------------------------
 
     private static RetrofitService sInstance; //singleton
 
-    public static <T> T create(@NotNull String baseURL, Class<T> serviceClass) {
-        return create(new Parameters(baseURL), serviceClass);
+    public static <T> T create(@NotNull String baseURL, Class<T> servicesInterface) {
+        return create(new Parameters(baseURL), servicesInterface);
     }
 
-    public static <T> T create(@NotNull Parameters parameters, Class<T> serviceClass) {
-        return create(parameters, null, serviceClass);
+    public static <T> T create(@NotNull Parameters parameters, Class<T> servicesInterface) {
+        return create(parameters, null, servicesInterface);
     }
 
-    public static <T> T create(@NotNull Parameters parameters, @Nullable Callback tmpBuildCallback, Class<T> serviceClass) {
+    public static <T> T create(@NotNull Parameters parameters, @Nullable Callback tmpBuildCallback, Class<T> servicesInterface) {
         if (sInstance == null) {
             sInstance = new RetrofitService(parameters, tmpBuildCallback);
 
@@ -200,7 +204,7 @@ public class RetrofitService {
             }
         }
 
-        return sInstance.mRetrofit.create(serviceClass);
+        return sInstance.mRetrofit.create(servicesInterface);
     }
 
     public static void destroy() {
