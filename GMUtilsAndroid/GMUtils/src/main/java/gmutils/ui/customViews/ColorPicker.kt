@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
-import android.provider.CalendarContract
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
@@ -22,8 +21,10 @@ import androidx.recyclerview.widget.RecyclerView
 import gmutils.R
 import gmutils.inputFilters.IntegerRangeFilter
 import gmutils.listeners.TextChangedListener
+import gmutils.storage.GeneralStorage
 import gmutils.ui.adapters.BaseRecyclerAdapter
 import okhttp3.internal.toHexString
+import org.json.JSONArray
 import kotlin.math.max
 
 class ColorPicker @JvmOverloads constructor(
@@ -84,7 +85,7 @@ class ColorPicker @JvmOverloads constructor(
         colorPreviewCard.cardElevation = 0f
         colorPreviewCard.radius =
             view.context.resources.getDimensionPixelSize(R.dimen.size_10).toFloat()
-        setResultedHexValue()
+        setupResultedHexValue()
 
         val colorPreviewCardContainer = view.findViewById<CardView>(R.id.colorPreviewCardContainer)
         colorPreviewCardContainer.setCardBackgroundColor(
@@ -179,7 +180,7 @@ class ColorPicker @JvmOverloads constructor(
         })
     }
 
-    private fun setResultedHexValue() {
+    private fun setupResultedHexValue() {
         hexValueEt.addTextChangedListener(TextChangedListener.create {
             if (disableHexEditTextListener) return@create
             applyChangeOnHexInput = false
@@ -211,7 +212,7 @@ class ColorPicker @JvmOverloads constructor(
             if (EditorInfo.IME_ACTION_DONE == actionId) {
                 try {
                     val colorCode = Color.parseColor(hexValueEt.text.toString())
-                    addRecentColor(colorCode)
+                    addToRecentColors(colorCode)
                 } catch (e: Exception) {
                 }
 
@@ -223,7 +224,7 @@ class ColorPicker @JvmOverloads constructor(
 
         colorPreviewCard.setOnClickListener {
             val colorCode = colorPreviewCard.cardBackgroundColor.defaultColor
-            addRecentColor(colorCode)
+            addToRecentColors(colorCode)
         }
     }
     //endregion
@@ -389,10 +390,11 @@ class ColorPicker @JvmOverloads constructor(
     //region recent color recycler view
     private class RecentColorsAdapter(
         recyclerView: RecyclerView?,
+        colors: MutableList<Int>,
         var onSelect: ((Int) -> Unit)?,
         var onRemove: ((RecentColorsAdapter, View, Int) -> Unit)?
     ) : BaseRecyclerAdapter<Int>(
-        recyclerView, mutableListOf(), false
+        recyclerView, colors, false
     ) {
         override fun onDispose() {
             onSelect = null
@@ -448,27 +450,72 @@ class ColorPicker @JvmOverloads constructor(
     }
 
     private fun setupRecentColorsRecyclerView() {
+        val colors = loadRecentSavedColors()
+
         RecentColorsAdapter(
             recyclerView = recentColorsRv,
+
+            colors = colors,
+
             onSelect = { color ->
                 displayColorValues(color)
             },
+
             onRemove = { adapter, view, position ->
                 val popupMenu = PopupMenu(view.context, view, Gravity.BOTTOM)
                 popupMenu.menu.add(R.string.remove).setOnMenuItemClickListener {
                     adapter.removeAt(position, true)
+                    updateSavedRecentColors()
                     true
                 }
                 popupMenu.show()
             }
         )
-
-        //todo load saved colors
     }
 
-    private fun addRecentColor(color: Int) {
-        (recentColorsRv.adapter as? RecentColorsAdapter)?.addOnTop(color, true)
-        //todo save color
+    private fun addToRecentColors(color: Int) {
+        val list = (recentColorsRv.adapter as? RecentColorsAdapter)?.list
+        if (list?.contains(color) == false) {
+            (recentColorsRv.adapter as? RecentColorsAdapter)?.addOnTop(color, true)
+            updateSavedRecentColors()
+        }
+    }
+
+    //--------------------------------------------------------------------
+
+    private val storageKey = "CLRS"
+
+    private fun loadRecentSavedColors(): MutableList<Int> {
+        val storage = GeneralStorage.getInstance(javaClass.simpleName)
+        val json = storage.retrieve(storageKey, "[]")
+
+        return try {
+            val jsonArray = JSONArray(json)
+            val list = mutableListOf<Int>()
+
+            for (i in 0 until jsonArray.length()) {
+                list.add(jsonArray.getInt(i))
+            }
+
+            list
+        } catch (e: Exception) {
+            emptyList<Int>().toMutableList()
+        }
+    }
+
+    private fun updateSavedRecentColors() {
+        val storage = GeneralStorage.getInstance(javaClass.simpleName)
+
+        val jsonArray = JSONArray()
+
+        (recentColorsRv.adapter as? RecentColorsAdapter)?.list?.forEach {
+            try {
+                jsonArray.put(it)
+            } catch (e: Exception) {
+            }
+        }
+
+        storage.save(storageKey, jsonArray.toString())
     }
     //endregion
 
@@ -503,7 +550,7 @@ class ColorPicker @JvmOverloads constructor(
 
     val onColorChanged: ((ColorPicker, Int) -> Unit)? = null
 
-    val color: Int
+    val selectedColor: Int
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val r = redValueSeekBar.progress.toFloat()
@@ -522,6 +569,13 @@ class ColorPicker @JvmOverloads constructor(
             }
         }
 
-    val colorHex get() = "#${color.toHexString()}"
+    val selectedColorHex get() = "#${selectedColor.toHexString()}"
 
+    val recentSelectedColors : List<Int> get() {
+        return loadRecentSavedColors()
+    }
+
+    fun addColorToRecentList(color: Int) {
+        addToRecentColors(color)
+    }
 }
