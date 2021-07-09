@@ -4,14 +4,18 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
+import android.provider.CalendarContract
 import android.util.AttributeSet
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.SeekBar
+import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +32,7 @@ class ColorPicker @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    //region private members
     private val redValueSeekBar: SeekBar
     private val redValueEt: EditText
 
@@ -45,6 +50,14 @@ class ColorPicker @JvmOverloads constructor(
 
     private val colorsRv: RecyclerView
     private val recentColorsRv: RecyclerView
+
+    private var disableSeekbarListener = false
+    private var disableEditTextListener = false
+    private var disableHexEditTextListener = false
+    private var applyChangeOnHexInput = true
+    //endregion
+
+    //----------------------------------------------------------------------------------------------
 
     init {
         val view = LayoutInflater.from(context).inflate(R.layout.color_picker, this, true)
@@ -69,7 +82,8 @@ class ColorPicker @JvmOverloads constructor(
         colorPreviewCard = view.findViewById(R.id.colorPreviewCard)
         colorPreviewCard.setCardBackgroundColor(Color.parseColor("#ff7f7f7f"))
         colorPreviewCard.cardElevation = 0f
-        colorPreviewCard.radius = view.context.resources.getDimensionPixelSize(R.dimen.size_10).toFloat()
+        colorPreviewCard.radius =
+            view.context.resources.getDimensionPixelSize(R.dimen.size_10).toFloat()
         setResultedHexValue()
 
         val colorPreviewCardContainer = view.findViewById<CardView>(R.id.colorPreviewCardContainer)
@@ -87,15 +101,29 @@ class ColorPicker @JvmOverloads constructor(
         setupColorsRecyclerView()
 
         recentColorsRv = view.findViewById(R.id.recentColorsRv)
+        setupRecentColorsRecyclerView()
 
     }
 
     //----------------------------------------------------------------------------------------------
 
-    private var disableSeekbarListener = false
-    private var disableEditTextListener = false
-    private var disableHexEditTextListener = false
-    private var applyChangeOnHexInput = true
+    //region SeekBar & EditText
+    private class SeekBarProgressChangeListener(
+        onChange: (SeekBar, Int) -> Unit
+    ) : SeekBar.OnSeekBarChangeListener {
+        var onChange: ((SeekBar, Int) -> Unit)? = onChange
+
+        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            onChange?.invoke(seekBar, progress)
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        }
+
+    }
 
     private fun setupSeekBarWithEditText(seekBar: SeekBar, editText: EditText, order: Int) {
         seekBar.setOnSeekBarChangeListener(SeekBarProgressChangeListener { seekBar, progress ->
@@ -115,11 +143,13 @@ class ColorPicker @JvmOverloads constructor(
             )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                val colorState = ColorStateList.valueOf(Color.rgb(
-                    if (order == 1) progress else 0,
-                    if (order == 2) progress else 0,
-                    if (order == 3) progress else 0
-                ))
+                val colorState = ColorStateList.valueOf(
+                    Color.rgb(
+                        if (order == 1) progress else 0,
+                        if (order == 2) progress else 0,
+                        if (order == 3) progress else 0
+                    )
+                )
 
                 seekBar.progressTintList = colorState
                 seekBar.thumbTintList = colorState
@@ -176,9 +206,98 @@ class ColorPicker @JvmOverloads constructor(
 
             applyChangeOnHexInput = true
         })
+
+        hexValueEt.setOnEditorActionListener { v, actionId, event ->
+            if (EditorInfo.IME_ACTION_DONE == actionId) {
+                try {
+                    val colorCode = Color.parseColor(hexValueEt.text.toString())
+                    addRecentColor(colorCode)
+                } catch (e: Exception) {
+                }
+
+                return@setOnEditorActionListener true
+            }
+
+            false
+        }
+
+        colorPreviewCard.setOnClickListener {
+            val colorCode = colorPreviewCard.cardBackgroundColor.defaultColor
+            addRecentColor(colorCode)
+        }
     }
+    //endregion
 
     //----------------------------------------------------------------------------------------------
+
+    //region Colors Recycler View
+    private data class Colors(
+        val one: Int,
+        val two: Int,
+        val three: Int
+    )
+
+    private class ColorsAdapter(
+        recyclerView: RecyclerView?,
+        list: MutableList<Colors>,
+        var whenColorSelect: ((Int) -> Unit)?
+    ) : BaseRecyclerAdapter<Colors>(
+        recyclerView, list, false
+    ) {
+        override fun onDispose() {
+            whenColorSelect = null
+        }
+
+        override fun getViewHolder(
+            viewType: Int,
+            inflater: LayoutInflater,
+            container: ViewGroup?
+        ) = VH(R.layout.adapter_colors, inflater, container)
+
+        inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
+            ViewHolder(resId, inflater, container) {
+
+            val card1 = findViewById<CardView>(R.id.card1)
+            val card2 = findViewById<CardView>(R.id.card2)
+            val card3 = findViewById<CardView>(R.id.card3)
+
+            init {
+                itemView.setOnClickListener(null)
+                card1.setOnClickListener(this)
+                card2.setOnClickListener(this)
+                card3.setOnClickListener(this)
+
+                val elevation =
+                    card1.context.resources.getDimensionPixelSize(R.dimen.size_1).toFloat()
+                val radius = card1.context.resources.getDimensionPixelSize(R.dimen.size_5).toFloat()
+
+                listOf<CardView>(card1, card2, card3).forEach {
+                    it.cardElevation = elevation
+                    it.radius = radius
+                }
+            }
+
+            override fun setValues(item: Colors) {
+                card1.setCardBackgroundColor(item.one)
+                card2.setCardBackgroundColor(item.two)
+                card3.setCardBackgroundColor(item.three)
+            }
+
+            override fun dispose() {
+            }
+
+            override fun onClick(v: View?) {
+                //super.onClick(v)
+                if (v == card1) {
+                    whenColorSelect?.invoke(item.one)
+                } else if (v == card2) {
+                    whenColorSelect?.invoke(item.two)
+                } else if (v == card3) {
+                    whenColorSelect?.invoke(item.three)
+                }
+            }
+        }
+    }
 
     private fun setupColorsRecyclerView() {
         val list = mutableListOf<Colors>()
@@ -199,10 +318,7 @@ class ColorPicker @JvmOverloads constructor(
         Log.e("****", "color count = ${list.size}")
 
         ColorsAdapter(colorsRv, list) { selectedColor ->
-            redValueSeekBar.progress = Color.red(selectedColor)
-            greenValueSeekBar.progress = Color.green(selectedColor)
-            blueValueSeekBar.progress = Color.blue(selectedColor)
-            alphaValueSeekBar.progress = Color.alpha(selectedColor)
+            displayColorValues(selectedColor)
         }
     }
 
@@ -260,8 +376,105 @@ class ColorPicker @JvmOverloads constructor(
         return list
     }
 
+    private fun displayColorValues(colorCode: Int) {
+        redValueSeekBar.progress = Color.red(colorCode)
+        greenValueSeekBar.progress = Color.green(colorCode)
+        blueValueSeekBar.progress = Color.blue(colorCode)
+        alphaValueSeekBar.progress = Color.alpha(colorCode)
+    }
+    //endregion
+
     //----------------------------------------------------------------------------------------------
 
+    //region recent color recycler view
+    private class RecentColorsAdapter(
+        recyclerView: RecyclerView?,
+        var onSelect: ((Int) -> Unit)?,
+        var onRemove: ((RecentColorsAdapter, View, Int) -> Unit)?
+    ) : BaseRecyclerAdapter<Int>(
+        recyclerView, mutableListOf(), false
+    ) {
+        override fun onDispose() {
+            onSelect = null
+            onRemove = null
+        }
+
+        override fun getViewHolder(
+            viewType: Int,
+            inflater: LayoutInflater,
+            container: ViewGroup?
+        ) = VH(R.layout.adapter_single_color, inflater, container)
+
+        inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
+            ViewHolder(resId, inflater, container) {
+
+            val card = findViewById<CardView>(R.id.card)
+
+            init {
+                itemView.setOnClickListener(null)
+                card.setOnClickListener(this)
+                card.setOnLongClickListener(this)
+
+                card.cardElevation =
+                    card.context.resources.getDimensionPixelSize(R.dimen.size_1).toFloat()
+                card.radius = card.context.resources.getDimensionPixelSize(R.dimen.size_5).toFloat()
+
+            }
+
+            override fun setValues(item: Int) {
+                card.setCardBackgroundColor(item)
+            }
+
+            override fun dispose() {
+            }
+
+            override fun onClick(v: View?) {
+                //super.onClick(v)
+                if (v == card) {
+                    onSelect?.invoke(item)
+                }
+            }
+
+            override fun onLongClick(v: View): Boolean {
+                //return super.onLongClick(v)
+                if (v == card) {
+                    onRemove?.invoke(this@RecentColorsAdapter, v, adapterPosition)
+                    return true
+                }
+
+                return false
+            }
+        }
+    }
+
+    private fun setupRecentColorsRecyclerView() {
+        RecentColorsAdapter(
+            recyclerView = recentColorsRv,
+            onSelect = { color ->
+                displayColorValues(color)
+            },
+            onRemove = { adapter, view, position ->
+                val popupMenu = PopupMenu(view.context, view, Gravity.BOTTOM)
+                popupMenu.menu.add(R.string.remove).setOnMenuItemClickListener {
+                    adapter.removeAt(position, true)
+                    true
+                }
+                popupMenu.show()
+            }
+        )
+
+        //todo load saved colors
+    }
+
+    private fun addRecentColor(color: Int) {
+        (recentColorsRv.adapter as? RecentColorsAdapter)?.addOnTop(color, true)
+        //todo save color
+    }
+    //endregion
+
+    //----------------------------------------------------------------------------------------------
+
+    //region helper methods
     private fun convertNumbersToColorCode(a: Int, r: Int, g: Int, b: Int): Int {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Color.valueOf(r.toFloat(), g.toFloat(), b.toFloat(), a.toFloat()).toArgb()
@@ -284,6 +497,7 @@ class ColorPicker @JvmOverloads constructor(
         val colorHex = "#$finalHex"
         return colorHex
     }
+    //endregion
 
     //----------------------------------------------------------------------------------------------
 
@@ -310,91 +524,4 @@ class ColorPicker @JvmOverloads constructor(
 
     val colorHex get() = "#${color.toHexString()}"
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private class SeekBarProgressChangeListener(onChange: (SeekBar, Int) -> Unit) :
-        SeekBar.OnSeekBarChangeListener {
-        var onChange: ((SeekBar, Int) -> Unit)? = onChange
-
-        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-            onChange?.invoke(seekBar, progress)
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        }
-
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        }
-
-    }
-
-    data class Colors(
-        val one: Int,
-        val two: Int,
-        val three: Int
-    )
-
-    private class ColorsAdapter(
-        recyclerView: RecyclerView?,
-        list: MutableList<Colors>,
-        whenColorSelect: (Int) -> Unit
-    ) :
-        BaseRecyclerAdapter<Colors>(recyclerView, list, false) {
-
-        var whenColorSelect: ((Int) -> Unit)? = whenColorSelect
-
-        override fun onDispose() {
-            whenColorSelect = null
-        }
-
-        override fun getViewHolder(
-            viewType: Int,
-            inflater: LayoutInflater,
-            container: ViewGroup?
-        ) = VH(R.layout.adapter_colors, inflater, container)
-
-        inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
-            ViewHolder(resId, inflater, container) {
-
-            val card1 = findViewById<CardView>(R.id.card1)
-            val card2 = findViewById<CardView>(R.id.card2)
-            val card3 = findViewById<CardView>(R.id.card3)
-
-            init {
-                itemView.setOnClickListener(null)
-                card1.setOnClickListener(this)
-                card2.setOnClickListener(this)
-                card3.setOnClickListener(this)
-
-                val elevation =
-                    card1.context.resources.getDimensionPixelSize(R.dimen.size_1).toFloat()
-                val radius = card1.context.resources.getDimensionPixelSize(R.dimen.size_5).toFloat()
-
-                listOf<CardView>(card1, card2, card3).forEach {
-                    it.cardElevation = elevation
-                    it.radius = radius
-                }
-            }
-
-            override fun setValues(item: Colors) {
-                card1.setCardBackgroundColor(item.one)
-                card2.setCardBackgroundColor(item.two)
-                card3.setCardBackgroundColor(item.three)
-            }
-
-            override fun dispose() {
-            }
-
-            override fun onClick(v: View?) {
-                //super.onClick(v)
-                if (v == card1) {
-                    whenColorSelect?.invoke(item.one)
-                } else if (v == card2) {
-                    whenColorSelect?.invoke(item.two)
-                } else if (v == card3) {
-                    whenColorSelect?.invoke(item.three)
-                }
-            }
-        }
-    }
 }
