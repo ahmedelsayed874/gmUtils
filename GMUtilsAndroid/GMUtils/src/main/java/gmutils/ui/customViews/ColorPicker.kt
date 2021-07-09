@@ -28,6 +28,7 @@ import org.json.JSONArray
 import kotlin.math.max
 
 class ColorPicker @JvmOverloads constructor(
+    val pickerName: String,
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -486,7 +487,7 @@ class ColorPicker @JvmOverloads constructor(
     private val storageKey = "CLRS"
 
     private fun loadRecentSavedColors(): MutableList<Int> {
-        val storage = GeneralStorage.getInstance(javaClass.simpleName)
+        val storage = GeneralStorage.getInstance(javaClass.simpleName + "-" + pickerName)
         val json = storage.retrieve(storageKey, "[]")
 
         return try {
@@ -548,7 +549,7 @@ class ColorPicker @JvmOverloads constructor(
 
     //----------------------------------------------------------------------------------------------
 
-    val onColorChanged: ((ColorPicker, Int) -> Unit)? = null
+    var onColorChanged: ((ColorPicker, Int) -> Unit)? = null
 
     val selectedColor: Int
         get() {
