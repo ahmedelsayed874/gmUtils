@@ -41,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import gmutils.DateOp;
 import gmutils.R;
 import gmutils.listeners.ActionCallback;
 import gmutils.utils.FileUtils;
@@ -696,6 +697,29 @@ public class ImageUtils {
             ImageView imageView,
             String paramName
     ) {
+        return createRetrofitMultipartBodyForImage(
+                imageView,
+                paramName,
+                DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + ".png"
+        );
+    }
+
+    public MultipartBody.Part createRetrofitMultipartBodyForImage(
+            Bitmap image,
+            String paramName
+    ) {
+        return createRetrofitMultipartBodyForImage(
+                image,
+                paramName,
+                DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + ".png"
+        );
+    }
+
+    public MultipartBody.Part createRetrofitMultipartBodyForImage(
+            ImageView imageView,
+            String paramName,
+            String fileName
+    ) {
         Bitmap bitmap = getBitmap(imageView);
 
         if (bitmap != null) {
@@ -712,17 +736,17 @@ public class ImageUtils {
 
     public MultipartBody.Part createRetrofitMultipartBodyForImage(
             Bitmap image,
-            String paramName
+            String paramName,
+            String fileName
     ) {
         try {
             RequestBody requestFile = createRetrofitRequestBodyForImage(image);
 
-            MultipartBody.Part photo =
-                    MultipartBody.Part.createFormData(
-                            paramName,
-                            new Date().toString() + ".png",
-                            requestFile
-                    );
+            MultipartBody.Part photo = MultipartBody.Part.createFormData(
+                    paramName,
+                    fileName,
+                    requestFile
+            );
 
             return photo;
         } catch (Exception e) {
@@ -738,7 +762,6 @@ public class ImageUtils {
             ByteArrayOutputStream bs = new ByteArrayOutputStream();
             image.compress(Bitmap.CompressFormat.PNG, 100, bs);
 
-            //bs.toByteArray().
             RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), bs.toByteArray());
             try {
                 bs.close();
