@@ -17,7 +17,7 @@
 
     <EditText
         android:id="@+id/number"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:layout_width="@dimen/size_100"
         android:layout_height="@dimen/size_35"
         android:layout_margin="@dimen/size_5"
