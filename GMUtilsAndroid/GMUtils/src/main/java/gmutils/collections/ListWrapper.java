@@ -87,6 +87,7 @@ public class ListWrapper<T> {
             if (rem) {
                 removeAt(i);
                 size--;
+                i--;
             }
         }
 
