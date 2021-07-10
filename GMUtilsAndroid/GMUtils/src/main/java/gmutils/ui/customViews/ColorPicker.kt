@@ -28,10 +28,10 @@ import org.json.JSONArray
 import kotlin.math.max
 
 class ColorPicker @JvmOverloads constructor(
-    val pickerName: String,
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    val pickerName: String = "",
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     //region private members
