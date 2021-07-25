@@ -1,5 +1,6 @@
 package com.blogspot.gm4s.gmutileexample;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
+import java.util.Arrays;
 import java.util.List;
 
 import gmutils.ui.adapters.BaseRecyclerAdapter;
@@ -72,5 +74,29 @@ public class RecyclerViewAdapterExample extends BaseRecyclerAdapter<String> {
         protected void dispose() {
             tv = null;
         }
+    }
+}
+
+
+class HowToUseRecyclerViewAdapterExample {
+
+    void onCreate(Context context) {
+        RecyclerView rv = new RecyclerView(context);
+
+        RecyclerViewAdapterExample adapter = new RecyclerViewAdapterExample(rv);
+        //that's enough to use
+        //if you need more
+
+        adapter.setOnItemClickListener(new BaseRecyclerAdapter.ClickListener<String>() {
+            @Override
+            public void onItemClicked(BaseRecyclerAdapter<String> adapter, String item, int position) {
+                System.out.println(position + ": " +item);
+            }
+        });
+
+        adapter.add("Item1", true);
+        adapter.add(Arrays.asList("Item2", "Item3", "Item4"), true);
+
+
     }
 }
