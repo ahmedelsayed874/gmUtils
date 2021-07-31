@@ -23,7 +23,7 @@ import gmutils.inputFilters.IntegerRangeFilter
 import gmutils.listeners.TextChangedListener
 import gmutils.storage.GeneralStorage
 import gmutils.ui.adapters.BaseRecyclerAdapter
-import okhttp3.internal.toHexString
+import gmutils.utils.TextHelper
 import org.json.JSONArray
 import kotlin.math.max
 
@@ -544,8 +544,10 @@ class ColorPicker @JvmOverloads constructor(
     private fun convertNumbersToColorHex(a: Int, r: Int, g: Int, b: Int): String {
         var finalHex = ""
 
+        val textHelper = TextHelper()
+
         listOf(a, r, g, b).forEach {
-            var x = it.toHexString()
+            var x = textHelper.convertToHex(it).replace("#", "")
             if (x.length < 2) x = "0$x"
             else if (x.length > 2) x = x.substring(0, 2)
 
