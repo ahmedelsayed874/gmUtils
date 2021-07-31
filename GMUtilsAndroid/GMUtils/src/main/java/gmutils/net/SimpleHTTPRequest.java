@@ -7,11 +7,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -23,6 +28,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 
@@ -237,109 +243,470 @@ public class SimpleHTTPRequest {
     //==============================================================================================
 
     public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.GET, null), callback);
+        new TextRequestExecutor(new Request(url, Method.GET, null), callback);
     }
 
     public static void get(String url, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.GET, null), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.GET, null), configurations, callback);
+    }
+
+    public static void get(String url, Map<String, String> headers, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.GET, headers), configurations, callback);
     }
 
 
-    public static void getFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.GET, null), destFile, callback);
+    public static void downloadFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, null, destFile, callback);
     }
 
-    public static void getFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.GET, null), destFile, configurations, callback);
+    public static void downloadFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, null, destFile, configurations, callback);
+    }
+
+    public static void downloadFile(String url, Map<String, String> headers, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, headers, destFile, configurations, callback);
     }
 
 
     public static void post(String url, Map<String, Object> parameters, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.POST, null, parameters), callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), callback);
     }
 
     public static void post(String url, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.POST, null, parameters), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), configurations, callback);
+    }
+
+    public static void post(String url, Map<String, String> headers, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, headers, parameters), configurations, callback);
     }
 
 
     public static void post(String url, String body, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.POST, null, body), callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, body), callback);
     }
 
     public static void post(String url, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(new Request(url, Method.POST, null, body), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, body), configurations, callback);
+    }
+
+    public static void post(String url, Map<String, String> headers, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, headers, body), configurations, callback);
     }
 
 
     public static void create(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(request, callback);
+        new TextRequestExecutor(request, callback);
     }
 
     public static void create(@NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new SimpleHTTPRequest(request, configurations, callback);
+        new TextRequestExecutor(request, configurations, callback);
     }
 
     //----------------------------------------------------------------------------------------------
 
-    private Request request;
-    private File destFile;
-    private Configurations configurations;
-    private ResultCallback2<Request, TextResponse> textCallback;
-    private ResultCallback2<Request, FileResponse> fileCallback;
+    static abstract class RequestExecutor {
+        private Request request;
+        private Configurations configurations;
 
-    public SimpleHTTPRequest(Request request, ResultCallback2<Request, TextResponse> textCallback) {
-        constructor(request, null, new Configurations(), textCallback, null);
-    }
+        RequestExecutor(Request request) {
+            this(request, null);
+        }
 
-    public SimpleHTTPRequest(Request request, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback) {
-        constructor(request, null, configurations, textCallback, null);
-    }
+        RequestExecutor(Request request, Configurations configurations) {
+            this.request = request;
 
+            if (configurations != null)
+                this.configurations = configurations;
+            else
+                this.configurations = new Configurations();
+        }
 
-    public SimpleHTTPRequest(Request request, File destFile, ResultCallback2<Request, FileResponse> fileCallback) {
-        constructor(request, destFile, new Configurations(), null, fileCallback);
-    }
+        public Request getRequest() {
+            return request;
+        }
 
-    public SimpleHTTPRequest(Request request, File destFile, Configurations configurations, ResultCallback2<Request, FileResponse> fileCallback) {
-        constructor(request, destFile, configurations, null, fileCallback);
-    }
+        public Configurations getConfigurations() {
+            return configurations;
+        }
 
+        void execute() {
+            new Thread(this::doRequest).start();
+        }
 
-    private void constructor(Request request, File destFile, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback, ResultCallback2<Request, FileResponse> fileCallback) {
-        this.request = request;
-        this.destFile = destFile;
+        protected abstract void doRequest();
 
-        if (configurations != null)
-            this.configurations = configurations;
-        else
-            this.configurations = new Configurations();
+        protected void executeRequest(ResultCallback2<Response, InputStream> callback) {
+            executeRequest(null, callback);
+        }
 
-        this.textCallback = textCallback;
-        this.fileCallback = fileCallback;
+        protected void executeRequest(ResultCallback<OutputStream> writeDataDelegate, ResultCallback2<Response, InputStream> callback) {
+            HttpURLConnection urlConnection = null;
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+            Response response = new Response();
 
-        doRequest();
-    }
+            try {
+                URL url = new URL(request.url);
+                URLConnection connection = url.openConnection();
 
-    private void doRequest() {
-        new Thread(() -> {
-            if (textCallback != null) {
-                fetchText(this::onPostExecute);
+                if (connection instanceof HttpURLConnection) {
+                    urlConnection = (HttpURLConnection) connection;
 
-            } else if (fileCallback != null) {
-                fetchFile(this::onPostExecute);
-            } else {
+                } else {
+                    HttpsURLConnection urlConnectionSecure = (HttpsURLConnection) connection;
+                    urlConnection = urlConnectionSecure;
+
+                    if (configurations.hostnameVerifier != null) {
+                        urlConnectionSecure.setHostnameVerifier(configurations.hostnameVerifier);
+                    }
+
+                    if (configurations.sslSocketFactory != null) {
+                        urlConnectionSecure.setSSLSocketFactory(configurations.sslSocketFactory);
+                    }
+
+                }
+
+                urlConnection.setRequestMethod(request.method.name());
+                urlConnection.setConnectTimeout(configurations.connectionTimeOut);
+                urlConnection.setReadTimeout(configurations.readTimeOut);
+                urlConnection.setUseCaches(configurations.allowCaching);
+
+                byte[] postDataBytes = null;
+
+                if (request.method == Method.POST || request.method == Method.PUT) {
+                    urlConnection.setDoInput(true);
+                    urlConnection.setDoOutput(true);
+
+                    if (request.postParameters != null) {
+                        StringBuilder postData = new StringBuilder();
+
+                        for (Map.Entry<String, Object> param : request.postParameters.entrySet()) {
+                            if (postData.length() != 0) postData.append('&');
+                            postData.append(URLEncoder.encode(param.getKey(), configurations.charEncoding));
+                            postData.append('=');
+                            postData.append(URLEncoder.encode(String.valueOf(param.getValue()), configurations.charEncoding));
+                        }
+
+                        postDataBytes = postData.toString().getBytes(configurations.charEncoding);
+
+                        urlConnection.setRequestProperty(CONTENT_TYPE, MIME_FORM_ENCODED);
+                        urlConnection.setRequestProperty(CONTENT_LENGTH, "" + postDataBytes.length);
+                        //urlConnection.setRequestProperty(CONTENT_LANGUAGE, "en-US");
+
+                    } else if (request.postBody != null) {
+                        postDataBytes = request.postBody.getBytes(configurations.charEncoding);
+                        urlConnection.setRequestProperty(CONTENT_TYPE, MIME_APPLICATION_JSON);
+                        urlConnection.setRequestProperty(CONTENT_LENGTH, "" + postDataBytes.length);
+                        //urlConnection.setRequestProperty(CONTENT_LANGUAGE, "en-US");
+                    }
+                } else if (request.method == Method.DELETE) {
+                    urlConnection.setRequestProperty(CONTENT_TYPE, MIME_FORM_ENCODED);
+                }
+
+                if (request.headers != null) {
+                    Set<Map.Entry<String, String>> entries = request.headers.entrySet();
+                    for (Map.Entry<String, String> entry : entries) {
+                        urlConnection.setRequestProperty(entry.getKey(), entry.getKey());
+                    }
+                }
+
+                urlConnection.connect();
+
+                if (postDataBytes != null) {
+                    outputStream = urlConnection.getOutputStream();
+                    outputStream.write(postDataBytes);
+                }
+
+                if (writeDataDelegate != null) {
+                    outputStream = urlConnection.getOutputStream();
+                    writeDataDelegate.invoke(outputStream);
+                }
+
+                response.setCode(urlConnection.getResponseCode());
+
+                inputStream = urlConnection.getInputStream();
+
+                callback.invoke(response, inputStream);
+
+            } catch (Exception e) {
+                response.setException(e);
+                callback.invoke(response, null);
+
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (outputStream != null) {
+                    try {
+                        outputStream.flush();
+                        outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 dispose();
             }
+        }
 
-        }).start();
+        protected void dispose() {
+            request = null;
+            configurations = null;
+        }
+
+        protected abstract void onDispose();
     }
 
-    //----------------------------------------------------------------------------------------------
+    static class TextRequestExecutor extends RequestExecutor {
+        private ResultCallback2<Request, TextResponse> textCallback;
 
-    private void fetchText(ResultCallback<TextResponse> callback) {
-        executeRequest((res, inputStream) -> {
-            TextResponse response = new TextResponse(res);
+        TextRequestExecutor(Request request, ResultCallback2<Request, TextResponse> textCallback) {
+            super(request);
+            this.textCallback = textCallback;
+        }
+
+        TextRequestExecutor(Request request, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback) {
+            super(request, configurations);
+            this.textCallback = textCallback;
+        }
+
+        @Override
+        protected void doRequest() {
+            if (textCallback != null)
+                fetchText(this::onRequestExecuted);
+            else
+                dispose();
+        }
+
+        private void fetchText(ResultCallback<TextResponse> callback) {
+            executeRequest((res, inputStream) -> {
+                TextResponse response = new TextResponse(res);
+                String text = null;
+
+                try {
+                    text = new Helpers().readInputStream(inputStream);
+                } catch (IOException e) {
+                    response.setException(e);
+                }
+
+                response.setText(text);
+
+                callback.invoke(response);
+
+            });
+        }
+
+        private void onRequestExecuted(TextResponse response) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                textCallback.invoke(getRequest(), response);
+            });
+        }
+
+        @Override
+        protected void onDispose() {
+            textCallback = null;
+        }
+    }
+
+    static class FileDownloadRequestExecutor extends RequestExecutor {
+        private File destFile;
+        private ResultCallback2<Request, FileResponse> fileCallback;
+
+        FileDownloadRequestExecutor(String url, Map<String, String> headers, File destFile, ResultCallback2<Request, FileResponse> fileCallback) {
+            super(new Request(url, Method.GET, headers));
+            this.destFile = destFile;
+            this.fileCallback = fileCallback;
+        }
+
+        FileDownloadRequestExecutor(String url, Map<String, String> headers, File destFile, Configurations configurations, ResultCallback2<Request, FileResponse> fileCallback) {
+            super(new Request(url, Method.GET, headers), configurations);
+            this.destFile = destFile;
+            this.fileCallback = fileCallback;
+        }
+
+        @Override
+        protected void doRequest() {
+            if (fileCallback != null)
+                fetchFile(this::onRequestExecuted);
+            else
+                dispose();
+        }
+
+        private void fetchFile(ResultCallback<FileResponse> callback) {
+            executeRequest((res, inputStream) -> {
+                FileResponse response = new FileResponse(res);
+                FileOutputStream os = null;
+
+                try {
+                    byte[] data = new byte[inputStream.available()];
+                    inputStream.read(data);
+
+                    os = new FileOutputStream(destFile);
+                    os.write(data);
+
+                    response.setFile(destFile);
+
+                } catch (Exception e) {
+                    response.setException(e);
+                } finally {
+                    if (os != null) {
+                        try {
+                            os.flush();
+                            os.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                callback.invoke(response);
+            });
+        }
+
+        private void onRequestExecuted(FileResponse response) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                fileCallback.invoke(getRequest(), response);
+            });
+        }
+
+        @Override
+        protected void onDispose() {
+            this.destFile = null;
+            this.fileCallback = null;
+        }
+    }
+
+    static class FileUploadRequestExecutor extends RequestExecutor {
+        private final String fieldName;
+        private File uploadingFile;
+        private ResultCallback2<Request, Integer> progressCallback;
+        private ResultCallback2<Request, TextResponse> textCallback;
+        private final String boundary;
+        private static final String LINE_FEED = "\r\n";
+
+
+        FileUploadRequestExecutor(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> textCallback) {
+            super(new Request(url, Method.POST, headers), configurations);
+
+            this.fieldName = fieldName;
+            this.uploadingFile = uploadingFile;
+            this.progressCallback = progressCallback;
+            this.textCallback = textCallback;
+
+            // creates a unique boundary based on time stamp
+            boundary = "===" + System.currentTimeMillis() + "===";
+
+            headers.put("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+        }
+
+        @Override
+        protected void doRequest() {
+            uploadFile(this::onRequestExecuted);
+        }
+
+        private void uploadFile(ResultCallback<TextResponse> callback) {
+            executeRequest(outputStream -> {
+                try {
+                    PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, getConfigurations().charEncoding), true);
+
+                    addFilePart(writer, fieldName, uploadingFile);
+
+                    readFileAndWriteToStream(uploadingFile, outputStream);
+
+                    writer.append(LINE_FEED);
+                    writer.flush();
+
+                    writer.append(LINE_FEED);
+                    writer.flush();
+
+                    writer.append("--" + boundary + "--");
+                    writer.append(LINE_FEED);
+                    writer.close();
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, (response0, inputStream) -> {
+                TextResponse response = new TextResponse(response0);
+                String text = null;
+
+                try {
+                    text = new Helpers().readInputStream(inputStream);
+                } catch (IOException e) {
+                    response.setException(e);
+                }
+
+                response.setText(text);
+
+                callback.invoke(response);
+            });
+        }
+
+        private void addFilePart(PrintWriter writer, String fieldName, File uploadFile) throws IOException {
+            String fileName = uploadFile.getName();
+            writer.append("--" + boundary)
+                    .append(LINE_FEED);
+            writer.append("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"")
+                    .append(LINE_FEED);
+            writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName))
+                    .append(LINE_FEED);
+            writer.append("Content-Transfer-Encoding: binary")
+                    .append(LINE_FEED);
+            writer.append(LINE_FEED);
+            writer.flush();
+        }
+
+        private void readFileAndWriteToStream(File uploadingFile, OutputStream outputStream) throws Exception {
+            FileInputStream inputStream = new FileInputStream(uploadingFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead = -1;
+            long totalBytesRead = 0;
+            int percentCompleted = 0;
+            long fileSize = uploadingFile.length();
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+                totalBytesRead += bytesRead;
+                percentCompleted = (int) (totalBytesRead * 100 / fileSize);
+                if (progressCallback != null) {
+                    int finalPercentCompleted = percentCompleted;
+                    handler.post(() -> {
+                        progressCallback.invoke(getRequest(), finalPercentCompleted);
+                    });
+                }
+            }
+
+            inputStream.close();
+            outputStream.flush();
+        }
+
+        private void onRequestExecuted(TextResponse response) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                textCallback.invoke(getRequest(), response);
+            });
+        }
+
+        @Override
+        protected void onDispose() {
+            uploadingFile = null;
+            textCallback = null;
+        }
+    }
+
+    private static class Helpers {
+
+        String readInputStream(InputStream inputStream) throws IOException {
             String text = null;
 
             if (inputStream != null) {
@@ -349,13 +716,10 @@ public class SimpleHTTPRequest {
                 String line;
                 StringBuilder stringBuffer = new StringBuilder();
 
-                try {
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuffer.append(line);
-                    }
-                } catch (Exception e) {
-                    response.setException(e);
+                while ((line = bufferedReader.readLine()) != null) {
+                    stringBuffer.append(line);
                 }
+
 
                 try {
                     bufferedReader.close();
@@ -366,176 +730,7 @@ public class SimpleHTTPRequest {
                 text = stringBuffer.toString();
             }
 
-            response.setText(text);
-
-            callback.invoke(response);
-        });
-    }
-
-    private void fetchFile(ResultCallback<FileResponse> callback) {
-        executeRequest((res, inputStream) -> {
-            FileResponse response = new FileResponse(res);
-            FileOutputStream os = null;
-
-            try {
-                byte[] data = new byte[inputStream.available()];
-                inputStream.read(data);
-
-                os = new FileOutputStream(destFile);
-                os.write(data);
-
-                response.setFile(destFile);
-
-            } catch (Exception e) {
-                response.setException(e);
-
-            } finally {
-                if (os != null) {
-                    try {
-                        os.flush();
-                        os.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            callback.invoke(response);
-        });
-    }
-
-    private void executeRequest(ResultCallback2<Response, InputStream> callback) {
-        HttpURLConnection urlConnection = null;
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        Response response = new Response();
-
-        try {
-            URL url = new URL(request.url);
-            URLConnection connection = url.openConnection();
-
-            if (connection instanceof HttpURLConnection) {
-                urlConnection = (HttpURLConnection) connection;
-
-            } else {
-                HttpsURLConnection urlConnectionSecure = (HttpsURLConnection) connection;
-                urlConnection = urlConnectionSecure;
-
-                if (configurations.hostnameVerifier != null) {
-                    urlConnectionSecure.setHostnameVerifier(configurations.hostnameVerifier);
-                }
-
-                if (configurations.sslSocketFactory != null) {
-                    urlConnectionSecure.setSSLSocketFactory(configurations.sslSocketFactory);
-                }
-
-            }
-
-            urlConnection.setRequestMethod(request.method.name());
-            urlConnection.setConnectTimeout(configurations.connectionTimeOut);
-            urlConnection.setReadTimeout(configurations.readTimeOut);
-            urlConnection.setUseCaches(configurations.allowCaching);
-
-            byte[] postDataBytes = null;
-
-            if (request.method == Method.POST || request.method == Method.PUT) {
-                urlConnection.setDoInput(true);
-                urlConnection.setDoOutput(true);
-
-                if (request.postParameters != null) {
-                    StringBuilder postData = new StringBuilder();
-
-                    for (Map.Entry<String, Object> param : request.postParameters.entrySet()) {
-                        if (postData.length() != 0) postData.append('&');
-                        postData.append(URLEncoder.encode(param.getKey(), configurations.charEncoding));
-                        postData.append('=');
-                        postData.append(URLEncoder.encode(String.valueOf(param.getValue()), configurations.charEncoding));
-                    }
-
-                    postDataBytes = postData.toString().getBytes(configurations.charEncoding);
-
-                    urlConnection.setRequestProperty(CONTENT_TYPE, MIME_FORM_ENCODED);
-                    urlConnection.setRequestProperty(CONTENT_LENGTH, "" + postDataBytes.length);
-                    //urlConnection.setRequestProperty(CONTENT_LANGUAGE, "en-US");
-
-                } else if (request.postBody != null) {
-                    postDataBytes = request.postBody.getBytes(configurations.charEncoding);
-                    urlConnection.setRequestProperty(CONTENT_TYPE, MIME_APPLICATION_JSON);
-                }
-            } else if (request.method == Method.DELETE) {
-                urlConnection.setRequestProperty(CONTENT_TYPE, MIME_FORM_ENCODED);
-            }
-
-            if (request.headers != null) {
-                Set<Map.Entry<String, String>> entries = request.headers.entrySet();
-                for (Map.Entry<String, String> entry : entries) {
-                    urlConnection.setRequestProperty(entry.getKey(), entry.getKey());
-                }
-            }
-
-            urlConnection.connect();
-
-            if (postDataBytes != null) {
-                outputStream = urlConnection.getOutputStream();
-                outputStream.write(postDataBytes);
-            }
-
-            response.setCode(urlConnection.getResponseCode());
-
-            inputStream = urlConnection.getInputStream();
-
-            callback.invoke(response, inputStream);
-
-        } catch (Exception e) {
-            response.setException(e);
-            callback.invoke(response, null);
-
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (outputStream != null) {
-                try {
-                    outputStream.flush();
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            return text;
         }
     }
-
-    //----------------------------------------------------------------------------------------------
-
-    private void onPostExecute(TextResponse response) {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            textCallback.invoke(request, response);
-            dispose();
-        });
-    }
-
-    private void onPostExecute(FileResponse response) {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            fileCallback.invoke(request, response);
-            dispose();
-        });
-    }
-
-    private void dispose() {
-        request = null;
-        textCallback = null;
-        destFile = null;
-        fileCallback = null;
-        configurations = null;
-    }
-
 }
