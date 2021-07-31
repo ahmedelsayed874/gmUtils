@@ -159,7 +159,7 @@ class ColorPicker @JvmOverloads constructor(
 
             if (applyChangeOnHexInput) {
                 disableHexEditTextListener = true
-                hexValueEt.setText(colorCode.toHexString())
+                hexValueEt.setText(convertNumbersToColorHex(colorCode))
                 disableHexEditTextListener = false
             }
 
@@ -532,6 +532,15 @@ class ColorPicker @JvmOverloads constructor(
         }
     }
 
+    private fun convertNumbersToColorHex(color: Int): String {
+        return convertNumbersToColorHex(
+            a = Color.alpha(color),
+            r = Color.red(color),
+            g = Color.green(color),
+            b = Color.blue(color)
+        )
+    }
+
     private fun convertNumbersToColorHex(a: Int, r: Int, g: Int, b: Int): String {
         var finalHex = ""
 
@@ -551,7 +560,7 @@ class ColorPicker @JvmOverloads constructor(
 
     var onColorChanged: ((ColorPicker, Int) -> Unit)? = null
 
-    val selectedColor: Int
+    var selectedColor: Int
         get() {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val r = redValueSeekBar.progress.toFloat()
@@ -569,12 +578,18 @@ class ColorPicker @JvmOverloads constructor(
                 convertNumbersToColorCode(a, r, g, b)
             }
         }
+        set(value) {
+            hexValueEt.setText(
+                convertNumbersToColorHex(value).replace("#", "")
+            )
+        }
 
-    val selectedColorHex get() = "#${selectedColor.toHexString()}"
+    val selectedColorHex get() = convertNumbersToColorHex(selectedColor)
 
-    val recentSelectedColors : List<Int> get() {
-        return loadRecentSavedColors()
-    }
+    val recentSelectedColors: List<Int>
+        get() {
+            return loadRecentSavedColors()
+        }
 
     fun addColorToRecentList(color: Int) {
         addToRecentColors(color)
