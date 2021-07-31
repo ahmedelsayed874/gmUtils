@@ -1,4 +1,4 @@
-package gmutils;
+package gmutils.utils;
 
 import android.content.Context;
 import android.text.Html;
@@ -142,6 +142,14 @@ public class TextHelper {
         return buf.toString();
     }
 
+    public String convertToHex(int number) {
+        return "#" + String.format("%X", number);
+    }
+
+    public String convertToHex(int number, int minLength) {
+        return "#" + String.format("%0" + minLength + "X", number);
+    }
+
     public String convertArabicNumberToEnglish(String text) {
         if (TextUtils.isEmpty(text)) return "";
 
@@ -226,7 +234,8 @@ public class TextHelper {
                         newText.append(part).append(" ");
                         it2 = ("" + it2).toUpperCase().charAt(0);
                         part = "";
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                    }
 
                     if (it2 >= 'a' && it2 <= 'z') {
                         part += it2;
@@ -256,4 +265,5 @@ public class TextHelper {
 
         return newText.toString();
     }
+
 }

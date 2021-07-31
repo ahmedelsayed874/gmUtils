@@ -3,6 +3,8 @@ package gmutils;
 import android.util.Patterns;
 import android.widget.EditText;
 
+import gmutils.utils.TextHelper;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012

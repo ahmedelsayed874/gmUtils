@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import gmutils.TextHelper;
+import gmutils.utils.TextHelper;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

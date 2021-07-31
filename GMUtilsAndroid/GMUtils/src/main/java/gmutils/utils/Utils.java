@@ -131,10 +131,6 @@ public class Utils {
         }
     }
 
-    public String colorHex(int color) {
-        return "#FF" + String.format("%06X", 0xFFFFFF & color);
-    }
-
     //----------------------------------------------------------------------------------------------
 
     /**
@@ -161,10 +157,6 @@ public class Utils {
         f.setMaximumFractionDigits(2);
         f.setMinimumFractionDigits(2);
         return f.format(number);
-    }
-
-    public String convertIntegerToHex(int number) {
-        return String.format("%08X", number);
     }
 
     //------------------------------------------------------------------------------------------
