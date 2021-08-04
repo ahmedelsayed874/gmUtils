@@ -146,7 +146,16 @@ class MainActivity : BaseActivity() {
         this.view.btn9.setOnClickListener {
             val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
             log("api", "getting time from: $url")
+
             SimpleHTTPRequest.get(url) { request, response ->
+                log("api", response.code.toString())
+                log("api", response.text)
+                log("api", "Exception: ${response.exception}")
+            }
+
+            SimpleHTTPRequest.TextRequestExecutor(
+                SimpleHTTPRequest.Request(url, SimpleHTTPRequest.Method.GET, null)
+            ).executeAsynchronously { request, response ->
                 log("api", response.code.toString())
                 log("api", response.text)
                 log("api", "Exception: ${response.exception}")

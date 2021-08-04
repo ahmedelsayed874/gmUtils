@@ -2,6 +2,7 @@ package gmutils.net;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -168,7 +169,7 @@ public class SimpleHTTPRequest {
             this.time = System.currentTimeMillis();
         }
 
-        public Response(Response other) {
+        protected Response(Response other) {
             this();
             this.setCode(other.code);
             this.setException(other.exception);
@@ -200,10 +201,10 @@ public class SimpleHTTPRequest {
     public static class TextResponse extends Response {
         private String text;
 
-        public TextResponse() {
+        TextResponse() {
         }
 
-        public TextResponse(Response other) {
+        TextResponse(Response other) {
             super(other);
         }
 
@@ -220,10 +221,10 @@ public class SimpleHTTPRequest {
     public static class FileResponse extends Response {
         private File file;
 
-        public FileResponse() {
+        FileResponse() {
         }
 
-        public FileResponse(Response other) {
+        FileResponse(Response other) {
             super(other);
         }
 
@@ -240,76 +241,103 @@ public class SimpleHTTPRequest {
     //==============================================================================================
 
     public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, null), callback);
+        new TextRequestExecutor(new Request(url, Method.GET, null)).executeAsynchronously(callback);
     }
 
     public static void get(String url, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, null), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.GET, null), configurations).executeAsynchronously(callback);
     }
 
     public static void get(String url, Map<String, String> headers, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, headers), configurations, callback);
-    }
-
-
-    public static void downloadFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, null, destFile, callback);
-    }
-
-    public static void downloadFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, null, destFile, configurations, callback);
-    }
-
-    public static void downloadFile(String url, Map<String, String> headers, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, headers, destFile, configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.GET, headers), configurations).executeAsynchronously(callback);
     }
 
 
     public static void post(String url, Map<String, Object> parameters, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, parameters)).executeAsynchronously(callback);
     }
 
     public static void post(String url, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), configurations).executeAsynchronously(callback);
     }
 
     public static void post(String url, Map<String, String> headers, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, headers, parameters), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.POST, headers, parameters), configurations).executeAsynchronously(callback);
     }
 
 
     public static void post(String url, String body, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, body), callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, body)).executeAsynchronously(callback);
     }
 
     public static void post(String url, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, body), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.POST, null, body), configurations).executeAsynchronously(callback);
     }
 
     public static void post(String url, Map<String, String> headers, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, headers, body), configurations, callback);
+        new TextRequestExecutor(new Request(url, Method.POST, headers, body), configurations).executeAsynchronously(callback);
     }
 
 
-    public static void create(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(request, callback);
+    public static void downloadFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, null, destFile).executeAsynchronously(callback);
     }
 
-    public static void create(@NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(request, configurations, callback);
+    public static void downloadFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, null, destFile, configurations).executeAsynchronously(callback);
+    }
+
+    public static void downloadFile(String url, Map<String, String> headers, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, headers, destFile, configurations).executeAsynchronously(callback);
+    }
+
+
+    public static void uploadFile(String url, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, null, fieldName, uploadingFile, null, progressCallback, callback);
+    }
+
+    public static void uploadFile(String url, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, null, fieldName, uploadingFile, configurations, progressCallback, callback);
+    }
+
+    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, headers, fieldName, uploadingFile, null, progressCallback, callback);
+    }
+
+    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        new FileUploadRequestExecutor(url, headers, fieldName, uploadingFile, configurations, progressCallback)
+                .executeAsynchronously(callback);
+    }
+
+
+    public static Response create(boolean synchronously, @NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        return create(synchronously, request, null, callback);
+    }
+
+    public static Response create(boolean synchronously, @NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        TextRequestExecutor executor = new TextRequestExecutor(request, configurations);
+
+        if (synchronously) {
+            return executor.executeSynchronously();
+        } else {
+            executor.executeAsynchronously(callback);
+            return null;
+        }
     }
 
     //----------------------------------------------------------------------------------------------
 
-    static abstract class RequestExecutor {
+    public static abstract class RequestExecutor<R extends Response> {
         private Request request;
         private Configurations configurations;
+        private boolean isDisposed = false;
 
-        RequestExecutor(Request request) {
+
+        public RequestExecutor(Request request) {
             this(request, null);
         }
 
-        RequestExecutor(Request request, Configurations configurations) {
+        public RequestExecutor(Request request, Configurations configurations) {
             this.request = request;
 
             if (configurations != null)
@@ -326,21 +354,42 @@ public class SimpleHTTPRequest {
             return configurations;
         }
 
-        void execute() {
-            new Thread(this::doRequest).start();
+        public boolean isDisposed() {
+            return isDisposed;
         }
 
-        protected abstract void doRequest();
+        //------------------------------------------------------------------------------------------
 
-        protected void executeRequest(ResultCallback2<Response, InputStream> callback) {
-            executeRequest(null, callback);
+        public Response executeSynchronously() {
+            return doRequest();
         }
 
-        protected void executeRequest(ResultCallback<OutputStream> writeDataDelegate, ResultCallback2<Response, InputStream> callback) {
+        public void executeAsynchronously(ResultCallback2<Request, R> callback) {
+            new Thread(() -> {
+                R response = doRequest();
+
+                if (callback != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        callback.invoke(getRequest(), response);
+                    });
+                }
+            }).start();
+        }
+
+        //------------------------------------------------------------------------------------------
+
+        protected abstract R doRequest();
+
+        protected Pair<Response, InputStream> executeRequestInternally() {
+            return executeRequestInternally(null);
+        }
+
+        protected Pair<Response, InputStream> executeRequestInternally(ResultCallback<OutputStream> writeDataDelegate) {
             HttpURLConnection urlConnection = null;
             InputStream inputStream = null;
             OutputStream outputStream = null;
             Response response = new Response();
+            Pair<Response, InputStream> returningData;
 
             try {
                 URL url = new URL(request.url);
@@ -423,11 +472,11 @@ public class SimpleHTTPRequest {
 
                 inputStream = urlConnection.getInputStream();
 
-                callback.invoke(response, inputStream);
+                returningData = new Pair<>(response, inputStream);
 
             } catch (Exception e) {
                 response.setException(e);
-                callback.invoke(response, null);
+                returningData = new Pair<>(response, null);
 
             } finally {
                 if (urlConnection != null) {
@@ -453,151 +502,127 @@ public class SimpleHTTPRequest {
 
                 dispose();
             }
+
+            return returningData;
         }
+
+        //------------------------------------------------------------------------------------------
 
         protected void dispose() {
             request = null;
             configurations = null;
+            isDisposed = true;
         }
 
         protected abstract void onDispose();
     }
 
-    static class TextRequestExecutor extends RequestExecutor {
-        private ResultCallback2<Request, TextResponse> textCallback;
+    public static class TextRequestExecutor extends RequestExecutor<TextResponse> {
 
-        TextRequestExecutor(Request request, ResultCallback2<Request, TextResponse> textCallback) {
+        public TextRequestExecutor(Request request) {
             super(request);
-            this.textCallback = textCallback;
         }
 
-        TextRequestExecutor(Request request, Configurations configurations, ResultCallback2<Request, TextResponse> textCallback) {
+        public TextRequestExecutor(Request request, Configurations configurations) {
             super(request, configurations);
-            this.textCallback = textCallback;
         }
 
         @Override
-        protected void doRequest() {
-            if (textCallback != null)
-                fetchText(this::onRequestExecuted);
-            else
-                dispose();
+        protected TextResponse doRequest() {
+            return fetchText();
         }
 
-        private void fetchText(ResultCallback<TextResponse> callback) {
-            executeRequest((res, inputStream) -> {
-                TextResponse response = new TextResponse(res);
-                String text = null;
+        private TextResponse fetchText() {
+            Pair<Response, InputStream> res = executeRequestInternally();
 
-                try {
-                    text = new Helpers().readInputStream(inputStream);
-                } catch (IOException e) {
-                    response.setException(e);
-                }
+            TextResponse response = new TextResponse(res.first);
+            String text = null;
 
-                response.setText(text);
+            try {
+                text = new Helpers().readInputStream(res.second);
+            } catch (IOException e) {
+                response.setException(e);
+            }
 
-                callback.invoke(response);
+            response.setText(text);
 
-            });
-        }
-
-        private void onRequestExecuted(TextResponse response) {
-            new Handler(Looper.getMainLooper()).post(() -> {
-                textCallback.invoke(getRequest(), response);
-            });
+            return response;
         }
 
         @Override
         protected void onDispose() {
-            textCallback = null;
         }
     }
 
-    static class FileDownloadRequestExecutor extends RequestExecutor {
+    public static class FileDownloadRequestExecutor extends RequestExecutor<FileResponse> {
         private File destFile;
-        private ResultCallback2<Request, FileResponse> fileCallback;
 
-        FileDownloadRequestExecutor(String url, Map<String, String> headers, File destFile, ResultCallback2<Request, FileResponse> fileCallback) {
+        public FileDownloadRequestExecutor(String url, Map<String, String> headers, File destFile) {
             super(new Request(url, Method.GET, headers));
             this.destFile = destFile;
-            this.fileCallback = fileCallback;
         }
 
-        FileDownloadRequestExecutor(String url, Map<String, String> headers, File destFile, Configurations configurations, ResultCallback2<Request, FileResponse> fileCallback) {
+        public FileDownloadRequestExecutor(String url, Map<String, String> headers, File destFile, Configurations configurations) {
             super(new Request(url, Method.GET, headers), configurations);
             this.destFile = destFile;
-            this.fileCallback = fileCallback;
         }
 
         @Override
-        protected void doRequest() {
-            if (fileCallback != null)
-                fetchFile(this::onRequestExecuted);
-            else
-                dispose();
+        protected FileResponse doRequest() {
+            return fetchFile();
         }
 
-        private void fetchFile(ResultCallback<FileResponse> callback) {
-            executeRequest((res, inputStream) -> {
-                FileResponse response = new FileResponse(res);
-                FileOutputStream os = null;
+        private FileResponse fetchFile() {
+            Pair<Response, InputStream> res = executeRequestInternally();
 
-                try {
-                    byte[] data = new byte[inputStream.available()];
-                    inputStream.read(data);
+            FileResponse response = new FileResponse(res.first);
+            FileOutputStream os = null;
 
-                    os = new FileOutputStream(destFile);
-                    os.write(data);
+            try {
+                byte[] data = new byte[res.second.available()];
+                res.second.read(data);
 
-                    response.setFile(destFile);
+                os = new FileOutputStream(destFile);
+                os.write(data);
 
-                } catch (Exception e) {
-                    response.setException(e);
-                } finally {
-                    if (os != null) {
-                        try {
-                            os.flush();
-                            os.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                response.setFile(destFile);
+
+            } catch (Exception e) {
+                response.setException(e);
+            } finally {
+                if (os != null) {
+                    try {
+                        os.flush();
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
+            }
 
-                callback.invoke(response);
-            });
-        }
-
-        private void onRequestExecuted(FileResponse response) {
-            new Handler(Looper.getMainLooper()).post(() -> {
-                fileCallback.invoke(getRequest(), response);
-            });
+            return response;
         }
 
         @Override
         protected void onDispose() {
             this.destFile = null;
-            this.fileCallback = null;
         }
     }
 
-    static class FileUploadRequestExecutor extends RequestExecutor {
+    public static class FileUploadRequestExecutor extends RequestExecutor<TextResponse> {
         private final String fieldName;
         private File uploadingFile;
         private ResultCallback2<Request, Integer> progressCallback;
-        private ResultCallback2<Request, TextResponse> textCallback;
         private final String boundary;
         private static final String LINE_FEED = "\r\n";
 
 
-        FileUploadRequestExecutor(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> textCallback) {
+        public FileUploadRequestExecutor(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback) {
             super(new Request(url, Method.POST, headers), configurations);
 
             this.fieldName = fieldName;
             this.uploadingFile = uploadingFile;
             this.progressCallback = progressCallback;
-            this.textCallback = textCallback;
 
             // creates a unique boundary based on time stamp
             boundary = "===" + System.currentTimeMillis() + "===";
@@ -607,12 +632,12 @@ public class SimpleHTTPRequest {
         }
 
         @Override
-        protected void doRequest() {
-            uploadFile(this::onRequestExecuted);
+        protected TextResponse doRequest() {
+            return uploadFile();
         }
 
-        private void uploadFile(ResultCallback<TextResponse> callback) {
-            executeRequest(outputStream -> {
+        private TextResponse uploadFile() {
+            Pair<Response, InputStream> res = executeRequestInternally(outputStream -> {
                 try {
                     PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, getConfigurations().charEncoding), true);
 
@@ -633,20 +658,20 @@ public class SimpleHTTPRequest {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }, (response0, inputStream) -> {
-                TextResponse response = new TextResponse(response0);
-                String text = null;
-
-                try {
-                    text = new Helpers().readInputStream(inputStream);
-                } catch (IOException e) {
-                    response.setException(e);
-                }
-
-                response.setText(text);
-
-                callback.invoke(response);
             });
+
+            TextResponse response = new TextResponse(res.first);
+            String text = null;
+
+            try {
+                text = new Helpers().readInputStream(res.second);
+            } catch (IOException e) {
+                response.setException(e);
+            }
+
+            response.setText(text);
+
+            return response;
         }
 
         private void addFilePart(PrintWriter writer, String fieldName, File uploadFile) throws IOException {
@@ -688,16 +713,9 @@ public class SimpleHTTPRequest {
             outputStream.flush();
         }
 
-        private void onRequestExecuted(TextResponse response) {
-            new Handler(Looper.getMainLooper()).post(() -> {
-                textCallback.invoke(getRequest(), response);
-            });
-        }
-
         @Override
         protected void onDispose() {
             uploadingFile = null;
-            textCallback = null;
         }
     }
 
