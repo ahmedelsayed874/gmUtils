@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -196,6 +197,26 @@ public class InputDialog extends BaseDialog {
 
     public InputDialog setCancelable(boolean cancellable) {
         super.setCancelable(cancellable);
+        return this;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    /**
+     * @param minWidth: -1 = MatchParent
+     */
+    public InputDialog setMinimumWidth(int minWidth) {
+        View lyContainer = getView().findViewById(R.id.lyContainer);
+
+        if (minWidth < 0) {
+            ViewGroup.LayoutParams layoutParams = lyContainer.getLayoutParams();
+            layoutParams.width = -1;
+            lyContainer.setLayoutParams(layoutParams);
+
+        } else {
+            lyContainer.setMinimumWidth(minWidth);
+        }
+
         return this;
     }
 

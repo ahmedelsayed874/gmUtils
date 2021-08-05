@@ -34,7 +34,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        //setContentView(R.layout.activity_main)
 
         this.view.btn1.text = "calc size"
         this.view.btn1.setOnClickListener {
@@ -178,7 +178,7 @@ class MainActivity : BaseActivity() {
             Activities.start(ColorPickerActivity::class.java, thisActivity())
         }
 
-        Activities.start(ColorPickerActivity::class.java, thisActivity())
+        //Activities.start(ColorPickerActivity::class.java, thisActivity())
         //Activities.start(ColorPicker2Activity::class.java, thisActivity())
 
         //------------------------------------------------------------------------------------------
