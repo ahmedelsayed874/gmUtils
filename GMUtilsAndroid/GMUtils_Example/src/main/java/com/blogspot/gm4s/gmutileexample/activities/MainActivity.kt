@@ -147,12 +147,14 @@ class MainActivity : BaseActivity() {
             val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
             log("api", "getting time from: $url")
 
+            //execute using static methods
             SimpleHTTPRequest.get(url) { request, response ->
                 log("api", response.code.toString())
                 log("api", response.text)
                 log("api", "Exception: ${response.exception}")
             }
 
+            //execute using initiating new instance
             SimpleHTTPRequest.TextRequestExecutor(
                 SimpleHTTPRequest.Request(url, SimpleHTTPRequest.Method.GET, null)
             ).executeAsynchronously { request, response ->
@@ -160,6 +162,20 @@ class MainActivity : BaseActivity() {
                 log("api", response.text)
                 log("api", "Exception: ${response.exception}")
             }
+
+            //execute synchronously
+            Thread {
+                val response = SimpleHTTPRequest.createSynchronously(
+                    SimpleHTTPRequest.Request(
+                        url,
+                        SimpleHTTPRequest.Method.GET,
+                        null
+                    )
+                )
+                log("api", response.second.code.toString())
+                log("api", response.second.text)
+                log("api", "Exception: ${response.second.exception}")
+            }.start()
         }
 
         this.view.btn10.text = "LooperThread"

@@ -22,6 +22,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -175,12 +176,12 @@ public class SimpleHTTPRequest {
             this.setException(other.exception);
         }
 
-        Response setException(Exception exception) {
+        protected Response setException(Exception exception) {
             this.exception = exception;
             return this;
         }
 
-        Response setCode(int code) {
+        protected Response setCode(int code) {
             this.code = code;
             return this;
         }
@@ -310,19 +311,20 @@ public class SimpleHTTPRequest {
     }
 
 
-    public static Response create(boolean synchronously, @NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        return create(synchronously, request, null, callback);
+    public static void createAsynchronously(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        createAsynchronously(request, null, callback);
     }
 
-    public static Response create(boolean synchronously, @NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        TextRequestExecutor executor = new TextRequestExecutor(request, configurations);
+    public static void createAsynchronously(@NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(request, configurations).executeAsynchronously(callback);
+    }
 
-        if (synchronously) {
-            return executor.executeSynchronously();
-        } else {
-            executor.executeAsynchronously(callback);
-            return null;
-        }
+    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request) {
+        return createSynchronously(request, null);
+    }
+
+    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request, Configurations configurations) {
+        return new TextRequestExecutor(request, configurations).executeSynchronously();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -360,36 +362,41 @@ public class SimpleHTTPRequest {
 
         //------------------------------------------------------------------------------------------
 
-        public Response executeSynchronously() {
-            return doRequest();
+        public Pair<Request, R> executeSynchronously() {
+            AtomicReference<Pair<Request, R>> result = new AtomicReference<>();
+
+            doRequest((response) -> {
+                result.set(new Pair<>(getRequest(), response));
+            });
+
+            return result.get();
         }
 
         public void executeAsynchronously(ResultCallback2<Request, R> callback) {
             new Thread(() -> {
-                R response = doRequest();
-
-                if (callback != null) {
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        callback.invoke(getRequest(), response);
-                    });
-                }
+                doRequest((response) -> {
+                    if (callback != null) {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            callback.invoke(getRequest(), response);
+                        });
+                    }
+                });
             }).start();
         }
 
         //------------------------------------------------------------------------------------------
 
-        protected abstract R doRequest();
+        protected abstract void doRequest(ResultCallback<R> callback);
 
-        protected Pair<Response, InputStream> executeRequestInternally() {
-            return executeRequestInternally(null);
+        protected void executeRequestInternally(ResultCallback2<Response, InputStream> resultCallback) {
+            executeRequestInternally(null, resultCallback);
         }
 
-        protected Pair<Response, InputStream> executeRequestInternally(ResultCallback<OutputStream> writeDataDelegate) {
+        protected void executeRequestInternally(ResultCallback<OutputStream> writeDataDelegate, ResultCallback2<Response, InputStream> resultCallback) {
             HttpURLConnection urlConnection = null;
             InputStream inputStream = null;
             OutputStream outputStream = null;
             Response response = new Response();
-            Pair<Response, InputStream> returningData;
 
             try {
                 URL url = new URL(request.url);
@@ -468,15 +475,17 @@ public class SimpleHTTPRequest {
                     writeDataDelegate.invoke(outputStream);
                 }
 
+                if (outputStream != null) outputStream.flush();
+
                 response.setCode(urlConnection.getResponseCode());
 
                 inputStream = urlConnection.getInputStream();
 
-                returningData = new Pair<>(response, inputStream);
+                resultCallback.invoke(response, inputStream);
 
             } catch (Exception e) {
                 response.setException(e);
-                returningData = new Pair<>(response, null);
+                resultCallback.invoke(response, null);
 
             } finally {
                 if (urlConnection != null) {
@@ -493,7 +502,6 @@ public class SimpleHTTPRequest {
 
                 if (outputStream != null) {
                     try {
-                        outputStream.flush();
                         outputStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -502,8 +510,6 @@ public class SimpleHTTPRequest {
 
                 dispose();
             }
-
-            return returningData;
         }
 
         //------------------------------------------------------------------------------------------
@@ -528,25 +534,25 @@ public class SimpleHTTPRequest {
         }
 
         @Override
-        protected TextResponse doRequest() {
-            return fetchText();
+        protected void doRequest(ResultCallback<TextResponse> callback) {
+            fetchText(callback);
         }
 
-        private TextResponse fetchText() {
-            Pair<Response, InputStream> res = executeRequestInternally();
+        private void fetchText(ResultCallback<TextResponse> callback) {
+            executeRequestInternally((res, inputStream) -> {
+                TextResponse response = new TextResponse(res);
+                String text = null;
 
-            TextResponse response = new TextResponse(res.first);
-            String text = null;
+                try {
+                    text = new Helpers().readInputStream(inputStream);
+                } catch (IOException e) {
+                    response.setException(e);
+                }
 
-            try {
-                text = new Helpers().readInputStream(res.second);
-            } catch (IOException e) {
-                response.setException(e);
-            }
+                response.setText(text);
 
-            response.setText(text);
-
-            return response;
+                callback.invoke(response);
+            });
         }
 
         @Override
@@ -568,39 +574,39 @@ public class SimpleHTTPRequest {
         }
 
         @Override
-        protected FileResponse doRequest() {
-            return fetchFile();
+        protected void doRequest(ResultCallback<FileResponse> callback) {
+            fetchFile(callback);
         }
 
-        private FileResponse fetchFile() {
-            Pair<Response, InputStream> res = executeRequestInternally();
+        private void fetchFile(ResultCallback<FileResponse> callback) {
+            executeRequestInternally((res, inputStream) -> {
+                FileResponse response = new FileResponse(res);
+                FileOutputStream os = null;
 
-            FileResponse response = new FileResponse(res.first);
-            FileOutputStream os = null;
+                try {
+                    byte[] data = new byte[inputStream.available()];
+                    inputStream.read(data);
 
-            try {
-                byte[] data = new byte[res.second.available()];
-                res.second.read(data);
+                    os = new FileOutputStream(destFile);
+                    os.write(data);
 
-                os = new FileOutputStream(destFile);
-                os.write(data);
+                    response.setFile(destFile);
 
-                response.setFile(destFile);
+                    callback.invoke(response);
 
-            } catch (Exception e) {
-                response.setException(e);
-            } finally {
-                if (os != null) {
-                    try {
-                        os.flush();
-                        os.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                } catch (Exception e) {
+                    response.setException(e);
+                } finally {
+                    if (os != null) {
+                        try {
+                            os.flush();
+                            os.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-
-            return response;
+            });
         }
 
         @Override
@@ -632,12 +638,12 @@ public class SimpleHTTPRequest {
         }
 
         @Override
-        protected TextResponse doRequest() {
-            return uploadFile();
+        protected void doRequest(ResultCallback<TextResponse> callback) {
+            uploadFile(callback);
         }
 
-        private TextResponse uploadFile() {
-            Pair<Response, InputStream> res = executeRequestInternally(outputStream -> {
+        private void uploadFile(ResultCallback<TextResponse> callback) {
+            executeRequestInternally(outputStream -> {
                 try {
                     PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, getConfigurations().charEncoding), true);
 
@@ -658,20 +664,20 @@ public class SimpleHTTPRequest {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            }, (res, inputStream) -> {
+                TextResponse response = new TextResponse(res);
+                String text = null;
+
+                try {
+                    text = new Helpers().readInputStream(inputStream);
+                } catch (IOException e) {
+                    response.setException(e);
+                }
+
+                response.setText(text);
+
+                callback.invoke(response);
             });
-
-            TextResponse response = new TextResponse(res.first);
-            String text = null;
-
-            try {
-                text = new Helpers().readInputStream(res.second);
-            } catch (IOException e) {
-                response.setException(e);
-            }
-
-            response.setText(text);
-
-            return response;
         }
 
         private void addFilePart(PrintWriter writer, String fieldName, File uploadFile) throws IOException {
