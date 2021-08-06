@@ -239,94 +239,6 @@ public class SimpleHTTPRequest {
         }
     }
 
-    //==============================================================================================
-
-    public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, null)).executeAsynchronously(callback);
-    }
-
-    public static void get(String url, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, null), configurations).executeAsynchronously(callback);
-    }
-
-    public static void get(String url, Map<String, String> headers, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, headers), configurations).executeAsynchronously(callback);
-    }
-
-
-    public static void post(String url, Map<String, Object> parameters, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, parameters)).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), configurations).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, Map<String, String> headers, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, headers, parameters), configurations).executeAsynchronously(callback);
-    }
-
-
-    public static void post(String url, String body, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, body)).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, body), configurations).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, Map<String, String> headers, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, headers, body), configurations).executeAsynchronously(callback);
-    }
-
-
-    public static void downloadFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, null, destFile).executeAsynchronously(callback);
-    }
-
-    public static void downloadFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, null, destFile, configurations).executeAsynchronously(callback);
-    }
-
-    public static void downloadFile(String url, Map<String, String> headers, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, headers, destFile, configurations).executeAsynchronously(callback);
-    }
-
-
-    public static void uploadFile(String url, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, null, fieldName, uploadingFile, null, progressCallback, callback);
-    }
-
-    public static void uploadFile(String url, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, null, fieldName, uploadingFile, configurations, progressCallback, callback);
-    }
-
-    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, headers, fieldName, uploadingFile, null, progressCallback, callback);
-    }
-
-    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        new FileUploadRequestExecutor(url, headers, fieldName, uploadingFile, configurations, progressCallback)
-                .executeAsynchronously(callback);
-    }
-
-
-    public static void createAsynchronously(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        createAsynchronously(request, null, callback);
-    }
-
-    public static void createAsynchronously(@NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(request, configurations).executeAsynchronously(callback);
-    }
-
-    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request) {
-        return createSynchronously(request, null);
-    }
-
-    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request, Configurations configurations) {
-        return new TextRequestExecutor(request, configurations).executeSynchronously();
-    }
-
     //----------------------------------------------------------------------------------------------
 
     public static abstract class RequestExecutor<R extends Response> {
@@ -754,4 +666,93 @@ public class SimpleHTTPRequest {
             return text;
         }
     }
+
+    //==============================================================================================
+
+    public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.GET, null)).executeAsynchronously(callback);
+    }
+
+    public static void get(String url, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.GET, null), configurations).executeAsynchronously(callback);
+    }
+
+    public static void get(String url, Map<String, String> headers, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.GET, headers), configurations).executeAsynchronously(callback);
+    }
+
+
+    public static void post(String url, Map<String, Object> parameters, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, null, parameters)).executeAsynchronously(callback);
+    }
+
+    public static void post(String url, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), configurations).executeAsynchronously(callback);
+    }
+
+    public static void post(String url, Map<String, String> headers, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, headers, parameters), configurations).executeAsynchronously(callback);
+    }
+
+
+    public static void post(String url, String body, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, null, body)).executeAsynchronously(callback);
+    }
+
+    public static void post(String url, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, null, body), configurations).executeAsynchronously(callback);
+    }
+
+    public static void post(String url, Map<String, String> headers, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(new Request(url, Method.POST, headers, body), configurations).executeAsynchronously(callback);
+    }
+
+
+    public static void downloadFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, null, destFile).executeAsynchronously(callback);
+    }
+
+    public static void downloadFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, null, destFile, configurations).executeAsynchronously(callback);
+    }
+
+    public static void downloadFile(String url, Map<String, String> headers, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
+        new FileDownloadRequestExecutor(url, headers, destFile, configurations).executeAsynchronously(callback);
+    }
+
+
+    public static void uploadFile(String url, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, null, fieldName, uploadingFile, null, progressCallback, callback);
+    }
+
+    public static void uploadFile(String url, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, null, fieldName, uploadingFile, configurations, progressCallback, callback);
+    }
+
+    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, headers, fieldName, uploadingFile, null, progressCallback, callback);
+    }
+
+    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        new FileUploadRequestExecutor(url, headers, fieldName, uploadingFile, configurations, progressCallback)
+                .executeAsynchronously(callback);
+    }
+
+
+    public static void createAsynchronously(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        createAsynchronously(request, null, callback);
+    }
+
+    public static void createAsynchronously(@NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
+        new TextRequestExecutor(request, configurations).executeAsynchronously(callback);
+    }
+
+    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request) {
+        return createSynchronously(request, null);
+    }
+
+    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request, Configurations configurations) {
+        return new TextRequestExecutor(request, configurations).executeSynchronously();
+    }
+
 }
