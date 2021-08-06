@@ -1,6 +1,7 @@
 package gmutils.utils;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -12,6 +13,7 @@ import androidx.annotation.RawRes;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -148,6 +150,25 @@ public class TextHelper {
 
     public String convertToHex(int number, int minLength) {
         return "#" + String.format("%0" + minLength + "X", number);
+    }
+
+    public String convertColorRGBToHex(int color) {
+        int a = Color.alpha(color);
+        int r = Color.red(color);
+        int g = Color.green(color);
+        int b = Color.blue(color);
+
+        String finalHex = "";
+
+        for (int v : Arrays.asList(a, r, g, b)) {
+            String x = convertToHex(v).replace("#", "");
+            if (x.length() < 2) x = "0$x";
+            else if (x.length() > 2) x = x.substring(0, 2);
+
+            finalHex += x;
+        }
+
+        return "#" + finalHex;
     }
 
     public String convertArabicNumberToEnglish(String text) {

@@ -205,6 +205,10 @@ public class Utils {
         return roundNumber(px, 0.5F);
     }
 
+    public String convertColorRGBToHex(int color) {
+        return TextHelper.createInstance().convertColorRGBToHex(color);
+    }
+
     //------------------------------------------------------------------------------------------
 
     public static boolean isAppInDebugMode(Context context) {
