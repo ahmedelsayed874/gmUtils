@@ -667,7 +667,9 @@ public class SimpleHTTPRequest {
         }
     }
 
+    /* ===================*/
     //==============================================================================================
+    /* ===================*/
 
     public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
         new TextRequestExecutor(new Request(url, Method.GET, null)).executeAsynchronously(callback);
