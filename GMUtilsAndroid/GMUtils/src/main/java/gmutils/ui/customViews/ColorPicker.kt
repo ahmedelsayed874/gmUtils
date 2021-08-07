@@ -159,7 +159,7 @@ class ColorPicker @JvmOverloads constructor(
 
             if (applyChangeOnHexInput) {
                 disableHexEditTextListener = true
-                hexValueEt.setText(convertNumbersToColorHex(colorCode))
+                hexValueEt.setText(convertNumbersToColorHex(colorCode).replace("#", ""))
                 disableHexEditTextListener = false
             }
 
@@ -212,7 +212,7 @@ class ColorPicker @JvmOverloads constructor(
         hexValueEt.setOnEditorActionListener { v, actionId, event ->
             if (EditorInfo.IME_ACTION_DONE == actionId) {
                 try {
-                    val colorCode = Color.parseColor(hexValueEt.text.toString())
+                    val colorCode = Color.parseColor("#" + hexValueEt.text.toString())
                     addToRecentColors(colorCode)
                 } catch (e: Exception) {
                 }
@@ -260,42 +260,31 @@ class ColorPicker @JvmOverloads constructor(
             ViewHolder(resId, inflater, container) {
 
             val card1 = findViewById<CardView>(R.id.card1)
-            val card2 = findViewById<CardView>(R.id.card2)
-            val card3 = findViewById<CardView>(R.id.card3)
 
             init {
                 itemView.setOnClickListener(null)
                 card1.setOnClickListener(this)
-                card2.setOnClickListener(this)
-                card3.setOnClickListener(this)
 
                 val elevation =
                     card1.context.resources.getDimensionPixelSize(R.dimen.size_1).toFloat()
                 val radius = card1.context.resources.getDimensionPixelSize(R.dimen.size_5).toFloat()
 
-                listOf<CardView>(card1, card2, card3).forEach {
+                listOf<CardView>(card1/*, card2, card3*/).forEach {
                     it.cardElevation = elevation
                     it.radius = radius
                 }
             }
 
             override fun setValues(item: Colors) {
-                card1.setCardBackgroundColor(item.one)
-                card2.setCardBackgroundColor(item.two)
-                card3.setCardBackgroundColor(item.three)
+                card1.setCardBackgroundColor(Color.rgb(item.one, item.two, item.three))
             }
 
             override fun dispose() {
             }
 
             override fun onClick(v: View?) {
-                //super.onClick(v)
                 if (v == card1) {
-                    whenColorSelect?.invoke(item.one)
-                } else if (v == card2) {
-                    whenColorSelect?.invoke(item.two)
-                } else if (v == card3) {
-                    whenColorSelect?.invoke(item.three)
+                    whenColorSelect?.invoke(Color.rgb(item.one, item.two, item.three))
                 }
             }
         }
@@ -304,78 +293,32 @@ class ColorPicker @JvmOverloads constructor(
     private fun setupColorsRecyclerView() {
         val list = mutableListOf<Colors>()
 
-        val reds = generateRedColorList()
-        val greens = generateGreenColorList()
-        val blues = generateBlueColorList()
+        //reds
+        list.add(Colors(255, 255, 255))
+        list.add(Colors(144, 144, 144))
+        list.add(Colors(0, 0, 0))
+        list.add(Colors(150, 100, 60))
+        list.add(Colors(210, 0, 0))
+        list.add(Colors(255, 40, 40))
+        list.add(Colors(255, 160, 40))
 
-        val count = max(reds.size, max(greens.size, blues.size))
+        //green
+        list.add(Colors(40, 128, 40))
+        list.add(Colors(40, 192, 40))
+        list.add(Colors(160, 255, 40))
+        list.add(Colors(255, 255, 127))
 
-        for (i in 0 until count) {
-            val c1 = if (i < reds.size) reds[i] else Color.WHITE
-            val c2 = if (i < greens.size) greens[i] else Color.WHITE
-            val c3 = if (i < blues.size) blues[i] else Color.WHITE
-            list.add(Colors(c1, c2, c3))
-        }
-
-        Log.e("****", "color count = ${list.size}")
+        //blue
+        list.add(Colors(160, 40, 192))
+        list.add(Colors(255, 0, 255))
+        list.add(Colors(40, 40, 192))
+        list.add(Colors(40, 40, 255))
+        list.add(Colors(40, 160, 255))
+        list.add(Colors(97, 211, 255))
 
         ColorsAdapter(colorsRv, list) { selectedColor ->
             displayColorValues(selectedColor)
         }
-    }
-
-    private fun generateRedColorList(): List<Int> {
-        val list = mutableListOf<Int>()
-
-        //3, 5, 15, 17, 51, 85, 255
-
-        val a1 = arrayOf(64, 128, 192, 255)
-        val a2 = arrayOf(40, 80, 120, 160)
-
-        for (a in a1)
-            for (b in a2)
-                for (c in a2) {
-                    if (a >= b && a >= c)
-                        list.add(Color.rgb(a, c, b))
-                }
-
-        return list
-    }
-
-    private fun generateGreenColorList(): List<Int> {
-        val list = mutableListOf<Int>()
-
-        //3, 5, 15, 17, 51, 85, 255
-
-        val a1 = arrayOf(64, 128, 192, 255)
-        val a2 = arrayOf(40, 80, 120, 160)
-
-        for (a in a1)
-            for (b in a2)
-                for (c in a2) {
-                    if (a >= b && a >= c)
-                        list.add(Color.rgb(c, a, b))
-                }
-
-        return list
-    }
-
-    private fun generateBlueColorList(): List<Int> {
-        val list = mutableListOf<Int>()
-
-        //3, 5, 15, 17, 51, 85, 255
-
-        val a1 = arrayOf(64, 128, 192, 255)
-        val a2 = arrayOf(40, 80, 120, 160)
-
-        for (a in a1)
-            for (b in a2)
-                for (c in a2) {
-                    if (a >= b && a >= c)
-                        list.add(Color.rgb(c, b, a))
-                }
-
-        return list
     }
 
     private fun displayColorValues(colorCode: Int) {
@@ -484,10 +427,12 @@ class ColorPicker @JvmOverloads constructor(
 
     //--------------------------------------------------------------------
 
-    private val storageKey = "CLRS"
+    private val storageKey get() = "CLRS"
+
+    private val storage get() = GeneralStorage.getInstance(javaClass.simpleName + "-" + pickerName)
 
     private fun loadRecentSavedColors(): MutableList<Int> {
-        val storage = GeneralStorage.getInstance(javaClass.simpleName + "-" + pickerName)
+
         val json = storage.retrieve(storageKey, "[]")
 
         return try {
@@ -505,8 +450,6 @@ class ColorPicker @JvmOverloads constructor(
     }
 
     private fun updateSavedRecentColors() {
-        val storage = GeneralStorage.getInstance(javaClass.simpleName)
-
         val jsonArray = JSONArray()
 
         (recentColorsRv.adapter as? RecentColorsAdapter)?.list?.forEach {
@@ -517,6 +460,8 @@ class ColorPicker @JvmOverloads constructor(
         }
 
         storage.save(storageKey, jsonArray.toString())
+        val json = storage.retrieve(storageKey, "[]")
+        print(json)
     }
     //endregion
 
