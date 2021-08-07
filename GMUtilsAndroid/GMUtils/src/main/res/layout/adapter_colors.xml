@@ -8,8 +8,8 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card1"
-        android:layout_width="@dimen/size_35"
-        android:layout_height="@dimen/size_35" />
+        android:layout_width="@dimen/size_30"
+        android:layout_height="@dimen/size_30" />
         <!--app:cardBackgroundColor="#ff0000"
         app:cardCornerRadius="@dimen/size_5"
         app:cardElevation="1dp" />-->

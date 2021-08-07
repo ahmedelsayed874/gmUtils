@@ -82,7 +82,7 @@ class ColorPicker @JvmOverloads constructor(
 
         hexValueEt = view.findViewById(R.id.hexValueEt)
         colorPreviewCard = view.findViewById(R.id.colorPreviewCard)
-        colorPreviewCard.setCardBackgroundColor(Color.parseColor("#ff7f7f7f"))
+        colorPreviewCard.setCardBackgroundColor(Color.parseColor("#39AFAEAE"))
         colorPreviewCard.cardElevation = 0f
         colorPreviewCard.radius =
             view.context.resources.getDimensionPixelSize(R.dimen.size_10).toFloat()
@@ -90,10 +90,11 @@ class ColorPicker @JvmOverloads constructor(
 
         val colorPreviewCardContainer = view.findViewById<CardView>(R.id.colorPreviewCardContainer)
         colorPreviewCardContainer.setCardBackgroundColor(
-            ContextCompat.getColor(
+            /*ContextCompat.getColor(
                 view.context,
                 R.color.gray3
-            )
+            )*/
+            Color.parseColor("#39AFAEAE")
         )
         colorPreviewCardContainer.cardElevation = 0f
         colorPreviewCardContainer.radius =

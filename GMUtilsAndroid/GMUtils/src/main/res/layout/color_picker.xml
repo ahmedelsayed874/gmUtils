@@ -188,8 +188,9 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/colorPreviewCardContainer"
             android:layout_width="@dimen/size_50"
-            android:layout_height="@dimen/size_25">
-            <!--app:cardBackgroundColor="@color/gray3"
+            android:layout_height="@dimen/size_25"
+            >
+            <!--app:cardBackgroundColor="#39AFAEAE"
             app:cardCornerRadius="@dimen/size_10"
             app:cardElevation="0dp">-->
 
@@ -197,7 +198,8 @@
                 android:id="@+id/colorPreviewCard"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/size_1"/>
+                android:layout_margin="@dimen/size_1"
+                app:cardBackgroundColor="#39AFAEAE"/>
                 <!--app:cardBackgroundColor="#ff7f7f7f"
                 app:cardCornerRadius="@dimen/size_10"
                 app:cardElevation="0dp" />-->
