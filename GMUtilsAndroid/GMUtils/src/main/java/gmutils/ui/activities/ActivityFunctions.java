@@ -212,7 +212,6 @@ public class ActivityFunctions implements BaseFragmentListener {
         );
     }
 
-
     public MessageDialog showMessageDialog(Context context, CharSequence msg) {
         return showMessageDialog(context, null, msg, (Pair<String, MessageDialog.Listener>) null);
     }
