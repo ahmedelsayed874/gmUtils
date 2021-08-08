@@ -83,6 +83,11 @@ public class MessageDialog extends BaseDialog {
         return this;
     }
 
+    public MessageDialog setBackgroundColor(int color) {
+        functions.setBackgroundColor(color);
+        return this;
+    }
+
     public MessageDialog setTextColor(int color) {
         functions.setTextColor(color);
         return this;

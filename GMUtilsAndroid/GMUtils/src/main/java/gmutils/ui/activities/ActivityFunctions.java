@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,7 +62,6 @@ public class ActivityFunctions implements BaseFragmentListener {
     public ActivityFunctions(@NotNull Delegate delegate) {
         this.delegate = delegate;
     }
-
 
     //----------------------------------------------------------------------------------------------
 
@@ -182,6 +182,65 @@ public class ActivityFunctions implements BaseFragmentListener {
     @Override
     public RetryPromptDialog showRetryPromptDialog(Context context, CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
         return RetryPromptDialog.show(context, msg, onRetry, onCancel);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public MessageDialog showMessageDialog(Context context, int msg) {
+        return showMessageDialog(context, 0, msg, (Pair<Integer, MessageDialog.Listener>) null);
+    }
+
+    public MessageDialog showMessageDialog(Context context, int msg, Pair<Integer, MessageDialog.Listener> button) {
+        return showMessageDialog(context, 0, msg, button);
+    }
+
+    @SafeVarargs
+    public final MessageDialog showMessageDialog(Context context, int title, int msg, Pair<Integer, MessageDialog.Listener>... buttons) {
+        Pair<String, MessageDialog.Listener>[] buttons2 = null;
+        if (buttons != null) {
+            buttons2 = new Pair[buttons.length];
+            for (int i = 0; i < buttons.length; i++) {
+                buttons2[i] = new Pair<>(context.getString(buttons[i].first), buttons[i].second);
+            }
+        }
+
+        return showMessageDialog(
+                context,
+                title == 0 ? null : context.getString(title),
+                msg == 0 ? null : context.getString(msg),
+                buttons2
+        );
+    }
+
+
+    public MessageDialog showMessageDialog(Context context, CharSequence msg) {
+        return showMessageDialog(context, null, msg, (Pair<String, MessageDialog.Listener>) null);
+    }
+
+    public MessageDialog showMessageDialog(Context context, CharSequence msg, Pair<String, MessageDialog.Listener> button) {
+        return showMessageDialog(context, null, msg, button);
+    }
+
+    @SafeVarargs
+    public final MessageDialog showMessageDialog(Context context, CharSequence title, CharSequence msg, Pair<String, MessageDialog.Listener>... buttons) {
+        MessageDialog dialog = MessageDialog.create(context);
+
+        if (title != null) dialog.setTitle(title);
+        else dialog.setTitle(R.string.message);
+
+        dialog.setMessage(msg);
+
+        if (buttons != null && buttons.length > 0) {
+            for (Pair<String, MessageDialog.Listener> button : buttons) {
+                dialog.setButton1(button.first, button.second);
+            }
+        } else {
+            dialog.setButton1(R.string.ok, null);
+        }
+
+        dialog.show();
+
+        return dialog;
     }
 
     //----------------------------------------------------------------------------------------------

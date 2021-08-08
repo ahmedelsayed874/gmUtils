@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import gmutils.Logger;
 import gmutils.R;
+import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.fragments.BaseFragment;
 import gmutils.ui.fragments.BaseFragmentListener;
@@ -275,6 +277,35 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
         return showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public MessageDialog showMessageDialog(int msg) {
+        return showMessageDialog(0, msg, (Pair<Integer, MessageDialog.Listener>) null);
+    }
+
+    public MessageDialog showMessageDialog(int msg, Pair<Integer, MessageDialog.Listener> button) {
+        return showMessageDialog(0, msg, button);
+    }
+
+    @SafeVarargs
+    public final MessageDialog showMessageDialog(int title, int msg, Pair<Integer, MessageDialog.Listener>... buttons) {
+        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
+    }
+
+
+    public MessageDialog showMessageDialog(CharSequence msg) {
+        return showMessageDialog(null, msg, (Pair<String, MessageDialog.Listener>) null);
+    }
+
+    public MessageDialog showMessageDialog(CharSequence msg, Pair<String, MessageDialog.Listener> button) {
+        return showMessageDialog(null, msg, button);
+    }
+
+    @SafeVarargs
+    public final MessageDialog showMessageDialog(CharSequence title, CharSequence msg, Pair<String, MessageDialog.Listener>... buttons) {
+        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
     }
 
     //----------------------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import gmutils.Logger;
 import gmutils.R;
+import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.fragments.BaseLegacyFragment;
 import gmutils.ui.utils.ViewSource;
@@ -42,12 +44,35 @@ import gmutils.ui.utils.ViewSource;
 @SuppressLint("Registered")
 public abstract class BaseLegacyActivity extends Activity implements BaseLegacyFragment.Listener {
 
-    private ActivityFunctions mActivityFunctions;
+    private ActivityFunctions _activityFunctions;
 
     //----------------------------------------------------------------------------------------------
 
     public final ActivityFunctions getActivityFunctions() {
-        return mActivityFunctions;
+        if (_activityFunctions == null) {
+            _activityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
+                @Override
+                public CharSequence getActivityTitle() {
+                    return BaseLegacyActivity.this.getActivityTitle();
+                }
+
+                @Override
+                public boolean allowApplyingPreferenceLocale() {
+                    return BaseLegacyActivity.this.allowApplyingPreferenceLocale();
+                }
+
+                @Override
+                public boolean isOrientationDisabled() {
+                    return BaseLegacyActivity.this.isOrientationDisabled();
+                }
+
+                @Override
+                public int initialKeyboardState() {
+                    return BaseLegacyActivity.this.initialKeyboardState();
+                }
+            });
+        }
+        return _activityFunctions;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -83,38 +108,16 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     //----------------------------------------------------------------------------------------------
 
     protected void onPreCreate() {
-        mActivityFunctions.onPreCreate(thisActivity());
+        _activityFunctions.onPreCreate(thisActivity());
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        mActivityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
-            @Override
-            public CharSequence getActivityTitle() {
-                return BaseLegacyActivity.this.getActivityTitle();
-            }
-
-            @Override
-            public boolean allowApplyingPreferenceLocale() {
-                return BaseLegacyActivity.this.allowApplyingPreferenceLocale();
-            }
-
-            @Override
-            public boolean isOrientationDisabled() {
-                return BaseLegacyActivity.this.isOrientationDisabled();
-            }
-
-            @Override
-            public int initialKeyboardState() {
-                return BaseLegacyActivity.this.initialKeyboardState();
-            }
-        });
-
         onPreCreate();
 
         super.onCreate(savedInstanceState);
 
-        mActivityFunctions.onCreate(thisActivity(), savedInstanceState);
+        _activityFunctions.onCreate(thisActivity(), savedInstanceState);
 
         ViewSource viewSource = getViewSource(getLayoutInflater());
 
@@ -134,23 +137,23 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     }
 
     protected void onPostCreate() {
-        mActivityFunctions.onPostCreate(thisActivity());
+        _activityFunctions.onPostCreate(thisActivity());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        mActivityFunctions.onStart(thisActivity());
+        _activityFunctions.onStart(thisActivity());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mActivityFunctions.onConfigurationChanged(thisActivity(), newConfig);
+        _activityFunctions.onConfigurationChanged(thisActivity(), newConfig);
     }
 
     public void attachBaseContext(Context newBase) {
-        super.attachBaseContext(mActivityFunctions.getAttachBaseContext(newBase));
+        super.attachBaseContext(_activityFunctions.getAttachBaseContext(newBase));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -161,15 +164,15 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @SuppressLint("ClickableViewAccessibility")
     public void setKeyboardAutoHidden() {
-        mActivityFunctions.setKeyboardAutoHidden(thisActivity());
+        _activityFunctions.setKeyboardAutoHidden(thisActivity());
     }
 
     public boolean keyboardShouldAutoHide(float rawX, float rawY) {
-        return mActivityFunctions.keyboardShouldAutoHide(rawX, rawY);
+        return _activityFunctions.keyboardShouldAutoHide(rawX, rawY);
     }
 
     public void keyboardDidHide() {
-        mActivityFunctions.keyboardDidHide();
+        _activityFunctions.keyboardDidHide();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -179,33 +182,62 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     }
 
     public void showWaitView(int msg) {
-        mActivityFunctions.showWaitView(thisActivity(), msg);
+        _activityFunctions.showWaitView(thisActivity(), msg);
     }
 
     public void hideWaitView() {
-        mActivityFunctions.hideWaitView();
+        _activityFunctions.hideWaitView();
     }
 
     public void hideWaitViewImmediately() {
-        mActivityFunctions.hideWaitViewImmediately();
+        _activityFunctions.hideWaitViewImmediately();
     }
 
     public void updateWaitViewMsg(CharSequence msg) {
-        mActivityFunctions.updateWaitViewMsg(msg);
+        _activityFunctions.updateWaitViewMsg(msg);
     }
 
     public boolean isWaitViewShown() {
-        return mActivityFunctions.isWaitViewShown();
+        return _activityFunctions.isWaitViewShown();
     }
 
     //----------------------------------------------------------------------------------------------
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry) {
-        return mActivityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, null);
+        return _activityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, null);
     }
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
-        return mActivityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
+        return _activityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public MessageDialog showMessageDialog(int msg) {
+        return showMessageDialog(0, msg, (Pair<Integer, MessageDialog.Listener>) null);
+    }
+
+    public MessageDialog showMessageDialog(int msg, Pair<Integer, MessageDialog.Listener> button) {
+        return showMessageDialog(0, msg, button);
+    }
+
+    @SafeVarargs
+    public final MessageDialog showMessageDialog(int title, int msg, Pair<Integer, MessageDialog.Listener>... buttons) {
+        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
+    }
+
+
+    public MessageDialog showMessageDialog(CharSequence msg) {
+        return showMessageDialog(null, msg, (Pair<String, MessageDialog.Listener>) null);
+    }
+
+    public MessageDialog showMessageDialog(CharSequence msg, Pair<String, MessageDialog.Listener> button) {
+        return showMessageDialog(null, msg, button);
+    }
+
+    @SafeVarargs
+    public final MessageDialog showMessageDialog(CharSequence title, CharSequence msg, Pair<String, MessageDialog.Listener>... buttons) {
+        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -288,7 +320,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mActivityFunctions.onDestroy();
+        _activityFunctions.onDestroy();
     }
 
 
@@ -296,13 +328,13 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        mActivityFunctions.onCreateOptionsMenu(menu);
+        _activityFunctions.onCreateOptionsMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mActivityFunctions.onOptionsItemSelected(thisActivity(), item)) return true;
+        if (_activityFunctions.onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
     }
 }

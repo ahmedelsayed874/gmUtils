@@ -87,6 +87,11 @@ public class MessageDialogFunctions {
         return this;
     }
 
+    public MessageDialogFunctions setBackgroundColor(int color) {
+        lyContainer.setBackgroundColor(color);
+        return this;
+    }
+
     public MessageDialogFunctions setTextColor(int color) {
         tvTitle.setTextColor(color);
         tvMsg.setTextColor(color);
