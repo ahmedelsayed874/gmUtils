@@ -199,7 +199,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/size_1"
-                app:cardBackgroundColor="#39AFAEAE"/>
+                />
                 <!--app:cardBackgroundColor="#ff7f7f7f"
                 app:cardCornerRadius="@dimen/size_10"
                 app:cardElevation="0dp" />-->
