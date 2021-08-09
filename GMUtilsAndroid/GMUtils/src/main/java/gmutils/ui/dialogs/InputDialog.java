@@ -58,8 +58,8 @@ public class InputDialog extends BaseDialog {
         tvTitle = view.findViewById(R.id.tv_title);
         tvMsg = view.findViewById(R.id.tv_msg);
         tvInput = view.findViewById(R.id.tv_input);
-        tvDone = view.findViewById(R.id.tv_btn1);
-        tvCancel = view.findViewById(R.id.tv_btn2);
+        tvDone = view.findViewById(R.id.tv_done);
+        tvCancel = view.findViewById(R.id.tv_cancel);
 
         tvDone.setOnClickListener(v -> {
             if (doneCallback != null)
