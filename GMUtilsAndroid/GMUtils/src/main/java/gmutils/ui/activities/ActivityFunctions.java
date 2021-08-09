@@ -48,8 +48,11 @@ import gmutils.utils.Utils;
 public class ActivityFunctions implements BaseFragmentListener {
     public interface Delegate {
         CharSequence getActivityTitle();
+
         boolean allowApplyingPreferenceLocale();
+
         boolean isOrientationDisabled();
+
         int initialKeyboardState();
     }
 
@@ -83,10 +86,12 @@ public class ActivityFunctions implements BaseFragmentListener {
     public void onCreate(Activity activity, @Nullable Bundle savedInstanceState) {
     }
 
-    public void onPostCreate(Activity activity) {}
+    public void onPostCreate(Activity activity) {
+    }
 
     public void onStart(Activity activity) {
-        if (!TextUtils.isEmpty(delegate.getActivityTitle())) activity.setTitle(delegate.getActivityTitle());
+        if (!TextUtils.isEmpty(delegate.getActivityTitle()))
+            activity.setTitle(delegate.getActivityTitle());
     }
 
     public void onConfigurationChanged(Activity activity, Configuration newConfig) {
@@ -113,7 +118,7 @@ public class ActivityFunctions implements BaseFragmentListener {
 
         View topView = new View(activity);
         topView.setLayoutParams(layoutParams);
-        topView.setOnTouchListener((View v,  MotionEvent e) -> {
+        topView.setOnTouchListener((View v, MotionEvent e) -> {
             if (keyboardShouldAutoHide(e.getRawX(), e.getRawY())) {
                 KeypadOp.hide(activity);
                 View currentFocus = activity.getCurrentFocus();
@@ -187,7 +192,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     //----------------------------------------------------------------------------------------------
 
     public MessageDialog showMessageDialog(Context context, int msg) {
-        return showMessageDialog(context, 0, msg, (Pair<Integer, MessageDialog.Listener>) null);
+        return showMessageDialog(context, 0, msg);
     }
 
     public MessageDialog showMessageDialog(Context context, int msg, Pair<Integer, MessageDialog.Listener> button) {
@@ -200,7 +205,8 @@ public class ActivityFunctions implements BaseFragmentListener {
         if (buttons != null) {
             buttons2 = new Pair[buttons.length];
             for (int i = 0; i < buttons.length; i++) {
-                buttons2[i] = new Pair<>(context.getString(buttons[i].first), buttons[i].second);
+                if (buttons[i] != null)
+                    buttons2[i] = new Pair<>(context.getString(buttons[i].first), buttons[i].second);
             }
         }
 
@@ -213,7 +219,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     public MessageDialog showMessageDialog(Context context, CharSequence msg) {
-        return showMessageDialog(context, null, msg, (Pair<String, MessageDialog.Listener>) null);
+        return showMessageDialog(context, null, msg);
     }
 
     public MessageDialog showMessageDialog(Context context, CharSequence msg, Pair<String, MessageDialog.Listener> button) {
@@ -231,7 +237,8 @@ public class ActivityFunctions implements BaseFragmentListener {
 
         if (buttons != null && buttons.length > 0) {
             for (Pair<String, MessageDialog.Listener> button : buttons) {
-                dialog.setButton1(button.first, button.second);
+                if (button != null)
+                    dialog.setButton1(button.first, button.second);
             }
         } else {
             dialog.setButton1(R.string.ok, null);

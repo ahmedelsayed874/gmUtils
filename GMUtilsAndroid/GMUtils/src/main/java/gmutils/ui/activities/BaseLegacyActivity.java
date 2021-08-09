@@ -214,7 +214,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     //----------------------------------------------------------------------------------------------
 
     public MessageDialog showMessageDialog(int msg) {
-        return showMessageDialog(0, msg, (Pair<Integer, MessageDialog.Listener>) null);
+        return showMessageDialog(0, msg);
     }
 
     public MessageDialog showMessageDialog(int msg, Pair<Integer, MessageDialog.Listener> button) {
@@ -228,7 +228,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
 
     public MessageDialog showMessageDialog(CharSequence msg) {
-        return showMessageDialog(null, msg, (Pair<String, MessageDialog.Listener>) null);
+        return showMessageDialog(null, msg);
     }
 
     public MessageDialog showMessageDialog(CharSequence msg, Pair<String, MessageDialog.Listener> button) {
