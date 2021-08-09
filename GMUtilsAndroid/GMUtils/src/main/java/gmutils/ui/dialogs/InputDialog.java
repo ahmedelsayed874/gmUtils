@@ -3,6 +3,7 @@ package gmutils.ui.dialogs;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -146,12 +147,22 @@ public class InputDialog extends BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     public InputDialog setDoneText(int textId) {
-        tvDone.setText(textId);
+        if (textId > 0) {
+            tvDone.setText(textId);
+            tvDone.setVisibility(View.VISIBLE);
+        } else {
+            tvDone.setVisibility(View.GONE);
+        }
         return this;
     }
 
     public InputDialog setDoneText(CharSequence text) {
-        tvDone.setText(text);
+        if (!TextUtils.isEmpty(text)) {
+            tvDone.setText(text);
+            tvDone.setVisibility(View.VISIBLE);
+        } else {
+            tvDone.setVisibility(View.GONE);
+        }
         return this;
     }
 
@@ -163,12 +174,22 @@ public class InputDialog extends BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     public InputDialog setCancelText(int textId) {
-        tvCancel.setText(textId);
+        if (textId > 0) {
+            tvCancel.setText(textId);
+            tvCancel.setVisibility(View.VISIBLE);
+        } else {
+            tvCancel.setVisibility(View.GONE);
+        }
         return this;
     }
 
     public InputDialog setCancelText(CharSequence text) {
-        tvCancel.setText(text);
+        if (!TextUtils.isEmpty(text)) {
+            tvCancel.setText(text);
+            tvCancel.setVisibility(View.VISIBLE);
+        } else {
+            tvCancel.setVisibility(View.GONE);
+        }
         return this;
     }
 
