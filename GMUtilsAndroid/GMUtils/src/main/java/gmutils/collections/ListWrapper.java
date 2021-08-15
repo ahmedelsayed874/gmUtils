@@ -97,7 +97,7 @@ public class ListWrapper<T> {
 
     //region processing methods
     public ListWrapper<T> filter(ActionCallback<T, Boolean> action) {
-        if (action == null) return this;
+        if (action == null) throw new IllegalArgumentException();
 
         int size = list.size();
         for (int i = 0; i < size; i++) {
@@ -112,20 +112,33 @@ public class ListWrapper<T> {
     }
 
     public <M> ListWrapper<T> map(ActionCallback<T, M> action, ResultCallback<List<M>> result) {
-        return map(new ArrayList<>(list.size()), action, result);
+        if (result == null) throw new IllegalArgumentException();
+
+        List<M> outList = this.map(action);
+        result.invoke(outList);
+
+        return this;
     }
 
-    public <M> ListWrapper<T> map(List<M> outList, ActionCallback<T, M> action, ResultCallback<List<M>> result) {
-        if (outList == null || action == null || result == null) return this;
+    public <M> ListWrapper<T> map(List<M> outList, ActionCallback<T, M> action) {
+        if (outList == null) throw new IllegalArgumentException();
+        if (action != null) throw new IllegalArgumentException();
 
-        for (T t : list) {
+        for (T t : this.list) {
             M value = action.invoke(t);
             outList.add(value);
         }
 
-        result.invoke(outList);
-
         return this;
+
+    }
+
+    public <M> List<M> map(ActionCallback<T, M> action) {
+        List<M> outList = new ArrayList<>(this.list.size());
+
+        map(outList, action);
+
+        return outList;
     }
 
     public ListWrapper<T> performAction(ActionCallback<ListWrapper<T>, Void> action) {

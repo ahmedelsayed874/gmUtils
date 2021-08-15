@@ -120,20 +120,25 @@ public class MapWrapper<K, V> {
     }
 
     public <Vn> MapWrapper<K, V> map(ActionCallback2<K, V, Vn> action, ResultCallback<Map<K, Vn>> result) {
-        return map(new HashMap<>(), action, result);
+        if (result == null) throw new IllegalArgumentException();
+
+        Map<K, Vn> map = map(action);
+        result.invoke(map);
+
+        return this;
     }
 
-    public <Vn> MapWrapper<K, V> map(Map<K, Vn> outMap, ActionCallback2<K, V, Vn> action, ResultCallback<Map<K, Vn>> result) {
-        if (action == null || result == null) return this;
+    public <Vn> Map<K, Vn> map(ActionCallback2<K, V, Vn> action) {
+        if (action == null) throw new IllegalArgumentException();
+
+        Map<K, Vn> outMap = new HashMap<>();
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
             Vn newValue = action.invoke(entry.getKey(), entry.getValue());
             outMap.put(entry.getKey(), newValue);
         }
 
-        result.invoke(outMap);
-
-        return this;
+        return outMap;
     }
 
     public MapWrapper<K, V> performAction(ActionCallback<MapWrapper<K, V>, Void> action) {
