@@ -236,10 +236,16 @@ public class ActivityFunctions implements BaseFragmentListener {
         dialog.setMessage(msg);
 
         if (buttons != null && buttons.length > 0) {
-            for (Pair<String, MessageDialog.Listener> button : buttons) {
-                if (button != null)
-                    dialog.setButton1(button.first, button.second);
+            dialog.setButton1(buttons[0].first, buttons[0].second);
+
+            if (buttons.length > 1) {
+                dialog.setButton2(buttons[1].first, buttons[1].second);
             }
+
+            if (buttons.length > 2) {
+                dialog.setButton3(buttons[2].first, buttons[2].second);
+            }
+
         } else {
             dialog.setButton1(R.string.ok, null);
         }
