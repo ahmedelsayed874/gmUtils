@@ -1053,6 +1053,11 @@ public class DateOp implements Serializable {
         });
     }
 
+
+    public void showDatePickerDialog(Context context, DatePickingListener listener) {
+        showDatePickerDialog(context, null, null, listener);
+    }
+
     public void showDatePickerDialog(Context context, @Nullable Long minDate, @Nullable Long maxDate, DatePickingListener listener) {
         int d = calendar.get(Calendar.DAY_OF_MONTH);
         int m = calendar.get(Calendar.MONTH);
@@ -1086,11 +1091,16 @@ public class DateOp implements Serializable {
         dialog.show();
     }
 
+
     public void showTimePickerDialog(Context context, final DatePickingListener listener) {
+        showTimePickerDialog(context, false, listener);
+    }
+
+    public void showTimePickerDialog(Context context, boolean is24HourView, final DatePickingListener listener) {
         int h = calendar.get(Calendar.HOUR_OF_DAY);
         int m = calendar.get(Calendar.MINUTE);
 
-        new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+        TimePickerDialog dialog = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
                 if (listener != null) {
@@ -1100,11 +1110,9 @@ public class DateOp implements Serializable {
                     listener.onDatePicked(DateOp.this);
                 }
             }
-        }, h, m, false);
-    }
+        }, h, m, is24HourView);
 
-    public void showDatePickerDialog(Context context, DatePickingListener listener) {
-        showDatePickerDialog(context, null, null, listener);
+        dialog.show();
     }
 
     public interface DatePickingListener {
