@@ -1,5 +1,7 @@
 package com.blogspot.gm4s.gmutileexample;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +44,8 @@ public class ListAndMapWrappersExample {
                 //extra methods
                 .filter(val -> {
                     return val % 2 == 0;
+                }, r ->{
+                    Log.d("***", "new list: " + r);
                 })
                 .map(val -> {
                     return "Value: " + val;
@@ -98,6 +102,8 @@ public class ListAndMapWrappersExample {
                 //extra methods
                 .filter((k, v) -> {
                     return k % 2 == 0;
+                }, result -> {
+                    Log.d("****", "new map: " + result);
                 })
                 .map((k, v) -> {
                     return "Key: " + k + " is mapping Value: " + v;
