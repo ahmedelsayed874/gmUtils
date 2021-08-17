@@ -105,10 +105,18 @@ public class MapWrapper<K, V> {
     //endregion
 
     //region processing methods
-    public MapWrapper<K, V> filter(ActionCallback2<K, V, Boolean> action, ResultCallback<Map<K, V>> result) {
+    /**
+     * @return new MapWrapper with filtered items
+     */
+    public MapWrapper<K, V> filterAndSwitch(ActionCallback2<K, V, Boolean> action) {
+        Map<K, V> newMap = filter(action);
+        return MapWrapper.create(newMap);
+    }
+
+    public MapWrapper<K, V> filter(ActionCallback2<K, V, Boolean> action, ResultCallback<MapWrapper<K, V>> result) {
         if (result == null) throw new IllegalArgumentException();
         Map<K, V> newMap = filter(action);
-        result.invoke(newMap);
+        result.invoke(MapWrapper.create(newMap));
         return this;
     }
 
@@ -135,11 +143,20 @@ public class MapWrapper<K, V> {
         return map;
     }
 
-    public <Vn> MapWrapper<K, V> map(ActionCallback2<K, V, Vn> action, ResultCallback<Map<K, Vn>> result) {
+
+    /**
+     * @return new MapWrapper with mapped items
+     */
+    public <Vn> MapWrapper<K, Vn> mapAndSwitch(ActionCallback2<K, V, Vn> action) {
+        Map<K, Vn> map = map(action);
+        return MapWrapper.create(map);
+    }
+
+    public <Vn> MapWrapper<K, V> map(ActionCallback2<K, V, Vn> action, ResultCallback<MapWrapper<K, Vn>> result) {
         if (result == null) throw new IllegalArgumentException();
 
         Map<K, Vn> map = map(action);
-        result.invoke(map);
+        result.invoke(MapWrapper.create(map));
 
         return this;
     }

@@ -96,11 +96,19 @@ public class ListWrapper<T> {
     //endregion
 
     //region processing methods
-    public ListWrapper<T> filter(ActionCallback<T, Boolean> action, ResultCallback<List<T>> result) {
+    /**
+     * @return new ListWrapper with filtered items
+     */
+    public ListWrapper<T> filterAndSwitch(ActionCallback<T, Boolean> action) {
+        List<T> newList = filter(action);
+        return ListWrapper.create(newList);
+    }
+
+    public ListWrapper<T> filter(ActionCallback<T, Boolean> action, ResultCallback<ListWrapper<T>> result) {
         if (result == null) throw new IllegalArgumentException();
 
         List<T> newList = filter(action);
-        result.invoke(newList);
+        result.invoke(ListWrapper.create(newList));
 
         return this;
     }
@@ -121,11 +129,20 @@ public class ListWrapper<T> {
         return newList;
     }
 
-    public <M> ListWrapper<T> map(ActionCallback<T, M> action, ResultCallback<List<M>> result) {
+
+    /**
+     * @return new ListWrapper with mapped items
+     */
+    public <M> ListWrapper<M> mapAndSwitch(ActionCallback<T, M> action) {
+        List<M> outList = this.map(action);
+        return ListWrapper.create(outList);
+    }
+
+    public <M> ListWrapper<T> map(ActionCallback<T, M> action, ResultCallback<ListWrapper<M>> result) {
         if (result == null) throw new IllegalArgumentException();
 
         List<M> outList = this.map(action);
-        result.invoke(outList);
+        result.invoke(ListWrapper.create(outList));
 
         return this;
     }
