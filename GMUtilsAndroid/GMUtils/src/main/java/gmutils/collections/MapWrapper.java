@@ -86,12 +86,18 @@ public class MapWrapper<K, V> {
     public MapWrapper<K, V> remove(ActionCallback2<K, V, Boolean> remover) {
         if (remover == null) return this;
 
+        LinkedList<K> keysToRemove = new LinkedList<>();
+
         for (Map.Entry<K, V> entry : map.entrySet()) {
             Boolean rem = remover.invoke(entry.getKey(), entry.getValue());
             if (rem == null) rem = false;
 
             if (rem)
-                map.remove(entry.getKey());
+                keysToRemove.add(entry.getKey());
+        }
+
+        for (K key : keysToRemove) {
+            map.remove(key);
         }
 
         return this;
@@ -99,24 +105,34 @@ public class MapWrapper<K, V> {
     //endregion
 
     //region processing methods
-    public MapWrapper<K, V> filter(ActionCallback2<K, V, Boolean> action) {
-        if (action == null) return this;
+    public MapWrapper<K, V> filter(ActionCallback2<K, V, Boolean> action, ResultCallback<Map<K, V>> result) {
+        if (result == null) throw new IllegalArgumentException();
+        Map<K, V> newMap = filter(action);
+        result.invoke(newMap);
+        return this;
+    }
 
-        LinkedList<K> keysTobeRemove = new LinkedList<>();
+    public Map<K, V> filter(ActionCallback2<K, V, Boolean> action) {
+        if (action == null) return null;
+
+        LinkedList<K> keysTobeSelected = new LinkedList<>();
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            Boolean remove = action.invoke(entry.getKey(), entry.getValue());
-            if (remove == null) remove = false;
-            if (remove) {
-                keysTobeRemove.addLast(entry.getKey());
+            Boolean selected = action.invoke(entry.getKey(), entry.getValue());
+            if (selected == null) selected = false;
+            if (selected) {
+                keysTobeSelected.addLast(entry.getKey());
             }
         }
 
-        for (K key : keysTobeRemove) {
-            map.remove(key);
+        Map<K, V> map = new HashMap<>();
+
+        for (K key : keysTobeSelected) {
+            V value = map.get(key);
+            map.put(key, value);
         }
 
-        return this;
+        return map;
     }
 
     public <Vn> MapWrapper<K, V> map(ActionCallback2<K, V, Vn> action, ResultCallback<Map<K, Vn>> result) {

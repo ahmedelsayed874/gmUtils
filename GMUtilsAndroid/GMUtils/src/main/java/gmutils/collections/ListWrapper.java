@@ -96,19 +96,29 @@ public class ListWrapper<T> {
     //endregion
 
     //region processing methods
-    public ListWrapper<T> filter(ActionCallback<T, Boolean> action) {
+    public ListWrapper<T> filter(ActionCallback<T, Boolean> action, ResultCallback<List<T>> result) {
+        if (result == null) throw new IllegalArgumentException();
+
+        List<T> newList = filter(action);
+        result.invoke(newList);
+
+        return this;
+    }
+
+    public List<T> filter(ActionCallback<T, Boolean> action) {
         if (action == null) throw new IllegalArgumentException();
 
-        int size = list.size();
-        for (int i = 0; i < size; i++) {
-            Boolean remove = action.invoke(list.get(i));
-            if (remove == null) remove = false;
-            if (remove) {
-                list.remove((int) i);
-                size--;
+        List<T> newList = new ArrayList<>();
+
+        for (T t : list) {
+            Boolean selected = action.invoke(t);
+            if (selected == null) selected = false;
+            if (selected) {
+                newList.add(t);
             }
         }
-        return this;
+
+        return newList;
     }
 
     public <M> ListWrapper<T> map(ActionCallback<T, M> action, ResultCallback<List<M>> result) {
