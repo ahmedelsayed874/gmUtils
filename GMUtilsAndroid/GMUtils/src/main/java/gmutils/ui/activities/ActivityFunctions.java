@@ -18,10 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +33,6 @@ import gmutils.storage.SettingsStorage;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.dialogs.WaitDialog;
-import gmutils.ui.fragments.BaseFragment;
 import gmutils.ui.fragments.BaseFragmentListener;
 import gmutils.ui.toast.MyToast;
 import gmutils.ui.utils.ViewSource;
@@ -58,14 +54,6 @@ public class ActivityFunctions implements BaseFragmentListener {
     public interface Delegate {
         ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
-        @Nullable
-        HashMap<Integer, Class<? extends ViewModel>> onPreparingViewModels();
-
-        @Nullable
-        default ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
-            return null;
-        }
-
         CharSequence getActivityTitle();
 
         boolean allowApplyingPreferenceLocale();
@@ -79,34 +67,12 @@ public class ActivityFunctions implements BaseFragmentListener {
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
     private ViewBinding activityViewBinding;
-    private HashMap<Integer, ViewModel> viewModels;
 
     //----------------------------------------------------------------------------------------------
 
     public ActivityFunctions(@NotNull Delegate delegate) {
         this.delegate = delegate;
     }
-
-    //----------------------------------------------------------------------------------------------
-
-    public ViewModelProvider.Factory getDefaultViewModelFactory(Application application) {
-        return ViewModelProvider
-                .AndroidViewModelFactory
-                .getInstance(application);
-    }
-
-    public ViewModel getViewModel() {
-        if (viewModels.size() == 1) {
-            return viewModels.values().toArray(new ViewModel[0])[0];
-        }
-
-        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
-    }
-
-    public ViewModel getViewModel(int id) {
-        return viewModels.get(id);
-    }
-
 
     //----------------------------------------------------------------------------------------------
 
@@ -141,27 +107,6 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     public void onPostCreate(Activity activity) {
-
-        if (activity instanceof ViewModelStoreOwner) {
-            HashMap<Integer, Class<? extends ViewModel>> viewModelClasses = delegate.onPreparingViewModels();
-            if (viewModelClasses != null) {
-                viewModels = new HashMap<>();
-                for (Integer id : viewModelClasses.keySet()) {
-                    ViewModelProvider.Factory viewModelFactory = delegate.onCreateViewModelFactory(id);
-                    if (viewModelFactory == null)
-                        viewModelFactory = getDefaultViewModelFactory(activity.getApplication());
-
-                    ViewModelProvider viewModelProvider = new ViewModelProvider(
-                            (ViewModelStoreOwner) activity,
-                            viewModelFactory
-                    );
-
-                    Class<? extends ViewModel> viewModelClass = viewModelClasses.get(id);
-                    assert viewModelClass != null;
-                    viewModels.put(id, viewModelProvider.get(viewModelClass));
-                }
-            }
-        }
     }
 
     public void onStart(Activity activity) {
@@ -391,7 +336,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         if (waitDialog != null) waitDialog.dismiss();
         waitDialogCount = 0;
         waitDialog = null;
-        if (viewModels != null) viewModels.clear();
+
         this.delegate = null;
     }
 

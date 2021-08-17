@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +51,7 @@ import gmutils.ui.utils.ViewSource;
 public abstract class BaseActivity extends AppCompatActivity implements BaseFragmentListener, BaseFragmentListenerX {
 
     private ActivityFunctions mActivityFunctions;
+    private HashMap<Integer, ViewModel> viewModels;
 
     //----------------------------------------------------------------------------------------------
 
@@ -59,16 +61,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 @Override
                 public ViewSource getViewSource(@NonNull LayoutInflater inflater) {
                     return BaseActivity.this.getViewSource(inflater);
-                }
-
-                @Override
-                public HashMap<Integer, Class<? extends ViewModel>> onPreparingViewModels() {
-                    return BaseActivity.this.onPreparingViewModels();
-                }
-
-                @Override
-                public ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
-                    return BaseActivity.this.onCreateViewModelFactory(viewModelId);
                 }
 
                 @Override
@@ -130,15 +122,21 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     protected ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
-        return getActivityFunctions().getDefaultViewModelFactory(getApplication());
+        return ViewModelProvider
+                .AndroidViewModelFactory
+                .getInstance(getApplication());
     }
 
     public ViewModel getViewModel() {
-        return getActivityFunctions().getViewModel();
+        if (viewModels.size() == 1) {
+            return viewModels.values().toArray(new ViewModel[0])[0];
+        }
+
+        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
     }
 
     public ViewModel getViewModel(int id) {
-        return getActivityFunctions().getViewModel(id);
+        return viewModels.get(id);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -163,6 +161,23 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     protected void onPostCreate() {
         getActivityFunctions().onPostCreate(thisActivity());
+
+        HashMap<Integer, Class<? extends ViewModel>> viewModelClasses = onPreparingViewModels();
+        if (viewModelClasses != null) {
+            viewModels = new HashMap<>();
+            for (Integer id : viewModelClasses.keySet()) {
+                ViewModelProvider.Factory viewModelFactory = onCreateViewModelFactory(id);
+
+                ViewModelProvider viewModelProvider = new ViewModelProvider(
+                        thisActivity(),
+                        viewModelFactory
+                );
+
+                Class<? extends ViewModel> viewModelClass = viewModelClasses.get(id);
+                assert viewModelClass != null;
+                viewModels.put(id, viewModelProvider.get(viewModelClass));
+            }
+        }
     }
 
     @Override

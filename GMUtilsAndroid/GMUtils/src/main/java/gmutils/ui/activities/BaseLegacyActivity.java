@@ -14,17 +14,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.viewbinding.ViewBinding;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
 import java.util.List;
 
 import gmutils.Logger;
@@ -56,19 +48,8 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
         if (_activityFunctions == null) {
             _activityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
                 @Override
-                public ViewSource getViewSource(@NonNull LayoutInflater inflater) {
+                public ViewSource getViewSource(LayoutInflater inflater) {
                     return BaseLegacyActivity.this.getViewSource(inflater);
-                }
-
-                @Override
-                public HashMap<Integer, Class<? extends ViewModel>> onPreparingViewModels() {
-                    return null;
-                }
-
-                @Nullable
-                @Override
-                public ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
-                    return null;
                 }
 
                 @Override
@@ -99,10 +80,6 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
-
-    public final ViewBinding getActivityViewBinding() {
-        return getActivityFunctions().getActivityViewBinding();
-    }
 
     //----------------------------------------------------------------------------------------------
 
