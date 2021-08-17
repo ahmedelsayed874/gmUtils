@@ -15,12 +15,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
 
 import gmutils.Logger;
@@ -52,6 +56,22 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
         if (_activityFunctions == null) {
             _activityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
                 @Override
+                public ViewSource getViewSource(@NonNull LayoutInflater inflater) {
+                    return BaseLegacyActivity.this.getViewSource(inflater);
+                }
+
+                @Override
+                public HashMap<Integer, Class<? extends ViewModel>> onPreparingViewModels() {
+                    return null;
+                }
+
+                @Nullable
+                @Override
+                public ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
+                    return null;
+                }
+
+                @Override
                 public CharSequence getActivityTitle() {
                     return BaseLegacyActivity.this.getActivityTitle();
                 }
@@ -77,13 +97,11 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     //----------------------------------------------------------------------------------------------
 
-    private ViewBinding activityViewBinding;
-
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
     public final ViewBinding getActivityViewBinding() {
-        return activityViewBinding;
+        return getActivityFunctions().getActivityViewBinding();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -108,7 +126,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     //----------------------------------------------------------------------------------------------
 
     protected void onPreCreate() {
-        _activityFunctions.onPreCreate(thisActivity());
+        getActivityFunctions().onPreCreate(thisActivity());
     }
 
     @Override
@@ -117,43 +135,30 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
         super.onCreate(savedInstanceState);
 
-        _activityFunctions.onCreate(thisActivity(), savedInstanceState);
-
-        ViewSource viewSource = getViewSource(getLayoutInflater());
-
-        if (viewSource instanceof ViewSource.LayoutResource) {
-            setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
-
-        } else if (viewSource instanceof ViewSource.View) {
-            setContentView(((ViewSource.View) viewSource).getView());
-
-        } else if (viewSource instanceof ViewSource.ViewBinding) {
-            activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-            setContentView(activityViewBinding.getRoot());
-        }
+        getActivityFunctions().onCreate(thisActivity(), savedInstanceState);
 
         onPostCreate();
 
     }
 
     protected void onPostCreate() {
-        _activityFunctions.onPostCreate(thisActivity());
+        getActivityFunctions().onPostCreate(thisActivity());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        _activityFunctions.onStart(thisActivity());
+        getActivityFunctions().onStart(thisActivity());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        _activityFunctions.onConfigurationChanged(thisActivity(), newConfig);
+        getActivityFunctions().onConfigurationChanged(thisActivity(), newConfig);
     }
 
     public void attachBaseContext(Context newBase) {
-        super.attachBaseContext(_activityFunctions.getAttachBaseContext(newBase));
+        super.attachBaseContext(getActivityFunctions().getAttachBaseContext(newBase));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -164,15 +169,15 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @SuppressLint("ClickableViewAccessibility")
     public void setKeyboardAutoHidden() {
-        _activityFunctions.setKeyboardAutoHidden(thisActivity());
+        getActivityFunctions().setKeyboardAutoHidden(thisActivity());
     }
 
     public boolean keyboardShouldAutoHide(float rawX, float rawY) {
-        return _activityFunctions.keyboardShouldAutoHide(rawX, rawY);
+        return getActivityFunctions().keyboardShouldAutoHide(rawX, rawY);
     }
 
     public void keyboardDidHide() {
-        _activityFunctions.keyboardDidHide();
+        getActivityFunctions().keyboardDidHide();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -182,33 +187,33 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     }
 
     public void showWaitView(int msg) {
-        _activityFunctions.showWaitView(thisActivity(), msg);
+        getActivityFunctions().showWaitView(thisActivity(), msg);
     }
 
     public void hideWaitView() {
-        _activityFunctions.hideWaitView();
+        getActivityFunctions().hideWaitView();
     }
 
     public void hideWaitViewImmediately() {
-        _activityFunctions.hideWaitViewImmediately();
+        getActivityFunctions().hideWaitViewImmediately();
     }
 
     public void updateWaitViewMsg(CharSequence msg) {
-        _activityFunctions.updateWaitViewMsg(msg);
+        getActivityFunctions().updateWaitViewMsg(msg);
     }
 
     public boolean isWaitViewShown() {
-        return _activityFunctions.isWaitViewShown();
+        return getActivityFunctions().isWaitViewShown();
     }
 
     //----------------------------------------------------------------------------------------------
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry) {
-        return _activityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, null);
+        return getActivityFunctions().showRetryPromptDialog(thisActivity(), msg, onRetry, null);
     }
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {
-        return _activityFunctions.showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
+        return getActivityFunctions().showRetryPromptDialog(thisActivity(), msg, onRetry, onCancel);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -320,7 +325,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        _activityFunctions.onDestroy();
+        getActivityFunctions().onDestroy();
     }
 
 
@@ -328,13 +333,13 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        _activityFunctions.onCreateOptionsMenu(menu);
+        getActivityFunctions().onCreateOptionsMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (_activityFunctions.onOptionsItemSelected(thisActivity(), item)) return true;
+        if (getActivityFunctions().onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
     }
 }

@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -49,13 +50,27 @@ import gmutils.ui.utils.ViewSource;
 public abstract class BaseActivity extends AppCompatActivity implements BaseFragmentListener, BaseFragmentListenerX {
 
     private ActivityFunctions mActivityFunctions;
-    private HashMap<Integer, ViewModel> viewModels;
 
     //----------------------------------------------------------------------------------------------
 
     public final ActivityFunctions getActivityFunctions() {
         if (mActivityFunctions == null) {
             mActivityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
+                @Override
+                public ViewSource getViewSource(@NonNull LayoutInflater inflater) {
+                    return BaseActivity.this.getViewSource(inflater);
+                }
+
+                @Override
+                public HashMap<Integer, Class<? extends ViewModel>> onPreparingViewModels() {
+                    return BaseActivity.this.onPreparingViewModels();
+                }
+
+                @Override
+                public ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
+                    return BaseActivity.this.onCreateViewModelFactory(viewModelId);
+                }
+
                 @Override
                 public CharSequence getActivityTitle() {
                     return BaseActivity.this.getActivityTitle();
@@ -82,13 +97,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    private ViewBinding activityViewBinding;
-
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
     public final ViewBinding getActivityViewBinding() {
-        return activityViewBinding;
+        return getActivityFunctions().getActivityViewBinding();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -116,23 +129,16 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         return null;
     }
 
-    protected ViewModelProvider.Factory onCreateViewModelFactory(int id) {
-        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
-                .AndroidViewModelFactory
-                .getInstance(getApplication());
-        return viewModelFactory;
+    protected ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
+        return getActivityFunctions().getDefaultViewModelFactory(getApplication());
     }
 
     public ViewModel getViewModel() {
-        if (viewModels.size() == 1) {
-            return viewModels.values().toArray(new ViewModel[0])[0];
-        }
-
-        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
+        return getActivityFunctions().getViewModel();
     }
 
     public ViewModel getViewModel(int id) {
-        return viewModels.get(id);
+        return getActivityFunctions().getViewModel(id);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -151,40 +157,12 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
         getActivityFunctions().onCreate(thisActivity(), savedInstanceState);
 
-        ViewSource viewSource = getViewSource(getLayoutInflater());
-
-        if (viewSource instanceof ViewSource.LayoutResource) {
-            setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
-
-        } else if (viewSource instanceof ViewSource.View) {
-            setContentView(((ViewSource.View) viewSource).getView());
-
-        } else if (viewSource instanceof ViewSource.ViewBinding) {
-            activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-            setContentView(activityViewBinding.getRoot());
-        }
-
         onPostCreate();
 
     }
 
     protected void onPostCreate() {
         getActivityFunctions().onPostCreate(thisActivity());
-
-        HashMap<Integer, Class<? extends ViewModel>> viewModelClasses = onPreparingViewModels();
-        if (viewModelClasses != null) {
-            viewModels = new HashMap<>();
-            for (Integer id : viewModelClasses.keySet()) {
-                ViewModelProvider viewModelProvider = new ViewModelProvider(
-                        thisActivity(),
-                        onCreateViewModelFactory(id)
-                );
-
-                Class<? extends ViewModel> viewModelClass = viewModelClasses.get(id);
-                assert viewModelClass != null;
-                viewModels.put(id, viewModelProvider.get(viewModelClass));
-            }
-        }
     }
 
     @Override
@@ -391,7 +369,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     protected void onDestroy() {
         super.onDestroy();
         getActivityFunctions().onDestroy();
-        if (viewModels != null) viewModels.clear();
     }
 
     //----------------------------------------------------------------------------------------------

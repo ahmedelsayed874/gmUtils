@@ -2,6 +2,7 @@ package gmutils.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -17,8 +18,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.viewbinding.ViewBinding;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
 
 import gmutils.KeypadOp;
 import gmutils.Logger;
@@ -47,6 +56,16 @@ import gmutils.utils.Utils;
 @SuppressLint("Registered")
 public class ActivityFunctions implements BaseFragmentListener {
     public interface Delegate {
+        ViewSource getViewSource(@NotNull LayoutInflater inflater);
+
+        @Nullable
+        HashMap<Integer, Class<? extends ViewModel>> onPreparingViewModels();
+
+        @Nullable
+        default ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
+            return null;
+        }
+
         CharSequence getActivityTitle();
 
         boolean allowApplyingPreferenceLocale();
@@ -59,12 +78,35 @@ public class ActivityFunctions implements BaseFragmentListener {
     private Delegate delegate;
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
+    private ViewBinding activityViewBinding;
+    private HashMap<Integer, ViewModel> viewModels;
 
     //----------------------------------------------------------------------------------------------
 
     public ActivityFunctions(@NotNull Delegate delegate) {
         this.delegate = delegate;
     }
+
+    //----------------------------------------------------------------------------------------------
+
+    public ViewModelProvider.Factory getDefaultViewModelFactory(Application application) {
+        return ViewModelProvider
+                .AndroidViewModelFactory
+                .getInstance(application);
+    }
+
+    public ViewModel getViewModel() {
+        if (viewModels.size() == 1) {
+            return viewModels.values().toArray(new ViewModel[0])[0];
+        }
+
+        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
+    }
+
+    public ViewModel getViewModel(int id) {
+        return viewModels.get(id);
+    }
+
 
     //----------------------------------------------------------------------------------------------
 
@@ -84,9 +126,42 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     public void onCreate(Activity activity, @Nullable Bundle savedInstanceState) {
+        ViewSource viewSource = delegate.getViewSource(activity.getLayoutInflater());
+
+        if (viewSource instanceof ViewSource.LayoutResource) {
+            activity.setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
+
+        } else if (viewSource instanceof ViewSource.View) {
+            activity.setContentView(((ViewSource.View) viewSource).getView());
+
+        } else if (viewSource instanceof ViewSource.ViewBinding) {
+            activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+            activity.setContentView(activityViewBinding.getRoot());
+        }
     }
 
     public void onPostCreate(Activity activity) {
+
+        if (activity instanceof ViewModelStoreOwner) {
+            HashMap<Integer, Class<? extends ViewModel>> viewModelClasses = delegate.onPreparingViewModels();
+            if (viewModelClasses != null) {
+                viewModels = new HashMap<>();
+                for (Integer id : viewModelClasses.keySet()) {
+                    ViewModelProvider.Factory viewModelFactory = delegate.onCreateViewModelFactory(id);
+                    if (viewModelFactory == null)
+                        viewModelFactory = getDefaultViewModelFactory(activity.getApplication());
+
+                    ViewModelProvider viewModelProvider = new ViewModelProvider(
+                            (ViewModelStoreOwner) activity,
+                            viewModelFactory
+                    );
+
+                    Class<? extends ViewModel> viewModelClass = viewModelClasses.get(id);
+                    assert viewModelClass != null;
+                    viewModels.put(id, viewModelProvider.get(viewModelClass));
+                }
+            }
+        }
     }
 
     public void onStart(Activity activity) {
@@ -104,6 +179,12 @@ public class ActivityFunctions implements BaseFragmentListener {
         } else {
             return newBase;
         }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public final ViewBinding getActivityViewBinding() {
+        return activityViewBinding;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -310,6 +391,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         if (waitDialog != null) waitDialog.dismiss();
         waitDialogCount = 0;
         waitDialog = null;
+        if (viewModels != null) viewModels.clear();
         this.delegate = null;
     }
 
