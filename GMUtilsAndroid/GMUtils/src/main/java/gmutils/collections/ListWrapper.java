@@ -149,7 +149,7 @@ public class ListWrapper<T> {
 
     public <M> ListWrapper<T> map(List<M> outList, ActionCallback<T, M> action) {
         if (outList == null) throw new IllegalArgumentException();
-        if (action != null) throw new IllegalArgumentException();
+        if (action == null) throw new IllegalArgumentException();
 
         for (T t : this.list) {
             M value = action.invoke(t);
