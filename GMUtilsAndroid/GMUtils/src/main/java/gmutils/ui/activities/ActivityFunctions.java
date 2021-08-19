@@ -70,39 +70,54 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     //----------------------------------------------------------------------------------------------
 
-    public ActivityFunctions(@NotNull Delegate delegate) {
+    public ActivityFunctions(Delegate delegate) {
         this.delegate = delegate;
     }
 
     //----------------------------------------------------------------------------------------------
 
+    public Context getAttachBaseContext(Context newBase) {
+        if (delegate == null || delegate.allowApplyingPreferenceLocale()) {
+            return SettingsStorage.getInstance().languagePref().createNewContext(newBase);
+        } else {
+            return newBase;
+        }
+    }
+
     public void onPreCreate(Activity activity) {
-        if (delegate.allowApplyingPreferenceLocale()) {
+        if (delegate == null || delegate.allowApplyingPreferenceLocale()) {
             SettingsStorage.getInstance().languagePref().applySavedLanguage(activity);
         }
 
-        if (delegate.isOrientationDisabled())
+        if (delegate != null && delegate.isOrientationDisabled())
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         try {
-            activity.getWindow().setSoftInputMode(delegate.initialKeyboardState());
+            if (delegate != null) {
+                activity.getWindow().setSoftInputMode(delegate.initialKeyboardState());
+            } else {
+                //activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+            }
         } catch (Exception ignored) {
         }
 
     }
 
     public void onCreate(Activity activity, @Nullable Bundle savedInstanceState) {
-        ViewSource viewSource = delegate.getViewSource(activity.getLayoutInflater());
+        if (delegate != null) {
+            ViewSource viewSource = delegate.getViewSource(activity.getLayoutInflater());
 
-        if (viewSource instanceof ViewSource.LayoutResource) {
-            activity.setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
+            if (viewSource instanceof ViewSource.LayoutResource) {
+                activity.setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
 
-        } else if (viewSource instanceof ViewSource.View) {
-            activity.setContentView(((ViewSource.View) viewSource).getView());
+            } else if (viewSource instanceof ViewSource.View) {
+                activity.setContentView(((ViewSource.View) viewSource).getView());
 
-        } else if (viewSource instanceof ViewSource.ViewBinding) {
-            activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-            activity.setContentView(activityViewBinding.getRoot());
+            } else if (viewSource instanceof ViewSource.ViewBinding) {
+                activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+                activity.setContentView(activityViewBinding.getRoot());
+            }
         }
     }
 
@@ -110,20 +125,14 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     public void onStart(Activity activity) {
-        if (!TextUtils.isEmpty(delegate.getActivityTitle()))
+
+        if (delegate != null && !TextUtils.isEmpty(delegate.getActivityTitle()))
             activity.setTitle(delegate.getActivityTitle());
+
     }
 
     public void onConfigurationChanged(Activity activity, Configuration newConfig) {
         SettingsStorage.getInstance().languagePref().applySavedLanguage(activity);
-    }
-
-    public Context getAttachBaseContext(Context newBase) {
-        if (delegate.allowApplyingPreferenceLocale()) {
-            return SettingsStorage.getInstance().languagePref().createNewContext(newBase);
-        } else {
-            return newBase;
-        }
     }
 
     //----------------------------------------------------------------------------------------------
