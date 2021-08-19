@@ -96,6 +96,7 @@ public class ListWrapper<T> {
     //endregion
 
     //region processing methods
+
     /**
      * @return new ListWrapper with filtered items
      */
@@ -167,6 +168,50 @@ public class ListWrapper<T> {
 
         return outList;
     }
+
+
+    public ListWrapper<T> serialize(ActionCallback<T, String> action, ResultCallback<String> result) {
+        if (action == null) throw new IllegalArgumentException();
+        if (result == null) throw new IllegalArgumentException();
+
+        StringBuilder sb = new StringBuilder();
+
+        for (T item : list) {
+            sb.append(action.invoke(item));
+        }
+
+        result.invoke(sb.toString());
+
+        return this;
+    }
+
+    public String serialize(ActionCallback<T, String> action) {
+        final String[] result = new String[1];
+
+        serialize(action, r -> {
+            result[0] = r;
+        });
+
+        return result[0];
+    }
+
+    public String serialize(String prefix, String postfix) {
+        StringBuilder sb = new StringBuilder();
+
+        for (T item : list) {
+            sb.append(prefix);
+
+            if (item != null)
+                sb.append(item.toString());
+            else
+                sb.append("null");
+
+            sb.append(postfix);
+        }
+
+        return sb.toString();
+    }
+
 
     public ListWrapper<T> performAction(ActionCallback<ListWrapper<T>, Void> action) {
         if (action != null)

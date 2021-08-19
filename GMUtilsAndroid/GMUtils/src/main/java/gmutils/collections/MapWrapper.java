@@ -174,6 +174,57 @@ public class MapWrapper<K, V> {
         return outMap;
     }
 
+
+    public MapWrapper<K, V> serialize(ActionCallback<DataGroup.Two<K, V>, String> action, ResultCallback<String> result) {
+        if (action == null) throw new IllegalArgumentException();
+        if (result == null) throw new IllegalArgumentException();
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            sb.append(action.invoke(new DataGroup.Two<>(entry.getKey(), entry.getValue())));
+        }
+
+        result.invoke(sb.toString());
+
+        return this;
+    }
+
+    public String serialize(ActionCallback<DataGroup.Two<K, V>, String> action) {
+        final String[] result = new String[1];
+
+        serialize(action, r -> {
+            result[0] = r;
+        });
+
+        return result[0];
+    }
+
+    public String serialize(String keyPrefix, String keyValueSeparator, String valuePostfix) {
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            sb.append(keyPrefix);
+
+            if (entry.getKey() != null)
+                sb.append(entry.toString());
+            else
+                sb.append("null");
+
+            sb.append(keyValueSeparator);
+
+            if (entry.getValue() != null)
+                sb.append(entry.getValue().toString());
+            else
+                sb.append("null");
+
+            sb.append(valuePostfix);
+        }
+
+        return sb.toString();
+    }
+
+
     public MapWrapper<K, V> performAction(ActionCallback<MapWrapper<K, V>, Void> action) {
         if (action != null)
             action.invoke(this);
