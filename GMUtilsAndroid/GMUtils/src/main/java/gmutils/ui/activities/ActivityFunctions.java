@@ -67,6 +67,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
     private ViewBinding activityViewBinding;
+    private boolean preCreateExecuted = false;
 
     //----------------------------------------------------------------------------------------------
 
@@ -85,6 +86,8 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     public void onPreCreate(Activity activity) {
+        preCreateExecuted = true;
+
         if (delegate == null || delegate.allowApplyingPreferenceLocale()) {
             SettingsStorage.getInstance().languagePref().applySavedLanguage(activity);
         }
@@ -105,6 +108,8 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     public void onCreate(Activity activity, @Nullable Bundle savedInstanceState) {
+        if (!preCreateExecuted) onPreCreate(activity);
+
         if (delegate != null) {
             ViewSource viewSource = delegate.getViewSource(activity.getLayoutInflater());
 
