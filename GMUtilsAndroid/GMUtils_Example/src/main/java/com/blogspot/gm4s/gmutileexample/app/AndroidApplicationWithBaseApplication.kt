@@ -8,7 +8,7 @@ import gmutils.app.BaseApplication
 class AndroidApplicationAndBaseApplication : Application() {
 
     val app = object : BaseApplication() {
-        override fun thisInstance(): Application {
+        override fun thisApp(): Application {
             return this@AndroidApplicationAndBaseApplication
         }
 

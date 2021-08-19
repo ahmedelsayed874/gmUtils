@@ -109,7 +109,7 @@ public abstract class BaseApplication extends Application implements Application
      * @return
      */
     @NotNull
-    protected Application thisInstance() {
+    protected Application thisApp() {
         return this;
     }
 
@@ -119,14 +119,14 @@ public abstract class BaseApplication extends Application implements Application
     public void onCreate() {
         onPreCreate();
 
-        if (thisInstance() == this)
+        if (thisApp() == this)
             super.onCreate();
 
-        StorageManager.registerCallback(this::thisInstance);
+        StorageManager.registerCallback(this::thisApp);
 
         registerDefaultUncaughtExceptionHandler();
 
-        thisInstance().registerActivityLifecycleCallbacks(this);
+        thisApp().registerActivityLifecycleCallbacks(this);
 
         printRecommendedResources();
 
@@ -160,7 +160,7 @@ public abstract class BaseApplication extends Application implements Application
                         "    <color name=\"gmUtilsRatingBar\">@color/gmUtilsPrimary</color>\n" +
                         "    <color name=\"gmUtilsEditTextBackground\">@color/white</color>";
 
-        Log.i("*** " + thisInstance().getClass().getSimpleName(), colors);
+        Log.i("*** " + thisApp().getClass().getSimpleName(), colors);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ public abstract class BaseApplication extends Application implements Application
                 t = t.getCause();
             }
 
-            Logger.writeToFile(thisInstance(), stack.toString(), bugFileName);
+            Logger.writeToFile(thisApp(), stack.toString(), bugFileName);
             Logger.print(stack.toString());
 
             if (defaultHandler != null) {
@@ -234,12 +234,12 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     public String getReportedBugs() {
-        return Logger.readFile(thisInstance(), bugFileName);
+        return Logger.readFile(thisApp(), bugFileName);
     }
 
     public void deleteBugs() {
         try {
-            Logger.deleteSavedFile(thisInstance(), bugFileName);
+            Logger.deleteSavedFile(thisApp(), bugFileName);
         } catch (Exception e) {
         }
     }
