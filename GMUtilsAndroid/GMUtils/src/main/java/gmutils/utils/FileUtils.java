@@ -34,6 +34,7 @@ import java.util.Map;
 
 import gmutils.Logger;
 import gmutils.R;
+import gmutils.ui.activities.ActivityFunctions;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -287,7 +288,6 @@ public class FileUtils {
         return sb.toString();
     }
 
-
     //----------------------------------------------------------------------------------------------
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -362,6 +362,51 @@ public class FileUtils {
         intent.setType(mimeType);
 
         return intent;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void showFolderExplorer(Activity activity, int requestCode) {
+        showFolderExplorer(activity, null, null, null, requestCode);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void showFolderExplorer(Activity activity, Uri uriToLoad, int requestCode) {
+        showFolderExplorer(activity, null, null, uriToLoad, requestCode);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void showFolderExplorer(Fragment fragment, int requestCode) {
+        showFolderExplorer(null, fragment, null, null, requestCode);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void showFolderExplorer(Fragment fragment, Uri uriToLoad, int requestCode) {
+        showFolderExplorer(null, fragment, null, uriToLoad, requestCode);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void showFolderExplorer(android.app.Fragment fragment, int requestCode) {
+        showFolderExplorer(null, null, fragment, null, requestCode);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void showFolderExplorer(android.app.Fragment fragment, Uri uriToLoad, int requestCode) {
+        showFolderExplorer(null, null, fragment, uriToLoad, requestCode);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void showFolderExplorer(Activity activity, Fragment fragment1, android.app.Fragment fragment2, Uri uriToLoad, int requestCode) {
+        // Choose a directory using the system's file picker.
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+        // Optionally, specify a URI for the directory that should be opened in
+        // the system file picker when it loads.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uriToLoad);
+        }
+
+        if (activity != null) activity.startActivityForResult(intent, requestCode);
+        else if (fragment1 != null) fragment1.startActivityForResult(intent, requestCode);
+        else if (fragment2 != null) fragment2.startActivityForResult(intent, requestCode);
     }
 
     //----------------------------------------------------------------------------------------------
