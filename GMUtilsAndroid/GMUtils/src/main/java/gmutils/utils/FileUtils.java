@@ -53,6 +53,29 @@ public class FileUtils {
         return new FileUtils();
     }
 
+
+    //----------------------------------------------------------------------------------------------
+
+    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public File createFolderInPublicStorage(Context context, String dirName) {
+        File root = Environment.getExternalStorageDirectory();
+        return createFolderOnStorage(context, dirName, root);
+    }
+
+    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public File createFolderOnStorage(Context context, String dirName, File root) {
+        if (dirName == null) dirName = context.getPackageName();
+
+        File dir = new File(root, dirName);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                return null;
+            }
+        }
+
+        return dir;
+    }
+
     //----------------------------------------------------------------------------------------------
 
     @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -69,18 +92,18 @@ public class FileUtils {
 
     @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public File createFileOnStorage(Context context, String dirName, String fileName, File root) {
-        if (dirName == null) dirName = "";
+        if (dirName == null) dirName = context.getPackageName();
 
         File dir = new File(root, dirName);
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
-                root = context.getExternalFilesDir(null);
-                dir = new File(root, dirName);
-                if (!dir.exists()) {
-                    if (!dir.mkdirs()) {
+                //root = context.getExternalFilesDir(null);
+                //dir = new File(root, dirName);
+                //if (!dir.exists()) {
+                    //if (!dir.mkdirs()) {
                         return null;
-                    }
-                }
+                    //}
+                //}
             }
         }
 
@@ -101,6 +124,8 @@ public class FileUtils {
 
         return file;
     }
+
+    //----------------------------------------------------------------------------------------------
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public boolean createFileOnStorageUsingFileExplorer(Fragment fragment, String fileName, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
