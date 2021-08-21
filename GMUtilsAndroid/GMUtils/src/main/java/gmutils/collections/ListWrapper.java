@@ -213,10 +213,25 @@ public class ListWrapper<T> {
     }
 
 
-    public ListWrapper<T> performAction(ActionCallback<ListWrapper<T>, Void> action) {
-        if (action != null)
-            action.invoke(this);
+    public <R> ListWrapper<T> performOperation(ActionCallback<DataGroup.Two<T, R>, R> action, ResultCallback<R> result) {
+        if (result == null) throw new IllegalArgumentException();
+
+        R finalResult = performOperation(action);
+        result.invoke(finalResult);
+
         return this;
+    }
+
+    public <R> R performOperation(ActionCallback<DataGroup.Two<T, R>, R> action) {
+        if (action == null) throw new IllegalArgumentException();
+
+        R result = null;
+
+        for (T item : list) {
+            result = action.invoke(new DataGroup.Two<>(item, result));
+        }
+
+        return result;
     }
     //endregion
 

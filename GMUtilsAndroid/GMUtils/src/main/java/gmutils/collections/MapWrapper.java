@@ -224,12 +224,6 @@ public class MapWrapper<K, V> {
         return sb.toString();
     }
 
-
-    public MapWrapper<K, V> performAction(ActionCallback<MapWrapper<K, V>, Void> action) {
-        if (action != null)
-            action.invoke(this);
-        return this;
-    }
     //endregion
 
     public Map<K, V> getMap() {

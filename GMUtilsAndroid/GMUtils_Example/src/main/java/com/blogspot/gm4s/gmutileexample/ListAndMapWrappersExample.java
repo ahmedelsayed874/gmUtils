@@ -52,11 +52,6 @@ public class ListAndMapWrappersExample {
                 }, result -> {
                     System.out.println(result);
                 })
-                .performAction(listWrapper -> {
-                    System.out.println(listWrapper.getList());
-                    return null;
-                })
-
                 .getList();
 
         System.out.println(list2);
@@ -109,10 +104,6 @@ public class ListAndMapWrappersExample {
                     return "Key: " + k + " is mapping Value: " + v;
                 }, result -> {
                     System.out.println(result);
-                })
-                .performAction(mapWrapper -> {
-                    System.out.println(mapWrapper.getMap());
-                    return null;
                 })
 
                 .getMap();
