@@ -2,6 +2,7 @@ package gmutils.ui.adapters;
 
 import android.os.Build;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -32,11 +33,16 @@ import gmutils.utils.UIUtils;
 
 public abstract class BaseListAdapter<T> extends BaseAdapter {
     private List<T> mList;
+    private ItemTouchListener<T> mItemTouchListener;
 
     public BaseListAdapter(List<T> mList) {
         this.mList = mList;
     }
 
+
+    public void setItemTouchListener(ItemTouchListener<T> itemTouchListener) {
+        this.mItemTouchListener = itemTouchListener;
+    }
 
     public List<T> getList() {
         return mList;
@@ -103,7 +109,6 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
 
     //----------------------------------------------------------------------------------------------
 
-
     @NotNull
     protected abstract ViewHolder<T> getViewHolder(@NotNull LayoutInflater inflater, ViewGroup container);
 
@@ -113,6 +118,13 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
 
         if (view == null) {
             holder = getViewHolder(LayoutInflater.from(parent.getContext()), parent);
+            holder.listener = new ViewHolder.Listener<T>() {
+                @Override
+                public ItemTouchListener<T> getItemTouchListener() {
+                    return BaseListAdapter.this.mItemTouchListener;
+                }
+            };
+
             view = holder.itemView;
             view.setTag(holder);
 
@@ -125,11 +137,15 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         return view;
     }
 
-    public abstract static class ViewHolder<T> {
+    //----------------------------------------------------------------------------------------------
+
+    public abstract static class ViewHolder<T> implements View.OnTouchListener {
         private View itemView;
         private ViewBinding viewBinding;
         private int itemPosition;
         private T item;
+        private Listener<T> listener;
+
 
         public ViewHolder(@LayoutRes int resId, @NotNull LayoutInflater inflater, ViewGroup container) {
             this(inflater.inflate(resId, container, false));
@@ -142,9 +158,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
                 UIUtils.createInstance().setViewDetachedObserver(view, new Runnable() {
                     @Override
                     public void run() {
-                        ViewHolder.this.itemView = null;
-                        ViewHolder.this.item = null;
-                        ViewHolder.this.onDispose();
+                        ViewHolder.this.dispose();
                     }
                 });
             }
@@ -185,6 +199,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
 
         public abstract void setValues(T item);
 
+
         public int getItemPosition() {
             return itemPosition;
         }
@@ -193,6 +208,36 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
             return item;
         }
 
+        private void dispose() {
+            this.itemView = null;
+            this.viewBinding = null;
+            this.item = null;
+            this.listener = null;
+            this.onDispose();
+        }
+
         protected abstract void onDispose();
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (this.listener != null)
+                if (this.listener.getItemTouchListener() != null) {
+                    this.listener.getItemTouchListener().onTouch(item, event);
+                    return true;
+                }
+            return false;
+        }
+
+        private interface Listener<T> {
+            ItemTouchListener<T> getItemTouchListener();
+        }
     }
+
+    //----------------------------------------------------------------------------------------------
+
+    public interface ItemTouchListener<T> {
+        void onTouch(T item, MotionEvent event);
+    }
+
+
 }
