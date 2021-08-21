@@ -30,6 +30,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
+import gmutils.utils.FileUtils;
 
 /*
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -640,30 +641,7 @@ public class SimpleHTTPRequest {
     private static class Helpers {
 
         String readInputStream(InputStream inputStream) throws IOException {
-            String text = null;
-
-            if (inputStream != null) {
-
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                StringBuilder stringBuffer = new StringBuilder();
-
-                while ((line = bufferedReader.readLine()) != null) {
-                    stringBuffer.append(line);
-                }
-
-
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                text = stringBuffer.toString();
-            }
-
-            return text;
+            return FileUtils.createInstance().readStream(inputStream);
         }
     }
 

@@ -22,8 +22,11 @@ import androidx.fragment.app.Fragment;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -822,6 +825,34 @@ public class FileUtils {
      */
     public boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public String readStream(InputStream inputStream) throws IOException {
+        String text = null;
+
+        if (inputStream != null) {
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            StringBuilder stringBuffer = new StringBuilder();
+
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuffer.append(line);
+            }
+
+            try {
+                bufferedReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            text = stringBuffer.toString();
+        }
+
+        return text;
     }
 
 }
