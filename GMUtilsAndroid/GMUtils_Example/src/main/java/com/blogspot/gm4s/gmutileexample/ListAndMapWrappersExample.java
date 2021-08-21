@@ -8,9 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import gmutils.collections.DataGroup;
+import gmutils.collections.dataGroup.DataGroup1;
 import gmutils.collections.ListWrapper;
 import gmutils.collections.MapWrapper;
+import gmutils.collections.dataGroup.DataGroup2;
 
 public class ListAndMapWrappersExample {
 
@@ -87,10 +88,10 @@ public class ListAndMapWrappersExample {
                 .add(2, "b")
 
                 .add(Arrays.asList(3, 4, 5), Arrays.asList("c", "d", "e")) //or
-                .add(ListWrapper.create(new ArrayList<DataGroup.Two<Integer, String>>())
-                        .add(new DataGroup.Two<>(3, "c"))
-                        .add(new DataGroup.Two<>(4, "d"))
-                        .add(new DataGroup.Two<>(5, "e"))
+                .add(ListWrapper.create(new ArrayList<DataGroup2<Integer, String>>())
+                        .add(new DataGroup2<>(3, "c"))
+                        .add(new DataGroup2<>(4, "d"))
+                        .add(new DataGroup2<>(5, "e"))
                         .getList()
                 )
 
