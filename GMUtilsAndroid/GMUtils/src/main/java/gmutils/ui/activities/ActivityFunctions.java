@@ -142,7 +142,7 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     //----------------------------------------------------------------------------------------------
 
-    public final ViewBinding getActivityViewBinding() {
+    public final ViewBinding getViewBinding() {
         return activityViewBinding;
     }
 

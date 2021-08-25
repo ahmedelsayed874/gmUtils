@@ -18,7 +18,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
@@ -92,8 +91,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
-    public final ViewBinding getActivityViewBinding() {
-        return getActivityFunctions().getActivityViewBinding();
+    public ViewBinding getViewBinding() {
+        return getActivityFunctions().getViewBinding();
     }
 
     //----------------------------------------------------------------------------------------------

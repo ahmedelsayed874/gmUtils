@@ -23,7 +23,7 @@ class ReadLogFileActivity : BaseActivity() {
         ActivityReadLogFileBinding.inflate(inflater)
     )
 
-    private val view: ActivityReadLogFileBinding get() = activityViewBinding as ActivityReadLogFileBinding
+    private val view: ActivityReadLogFileBinding get() = viewBinding as ActivityReadLogFileBinding
 
     //----------------------------------------------------------------------------------------------
 

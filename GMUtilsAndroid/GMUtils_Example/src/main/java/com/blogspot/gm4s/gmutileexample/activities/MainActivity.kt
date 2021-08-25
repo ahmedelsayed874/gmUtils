@@ -13,7 +13,6 @@ import androidx.core.app.ActivityCompat
 import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
-import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
 import gmutils.Activities
 import gmutils.DateOp
 import gmutils.LooperThread
@@ -30,7 +29,7 @@ class MainActivity : BaseActivity() {
     override fun getViewSource(inflater: LayoutInflater) =
         ViewSource.ViewBinding(ActivityMainBinding.inflate(inflater))
 
-    private val view: ActivityMainBinding get() = activityViewBinding as ActivityMainBinding
+    private val view: ActivityMainBinding get() = viewBinding as ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
