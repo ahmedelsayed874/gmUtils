@@ -78,6 +78,7 @@ public class MessageDialog extends BaseDialog {
         });
     }
 
+
     public MessageDialog setBackground(int resId) {
         functions.setBackground(resId);
         return this;
@@ -249,6 +250,17 @@ public class MessageDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
+    @Override
+    protected BaseDialog reinitialize() {
+        MessageDialog dialog = new MessageDialog(this.dialog.getContext());
+        dialog.functions.copyProperties(this.functions);
+        dialog.listenerBtn1 = this.listenerBtn1;
+        dialog.listenerBtn2 = this.listenerBtn2;
+        dialog.listenerBtn3 = this.listenerBtn3;
+        return dialog;
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     protected void onDestroy() {

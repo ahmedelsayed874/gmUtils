@@ -1,6 +1,7 @@
 package gmutils.ui.dialogs;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -28,8 +29,12 @@ public class WaitDialog extends BaseDialog {
     }
 
     public static WaitDialog show(Context context, @StringRes int msg) {
+        return show(context, context.getString(msg));
+    }
+
+    public static WaitDialog show(Context context, CharSequence msg) {
         WaitDialog waitDialog = new WaitDialog(context);
-        if (msg != 0) waitDialog.textView.setText(msg);
+        if (!TextUtils.isEmpty(msg)) waitDialog.textView.setText(msg);
         waitDialog.show();
         return waitDialog;
     }
@@ -58,5 +63,10 @@ public class WaitDialog extends BaseDialog {
     @Override
     protected void onDestroy() {
         textView = null;
+    }
+
+    @Override
+    protected BaseDialog reinitialize() {
+        return WaitDialog.show(textView.getContext(), textView.getText());
     }
 }

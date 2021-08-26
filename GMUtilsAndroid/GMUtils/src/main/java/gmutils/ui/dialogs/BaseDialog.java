@@ -24,9 +24,8 @@ import gmutils.listeners.SimpleWindowAttachListener;
  * +201022663988
  */
 public abstract class BaseDialog {
-    private AlertDialog dialog;
+    protected AlertDialog dialog;
     private View view;
-
 
     @NonNull
     protected abstract View createView(LayoutInflater layoutInflater);

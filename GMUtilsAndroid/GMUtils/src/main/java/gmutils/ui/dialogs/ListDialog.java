@@ -178,6 +178,20 @@ public class ListDialog extends BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     @Override
+    protected BaseDialog reinitialize() {
+        ListDialog dialog = new ListDialog(tvTitle.getContext(), this.mListener);
+        dialog.setTitle(this.tvTitle.getText());
+        dialog.setList(this.mList);
+        dialog.setAdapter(this.mCustomAdapter);
+        dialog.setListener(this.mListener);
+        dialog.setOnNewValueInsertedListener(this.mListener2);
+        return dialog;
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
+    @Override
     protected void onDestroy() {
         KeypadOp.hide(getView().findFocus());
 

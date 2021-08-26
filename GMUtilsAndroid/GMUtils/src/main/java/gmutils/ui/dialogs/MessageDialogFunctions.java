@@ -144,6 +144,7 @@ public class MessageDialogFunctions {
     public MessageDialogFunctions setMessageBold() {
         Typeface typeface = tvMsg.getTypeface();
         Typeface.create(typeface, Typeface.BOLD);
+        tvMsg.setTypeface(typeface);
         return this;
     }
 
@@ -322,9 +323,21 @@ public class MessageDialogFunctions {
         return this;
     }
 
-
     //----------------------------------------------------------------------------------------------
 
+    void copyProperties(MessageDialogFunctions from) {
+        this.lyContainer.setBackground(from.lyContainer.getBackground());
+        this.setTextColor(from.tvTitle.getCurrentTextColor());
+        this.setTitle(from.tvTitle.getText());
+        this.setMessage(from.tvMsg.getText());
+        this.setMessageGravity(from.tvMsg.getGravity());
+        this.tvMsg.setTypeface(from.tvMsg.getTypeface());
+        this.setButton1(from.tvButton1.getText());
+        this.setButton2(from.tvButton2.getText());
+        this.setButton3(from.tvButton3.getText());
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     public void onDestroy() {
         this.lyContainer = null;
