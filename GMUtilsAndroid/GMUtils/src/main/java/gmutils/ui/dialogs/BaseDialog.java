@@ -109,7 +109,27 @@ public abstract class BaseDialog {
     }
 
     public void dismiss() {
-        if (dialog != null && dialog.isShowing())
+        if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
+            dismissed = true;
+        }
     }
+
+    private boolean dismissed = false;
+
+    public void reshow() {
+        if (!dismissed) {
+            show();
+
+        } else {
+            try {
+                BaseDialog dialog = reinitialize();
+                dialog.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    protected abstract BaseDialog reinitialize();
 }

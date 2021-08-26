@@ -38,11 +38,11 @@ public class InputDialog extends BaseDialog {
     private TextView tvTitle;
     private TextView tvMsg;
     private EditText tvInput;
-    private TextView tvDone;
-    private TextView tvCancel;
+    private TextView tvPositiveBtn;
+    private TextView tvCancelBtn;
 
-    private ResultCallback2<InputDialog, String> doneCallback;
-    private ResultCallback<InputDialog> cancelCallback;
+    private ResultCallback2<InputDialog, String> positiveButtonCallback;
+    private ResultCallback<InputDialog> cancelButtonCallback;
     
 
     @NonNull
@@ -59,18 +59,18 @@ public class InputDialog extends BaseDialog {
         tvTitle = view.findViewById(R.id.tv_title);
         tvMsg = view.findViewById(R.id.tv_msg);
         tvInput = view.findViewById(R.id.tv_input);
-        tvDone = view.findViewById(R.id.tv_done);
-        tvCancel = view.findViewById(R.id.tv_cancel);
+        tvPositiveBtn = view.findViewById(R.id.tv_done);
+        tvCancelBtn = view.findViewById(R.id.tv_cancel);
 
-        tvDone.setOnClickListener(v -> {
-            if (doneCallback != null)
-                doneCallback.invoke(InputDialog.this, tvInput.getText().toString());
+        tvPositiveBtn.setOnClickListener(v -> {
+            if (positiveButtonCallback != null)
+                positiveButtonCallback.invoke(InputDialog.this, tvInput.getText().toString());
             dismiss();
         });
 
-        tvCancel.setOnClickListener(v -> {
-            if (cancelCallback != null)
-                cancelCallback.invoke(InputDialog.this);
+        tvCancelBtn.setOnClickListener(v -> {
+            if (cancelButtonCallback != null)
+                cancelButtonCallback.invoke(InputDialog.this);
             dismiss();
         });
     }
@@ -146,55 +146,55 @@ public class InputDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
-    public InputDialog setDoneText(int textId) {
+    public InputDialog setPositiveButtonText(int textId) {
         if (textId > 0) {
-            tvDone.setText(textId);
-            tvDone.setVisibility(View.VISIBLE);
+            tvPositiveBtn.setText(textId);
+            tvPositiveBtn.setVisibility(View.VISIBLE);
         } else {
-            tvDone.setVisibility(View.GONE);
+            tvPositiveBtn.setVisibility(View.GONE);
         }
         return this;
     }
 
-    public InputDialog setDoneText(CharSequence text) {
+    public InputDialog setPositiveButtonText(CharSequence text) {
         if (!TextUtils.isEmpty(text)) {
-            tvDone.setText(text);
-            tvDone.setVisibility(View.VISIBLE);
+            tvPositiveBtn.setText(text);
+            tvPositiveBtn.setVisibility(View.VISIBLE);
         } else {
-            tvDone.setVisibility(View.GONE);
+            tvPositiveBtn.setVisibility(View.GONE);
         }
         return this;
     }
 
-    public InputDialog setDoneCallback(ResultCallback2<InputDialog, String> callback) {
-        this.doneCallback = callback;
+    public InputDialog setPositiveButtonCallback(ResultCallback2<InputDialog, String> callback) {
+        this.positiveButtonCallback = callback;
         return this;
     }
 
     //----------------------------------------------------------------------------------------------
 
-    public InputDialog setCancelText(int textId) {
+    public InputDialog setCancelButtonText(int textId) {
         if (textId > 0) {
-            tvCancel.setText(textId);
-            tvCancel.setVisibility(View.VISIBLE);
+            tvCancelBtn.setText(textId);
+            tvCancelBtn.setVisibility(View.VISIBLE);
         } else {
-            tvCancel.setVisibility(View.GONE);
+            tvCancelBtn.setVisibility(View.GONE);
         }
         return this;
     }
 
-    public InputDialog setCancelText(CharSequence text) {
+    public InputDialog setCancelButtonText(CharSequence text) {
         if (!TextUtils.isEmpty(text)) {
-            tvCancel.setText(text);
-            tvCancel.setVisibility(View.VISIBLE);
+            tvCancelBtn.setText(text);
+            tvCancelBtn.setVisibility(View.VISIBLE);
         } else {
-            tvCancel.setVisibility(View.GONE);
+            tvCancelBtn.setVisibility(View.GONE);
         }
         return this;
     }
 
-    public InputDialog setCancelCallback(ResultCallback<InputDialog> callback) {
-        this.cancelCallback = callback;
+    public InputDialog setCancelButtonCallback(ResultCallback<InputDialog> callback) {
+        this.cancelButtonCallback = callback;
         return this;
     }
 
@@ -210,8 +210,8 @@ public class InputDialog extends BaseDialog {
         tvMsg.setTextColor(color);
         tvInput.setTextColor(color);
 
-        tvDone.setTextColor(color);
-        tvCancel.setTextColor(color);
+        tvPositiveBtn.setTextColor(color);
+        tvCancelBtn.setTextColor(color);
 
         return this;
     }
@@ -248,7 +248,23 @@ public class InputDialog extends BaseDialog {
         super.show();
         return this;
     }
-    
+
+    @Override
+    protected BaseDialog reinitialize() {
+        InputDialog dialog = new InputDialog(tvTitle.getContext());
+        dialog.setTitle(tvTitle.getText());
+        dialog.setMessage(tvMsg.getText());
+        dialog.setInputHint(tvInput.getHint());
+        dialog.setPositiveButtonText(tvPositiveBtn.getText());
+        dialog.setPositiveButtonCallback(positiveButtonCallback);
+        dialog.setCancelButtonText(tvCancelBtn.getText());
+        dialog.setCancelButtonCallback(cancelButtonCallback);
+
+        return dialog;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     @Override
     protected void onDestroy() {
         this.lyContainer = null;
@@ -256,10 +272,10 @@ public class InputDialog extends BaseDialog {
         this.tvMsg = null;
         this.tvInput = null;
 
-        this.tvDone = null;
-        this.tvCancel = null;
+        this.tvPositiveBtn = null;
+        this.tvCancelBtn = null;
 
-        this.doneCallback = null;
-        this.cancelCallback = null;
+        this.positiveButtonCallback = null;
+        this.cancelButtonCallback = null;
     }
 }
