@@ -318,11 +318,10 @@ public class FileUtils {
 
     //----------------------------------------------------------------------------------------------
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public boolean showFileExplorer(Fragment fragment, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
-        Intent intent = createShowingFileExplorerIntent(mimeType, pickerInitialUri);
+        Intent intent = canShowFileExplorer(fragment.getActivity(), mimeType, pickerInitialUri, requestId);
 
-        if (intent.resolveActivity(fragment.getActivity().getPackageManager()) != null) {
+        if (intent != null) {
             fragment.startActivityForResult(intent, requestId);
             return true;
         }
@@ -330,11 +329,10 @@ public class FileUtils {
         return false;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public boolean showFileExplorer(Activity activity, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
-        Intent intent = createShowingFileExplorerIntent(mimeType, pickerInitialUri);
+        Intent intent = canShowFileExplorer(activity, mimeType, pickerInitialUri, requestId);
 
-        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+        if (intent != null) {
             activity.startActivityForResult(intent, requestId);
             return true;
         }
@@ -342,14 +340,45 @@ public class FileUtils {
         return false;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private Intent createShowingFileExplorerIntent(String mimeType, @Nullable Uri pickerInitialUri) {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType(mimeType);//"application/pdf");
+    private Intent canShowFileExplorer(Activity activity, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
 
-        // Optionally, specify a URI for the file that should appear in the
-        // system file picker when it loads.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            Intent intent = createShowingFileExplorerIntent19(mimeType, pickerInitialUri);
+
+            if (intent.resolveActivity(activity.getPackageManager()) != null) {
+                return intent;
+            } else {
+                intent = createShowingFileExplorerIntent(mimeType);
+                if (intent.resolveActivity(activity.getPackageManager()) != null)
+                    return intent;
+            }
+
+        } else {
+            Intent intent = createShowingFileExplorerIntent(mimeType);
+            if (intent.resolveActivity(activity.getPackageManager()) != null)
+                return intent;
+        }
+
+        return null;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private Intent createShowingFileExplorerIntent19(String mimeType, @Nullable Uri pickerInitialUri) {
+        return createShowingFileExplorerIntent(Intent.ACTION_OPEN_DOCUMENT, mimeType, pickerInitialUri);
+    }
+
+    private Intent createShowingFileExplorerIntent(String mimeType) {
+        return createShowingFileExplorerIntent(Intent.ACTION_GET_CONTENT, mimeType, null);
+    }
+
+    private Intent createShowingFileExplorerIntent(String action, String mimeType, @Nullable Uri pickerInitialUri) {
+        if (TextUtils.isEmpty(mimeType)) mimeType = "*/*";
+
+        Intent intent = new Intent(action);
+
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mimeType);
+
         if (pickerInitialUri != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
@@ -357,39 +386,7 @@ public class FileUtils {
         }
 
         return intent;
-    }
 
-
-    public boolean showFileExplorer(Fragment fragment, String mimeType, int requestCode) {
-        Intent intent = createShowingFileExplorerIntent(mimeType);
-
-        if (intent.resolveActivity(fragment.getActivity().getPackageManager()) != null) {
-            fragment.startActivityForResult(intent, requestCode);
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean showFileExplorer(Activity activity, String mimeType, int requestCode) {
-        Intent intent = createShowingFileExplorerIntent(mimeType);
-
-        if (intent.resolveActivity(activity.getPackageManager()) != null) {
-            activity.startActivityForResult(intent, requestCode);
-            return true;
-        }
-
-        return false;
-    }
-
-    private Intent createShowingFileExplorerIntent(String mimeType) {
-        if (TextUtils.isEmpty(mimeType)) mimeType = "*/*";
-
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType(mimeType);
-
-        return intent;
     }
 
     //----------------------------------------------------------------------------------------------
