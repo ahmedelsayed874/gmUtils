@@ -76,6 +76,11 @@ public abstract class BaseDialog {
         return view;
     }
 
+    public final Context getContext() {
+        if (view != null) return view.getContext();
+        return null;
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public BaseDialog setOnDismissListener(DialogInterface.OnDismissListener listener) {

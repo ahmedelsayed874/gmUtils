@@ -48,7 +48,7 @@ public class ListDialog extends BaseDialog {
     @NonNull
     @Override
     protected View createView(LayoutInflater layoutInflater) {
-        return layoutInflater.inflate(R.layout.dialog_list, null);
+        return layoutInflater.inflate(R.layout.dialog_list_gm4s, null);
     }
 
     public ListDialog(Context context, Listener listener) {

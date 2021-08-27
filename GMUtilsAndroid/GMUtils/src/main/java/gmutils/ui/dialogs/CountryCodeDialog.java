@@ -42,12 +42,14 @@ public class CountryCodeDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
+    private boolean hideDialCode;
     private Listener mListener;
 
     public final CountryPhoneCodes countryPhoneCodes;
 
     private CountryCodeDialog(Context context, boolean hideDialCode, Listener listener) {
         super(context);
+        this.hideDialCode = hideDialCode;
         mListener = listener;
 
         View view = getView();
@@ -94,6 +96,19 @@ public class CountryCodeDialog extends BaseDialog {
     public void setListBackgroundRes(@DrawableRes int resid) {
         RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
         recyclerCountryCodes.setBackgroundResource(resid);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @Override
+    protected BaseDialog reinitialize() {
+        CountryCodeDialog dialog = new CountryCodeDialog(getContext(), this.hideDialCode, this.mListener);
+        RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
+        if (recyclerCountryCodes != null) {
+            RecyclerView recyclerCountryCodes2 = dialog.getView().findViewById(R.id.recycler_country_code);
+            recyclerCountryCodes2.setBackground(recyclerCountryCodes.getBackground());
+        }
+        return dialog;
     }
 
     //----------------------------------------------------------------------------------------------
