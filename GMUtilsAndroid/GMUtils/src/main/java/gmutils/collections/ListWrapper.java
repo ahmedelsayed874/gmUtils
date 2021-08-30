@@ -53,6 +53,13 @@ public class ListWrapper<T> {
         return this;
     }
 
+    public ListWrapper<T> add(T[] items) {
+        if (items != null && items.length > 0) {
+            add(items.length, c -> items[c]);
+        }
+        return this;
+    }
+
     public ListWrapper<T> add(int count, ActionCallback<Integer, T> adder) {
         if (count == 0 || adder == null) return this;
 
