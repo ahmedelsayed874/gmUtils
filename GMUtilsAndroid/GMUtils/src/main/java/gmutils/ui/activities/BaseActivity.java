@@ -141,7 +141,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     //----------------------------------------------------------------------------------------------
 
     protected void onPreCreate() {
-        getActivityFunctions().onPreCreate(thisActivity());
+        getActivityFunctions().lifecycle().onPreCreate(thisActivity());
     }
 
     @Override
@@ -149,17 +149,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         getActivityFunctions();//to create the object
 
         onPreCreate();
-
         super.onCreate(savedInstanceState);
-
-        getActivityFunctions().onCreate(thisActivity(), savedInstanceState);
-
-        onPostCreate();
-
-    }
-
-    protected void onPostCreate() {
-        getActivityFunctions().onPostCreate(thisActivity());
+        getActivityFunctions().lifecycle().onCreate(thisActivity(), savedInstanceState);
 
         HashMap<Integer, Class<? extends ViewModel>> viewModelClasses = onPreparingViewModels();
         if (viewModelClasses != null) {
@@ -182,17 +173,17 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     public void onStart() {
         super.onStart();
-        getActivityFunctions().onStart(thisActivity());
+        getActivityFunctions().lifecycle().onStart(thisActivity());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        getActivityFunctions().onConfigurationChanged(thisActivity(), newConfig);
+        getActivityFunctions().lifecycle().onConfigurationChanged(thisActivity(), newConfig);
     }
 
     public void attachBaseContext(Context newBase) {
-        super.attachBaseContext(getActivityFunctions().getAttachBaseContext(newBase));
+        super.attachBaseContext(getActivityFunctions().lifecycle().getAttachBaseContext(newBase));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -382,20 +373,20 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        getActivityFunctions().onDestroy();
+        getActivityFunctions().lifecycle().onDestroy();
     }
 
     //----------------------------------------------------------------------------------------------
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getActivityFunctions().onCreateOptionsMenu(menu);
+        getActivityFunctions().lifecycle().onCreateOptionsMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (getActivityFunctions().onOptionsItemSelected(thisActivity(), item)) return true;
+        if (getActivityFunctions().lifecycle().onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
     }
 }

@@ -103,7 +103,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     //----------------------------------------------------------------------------------------------
 
     protected void onPreCreate() {
-        getActivityFunctions().onPreCreate(thisActivity());
+        getActivityFunctions().lifecycle().onPreCreate(thisActivity());
     }
 
     @Override
@@ -112,30 +112,24 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
         super.onCreate(savedInstanceState);
 
-        getActivityFunctions().onCreate(thisActivity(), savedInstanceState);
+        getActivityFunctions().lifecycle().onCreate(thisActivity(), savedInstanceState);
 
-        onPostCreate();
-
-    }
-
-    protected void onPostCreate() {
-        getActivityFunctions().onPostCreate(thisActivity());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        getActivityFunctions().onStart(thisActivity());
+        getActivityFunctions().lifecycle().onStart(thisActivity());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        getActivityFunctions().onConfigurationChanged(thisActivity(), newConfig);
+        getActivityFunctions().lifecycle().onConfigurationChanged(thisActivity(), newConfig);
     }
 
     public void attachBaseContext(Context newBase) {
-        super.attachBaseContext(getActivityFunctions().getAttachBaseContext(newBase));
+        super.attachBaseContext(getActivityFunctions().lifecycle().getAttachBaseContext(newBase));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -302,7 +296,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        getActivityFunctions().onDestroy();
+        getActivityFunctions().destroy();
     }
 
 
@@ -310,13 +304,13 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getActivityFunctions().onCreateOptionsMenu(menu);
+        getActivityFunctions().lifecycle().onCreateOptionsMenu(menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (getActivityFunctions().onOptionsItemSelected(thisActivity(), item)) return true;
+        if (getActivityFunctions().lifecycle().onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
     }
 }

@@ -18,13 +18,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-import androidx.lifecycle.ViewModel;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
 
 import gmutils.KeypadOp;
 import gmutils.Logger;
@@ -51,6 +48,9 @@ import gmutils.utils.Utils;
  */
 @SuppressLint("Registered")
 public class ActivityFunctions implements BaseFragmentListener {
+    public static final int SOFT_INPUT_ADJUST_PAN = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
+    public static final int SOFT_INPUT_STATE_HIDDEN = WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
+
     public interface Delegate {
         ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
@@ -60,14 +60,16 @@ public class ActivityFunctions implements BaseFragmentListener {
 
         boolean isOrientationDisabled();
 
+        /**
+         * @return WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN; WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
+         */
         int initialKeyboardState();
     }
 
     private Delegate delegate;
     private WaitDialog waitDialog = null;
     private int waitDialogCount = 0;
-    private ViewBinding activityViewBinding;
-    private boolean preCreateExecuted = false;
+    private Lifecycle lifecycle;
 
     //----------------------------------------------------------------------------------------------
 
@@ -77,73 +79,142 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     //----------------------------------------------------------------------------------------------
 
-    public Context getAttachBaseContext(Context newBase) {
-        if (delegate == null || delegate.allowApplyingPreferenceLocale()) {
-            return SettingsStorage.getInstance().languagePref().createNewContext(newBase);
-        } else {
-            return newBase;
+    public static final class Lifecycle {
+        private Delegate delegate;
+        private Runnable onDestroy;
+        private boolean preCreateExecuted = false;
+        private ViewBinding activityViewBinding;
+        private int showBugsMenuItemId = 0;
+
+        private Lifecycle(Delegate delegate, Runnable onDestroy) {
+            this.delegate = delegate;
+            this.onDestroy = onDestroy;
         }
-    }
 
-    public void onPreCreate(Activity activity) {
-        preCreateExecuted = true;
+        public Context getAttachBaseContext(Context newBase) {
+            if (delegate == null || delegate.allowApplyingPreferenceLocale()) {
+                return SettingsStorage.getInstance().languagePref().createNewContext(newBase);
+            } else {
+                return newBase;
+            }
+        }
 
-        if (delegate == null || delegate.allowApplyingPreferenceLocale()) {
+        public void onPreCreate(Activity activity) {
+            preCreateExecuted = true;
+
+            if (delegate == null || delegate.allowApplyingPreferenceLocale()) {
+                SettingsStorage.getInstance().languagePref().applySavedLanguage(activity);
+            }
+
+            if (delegate != null && delegate.isOrientationDisabled())
+                activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+            try {
+                if (delegate != null) {
+                    activity.getWindow().setSoftInputMode(delegate.initialKeyboardState());
+                } else {
+                    //activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+                    activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+                }
+            } catch (Exception ignored) {
+            }
+
+        }
+
+        public void onCreate(Activity activity, @Nullable Bundle savedInstanceState) {
+            if (!preCreateExecuted) onPreCreate(activity);
+
+            if (delegate != null) {
+                ViewSource viewSource = delegate.getViewSource(activity.getLayoutInflater());
+
+                if (viewSource instanceof ViewSource.LayoutResource) {
+                    activity.setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
+
+                } else if (viewSource instanceof ViewSource.View) {
+                    activity.setContentView(((ViewSource.View) viewSource).getView());
+
+                } else if (viewSource instanceof ViewSource.ViewBinding) {
+                    activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+                    activity.setContentView(activityViewBinding.getRoot());
+                }
+            }
+        }
+
+        public void onStart(Activity activity) {
+
+            if (delegate != null && !TextUtils.isEmpty(delegate.getActivityTitle()))
+                activity.setTitle(delegate.getActivityTitle());
+
+        }
+
+        public void onConfigurationChanged(Activity activity, Configuration newConfig) {
             SettingsStorage.getInstance().languagePref().applySavedLanguage(activity);
         }
 
-        if (delegate != null && delegate.isOrientationDisabled())
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //-----------------------------------------------------------------------------------
 
-        try {
-            if (delegate != null) {
-                activity.getWindow().setSoftInputMode(delegate.initialKeyboardState());
-            } else {
-                //activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-                activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-            }
-        } catch (Exception ignored) {
-        }
-
-    }
-
-    public void onCreate(Activity activity, @Nullable Bundle savedInstanceState) {
-        if (!preCreateExecuted) onPreCreate(activity);
-
-        if (delegate != null) {
-            ViewSource viewSource = delegate.getViewSource(activity.getLayoutInflater());
-
-            if (viewSource instanceof ViewSource.LayoutResource) {
-                activity.setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
-
-            } else if (viewSource instanceof ViewSource.View) {
-                activity.setContentView(((ViewSource.View) viewSource).getView());
-
-            } else if (viewSource instanceof ViewSource.ViewBinding) {
-                activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-                activity.setContentView(activityViewBinding.getRoot());
+        public void onCreateOptionsMenu(Menu menu) {
+            if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
+                if (showBugsMenuItemId == 0) {
+                    showBugsMenuItemId = "Show Log".hashCode();
+                    if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
+                }
+                menu.add(0, showBugsMenuItemId, 10, "Show Log");
             }
         }
+
+        public boolean onOptionsItemSelected(Activity activity, MenuItem item) {
+            if (item.getItemId() == android.R.id.home) {
+                try {
+                    activity.onBackPressed();
+                } catch (Exception e) {
+                }
+
+                return true;
+            }
+
+            if (item.getItemId() == showBugsMenuItemId) {
+                String txt = Logger.readAllFilesContents(activity);
+
+                MessageDialog.create(activity)
+                        .setMessage(txt)
+                        .setMessageGravity(Gravity.START)
+                        .setButton1(R.string.copy, (d) -> {
+                            if (Utils.createInstance().copyText(activity, txt)) {
+                                MyToast.showError(activity, "copied");
+                            } else {
+                                MyToast.showError(activity, "failed");
+                            }
+                        })
+                        .setButton2(R.string.delete, (d) -> {
+                            Logger.deleteSavedFiles(activity);
+                        })
+                        .show();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public void onDestroy() {
+            if (this.onDestroy != null) this.onDestroy.run();
+            this.onDestroy = null;
+            this.delegate = null;
+            this.activityViewBinding = null;
+        }
     }
 
-    public void onPostCreate(Activity activity) {
-    }
-
-    public void onStart(Activity activity) {
-
-        if (delegate != null && !TextUtils.isEmpty(delegate.getActivityTitle()))
-            activity.setTitle(delegate.getActivityTitle());
-
-    }
-
-    public void onConfigurationChanged(Activity activity, Configuration newConfig) {
-        SettingsStorage.getInstance().languagePref().applySavedLanguage(activity);
+    public Lifecycle lifecycle() {
+        if (lifecycle == null)
+            lifecycle = new Lifecycle(delegate, this::destroy0);
+        return lifecycle;
     }
 
     //----------------------------------------------------------------------------------------------
 
     public final ViewBinding getViewBinding() {
-        return activityViewBinding;
+        return lifecycle().activityViewBinding;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -297,61 +368,17 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     //----------------------------------------------------------------------------------------------
 
-    private int showBugsMenuItemId = 0;
-
-    public void onCreateOptionsMenu(Menu menu) {
-        if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
-            if (showBugsMenuItemId == 0) {
-                showBugsMenuItemId = "Show Log".hashCode();
-                if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
-            }
-            menu.add(0, showBugsMenuItemId, 10, "Show Log");
-        }
-    }
-
-    public boolean onOptionsItemSelected(Activity activity, MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            try {
-                activity.onBackPressed();
-            } catch (Exception e) {
-            }
-
-            return true;
-        }
-
-        if (item.getItemId() == showBugsMenuItemId) {
-            String txt = Logger.readAllFilesContents(activity);
-
-            MessageDialog.create(activity)
-                    .setMessage(txt)
-                    .setMessageGravity(Gravity.START)
-                    .setButton1(R.string.copy, (d) -> {
-                        if (Utils.createInstance().copyText(activity, txt)) {
-                            MyToast.showError(activity, "copied");
-                        } else {
-                            MyToast.showError(activity, "failed");
-                        }
-                    })
-                    .setButton2(R.string.delete, (d) -> {
-                        Logger.deleteSavedFiles(activity);
-                    })
-                    .show();
-
-            return true;
-        }
-
-        return false;
-    }
-
-
-    //----------------------------------------------------------------------------------------------
-
-    public void onDestroy() {
+    private void destroy0() {
         if (waitDialog != null) waitDialog.dismiss();
         waitDialogCount = 0;
         waitDialog = null;
 
         this.delegate = null;
+        this.lifecycle = null;
+    }
+
+    public void destroy() {
+        if (lifecycle != null) lifecycle.onDestroy();
     }
 
 }
