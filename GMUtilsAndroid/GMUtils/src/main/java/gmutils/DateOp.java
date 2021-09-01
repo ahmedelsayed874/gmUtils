@@ -1265,6 +1265,15 @@ public class DateOp implements Serializable {
         return date;
     }
 
+    public static String tryFormat(String originDate, String toPattern, String defaultDate, boolean forceEnglish) {
+        try {
+            DateOp dateOp = DateOp.getInstance(originDate, true);
+            return dateOp.formatDate(toPattern, forceEnglish);
+        } catch (Exception e) {
+            return defaultDate;
+        }
+    }
+
     //--------------------------------------------------------------------------------------------//
 
     public static String convertTimeToString(long timeInMillis, boolean en) {
@@ -1328,7 +1337,7 @@ public class DateOp implements Serializable {
             }
         }
 
-        return (isNeg? "(-) " :"(+) ") + string.toString();
+        return (isNeg ? "(-) " : "(+) ") + string.toString();
     }
 
 }
