@@ -60,10 +60,10 @@ public abstract class BaseDialog {
     }
 
     private void destroy() {
+        onDestroy();
+
         this.dialog = null;
         this.view = null;
-
-        onDestroy();
     }
 
     protected abstract void onDestroy();

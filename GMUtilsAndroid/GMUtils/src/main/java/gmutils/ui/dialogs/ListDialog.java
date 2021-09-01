@@ -1,6 +1,7 @@
 package gmutils.ui.dialogs;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -53,6 +54,8 @@ public class ListDialog extends BaseDialog {
 
     public ListDialog(Context context, Listener listener) {
         super(context);
+
+        setBackground(Color.WHITE);
 
         View view = getView();
         tvTitle = view.findViewById(R.id.text_title);
