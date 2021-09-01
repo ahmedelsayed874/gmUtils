@@ -38,6 +38,7 @@ import gmutils.listeners.SearchTextChangeListener;
 public class ListDialog extends BaseDialog {
 
     private TextView tvTitle;
+    private TextView tvHint;
     private ListView lvList;
     private TextView tvNoResult;
     private TextView tvAddValue;
@@ -64,6 +65,7 @@ public class ListDialog extends BaseDialog {
 
         View view = getView();
         tvTitle = view.findViewById(R.id.text_title);
+        tvHint = view.findViewById(R.id.text_hint);
         View ivClose = view.findViewById(R.id.image_close);
         final EditText etSearchToken = view.findViewById(R.id.text_search_token);
         lvList = view.findViewById(R.id.list);
@@ -152,6 +154,18 @@ public class ListDialog extends BaseDialog {
 
     public ListDialog setTitle(CharSequence title) {
         tvTitle.setText(title);
+        return this;
+    }
+
+    public ListDialog setHint(@StringRes int hint) {
+        tvHint.setText(hint);
+        tvHint.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public ListDialog setHint(CharSequence hint) {
+        tvHint.setText(hint);
+        tvHint.setVisibility(View.VISIBLE);
         return this;
     }
 
