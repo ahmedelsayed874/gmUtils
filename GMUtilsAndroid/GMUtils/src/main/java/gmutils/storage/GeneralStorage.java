@@ -4,6 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -60,5 +65,41 @@ public class GeneralStorage {
 
     public void removeAll() {
         mPreference.edit().clear().apply();
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public void saveToList(String listName, String value) {
+
+        List<String> list = retrieveList(listName);
+        if (!list.contains(value))
+            list.add(0, value);
+
+        try {
+            JSONArray jsonArray = new JSONArray();
+
+            for (String it : list) {
+                jsonArray.put(it);
+            }
+
+            save(listName, jsonArray.toString());
+
+        } catch (Throwable e) {
+        }
+    }
+
+    public List<String> retrieveList(String listName) {
+        List<String> list = new ArrayList<>();
+
+        try {
+            String addressesJson = retrieve(listName, "[]");
+            JSONArray jsonArray = new JSONArray(addressesJson);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                list.add(jsonArray.getString(i));
+            }
+        } catch (Throwable ignored) {
+        }
+
+        return list;
     }
 }
