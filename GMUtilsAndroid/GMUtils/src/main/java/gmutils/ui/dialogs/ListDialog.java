@@ -178,8 +178,8 @@ public class ListDialog extends BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     @Override
-    protected BaseDialog reinitialize() {
-        ListDialog dialog = new ListDialog(tvTitle.getContext(), this.mListener);
+    protected BaseDialog reinitialize(Context context) {
+        ListDialog dialog = new ListDialog(context, this.mListener);
         dialog.setTitle(this.tvTitle.getText());
         dialog.setList(this.mList);
         dialog.setAdapter(this.mCustomAdapter);

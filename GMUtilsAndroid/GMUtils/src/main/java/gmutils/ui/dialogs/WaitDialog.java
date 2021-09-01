@@ -66,7 +66,7 @@ public class WaitDialog extends BaseDialog {
     }
 
     @Override
-    protected BaseDialog reinitialize() {
-        return WaitDialog.show(textView.getContext(), textView.getText());
+    protected BaseDialog reinitialize(Context context) {
+        return WaitDialog.show(context, textView.getText());
     }
 }

@@ -251,8 +251,8 @@ public class MessageDialog extends BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     @Override
-    protected BaseDialog reinitialize() {
-        MessageDialog dialog = new MessageDialog(this.dialog.getContext());
+    protected BaseDialog reinitialize(Context context) {
+        MessageDialog dialog = new MessageDialog(context);
         dialog.functions.copyProperties(this.functions);
         dialog.listenerBtn1 = this.listenerBtn1;
         dialog.listenerBtn2 = this.listenerBtn2;

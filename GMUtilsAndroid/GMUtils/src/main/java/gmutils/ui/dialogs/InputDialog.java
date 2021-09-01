@@ -250,11 +250,12 @@ public class InputDialog extends BaseDialog {
     }
 
     @Override
-    protected BaseDialog reinitialize() {
-        InputDialog dialog = new InputDialog(tvTitle.getContext());
+    protected BaseDialog reinitialize(Context context) {
+        InputDialog dialog = new InputDialog(context);
         dialog.setTitle(tvTitle.getText());
         dialog.setMessage(tvMsg.getText());
         dialog.setInputHint(tvInput.getHint());
+        dialog.setInputTextType(tvInput.getInputType());
         dialog.setPositiveButtonText(tvPositiveBtn.getText());
         dialog.setPositiveButtonCallback(positiveButtonCallback);
         dialog.setCancelButtonText(tvCancelBtn.getText());

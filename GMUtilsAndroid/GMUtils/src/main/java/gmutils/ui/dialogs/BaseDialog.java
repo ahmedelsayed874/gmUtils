@@ -118,15 +118,15 @@ public abstract class BaseDialog {
         }
     }
 
-    public void reshow() {
+    public void reshow(Context context) {
         try {
-            this.dismiss();
-            BaseDialog dialog = reinitialize();
+            BaseDialog dialog = reinitialize(context);
             dialog.show();
+            this.dismiss();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    protected abstract BaseDialog reinitialize();
+    protected abstract BaseDialog reinitialize(Context context);
 }

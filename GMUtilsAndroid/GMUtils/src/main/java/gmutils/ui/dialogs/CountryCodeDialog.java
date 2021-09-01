@@ -101,8 +101,8 @@ public class CountryCodeDialog extends BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     @Override
-    protected BaseDialog reinitialize() {
-        CountryCodeDialog dialog = new CountryCodeDialog(getContext(), this.hideDialCode, this.mListener);
+    protected BaseDialog reinitialize(Context context) {
+        CountryCodeDialog dialog = new CountryCodeDialog(context, this.hideDialCode, this.mListener);
         RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
         if (recyclerCountryCodes != null) {
             RecyclerView recyclerCountryCodes2 = dialog.getView().findViewById(R.id.recycler_country_code);
