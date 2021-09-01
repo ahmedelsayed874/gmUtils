@@ -17,9 +17,9 @@ import gmutils.listeners.ResultCallback;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -27,14 +27,21 @@ public class AccountStorage {
 
     public interface IAccount {
         String _id();
+
         String _loginUserName(); //user name | email | phone number
+
         default String _fullName() {
             return _firstName() + " " + _lastName();
         }
+
         String _firstName();
+
         String _lastName();
+
         String _contactInfo();
+
         String _photo();
+
         String _token();
     }
 
@@ -158,10 +165,18 @@ public class AccountStorage {
     //----------------------------------------------------------------------------------------------
 
     public AccountStorage saveAccount(IAccount account, String password) {
-        return saveAccount(account, password, null);
+        return saveAccount(account, account._loginUserName(), password, null);
+    }
+
+    public AccountStorage saveAccount(IAccount account, String userName, String password) {
+        return saveAccount(account, userName, password, null);
     }
 
     public AccountStorage saveAccount(IAccount account, String password, ResultCallback<Boolean> feedback) {
+        return saveAccount(account, account._loginUserName(), password, feedback);
+    }
+
+    public AccountStorage saveAccount(IAccount account, String userName, String password, ResultCallback<Boolean> feedback) {
         try {
             IAccount acc = ACCOUNT;
             ACCOUNT = account;
@@ -181,7 +196,7 @@ public class AccountStorage {
             sharedPreferences
                     .edit()
                     .putString(KEY_USER, data)
-                    .putString(KEY_USER_NAME, account._loginUserName())
+                    .putString(KEY_USER_NAME, userName)
                     .putString(KEY_PASSWORD, password)
                     .putString(KEY_DATE, date)
                     .apply();
@@ -194,19 +209,6 @@ public class AccountStorage {
             e.printStackTrace();
             if (feedback != null) feedback.invoke(false);
         }
-
-        return this;
-    }
-
-    public AccountStorage saveCredentials(String userName, String password) {
-        userName = tryEncrypt(userName);
-        password = tryEncrypt(password);
-
-        sharedPreferences
-                .edit()
-                .putString(KEY_USER_NAME, userName)
-                .putString(KEY_PASSWORD, password)
-                .apply();
 
         return this;
     }
