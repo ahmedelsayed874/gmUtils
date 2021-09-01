@@ -21,6 +21,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import gmutils.collections.dataGroup.DataGroup1;
+import gmutils.collections.dataGroup.DataGroup2;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.RecyclerViewPaginationListener;
 import gmutils.listeners.SimpleWindowAttachListener;
@@ -159,6 +161,10 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     //------------------------------------------------------------------------------------------------------------------
 
     public void enableDeleteItemOnSwipe() {
+        enableDeleteItemOnSwipe(null);
+    }
+
+    public void enableDeleteItemOnSwipe(ActionCallback<DataGroup2<T, Integer>, Boolean> onDelete) {
         RecyclerView recyclerView = getRecyclerView();
         if (recyclerView != null) {
             ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
@@ -172,7 +178,16 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                 @Override
                 public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int direction) {
                     int position = viewHolder.getAdapterPosition();
-                    removeAt(position, true);
+                    if (onDelete == null) {
+                        removeAt(position, true);
+                    } else {
+                        try {
+                            boolean delete = onDelete.invoke(new DataGroup2<>(mList.get(position), position));
+                            if (delete) removeAt(position, true);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             });
 
@@ -635,11 +650,13 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                             if (BaseRecyclerAdapter.ViewHolder.this.viewBinding instanceof DumbViewBinding) {
                                 ((DumbViewBinding) BaseRecyclerAdapter.ViewHolder.this.viewBinding).dispose();
                             }
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
 
                         try {
                             BaseRecyclerAdapter.ViewHolder.this.viewBinding = null;
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
 
                         dispose();
                     }
@@ -647,7 +664,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
                 try {
                     viewBinding.getRoot().getViewTreeObserver().addOnWindowAttachListener(listener);
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         }
 
