@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,7 @@ public class ListDialog extends BaseDialog {
     public ListDialog(Context context, Listener listener) {
         super(context);
 
-        setBackground(Color.WHITE);
+        setBackground(ContextCompat.getColor(context, R.color.gmDialogBackground));
 
         View view = getView();
         tvTitle = view.findViewById(R.id.text_title);
