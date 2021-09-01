@@ -10,6 +10,7 @@ import java.util.Map;
 
 import gmutils.DateOp;
 import gmutils.Security;
+import gmutils.listeners.ResultCallback;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -86,7 +87,6 @@ public class AccountStorage {
 
     public static IAccount ACCOUNT;
 
-
     //------------------------------------------------------------------------------------------------------------------
 
     public static AccountStorage getInstance() {
@@ -157,7 +157,11 @@ public class AccountStorage {
 
     //----------------------------------------------------------------------------------------------
 
-    public boolean saveAccount(IAccount account, String password) {
+    public AccountStorage saveAccount(IAccount account, String password) {
+        return saveAccount(account, password, null);
+    }
+
+    public AccountStorage saveAccount(IAccount account, String password, ResultCallback<Boolean> feedback) {
         try {
             IAccount acc = ACCOUNT;
             ACCOUNT = account;
@@ -177,28 +181,37 @@ public class AccountStorage {
             sharedPreferences
                     .edit()
                     .putString(KEY_USER, data)
+                    .putString(KEY_USER_NAME, account._loginUserName())
                     .putString(KEY_PASSWORD, password)
                     .putString(KEY_DATE, date)
                     .apply();
 
             callListener(acc, account);
 
-            return true;
+            if (feedback != null) feedback.invoke(true);
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            if (feedback != null) feedback.invoke(false);
         }
+
+        return this;
     }
 
-    public void saveCredentials(String userName, String password) {
+    public AccountStorage saveCredentials(String userName, String password) {
+        userName = tryEncrypt(userName);
         password = tryEncrypt(password);
 
         sharedPreferences
                 .edit()
+                .putString(KEY_USER_NAME, userName)
                 .putString(KEY_PASSWORD, password)
                 .apply();
+
+        return this;
     }
+
+    //----------------------------------------------------------------------------------------------
 
     public <T extends IAccount> T getAccount(Class<T> accountClass) {
         if (ACCOUNT == null) {
@@ -249,7 +262,9 @@ public class AccountStorage {
         return date;
     }
 
-    public void logOut() {
+    //----------------------------------------------------------------------------------------------
+
+    public void remove() {
         sharedPreferences.edit().clear().apply();
 
         IAccount acc = ACCOUNT;
@@ -257,6 +272,8 @@ public class AccountStorage {
 
         callListener(acc, null);
     }
+
+    //----------------------------------------------------------------------------------------------
 
     private void callListener(IAccount oldAccount, IAccount newAccount) {
         if (sListener != null) {
