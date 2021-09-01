@@ -185,6 +185,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                         try {
                             boolean delete = onDelete.invoke(new DataGroup3<>(BaseRecyclerAdapter.this, mList.get(position), position));
                             if (delete) removeAt(position, true);
+                            else notifyDataSetChanged();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
