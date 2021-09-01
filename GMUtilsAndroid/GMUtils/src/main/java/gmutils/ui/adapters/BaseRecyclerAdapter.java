@@ -23,6 +23,7 @@ import java.util.List;
 
 import gmutils.collections.dataGroup.DataGroup1;
 import gmutils.collections.dataGroup.DataGroup2;
+import gmutils.collections.dataGroup.DataGroup3;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.RecyclerViewPaginationListener;
 import gmutils.listeners.SimpleWindowAttachListener;
@@ -164,7 +165,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         enableDeleteItemOnSwipe(null);
     }
 
-    public void enableDeleteItemOnSwipe(ActionCallback<DataGroup2<T, Integer>, Boolean> onDelete) {
+    public void enableDeleteItemOnSwipe(ActionCallback<DataGroup3<BaseRecyclerAdapter<T>, T, Integer>, Boolean> onDelete) {
         RecyclerView recyclerView = getRecyclerView();
         if (recyclerView != null) {
             ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
@@ -182,7 +183,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                         removeAt(position, true);
                     } else {
                         try {
-                            boolean delete = onDelete.invoke(new DataGroup2<>(mList.get(position), position));
+                            boolean delete = onDelete.invoke(new DataGroup3<>(BaseRecyclerAdapter.this, mList.get(position), position));
                             if (delete) removeAt(position, true);
                         } catch (Exception e) {
                             e.printStackTrace();
