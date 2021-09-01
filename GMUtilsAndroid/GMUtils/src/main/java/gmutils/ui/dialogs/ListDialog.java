@@ -2,6 +2,7 @@ package gmutils.ui.dialogs;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,7 +14,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,11 @@ public class ListDialog extends BaseDialog {
     public ListDialog(Context context, Listener listener) {
         super(context);
 
-        setBackground(ContextCompat.getColor(context, R.color.gmDialogBackground));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            setBackground(context.getColor(R.color.gmDialogBackground));
+        } else {
+            setBackground(context.getResources().getColor(R.color.gmDialogBackground));
+        }
 
         View view = getView();
         tvTitle = view.findViewById(R.id.text_title);
