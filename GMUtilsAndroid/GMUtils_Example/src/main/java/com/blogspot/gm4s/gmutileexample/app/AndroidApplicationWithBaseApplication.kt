@@ -1,5 +1,6 @@
 package com.blogspot.gm4s.gmutileexample.app
 
+import android.app.Activity
 import android.app.Application
 import android.util.Log
 import gmutils.Logger
@@ -20,11 +21,11 @@ class AndroidApplicationAndBaseApplication : Application() {
             Log.d("*****", "onPostCreate()")
         }
 
-        override fun onApplicationStartedFirstActivity() {
+        override fun onApplicationStartedFirstActivity(activity: Activity) {
             Log.d("*****", "onApplicationStartedFirstActivity()")
         }
 
-        override fun onApplicationFinishedLastActivity() {
+        override fun onApplicationFinishedLastActivity(activity: Activity) {
             Log.d("*****", "onApplicationFinishedLastActivity()")
         }
 

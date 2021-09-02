@@ -254,7 +254,7 @@ public abstract class BaseApplication extends Application implements Application
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (activityCount == 1) {
-                onApplicationStartedFirstActivity();
+                onApplicationStartedFirstActivity(activity);
 
                 if (bugs.length() != 0 && Logger.IS_WRITE_TO_FILE_ENABLED()) {
                     hasBugs = true;
@@ -309,7 +309,7 @@ public abstract class BaseApplication extends Application implements Application
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (activityCount <= 0) {
-                onApplicationFinishedLastActivity();
+                onApplicationFinishedLastActivity(activity);
 
                 if (onApplicationFinishedLastActivity != null) onApplicationFinishedLastActivity.run();
 
@@ -322,9 +322,9 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
-    protected void onApplicationStartedFirstActivity() {}
+    protected void onApplicationStartedFirstActivity(Activity activity) {}
 
-    protected void onApplicationFinishedLastActivity() {}
+    protected void onApplicationFinishedLastActivity(Activity activity) {}
 
     //----------------------------------------------------------------------------------------------
 
