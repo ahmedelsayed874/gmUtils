@@ -2,6 +2,7 @@ package gmutils.collections;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import gmutils.collections.dataGroup.DataGroup1;
@@ -218,6 +219,13 @@ public class ListWrapper<T> {
         }
 
         return sb.toString();
+    }
+
+
+    public SetWrapper<T> convertToSet() {
+        SetWrapper<T> setWrapper = SetWrapper.create(new HashSet<T>());
+        for (T t : list) setWrapper.add(t);
+        return setWrapper;
     }
 
 
