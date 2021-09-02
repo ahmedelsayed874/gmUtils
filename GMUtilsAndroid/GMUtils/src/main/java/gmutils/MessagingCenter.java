@@ -1,5 +1,8 @@
 package gmutils;
 
+import android.os.Build;
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +14,9 @@ import java.util.Objects;
  * Computer Engineer / 2012
  * Android/iOS Developer with (Java/Kotlin, Swift)
  * Have experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -44,14 +47,18 @@ public class MessagingCenter {
     //----------------------------------------------------------------------------------------------
 
     private static class MessageKey {
-        Class<?> caller;
+        String callerId;
         String messageName;
         boolean hasLongLife;
 
-        public MessageKey(Class<?> caller, String messageName, boolean hasLongLife) {
-            this.caller = caller;
+        public MessageKey(Object caller, String messageName, boolean hasLongLife) {
+            this.callerId = generateCallerId(caller);
             this.messageName = messageName;
             this.hasLongLife = hasLongLife;
+        }
+
+        private static String generateCallerId(Object caller) {
+            return caller.getClass().getName() + caller.hashCode();
         }
 
         @Override
@@ -60,13 +67,17 @@ public class MessagingCenter {
             if (o == null || getClass() != o.getClass()) return false;
             MessageKey that = (MessageKey) o;
             return hasLongLife == that.hasLongLife &&
-                    Objects.equals(caller, that.caller) &&
-                    Objects.equals(messageName, that.messageName);
+                    TextUtils.equals(callerId, that.callerId) &&
+                    TextUtils.equals(messageName, that.messageName);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(caller, messageName, hasLongLife);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return Objects.hash(callerId, messageName, hasLongLife);
+            } else {
+                return (callerId + "+" + messageName).hashCode() + (hasLongLife ? 1 : 0);
+            }
         }
     }
 
@@ -78,29 +89,29 @@ public class MessagingCenter {
 
     //----------------------------------------------------------------------------------------------
 
-    public void subscribeOnce(Class<?> caller, String messageName, Observer observer) {
+    public void subscribeOnce(Object caller, String messageName, Observer observer) {
         observers.put(new MessageKey(caller, messageName, false), observer);
     }
 
-    public void subscribeOnce(Class<?> caller, Class<?> dataType, Observer observer) {
+    public void subscribeOnce(Object caller, Class<?> dataType, Observer observer) {
         subscribeOnce(caller, dataType.getName(), observer);
     }
 
-    public void subscribeAlways(Class<?> caller, String messageName, Observer observer) {
+    public void subscribeAlways(Object caller, String messageName, Observer observer) {
         observers.put(new MessageKey(caller, messageName, true), observer);
     }
 
-    public void subscribeAlways(Class<?> caller, Class<?> dataType, Observer observer) {
+    public void subscribeAlways(Object caller, Class<?> dataType, Observer observer) {
         subscribeAlways(caller, dataType.getName(), observer);
     }
 
     //----------------------------------------------------------------------------------------------
 
-    public void unsubscribe(Class<?> caller) {
+    public void unsubscribe(Object caller) {
         List<MessageKey> messageKeys = new ArrayList<>();
 
         for (MessageKey messageKey : observers.keySet()) {
-            if (messageKey.caller == caller) {
+            if (messageKey.callerId.equals(MessageKey.generateCallerId(caller))) {
                 messageKeys.add(messageKey);
             }
         }
@@ -110,11 +121,11 @@ public class MessagingCenter {
         }
     }
 
-    public void unsubscribe(Class<?> caller, String messageName) {
+    public void unsubscribe(Object caller, String messageName) {
         observers.remove(new MessageKey(caller, messageName, true));
     }
 
-    public void unsubscribe(Class<?> caller, Class<?> dataType) {
+    public void unsubscribe(Object caller, Class<?> dataType) {
         unsubscribe(caller, dataType.getName());
     }
 
