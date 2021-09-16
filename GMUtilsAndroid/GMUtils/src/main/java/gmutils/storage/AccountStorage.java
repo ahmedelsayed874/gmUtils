@@ -185,6 +185,7 @@ public class AccountStorage {
             String data = gson.toJson(account);
 
             data = tryEncrypt(data);
+            userName = tryEncrypt(userName);
             password = tryEncrypt(password);
             String date = tryEncrypt(
                     DateOp.getInstance().formatDate(
