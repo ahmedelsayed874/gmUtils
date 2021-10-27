@@ -138,27 +138,27 @@ public abstract class BaseApplication extends Application implements Application
     private void printRecommendedResources() {
         String colors =
                 "It's recommend to override those resources in color (normal & night):\n\n" +
-                        "    <color name=\"gmUtilsPrimaryDark\">@color/black</color>\n" +
-                        "    <color name=\"gmUtilsPrimary\">@color/orange</color>\n" +
-                        "    <color name=\"gmUtilsAccent\">@color/red1</color>\n" +
+                        "    <color name=\"gmPrimaryDark\">@color/black</color>\n" +
+                        "    <color name=\"gmPrimary\">@color/orange</color>\n" +
+                        "    <color name=\"gmAccent\">@color/red1</color>\n" +
                         "\n" +
-                        "    <color name=\"gmUtilsBackground\">@color/white</color>\n" +
-                        "    <color name=\"gmUtilsText\">@color/black</color>\n" +
-                        "    <color name=\"gmUtilsHint\">@color/gray1</color>\n" +
-                        "    <color name=\"gmUtilsTitle\">@color/black</color>\n" +
-                        "    <color name=\"gmUtilsScreenTitle\">@color/gray5</color>\n" +
+                        "    <color name=\"gmBackground\">@color/white</color>\n" +
+                        "    <color name=\"gmText\">@color/black</color>\n" +
+                        "    <color name=\"gmHint\">@color/gray1</color>\n" +
+                        "    <color name=\"gmTitle\">@color/black</color>\n" +
+                        "    <color name=\"gmScreenTitle\">@color/gray5</color>\n" +
                         "\n" +
-                        "    <color name=\"gmUtilsButtonLink\">@color/blue0</color>\n" +
-                        "    <color name=\"gmUtilsButtonActive\">@color/green5</color>\n" +
-                        "    <color name=\"gmUtilsButtonDestructive\">@color/red1</color>\n" +
-                        "    <color name=\"gmUtilsButtonDark\">@color/black</color>\n" +
+                        "    <color name=\"gmButtonLink\">@color/blue0</color>\n" +
+                        "    <color name=\"gmButtonActive\">@color/green5</color>\n" +
+                        "    <color name=\"gmButtonDestructive\">@color/red1</color>\n" +
+                        "    <color name=\"gmButtonDark\">@color/black</color>\n" +
                         "\n" +
-                        "    <color name=\"gmUtilsDialogBackground\">@color/gmUtilsPrimary</color>\n" +
-                        "    <color name=\"gmUtilsDialogText\">#fff</color>\n" +
+                        "    <color name=\"gmDialogBackground\">@color/gmUtilsPrimary</color>\n" +
+                        "    <color name=\"gmDialogText\">#fff</color>\n" +
                         "\n" +
-                        "    <color name=\"gmUtilsSeparateLine\">@color/gray1</color>\n" +
-                        "    <color name=\"gmUtilsRatingBar\">@color/gmUtilsPrimary</color>\n" +
-                        "    <color name=\"gmUtilsEditTextBackground\">@color/white</color>";
+                        "    <color name=\"gmSeparateLine\">@color/gray1</color>\n" +
+                        "    <color name=\"gmRatingBar\">@color/gmUtilsPrimary</color>\n" +
+                        "    <color name=\"gmEditTextBackground\">@color/white</color>";
 
         Log.i("*** " + thisApp().getClass().getSimpleName(), colors);
     }

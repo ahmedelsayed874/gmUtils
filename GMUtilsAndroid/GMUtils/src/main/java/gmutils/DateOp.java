@@ -157,7 +157,7 @@ public class DateOp implements Serializable {
     @NotNull
     @Override
     public String toString() {
-        return formatDate("E dd-MMMM'('MM')'-yyyy HH:mm:ss.SSSXXX", false) + " / " + getTimeInMillis();
+        return formatDate("E dd-MMMM'('MM')'-yyyy HH:mm:ss.SSS", false) + " / " + getTimeInMillis();
     }
 
     //--------------------------------------------------------------------------------------------//
