@@ -47,6 +47,7 @@ public class ListDialog extends BaseDialog {
     private CustomListAdapter mCustomAdapter;
     private Listener mListener;
     private Listener2 mListener2;
+    private SearchDelegate mSearchDelegate;
 
     @NonNull
     @Override
@@ -97,8 +98,16 @@ public class ListDialog extends BaseDialog {
 
             final List newList = new ArrayList();
             for (Object o : ListDialog.this.mList) {
-                if (o.toString().toLowerCase().contains(text)) {
-                    newList.add(o);
+                if (o != null) {
+                    if (mSearchDelegate == null) {
+                        if (o.toString().toLowerCase().contains(text)) {
+                            newList.add(o);
+                        }
+                    } else {
+                        if (mSearchDelegate.onSearchingTextChanged(ListDialog.this, text, o)) {
+                            newList.add(o);
+                        }
+                    }
                 }
             }
 
@@ -191,6 +200,11 @@ public class ListDialog extends BaseDialog {
         return this;
     }
 
+    public ListDialog setSearchDelegate(SearchDelegate searchDelegate) {
+        this.mSearchDelegate = searchDelegate;
+        return this;
+    }
+
     public ListDialog show() {
         setListAdapter(mList, false);
         super.show();
@@ -236,6 +250,10 @@ public class ListDialog extends BaseDialog {
 
     public interface Listener2 {
         void onNewValueInserted(ListDialog dialog, String text);
+    }
+
+    public interface SearchDelegate {
+        boolean onSearchingTextChanged(ListDialog dialog, String text, Object item);
     }
 
     public interface CustomListAdapter {

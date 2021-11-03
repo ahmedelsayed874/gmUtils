@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="GMUtils/src/main/res/layout/dialog_input_gm4s.xml" value="0.2640625" />
+        <entry key="GMUtils/src/main/res/layout/dialog_list_gm4s.xml" value="0.485" />
         <entry key="GMUtils/src/main/res/layout/dialog_message_gm4s.xml" value="0.21770833333333334" />
         <entry key="GMUtils/src/main/res/layout/dialog_wait.xml" value="0.5125" />
       </map>
