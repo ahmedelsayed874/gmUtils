@@ -16,6 +16,7 @@ public class ToastNative implements MyToast.IToast {
     private Toast toast;
     private View root;
     private TextView tv;
+    private boolean isFast;
 
     public ToastNative(Context context, int msg, boolean systemStyle) {
         this(context, context.getString(msg), systemStyle);
@@ -23,7 +24,7 @@ public class ToastNative implements MyToast.IToast {
 
     @SuppressLint("ShowToast")
     public ToastNative(Context context, CharSequence msg, boolean systemStyle) {
-        toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
+        toast = Toast.makeText(context, msg, isFast ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG);
 
         try {
             root = toast.getView();
@@ -56,6 +57,16 @@ public class ToastNative implements MyToast.IToast {
         }
     }
 
+    @Override
+    public boolean isFast() {
+        return isFast;
+    }
+
+    @Override
+    public MyToast.IToast setFast(boolean fast) {
+        this.isFast = fast;
+        return this;
+    }
 
     @Override
     public MyToast.IToast setBackground(int bgRes) {

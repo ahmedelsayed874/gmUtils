@@ -24,6 +24,10 @@ public class MyToast {
 
     public interface IToast {
 
+        boolean isFast();
+
+        IToast setFast(boolean fast);
+
         IToast setBackground(int bgRes);
 
         IToast setTextColor(int textColorRes);

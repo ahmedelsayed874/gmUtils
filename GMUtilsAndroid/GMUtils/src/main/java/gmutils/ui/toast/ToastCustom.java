@@ -21,12 +21,14 @@ import gmutils.R;
  * +201022663988
  */
 public class ToastCustom implements MyToast.IToast {
+    private final long defaultDuration = 3000;
 
     private ViewGroup windowLayout;
     private View rootLayout;
     private View textContainer;
     private TextView tv;
-    private long duration = 3000;
+    private long duration = defaultDuration;
+    private boolean isFast;
     
 
     public ToastCustom(Activity activity, int msg, boolean systemStyle) {
@@ -94,8 +96,25 @@ public class ToastCustom implements MyToast.IToast {
     }
 
     @Override
+    public boolean isFast() {
+        return isFast;
+    }
+
+    @Override
+    public MyToast.IToast setFast(boolean fast) {
+        isFast = fast;
+        return this;
+    }
+
+    @Override
     public MyToast.IToast show() {
         windowLayout.addView(rootLayout);
+
+        long duration2 = duration;
+
+        if (duration2 != defaultDuration) {
+            duration2 = isFast ? 700 : duration2;
+        }
 
         rootLayout.postDelayed(this::hide, duration);
 
