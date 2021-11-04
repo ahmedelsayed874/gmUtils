@@ -145,7 +145,7 @@ public class ListDialog extends BaseDialog {
             if (!isNewList) {
                 lvList.setAdapter(mCustomAdapter.createAdapter());
             } else {
-                mCustomAdapter.updateAdapter(list);
+                mCustomAdapter.updateAdapter((BaseAdapter) lvList.getAdapter(), list);
             }
         }
 
@@ -260,6 +260,6 @@ public class ListDialog extends BaseDialog {
 
         BaseAdapter createAdapter();
 
-        void updateAdapter(List newList);
+        void updateAdapter(BaseAdapter adapter, List newList);
     }
 }
