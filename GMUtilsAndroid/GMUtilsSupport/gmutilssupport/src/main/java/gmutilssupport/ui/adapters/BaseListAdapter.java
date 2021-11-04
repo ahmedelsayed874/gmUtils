@@ -218,7 +218,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
         public boolean onTouch(View v, MotionEvent event) {
             if (this.listener != null)
                 if (this.listener.getItemTouchListener() != null) {
-                    this.listener.getItemTouchListener().onTouch(item, event);
+                    this.listener.getItemTouchListener().onTouch(itemView, item, event);
                     return true;
                 }
             return false;
@@ -232,7 +232,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter {
     //----------------------------------------------------------------------------------------------
 
     public interface ItemTouchListener<T> {
-        void onTouch(T item, MotionEvent event);
+        void onTouch(View itemView, T item, MotionEvent event);
     }
 
 

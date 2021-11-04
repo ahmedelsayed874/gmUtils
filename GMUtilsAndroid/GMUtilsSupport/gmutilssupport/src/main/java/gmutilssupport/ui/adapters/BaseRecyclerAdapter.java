@@ -694,13 +694,13 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         @Override
         public void onClick(View v) {
             if (mClickListener != null)
-                mClickListener.onItemClicked(BaseRecyclerAdapter.this, getItem(), itemPosition);
+                mClickListener.onItemClicked(BaseRecyclerAdapter.this, itemView, getItem(), itemPosition);
         }
 
         @Override
         public boolean onLongClick(View v) {
             if (mLongClickListener != null)
-                return mLongClickListener.onItemLongClicked(BaseRecyclerAdapter.this, getItem(), getAdapterPosition());
+                return mLongClickListener.onItemLongClicked(BaseRecyclerAdapter.this, itemView, getItem(), getAdapterPosition());
             else
                 return false;
         }
@@ -711,11 +711,11 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     //------------------------------------------------------------------------------------------------------------------
 
     public interface ClickListener<T> {
-        void onItemClicked(BaseRecyclerAdapter<T> adapter, T item, int position);
+        void onItemClicked(BaseRecyclerAdapter<T> adapter, View itemView, T item, int position);
     }
 
     public interface LongClickListener<T> {
-        boolean onItemLongClicked(BaseRecyclerAdapter<T> adapter, T item, int position);
+        boolean onItemLongClicked(BaseRecyclerAdapter<T> adapter, View itemView, T item, int position);
     }
 
     public interface OnLoadMoreListener<T> {

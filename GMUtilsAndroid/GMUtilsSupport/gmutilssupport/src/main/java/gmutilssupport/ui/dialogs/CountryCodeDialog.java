@@ -58,7 +58,7 @@ public class CountryCodeDialog extends BaseDialog {
 
         CountryCodesAdapter adapter = new CountryCodesAdapter(recyclerCountryCodes, hideDialCode);
         adapter.add(countryPhoneCodes.sortByName().getCountryCodes(), true);
-        adapter.setOnItemClickListener((adapter1, item, position) -> {
+        adapter.setOnItemClickListener((adapter1, itemView, item, position) -> {
             if (mListener != null) mListener.onCountryPhoneCodeSelected(item);
             dismiss();
         });
