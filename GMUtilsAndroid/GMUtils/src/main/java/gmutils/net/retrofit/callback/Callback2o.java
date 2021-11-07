@@ -48,7 +48,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
     }
 
     private void setResult(R result) {
-        onResponseReady.invoke(result);
+        if (onResponseReady != null) onResponseReady.invoke(result);
         onResponseReady = null;
         callbackOperations = null;
     }

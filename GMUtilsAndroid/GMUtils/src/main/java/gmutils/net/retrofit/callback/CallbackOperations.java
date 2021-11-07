@@ -168,7 +168,7 @@ final class CallbackOperations<R extends BaseResponse> {
 
         result._requestTime = requestTime;
         result._responseTime = System.currentTimeMillis();
-        listener.onResponseReady(result);
+        if (listener != null) listener.onResponseReady(result);
 
         destroyReferences();
     }

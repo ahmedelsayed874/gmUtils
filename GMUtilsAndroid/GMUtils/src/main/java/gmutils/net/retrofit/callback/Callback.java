@@ -44,7 +44,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     }
 
     private void setResult(R result) {
-        onResponseReady.invoke(result);
+        if (onResponseReady != null) onResponseReady.invoke(result);
         onResponseReady = null;
         callbackOperations = null;
     }
