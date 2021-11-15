@@ -3,8 +3,8 @@ package gmutils.net.volley.utils;
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
- * Android/iOS Developer with (Java/Kotlin, Swift)
- * Have experience with:
+ * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
+ * Have precedent experience with:
  *      - (C/C++, C#) languages
  *      - .NET environment
  *      - AVR Microcontrollers

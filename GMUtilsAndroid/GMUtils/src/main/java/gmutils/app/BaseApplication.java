@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
-import org.jetbrains.annotations.NotNull;
-
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,21 +20,16 @@ import gmutils.ui.dialogs.MessageDialog;
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
- * Android/iOS Developer with (Java/Kotlin, Swift)
- * Have experience with:
+ * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
+ * Have precedent experience with:
  * - (C/C++, C#) languages
  * - .NET environment
+ * - Java swing
  * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
-    public interface Callbacks {
-        void onApplicationStartedFirstActivity(String key);
-
-        void onApplicationFinishedLastActivity(String key);
-
-    }
 
     public interface GlobalVariableDisposal {
         void dispose();
@@ -97,6 +90,27 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
+    public static BaseApplication register(Application application) {
+        BaseApplication baseApplication = new BaseApplication() {
+            final WeakReference<Application> app = new WeakReference<>(application);
+
+            @Override
+            Application thisApp() {
+                return app.get();
+            }
+
+            @Override
+            protected void onPreCreate() {
+            }
+        };
+
+        baseApplication.onCreate();
+
+        return baseApplication;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     public static BaseApplication current() {
         return current;
     }
@@ -108,8 +122,7 @@ public abstract class BaseApplication extends Application implements Application
      *
      * @return
      */
-    @NotNull
-    protected Application thisApp() {
+    Application thisApp() {
         return this;
     }
 
@@ -133,7 +146,7 @@ public abstract class BaseApplication extends Application implements Application
         onPostCreate();
     }
 
-    protected abstract void onPostCreate();
+    protected void onPostCreate() {}
 
     private void printRecommendedResources() {
         String colors =

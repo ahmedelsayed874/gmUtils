@@ -8,32 +8,12 @@ import gmutils.app.BaseApplication
 
 class AndroidApplicationAndBaseApplication : Application() {
 
-    val app = object : BaseApplication() {
-        override fun thisApp(): Application {
-            return this@AndroidApplicationAndBaseApplication
-        }
-
-        override fun onPreCreate() {
-            Log.d("*****", "onPreCreate()")
-        }
-
-        override fun onPostCreate() {
-            Log.d("*****", "onPostCreate()")
-        }
-
-        override fun onApplicationStartedFirstActivity(activity: Activity) {
-            Log.d("*****", "onApplicationStartedFirstActivity()")
-        }
-
-        override fun onApplicationFinishedLastActivity(activity: Activity) {
-            Log.d("*****", "onApplicationFinishedLastActivity()")
-        }
-
-    }
+    lateinit var app : BaseApplication
 
     override fun onCreate() {
         super.onCreate()
-        app.onCreate()
+
+        app = BaseApplication.register(this)
 
         Logger.SET_WRITE_TO_FILE_DEADLINE(22, 11, 2021)
         Log.d("*****", "onCreate()")
