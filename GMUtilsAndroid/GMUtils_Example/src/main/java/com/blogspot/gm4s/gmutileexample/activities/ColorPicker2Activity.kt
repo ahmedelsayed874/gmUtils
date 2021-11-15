@@ -24,7 +24,7 @@ class ColorPicker2Activity : AppCompatActivity() {
         val text = findViewById<TextView>(R.id.text)
 
         val adapter = Adapter(rv, generateColorList())
-        adapter.setOnItemClickListener { adapter, item, position ->
+        adapter.setOnItemClickListener { adapter, view, item, position ->
             text.text = item.toString() + "\n" + item.color
             Log.e("****", item.toString() + " ---- " + item.color)
         }

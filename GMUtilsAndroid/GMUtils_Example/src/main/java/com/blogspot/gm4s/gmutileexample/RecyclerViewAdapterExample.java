@@ -89,7 +89,7 @@ class HowToUseRecyclerViewAdapterExample {
 
         adapter.setOnItemClickListener(new BaseRecyclerAdapter.ClickListener<String>() {
             @Override
-            public void onItemClicked(BaseRecyclerAdapter<String> adapter, String item, int position) {
+            public void onItemClicked(BaseRecyclerAdapter<String> adapter, View itemView, String item, int position) {
                 System.out.println(position + ": " +item);
             }
         });
