@@ -5,8 +5,12 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Pair;
 import org.jetbrains.annotations.NotNull;
+
+import gmutils.listeners.ActionCallback0;
+import gmutils.listeners.ResultCallback;
 
 
 /**
@@ -264,6 +268,34 @@ public class BaseViewModel extends AndroidViewModel {
     public void runOnUIThread(Runnable runnable, long delay) {
         if (handler == null) handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(runnable, delay);
+    }
+
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
+        runOnBackgroundThread(null, task, dispatchResultOnUIThread, onFinish);
+    }
+
+    public <T> void runOnBackgroundThread(String name, ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
+        if (task == null) return;
+
+        Runnable target = () -> {
+            T result = task.invoke();
+            if (onFinish != null) {
+                if (dispatchResultOnUIThread)
+                    runOnUIThread(() -> onFinish.invoke(result));
+                else
+                    onFinish.invoke(result);
+            }
+        };
+
+        if (TextUtils.isEmpty(name))
+            new Thread(target).start();
+        else
+            new Thread(target, name).start();
+    }
+    
+    public void runOnBackgroundThread(Runnable task) {
+        if (task == null) return;
+        new Thread(task).start();
     }
 
     //----------------------------------------------------------------------------------------------

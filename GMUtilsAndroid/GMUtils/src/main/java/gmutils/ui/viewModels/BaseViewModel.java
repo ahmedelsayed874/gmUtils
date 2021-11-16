@@ -3,6 +3,7 @@ package gmutils.ui.viewModels;
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import androidx.lifecycle.AndroidViewModel;
@@ -11,6 +12,8 @@ import androidx.lifecycle.MutableLiveData;
 import org.jetbrains.annotations.NotNull;
 
 import gmutils.app.BaseApplication;
+import gmutils.listeners.ActionCallback0;
+import gmutils.listeners.ResultCallback;
 
 
 /**
@@ -29,6 +32,7 @@ public class BaseViewModel extends AndroidViewModel {
 
     public interface ProgressStatus {
         int getProgress();
+
         ProgressStatus setProgress(int progress);
 
         class Show implements ProgressStatus {
@@ -269,6 +273,34 @@ public class BaseViewModel extends AndroidViewModel {
     public void runOnUIThread(Runnable runnable, long delay) {
         if (handler == null) handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(runnable, delay);
+    }
+
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
+        runOnBackgroundThread(null, task, dispatchResultOnUIThread, onFinish);
+    }
+
+    public <T> void runOnBackgroundThread(String name, ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
+        if (task == null) return;
+
+        Runnable target = () -> {
+            T result = task.invoke();
+            if (onFinish != null) {
+                if (dispatchResultOnUIThread)
+                    runOnUIThread(() -> onFinish.invoke(result));
+                else
+                    onFinish.invoke(result);
+            }
+        };
+
+        if (TextUtils.isEmpty(name))
+            new Thread(target).start();
+        else
+            new Thread(target, name).start();
+    }
+
+    public void runOnBackgroundThread(Runnable task) {
+        if (task == null) return;
+        new Thread(task).start();
     }
 
     //----------------------------------------------------------------------------------------------
