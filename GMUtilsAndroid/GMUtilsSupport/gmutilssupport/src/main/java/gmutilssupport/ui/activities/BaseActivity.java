@@ -2,6 +2,7 @@ package gmutilssupport.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import gmutils.Logger;
+import gmutils.ui.toast.MyToast;
 import gmutilsSupport.R;
 import gmutilssupport.ui.dialogs.MessageDialog;
 import gmutilssupport.ui.dialogs.RetryPromptDialog;
@@ -32,6 +34,7 @@ import gmutilssupport.ui.fragments.BaseFragment;
 import gmutilssupport.ui.fragments.BaseFragmentListener;
 import gmutilssupport.ui.fragments.BaseFragmentListenerX;
 import gmutilssupport.ui.utils.ViewSource;
+import gmutilssupport.ui.viewModels.BaseViewModel;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -163,7 +166,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
                 Class<? extends ViewModel> viewModelClass = viewModelClasses.get(id);
                 assert viewModelClass != null;
-                viewModels.put(id, viewModelProvider.get(viewModelClass));
+                ViewModel viewModel = viewModelProvider.get(viewModelClass);
+                viewModels.put(id, viewModel);
+
+                if (viewModel instanceof BaseViewModel) {
+                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(this, getProgressStatusLiveData());
+                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(this, getAlertMessageLiveData());
+                }
             }
         }
     }
@@ -387,4 +396,75 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         if (getActivityFunctions().lifecycle().onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
     }
+
+
+    //----------------------------------------------------------------------------------------------
+
+    private Observer<BaseViewModel.ProgressStatus> getProgressStatusLiveData() {
+        return progressStatus -> {
+            if (progressStatus != null)
+                onProgressOfViewModelTaskChanged(progressStatus);
+        };
+    }
+
+    protected void onProgressOfViewModelTaskChanged(BaseViewModel.ProgressStatus progressStatus) {
+        if (progressStatus instanceof BaseViewModel.ProgressStatus.Show) {
+            BaseViewModel.ProgressStatus.Show ps = (BaseViewModel.ProgressStatus.Show) progressStatus;
+            if (ps.messageId != 0) showWaitView(ps.messageId);
+            else showWaitView();
+
+        } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Update) {
+            BaseViewModel.ProgressStatus.Update ps = (BaseViewModel.ProgressStatus.Update) progressStatus;
+            updateWaitViewMsg(ps.message);
+
+        } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Hide) {
+            hideWaitView();
+        }
+    }
+
+    private Observer<BaseViewModel.Message> getAlertMessageLiveData() {
+        return message -> {
+            if (message != null) {
+                onMessageReceivedFromViewModel(message);
+            }
+        };
+    }
+
+    protected void onMessageReceivedFromViewModel(BaseViewModel.Message message) {
+        String msg = "";
+        msg = (message.messageId != null) ? getString(message.messageId) : message.messageString;
+        if (message.type instanceof BaseViewModel.MessageType.Normal) {
+            if (message.popup) {
+                showMessageDialog(msg);
+            } else {
+                MyToast.show(this, msg);
+            }
+        } else if (message.type instanceof BaseViewModel.MessageType.Error) {
+            BaseViewModel.MessageType.Error mt = (BaseViewModel.MessageType.Error) message.type;
+            if (message.popup) {
+                MessageDialog dialog = showMessageDialog(msg);
+                if (mt.button1() != null) {
+                    dialog.setButton1(mt.button1().first, d -> mt.button1().second.run());
+                }
+                if (mt.button2() != null) {
+                    dialog.setButton2(mt.button2().first, d -> mt.button2().second.run());
+                }
+                if (mt.button3() != null) {
+                    dialog.setButton3(mt.button3().first, d -> mt.button3().second.run());
+                }
+            } else {
+                MyToast.showError(this, msg);
+            }
+            mt.destroy();
+
+        } else if (message.type instanceof BaseViewModel.MessageType.Retry) {
+            BaseViewModel.MessageType.Retry mt = (BaseViewModel.MessageType.Retry) message.type;
+            Runnable onRetry = mt.onRetry();
+            mt.destroy();
+            showRetryPromptDialog(msg, d -> {
+                if (onRetry != null) onRetry.run();
+            });
+        }
+    }
+
 }
