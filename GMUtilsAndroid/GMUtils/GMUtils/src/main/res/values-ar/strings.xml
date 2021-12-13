@@ -1,0 +1,99 @@
+<resources>
+    <string name="wait_moments">انتظر من فضلك...</string>
+    <string name="ok">موافق</string>
+    <string name="cancel">إلغاء</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="skip">تخطي</string>
+    <string name="dismiss">إغلاق</string>
+    <string name="continue_">استمرار</string>
+    <string name="save">حفظ</string>
+    <string name="close">إغلاق</string>
+    <string name="finish">إنهاء</string>
+
+    <string name="gallery">الأستوديو</string>
+    <string name="camera">الكاميرا</string>
+    <string name="remove">إزالة</string>
+
+    <string name="login">تسجيل الدخول</string>
+
+    <string name="email">البريد الإلكتروني</string>
+    <string name="email_">البريد الإلكتروني:</string>
+    <string name="type_valid_email">أدخل عنوان بريد إلكتروني صحيح</string>
+
+    <string name="password">كلمة المرور</string>
+    <string name="passwordـ">كلمة المرور:</string>
+    <string name="type_valid_password">أدخل كلمة مرور صحيحة (لا تقل عن ٦ أحرف)</string>
+    <string name="forgot_password">نسيت كلمة المرور</string>
+    <string name="forgot_password_">نسيت كلمة المرور؟</string>
+    <string name="change_password">تغيير كلمة المرور</string>
+    <string name="current_password">كلمة المرور الحالية</string>
+    <string name="current_passwordـ">كلمة المرور الحالية:</string>
+    <string name="new_password">كلمة المرور الجديدة</string>
+    <string name="new_passwordـ">كلمة المرور الجديدة:</string>
+    <string name="password_confirm">تأكيد كلمة المرور</string>
+    <string name="password_confirm_">تأكيد كلمة المرور:</string>
+    <string name="type_valid_password_confirm">كلمة المرور غير مطابقة</string>
+    <string name="reset_password">استعادة كلمة المرور</string>
+
+    <string name="mobile">رقم الموبايل</string>
+    <string name="mobile_">رقم الموبايل:</string>
+    <string name="type_valid_mobile">اكتب رقم موبايل يتكون من ١١ ارقام على الأقل (مثال: ٠١٢٣٤٥٦٧٨٩٠)</string>
+    <string name="type_valid_mobile2">اكتب رقم هاتف صحيح</string>
+
+    <string name="phoneNumber">رقم الهاتف</string>
+    <string name="phoneNumber_">رقم الهاتف:</string>
+    <string name="type_valid_phoneNumber">اكتب رقم هاتف يتكون من ١١ ارقام على الأقل (مثال: ٠١٢٣٤٥٦٧٨٩٠)</string>
+    <string name="type_valid_phoneNumber2">اكتب رقم هاتف صحيح</string>
+
+    <string name="name">الإسم</string>
+    <string name="name_">الإسم:</string>
+    <string name="first_name">الإسم الأول</string>
+    <string name="first_name_">الإسم الأول:</string>
+    <string name="last_name">إسم العائلة</string>
+    <string name="last_name_">إسم العائلة:</string>
+    <string name="type_valid_name">اكتب اسما صحيحا (٣ حروف على الأقل)</string>
+
+    <string name="review_mentioned_errors">راجع الأخطاء المذكورة</string>
+    <string name="check_mentioned_errors">راجع الأخطاء المذكورة</string>
+
+    <string name="register">إنشاء حساب جديد</string>
+    <string name="main">الرئيسية</string>
+    <string name="home">الرئيسية</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="profile">الملف الشخصي</string>
+    <string name="edit_profile">تعديل الملف الشخصي</string>
+
+    <string name="gender">الجنس</string>
+    <string name="gender_">الجنس:</string>
+    <string name="male">ذكر</string>
+    <string name="female">أنثى</string>
+    <string name="yes">نعم</string>
+    <string name="no">لا</string>
+    <string name="dontShowAgain">لا تظهرها ثانية</string>
+    <string name="copy">نسخ</string>
+    <string name="delete">حذف</string>
+    <string name="back">الخلف</string>
+    <string name="what_you_are_looking_for">ما الذي تبحث عنه؟</string>
+    <string name="select_one">Select One</string>
+    <string name="there_is_no_result">There is no results</string>
+    <string name="click_here_to_add">Click here to add</string>
+
+    <string name="type_strong_password">
+        أكتب كلمة مرور قوية بحيث تحتوي على ٨ أحرف على الأقل وتحتوى على حروف كبيرة وصغيرة وأرقام وحروف خاصة.
+    </string>
+    <string name="accept">أقبل</string>
+    <string name="accept_terms_and_conditions">أوافق على الشروط والأحكام.</string>
+
+    <string name="try_again">حاول مرة أخرى</string>
+    <string name="take_photo">إلتقط صورة</string>
+    <string name="pickup_photo">فتح صورة</string>
+    <string name="type_valid_first_name">أكتب الإسم الأول صحيحا.</string>
+    <string name="type_valid_last_name">أكتب الإسم الأخير صحيحا.</string>
+    <string name="done">تم</string>
+    <string name="Red">Red</string>
+    <string name="Green">Green</string>
+    <string name="Blue">Blue</string>
+    <string name="Alpha">Alpha</string>
+    <string name="Hex">Hex</string>
+
+</resources>

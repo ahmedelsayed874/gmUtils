@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="gmPrimaryDark">#3700B3</color>
+    <color name="gmPrimary">#6200EE</color>
+    <color name="gmAccent">#03DAC5</color>
+
+    <color name="brandColor">@color/gmPrimary</color>
+    <color name="background">@color/white</color>
+
+</resources>

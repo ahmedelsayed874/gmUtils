@@ -1,0 +1,3 @@
+rootProject.name = "GMUtils"
+include ':GMUtils'
+include ':GMUtils_Example'

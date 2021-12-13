@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ShapeView">
+        <attr name="strokeThickness" format="dimension"/>
+        <attr name="stroke_Color" format="color"/>
+        <attr name="shapeColor" format="color"/>
+        <attr name="sides" format="integer"/>
+        <attr name="roundRadius" format="dimension"/>
+        <attr name="lineWidth" format="dimension"/>
+    </declare-styleable>
+</resources>
