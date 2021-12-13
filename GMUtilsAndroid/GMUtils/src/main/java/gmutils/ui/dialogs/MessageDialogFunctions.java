@@ -35,6 +35,7 @@ public class MessageDialogFunctions {
 
     public interface Listener {
         View getView();
+
         void onButtonClick(MessageDialogFunctions dialog, int button);
     }
 
@@ -152,8 +153,6 @@ public class MessageDialogFunctions {
 
     //----------------------------------------------------------------------------------------------
 
-    private boolean isShowingDisabled = false;
-
     @NonNull
     JSONArray getDontShowAgainCheckboxTagsArray() {
         GeneralStorage preferences = GeneralStorage.getInstance(MessageDialogFunctions.class.getName());
@@ -228,30 +227,22 @@ public class MessageDialogFunctions {
      */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public MessageDialogFunctions showDontShowAgainCheckbox(int tag) {
-        isDontShowAgainCheckboxDisabledByUser(tag, (result) -> {
-            isShowingDisabled = result;
-            if (!isShowingDisabled) {
+        lyDontShowAgain.setVisibility(View.VISIBLE);
+        chkDontShowAgain.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            JSONArray tagsJsonArray = getDontShowAgainCheckboxTagsArray();
 
-                lyDontShowAgain.setVisibility(View.VISIBLE);
+            if (isChecked) { //add to disabled list
+                tagsJsonArray.put(tag);
+                saveDontShowAgainCheckboxTagsArray(tagsJsonArray);
 
-                chkDontShowAgain.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    JSONArray tagsJsonArray = getDontShowAgainCheckboxTagsArray();
-
-                    if (isChecked) { //add to disabled list
-                        tagsJsonArray.put(tag);
+            } else {
+                for (int i = 0; i < tagsJsonArray.length(); i++) {
+                    if (tagsJsonArray.optInt(i, -1) == tag) {
+                        tagsJsonArray.remove(i);
                         saveDontShowAgainCheckboxTagsArray(tagsJsonArray);
-
-                    } else {
-                        for (int i = 0; i < tagsJsonArray.length(); i++) {
-                            if (tagsJsonArray.optInt(i, -1) == tag) {
-                                tagsJsonArray.remove(i);
-                                saveDontShowAgainCheckboxTagsArray(tagsJsonArray);
-                                break;
-                            }
-                        }
+                        break;
                     }
-                });
-
+                }
             }
         });
 
