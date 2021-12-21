@@ -21,15 +21,17 @@ import android.viewbinding.ViewBinding;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import gmutils.BackgroundTask;
 import gmutils.KeypadOp;
 import gmutils.Logger;
+import gmutils.listeners.ResultCallback;
 import gmutils.storage.SettingsStorage;
+import gmutils.ui.toast.MyToast;
 import gmutilsSupport.R;
 import gmutilssupport.ui.dialogs.MessageDialog;
 import gmutilssupport.ui.dialogs.RetryPromptDialog;
 import gmutilssupport.ui.dialogs.WaitDialog;
 import gmutilssupport.ui.fragments.BaseFragmentListener;
-import gmutilssupport.ui.toast.MyToast;
 import gmutilssupport.ui.utils.ViewSource;
 import gmutils.utils.Utils;
 
@@ -172,22 +174,28 @@ public class ActivityFunctions implements BaseFragmentListener {
             }
 
             if (item.getItemId() == showBugsMenuItemId) {
-                String txt = Logger.readAllFilesContents(activity);
-
-                MessageDialog.create(activity)
-                        .setMessage(txt)
-                        .setMessageGravity(Gravity.START)
-                        .setButton1(R.string.copy, (d) -> {
-                            if (Utils.createInstance().copyText(activity, txt)) {
-                                MyToast.showError(activity, "copied");
-                            } else {
-                                MyToast.showError(activity, "failed");
-                            }
-                        })
-                        .setButton2(R.string.delete, (d) -> {
-                            Logger.deleteSavedFiles(activity);
-                        })
-                        .show();
+                if (activity instanceof BaseActivity) {
+                    ((BaseActivity) activity).showWaitView();
+                }
+                BackgroundTask.run(() -> Logger.readAllFilesContents(activity), (ResultCallback<String>) txt -> {
+                    if (activity instanceof BaseActivity) {
+                        ((BaseActivity) activity).hideWaitView();
+                    }
+                    gmutils.ui.dialogs.MessageDialog.create(activity)
+                            .setMessage(txt)
+                            .setMessageGravity(Gravity.START)
+                            .setButton1(R.string.copy, (d) -> {
+                                if (Utils.createInstance().copyText(activity, txt)) {
+                                    gmutils.ui.toast.MyToast.showError(activity, "copied");
+                                } else {
+                                    MyToast.showError(activity, "failed");
+                                }
+                            })
+                            .setButton2(R.string.delete, (d) -> {
+                                Logger.deleteSavedFiles(activity);
+                            })
+                            .show();
+                });
 
                 return true;
             }
