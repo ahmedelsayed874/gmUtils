@@ -23,9 +23,12 @@ import androidx.viewbinding.ViewBinding;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import gmutils.BackgroundTask;
 import gmutils.KeypadOp;
 import gmutils.Logger;
 import gmutils.R;
+import gmutils.listeners.ActionCallback0;
+import gmutils.listeners.ResultCallback;
 import gmutils.storage.SettingsStorage;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
@@ -175,22 +178,28 @@ public class ActivityFunctions implements BaseFragmentListener {
             }
 
             if (item.getItemId() == showBugsMenuItemId) {
-                String txt = Logger.readAllFilesContents(activity);
-
-                MessageDialog.create(activity)
-                        .setMessage(txt)
-                        .setMessageGravity(Gravity.START)
-                        .setButton1(R.string.copy, (d) -> {
-                            if (Utils.createInstance().copyText(activity, txt)) {
-                                MyToast.showError(activity, "copied");
-                            } else {
-                                MyToast.showError(activity, "failed");
-                            }
-                        })
-                        .setButton2(R.string.delete, (d) -> {
-                            Logger.deleteSavedFiles(activity);
-                        })
-                        .show();
+                if (activity instanceof BaseActivity) {
+                    ((BaseActivity) activity).showWaitView();
+                }
+                BackgroundTask.run(() -> Logger.readAllFilesContents(activity), (ResultCallback<String>) txt -> {
+                    if (activity instanceof BaseActivity) {
+                        ((BaseActivity) activity).hideWaitView();
+                    }
+                    MessageDialog.create(activity)
+                            .setMessage(txt)
+                            .setMessageGravity(Gravity.START)
+                            .setButton1(R.string.copy, (d) -> {
+                                if (Utils.createInstance().copyText(activity, txt)) {
+                                    MyToast.showError(activity, "copied");
+                                } else {
+                                    MyToast.showError(activity, "failed");
+                                }
+                            })
+                            .setButton2(R.string.delete, (d) -> {
+                                Logger.deleteSavedFiles(activity);
+                            })
+                            .show();
+                });
 
                 return true;
             }
