@@ -22,6 +22,7 @@ import android.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import gmutilssupport.ui.dialogs.RetryPromptDialog;
 import gmutilssupport.ui.fragments.BaseFragment;
 import gmutilssupport.ui.fragments.BaseFragmentListener;
 import gmutilssupport.ui.fragments.BaseFragmentListenerX;
+import gmutilssupport.ui.fragments.ShowFragmentOptions;
 import gmutilssupport.ui.utils.ViewSource;
 import gmutilssupport.ui.viewModels.BaseViewModel;
 
@@ -300,33 +302,60 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-
     public void showFragment(Fragment fragment, boolean addToBackStack) {
-        showFragment(fragment, addToBackStack, fragment.getClass().getName(), null);
+        showFragment(
+                fragment,
+                new ShowFragmentOptions()
+                        .setAddToBackStack(addToBackStack)
+                        .setStackName(fragment.getClass().getName())
+        );
     }
 
     public void showFragment(Fragment fragment, boolean addToBackStack, String stackName) {
-        showFragment(fragment, addToBackStack, stackName, null);
+        showFragment(
+                fragment,
+                new ShowFragmentOptions()
+                        .setAddToBackStack(addToBackStack)
+                        .setStackName(stackName)
+        );
     }
 
     public void showFragment(Fragment fragment, boolean addToBackStack, Integer fragmentContainerId) {
-        showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
+        showFragment(
+                fragment,
+                new ShowFragmentOptions()
+                        .setAddToBackStack(addToBackStack)
+                        .setStackName(fragment.getClass().getName())
+                        .setFragmentContainerId(fragmentContainerId)
+        );
     }
 
+    @SuppressLint("WrongConstant")
     @Override
-    public void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId) {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(
-                        fragmentContainerId != null ? fragmentContainerId : R.id.layout_fragment_container,
-                        fragment
-                );
-
-        if (addToBackStack) {
-            fragmentTransaction.addToBackStack(stackName);
+    public void showFragment(Fragment fragment, ShowFragmentOptions options) {
+        int fragmentContainerId = R.id.layout_fragment_container;
+        if (options != null && options.getFragmentContainerId() != null) {
+            fragmentContainerId = options.getFragmentContainerId();
         }
 
-        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(fragmentContainerId, fragment);
+
+        if (options != null) {
+            if (options.isAddToBackStack()) {
+                fragmentTransaction.addToBackStack(options.getStackName());
+            }
+        }
+
+        if (options != null) {
+            if (options.getTransition() != null) {
+                try {
+                    fragmentTransaction.setTransition(options.getTransition());
+                } catch (Exception ignore) {
+                }
+            }
+        }
 
         fragmentTransaction.commit();
     }
@@ -393,7 +422,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (getActivityFunctions().lifecycle().onOptionsItemSelected(thisActivity(), item)) return true;
+        if (getActivityFunctions().lifecycle().onOptionsItemSelected(thisActivity(), item))
+            return true;
         return super.onOptionsItemSelected(item);
     }
 

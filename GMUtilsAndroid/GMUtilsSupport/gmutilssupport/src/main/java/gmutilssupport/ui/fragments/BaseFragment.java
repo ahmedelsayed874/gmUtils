@@ -209,15 +209,11 @@ public abstract class BaseFragment extends Fragment {
     //----------------------------------------------------------------------------------------------
 
     protected void showFragment(Fragment fragment) {
-        showFragment(fragment, false, null, null);
+        showFragment(fragment, new ShowFragmentOptions().setAddToBackStack(false));
     }
 
-    protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable Integer fragmentContainerId) {
-        listenerX.showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
-    }
-
-    protected void showFragment(Fragment fragment, boolean addToBackStack, @Nullable String stackName, @Nullable Integer fragmentContainerId) {
-        listenerX.showFragment(fragment, addToBackStack, stackName, fragmentContainerId);
+    protected void showFragment(Fragment fragment, ShowFragmentOptions options) {
+        listenerX.showFragment(fragment, options);
     }
 
     //----------------------------------------------------------------------------------------------

@@ -34,6 +34,7 @@ import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.fragments.BaseFragment;
 import gmutils.ui.fragments.BaseFragmentListener;
 import gmutils.ui.fragments.BaseFragmentListenerX;
+import gmutils.ui.fragments.ShowFragmentOptions;
 import gmutils.ui.toast.MyToast;
 import gmutils.ui.utils.ViewSource;
 import gmutils.ui.viewModels.BaseViewModel;
@@ -304,31 +305,59 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     //----------------------------------------------------------------------------------------------
 
     public void showFragment(Fragment fragment, boolean addToBackStack) {
-        showFragment(fragment, addToBackStack, fragment.getClass().getName(), null);
+        showFragment(
+                fragment,
+                new ShowFragmentOptions()
+                        .setAddToBackStack(addToBackStack)
+                        .setStackName(fragment.getClass().getName())
+        );
     }
 
     public void showFragment(Fragment fragment, boolean addToBackStack, String stackName) {
-        showFragment(fragment, addToBackStack, stackName, null);
+        showFragment(
+                fragment,
+                new ShowFragmentOptions()
+                        .setAddToBackStack(addToBackStack)
+                        .setStackName(stackName)
+        );
     }
 
     public void showFragment(Fragment fragment, boolean addToBackStack, Integer fragmentContainerId) {
-        showFragment(fragment, addToBackStack, fragment.getClass().getName(), fragmentContainerId);
+        showFragment(
+                fragment,
+                new ShowFragmentOptions()
+                        .setAddToBackStack(addToBackStack)
+                        .setStackName(fragment.getClass().getName())
+                        .setFragmentContainerId(fragmentContainerId)
+        );
     }
 
+    @SuppressLint("WrongConstant")
     @Override
-    public void showFragment(Fragment fragment, boolean addToBackStack, String stackName, Integer fragmentContainerId) {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(
-                        fragmentContainerId != null ? fragmentContainerId : R.id.layout_fragment_container,
-                        fragment
-                );
-
-        if (addToBackStack) {
-            fragmentTransaction.addToBackStack(stackName);
+    public void showFragment(Fragment fragment, ShowFragmentOptions options) {
+        int fragmentContainerId = R.id.layout_fragment_container;
+        if (options != null && options.getFragmentContainerId() != null) {
+            fragmentContainerId = options.getFragmentContainerId();
         }
 
-        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(fragmentContainerId, fragment);
+
+        if (options != null) {
+            if (options.isAddToBackStack()) {
+                fragmentTransaction.addToBackStack(options.getStackName());
+            }
+        }
+
+        if (options != null) {
+            if (options.getTransition() != null) {
+                try {
+                    fragmentTransaction.setTransition(options.getTransition());
+                } catch (Exception ignore) {
+                }
+            }
+        }
 
         fragmentTransaction.commit();
     }
