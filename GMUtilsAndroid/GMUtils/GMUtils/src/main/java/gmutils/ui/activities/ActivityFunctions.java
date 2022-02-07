@@ -313,12 +313,17 @@ public class ActivityFunctions implements BaseFragmentListener {
     //----------------------------------------------------------------------------------------------
 
     public static class ShowMessageDialogOptions {
-        final CharSequence title;
-        final Pair<String, MessageDialog.Listener>[] buttons;
+        private CharSequence title;
+        private Pair<String, MessageDialog.Listener>[] buttons;
 
-        public ShowMessageDialogOptions(CharSequence title, Pair<String, MessageDialog.Listener>[] buttons) {
+        public ShowMessageDialogOptions setTitle(@NotNull CharSequence title) {
             this.title = title;
+            return this;
+        }
+
+        public ShowMessageDialogOptions setButtons(Pair<String, MessageDialog.Listener>[] buttons) {
             this.buttons = buttons;
+            return this;
         }
     }
 
@@ -326,7 +331,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         return showMessageDialog(context, context.getString(msg), options);
     }
 
-    public final MessageDialog showMessageDialog(Context context, CharSequence msg, ShowMessageDialogOptions options) {
+    public final MessageDialog showMessageDialog(Context context, @NotNull CharSequence msg, ShowMessageDialogOptions options) {
         MessageDialog dialog = MessageDialog.create(context);
 
         if (options != null && options.title != null) dialog.setTitle(options.title);
