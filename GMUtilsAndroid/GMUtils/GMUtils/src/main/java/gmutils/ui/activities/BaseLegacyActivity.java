@@ -190,31 +190,12 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     //----------------------------------------------------------------------------------------------
 
-    public MessageDialog showMessageDialog(int msg) {
-        return showMessageDialog(0, msg);
+    public MessageDialog showMessageDialog(int msg, ActivityFunctions.ShowMessageDialogOptions options) {
+        return showMessageDialog(getString(msg), options);
     }
 
-    public MessageDialog showMessageDialog(int msg, Pair<Integer, MessageDialog.Listener> button) {
-        return showMessageDialog(0, msg, button);
-    }
-
-    @SafeVarargs
-    public final MessageDialog showMessageDialog(int title, int msg, Pair<Integer, MessageDialog.Listener>... buttons) {
-        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
-    }
-
-
-    public MessageDialog showMessageDialog(CharSequence msg) {
-        return showMessageDialog(null, msg);
-    }
-
-    public MessageDialog showMessageDialog(CharSequence msg, Pair<String, MessageDialog.Listener> button) {
-        return showMessageDialog(null, msg, button);
-    }
-
-    @SafeVarargs
-    public final MessageDialog showMessageDialog(CharSequence title, CharSequence msg, Pair<String, MessageDialog.Listener>... buttons) {
-        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
+    public MessageDialog showMessageDialog(CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
+        return getActivityFunctions().showMessageDialog(this, msg, options);
     }
 
     //----------------------------------------------------------------------------------------------

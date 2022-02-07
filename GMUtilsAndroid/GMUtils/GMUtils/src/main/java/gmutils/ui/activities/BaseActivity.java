@@ -275,31 +275,12 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    public MessageDialog showMessageDialog(int msg) {
-        return showMessageDialog(0, msg);
+    public MessageDialog showMessageDialog(int msg, ActivityFunctions.ShowMessageDialogOptions options) {
+        return showMessageDialog(getString(msg), options);
     }
 
-    public MessageDialog showMessageDialog(int msg, Pair<Integer, MessageDialog.Listener> button) {
-        return showMessageDialog(0, msg, button);
-    }
-
-    @SafeVarargs
-    public final MessageDialog showMessageDialog(int title, int msg, Pair<Integer, MessageDialog.Listener>... buttons) {
-        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
-    }
-
-
-    public MessageDialog showMessageDialog(CharSequence msg) {
-        return showMessageDialog(null, msg);
-    }
-
-    public MessageDialog showMessageDialog(CharSequence msg, Pair<String, MessageDialog.Listener> button) {
-        return showMessageDialog(null, msg, button);
-    }
-
-    @SafeVarargs
-    public final MessageDialog showMessageDialog(CharSequence title, CharSequence msg, Pair<String, MessageDialog.Listener>... buttons) {
-        return getActivityFunctions().showMessageDialog(thisActivity(), title, msg, buttons);
+    public MessageDialog showMessageDialog(CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
+        return getActivityFunctions().showMessageDialog(this, msg, options);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -467,14 +448,14 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         msg = (message.messageId != null) ? getString(message.messageId) : message.messageString;
         if (message.type instanceof BaseViewModel.MessageType.Normal) {
             if (message.popup) {
-                showMessageDialog(msg);
+                showMessageDialog(msg, null);
             } else {
                 MyToast.show(this, msg);
             }
         } else if (message.type instanceof BaseViewModel.MessageType.Error) {
             BaseViewModel.MessageType.Error mt = (BaseViewModel.MessageType.Error) message.type;
             if (message.popup) {
-                MessageDialog dialog = showMessageDialog(msg);
+                MessageDialog dialog = showMessageDialog(msg, null);
                 if (mt.button1() != null) {
                     dialog.setButton1(mt.button1().first, d -> mt.button1().second.run());
                 }
