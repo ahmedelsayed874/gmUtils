@@ -181,7 +181,7 @@ public class ActivityFunctions implements BaseFragmentListener {
                     if (activity instanceof BaseActivity) {
                         ((BaseActivity) activity).hideWaitView();
                     }
-                    gmutils.ui.dialogs.MessageDialog.create(activity)
+                    MessageDialog.create(activity)
                             .setMessage(txt)
                             .setMessageGravity(Gravity.START)
                             .setButton1(R.string.copy, (d) -> {
@@ -308,59 +308,37 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     //----------------------------------------------------------------------------------------------
 
-    public MessageDialog showMessageDialog(Context context, int msg) {
-        return showMessageDialog(context, 0, msg);
-    }
+    public static class ShowMessageDialogOptions {
+        final CharSequence title;
+        final Pair<String, MessageDialog.Listener>[] buttons;
 
-    public MessageDialog showMessageDialog(Context context, int msg, Pair<Integer, MessageDialog.Listener> button) {
-        return showMessageDialog(context, 0, msg, button);
-    }
-
-    @SafeVarargs
-    public final MessageDialog showMessageDialog(Context context, int title, int msg, Pair<Integer, MessageDialog.Listener>... buttons) {
-        Pair<String, MessageDialog.Listener>[] buttons2 = null;
-        if (buttons != null) {
-            buttons2 = new Pair[buttons.length];
-            for (int i = 0; i < buttons.length; i++) {
-                if (buttons[i] != null)
-                    buttons2[i] = new Pair<>(context.getString(buttons[i].first), buttons[i].second);
-            }
+        public ShowMessageDialogOptions(CharSequence title, Pair<String, MessageDialog.Listener>[] buttons) {
+            this.title = title;
+            this.buttons = buttons;
         }
-
-        return showMessageDialog(
-                context,
-                title == 0 ? null : context.getString(title),
-                msg == 0 ? null : context.getString(msg),
-                buttons2
-        );
     }
 
-    public MessageDialog showMessageDialog(Context context, CharSequence msg) {
-        return showMessageDialog(context, null, msg);
+    public MessageDialog showMessageDialog(Context context, int msg, ActivityFunctions.ShowMessageDialogOptions options) {
+        return showMessageDialog(context, context.getString(msg), options);
     }
 
-    public MessageDialog showMessageDialog(Context context, CharSequence msg, Pair<String, MessageDialog.Listener> button) {
-        return showMessageDialog(context, null, msg, button);
-    }
-
-    @SafeVarargs
-    public final MessageDialog showMessageDialog(Context context, CharSequence title, CharSequence msg, Pair<String, MessageDialog.Listener>... buttons) {
+    public final MessageDialog showMessageDialog(Context context, CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
         MessageDialog dialog = MessageDialog.create(context);
 
-        if (title != null) dialog.setTitle(title);
+        if (options != null && options.title != null) dialog.setTitle(options.title);
         else dialog.setTitle(R.string.message);
 
         dialog.setMessage(msg);
 
-        if (buttons != null && buttons.length > 0) {
-            dialog.setButton1(buttons[0].first, buttons[0].second);
+        if (options != null && options.buttons != null && options.buttons.length > 0) {
+            dialog.setButton1(options.buttons[0].first, options.buttons[0].second);
 
-            if (buttons.length > 1) {
-                dialog.setButton2(buttons[1].first, buttons[1].second);
+            if (options.buttons.length > 1) {
+                dialog.setButton2(options.buttons[1].first, options.buttons[1].second);
             }
 
-            if (buttons.length > 2) {
-                dialog.setButton3(buttons[2].first, buttons[2].second);
+            if (options.buttons.length > 2) {
+                dialog.setButton3(options.buttons[2].first, options.buttons[2].second);
             }
 
         } else {
