@@ -151,7 +151,8 @@ public class ImageLoader {
         LoaderCallback picassoCallback = new LoaderCallback(url, imageView, options, callback);
 
         if (currentRequests.containsKey(url)) {
-            Logger.print(ImageLoader.class.getSimpleName(), "loading image from " + url + " already IN-PROGRESS");
+            String finalUrl = url;
+            Logger.print(ImageLoader.class.getSimpleName(), () -> "loading image from " + finalUrl + " already IN-PROGRESS");
 
             List<LoaderCallback> pendingRequests = currentRequests.get(url);
             if (pendingRequests == null) pendingRequests = new ArrayList<>();
@@ -161,7 +162,8 @@ public class ImageLoader {
 
         } else {
             currentRequests.put(url, null);
-            Logger.print(ImageLoader.class.getSimpleName(), "loading image from " + url + " will start");
+            String finalUrl1 = url;
+            Logger.print(ImageLoader.class.getSimpleName(), () -> "loading image from " + finalUrl1 + " will start");
         }
 
         RequestCreator request = picasso.load(url);
@@ -297,7 +299,7 @@ public class ImageLoader {
 
                 if (loaderCallback2.imageView != null) {
                     imageViewDrawable = loaderCallback2.imageView.getDrawable();
-                    Logger.print(ImageLoader.class.getSimpleName(), "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
+                    Logger.print(ImageLoader.class.getSimpleName(), () -> "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
                 }
 
                 if (imageViewDrawable != null) {
@@ -344,19 +346,19 @@ public class ImageLoader {
                 imageView.setScaleType(options.loadingScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                Logger.print(e.getMessage());
+                Logger.print(() -> e.getMessage());
             }
         }
 
         public void onSuccess() {
-            Logger.print(ImageLoader.class.getSimpleName(), "image from " + imgUrl + " COMPLETED");
+            Logger.print(ImageLoader.class.getSimpleName(), () -> "image from " + imgUrl + " COMPLETED");
             onComplete(true);
 
             try {
                 imageView.setScaleType(options.successScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                Logger.print(e.getMessage());
+                Logger.print(() -> e.getMessage());
             }
 
             if (outerCallback != null) {
@@ -367,14 +369,14 @@ public class ImageLoader {
         }
 
         public void onError() {
-            Logger.print(ImageLoader.class.getSimpleName(), "image from " + imgUrl + " FAILED");
+            Logger.print(ImageLoader.class.getSimpleName(), () -> "image from " + imgUrl + " FAILED");
             onComplete(false);
 
             try {
                 imageView.setScaleType(options.errorScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                Logger.print(e.getMessage());
+                Logger.print(() -> e.getMessage());
             }
 
             if (outerCallback != null) {

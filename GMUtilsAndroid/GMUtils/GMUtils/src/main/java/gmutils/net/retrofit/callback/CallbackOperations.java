@@ -40,7 +40,7 @@ final class CallbackOperations<R extends BaseResponse> {
         this("", responseClass, listener);
         try {
             if (Logger.IS_LOG_ENABLED())
-                Logger.print("API:Request:", request.toString());
+                Logger.print("API:Request:", () -> request.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -54,7 +54,7 @@ final class CallbackOperations<R extends BaseResponse> {
 
         if (requestInfo != null && !"".equals(requestInfo))
             if (Logger.IS_LOG_ENABLED())
-                Logger.print("API:Request:", requestInfo);
+                Logger.print("API:Request:", () -> requestInfo);
 
         try {
             responseClass.newInstance();
@@ -162,7 +162,7 @@ final class CallbackOperations<R extends BaseResponse> {
         if (Logger.IS_LOG_ENABLED()) {
             Logger.print(
                     "EXTRA_INFO:",
-                    "[callbackStatus=" + result.getCallbackStatus() +
+                    () -> "[callbackStatus=" + result.getCallbackStatus() +
                             ", responseStatus=" + result.getResponseStatus() + "]"
             );
         }
@@ -204,23 +204,27 @@ final class CallbackOperations<R extends BaseResponse> {
         }
 
         if (response != null) {
+            String finalUrl = url;
+            String finalExtrasString = extrasString;
             Logger.print(
                     "API:Response:",
-                    "url: <" + url + ">," +
+                    () -> "url: <" + finalUrl + ">," +
                             "\nresponseType: " + responseType + ", " +
                             "\nresponse: " + response.body() + ", " +
                             "\ncode= " + response.code() + ", " +
                             "\nmsg= " + response.message() + ", " +
                             "\nerrorBody= " + errorBody +
-                            "\nextras= " + extrasString
+                            "\nextras= " + finalExtrasString
             );
         } else {
+            String finalUrl1 = url;
+            String finalExtrasString1 = extrasString;
             Logger.print(
                     "API:Response:",
-                    "url: <" + url + ">," +
+                    () -> "url: <" + finalUrl1 + ">," +
                             "\nresponseType: " + responseType + ", " +
                             "\nerrorBody: " + errorBody +
-                            "\nextras= " + extrasString
+                            "\nextras= " + finalExtrasString1
             );
         }
     }

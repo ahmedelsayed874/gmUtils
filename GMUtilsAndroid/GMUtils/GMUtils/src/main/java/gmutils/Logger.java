@@ -162,51 +162,61 @@ public class Logger {
 
     //----------------------------------------------------------------------------------------------
 
+    public interface Callbacks {
+        interface PrintSingle {
+            Object getContent();
+        }
+        interface PrintMultiple {
+            Object[] getContent();
+        }
+    }
+
     //region LOGs
-    public static void print(Throwable e) {
-        print("", e);
+    public static void print(Throwable throwable) {
+        print("", throwable);
     }
 
-    public static void print(String title, Throwable e) {
-        print("EXCEPTION **** " + title, e == null ? "null" : e.toString());
+    public static void print(String title, Throwable throwable) {
+        print("EXCEPTION **** " + title, () -> throwable == null ? "null" : throwable.toString());
     }
 
-    public static void print(Object... o) {
-        print("", o);
+    public static void print(@NotNull Callbacks.PrintMultiple callback) {
+        print("", callback);
     }
 
-    public static void print(String title, Object... o) {
-        String msg = "";
-
+    public static void print(String title, @NotNull Callbacks.PrintMultiple callback) {
         if (IS_LOG_ENABLED() || IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
-            if (o == null || o.length == 0) {
-                msg = "null";
+            String[] msg = new String[] {""};
+
+            if (callback.getContent() == null || callback.getContent().length == 0) {
+                msg[0] = "null";
 
             } else {
-                for (int i = 0; i < o.length; i++) {
-                    msg += "OBJ[" + i + "]: " + (o[i] == null ? "null" : o[i].toString());
-                    if (i < o.length - 1) {
-                        msg += "\n+++\n";
+                for (int i = 0; i < callback.getContent().length; i++) {
+                    msg[0] += "OBJ[" + i + "]: " + (callback.getContent()[i] == null ? "null" : callback.getContent()[i].toString());
+                    if (i < callback.getContent().length - 1) {
+                        msg[0] += "\n+++\n";
                     }
                 }
             }
+
+            print("" + title, () -> msg[0]);
         }
 
-        print("" + title, msg);
     }
 
-    public static void print(String msg) {
-        print("", msg);
+    public static void print(@NotNull Callbacks.PrintSingle callback) {
+        print("", callback);
     }
 
-    public static void print(String title, String msg) {
-        print(title, msg, IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED());
+    public static void print(String title, @NotNull Callbacks.PrintSingle callback) {
+        print(title, callback, IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED());
     }
 
-    public static void print(String title, String msg, boolean writeToFileAlso) {
+    public static void print(String title, @NotNull Callbacks.PrintSingle callback, boolean writeToFileAlso) {
         if (IS_LOG_ENABLED()) {
             String[] t = refineTitle("**** " + title);
-            String[] m = divideLogMsg(msg, t.length > 1 ? t[1].length() : 0);
+            String[] m = divideLogMsg(callback.getContent().toString(), t.length > 1 ? t[1].length() : 0);
 
             if (m.length == 1) {
                 if (t.length == 1)
@@ -227,7 +237,7 @@ public class Logger {
         if (writeToFileAlso) {
             if (BaseApplication.current() != null) {
                 try {
-                    writeToFile(BaseApplication.current(), msg, "APP_LOGS");
+                    writeToFile(BaseApplication.current(), callback.getContent().toString(), "APP_LOGS");
                 } catch (Exception e) {
                 }
             }
@@ -250,9 +260,9 @@ public class Logger {
                     " -> line: " + stackTrace.getLineNumber() +
                     (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));
 
-            print("", msg, writeToFileAlso);
+            print("", () -> msg, writeToFileAlso);
         } catch (Exception e) {
-            print("", moreInfo, writeToFileAlso);
+            print("", e::toString, writeToFileAlso);
         }
     }
 

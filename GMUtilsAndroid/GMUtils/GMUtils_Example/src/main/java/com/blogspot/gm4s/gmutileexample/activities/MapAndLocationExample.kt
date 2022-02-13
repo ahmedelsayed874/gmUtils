@@ -219,7 +219,7 @@ class MapAndLocationExample : BaseActivity() {
                         )
 
                     LocationTracker.Listener.ERR_EXCEPTION ->
-                        Logger.print(p2)
+                        Logger.print(Logger.Callbacks.PrintSingle { p2 ?: "" })
                 }
             }
         })

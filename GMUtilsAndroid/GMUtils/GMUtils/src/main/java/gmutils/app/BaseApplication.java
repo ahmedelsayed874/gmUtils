@@ -218,7 +218,7 @@ public abstract class BaseApplication extends Application implements Application
             }
 
             Logger.writeToFile(thisApp(), stack.toString(), bugFileName);
-            Logger.print(stack.toString());
+            Logger.print(() -> stack.toString());
 
             if (defaultHandler != null) {
                 defaultHandler.uncaughtException(thread, throwable);
