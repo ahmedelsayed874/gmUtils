@@ -180,21 +180,22 @@ public class Logger {
         print("EXCEPTION **** " + title, () -> throwable == null ? "null" : throwable.toString());
     }
 
-    public static void print(@NotNull Callbacks.PrintMultiple callback) {
-        print("", callback);
+    public static void printm(@NotNull Callbacks.PrintMultiple callback) {
+        printm("", callback);
     }
 
-    public static void print(String title, @NotNull Callbacks.PrintMultiple callback) {
+    public static void printm(String title, @NotNull Callbacks.PrintMultiple callback) {
         if (IS_LOG_ENABLED() || IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED()) {
             String[] msg = new String[] {""};
 
-            if (callback.getContent() == null || callback.getContent().length == 0) {
+            Object[] content = callback.getContent();
+            if (content == null || content.length == 0) {
                 msg[0] = "null";
 
             } else {
-                for (int i = 0; i < callback.getContent().length; i++) {
-                    msg[0] += "OBJ[" + i + "]: " + (callback.getContent()[i] == null ? "null" : callback.getContent()[i].toString());
-                    if (i < callback.getContent().length - 1) {
+                for (int i = 0; i < content.length; i++) {
+                    msg[0] += "OBJ[" + i + "]: " + (content[i] == null ? "null" : content[i].toString());
+                    if (i < content.length - 1) {
                         msg[0] += "\n+++\n";
                     }
                 }
@@ -214,9 +215,15 @@ public class Logger {
     }
 
     public static void print(String title, @NotNull Callbacks.PrintSingle callback, boolean writeToFileAlso) {
+        String content = "";
+
+        if (IS_LOG_ENABLED() || writeToFileAlso) {
+            content = callback.getContent().toString();
+        }
+
         if (IS_LOG_ENABLED()) {
             String[] t = refineTitle("**** " + title);
-            String[] m = divideLogMsg(callback.getContent().toString(), t.length > 1 ? t[1].length() : 0);
+            String[] m = divideLogMsg(content, t.length > 1 ? t[1].length() : 0);
 
             if (m.length == 1) {
                 if (t.length == 1)
@@ -237,22 +244,34 @@ public class Logger {
         if (writeToFileAlso) {
             if (BaseApplication.current() != null) {
                 try {
-                    writeToFile(BaseApplication.current(), callback.getContent().toString(), "APP_LOGS");
+                    writeToFile(BaseApplication.current(), content, "APP_LOGS");
                 } catch (Exception e) {
                 }
             }
         }
     }
 
-    public static void printMethod(String moreInfo) {
-        printMethod(moreInfo, IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED());
+    public static void printMethod() {
+        printMethod(null);
     }
 
-    public static void printMethod(String moreInfo, boolean writeToFileAlso) {
+    public static void printMethod(Callbacks.PrintSingle moreInfoCallback) {
+        printMethod(moreInfoCallback, IS_WRITE_LOGS_TO_FILE_DEADLINE_ENABLED());
+    }
+
+    public static void printMethod(Callbacks.PrintSingle moreInfoCallback, boolean writeToFileAlso) {
         try {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             StackTraceElement stackTrace = null;
             stackTrace = stackTraceList[2];
+
+            String moreInfo = "";
+            if (moreInfoCallback != null) {
+                Object content = moreInfoCallback.getContent();
+                if (content != null) {
+                    moreInfo = content.toString();
+                }
+            }
 
             String msg = stackTrace.getFileName() +
                     "\n" +
