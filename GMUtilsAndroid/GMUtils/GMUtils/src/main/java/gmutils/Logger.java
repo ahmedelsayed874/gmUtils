@@ -263,7 +263,12 @@ public class Logger {
         try {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             StackTraceElement stackTrace = null;
-            stackTrace = stackTraceList[2];
+            for (int s = 1; s <= 3; s++) {
+                if (!Logger.class.getName().equals(stackTraceList[s].getClassName())) {
+                    stackTrace = stackTraceList[s];
+                    break;
+                }
+            }
 
             String moreInfo = "";
             if (moreInfoCallback != null) {
