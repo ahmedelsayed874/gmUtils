@@ -11,7 +11,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.jetbrains.annotations.NotNull;
 
-import gmutils.app.BaseApplication;
+import java.util.ArrayList;
+import java.util.List;
+
+import gmutils.collections.MultiLanguageString;
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
 
@@ -92,10 +95,11 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     public static class Message {
-        public final Integer messageId;
-        public final String messageString;
+        public final List<Integer> messageIds;
+        public final MultiLanguageString messageString;
         public final boolean popup;
         public final MessageType type;
+        private String multiMessageIdsSeparator = "\n";
 
         public Message(Integer messageId) {
             this(messageId, null, false, new MessageType.Normal());
@@ -114,12 +118,45 @@ public class BaseViewModel extends AndroidViewModel {
         }
 
         private Message(Integer messageId, String messageString, boolean popup, MessageType type) {
-            this.messageId = messageId;
+            if (messageId != null) {
+                this.messageIds = new ArrayList<>();
+                this.messageIds.add(messageId);
+            } else {
+                this.messageIds = null;
+            }
+
+            if (messageString != null) {
+                this.messageString = new MultiLanguageString(messageString);
+            } else {
+                this.messageString = null;
+            }
+
+            this.popup = popup;
+            this.type = type;
+        }
+
+        public Message(@NotNull List<Integer> messageIds, boolean popup, MessageType type) {
+            this.messageIds = messageIds;
+            this.messageString = null;
+            this.popup = popup;
+            this.type = type;
+        }
+
+        public Message(@NotNull MultiLanguageString messageString, boolean popup, MessageType type) {
+            this.messageIds = null;
             this.messageString = messageString;
             this.popup = popup;
             this.type = type;
         }
 
+        public Message setMultiMessageIdsSeparator(String multiMessageIdsSeparator) {
+            this.multiMessageIdsSeparator = multiMessageIdsSeparator;
+            return this;
+        }
+
+        public String getMultiMessageIdsSeparator() {
+            return multiMessageIdsSeparator;
+        }
     }
 
     public interface MessageType {
@@ -233,18 +270,23 @@ public class BaseViewModel extends AndroidViewModel {
         alertMessageLiveData.postValue(message);
     }
 
-    public void postAlertMessage(int messageId) {
+    public void postPopMessage(int messageId) {
         Message m = new Message(messageId, true, new MessageType.Normal());
         postMessage(m);
     }
 
-    public void postAlertMessage(String message) {
+    public void postPopMessage(String message) {
         Message m = new Message(message, true, new MessageType.Normal());
         postMessage(m);
     }
 
-    public void postAlertMessage(int messageId, MessageType messageType) {
+    public void postPopMessage(int messageId, MessageType messageType) {
         Message m = new Message(messageId, true, messageType);
+        postMessage(m);
+    }
+
+    public void postPopMessage(String message, MessageType messageType) {
+        Message m = new Message(message, true, messageType);
         postMessage(m);
     }
 
