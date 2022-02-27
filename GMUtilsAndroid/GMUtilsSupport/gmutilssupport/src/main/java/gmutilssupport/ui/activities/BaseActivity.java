@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import gmutils.Logger;
+import gmutils.storage.SettingsStorage;
 import gmutils.ui.toast.MyToast;
 import gmutilsSupport.R;
 import gmutilssupport.ui.dialogs.MessageDialog;
@@ -443,7 +444,24 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     protected void onMessageReceivedFromViewModel(BaseViewModel.Message message) {
         String msg = "";
-        msg = (message.messageId != null) ? getString(message.messageId) : message.messageString;
+        if (message.messageIds != null && !message.messageIds.isEmpty()) {
+            for (Integer messageId : message.messageIds) {
+                if (!msg.isEmpty()) msg += message.getMultiMessageIdsSeparator();
+                msg += getString(messageId);
+            }
+        } else if (message.messageString != null) {
+            List<String> langCodes = message.messageString.getLangCodes();
+            if (langCodes.size() == 1) {
+                msg = message.messageString.getDefault();
+            } else {
+                if (SettingsStorage.Language.usingEnglish()) {
+                    msg = message.messageString.getEnglish();
+                } else {
+                    msg = message.messageString.getArabic();
+                }
+            }
+        }
+
         if (message.type instanceof BaseViewModel.MessageType.Normal) {
             if (message.popup) {
                 showMessageDialog(msg, null);
