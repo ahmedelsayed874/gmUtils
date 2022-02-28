@@ -448,7 +448,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         if (message.messageIds != null && !message.messageIds.isEmpty()) {
             for (Integer messageId : message.messageIds) {
                 if (!msg.isEmpty()) msg += message.getMultiMessageIdsSeparator();
-                msg += getString(messageId);
+                msg += message.getMultiMessageIdsPrefix() + " " + getString(messageId);
             }
         } else if (message.messageString != null) {
             List<String> langCodes = message.messageString.getLangCodes();

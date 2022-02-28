@@ -99,6 +99,7 @@ public class BaseViewModel extends AndroidViewModel {
         public final MultiLanguageString messageString;
         public final boolean popup;
         public final MessageType type;
+        private String multiMessageIdsPrefix = "-";
         private String multiMessageIdsSeparator = "\n";
 
         public Message(Integer messageId) {
@@ -149,6 +150,15 @@ public class BaseViewModel extends AndroidViewModel {
             this.type = type;
         }
 
+        public Message setMultiMessageIdsPrefix(String multiMessageIdsPrefix) {
+            this.multiMessageIdsPrefix = multiMessageIdsPrefix;
+            return this;
+        }
+
+        public String getMultiMessageIdsPrefix() {
+            return multiMessageIdsPrefix;
+        }
+
         public Message setMultiMessageIdsSeparator(String multiMessageIdsSeparator) {
             this.multiMessageIdsSeparator = multiMessageIdsSeparator;
             return this;
@@ -157,6 +167,7 @@ public class BaseViewModel extends AndroidViewModel {
         public String getMultiMessageIdsSeparator() {
             return multiMessageIdsSeparator;
         }
+
     }
 
     public interface MessageType {
