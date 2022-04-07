@@ -156,11 +156,10 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     }
 
     public boolean keyboardShouldAutoHide(float rawX, float rawY) {
-        return getActivityFunctions().keyboardShouldAutoHide(rawX, rawY);
+        return true;
     }
 
     public void keyboardDidHide() {
-        getActivityFunctions().keyboardDidHide();
     }
 
     //----------------------------------------------------------------------------------------------
