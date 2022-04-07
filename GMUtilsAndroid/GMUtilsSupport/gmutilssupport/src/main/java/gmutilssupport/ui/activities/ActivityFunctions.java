@@ -64,6 +64,10 @@ public class ActivityFunctions implements BaseFragmentListener {
          * @return WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN; WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
          */
         int initialKeyboardState();
+
+        boolean keyboardShouldAutoHide(float rawX, float rawY);
+
+        void keyboardDidHide();
     }
 
     private Delegate delegate;
@@ -250,10 +254,11 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     public boolean keyboardShouldAutoHide(float rawX, float rawY) {
-        return true;
+        return delegate.keyboardShouldAutoHide(rawX, rawY);
     }
 
     public void keyboardDidHide() {
+        delegate.keyboardDidHide();
     }
 
     //----------------------------------------------------------------------------------------------

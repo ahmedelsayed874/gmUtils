@@ -72,6 +72,17 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
                 public int initialKeyboardState() {
                     return BaseLegacyActivity.this.initialKeyboardState();
                 }
+
+                @Override
+                public boolean keyboardShouldAutoHide(float rawX, float rawY) {
+                    return BaseLegacyActivity.this.keyboardShouldAutoHide(rawX, rawY);
+                }
+
+                @Override
+                public void keyboardDidHide() {
+                    BaseLegacyActivity.this.keyboardDidHide();
+                }
+
             });
         }
         return _activityFunctions;

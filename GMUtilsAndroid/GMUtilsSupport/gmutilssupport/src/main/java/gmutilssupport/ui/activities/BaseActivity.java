@@ -85,6 +85,16 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 public int initialKeyboardState() {
                     return BaseActivity.this.initialKeyboardState();
                 }
+
+                @Override
+                public boolean keyboardShouldAutoHide(float rawX, float rawY) {
+                    return BaseActivity.this.keyboardShouldAutoHide(rawX, rawY);
+                }
+
+                @Override
+                public void keyboardDidHide() {
+                    BaseActivity.this.keyboardDidHide();
+                }
             });
         }
         return mActivityFunctions;
