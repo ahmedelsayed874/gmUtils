@@ -226,11 +226,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     public boolean keyboardShouldAutoHide(float rawX, float rawY) {
-        return getActivityFunctions().keyboardShouldAutoHide(rawX, rawY);
+        return true;
     }
 
     public void keyboardDidHide() {
-        getActivityFunctions().keyboardDidHide();
     }
 
     //----------------------------------------------------------------------------------------------
