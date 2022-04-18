@@ -164,6 +164,7 @@ public class Utils {
 
     /**
      * @return "android.resource://[package]/[res type]/[res id]"
+     * alter: "android.resource://" + packageName + "/" + resId
      */
     public Uri getResourceUri(Context context, int resourceId) {
         Resources resources = context.getResources();
