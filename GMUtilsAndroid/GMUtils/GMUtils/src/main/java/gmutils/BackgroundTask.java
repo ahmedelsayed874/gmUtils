@@ -14,7 +14,7 @@ public class BackgroundTask {
         run(() -> {
             task.run();
             return null;
-        }, result -> resultCallback.run());
+        }, resultCallback == null ? null : result -> resultCallback.run());
 
     }
 
