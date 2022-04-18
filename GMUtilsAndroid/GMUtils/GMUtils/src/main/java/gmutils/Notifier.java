@@ -88,9 +88,11 @@ public class Notifier {
                     channelName,
                     importance
             );
+
             if (channelDescription != null) {
                 channel.setDescription(channelDescription);
             }
+
             if (rawSoundId != null) {
                 //"android.resource://" + applicationContext.packageName + "/" + soundId
                 Uri soundUri = Utils.createInstance().getResourceUri(context, rawSoundId);
@@ -116,6 +118,8 @@ public class Notifier {
         return this;
     }
     //endregion
+
+    //---------------------------------
 
     public Notifier removeNotificationChannel(String channelId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
