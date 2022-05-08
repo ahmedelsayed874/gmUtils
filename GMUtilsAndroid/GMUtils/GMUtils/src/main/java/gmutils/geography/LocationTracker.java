@@ -52,18 +52,20 @@ public class LocationTracker implements LocationListener {
 
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public LocationTracker(Fragment fragment, Listener callback) {
-        locationManager = (LocationManager) fragment.getContext().getSystemService(LOCATION_SERVICE);
-        this.mListener = callback;
-
+        this(fragment.getContext(), callback);
         UIUtils.createInstance().addOnFragmentDestroyedObserver(fragment, this::destroy);
     }
 
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public LocationTracker(Activity activity, Listener callback) {
-        locationManager = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
-        this.mListener = callback;
-
+        this((Context) activity, callback);
         UIUtils.createInstance().addOnActivityDestroyed(activity, this::destroy);
+    }
+
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+    public LocationTracker(Context context, Listener callback) {
+        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        this.mListener = callback;
     }
 
     //----------------------------------------------------------------------------------------------
