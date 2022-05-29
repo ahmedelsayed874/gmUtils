@@ -61,32 +61,36 @@ public class Notifier {
 
     //region setNotificationChannel
     public Notifier setNotificationChannel(String channelId, String channelName) {
-        return setNotificationChannel(channelId, channelName, null, NotificationManager.IMPORTANCE_DEFAULT, null);
+        return setNotificationChannel(channelId, channelName, null, NotificationManager.IMPORTANCE_DEFAULT, soundUri);
     }
 
     public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription) {
-        return setNotificationChannel(channelId, channelName, channelDescription, NotificationManager.IMPORTANCE_DEFAULT, null);
+        return setNotificationChannel(channelId, channelName, channelDescription, NotificationManager.IMPORTANCE_DEFAULT, soundUri);
     }
 
     public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance) {
-        return setNotificationChannel(channelId, channelName, channelDescription, importance, null);
+        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Integer rawSoundId) {
-        return setNotificationChannel(channelId, channelName, channelDescription, importance, rawSoundId, false);
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, int rawSoundId) {
+        return setNotificationChannel(channelId, channelName, channelDescription, importance, rawSoundId, vibrate);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Integer rawSoundId, boolean vibrate) {
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, int rawSoundId, boolean vibrate) {
         Uri soundUri = null;
         
-        if (rawSoundId != null) {
+        if (rawSoundId != 0) {
             //"android.resource://" + applicationContext.packageName + "/" + soundId
             soundUri = Utils.createInstance().getResourceUri(context, rawSoundId);
         }
         
         return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
     }
-    
+
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Uri soundUri) {
+        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
+    }
+
     public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Uri soundUri, boolean vibrate) {
         this.soundUri = soundUri;
         this.vibrate = vibrate;
@@ -132,6 +136,10 @@ public class Notifier {
         }
 
         return this;
+    }
+
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, boolean vibrate) {
+        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
     }
     //endregion
 
