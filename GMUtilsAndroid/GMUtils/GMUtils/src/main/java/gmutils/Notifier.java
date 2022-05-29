@@ -56,7 +56,7 @@ public class Notifier {
         this.notificationIconRes = notificationIconRes;
         this.iconBackgroundColor = iconBackgroundColor;
 
-        this.soundUri =  RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_NOTIFICATION);
+        this.soundUri = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_NOTIFICATION);
     }
 
     //---------------------------------
@@ -80,12 +80,12 @@ public class Notifier {
 
     public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, int rawSoundId, boolean vibrate) {
         Uri soundUri = null;
-        
+
         if (rawSoundId != 0) {
             //"android.resource://" + applicationContext.packageName + "/" + soundId
             soundUri = Utils.createInstance().getResourceUri(context, rawSoundId);
         }
-        
+
         return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
     }
 
@@ -98,7 +98,8 @@ public class Notifier {
         this.vibrate = vibrate;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (notificationBuilder != null) throw new IllegalStateException("Can't create channel after create notification");
+            if (notificationBuilder != null)
+                throw new IllegalStateException("Can't create channel after create notification");
 
             channelId = TextUtils.isEmpty(channelId) ? "default" : channelId;
             channelName = TextUtils.isEmpty(channelName) ? "Default" : channelName;
@@ -185,7 +186,7 @@ public class Notifier {
                 .setSound(soundUri);
 
         if (vibrate) enableVibrate();
-                
+
         return this;
     }
 
@@ -268,17 +269,44 @@ public class Notifier {
         return this;
     }
 
-    public void release() {
+    //---------------------------------
+
+    public int release() {
         int i = new Random(100).nextInt(1000);
-        release(i);
+        return release(i);
     }
 
-    public void release(int notificationId) {
+    public int release(int notificationId) {
         if (notificationBuilder == null) throw new NullPointerException();
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(notificationId, notificationBuilder.build());
 
         this.context = null;
+
+        Notifier.lastNotificationId = notificationId;
+
+        return notificationId;
     }
+
+    //---------------------------------
+
+    private static Integer lastNotificationId = null;
+
+    public void removeNotification(Context context, int notificationId) {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        notificationManager.cancel(notificationId);
+    }
+
+    public void removeAllNotifications(Context context) {
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        notificationManager.cancelAll();
+    }
+
+    public void removeLastNotification(Context context) {
+        if (Notifier.lastNotificationId == null) return;
+        removeNotification(context, Notifier.lastNotificationId);
+    }
+
+
 }
