@@ -99,7 +99,11 @@ public class MyToast {
     }
 
     public MyToast show() {
-        toast.show();
+        try {
+            toast.show();
+        } catch (Throwable e) {
+        }
+
         return this;
     }
 

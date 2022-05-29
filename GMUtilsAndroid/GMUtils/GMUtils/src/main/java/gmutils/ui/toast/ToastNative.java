@@ -114,7 +114,7 @@ public class ToastNative implements MyToast.IToast {
     public MyToast.IToast show() {
         try {
             toast.show();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
         return this;

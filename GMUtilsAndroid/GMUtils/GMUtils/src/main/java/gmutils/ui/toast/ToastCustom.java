@@ -109,16 +109,17 @@ public class ToastCustom implements MyToast.IToast {
 
     @Override
     public MyToast.IToast show() {
-        windowLayout.addView(rootLayout);
+        try {
+            windowLayout.addView(rootLayout);
 
-        long duration2 = duration;
+            long duration2 = duration;
 
-        if (duration2 != defaultDuration) {
-            duration2 = isFast ? 700 : duration2;
-        }
+            if (duration2 != defaultDuration) {
+                duration2 = isFast ? 700 : duration2;
+            }
 
-        rootLayout.postDelayed(this::hide, duration);
-
+            rootLayout.postDelayed(this::hide, duration);
+        } catch (Throwable e) {}
         return this;
     }
 
