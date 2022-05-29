@@ -17,10 +17,12 @@ import android.text.TextUtils;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
+import gmutils.listeners.ResultCallback;
 import gmutils.utils.Utils;
 
 /**
@@ -171,13 +173,15 @@ public class Notifier {
         notificationBuilder = new NotificationCompat.Builder(context, createdChannelId)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
-                .setTicker(body)
                 .setSmallIcon(notificationIconRes)
+                .setTicker(body)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setColor(iconBackgroundColor)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSound(soundUri);
 
         if (vibrate) enableVibrate();
@@ -203,6 +207,24 @@ public class Notifier {
     public Notifier enableVibrate() {
         if (notificationBuilder == null) throw new NullPointerException();
         notificationBuilder.setVibrate(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        return this;
+    }
+
+    /**
+     * @param priority: NotificationCompat
+     */
+    public Notifier setPriority(int priority) {
+        if (notificationBuilder == null) throw new NullPointerException();
+        notificationBuilder.setPriority(priority);
+        return this;
+    }
+
+    /**
+     * @param visibility: NotificationCompat
+     */
+    public Notifier setVisibility(int visibility) {
+        if (notificationBuilder == null) throw new NullPointerException();
+        notificationBuilder.setVisibility(visibility);
         return this;
     }
 
@@ -238,6 +260,11 @@ public class Notifier {
                 pendingIntent
         );
 
+        return this;
+    }
+
+    public Notifier updateNotificationBuilder(@NotNull ResultCallback<NotificationCompat.Builder> builder) {
+        builder.invoke(notificationBuilder);
         return this;
     }
 
