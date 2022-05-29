@@ -205,22 +205,8 @@ class MapAndLocationExample : BaseActivity() {
                 }
             }
 
-            override fun onErrorHappened(p0: LocationTracker, p1: Int, p2: String?) {
-                when (p1) {
-                    LocationTracker.Listener.ERR_GPS_CLOSED ->
-                        p0.showGPSDisabledAlert(
-                            thisActivity(),
-                            getString(R.string.app_name),
-                            /*getString(R.string.*/
-                            "please_enable_GPS_to_help_us_find_your_physical_location",
-                            /*getString(R.string.*/"location_settings",
-                            "cancel",
-                            null
-                        )
-
-                    LocationTracker.Listener.ERR_EXCEPTION ->
-                        Logger.print(Logger.Callbacks.PrintSingle { p2 ?: "" })
-                }
+            override fun onErrorOccurred(obj: LocationTracker?, error: String?) {
+                Logger.print(Logger.Callbacks.PrintSingle { error ?: "" })
             }
         })
         mLocationTracker?.startLocationUpdating()
