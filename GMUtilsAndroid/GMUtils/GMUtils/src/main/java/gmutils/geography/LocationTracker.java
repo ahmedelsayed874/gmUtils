@@ -112,14 +112,14 @@ public class LocationTracker implements LocationListener {
 
             } else {
                 if (mListener != null) {
-                    mListener.onErrorHappened(this, Listener.ERR_GPS_CLOSED, "");
+                    mListener.onLocationProviderStatusChanged(this, LocationManager.GPS_PROVIDER, true);
                 }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             if (mListener != null) {
-                mListener.onErrorHappened(this, Listener.ERR_EXCEPTION, e.getMessage());
+                mListener.onErrorOccurred(this, e.getMessage());
             }
         }
     }
@@ -240,8 +240,6 @@ public class LocationTracker implements LocationListener {
     //----------------------------------------------------------------------------------------------
 
     public interface Listener {
-        int ERR_GPS_CLOSED = 1;
-        int ERR_EXCEPTION = 2;
 
         void onLocationFounded(LocationTracker obj, @NonNull Location location);
 
@@ -250,9 +248,6 @@ public class LocationTracker implements LocationListener {
          */
         void onLocationProviderStatusChanged(LocationTracker obj, String provider, boolean disabled);
 
-        /**
-         * @param errorCode {@link #ERR_GPS_CLOSED} or {@link #ERR_EXCEPTION}
-         */
-        void onErrorHappened(LocationTracker obj, int errorCode, String msg);
+        void onErrorOccurred(LocationTracker obj, String error);
     }
 }

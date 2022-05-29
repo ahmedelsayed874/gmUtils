@@ -39,9 +39,10 @@ public class Notifier {
     private NotificationCompat.Builder notificationBuilder;
     private final int notificationIconRes;
     private int iconBackgroundColor = Color.WHITE;
-    private Uri soundUri;
-    private boolean vibrate;
     private String createdChannelId = null;
+
+    private Uri soundUri;
+    private boolean vibrate = false;
 
 
     public static Notifier getInstance(Context context, int notificationIconRes, int iconBackgroundColor) {
@@ -52,30 +53,47 @@ public class Notifier {
         this.context = context;
         this.notificationIconRes = notificationIconRes;
         this.iconBackgroundColor = iconBackgroundColor;
-        this.soundUri = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_NOTIFICATION);
+
+        this.soundUri =  RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_NOTIFICATION);
     }
 
     //---------------------------------
 
-    //region createNotificationChannel
-    public Notifier createNotificationChannel(String channelId, String channelName) {
-        return createNotificationChannel(channelId, channelName, null, NotificationManager.IMPORTANCE_DEFAULT, null);
+    //region setNotificationChannel
+    public Notifier setNotificationChannel(String channelId, String channelName) {
+        return setNotificationChannel(channelId, channelName, null, NotificationManager.IMPORTANCE_DEFAULT, null);
     }
 
-    public Notifier createNotificationChannel(String channelId, String channelName, String channelDescription) {
-        return createNotificationChannel(channelId, channelName, channelDescription, NotificationManager.IMPORTANCE_DEFAULT, null);
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription) {
+        return setNotificationChannel(channelId, channelName, channelDescription, NotificationManager.IMPORTANCE_DEFAULT, null);
     }
 
-    public Notifier createNotificationChannel(String channelId, String channelName, String channelDescription, int importance) {
-        return createNotificationChannel(channelId, channelName, channelDescription, importance, null);
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance) {
+        return setNotificationChannel(channelId, channelName, channelDescription, importance, null);
     }
 
-    public Notifier createNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Integer rawSoundId) {
-        return createNotificationChannel(channelId, channelName, channelDescription, importance, null, false);
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Integer rawSoundId) {
+        return setNotificationChannel(channelId, channelName, channelDescription, importance, rawSoundId, false);
     }
 
-    public Notifier createNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Integer rawSoundId, boolean vibrate) {
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Integer rawSoundId, boolean vibrate) {
+        Uri soundUri = null;
+        
+        if (rawSoundId != null) {
+            //"android.resource://" + applicationContext.packageName + "/" + soundId
+            soundUri = Utils.createInstance().getResourceUri(context, rawSoundId);
+        }
+        
+        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
+    }
+    
+    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Uri soundUri, boolean vibrate) {
+        this.soundUri = soundUri;
+        this.vibrate = vibrate;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (notificationBuilder != null) throw new IllegalStateException("Can't create channel after create notification");
+
             channelId = TextUtils.isEmpty(channelId) ? "default" : channelId;
             channelName = TextUtils.isEmpty(channelName) ? "Default" : channelName;
 
@@ -93,10 +111,7 @@ public class Notifier {
                 channel.setDescription(channelDescription);
             }
 
-            if (rawSoundId != null) {
-                //"android.resource://" + applicationContext.packageName + "/" + soundId
-                Uri soundUri = Utils.createInstance().getResourceUri(context, rawSoundId);
-
+            if (soundUri != null) {
                 AudioAttributes audioAttr = new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .setUsage(AudioAttributes.USAGE_ALARM)
@@ -112,6 +127,7 @@ public class Notifier {
                 channel.enableVibration(true);
                 channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
             }
+
             notificationManager.createNotificationChannel(channel);
         }
 
@@ -141,7 +157,7 @@ public class Notifier {
         title = TextUtils.isEmpty(title) ? context.getString(R.string.app_name) : title;
 
         if (TextUtils.isEmpty(createdChannelId)) {
-            createNotificationChannel(null, null, null);
+            setNotificationChannel(null, null, null);
         }
 
         notificationBuilder = new NotificationCompat.Builder(context, createdChannelId)
@@ -150,14 +166,14 @@ public class Notifier {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
                 .setTicker(body)
                 .setSmallIcon(notificationIconRes)
-                //.setLargeIcon(ResourcesHelper.getBitmap(context, android.R.drawable.sym_def_app_icon))
                 .setDefaults(Notification.DEFAULT_ALL)
-                .setAutoCancel(true)
                 .setColor(iconBackgroundColor)
                 .setContentIntent(pendingIntent)
-                .setSound(soundUri)
-                .setVibrate(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+                .setAutoCancel(true)
+                .setSound(soundUri);
 
+        if (vibrate) enableVibrate();
+                
         return this;
     }
 
@@ -167,6 +183,18 @@ public class Notifier {
         if (notificationBuilder == null) throw new NullPointerException();
         if (icon == null) return this;
         notificationBuilder.setLargeIcon(icon);
+        return this;
+    }
+
+    public Notifier setSoundUri(Uri soundUri) {
+        if (notificationBuilder == null) throw new NullPointerException();
+        notificationBuilder.setSound(soundUri);
+        return this;
+    }
+
+    public Notifier enableVibrate() {
+        if (notificationBuilder == null) throw new NullPointerException();
+        notificationBuilder.setVibrate(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
         return this;
     }
 
