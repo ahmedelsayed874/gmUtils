@@ -293,17 +293,17 @@ public class Notifier {
 
     private static Integer lastNotificationId = null;
 
-    public void removeNotification(Context context, int notificationId) {
+    public static void removeNotification(Context context, int notificationId) {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.cancel(notificationId);
     }
 
-    public void removeAllNotifications(Context context) {
+    public static void removeAllNotifications(Context context) {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.cancelAll();
     }
 
-    public void removeLastNotification(Context context) {
+    public static void removeLastNotification(Context context) {
         if (Notifier.lastNotificationId == null) return;
         removeNotification(context, Notifier.lastNotificationId);
     }
