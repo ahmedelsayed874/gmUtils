@@ -75,7 +75,7 @@ public abstract class BaseApplication extends Application implements Application
         }
     }
 
-    private static BaseApplication current;
+    //==============================================================================================
 
     private int activityCount = 0;
     private final long delayAmount = 500L;
@@ -110,6 +110,8 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     //----------------------------------------------------------------------------------------------
+
+    private static BaseApplication current;
 
     public static BaseApplication current() {
         return current;
@@ -219,6 +221,10 @@ public abstract class BaseApplication extends Application implements Application
 
             Logger.writeToFile(thisApp(), stack.toString(), bugFileName);
             Logger.print(() -> stack.toString());
+
+            try {
+                dispose();
+            } catch (Throwable ignore) {}
 
             if (defaultHandler != null) {
                 defaultHandler.uncaughtException(thread, throwable);

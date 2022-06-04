@@ -23,7 +23,7 @@ import retrofit2.Call;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-final class CallbackOperations<R extends BaseResponse> {
+public final class CallbackOperations<R extends BaseResponse> {
     interface Listener<R> {
         void onResponseReady(R response);
     }
@@ -66,17 +66,17 @@ final class CallbackOperations<R extends BaseResponse> {
 
     //----------------------------------------------------------------------------------------------
 
-    void setExtras(Map<String, Object> extras) {
+    public void setExtras(Map<String, Object> extras) {
         this.extras = extras;
     }
 
-    void setErrorListener(CallbackErrorHandler errorListener) {
+    public void setErrorListener(CallbackErrorHandler errorListener) {
         this.errorListener = errorListener;
     }
 
     //----------------------------------------------------------------------------------------------
 
-    void onResponse(Call<R> call, retrofit2.Response<R> response) {
+    public void onResponse(Call<R> call, retrofit2.Response<R> response) {
         String error = "";
         try {
             error = response.errorBody().string();
@@ -105,7 +105,7 @@ final class CallbackOperations<R extends BaseResponse> {
         }
     }
 
-    void onFailure(Call<R> call, Throwable t) {
+    public void onFailure(Call<R> call, Throwable t) {
         printCallInfo(call, null, "Exception[" + t.getMessage() + "]");
 
         setError(t.getMessage(), 0);
@@ -174,7 +174,7 @@ final class CallbackOperations<R extends BaseResponse> {
         destroyReferences();
     }
 
-    void destroyReferences() {
+    public void destroyReferences() {
         listener = null;
         extras = null;
         errorListener = null;

@@ -2,6 +2,9 @@ package gmutils.net.retrofit.responseHolders;
 
 import androidx.room.Ignore;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,23 +70,29 @@ import java.util.Map;
 public abstract class BaseResponse {
     public enum Statuses { Succeeded, Error, ConnectionFailed }
 
+    @Expose(serialize = false, deserialize = false)
     @Ignore
     private String _callbackStatus = null;
 
+    @Expose(serialize = false, deserialize = false)
     @Ignore
     public Integer _code;
 
+    @Expose(serialize = false, deserialize = false)
     @Ignore
     public String _error;
 
+    @Expose(serialize = false, deserialize = false)
     @Ignore
     public Map<String, Object> _extras;
 
+    @Expose(serialize = false, deserialize = false)
     @Ignore
-    public long _requestTime;
+    public Long _requestTime;
 
+    @Expose(serialize = false, deserialize = false)
     @Ignore
-    public long _responseTime;
+    public Long _responseTime;
 
     //----------------------------------------------------------------------------------------------
 
