@@ -163,7 +163,7 @@ public class TextHelper {
 
         for (int v : Arrays.asList(a, r, g, b)) {
             String x = convertToHex(v).replace("#", "");
-            if (x.length() < 2) x = "0$x";
+            if (x.length() < 2) x = "0" + x;
             else if (x.length() > 2) x = x.substring(0, 2);
 
             finalHex += x;
