@@ -13,6 +13,7 @@ class BaseApplicationExample : BaseApplication() {
     }
 
     override fun onApplicationStartedFirstActivity(activity: Activity) {
+
     }
 
     override fun onApplicationFinishedLastActivity(activity: Activity) {

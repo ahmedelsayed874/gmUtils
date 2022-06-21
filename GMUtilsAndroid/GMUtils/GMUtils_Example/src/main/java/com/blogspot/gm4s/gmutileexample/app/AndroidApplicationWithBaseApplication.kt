@@ -31,5 +31,7 @@ class AndroidApplicationAndBaseApplication : Application() {
 
         app.messagingCenter().post("zxc", "asd")
 
+//        val x = "mmc_wms".hashCode()
+//        print("****************** $x")
     }
 }

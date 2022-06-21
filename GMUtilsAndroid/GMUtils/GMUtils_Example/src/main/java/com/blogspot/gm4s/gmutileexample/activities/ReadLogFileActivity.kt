@@ -45,7 +45,7 @@ class ReadLogFileActivity : BaseActivity() {
     fun onOpenFileClick(view: View) {
         FileUtils.createInstance().showFileExplorer(
             this,
-            "text/*",
+            "*/*",
             null,
             1
         )

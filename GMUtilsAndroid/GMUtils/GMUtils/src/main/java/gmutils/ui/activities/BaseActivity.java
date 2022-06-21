@@ -483,13 +483,16 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
             if (message.popup) {
                 MessageDialog dialog = showMessageDialog(msg, null);
                 if (mt.button1() != null) {
-                    dialog.setButton1(mt.button1().first, d -> mt.button1().second.run());
+                    Runnable runnable =  mt.button1().second;
+                    dialog.setButton1(mt.button1().first, d -> runnable.run());
                 }
                 if (mt.button2() != null) {
-                    dialog.setButton2(mt.button2().first, d -> mt.button2().second.run());
+                    Runnable runnable =  mt.button2().second;
+                    dialog.setButton2(mt.button2().first, d -> runnable.run());
                 }
                 if (mt.button3() != null) {
-                    dialog.setButton3(mt.button3().first, d -> mt.button3().second.run());
+                    Runnable runnable =  mt.button3().second;
+                    dialog.setButton3(mt.button3().first, d -> runnable.run());
                 }
             } else {
                 MyToast.showError(this, msg);
