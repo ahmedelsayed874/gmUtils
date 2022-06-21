@@ -23,6 +23,9 @@ import androidx.viewbinding.ViewBinding;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gmutils.BackgroundTask;
 import gmutils.KeypadOp;
 import gmutils.Logger;
@@ -319,17 +322,31 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     public static class ShowMessageDialogOptions {
         private CharSequence title;
-        private Pair<String, MessageDialog.Listener>[] buttons;
+        private Pair<String, MessageDialog.Listener> button1;
+        private Pair<String, MessageDialog.Listener> button2;
+        private Pair<String, MessageDialog.Listener> button3;
 
         public ShowMessageDialogOptions setTitle(@NotNull CharSequence title) {
             this.title = title;
             return this;
         }
 
-        public ShowMessageDialogOptions setButtons(Pair<String, MessageDialog.Listener>[] buttons) {
-            this.buttons = buttons;
+        public ShowMessageDialogOptions setButton1(String text, MessageDialog.Listener listener) {
+            button1 = new Pair<>(text, listener);
             return this;
         }
+
+        public ShowMessageDialogOptions setButton2(String text, MessageDialog.Listener listener) {
+            button2 = new Pair<>(text, listener);
+            return this;
+        }
+
+        public ShowMessageDialogOptions setButton3(String text, MessageDialog.Listener listener) {
+            button3 = new Pair<>(text, listener);
+            return this;
+        }
+
+
     }
 
     public MessageDialog showMessageDialog(Context context, int msg, ShowMessageDialogOptions options) {
@@ -344,15 +361,18 @@ public class ActivityFunctions implements BaseFragmentListener {
 
         dialog.setMessage(msg);
 
-        if (options != null && options.buttons != null && options.buttons.length > 0) {
-            dialog.setButton1(options.buttons[0].first, options.buttons[0].second);
-
-            if (options.buttons.length > 1) {
-                dialog.setButton2(options.buttons[1].first, options.buttons[1].second);
+        //Pair<String, MessageDialog.Listener> button1;
+        if (options != null && (options.button1 != null || options.button2 != null || options.button3 != null)) {
+            if (options.button1 != null) {
+                dialog.setButton1(options.button1.first, options.button1.second);
             }
 
-            if (options.buttons.length > 2) {
-                dialog.setButton3(options.buttons[2].first, options.buttons[2].second);
+            if (options.button2 != null) {
+                dialog.setButton2(options.button2.first, options.button2.second);
+            }
+
+            if (options.button3 != null) {
+                dialog.setButton3(options.button3.first, options.button3.second);
             }
 
         } else {
