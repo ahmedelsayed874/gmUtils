@@ -77,11 +77,21 @@ public class GeneralStorage {
         saveToList(listName, false, value);
     }
 
-    public void saveToList(String listName, boolean onTop, String... value) {
+    public void saveToList(String listName, List<String> value) {
+        saveToList(listName, false, value);
+    }
 
+    public void saveToList(String listName, boolean onTop, String... value) {
+        List<String> valueList = Arrays.asList(value);
+        saveToList(listName, onTop, valueList);
+    }
+
+    public void saveToList(String listName, boolean onTop, List<String> value) {
         List<String> list = retrieveList(listName);
-        for (int i = value.length - 1; i >= 0; i--) {
-            String v = value[i];
+
+        int valueCount = value.size();
+        for (int i = valueCount - 1; i >= 0; i--) {
+            String v = value.get(i);
             if (onTop)
                 list.add(0, v);
             else
@@ -101,26 +111,17 @@ public class GeneralStorage {
         }
     }
 
-    public List<String> retrieveList(String listName) {
-        List<String> list = new ArrayList<>();
-
-        try {
-            String addressesJson = retrieve(listName, "[]");
-            JSONArray jsonArray = new JSONArray(addressesJson);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                list.add(jsonArray.getString(i));
-            }
-        } catch (Throwable ignored) {
-        }
-
-        return list;
+    public void saveToSet(String setName, String... value) {
+        List<String> valueList = Arrays.asList(value);
+        saveToSet(setName, valueList);
     }
 
-    public void saveToSet(String setName, String... value) {
-
+    public void saveToSet(String setName, List<String> value) {
         Set<String> set = new HashSet<>(retrieveList(setName));
-        for (int i = value.length - 1; i >= 0; i--) {
-            String v = value[i];
+
+        int valueLength = value.size();
+        for (int i = valueLength - 1; i >= 0; i--) {
+            String v = value.get(i);
             set.add(v);
         }
 
@@ -135,6 +136,21 @@ public class GeneralStorage {
 
         } catch (Throwable e) {
         }
+    }
+
+    public List<String> retrieveList(String listName) {
+        List<String> list = new ArrayList<>();
+
+        try {
+            String addressesJson = retrieve(listName, "[]");
+            JSONArray jsonArray = new JSONArray(addressesJson);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                list.add(jsonArray.getString(i));
+            }
+        } catch (Throwable ignored) {
+        }
+
+        return list;
     }
 
     public Set<String> retrieveSet(String setName) {
