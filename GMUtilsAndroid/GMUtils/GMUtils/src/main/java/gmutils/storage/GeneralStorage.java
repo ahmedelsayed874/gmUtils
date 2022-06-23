@@ -8,6 +8,7 @@ import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,8 @@ public class GeneralStorage {
         return mPreference.getString(key, defaultValue);
     }
 
+    //----------------------------------------------------------------------------------------------
+
     public void remove(String key) {
         mPreference.edit().remove(key).apply();
     }
@@ -71,7 +74,7 @@ public class GeneralStorage {
         mPreference.edit().clear().apply();
     }
 
-    //----------------------------------------------------------------------------------------------
+    //==============================================================================================
 
     public void saveToList(String listName, String... value) {
         saveToList(listName, false, value);
@@ -80,6 +83,7 @@ public class GeneralStorage {
     public void saveToList(String listName, List<String> value) {
         saveToList(listName, false, value);
     }
+
 
     public void saveToList(String listName, boolean onTop, String... value) {
         List<String> valueList = Arrays.asList(value);
@@ -98,10 +102,15 @@ public class GeneralStorage {
                 list.add(v);
         }
 
+        saveListHelper(listName, list);
+    }
+
+
+    private void saveListHelper(String listName, Collection<String> data) {
         try {
             JSONArray jsonArray = new JSONArray();
 
-            for (String it : list) {
+            for (String it : data) {
                 jsonArray.put(it);
             }
 
@@ -110,6 +119,8 @@ public class GeneralStorage {
         } catch (Throwable e) {
         }
     }
+
+    //---------------------------------------------------------------------
 
     public void saveToSet(String setName, String... value) {
         List<String> valueList = Arrays.asList(value);
@@ -125,18 +136,10 @@ public class GeneralStorage {
             set.add(v);
         }
 
-        try {
-            JSONArray jsonArray = new JSONArray();
-
-            for (String it : set) {
-                jsonArray.put(it);
-            }
-
-            save(setName, jsonArray.toString());
-
-        } catch (Throwable e) {
-        }
+        saveListHelper(setName, set);
     }
+
+    //---------------------------------------------------------------------
 
     public List<String> retrieveList(String listName) {
         List<String> list = new ArrayList<>();
@@ -166,6 +169,16 @@ public class GeneralStorage {
         }
 
         return set;
+    }
+
+    //---------------------------------------------------------------------
+
+    public void removeFromList(String listName, String value) {
+        List<String> list = retrieveList(listName);
+
+        while (list.remove(value));
+        saveListHelper(listName, list);
+
     }
 
 }
