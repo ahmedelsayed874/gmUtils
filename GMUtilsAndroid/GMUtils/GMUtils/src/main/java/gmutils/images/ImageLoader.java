@@ -541,6 +541,10 @@ public class ImageLoader {
     }
 
     public static void loadFromBase64(String base64Encoded, ImageView imageView, Options options, String imageDebugName) {
+        loadFromBase64(base64Encoded, imageView, options, imageDebugName, null);
+    }
+
+    public static void loadFromBase64(String base64Encoded, ImageView imageView, Options options, String imageDebugName, Callback callback) {
         if (imageView == null) return;
 
         if (MIN_IMAGE_SIZE == null) {
@@ -559,16 +563,9 @@ public class ImageLoader {
         } catch (Exception ignored) {
         }
 
-        Bitmap bitmap = null;
+        Bitmap bitmap = convertBase64(base64Encoded);
 
-        try {
-            byte[] bytes = Base64.decode(base64Encoded, Base64.DEFAULT);
-            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        } catch (Exception e) {
-            Logger.print(e);
-        }
-
-        LoaderCallback2 loaderCallback2 = new LoaderCallback2(imageDebugName, imageView, options, null);
+        LoaderCallback2 loaderCallback2 = new LoaderCallback2(imageDebugName, imageView, options, callback);
 
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
@@ -582,5 +579,16 @@ public class ImageLoader {
         }
     }
 
+    public static Bitmap convertBase64(String base64Encoded) {
+        Bitmap bitmap = null;
 
+        try {
+            byte[] bytes = Base64.decode(base64Encoded, Base64.DEFAULT);
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        } catch (Exception e) {
+            Logger.print(e);
+        }
+
+        return bitmap;
+    }
 }
