@@ -146,7 +146,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
             return viewModels.values().toArray(new ViewModel[0])[0];
         }
 
-        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
+        if (viewModels.size() == 0) {
+            throw new IllegalStateException("You didn't declare any View Models in getViewModelClasses()");
+        } else {
+            throw new IllegalStateException("You have declared several View Models in getViewModelClasses()");
+        }
     }
 
     public ViewModel getViewModel(int id) {
