@@ -126,7 +126,7 @@ public class ListDialogV2<T> extends gmutils.ui.dialogs.BaseDialog {
     private AdapterView.OnItemClickListener getOnListItemClickListener() {
         return (adapterView, view, i, l) -> {
             if (mListener != null)
-                mListener.onItemSelected(ListDialogV2.this, adapterView.getItemAtPosition(i));
+                mListener.onItemSelected(ListDialogV2.this, (T) adapterView.getItemAtPosition(i));
             dismiss();
         };
     }
@@ -244,7 +244,7 @@ public class ListDialogV2<T> extends gmutils.ui.dialogs.BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     public interface Listener<T> {
-        void onItemSelected(ListDialogV2<T> dialog, Object item);
+        void onItemSelected(ListDialogV2<T> dialog, T item);
     }
 
     public interface Listener2<T> {
