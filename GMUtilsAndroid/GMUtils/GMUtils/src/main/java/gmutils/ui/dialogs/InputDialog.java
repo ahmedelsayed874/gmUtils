@@ -113,6 +113,11 @@ public class InputDialog extends BaseDialog {
         return this;
     }
 
+    public InputDialog setMessageMinLines(int min) {
+        tvMsg.setMinLines(min);
+        return this;
+    }
+
     public InputDialog setMessageBold() {
         Typeface typeface = tvMsg.getTypeface();
         Typeface.create(typeface, Typeface.BOLD);

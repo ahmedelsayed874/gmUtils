@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:layout_margin="@dimen/size_10"
         android:background="@drawable/dialog_background"
-        android:minWidth="@dimen/size_250"
+        android:minWidth="@dimen/size_300"
         android:orientation="vertical"
         android:paddingTop="@dimen/size_10">
 
@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_marginStart="@dimen/size_10"
             android:layout_marginEnd="@dimen/size_10"
-            android:text="MSG"
+            tools:text="MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG MSG 70000 bm"
             android:textColor="@color/gmDialogText" />
 
         <EditText
