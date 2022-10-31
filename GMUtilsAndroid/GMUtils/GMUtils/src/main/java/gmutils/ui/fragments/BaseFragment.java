@@ -206,10 +206,10 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void onMessageReceivedFromViewModel(BaseViewModel.Message message) {
-        String msg = "";
+        CharSequence msg = "";
         if (message.messageIds != null && !message.messageIds.isEmpty()) {
             for (Integer messageId : message.messageIds) {
-                if (!msg.isEmpty()) msg += message.getMultiMessageIdsSeparator();
+                if (msg.length() > 0) msg += message.getMultiMessageIdsSeparator();
                 msg += message.getMultiMessageIdsPrefix() + " " + getString(messageId);
             }
         } else if (message.messageString != null) {

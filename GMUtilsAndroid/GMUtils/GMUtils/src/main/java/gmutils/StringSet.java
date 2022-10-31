@@ -9,37 +9,37 @@ public class StringSet {
     public static final String ENGLISH_LANG_CODE = "en";
     public static final String ARABIC_LANG_CODE = "ar";
 
-    Map<String, String> strings;
+    Map<String, CharSequence> strings;
 
-    public StringSet(String defaultString) {
+    public StringSet(CharSequence defaultString) {
         this(defaultString, null);
     }
 
-    public StringSet(String english, String arabic) {
+    public StringSet(CharSequence english, CharSequence arabic) {
         this(new HashMap<>());
         this.strings.put(ENGLISH_LANG_CODE, english);
         if (arabic != null) this.strings.put(ARABIC_LANG_CODE, arabic);
     }
 
-    public StringSet(Map<String, String> others) {
+    public StringSet(Map<String, CharSequence> others) {
         this.strings = others;
     }
 
     //
 
-    public String getDefault() {
+    public CharSequence getDefault() {
         return strings.get(ENGLISH_LANG_CODE);
     }
 
-    public String getEnglish() {
+    public CharSequence getEnglish() {
         return strings.get(ENGLISH_LANG_CODE);
     }
 
-    public String getArabic() {
+    public CharSequence getArabic() {
         return strings.get(ARABIC_LANG_CODE);
     }
 
-    public String get(String langCode) {
+    public CharSequence get(String langCode) {
         return strings.get(langCode);
     }
 
@@ -49,7 +49,7 @@ public class StringSet {
 
     //
 
-    public void set(String langCode, String string) {
+    public void set(String langCode, CharSequence string) {
         strings.put(langCode, string);
     }
 }
