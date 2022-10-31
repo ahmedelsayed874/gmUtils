@@ -2,6 +2,7 @@
 <resources>
     <color name="gmPrimaryDark">@color/black</color>
     <color name="gmPrimary">@color/orange</color>
+    <color name="gmPrimaryVariant">@color/white</color>
     <color name="gmAccent">@color/red1</color>
 
     <color name="gmBackground">@color/white</color>

@@ -291,6 +291,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         return getActivityFunctions().showMessageDialog(this, msg, options);
     }
 
+    @Override
+    public MessageDialog showMessageDialog(Context context, CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
+        return getActivityFunctions().showMessageDialog(context, msg, options);
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public void showFragment(Fragment fragment, boolean addToBackStack) {

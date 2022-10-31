@@ -2,6 +2,9 @@ package gmutilssupport.ui.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+
+import gmutilssupport.ui.activities.ActivityFunctions;
+import gmutilssupport.ui.dialogs.MessageDialog;
 import gmutilssupport.ui.dialogs.RetryPromptDialog;
 
 
@@ -16,6 +19,8 @@ public interface BaseFragmentListener {
     void hideWaitViewImmediately();
 
     void updateWaitViewMsg(CharSequence msg);
+
+    MessageDialog showMessageDialog(Context context, CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options);
 
     RetryPromptDialog showRetryPromptDialog(
             Context context,

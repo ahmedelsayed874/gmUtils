@@ -25,10 +25,6 @@ public class MyToast {
 
     public interface IToast {
 
-        boolean isFast();
-
-        IToast setFast(boolean fast);
-
         IToast setBackground(int bgRes);
 
         IToast setTextColor(int textColorRes);
@@ -45,7 +41,7 @@ public class MyToast {
     public static Boolean DEFAULT_STYLE = true;
 
     public static Integer BACKGROUND_RES = R.color.gmPrimary; //android.R.color.black;
-    public static Integer TEXT_COLOR_RES = Color.WHITE;
+    public static Integer TEXT_COLOR_RES = R.color.gmPrimaryVariant;
 
     public static Integer ERROR_BACKGROUND_RES = android.R.color.holo_red_dark;
     public static Integer ERROR_TEXT_COLOR_RES = Color.WHITE;
@@ -54,35 +50,64 @@ public class MyToast {
 
     public final MyToast.IToast toast;
 
+
     public MyToast(Context context, int msg) {
-        this(context, msg, true);
+        this(context, msg, false, true);
     }
+
+    public MyToast(Context context, int msg, boolean fastShow) {
+        this(context, msg, fastShow, true);
+    }
+
+    public MyToast(Context context, int msg, boolean fastShow, boolean systemStyle) {
+        this(context, context.getString(msg), fastShow, systemStyle);
+    }
+
+
+    public MyToast(Activity activity, int msg) {
+        this((Context) activity, msg, false, true);
+    }
+
+    public MyToast(Activity activity, int msg, boolean fastShow) {
+        this((Context) activity, msg, fastShow, true);
+    }
+
+    public MyToast(Activity activity, int msg, boolean fastShow, boolean systemStyle) {
+        this((Context) activity, msg, fastShow, systemStyle);
+    }
+
+
 
     public MyToast(Activity activity, CharSequence msg) {
-        this(activity, msg, true);
+        this(activity, msg, false, true);
     }
 
-    public MyToast(Activity activity, int msg, boolean systemStyle) {
-        this((Context) activity, msg, systemStyle);
+    public MyToast(Activity activity, CharSequence msg, boolean fastShow) {
+        this(activity, msg, fastShow, true);
     }
 
-    public MyToast(Context context, int msg, boolean systemStyle) {
-        this(context, context.getString(msg), systemStyle);
+    public MyToast(Activity activity, CharSequence msg, boolean fastShow, boolean systemStyle) {
+        this((Context) activity, msg, fastShow, systemStyle);
     }
 
-    public MyToast(Activity activity, CharSequence msg, boolean systemStyle) {
-        this((Context) activity, msg, systemStyle);
+
+    public MyToast(Context context, CharSequence msg) {
+        this(context, msg, false, true);
     }
 
-    public MyToast(Context context, CharSequence msg, boolean systemStyle) {
+    public MyToast(Context context, CharSequence msg, boolean fastShow) {
+        this(context, msg, fastShow, true);
+    }
+
+    public MyToast(Context context, CharSequence msg, boolean fastShow, boolean systemStyle) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            toast = new ToastNative(context, msg, systemStyle);
+            toast = new ToastNative(context, msg, fastShow, systemStyle);
 
         } else {
             if (context instanceof Activity)
-                toast = new ToastCustom((Activity) context, msg, systemStyle);
+                toast = new ToastCustom((Activity) context, msg, fastShow, systemStyle);
             else
-                toast = new ToastNative(context, msg, systemStyle);
+                toast = new ToastNative(context, msg, fastShow, systemStyle);
         }
     }
 
@@ -110,19 +135,29 @@ public class MyToast {
     //----------------------------------------------------------------------------------------------
 
     public static void show(Context context, int msgRes) {
-        show(context, context.getString(msgRes), null, null);
+        show(context, context.getString(msgRes), false, null, null);
     }
+
+    public static void show(Context context, int msgRes, boolean fastShow) {
+        show(context, context.getString(msgRes), fastShow, null, null);
+    }
+
 
     public static void show(Context context, CharSequence msg) {
-        show(context, msg, null, null);
+        show(context, msg, false, null, null);
     }
 
-    public static void show(Context context, CharSequence msg, @Nullable Integer bgRes) {
-        show(context, msg, bgRes, null);
+    public static void show(Context context, CharSequence msg, boolean fastShow) {
+        show(context, msg, fastShow, null, null);
     }
 
-    public static void show(Context context, CharSequence msg, @Nullable Integer bgRes, @Nullable Integer textColorRes) {
-        MyToast toast = new MyToast(context, msg, DEFAULT_STYLE);
+
+    public static void show(Context context, CharSequence msg, boolean fastShow, @Nullable Integer bgRes) {
+        show(context, msg, fastShow, bgRes, null);
+    }
+
+    public static void show(Context context, CharSequence msg, boolean fastShow, @Nullable Integer bgRes, @Nullable Integer textColorRes) {
+        MyToast toast = new MyToast(context, msg, fastShow, DEFAULT_STYLE);
         if (bgRes != null) {
             toast.setBackground(bgRes);
         }
@@ -135,11 +170,19 @@ public class MyToast {
     //----------------------------------------------------------------------------------------------
 
     public static void showError(Context context, CharSequence msg) {
-        show(context, msg, ERROR_BACKGROUND_RES, ERROR_TEXT_COLOR_RES);
+        show(context, msg, false, ERROR_BACKGROUND_RES, ERROR_TEXT_COLOR_RES);
+    }
+
+    public static void showError(Context context, CharSequence msg, boolean fastShow) {
+        show(context, msg, fastShow, ERROR_BACKGROUND_RES, ERROR_TEXT_COLOR_RES);
     }
 
     public static void showError(Context context, int msgRes) {
-        show(context, context.getString(msgRes), ERROR_BACKGROUND_RES, ERROR_TEXT_COLOR_RES);
+        show(context, context.getString(msgRes), false, ERROR_BACKGROUND_RES, ERROR_TEXT_COLOR_RES);
+    }
+
+    public static void showError(Context context, int msgRes, boolean fastShow) {
+        show(context, context.getString(msgRes), fastShow, ERROR_BACKGROUND_RES, ERROR_TEXT_COLOR_RES);
     }
 
 }

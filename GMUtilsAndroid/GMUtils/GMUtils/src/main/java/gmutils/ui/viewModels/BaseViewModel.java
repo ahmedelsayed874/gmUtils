@@ -34,63 +34,40 @@ import gmutils.listeners.ResultCallback;
 public class BaseViewModel extends AndroidViewModel {
 
     public interface ProgressStatus {
-        int getProgress();
-
-        ProgressStatus setProgress(int progress);
 
         class Show implements ProgressStatus {
+            public final String message;
             public final int messageId;
-            private int progress = 0;
 
             public Show(int messageId) {
+                this.message = null;
                 this.messageId = messageId;
             }
 
-            @Override
-            public int getProgress() {
-                return progress;
+            public Show(String message) {
+                this.message = message;
+                this.messageId = 0;
             }
 
-            @Override
-            public ProgressStatus setProgress(int progress) {
-                this.progress = progress;
-                return this;
-            }
         }
 
         class Update implements ProgressStatus {
             public final String message;
-            private int progress = 0;
+            public final int messageId;
+
+            public Update(int messageId) {
+                this.message = null;
+                this.messageId = messageId;
+            }
 
             public Update(String message) {
                 this.message = message;
+                this.messageId = 0;
             }
 
-            @Override
-            public int getProgress() {
-                return progress;
-            }
-
-            @Override
-            public ProgressStatus setProgress(int progress) {
-                this.progress = progress;
-                return this;
-            }
         }
 
         class Hide implements ProgressStatus {
-            private int progress = 0;
-
-            @Override
-            public int getProgress() {
-                return progress;
-            }
-
-            @Override
-            public ProgressStatus setProgress(int progress) {
-                this.progress = progress;
-                return this;
-            }
         }
     }
 

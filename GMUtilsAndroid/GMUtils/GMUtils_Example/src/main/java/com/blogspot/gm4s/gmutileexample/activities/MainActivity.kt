@@ -15,6 +15,7 @@ import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
 import gmutils.Activities
 import gmutils.DateOp
+import gmutils.Intents
 import gmutils.LooperThread
 import gmutils.net.SimpleHTTPRequest
 import gmutils.net.volley.example.URLs.TimeURLs
@@ -49,7 +50,7 @@ class MainActivity : BaseActivity() {
 
         this.view.btn3.text = "show my toast2"
         this.view.btn3.setOnClickListener {
-            MyToast.show(this, "test my toast", R.drawable.shape_solid_round_accent)
+            MyToast.show(this, "test my toast", false, R.drawable.shape_solid_round_accent)
         }
 
         this.view.btn4.text = "show original toast"
@@ -193,6 +194,18 @@ class MainActivity : BaseActivity() {
             Activities.start(ColorPickerActivity::class.java, thisActivity())
         }
 
+        this.view.btn12.text = "take photo"
+        this.view.btn12.setOnClickListener {
+            val url = Intents.getInstance().imageIntents.takePicture(this, 123)
+            log("image from camera uri", url?.toString())
+        }
+
+        this.view.btn13.text = "pick photo from gallery"
+        this.view.btn13.setOnClickListener {
+            Intents.getInstance().imageIntents.pickImage(this, 456)!!
+            log("pick image began", "")
+        }
+
         //Activities.start(ColorPickerActivity::class.java, thisActivity())
         //Activities.start(ColorPicker2Activity::class.java, thisActivity())
 
@@ -218,4 +231,15 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 123) {
+            log("action result from camera", data?.data?.toString())
+            log("action result from camera", data?.extras?.toString())
+        } else if (requestCode == 456){
+            log("action result pick image", data?.data?.toString())
+            log("action result pick image", data?.extras?.toString())
+        }
+    }
 }

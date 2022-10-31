@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -247,8 +248,17 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         showWaitView(thisActivity(), msg);
     }
 
+    public void showWaitView(CharSequence msg) {
+        showWaitView(thisActivity(), msg);
+    }
+
     @Override
     public void showWaitView(Context context, int msg) {
+        getActivityFunctions().showWaitView(context, msg);
+    }
+
+    @Override
+    public void showWaitView(Context context, CharSequence msg) {
         getActivityFunctions().showWaitView(context, msg);
     }
 
@@ -265,6 +275,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     public void updateWaitViewMsg(CharSequence msg) {
         getActivityFunctions().updateWaitViewMsg(msg);
+    }
+
+    public void updateWaitViewMsg(int msg) {
+        getActivityFunctions().updateWaitViewMsg(getString(msg));
     }
 
     public boolean isWaitViewShown() {
@@ -294,6 +308,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     public MessageDialog showMessageDialog(CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
         return getActivityFunctions().showMessageDialog(this, msg, options);
+    }
+
+    @Override
+    public MessageDialog showMessageDialog(Context context, CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
+        return getActivityFunctions().showMessageDialog(context, msg, options);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -436,12 +455,15 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     protected void onProgressOfViewModelTaskChanged(BaseViewModel.ProgressStatus progressStatus) {
         if (progressStatus instanceof BaseViewModel.ProgressStatus.Show) {
             BaseViewModel.ProgressStatus.Show ps = (BaseViewModel.ProgressStatus.Show) progressStatus;
-            if (ps.messageId != 0) showWaitView(ps.messageId);
+            if (!TextUtils.isEmpty(ps.message)) showWaitView(ps.message);
+            else if (ps.messageId != 0) showWaitView(ps.messageId);
             else showWaitView();
 
         } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Update) {
             BaseViewModel.ProgressStatus.Update ps = (BaseViewModel.ProgressStatus.Update) progressStatus;
-            updateWaitViewMsg(ps.message);
+            if (!TextUtils.isEmpty(ps.message)) updateWaitViewMsg(ps.message);
+            else if (ps.messageId != 0) updateWaitViewMsg(ps.messageId);
+            else updateWaitViewMsg("");
 
         } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Hide) {
             hideWaitView();

@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.CalendarContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -144,28 +145,29 @@ public class Intents {
         //------------------------------------------------------------------------------------------
 
         public boolean checkPermissionForCamera(Activity activity, int requestCode) {
-            String[] neededPermissions = {
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            };
+            List<String> requiredPermissions = new ArrayList<>();
 
-            List<String> nonPermittedPermissions = new ArrayList<>();
+            int cameraPermissionStatus = ActivityCompat.checkSelfPermission(
+                    activity,
+                    Manifest.permission.CAMERA
+            );
+            if (cameraPermissionStatus != PackageManager.PERMISSION_GRANTED)
+                requiredPermissions.add(Manifest.permission.CAMERA);
 
-            for (String neededPermission : neededPermissions) {
-                boolean isPermitted = ActivityCompat.checkSelfPermission(
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                int storagePermissionStatus = ActivityCompat.checkSelfPermission(
                         activity,
-                        neededPermission
-                ) == PackageManager.PERMISSION_GRANTED;
-
-                if (!isPermitted) {
-                    nonPermittedPermissions.add(neededPermission);
-                }
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                );
+                if (storagePermissionStatus != PackageManager.PERMISSION_GRANTED)
+                    requiredPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             }
 
-            if (nonPermittedPermissions.size() > 0) {
+            if (requiredPermissions.size() > 0) {
                 ActivityCompat.requestPermissions(
                         activity,
-                        nonPermittedPermissions.toArray(new String[0]),
+                        requiredPermissions.toArray(new String[0]),
                         requestCode);
 
                 return false;
@@ -175,20 +177,37 @@ public class Intents {
         }
 
         public boolean checkPermissionForGallery(Activity activity, int requestCode) {
-            boolean isReadFilesPermitted = ActivityCompat.checkSelfPermission(
-                    activity, Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED;
-
-            if (!isReadFilesPermitted) {
-                ActivityCompat.requestPermissions(
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                if (ActivityCompat.checkSelfPermission(
                         activity,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        requestCode);
+                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    boolean shouldShow;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        shouldShow = activity.shouldShowRequestPermissionRationale(
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                        );
+                    } else {
+                        shouldShow = true;
+                    }
 
-                return false;
+                    if (shouldShow) {
+                        ActivityCompat.requestPermissions(
+                                activity,
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                requestCode
+                        );
+
+                        return false;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            } else {
+                return true;
             }
-
-            return true;
         }
 
         //------------------------------------------------------------------------------------------
@@ -255,6 +274,11 @@ public class Intents {
             intent.setType("image/*");
 
             return intent;
+        }
+
+        private Intent getPickImageIntentAPI33() {
+            //return new Intent(MediaStore.ACTION_PICK_IMAGES);
+            return null;
         }
 
         //------------------------------------------------------------------------------------------

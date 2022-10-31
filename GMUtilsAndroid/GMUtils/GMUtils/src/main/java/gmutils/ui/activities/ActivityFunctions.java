@@ -272,8 +272,13 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     @Override
     public void showWaitView(Context context, int msg) {
+        showWaitView(context, msg == 0 ? null : context.getString(msg));
+    }
+
+    @Override
+    public void showWaitView(Context context, CharSequence msg) {
         if (waitDialogCount == 0) {
-            if (msg == 0) msg = R.string.wait_moments;
+            if (msg == null) msg = context.getString(R.string.wait_moments);
             waitDialog = WaitDialog.show(context, msg);
         }
 
@@ -353,7 +358,8 @@ public class ActivityFunctions implements BaseFragmentListener {
         return showMessageDialog(context, context.getString(msg), options);
     }
 
-    public final MessageDialog showMessageDialog(Context context, @NotNull CharSequence msg, ShowMessageDialogOptions options) {
+    @Override
+    public MessageDialog showMessageDialog(Context context,CharSequence msg, ShowMessageDialogOptions options) {
         MessageDialog dialog = MessageDialog.create(context);
 
         if (options != null && options.title != null) dialog.setTitle(options.title);

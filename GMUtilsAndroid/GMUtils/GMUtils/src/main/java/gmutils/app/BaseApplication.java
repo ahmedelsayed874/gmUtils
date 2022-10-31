@@ -155,6 +155,7 @@ public abstract class BaseApplication extends Application implements Application
                 "It's recommend to override those resources in color (normal & night):\n\n" +
                         "    <color name=\"gmPrimaryDark\">@color/black</color>\n" +
                         "    <color name=\"gmPrimary\">@color/orange</color>\n" +
+                        "    <color name=\"gmPrimaryVariant\">@color/white</color>\n" +
                         "    <color name=\"gmAccent\">@color/red1</color>\n" +
                         "\n" +
                         "    <color name=\"gmBackground\">@color/white</color>\n" +

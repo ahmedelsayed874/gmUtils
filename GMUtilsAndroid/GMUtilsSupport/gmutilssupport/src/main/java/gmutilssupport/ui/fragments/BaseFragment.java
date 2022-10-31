@@ -1,5 +1,6 @@
 package gmutilssupport.ui.fragments;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.content.Context;
@@ -14,10 +15,15 @@ import android.viewbinding.ViewBinding;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
+import java.util.List;
 
+import gmutils.storage.SettingsStorage;
+import gmutils.ui.toast.MyToast;
 import gmutilsSupport.R;
+import gmutilssupport.ui.dialogs.MessageDialog;
 import gmutilssupport.ui.dialogs.RetryPromptDialog;
 import gmutilssupport.ui.utils.ViewSource;
+import gmutilssupport.ui.viewModels.BaseViewModel;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -134,7 +140,6 @@ public abstract class BaseFragment extends Fragment {
     public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         //------------------------------------------------------------------------------------------
 
         HashMap<Integer, Class<? extends ViewModel>> viewModelClasses = onPreparingViewModels();
@@ -149,8 +154,103 @@ public abstract class BaseFragment extends Fragment {
 
                 Class<? extends ViewModel> viewModelClass = viewModelClasses.get(id);
                 assert viewModelClass != null;
-                viewModels.put(id, viewModelProvider.get(viewModelClass));
+                ViewModel viewModel = viewModelProvider.get(viewModelClass);
+                viewModels.put(id, viewModel);
+
+                if (viewModel instanceof BaseViewModel) {
+                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(this, getProgressStatusLiveData());
+                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(this, getAlertMessageLiveData());
+                }
             }
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    private Observer<BaseViewModel.ProgressStatus> getProgressStatusLiveData() {
+        return progressStatus -> {
+            if (progressStatus != null)
+                onProgressOfViewModelTaskChanged(progressStatus);
+        };
+    }
+
+    protected void onProgressOfViewModelTaskChanged(BaseViewModel.ProgressStatus progressStatus) {
+        if (progressStatus instanceof BaseViewModel.ProgressStatus.Show) {
+            BaseViewModel.ProgressStatus.Show ps = (BaseViewModel.ProgressStatus.Show) progressStatus;
+            if (ps.messageId != 0) showWaitView(ps.messageId);
+            else showWaitView();
+
+        } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Update) {
+            BaseViewModel.ProgressStatus.Update ps = (BaseViewModel.ProgressStatus.Update) progressStatus;
+            updateWaitViewMsg(ps.message);
+
+        } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Hide) {
+            hideWaitView();
+        }
+    }
+
+    private Observer<BaseViewModel.Message> getAlertMessageLiveData() {
+        return message -> {
+            if (message != null) {
+                onMessageReceivedFromViewModel(message);
+            }
+        };
+    }
+
+    protected void onMessageReceivedFromViewModel(BaseViewModel.Message message) {
+        String msg = "";
+        if (message.messageIds != null && !message.messageIds.isEmpty()) {
+            for (Integer messageId : message.messageIds) {
+                if (!msg.isEmpty()) msg += message.getMultiMessageIdsSeparator();
+                msg += message.getMultiMessageIdsPrefix() + " " + getString(messageId);
+            }
+        } else if (message.messageString != null) {
+            List<String> langCodes = message.messageString.getLangCodes();
+            if (langCodes.size() == 1) {
+                msg = message.messageString.getDefault();
+            } else {
+                if (SettingsStorage.Language.usingEnglish()) {
+                    msg = message.messageString.getEnglish();
+                } else {
+                    msg = message.messageString.getArabic();
+                }
+            }
+        }
+
+        if (message.type instanceof BaseViewModel.MessageType.Normal) {
+            if (message.popup) {
+                listener.showMessageDialog(getContext(), msg, null);
+            } else {
+                MyToast.show(getContext(), msg);
+            }
+        } else if (message.type instanceof BaseViewModel.MessageType.Error) {
+            BaseViewModel.MessageType.Error mt = (BaseViewModel.MessageType.Error) message.type;
+            if (message.popup) {
+                MessageDialog dialog = listener.showMessageDialog(getContext(), msg, null);
+                if (mt.button1() != null) {
+                    Runnable runnable =  mt.button1().second;
+                    dialog.setButton1(mt.button1().first, d -> runnable.run());
+                }
+                if (mt.button2() != null) {
+                    Runnable runnable =  mt.button2().second;
+                    dialog.setButton2(mt.button2().first, d -> runnable.run());
+                }
+                if (mt.button3() != null) {
+                    Runnable runnable =  mt.button3().second;
+                    dialog.setButton3(mt.button3().first, d -> runnable.run());
+                }
+            } else {
+                MyToast.showError(getContext(), msg);
+            }
+            mt.destroy();
+
+        } else if (message.type instanceof BaseViewModel.MessageType.Retry) {
+            BaseViewModel.MessageType.Retry mt = (BaseViewModel.MessageType.Retry) message.type;
+            Runnable onRetry = mt.onRetry();
+            mt.destroy();
+            showRetryPromptDialog(msg, d -> {
+                if (onRetry != null) onRetry.run();
+            });
         }
     }
 

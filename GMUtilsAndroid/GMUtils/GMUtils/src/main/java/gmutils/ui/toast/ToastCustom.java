@@ -32,12 +32,12 @@ public class ToastCustom implements MyToast.IToast {
     private boolean isFast;
     
 
-    public ToastCustom(Activity activity, int msg, boolean systemStyle) {
-        this(activity, activity.getString(msg), systemStyle);
+    public ToastCustom(Activity activity, int msg, boolean fastShow, boolean systemStyle) {
+        this(activity, activity.getString(msg), fastShow, systemStyle);
     }
 
     @SuppressLint("ShowToast")
-    public ToastCustom(Activity activity, CharSequence msg, boolean systemStyle) {
+    public ToastCustom(Activity activity, CharSequence msg, boolean fastShow, boolean systemStyle) {
         windowLayout = activity.findViewById(android.R.id.content);
 
         rootLayout = LayoutInflater.from(activity)
@@ -47,6 +47,8 @@ public class ToastCustom implements MyToast.IToast {
 
         tv = textContainer.findViewById(R.id.tv_msg);
         tv.setText(msg);
+
+        isFast = fastShow;
 
         if (!systemStyle) {
             setBackground(MyToast.BACKGROUND_RES);
@@ -93,17 +95,6 @@ public class ToastCustom implements MyToast.IToast {
 
     public ToastCustom setDuration(long duration) {
         this.duration = duration;
-        return this;
-    }
-
-    @Override
-    public boolean isFast() {
-        return isFast;
-    }
-
-    @Override
-    public MyToast.IToast setFast(boolean fast) {
-        isFast = fast;
         return this;
     }
 

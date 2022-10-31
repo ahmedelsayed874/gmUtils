@@ -332,7 +332,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         return showMessageDialog(context, context.getString(msg), options);
     }
 
-    public final MessageDialog showMessageDialog(Context context, @NotNull CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
+    public MessageDialog showMessageDialog(Context context, @NotNull CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
         MessageDialog dialog = MessageDialog.create(context);
 
         if (options != null && options.title != null) dialog.setTitle(options.title);
