@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import gmutils.collections.MultiLanguageString;
+import gmutils.StringSet;
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
 
@@ -73,7 +73,7 @@ public class BaseViewModel extends AndroidViewModel {
 
     public static class Message {
         public final List<Integer> messageIds;
-        public final MultiLanguageString messageString;
+        public final StringSet messageString;
         public final boolean popup;
         public final MessageType type;
         private String multiMessageIdsPrefix = "-";
@@ -104,7 +104,7 @@ public class BaseViewModel extends AndroidViewModel {
             }
 
             if (messageString != null) {
-                this.messageString = new MultiLanguageString(messageString);
+                this.messageString = new StringSet(messageString);
             } else {
                 this.messageString = null;
             }
@@ -120,7 +120,7 @@ public class BaseViewModel extends AndroidViewModel {
             this.type = type;
         }
 
-        public Message(@NotNull MultiLanguageString messageString, boolean popup, MessageType type) {
+        public Message(@NotNull StringSet messageString, boolean popup, MessageType type) {
             this.messageIds = null;
             this.messageString = messageString;
             this.popup = popup;

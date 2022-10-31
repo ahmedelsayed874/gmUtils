@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -14,7 +15,11 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import gmutils.net.retrofit.listeners.OnResponseReady;
+import gmutils.net.retrofit.responseHolders.BaseResponse;
 import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -33,7 +38,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * https://square.github.io/retrofit/
- *
+ * <p>
  * it depends on
  * 'com.squareup.retrofit2:retrofit:2.7.1'
  * 'com.squareup.retrofit2:converter-gson:2.7.1'
@@ -210,6 +215,49 @@ public class RetrofitService {
 
     public static void destroy() {
         if (sInstance != null) sInstance.mRetrofit = null;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @Nullable
+    public static <R extends BaseResponse> R executeWebService(
+            boolean async,
+            Class<R> responseClass,
+            Call<R> call,
+            @Nullable OnResponseReady<R> callback
+    ) {
+        if (async) {
+            gmutils.net.retrofit.callback.Callback<R> callback2;
+            callback2 = new gmutils.net.retrofit.callback.Callback<>(
+                    call.request(),
+                    responseClass,
+                    callback
+            );
+            call.enqueue(callback2);
+            return null;
+        } else {
+            AtomicReference<R> response = new AtomicReference<>();
+
+            gmutils.net.retrofit.callback.Callback<R> callback2;
+            callback2 = new gmutils.net.retrofit.callback.Callback<>(
+                    call.request(),
+                    responseClass,
+                    response::set
+            );
+
+            try {
+                Response<R> retrofitResponse = call.execute();
+                callback2.onResponse(call, retrofitResponse);
+            } catch (Exception e) {
+                callback2.onFailure(call, e);
+            }
+
+            if (callback != null) {
+                callback.invoke(response.get());
+            }
+
+            return response.get();
+        }
     }
 
 }
