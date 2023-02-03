@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gmutils.StringSet;
+import gmutils.collections.dataGroup.DataGroup3;
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
 
@@ -38,6 +39,11 @@ public class BaseViewModel extends AndroidViewModel {
         class Show implements ProgressStatus {
             public final String message;
             public final int messageId;
+
+            public Show() {
+                this.message = null;
+                this.messageId = 0;
+            }
 
             public Show(int messageId) {
                 this.message = null;
@@ -157,41 +163,78 @@ public class BaseViewModel extends AndroidViewModel {
         }
 
         class Error implements MessageType {
-            private Pair<Integer, Runnable> button1;
-            private Pair<Integer, Runnable> button2;
-            private Pair<Integer, Runnable> button3;
+            private DataGroup3<Integer, String, Runnable> button1;
+            private DataGroup3<Integer, String, Runnable> button2;
+            private DataGroup3<Integer, String, Runnable> button3;
 
             public Error() {
-                this(null, null, null);
+                this(
+                        (String) null, null,
+                        (String) null, null,
+                        (String) null, null
+                );
             }
 
-            public Error(Pair<Integer, Runnable> button1) {
-                this(button1, null, null);
+            public Error(Integer button1Text, Runnable button1Action) {
+                this(
+                        button1Text, button1Action,
+                        (Integer) null, null,
+                        (Integer) null, null
+                );
             }
 
-            public Error(Pair<Integer, Runnable> button1, Pair<Integer, Runnable> button2) {
-                this(button1, button2, null);
+            public Error(String button1Text, Runnable button1Action) {
+                this(
+                        button1Text, button1Action,
+                        (String) null, null,
+                        (String) null, null
+                );
             }
 
-            public Error(Pair<Integer, Runnable> button1, Pair<Integer, Runnable> button2, Pair<Integer, Runnable> button3) {
-                this.button1 = button1;
-                this.button2 = button2;
-                this.button3 = button3;
+
+            public Error(Integer button1Text, Runnable button1Action, Integer button2Text, Runnable button2Action) {
+                this(
+                        button1Text, button1Action,
+                        button2Text, button2Action,
+                        (Integer) null, null
+                );
             }
+
+            public Error(String button1Text, Runnable button1Action, String button2Text, Runnable button2Action) {
+                this(
+                        button1Text, button1Action,
+                        button2Text, button2Action,
+                        (String) null, null
+                );
+            }
+
+
+            public Error(Integer button1Text, Runnable button1Action, Integer button2Text, Runnable button2Action, Integer button3Text, Runnable button3Action) {
+                this.button1 = (button1Text == null || button1Text == 0) && button1Action == null ? null : new DataGroup3<>(button1Text, null, button1Action);
+                this.button2 = (button2Text == null || button2Text == 0) && button2Action == null ? null : new DataGroup3<>(button2Text, null, button2Action);
+                this.button3 = (button3Text == null || button3Text == 0) && button3Action == null ? null : new DataGroup3<>(button3Text, null, button3Action);
+            }
+
+            public Error(String button1Text, Runnable button1Action, String button2Text, Runnable button2Action, String button3Text, Runnable button3Action) {
+                this.button1 = TextUtils.isEmpty(button1Text) && button1Action == null ? null : new DataGroup3<>(null, button1Text, button1Action);
+                this.button2 = TextUtils.isEmpty(button2Text) && button2Action == null ? null : new DataGroup3<>(null, button2Text, button2Action);
+                this.button3 = TextUtils.isEmpty(button3Text) && button3Action == null ? null : new DataGroup3<>(null, button3Text, button3Action);
+            }
+
 
             public boolean hasSpecialButtons() {
                 return button1 != null || button2 != null || button3 != null;
             }
 
-            public final Pair<Integer, Runnable> button1() {
+            public final DataGroup3<Integer, String, Runnable> button1() {
                 return button1;
             }
 
-            public final Pair<Integer, Runnable> button2() {
+            public final DataGroup3<Integer, String, Runnable> button2() {
                 return button2;
             }
 
-            public final Pair<Integer, Runnable> button3() {
+            public final DataGroup3<Integer, String, Runnable> button3() {
                 return button3;
             }
 
@@ -306,10 +349,18 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
-        runOnBackgroundThread(null, task, dispatchResultOnUIThread, onFinish);
+        runOnBackgroundThread(null, task, 0, dispatchResultOnUIThread, onFinish);
+    }
+
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, long delay, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
+        runOnBackgroundThread(null, task, delay, dispatchResultOnUIThread, onFinish);
     }
 
     public <T> void runOnBackgroundThread(String name, ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
+        runOnBackgroundThread(name, task, 0, dispatchResultOnUIThread, onFinish);
+    }
+
+    public <T> void runOnBackgroundThread(String name, ActionCallback0<T> task, long delay, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
         if (task == null) return;
 
         Runnable target = () -> {
@@ -322,15 +373,46 @@ public class BaseViewModel extends AndroidViewModel {
             }
         };
 
-        if (TextUtils.isEmpty(name))
-            new Thread(target).start();
-        else
-            new Thread(target, name).start();
+        Runnable startThread = () -> {
+            if (TextUtils.isEmpty(name)) {
+                new Thread(target).start();
+            } else {
+                new Thread(target, name).start();
+            }
+        };
+
+        if (delay > 0) {
+            runOnUIThread(startThread, delay);
+        } else {
+            startThread.run();
+        }
     }
 
     public void runOnBackgroundThread(Runnable task) {
+        runOnBackgroundThread(task, 0);
+    }
+
+    public void runOnBackgroundThread(Runnable task, long delay) {
         if (task == null) return;
-        new Thread(task).start();
+
+        runOnBackgroundThread(
+                "",
+
+                //task
+                () -> {
+                    task.run();
+                    return null;
+                },
+
+                //delay
+                delay,
+
+                //dispatchResultOnUIThread
+                false,
+
+                //onFinish
+                null
+        );
     }
 
     //----------------------------------------------------------------------------------------------

@@ -244,7 +244,7 @@ public class Logger {
         if (writeToFileAlso) {
             if (BaseApplication.current() != null) {
                 try {
-                    writeToFile(BaseApplication.current(), content, "APP_LOGS");
+                    writeToFile(BaseApplication.current(), content);//, "APP_LOGS");
                 } catch (Exception e) {
                 }
             }

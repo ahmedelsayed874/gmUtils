@@ -210,7 +210,7 @@ class ColorPicker @JvmOverloads constructor(
             applyChangeOnHexInput = true
         })
 
-        hexValueEt.setOnEditorActionListener { v, actionId, event ->
+        hexValueEt.setOnEditorActionListener { _, actionId, _ ->
             if (EditorInfo.IME_ACTION_DONE == actionId) {
                 try {
                     val colorCode = Color.parseColor("#" + hexValueEt.text.toString())
@@ -385,7 +385,7 @@ class ColorPicker @JvmOverloads constructor(
             override fun onLongClick(v: View): Boolean {
                 //return super.onLongClick(v)
                 if (v == card) {
-                    onRemove?.invoke(this@RecentColorsAdapter, v, adapterPosition)
+                    onRemove?.invoke(this@RecentColorsAdapter, v, itemPosition)
                     return true
                 }
 

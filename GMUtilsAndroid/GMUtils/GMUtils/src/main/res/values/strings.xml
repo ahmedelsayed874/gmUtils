@@ -97,6 +97,7 @@
     <string name="Alpha">Alpha</string>
     <string name="Hex">Hex</string>
     <string name="message">Message</string>
+    <string name="action">Action</string>
 
 
 </resources>

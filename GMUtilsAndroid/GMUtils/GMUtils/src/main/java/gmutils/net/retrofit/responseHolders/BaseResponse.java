@@ -8,7 +8,10 @@ import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -80,6 +83,10 @@ public abstract class BaseResponse {
 
     @Expose(serialize = false, deserialize = false)
     @Ignore
+    public Map<String, List<String>> _headers;
+
+    @Expose(serialize = false, deserialize = false)
+    @Ignore
     public String _error;
 
     @Expose(serialize = false, deserialize = false)
@@ -120,7 +127,8 @@ public abstract class BaseResponse {
         _error = otherResponse._error;
         _callbackStatus = otherResponse._callbackStatus;
         _code = otherResponse._code;
-        _extras = otherResponse._extras;
+        _headers = otherResponse._headers == null ? null : new HashMap<>(otherResponse._headers);
+        _extras = otherResponse._extras == null ? null : new HashMap<>(otherResponse._extras);
 
         _requestTime = otherResponse._requestTime;
         _responseTime = otherResponse._responseTime;
@@ -128,9 +136,25 @@ public abstract class BaseResponse {
 
     //----------------------------------------------------------------------------------------------
 
-
     @Override
     public String toString() {
+        StringBuffer header = new StringBuffer();
+        if (_headers == null) {
+            header.append("NULL");
+        } else {
+            header.append("{");
+            for (Map.Entry<String, List<String>> entry : _headers.entrySet()) {
+                header.append(entry.getKey()).append(": [");
+                if (entry.getValue() != null) {
+                    for (String value : entry.getValue()) {
+                        header.append(value).append(",");
+                    }
+                }
+                header.append("],");
+            }
+            header.append("}");
+        }
+
         return "BaseResponse{" +
                 "_callbackStatus='" + _callbackStatus + '\'' +
                 ", _code=" + _code +
@@ -138,6 +162,7 @@ public abstract class BaseResponse {
                 ", _extras=" + _extras +
                 ", _requestTime=" + _requestTime +
                 ", _responseTime=" + _responseTime +
+                ", _header=" + header +
                 '}';
     }
 }

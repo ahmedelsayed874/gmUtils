@@ -135,12 +135,12 @@ class MapAndLocationExample : BaseActivity() {
         //mMapController?.enableToolbarControl()
 
         mMapController?.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
-            override fun getInfoWindow(p0: Marker?): View? {
+            override fun getInfoWindow(p0: Marker): View? {
                 return null
             }
 
-            override fun getInfoContents(p0: Marker?): View? {
-                val info = p0?.tag as? String
+            override fun getInfoContents(p0: Marker): View? {
+                val info = p0.tag as? String
                 return createMapInfoWindowView(info)
             }
 

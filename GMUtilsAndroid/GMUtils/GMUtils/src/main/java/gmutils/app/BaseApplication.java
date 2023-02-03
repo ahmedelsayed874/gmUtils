@@ -9,6 +9,7 @@ import android.util.Log;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import gmutils.Logger;
@@ -36,9 +37,11 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     public static final class GlobalVariables {
+        private int secret;
         private final Map<String, Object> globalInstances = new HashMap<>();
 
         private GlobalVariables() {
+            secret = new Random().nextInt();
         }
 
         public void add(String key, Object instance) {
@@ -60,7 +63,10 @@ public abstract class BaseApplication extends Application implements Application
             }
         }
 
-        public void clear() {
+        public void clear(int secret) {
+            if (this.secret != secret) {
+                throw new RuntimeException("this method can call only from container class");
+            }
             Set<Map.Entry<String, Object>> entries = this.globalInstances.entrySet();
             for (Map.Entry<String, Object> entry : entries) {
                 if (entry.getValue() instanceof GlobalVariableDisposal) {
@@ -361,7 +367,7 @@ public abstract class BaseApplication extends Application implements Application
 
         onBugMessageClosed = null;
 
-        if (globalVariables != null) globalVariables.clear();
+        if (globalVariables != null) globalVariables.clear(globalVariables.secret);
         globalVariables = null;
 
         if (messagingCenter != null) messagingCenter.clearObservers();

@@ -12,13 +12,14 @@ import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -271,6 +272,21 @@ public class Notifier {
 
     //---------------------------------
 
+    Integer notificationIdToRemove;
+    boolean removeAllPreviousNotifications = false;
+
+    public Notifier removeNotification(int notificationId) {
+        notificationIdToRemove = notificationId;
+        return this;
+    }
+
+    public Notifier removeAllNotifications() {
+        removeAllPreviousNotifications = true;
+        return this;
+    }
+
+    //---------------------------------
+
     public int release() {
         int i = new Random(100).nextInt(1000);
         return release(i);
@@ -279,33 +295,49 @@ public class Notifier {
     public int release(int notificationId) {
         if (notificationBuilder == null) throw new NullPointerException();
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        NotificationManagerCompat notificationManager = getNotificationManagerCompat(context);
+
+        if (removeAllPreviousNotifications) {
+            notificationManager.cancelAll();
+        } else if (notificationIdToRemove != null) {
+            notificationManager.cancel(notificationIdToRemove);
+        }
+
         notificationManager.notify(notificationId, notificationBuilder.build());
 
         this.context = null;
 
-        Notifier.lastNotificationId = notificationId;
+        Notifier.lastReleasedNotificationId = notificationId;
 
         return notificationId;
     }
 
     //---------------------------------
 
-    private static Integer lastNotificationId = null;
+    private static Integer lastReleasedNotificationId = null;
 
+    public static NotificationManager getNotificationManager(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        return notificationManager;
+    }
+
+    public static NotificationManagerCompat getNotificationManagerCompat(Context context) {
+        return NotificationManagerCompat.from(context);
+    }
+    
     public static void removeNotification(Context context, int notificationId) {
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        NotificationManagerCompat notificationManager = getNotificationManagerCompat(context);
         notificationManager.cancel(notificationId);
     }
 
     public static void removeAllNotifications(Context context) {
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        NotificationManagerCompat notificationManager = getNotificationManagerCompat(context);
         notificationManager.cancelAll();
     }
 
-    public static void removeLastNotification(Context context) {
-        if (Notifier.lastNotificationId == null) return;
-        removeNotification(context, Notifier.lastNotificationId);
+    public static void removeLastReleasedNotification(Context context) {
+        if (Notifier.lastReleasedNotificationId == null) return;
+        removeNotification(context, Notifier.lastReleasedNotificationId);
     }
 
 

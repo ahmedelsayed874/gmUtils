@@ -95,5 +95,6 @@
     <string name="Blue">Blue</string>
     <string name="Alpha">Alpha</string>
     <string name="Hex">Hex</string>
+    <string name="action">Action</string>
 
 </resources>

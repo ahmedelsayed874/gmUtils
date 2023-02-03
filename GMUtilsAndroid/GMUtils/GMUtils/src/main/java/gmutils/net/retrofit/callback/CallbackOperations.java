@@ -2,6 +2,7 @@ package gmutils.net.retrofit.callback;
 
 import android.text.TextUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -84,6 +85,13 @@ public final class CallbackOperations<R extends BaseResponse> {
             error = response.message() + "\nCode: " + response.code();
         }
 
+        Map<String, List<String>> headers;
+        try {
+            headers = response.headers().toMultimap();
+        } catch (Exception e) {
+            headers = null;
+        }
+
         printCallInfo(call, response, error);
 
         if (response.isSuccessful()) {
@@ -95,23 +103,23 @@ public final class CallbackOperations<R extends BaseResponse> {
 
                 body._code = response.code();
 
-                setResult(response.body());
+                setResult(body, headers);
 
             } else {
-                setError("", response.code());
+                setError("", response.code(), headers);
             }
         } else {
-            setError(error, response.code());
+            setError(error, response.code(), headers);
         }
     }
 
     public void onFailure(Call<R> call, Throwable t) {
         printCallInfo(call, null, "Exception[" + t.getMessage() + "]");
 
-        setError(t.getMessage(), 0);
+        setError(t.getMessage(), 0, null);
     }
 
-    private void setError(String error, int code) {
+    private void setError(String error, int code, Map<String, List<String>> headers) {
         R response = null;
 
         try {
@@ -153,12 +161,12 @@ public final class CallbackOperations<R extends BaseResponse> {
         }
 
         response._code = code;
+        response._headers = headers;
 
-
-        setResult(response);
+        setResult(response, headers);
     }
 
-    private void setResult(R result) {
+    private void setResult(R result, Map<String, List<String>> headers) {
         if (Logger.IS_LOG_ENABLED()) {
             Logger.print(
                     "EXTRA_INFO:",
@@ -167,6 +175,7 @@ public final class CallbackOperations<R extends BaseResponse> {
             );
         }
 
+        result._headers = headers;
         result._requestTime = requestTime;
         result._responseTime = System.currentTimeMillis();
         if (listener != null) listener.onResponseReady(result);

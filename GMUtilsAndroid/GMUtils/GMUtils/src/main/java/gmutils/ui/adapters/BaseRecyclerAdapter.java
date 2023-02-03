@@ -205,7 +205,11 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void dispose() {
-        unregisterAdapterDataObserver(adapterDataObserver);
+        try {
+            unregisterAdapterDataObserver(adapterDataObserver);
+        } catch (Exception e) {
+
+        }
         adapterDataObserver = null;
 
         mList = null;
@@ -551,11 +555,6 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     @NotNull
     protected abstract ViewHolder getViewHolder(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
-
-//    @NotNull
-//    protected abstract ViewSource getViewSource(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
-//    protected abstract ViewHolder getViewHolder(View view, int viewType);
-//    protected ViewHolder getViewHolder(ViewBinding viewBinding, int viewType) { return null; }
 
     @NotNull
     @Override
