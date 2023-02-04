@@ -214,10 +214,6 @@ public class Intents {
 
         //@RequiresPermission(allOf = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE})
         public Uri takePicture(Activity activity, int requestCode) {
-            return takePicture(activity, requestCode, false);
-        }
-
-        public Uri takePicture(Activity activity, int requestCode, boolean useAppPackage) {
             if (!checkPermissionForCamera(activity, requestCode)) return null;
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
