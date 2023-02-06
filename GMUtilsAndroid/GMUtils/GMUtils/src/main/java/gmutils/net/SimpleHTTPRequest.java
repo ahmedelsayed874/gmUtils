@@ -2,9 +2,11 @@ package gmutils.net;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -529,18 +531,20 @@ public class SimpleHTTPRequest {
     }
 
     public static class FileUploadRequestExecutor extends RequestExecutor<TextResponse> {
-        private final String fieldName;
+        private final String parameterName;
         private File uploadingFile;
         private ResultCallback2<Request, Integer> progressCallback;
         private final String boundary;
         private static final String LINE_FEED = "\r\n";
+        private final String mimeType;
 
 
-        public FileUploadRequestExecutor(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback) {
+        public FileUploadRequestExecutor(String url, Map<String, String> headers, String parameterName, File uploadingFile, @Nullable String mimeType, Configurations configurations, ResultCallback2<Request, Integer> progressCallback) {
             super(new Request(url, Method.POST, headers), configurations);
 
-            this.fieldName = fieldName;
+            this.parameterName = parameterName;
             this.uploadingFile = uploadingFile;
+            this.mimeType = mimeType;
             this.progressCallback = progressCallback;
 
             // creates a unique boundary based on time stamp
@@ -560,7 +564,7 @@ public class SimpleHTTPRequest {
                 try {
                     PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, getConfigurations().charEncoding), true);
 
-                    addFilePart(writer, fieldName, uploadingFile);
+                    addFilePart(writer, parameterName, uploadingFile, mimeType);
 
                     readFileAndWriteToStream(uploadingFile, outputStream);
 
@@ -593,16 +597,21 @@ public class SimpleHTTPRequest {
             });
         }
 
-        private void addFilePart(PrintWriter writer, String fieldName, File uploadFile) throws IOException {
+        private void addFilePart(PrintWriter writer, String fieldName, File uploadFile, @Nullable String mimeType) throws IOException {
             String fileName = uploadFile.getName();
-            writer.append("--" + boundary)
-                    .append(LINE_FEED);
+
+            writer.append("--" + boundary).append(LINE_FEED);
             writer.append("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + fileName + "\"")
                     .append(LINE_FEED);
-            writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName))
-                    .append(LINE_FEED);
-            writer.append("Content-Transfer-Encoding: binary")
-                    .append(LINE_FEED);
+
+            if (TextUtils.isEmpty(mimeType)) {
+                mimeType = URLConnection.guessContentTypeFromName(fileName);
+            }
+            if (!TextUtils.isEmpty(mimeType)) {
+                writer.append("Content-Type: " + mimeType).append(LINE_FEED);
+            }
+
+            writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
             writer.append(LINE_FEED);
             writer.flush();
         }
@@ -701,20 +710,20 @@ public class SimpleHTTPRequest {
     }
 
 
-    public static void uploadFile(String url, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, null, fieldName, uploadingFile, null, progressCallback, callback);
+    public static void uploadFile(String url, String fieldName, File uploadingFile, @Nullable String mimeType, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, null, fieldName, uploadingFile, mimeType, null, progressCallback, callback);
     }
 
-    public static void uploadFile(String url, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, null, fieldName, uploadingFile, configurations, progressCallback, callback);
+    public static void uploadFile(String url, String fieldName, File uploadingFile, @Nullable String mimeType, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, null, fieldName, uploadingFile, mimeType, configurations, progressCallback, callback);
     }
 
-    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, headers, fieldName, uploadingFile, null, progressCallback, callback);
+    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, @Nullable String mimeType, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        uploadFile(url, headers, fieldName, uploadingFile, mimeType, null, progressCallback, callback);
     }
 
-    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        new FileUploadRequestExecutor(url, headers, fieldName, uploadingFile, configurations, progressCallback)
+    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, @Nullable String mimeType, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
+        new FileUploadRequestExecutor(url, headers, fieldName, uploadingFile, mimeType, configurations, progressCallback)
                 .executeAsynchronously(callback);
     }
 

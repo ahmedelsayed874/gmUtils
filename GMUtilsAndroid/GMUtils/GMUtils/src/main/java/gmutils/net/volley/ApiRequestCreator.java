@@ -489,7 +489,7 @@ public class ApiRequestCreator {
             int w = bitmap.getWidth();
             int h = bitmap.getHeight();
 
-            int oneDimenLength = MAX_IMAGE_SIZE / 2;
+            int oneDimenLength = (int) Math.sqrt(MAX_IMAGE_SIZE);
 
             if (w * h > MAX_IMAGE_SIZE) {
                 int nW, nH;

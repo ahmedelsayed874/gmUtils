@@ -188,6 +188,7 @@ public class ImageUtils {
      */
     public Bitmap scaleImageSafely(int targetWidth, int targetHeight, InputStream imageFileStream) {
         Bitmap bitmap = null;
+
         try {
             byte[] imgBytes = new byte[imageFileStream.available()];
             imageFileStream.read(imgBytes);
@@ -248,11 +249,11 @@ public class ImageUtils {
 
     //------------------------------------------------------------------------------------------
 
-    public byte[] encodeImage(Bitmap bitmap) {
+    public byte[] encodeImage(Bitmap bitmap, Bitmap.CompressFormat compressFormat) {
         if (bitmap == null) return null;
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        bitmap.compress(compressFormat, 100, byteArrayOutputStream);
         byte[] bytes = byteArrayOutputStream.toByteArray();
         try {
             byteArrayOutputStream.flush();
@@ -263,9 +264,9 @@ public class ImageUtils {
         return bytes;
     }
 
-    public String convertToBase64(Bitmap image) {
+    public String convertToBase64(Bitmap image, Bitmap.CompressFormat compressFormat) {
         if (image == null) return "";
-        byte[] data1 = encodeImage(image);
+        byte[] data1 = encodeImage(image, compressFormat);
         return Base64.encodeToString(data1, Base64.DEFAULT);
     }
 
@@ -352,29 +353,29 @@ public class ImageUtils {
     /**
      * this method won't run on Android 10
      */
-    public File saveImageToPublicStorage(Bitmap bm, String imgName) throws IOException {
+    public File saveImageToPublicStorage(Bitmap bm, Bitmap.CompressFormat compressFormat, String imgName) throws IOException {
         File root = Environment.getExternalStoragePublicDirectory(DIRECTORY_PICTURES);
-        return saveImageToStorage(root, bm, imgName);
+        return saveImageToStorage(root, bm, compressFormat, imgName);
     }
 
     /**
      * this method won't run on Android 10
      */
-    public File saveImageToStorage(File root, Bitmap bm, String imgName) throws IOException {
-        File imgFile = new File(root, imgName + ".png");
+    public File saveImageToStorage(File root, Bitmap bm, Bitmap.CompressFormat compressFormat, String imgName) throws IOException {
+        File imgFile = new File(root, imgName + "." + compressFormat.name());
         if (!imgFile.createNewFile()) {
             throw new IOException("couldn't create the file");
         }
 
         FileOutputStream out = new FileOutputStream(imgFile);
-        saveImageToStorage(bm, out);
+        saveImageToStorage(bm, compressFormat, out);
 
         return imgFile;
     }
 
-    public boolean saveImageToStorage(Bitmap image, OutputStream outputStream) throws IOException {
+    public boolean saveImageToStorage(Bitmap image, Bitmap.CompressFormat compressFormat, OutputStream outputStream) throws IOException {
         try {
-            boolean b = image.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            boolean b = image.compress(compressFormat, 100, outputStream);
             outputStream.flush();
             outputStream.close();
 
@@ -386,20 +387,20 @@ public class ImageUtils {
 
     //------------------------------------------------------------------------------------------
 
-    public Uri saveImageUsingFileProvide(Context context, Bitmap image) {
-        return saveImageUsingFileProvide(context, image, (String) null);
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image, Bitmap.CompressFormat compressFormat) {
+        return saveImageUsingFileProvide(context, image, compressFormat, (String) null);
     }
 
-    public Uri saveImageUsingFileProvide(Context context, Bitmap image, @Nullable String fileName) {
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image, Bitmap.CompressFormat compressFormat, @Nullable String fileName) {
         try {
             File imgFile;
             if (TextUtils.isEmpty(fileName))
-                imgFile = createImageFileUsingFileProvider(context);
+                imgFile = createImageFileUsingFileProvider(context, compressFormat.name());
             else
-                imgFile = createImageFileUsingFileProvider(context, fileName);
+                imgFile = createImageFileUsingFileProvider(context, fileName, compressFormat.name());
 
             FileOutputStream fos = new FileOutputStream(imgFile);
-            boolean b = saveImageToStorage(image, fos);
+            boolean b = saveImageToStorage(image, compressFormat, fos);
             if (!b) {
                 imgFile.delete();
             }
@@ -412,20 +413,20 @@ public class ImageUtils {
         }
     }
 
-    public Uri saveImageUsingFileProvide(Context context, Bitmap image, File root) {
-        return saveImageUsingFileProvide(context, image, root, null);
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image, Bitmap.CompressFormat compressFormat, File root) {
+        return saveImageUsingFileProvide(context, image, compressFormat, root, null);
     }
 
-    public Uri saveImageUsingFileProvide(Context context, Bitmap image, File root, @Nullable String fileName) {
+    public Uri saveImageUsingFileProvide(Context context, Bitmap image, Bitmap.CompressFormat compressFormat, File root, @Nullable String fileName) {
         try {
             File imgFile;
             if (TextUtils.isEmpty(fileName))
-                imgFile = createImageFileUsingFileProvider(root);
+                imgFile = createImageFileUsingFileProvider(root, compressFormat.name());
             else
-                imgFile = createImageFileUsingFileProvider(root, fileName);
+                imgFile = createImageFileUsingFileProvider(root, fileName, compressFormat.name());
 
             FileOutputStream fos = new FileOutputStream(imgFile);
-            boolean b = saveImageToStorage(image, fos);
+            boolean b = saveImageToStorage(image, compressFormat, fos);
             if (!b) {
                 imgFile.delete();
             }
@@ -444,18 +445,18 @@ public class ImageUtils {
      * save into ExternalFilesDir -> Pictures
      * check {@link R.xml#file_paths}
      */
-    public File createImageFileUsingFileProvider(Context context) throws IOException {
+    public File createImageFileUsingFileProvider(Context context, String imageFileExtension) throws IOException {
         File root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return createImageFileUsingFileProvider(root);
+        return createImageFileUsingFileProvider(root, imageFileExtension);
     }
 
     /**
      * save into ExternalFilesDir -> Pictures
      * check {@link R.xml#file_paths}
      */
-    public File createImageFileUsingFileProvider(Context context, String fileName) throws IOException {
+    public File createImageFileUsingFileProvider(Context context, String fileName, String imageFileExtension) throws IOException {
         File root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return createImageFileUsingFileProvider(root, fileName);
+        return createImageFileUsingFileProvider(root, fileName, imageFileExtension);
     }
 
     //========
@@ -463,16 +464,16 @@ public class ImageUtils {
     /**
      * @param root check {@link R.xml#file_paths}
      */
-    public File createImageFileUsingFileProvider(File root) throws IOException {
-        File file = FileUtils.createInstance().createFileUsingFileProvider(root, ".png");
+    public File createImageFileUsingFileProvider(File root, String imageFileExtension) throws IOException {
+        File file = FileUtils.createInstance().createFileUsingFileProvider(root, imageFileExtension);
         return file;
     }
 
     /**
      * @param root check {@link R.xml#file_paths}
      */
-    public File createImageFileUsingFileProvider(File root, String fileName) throws IOException {
-        File file = FileUtils.createInstance().createFileUsingFileProvider(root, fileName, ".png");
+    public File createImageFileUsingFileProvider(File root, String fileName, String imageFileExtension) throws IOException {
+        File file = FileUtils.createInstance().createFileUsingFileProvider(root, fileName, imageFileExtension);
         return file;
     }
 
@@ -482,8 +483,8 @@ public class ImageUtils {
      * save into ExternalFilesDir -> Pictures
      * check {@link R.xml#file_paths}
      */
-    public Uri createImageFileUsingFileProvider2(Context context) throws IOException {
-        File file = createImageFileUsingFileProvider(context);
+    public Uri createImageFileUsingFileProvider2(Context context, String imageFileExtension) throws IOException {
+        File file = createImageFileUsingFileProvider(context, imageFileExtension);
         return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
     }
 
@@ -491,8 +492,8 @@ public class ImageUtils {
      * save into ExternalFilesDir -> Pictures
      * check {@link R.xml#file_paths}
      */
-    public Uri createImageFileUsingFileProvider2(Context context, String fileName) throws IOException {
-        File file = createImageFileUsingFileProvider(context, fileName);
+    public Uri createImageFileUsingFileProvider2(Context context, String fileName, String imageFileExtension) throws IOException {
+        File file = createImageFileUsingFileProvider(context, fileName, imageFileExtension);
         return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
     }
 
@@ -501,16 +502,16 @@ public class ImageUtils {
     /**
      * @param root check {@link R.xml#file_paths}
      */
-    public Uri createImageFileUsingFileProvider2(Context context, File root) throws IOException {
-        File file = createImageFileUsingFileProvider(root);
+    public Uri createImageFileUsingFileProvider2(Context context, File root, String imageFileExtension) throws IOException {
+        File file = createImageFileUsingFileProvider(root, imageFileExtension);
         return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
     }
 
     /**
      * @param root check {@link R.xml#file_paths}
      */
-    public Uri createImageFileUsingFileProvider2(Context context, File root, String fileName) throws IOException {
-        File file = createImageFileUsingFileProvider(root, fileName);
+    public Uri createImageFileUsingFileProvider2(Context context, File root, String fileName, String imageFileExtension) throws IOException {
+        File file = createImageFileUsingFileProvider(root, fileName, imageFileExtension);
         return FileUtils.createInstance().createUriForFileUsingFileProvider(context, file);
     }
 
@@ -519,12 +520,14 @@ public class ImageUtils {
     public static class SaveBitmapToDevice extends AsyncTask<Bitmap, Void, String> {
         ContentResolver contentResolver;
         String title, description;
+        Bitmap.CompressFormat imageCompressFormat;
         boolean savedOnSD;
 
-        public SaveBitmapToDevice(ContentResolver contentResolver, String title, String description) {
+        public SaveBitmapToDevice(ContentResolver contentResolver, String title, String description, Bitmap.CompressFormat imageCompressFormat) {
             this.contentResolver = contentResolver;
             this.title = title;
             this.description = description;
+            this.imageCompressFormat = imageCompressFormat;
         }
 
         @Override
@@ -552,7 +555,7 @@ public class ImageUtils {
                 if (source != null) {
                     OutputStream imageOut = cr.openOutputStream(url);
                     try {
-                        source.compress(Bitmap.CompressFormat.JPEG, 50, imageOut);
+                        source.compress(imageCompressFormat, 50, imageOut);
                     } finally {
                         imageOut.close();
                     }
@@ -623,7 +626,7 @@ public class ImageUtils {
 
             try {
                 OutputStream thumbOut = cr.openOutputStream(url);
-                thumb.compress(Bitmap.CompressFormat.JPEG, 100, thumbOut);
+                thumb.compress(imageCompressFormat, 100, thumbOut);
                 thumbOut.close();
                 return thumb;
             } catch (FileNotFoundException ex) {
@@ -658,7 +661,7 @@ public class ImageUtils {
             File image = new File(sdCardDirectory, title + " -- [" + sdf.format(new Date()) + "].jpg");
             try {
                 FileOutputStream imageOut = new FileOutputStream(image);
-                src.compress(Bitmap.CompressFormat.JPEG, 100, imageOut);
+                src.compress(imageCompressFormat, 100, imageOut);
                 imageOut.close();
                 savedOnSD = true;
                 return image.getAbsolutePath();
@@ -690,89 +693,6 @@ public class ImageUtils {
 //                Toast.makeText(ActivityA.this, getString(R.string.error_compressing), Toast.LENGTH_SHORT).show();
         }
 
-    }
-
-    //------------------------------------------------------------------------------------------
-
-    public MultipartBody.Part createRetrofitMultipartBodyForImage(
-            ImageView imageView,
-            String paramName
-    ) {
-        return createRetrofitMultipartBodyForImage(
-                imageView,
-                paramName,
-                DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + ".png"
-        );
-    }
-
-    public MultipartBody.Part createRetrofitMultipartBodyForImage(
-            Bitmap image,
-            String paramName
-    ) {
-        return createRetrofitMultipartBodyForImage(
-                image,
-                paramName,
-                DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + ".png"
-        );
-    }
-
-    public MultipartBody.Part createRetrofitMultipartBodyForImage(
-            ImageView imageView,
-            String paramName,
-            String fileName
-    ) {
-        Bitmap bitmap = getBitmap(imageView);
-
-        if (bitmap != null) {
-            try {
-                bitmap = resizeImage(bitmap);
-            } catch (Exception e) {
-            }
-
-            return createRetrofitMultipartBodyForImage(bitmap, paramName);
-        }
-
-        return null;
-    }
-
-    public MultipartBody.Part createRetrofitMultipartBodyForImage(
-            Bitmap image,
-            String paramName,
-            String fileName
-    ) {
-        try {
-            RequestBody requestFile = createRetrofitRequestBodyForImage(image);
-
-            MultipartBody.Part photo = MultipartBody.Part.createFormData(
-                    paramName,
-                    fileName,
-                    requestFile
-            );
-
-            return photo;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public RequestBody createRetrofitRequestBodyForImage(
-            Bitmap image
-    ) {
-
-        try {
-            ByteArrayOutputStream bs = new ByteArrayOutputStream();
-            image.compress(Bitmap.CompressFormat.PNG, 100, bs);
-
-            RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), bs.toByteArray());
-            try {
-                bs.close();
-            } catch (Exception e) {
-            }
-
-            return requestFile;
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     //------------------------------------------------------------------------------------------

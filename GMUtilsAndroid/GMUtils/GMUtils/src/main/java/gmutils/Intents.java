@@ -133,10 +133,10 @@ public class Intents {
 
     public static class ImageIntents {
 
-        private Uri createUriForFile(Context context) {
+        private Uri createUriForImageFile(Context context, String imageFileExtension) {
             ImageUtils imageUtils = ImageUtils.createInstance();
             try {
-                return imageUtils.createImageFileUsingFileProvider2(context);
+                return imageUtils.createImageFileUsingFileProvider2(context, imageFileExtension);
             } catch (IOException e) {
                 return null;
             }
@@ -213,13 +213,13 @@ public class Intents {
         //------------------------------------------------------------------------------------------
 
         //@RequiresPermission(allOf = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-        public Uri takePicture(Activity activity, int requestCode) {
+        public Uri takePicture(Activity activity, String imageFileExtension, int requestCode) {
             if (!checkPermissionForCamera(activity, requestCode)) return null;
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
                 try {
-                    Uri photoURI = createUriForFile(activity);
+                    Uri photoURI = createUriForImageFile(activity, imageFileExtension);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                     activity.startActivityForResult(takePictureIntent, requestCode);
                     return photoURI;
@@ -232,13 +232,13 @@ public class Intents {
         }
 
         //@RequiresPermission(allOf = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-        public Uri takePicture(Fragment fragment, int requestCode) {
+        public Uri takePicture(Fragment fragment, String imageFileExtension, int requestCode) {
             if (!checkPermissionForCamera(fragment.getActivity(), requestCode)) return null;
 
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(fragment.getContext().getPackageManager()) != null) {
                 try {
-                    Uri photoURI = createUriForFile(fragment.getContext());
+                    Uri photoURI = createUriForImageFile(fragment.getContext(), imageFileExtension);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
                     fragment.startActivityForResult(takePictureIntent, requestCode);
@@ -296,7 +296,7 @@ public class Intents {
 
         public boolean showImage(Context context, Bitmap image) {
             ImageUtils imageUtils = ImageUtils.createInstance();
-            Uri imgUri = imageUtils.saveImageUsingFileProvide(context, image);
+            Uri imgUri = imageUtils.saveImageUsingFileProvide(context, image, Bitmap.CompressFormat.JPEG);
 
             if (imgUri != null) {
                 Intent intent = new Intent();
@@ -323,7 +323,7 @@ public class Intents {
 
         public void shareImage(Context context, Bitmap image, String text) {
             ImageUtils imageUtils = ImageUtils.createInstance();
-            Uri imgUri = imageUtils.saveImageUsingFileProvide(context, image);
+            Uri imgUri = imageUtils.saveImageUsingFileProvide(context, image, Bitmap.CompressFormat.JPEG);
 
             if (imgUri != null) {
                 Intent intent = new Intent();

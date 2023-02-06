@@ -29,20 +29,20 @@ public class ImageAPI implements ImageAPIs {
     public static String URL = "BASE URL OF API";
 
     public void post(String text, Bitmap image, OnResponseReady2o<Object, ImageResponse> callback) {
-        ImageRequest request = RetrofitService.create(URL, ImageRequest.class);
-
-        Call<ImageResponse> call = request.post(
-                RequestBody.create(MediaType.parse("text/plain"), text),
-                ImageUtils.createInstance().createRetrofitMultipartBodyForImage(image, "image")
-        );
-
-        Callback2o<Object, ImageResponse> callback2 = new Callback2o<>(
-                call.request(),
-                ImageResponse.class,
-                callback
-        );
-
-        call.enqueue(callback2);
+//        ImageRequest request = RetrofitService.create(URL, ImageRequest.class);
+//
+//        Call<ImageResponse> call = request.post(
+//                RequestBody.create(MediaType.parse("text/plain"), text),
+//                ImageUtils.createInstance().createRetrofitMultipartBodyForImage(image, "image")
+//        );
+//
+//        Callback2o<Object, ImageResponse> callback2 = new Callback2o<>(
+//                call.request(),
+//                ImageResponse.class,
+//                callback
+//        );
+//
+//        call.enqueue(callback2);
     }
 
 }
