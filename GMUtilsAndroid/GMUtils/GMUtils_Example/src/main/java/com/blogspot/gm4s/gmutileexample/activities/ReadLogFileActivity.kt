@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
 import gmutils.ui.toast.MyToast
-import gmutils.Security
+import gmutils.security.Security
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.WaitDialog
 import gmutils.ui.utils.ViewSource

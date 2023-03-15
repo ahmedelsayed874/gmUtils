@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import gmutils.DateOp;
-import gmutils.Security;
+import gmutils.security.Security;
 import gmutils.listeners.ResultCallback;
 
 /**
@@ -28,20 +28,6 @@ public class AccountStorage {
 
     public interface IAccount {
         String _id();
-
-        String _loginUserName(); //user name | email | phone number
-
-        default String _fullName() {
-            return _firstName() + " " + _lastName();
-        }
-
-        String _firstName();
-
-        String _lastName();
-
-        String _contactInfo();
-
-        String _photo();
 
         String _token();
     }
@@ -165,16 +151,8 @@ public class AccountStorage {
 
     //----------------------------------------------------------------------------------------------
 
-    public AccountStorage saveAccount(IAccount account, String password) {
-        return saveAccount(account, account._loginUserName(), password, null);
-    }
-
     public AccountStorage saveAccount(IAccount account, String userName, String password) {
         return saveAccount(account, userName, password, null);
-    }
-
-    public AccountStorage saveAccount(IAccount account, String password, ResultCallback<Boolean> feedback) {
-        return saveAccount(account, account._loginUserName(), password, feedback);
     }
 
     public AccountStorage saveAccount(IAccount account, String userName, String password, ResultCallback<Boolean> feedback) {

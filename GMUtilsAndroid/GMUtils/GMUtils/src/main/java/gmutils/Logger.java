@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 
 import gmutils.app.BaseApplication;
+import gmutils.security.Security;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -649,7 +650,7 @@ public class Logger {
             sessionId = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
         }
 
-        return createOrGetLogFile(context, "/LOG_FILE_" + sessionId + ".txt");
+        return createOrGetLogFile(context, "/LOG_FILE_" + sessionId);
     }
 
     private synchronized static File createOrGetLogFile(Context context, String fileName) {

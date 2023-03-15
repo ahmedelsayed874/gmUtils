@@ -1,4 +1,4 @@
-package gmutils;
+package gmutils.security;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -40,6 +40,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.x500.X500Principal;
 
+import gmutils.Logger;
 import gmutils.utils.TextHelper;
 
 /**

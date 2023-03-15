@@ -12,10 +12,8 @@ import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -38,7 +36,6 @@ import gmutils.utils.Utils;
  * +201022663988
  */
 public class Notifier {
-    private Context context;
     private NotificationCompat.Builder notificationBuilder;
     private final int notificationIconRes;
     private int iconBackgroundColor = Color.WHITE;
@@ -53,7 +50,6 @@ public class Notifier {
     }
 
     private Notifier(Context context, int notificationIconRes, int iconBackgroundColor) {
-        this.context = context;
         this.notificationIconRes = notificationIconRes;
         this.iconBackgroundColor = iconBackgroundColor;
 
@@ -63,23 +59,23 @@ public class Notifier {
     //---------------------------------
 
     //region setNotificationChannel
-    public Notifier setNotificationChannel(String channelId, String channelName) {
-        return setNotificationChannel(channelId, channelName, null, NotificationManager.IMPORTANCE_DEFAULT, soundUri);
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName) {
+        return setNotificationChannel(context, channelId, channelName, null, NotificationManager.IMPORTANCE_DEFAULT, soundUri);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription) {
-        return setNotificationChannel(channelId, channelName, channelDescription, NotificationManager.IMPORTANCE_DEFAULT, soundUri);
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription) {
+        return setNotificationChannel(context, channelId, channelName, channelDescription, NotificationManager.IMPORTANCE_DEFAULT, soundUri);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance) {
-        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri);
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription, int importance) {
+        return setNotificationChannel(context, channelId, channelName, channelDescription, importance, soundUri);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, int rawSoundId) {
-        return setNotificationChannel(channelId, channelName, channelDescription, importance, rawSoundId, vibrate);
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription, int importance, int rawSoundId) {
+        return setNotificationChannel(context, channelId, channelName, channelDescription, importance, rawSoundId, vibrate);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, int rawSoundId, boolean vibrate) {
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription, int importance, int rawSoundId, boolean vibrate) {
         Uri soundUri = null;
 
         if (rawSoundId != 0) {
@@ -87,14 +83,14 @@ public class Notifier {
             soundUri = Utils.createInstance().getResourceUri(context, rawSoundId);
         }
 
-        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
+        return setNotificationChannel(context, channelId, channelName, channelDescription, importance, soundUri, vibrate);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Uri soundUri) {
-        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription, int importance, Uri soundUri) {
+        return setNotificationChannel(context, channelId, channelName, channelDescription, importance, soundUri, vibrate);
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, Uri soundUri, boolean vibrate) {
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription, int importance, Uri soundUri, boolean vibrate) {
         this.soundUri = soundUri;
         this.vibrate = vibrate;
 
@@ -142,14 +138,14 @@ public class Notifier {
         return this;
     }
 
-    public Notifier setNotificationChannel(String channelId, String channelName, String channelDescription, int importance, boolean vibrate) {
-        return setNotificationChannel(channelId, channelName, channelDescription, importance, soundUri, vibrate);
+    public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription, int importance, boolean vibrate) {
+        return setNotificationChannel(context, channelId, channelName, channelDescription, importance, soundUri, vibrate);
     }
     //endregion
 
     //---------------------------------
 
-    public Notifier removeNotificationChannel(String channelId) {
+    public Notifier removeNotificationChannel(Context context, String channelId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.deleteNotificationChannel(channelId);
@@ -159,7 +155,7 @@ public class Notifier {
 
     //---------------------------------
 
-    public Notifier createNotification(CharSequence title, CharSequence body, Intent intent) {
+    public Notifier createNotification(Context context, CharSequence title, CharSequence body, Intent intent) {
         PendingIntent pendingIntent = null;
         if (intent != null) {
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -242,7 +238,7 @@ public class Notifier {
         return this;
     }
 
-    public Notifier addActionForUrl(String title, String url) {
+    public Notifier addActionForUrl(Context context, String title, String url) {
         if (notificationBuilder == null) throw new NullPointerException();
         if (TextUtils.isEmpty(url)) return this;
 
@@ -287,12 +283,20 @@ public class Notifier {
 
     //---------------------------------
 
-    public int release() {
-        int i = new Random(100).nextInt(1000);
-        return release(i);
+    public Notification buildNotification() {
+        return notificationBuilder.build();
     }
 
-    public int release(int notificationId) {
+    public int release(Context context) {
+        Notification notification = buildNotification();
+        return release(context, notification, notification.hashCode());
+    }
+
+    public int release(Context context, int notificationId) {
+        return release(context, buildNotification(), notificationId);
+    }
+
+    public int release(Context context, Notification notification, int notificationId) {
         if (notificationBuilder == null) throw new NullPointerException();
 
         NotificationManagerCompat notificationManager = getNotificationManagerCompat(context);
@@ -303,9 +307,7 @@ public class Notifier {
             notificationManager.cancel(notificationIdToRemove);
         }
 
-        notificationManager.notify(notificationId, notificationBuilder.build());
-
-        this.context = null;
+        notificationManager.notify(notificationId, notification);
 
         Notifier.lastReleasedNotificationId = notificationId;
 
@@ -324,7 +326,7 @@ public class Notifier {
     public static NotificationManagerCompat getNotificationManagerCompat(Context context) {
         return NotificationManagerCompat.from(context);
     }
-    
+
     public static void removeNotification(Context context, int notificationId) {
         NotificationManagerCompat notificationManager = getNotificationManagerCompat(context);
         notificationManager.cancel(notificationId);

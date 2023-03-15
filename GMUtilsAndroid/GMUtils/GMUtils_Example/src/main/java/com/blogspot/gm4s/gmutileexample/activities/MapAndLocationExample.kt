@@ -184,7 +184,7 @@ class MapAndLocationExample : BaseActivity() {
                     location.latitude,
                     location.longitude
                 ).also {
-                    it.setName(AccountStorage.ACCOUNT._fullName())
+                    it.setName(AccountStorage.ACCOUNT._id())
                     it.setExtraData(AccountStorage.ACCOUNT)
                     //it.setIcon()
                 }
