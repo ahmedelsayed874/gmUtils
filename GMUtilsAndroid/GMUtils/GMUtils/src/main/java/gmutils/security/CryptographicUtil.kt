@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.util.Base64
 import androidx.annotation.RequiresApi
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
@@ -13,34 +14,40 @@ import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.KeyStore
+import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 
-class CryptographicUtil {
+class CryptographicUtil(private val secretKey: String) {
 
-    private fun getCipher(mode: Int) : Cipher {
-        val keygen = KeyGenerator.getInstance("AES")
-        keygen.init(256)
-
-        val key: SecretKey = keygen.generateKey()
-
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
-        cipher.init(mode, key)
-
-        return cipher
+    private fun cipher(mode: Int) = Cipher.getInstance("AES/CBC/PKCS5Padding").apply {
+        val secretKey = SecretKeySpec(secretKey.toByteArray(), "AES")
+        init(mode, secretKey, iv())
     }
 
-    fun encrypt(plaintext: String) : ByteArray {
-        val cipher = getCipher(Cipher.ENCRYPT_MODE)
-        //val iv: ByteArray = cipher.iv
-        return cipher.doFinal(plaintext.toByteArray())
+    private fun iv(): IvParameterSpec {
+        val byteIV = ByteArray(16)
+        val r = SecureRandom()
+        r.setSeed(r.generateSeed(16))
+        r.nextBytes(byteIV)
+
+        return IvParameterSpec(byteIV)
     }
 
-    fun decrypt(ciphertext: ByteArray) : ByteArray {
-        val cipher = getCipher(Cipher.DECRYPT_MODE)
-        return cipher.doFinal(ciphertext)
+    fun encrypt(plaintext: String): String {
+        val cipher = cipher(Cipher.ENCRYPT_MODE)
+        val cipherText = cipher.doFinal(plaintext.toByteArray())
+        return Base64.encodeToString(cipherText, 0)
+    }
+
+    fun decrypt(ciphertext: String): String {
+        val bytes = Base64.decode(ciphertext, 0)
+        val cipher = cipher(Cipher.DECRYPT_MODE)
+        return String(cipher.doFinal(bytes), )
     }
 
 }
@@ -88,22 +95,26 @@ class CryptographicUtil23(keyName: String? = null) {
     }
 
 
-    fun encrypt(data: String): ByteArray {
+    fun encrypt(data: String): String {
         val cipher = getCipher()
         val secretKey = getSecretKey()
 
         cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        return cipher.doFinal(
-            data.toByteArray(Charset.defaultCharset())
+        val cipherText = cipher.doFinal(
+            data.toByteArray()
         )
+
+        return Base64.encodeToString(cipherText, 0)
     }
 
-    fun decrypt(cipherData: ByteArray): ByteArray {
+    fun decrypt(cipherText: String): String {
         val cipher = getCipher()
         val secretKey = getSecretKey()
 
         cipher.init(Cipher.DECRYPT_MODE, secretKey)
-        return cipher.doFinal(cipherData)
+
+        val bytes = Base64.decode(cipherText, 0)
+        return String(cipher.doFinal(bytes), )
     }
 
     //==============================================================================================
@@ -130,7 +141,7 @@ class CryptographicUtil23(keyName: String? = null) {
         }
     }
 
-    fun decryptFileContent(context: Context, file: File): ByteArray {
+    fun decryptFileContent(context: Context, file: File): String {
         // Although you can define your own key generation parameter specification, it's
         // recommended that you use the value specified here.
         val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
@@ -151,7 +162,7 @@ class CryptographicUtil23(keyName: String? = null) {
             nextByte = inputStream.read()
         }
 
-        return byteArrayOutputStream.toByteArray()
+        return String(byteArrayOutputStream.toByteArray(), )
     }
 
 

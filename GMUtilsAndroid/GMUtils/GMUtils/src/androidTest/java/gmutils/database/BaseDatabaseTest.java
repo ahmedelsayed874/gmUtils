@@ -11,7 +11,6 @@ import static org.junit.Assert.*;
 
 public class BaseDatabaseTest {
 
-
     @Test
     public void test() {
         class x extends BaseDatabase {
