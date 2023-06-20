@@ -226,8 +226,8 @@ public abstract class BaseApplication extends Application implements Application
                 t = t.getCause();
             }
 
-            Logger.writeToFile(thisApp(), stack.toString(), bugFileName);
-            Logger.print(() -> stack.toString());
+            Logger.d().writeToFile(thisApp(), stack.toString(), bugFileName);
+            Logger.d().print(() -> stack.toString());
 
             try {
                 dispose();
@@ -238,7 +238,7 @@ public abstract class BaseApplication extends Application implements Application
             }
         });
 
-        if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
+        if (Logger.d().getLogConfigs().isWriteToFileEnabled()) {
             bugs = getReportedBugs();
         }
     }
@@ -260,12 +260,12 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     public String getReportedBugs() {
-        return Logger.readFile(thisApp(), bugFileName);
+        return Logger.d().readFile(thisApp(), bugFileName);
     }
 
     public void deleteBugs() {
         try {
-            Logger.deleteSavedFile(thisApp(), bugFileName);
+            Logger.d().deleteSavedFile(thisApp(), bugFileName);
         } catch (Exception e) {
         }
     }
@@ -282,7 +282,7 @@ public abstract class BaseApplication extends Application implements Application
             if (activityCount == 1) {
                 onApplicationStartedFirstActivity(activity);
 
-                if (bugs.length() != 0 && Logger.IS_WRITE_TO_FILE_ENABLED()) {
+                if (bugs.length() != 0 && Logger.d().getLogConfigs().isWriteToFileEnabled()) {
                     hasBugs = true;
                     isBugMessageDisplayed = true;
                     try {

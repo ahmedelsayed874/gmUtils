@@ -15,18 +15,18 @@ class AndroidApplicationAndBaseApplication : Application() {
 
         app = BaseApplication.register(this)
 
-        Logger.SET_WRITE_TO_FILE_DEADLINE(22, 11, 2021)
+        Logger.d().logConfigs.setWriteToFileDeadline(22, 11, 2021)
         Log.d("*****", "onCreate()")
 
         Log.d("*****", "reportedBugs: " + app.reportedBugs)
 
         app.globalVariables().add("zx", 123)
         val s = app.globalVariables().size();
-        Log.d("****", "global var count: " + s.toString())
+        Log.d("****", "global var count: $s")
         Log.d("****", "var val (zx)" +  app.globalVariables().retrieve("zx").toString())
 
         app.messagingCenter().subscribeAlways(javaClass, "zxc") {name, data ->
-            Log.d("****", name + " : " + data.toString())
+            Log.d("****", "$name : $data")
         }
 
         app.messagingCenter().post("zxc", "asd")

@@ -105,7 +105,7 @@ public abstract class SearchTextChangeListener extends TextChangedListener {
             SearchTextChangeListener stcl = stclRef.get();
             if (stcl == null || !stcl.started) return;
 
-            Logger.print(() -> "CurrentInput: " + stcl.currentInput + ", PreviousInput: " + stcl.lastInput);
+            Logger.d().print(() -> "CurrentInput: " + stcl.currentInput + ", PreviousInput: " + stcl.lastInput);
 
             stcl.lastInput = stcl.currentInput;
 

@@ -310,7 +310,7 @@ public class ApiRequestCreator {
                         errorMsg = error.toString();
                     }
 
-                    Logger.print("WebRequest", () -> error.toString());
+                    Logger.d().print("WebRequest", () -> error.toString());
                     onDataReady.onResponseFetchedFailed(errorMsg, response, statusCode);
                 }
             }
@@ -463,7 +463,7 @@ public class ApiRequestCreator {
                             } catch (Exception e) {
                                 Log.e(ApiRequestCreator.class.getSimpleName(), "contentResolver required in case of uploading file by Uri");
                                 e.printStackTrace();
-                                Logger.print(e);
+                                Logger.d().print(e);
                             }
                         }
                     }

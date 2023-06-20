@@ -603,7 +603,7 @@ public class ImageSlider {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Logger.print(e);
+                Logger.d().print(e);
             }
         }
 

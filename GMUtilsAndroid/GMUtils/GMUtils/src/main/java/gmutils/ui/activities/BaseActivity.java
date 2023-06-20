@@ -138,7 +138,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     protected ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
-        return ViewModelProvider
+        return (ViewModelProvider.Factory) ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getApplication());
     }
@@ -396,7 +396,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                         currentFragment = fragmentManager.getFragments().get(0);
                         currentFragment.setArguments(fragment.getArguments());
                     } catch (Exception e) {
-                        Logger.print(e);
+                        Logger.d().print(e);
                     }
                 }
             } else {
@@ -489,7 +489,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 m -> MyToast.show(this, m),
 
                 //showRetryPromptDialog
-                (m , a) -> showRetryPromptDialog(m, d -> a.run())
+                (m, a) -> showRetryPromptDialog(m, d -> a.run())
         );
     }
 

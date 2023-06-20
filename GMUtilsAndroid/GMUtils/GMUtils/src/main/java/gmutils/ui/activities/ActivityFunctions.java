@@ -165,7 +165,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         //-----------------------------------------------------------------------------------
 
         public void onCreateOptionsMenu(Menu menu) {
-            if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
+            if (Logger.d().getLogConfigs().isWriteToFileEnabled()) {
                 if (showBugsMenuItemId == 0) {
                     showBugsMenuItemId = "Show Log".hashCode();
                     if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
@@ -188,7 +188,7 @@ public class ActivityFunctions implements BaseFragmentListener {
                 if (activity instanceof BaseActivity) {
                     ((BaseActivity) activity).showWaitView();
                 }
-                BackgroundTask.run(() -> Logger.readAllFilesContents(activity), (ResultCallback<String>) txt -> {
+                BackgroundTask.run(() -> Logger.d().readAllFilesContents(activity), (ResultCallback<String>) txt -> {
                     if (activity instanceof BaseActivity) {
                         ((BaseActivity) activity).hideWaitView();
                     }
@@ -203,7 +203,7 @@ public class ActivityFunctions implements BaseFragmentListener {
                                 }
                             })
                             .setButton2(R.string.delete, (d) -> {
-                                Logger.deleteSavedFiles(activity);
+                                Logger.d().deleteSavedFiles(activity);
                             })
                             .show();
                 });

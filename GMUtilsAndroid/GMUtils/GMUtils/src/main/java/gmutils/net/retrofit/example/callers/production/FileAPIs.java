@@ -49,7 +49,7 @@ public class FileAPIs implements gmutils.net.retrofit.example.callers._interface
 
         Call<ResponseBody> call = service.downloadFile(fileURL);
 
-        Logger.print(() -> call.request());
+        Logger.d().print(() -> call.request());
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override

@@ -200,7 +200,7 @@ public class FileUtils {
                 root            /* directory */
         );
 
-        Logger.print(() -> "createFileUsingFileProvider-> " + file);
+        Logger.d().print(() -> "createFileUsingFileProvider-> " + file);
 
         return file;
     }

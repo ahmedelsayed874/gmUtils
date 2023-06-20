@@ -262,7 +262,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
                         currentFragment = fragmentManager.getFragments().get(0);
                         currentFragment.setArguments(fragment.getArguments());
                     } catch (Exception e) {
-                        Logger.print(e);
+                        Logger.d().print(e);
                     }
                 }
             } else {

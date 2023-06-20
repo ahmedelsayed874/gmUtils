@@ -40,8 +40,8 @@ public final class CallbackOperations<R extends BaseResponse> {
     public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener) {
         this("", responseClass, listener);
         try {
-            if (Logger.IS_LOG_ENABLED())
-                Logger.print("API:Request:", () -> request.toString());
+            if (Logger.d().getLogConfigs().isLogEnabled())
+                Logger.d().print("API:Request:", () -> request.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -54,8 +54,8 @@ public final class CallbackOperations<R extends BaseResponse> {
         this.requestTime = System.currentTimeMillis();
 
         if (requestInfo != null && !"".equals(requestInfo))
-            if (Logger.IS_LOG_ENABLED())
-                Logger.print("API:Request:", () -> requestInfo);
+            if (Logger.d().getLogConfigs().isLogEnabled())
+                Logger.d().print("API:Request:", () -> requestInfo);
 
         try {
             responseClass.newInstance();
@@ -167,8 +167,8 @@ public final class CallbackOperations<R extends BaseResponse> {
     }
 
     private void setResult(R result, Map<String, List<String>> headers) {
-        if (Logger.IS_LOG_ENABLED()) {
-            Logger.print(
+        if (Logger.d().getLogConfigs().isLogEnabled()) {
+            Logger.d().print(
                     "EXTRA_INFO:",
                     () -> "[callbackStatus=" + result.getCallbackStatus() +
                             ", responseStatus=" + result.getResponseStatus() + "]"
@@ -192,7 +192,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     //----------------------------------------------------------------------------------------------
 
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response, String errorBody) {
-        if (!Logger.IS_LOG_ENABLED()) return;
+        if (!Logger.d().getLogConfigs().isLogEnabled()) return;
 
         String url = "";
 
@@ -215,7 +215,7 @@ public final class CallbackOperations<R extends BaseResponse> {
         if (response != null) {
             String finalUrl = url;
             String finalExtrasString = extrasString;
-            Logger.print(
+            Logger.d().print(
                     "API:Response:",
                     () -> "url: <" + finalUrl + ">," +
                             "\nresponseType: " + responseType + ", " +
@@ -228,7 +228,7 @@ public final class CallbackOperations<R extends BaseResponse> {
         } else {
             String finalUrl1 = url;
             String finalExtrasString1 = extrasString;
-            Logger.print(
+            Logger.d().print(
                     "API:Response:",
                     () -> "url: <" + finalUrl1 + ">," +
                             "\nresponseType: " + responseType + ", " +

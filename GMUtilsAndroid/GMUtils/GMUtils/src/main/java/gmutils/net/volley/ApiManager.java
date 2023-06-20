@@ -151,7 +151,7 @@ public class ApiManager {
 
 
     private void printLog(String msg) {
-        Logger.print("ApiManager", () -> msg);
+        Logger.d().print("ApiManager", () -> msg);
     }
 
     //--------------------------------------------------------------------------------------------//

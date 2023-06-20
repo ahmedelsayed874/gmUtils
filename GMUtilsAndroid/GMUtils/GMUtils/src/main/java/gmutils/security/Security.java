@@ -135,7 +135,7 @@ public class Security {
                 String encryptedBase64Encoded = Base64.encodeToString(encodedBytes, Base64.DEFAULT);
                 return encryptedBase64Encoded;
             } catch (Exception e) {
-                Logger.print(e);
+                Logger.d().print(e);
                 return input;
             }
         }
@@ -150,7 +150,7 @@ public class Security {
                 String decodedText = new String(decodedBytes);
                 return decodedText;
             } catch (Exception e) {
-                Logger.print(e);
+                Logger.d().print(e);
                 return encrypted;
             }
         }
@@ -301,7 +301,7 @@ public class Security {
                 String encryptedBase64Encoded = Base64.encodeToString(encodedBytes, Base64.DEFAULT);
                 return encryptedBase64Encoded;
             } catch (Exception e) {
-                Logger.print(e);
+                Logger.d().print(e);
                 return input;
             }
         }
@@ -314,7 +314,7 @@ public class Security {
                 byte[] decodedBytes = doCipher(Cipher.DECRYPT_MODE, encryptedBytes);
                 return new String(decodedBytes);
             } catch (Exception e) {
-                Logger.print(e);
+                Logger.d().print(e);
                 return encrypted;
             }
         }
@@ -333,13 +333,13 @@ public class Security {
          * val instance = Security.getSimpleInstance()
          * val plainData = "ABC"
          * val encrypt = instance.encrypt(this, plainData)
-         * Logger.print(plainData + "encrypted to:\n" + encrypt)
+         * Logger.d().print(plainData + "encrypted to:\n" + encrypt)
          * val decrypt = instance.decrypt(this, encrypt)
          * <p>
          * if (plainData == decrypt) {
-         * Logger.print("EncDec: Succeeded")
+         * Logger.d().print("EncDec: Succeeded")
          * } else {
-         * Logger.print("EncDec: Failed")
+         * Logger.d().print("EncDec: Failed")
          * }
          */
         private final String karlst = "§1234567890-=][poiuytrewqasdfghjkl;'\\`zxcvbnm,...../±!@@@@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:\"|~ZXCVBNM<>?";
