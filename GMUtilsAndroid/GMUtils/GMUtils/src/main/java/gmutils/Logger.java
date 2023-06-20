@@ -220,7 +220,7 @@ public class Logger {
         String content = "";
 
         if (logConfigs.isLogEnabled() || writeToFileAlso) {
-            content = callback.getContent().toString();
+            content = ("" + callback.getContent());
         }
 
         if (logConfigs.isLogEnabled()) {
