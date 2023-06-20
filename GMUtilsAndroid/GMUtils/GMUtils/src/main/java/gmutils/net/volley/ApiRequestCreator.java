@@ -310,7 +310,7 @@ public class ApiRequestCreator {
                         errorMsg = error.toString();
                     }
 
-                    Logger.d().print("WebRequest", () -> error.toString());
+                    Logger.d().print(() -> "WebRequest", () -> error.toString());
                     onDataReady.onResponseFetchedFailed(errorMsg, response, statusCode);
                 }
             }

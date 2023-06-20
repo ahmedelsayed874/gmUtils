@@ -41,7 +41,7 @@ public final class CallbackOperations<R extends BaseResponse> {
         this("", responseClass, listener);
         try {
             if (Logger.d().getLogConfigs().isLogEnabled())
-                Logger.d().print("API:Request:", () -> request.toString());
+                Logger.d().print(() -> "API:Request:", () -> request.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -55,7 +55,7 @@ public final class CallbackOperations<R extends BaseResponse> {
 
         if (requestInfo != null && !"".equals(requestInfo))
             if (Logger.d().getLogConfigs().isLogEnabled())
-                Logger.d().print("API:Request:", () -> requestInfo);
+                Logger.d().print(() -> "API:Request:", () -> requestInfo);
 
         try {
             responseClass.newInstance();
@@ -169,7 +169,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     private void setResult(R result, Map<String, List<String>> headers) {
         if (Logger.d().getLogConfigs().isLogEnabled()) {
             Logger.d().print(
-                    "EXTRA_INFO:",
+                    () -> "EXTRA_INFO:",
                     () -> "[callbackStatus=" + result.getCallbackStatus() +
                             ", responseStatus=" + result.getResponseStatus() + "]"
             );
@@ -216,7 +216,7 @@ public final class CallbackOperations<R extends BaseResponse> {
             String finalUrl = url;
             String finalExtrasString = extrasString;
             Logger.d().print(
-                    "API:Response:",
+                    () -> "API:Response:",
                     () -> "url: <" + finalUrl + ">," +
                             "\nresponseType: " + responseType + ", " +
                             "\nresponse: " + response.body() + ", " +
@@ -229,7 +229,7 @@ public final class CallbackOperations<R extends BaseResponse> {
             String finalUrl1 = url;
             String finalExtrasString1 = extrasString;
             Logger.d().print(
-                    "API:Response:",
+                    () -> "API:Response:",
                     () -> "url: <" + finalUrl1 + ">," +
                             "\nresponseType: " + responseType + ", " +
                             "\nerrorBody: " + errorBody +

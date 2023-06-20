@@ -152,7 +152,7 @@ public class ImageLoader {
 
         if (currentRequests.containsKey(url)) {
             String finalUrl = url;
-            Logger.d().print(ImageLoader.class.getSimpleName(), () -> "loading image from " + finalUrl + " already IN-PROGRESS");
+            Logger.d().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl + " already IN-PROGRESS");
 
             List<LoaderCallback> pendingRequests = currentRequests.get(url);
             if (pendingRequests == null) pendingRequests = new ArrayList<>();
@@ -163,7 +163,7 @@ public class ImageLoader {
         } else {
             currentRequests.put(url, null);
             String finalUrl1 = url;
-            Logger.d().print(ImageLoader.class.getSimpleName(), () -> "loading image from " + finalUrl1 + " will start");
+            Logger.d().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl1 + " will start");
         }
 
         RequestCreator request = picasso.load(url);
@@ -299,7 +299,7 @@ public class ImageLoader {
 
                 if (loaderCallback2.imageView != null) {
                     imageViewDrawable = loaderCallback2.imageView.getDrawable();
-                    Logger.d().print(ImageLoader.class.getSimpleName(), () -> "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
+                    Logger.d().print(ImageLoader.class::getSimpleName, () -> "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
                 }
 
                 if (imageViewDrawable != null) {
@@ -351,7 +351,7 @@ public class ImageLoader {
         }
 
         public void onSuccess() {
-            Logger.d().print(ImageLoader.class.getSimpleName(), () -> "image from " + imgUrl + " COMPLETED");
+            Logger.d().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " COMPLETED");
             onComplete(true);
 
             try {
@@ -369,7 +369,7 @@ public class ImageLoader {
         }
 
         public void onError() {
-            Logger.d().print(ImageLoader.class.getSimpleName(), () -> "image from " + imgUrl + " FAILED");
+            Logger.d().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " FAILED");
             onComplete(false);
 
             try {

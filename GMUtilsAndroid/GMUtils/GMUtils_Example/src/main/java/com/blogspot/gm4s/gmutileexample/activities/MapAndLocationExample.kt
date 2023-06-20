@@ -206,7 +206,7 @@ class MapAndLocationExample : BaseActivity() {
             }
 
             override fun onErrorOccurred(obj: LocationTracker?, error: String?) {
-                Logger.d().print(Logger.Callbacks.PrintSingle { error ?: "" })
+                Logger.d().print { error ?: "" }
             }
         })
         mLocationTracker?.startLocationUpdating()

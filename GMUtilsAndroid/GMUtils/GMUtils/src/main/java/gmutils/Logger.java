@@ -166,6 +166,12 @@ public class Logger {
         this.logConfigs = new LogConfigs();
     }
 
+    @NotNull
+    private String logId() {
+        if (logId != null && !(logId.trim()).isEmpty()) return logId.trim();
+        return "";
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public void setLogConfigs(@NotNull LogConfigs logConfigs) {
@@ -180,64 +186,37 @@ public class Logger {
 
     //----------------------------------------------------------------------------------------------
 
-    public interface Callbacks {
-        interface PrintSingle {
-            Object getContent();
-        }
+    public interface TitleGetter {
+        String getTitle();
+    }
 
-        interface PrintMultiple {
-            Object[] getContent();
-        }
+    public interface ContentGetter {
+        Object getContent();
     }
 
     //region LOGs
     public void print(Throwable throwable) {
-        print("", throwable);
+        print(null, throwable);
     }
 
-    public void print(String title, Throwable throwable) {
-        print("EXCEPTION **** " + title, () -> throwable == null ? "null" : throwable.toString());
+    public void print(TitleGetter title, Throwable throwable) {
+        print(
+                () -> "EXCEPTION **** " + (title == null ? "" : title.getTitle()),
+                () -> throwable == null ? "null" : throwable.toString()
+        );
     }
-
+    
     //----------------
 
-    public void printm(@NotNull Callbacks.PrintMultiple callback) {
-        printm("", callback);
+    public void print(@NotNull ContentGetter callback) {
+        print(null, callback);
     }
 
-    public void printm(String title, @NotNull Callbacks.PrintMultiple callback) {
-        if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
-            String[] msg = new String[]{""};
-
-            Object[] content = callback.getContent();
-            if (content == null || content.length == 0) {
-                msg[0] = "null";
-
-            } else {
-                for (int i = 0; i < content.length; i++) {
-                    msg[0] += "OBJ[" + i + "]: " + (content[i] == null ? "null" : content[i].toString());
-                    if (i < content.length - 1) {
-                        msg[0] += "\n+++\n";
-                    }
-                }
-            }
-
-            print("" + title, () -> msg[0]);
-        }
-
-    }
-
-    //----------------
-
-    public void print(@NotNull Callbacks.PrintSingle callback) {
-        print("", callback);
-    }
-
-    public void print(String title, @NotNull Callbacks.PrintSingle callback) {
+    public void print(TitleGetter title, @NotNull ContentGetter callback) {
         print(title, callback, logConfigs.isWriteLogsToFileEnabled());
     }
 
-    public void print(String title, @NotNull Callbacks.PrintSingle callback, boolean writeToFileAlso) {
+    public void print(TitleGetter title, @NotNull ContentGetter callback, boolean writeToFileAlso) {
         String content = "";
 
         if (logConfigs.isLogEnabled() || writeToFileAlso) {
@@ -245,7 +224,11 @@ public class Logger {
         }
 
         if (logConfigs.isLogEnabled()) {
-            String[] t = refineTitle("**** " + title);
+            String title2 = "**** ";
+            if (!logId().isEmpty()) title2 += "|"+logId()+"| ";
+            if (title != null) title2 += title.getTitle();
+
+            String[] t = refineTitle(title2);
             String[] m = divideLogMsg(content, t.length > 1 ? t[1].length() : 0);
 
             if (m.length == 1) {
@@ -277,14 +260,14 @@ public class Logger {
     //----------------
 
     public void printMethod() {
-        printMethod((Callbacks.PrintSingle) null);
+        printMethod(null);
     }
 
-    public void printMethod(Callbacks.PrintSingle moreInfoCallback) {
+    public void printMethod(ContentGetter moreInfoCallback) {
         printMethod(moreInfoCallback, logConfigs.isWriteLogsToFileEnabled());
     }
 
-    public void printMethod(Callbacks.PrintSingle moreInfoCallback, boolean writeToFileAlso) {
+    public void printMethod(ContentGetter moreInfoCallback, boolean writeToFileAlso) {
         try {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             StackTraceElement stackTrace = null;
@@ -309,9 +292,9 @@ public class Logger {
                     " -> line: " + stackTrace.getLineNumber() +
                     (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));
 
-            print("", () -> msg, writeToFileAlso);
+            print(null, () -> msg, writeToFileAlso);
         } catch (Exception e) {
-            print("", e::toString, writeToFileAlso);
+            print(null, e::toString, writeToFileAlso);
         }
     }
 
@@ -623,7 +606,7 @@ public class Logger {
     // get/create directory
     private synchronized File getLogDirector(Context context) {
         String dirName = "LOGS";
-        if (logId != null && !(logId.trim()).isEmpty()) dirName += "/" + logId;
+        if (!logId().isEmpty()) dirName += "/" + logId();
 
         return getLogDirector(context, dirName);
     }
