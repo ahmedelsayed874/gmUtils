@@ -205,7 +205,7 @@ public class Logger {
                 () -> throwable == null ? "null" : throwable.toString()
         );
     }
-    
+
     //----------------
 
     public void print(@NotNull ContentGetter callback) {
@@ -225,7 +225,7 @@ public class Logger {
 
         if (logConfigs.isLogEnabled()) {
             String title2 = "**** ";
-            if (!logId().isEmpty()) title2 += "|"+logId()+"| ";
+            if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
             if (title != null) title2 += title.getTitle();
 
             String[] t = refineTitle(title2);
@@ -260,23 +260,38 @@ public class Logger {
     //----------------
 
     public void printMethod() {
-        printMethod(null);
+        printMethod(null, logConfigs.isWriteLogsToFileEnabled(), 0);
+    }
+
+    public void printMethod(int exceptionIndexTuner) {
+        printMethod(null, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
     }
 
     public void printMethod(ContentGetter moreInfoCallback) {
-        printMethod(moreInfoCallback, logConfigs.isWriteLogsToFileEnabled());
+        printMethod(moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), 0);
+    }
+
+    public void printMethod(ContentGetter moreInfoCallback, int exceptionIndexTuner) {
+        printMethod(moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
     }
 
     public void printMethod(ContentGetter moreInfoCallback, boolean writeToFileAlso) {
+        printMethod(moreInfoCallback, writeToFileAlso, 0);
+    }
+
+    public void printMethod(ContentGetter moreInfoCallback, boolean writeToFileAlso, int exceptionIndexTuner) {
         try {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             StackTraceElement stackTrace = null;
-            for (int s = 1; s <= 3; s++) {
+            int idx = -1;
+            for (int s = 1; s < stackTraceList.length; s++) {
                 if (!Logger.class.getName().equals(stackTraceList[s].getClassName())) {
-                    stackTrace = stackTraceList[s];
+                    idx = s;
                     break;
                 }
             }
+
+            stackTrace = stackTraceList[idx - exceptionIndexTuner];
 
             String moreInfo = "";
             if (moreInfoCallback != null) {
@@ -287,7 +302,7 @@ public class Logger {
             }
 
             String msg = stackTrace.getFileName() +
-                    "\n" +
+                    "." +
                     stackTrace.getMethodName() +
                     " -> line: " + stackTrace.getLineNumber() +
                     (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));

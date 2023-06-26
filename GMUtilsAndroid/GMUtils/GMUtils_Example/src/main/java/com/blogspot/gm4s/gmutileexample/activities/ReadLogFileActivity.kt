@@ -51,6 +51,10 @@ class ReadLogFileActivity : BaseActivity() {
         )
     }
 
+    fun onOpenTextEditorClick(v: View) {
+        //todo
+    }
+
     fun readFile(uri: Uri) {
         val waitDialog = WaitDialog.show(this)
 
