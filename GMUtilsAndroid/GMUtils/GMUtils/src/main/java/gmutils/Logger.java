@@ -291,7 +291,7 @@ public class Logger {
                 }
             }
 
-            stackTrace = stackTraceList[idx - exceptionIndexTuner];
+            stackTrace = stackTraceList[idx + exceptionIndexTuner];
 
             String moreInfo = "";
             if (moreInfoCallback != null) {
@@ -302,9 +302,9 @@ public class Logger {
             }
 
             String msg = stackTrace.getFileName() +
-                    "." +
+                    "\n" +
                     stackTrace.getMethodName() +
-                    " -> line: " + stackTrace.getLineNumber() +
+                    "() -> line: " + stackTrace.getLineNumber() +
                     (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));
 
             print(null, () -> msg, writeToFileAlso);
@@ -468,27 +468,7 @@ public class Logger {
     }
 
     public String readFileContent(File file) {
-        try {
-            FileInputStream is = new FileInputStream(file);
-            byte[] b = new byte[is.available()];
-            is.read(b);
-            String text = new String(b);
-
-            if (logConfigs.isFileContentEncryptEnabled()) {
-                if (logConfigs.fileContentEncryptionKey == null)
-                    logConfigs.fileContentEncryptionKey = DEF_ENC_KEY;
-
-                try {
-                    text = Security.getSimpleInstance(logConfigs.fileContentEncryptionKey).decrypt(text);
-                } catch (Exception e) {
-                }
-            }
-
-            return text;
-
-        } catch (Exception e) {
-            return "";
-        }
+        return createLogFileWriter(file).readFileContent();
     }
     //endregion read files
 
@@ -668,7 +648,7 @@ public class Logger {
         private final boolean enableEncryption;
         private final Integer encryptionKey;
 
-        private LogFileWriter(File file, boolean enableEncryption, Integer encryptionKey) {
+        public LogFileWriter(File file, boolean enableEncryption, Integer encryptionKey) {
             this.file = file;
             this.enableEncryption = enableEncryption;
             this.encryptionKey = encryptionKey;
@@ -735,6 +715,31 @@ public class Logger {
                 );
             } catch (Exception e) {
                 append(moreInfo);
+            }
+        }
+
+        public String readFileContent() {
+            try {
+                FileInputStream is = new FileInputStream(file);
+                byte[] b = new byte[is.available()];
+                is.read(b);
+                String text = new String(b);
+
+                if (enableEncryption) {
+                    Integer encryptionKey2 = encryptionKey;
+                    if (encryptionKey2 == null)
+                        encryptionKey2 = DEF_ENC_KEY;
+
+                    try {
+                        text = Security.getSimpleInstance(encryptionKey2).decrypt(text);
+                    } catch (Exception e) {
+                    }
+                }
+
+                return text;
+
+            } catch (Exception e) {
+                return "";
             }
         }
     }

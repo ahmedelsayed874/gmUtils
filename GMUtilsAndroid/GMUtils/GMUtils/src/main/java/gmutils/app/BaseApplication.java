@@ -2,10 +2,14 @@ package gmutils.app;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
+import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,12 +89,6 @@ public abstract class BaseApplication extends Application implements Application
 
     private int activityCount = 0;
     private final long delayAmount = 500L;
-    private final String bugFileName = "BUGS";
-    private String bugs = "";
-    private boolean hasBugs = false;
-    private boolean isBugMessageDisplayed = false;
-    private Runnable onBugMessageClosed = null;
-
     private GlobalVariables globalVariables = null;
     private MessagingCenter messagingCenter = null;
 
@@ -226,8 +224,15 @@ public abstract class BaseApplication extends Application implements Application
                 t = t.getCause();
             }
 
-            Logger.d().writeToFile(thisApp(), stack.toString(), bugFileName);
-            Logger.d().print(() -> stack.toString());
+            try {
+                File bugFile = getBugFile();
+                Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
+                fileWriter.append(stack.toString());
+            } catch (Exception e) {
+                Logger.d().writeToFile(thisApp(), stack.toString(), "BUGS");
+            }
+
+            Logger.d().print(stack::toString);
 
             try {
                 dispose();
@@ -237,39 +242,94 @@ public abstract class BaseApplication extends Application implements Application
                 defaultHandler.uncaughtException(thread, throwable);
             }
         });
+    }
 
-        if (Logger.d().getLogConfigs().isWriteToFileEnabled()) {
-            bugs = getReportedBugs();
+    private File getBugDir() {
+        File bugDir = new File(getExternalFilesDir(null), "bugs");
+        if (!bugDir.exists()) {
+            if (bugDir.mkdirs()) return bugDir;
+            else return null;
         }
+        return bugDir;
     }
 
-    //----------------------------------------------------------------------------------------------
+    private File getBugFile() {
+        File bugDir = getBugDir();
+        File bugFile = new File(bugDir, "bugs.bugs");
+        if (!bugFile.exists()) {
+            try {
+                bugFile.createNewFile();
+            } catch (Exception e) {
+                return  null;
+            }
+        }
 
-    public boolean isBugMessageDisplayed() {
-        return isBugMessageDisplayed;
-    }
-
-    public void setOnBugMessageClosedListener(Runnable action) {
-        this.onBugMessageClosed = action;
+        return bugFile;
     }
 
     //----------------------------------------------------------------------------------------------
 
     public boolean hasBugs() {
-        return hasBugs;
+        File bugDir = getBugDir();
+        if (bugDir != null) {
+            String[] list = bugDir.list();
+            return list != null && list.length > 0;
+        }
+
+        return false;
+    }
+
+    public void showBugsDialog(Context context, Runnable onDismiss) {
+        if (!hasBugs()) {
+            if (onDismiss != null) onDismiss.run();
+            return;
+        }
+
+        String bugs = getReportedBugs();
+        if (bugs.isEmpty()) {
+            if (onDismiss != null) onDismiss.run();
+            deleteBugs();
+            return;
+        }
+
+        MessageDialog.create(context)
+                .setMessage(bugs)
+                .setButton1(R.string.ok, null)
+                .setButton2(R.string.delete, dialog -> {
+                    deleteBugs();
+                })
+                .setOnDismissListener(dialog -> {
+                    if (onDismiss != null) onDismiss.run();
+                })
+                .show();
     }
 
     public String getReportedBugs() {
-        return Logger.d().readFile(thisApp(), bugFileName);
+        //return Log ger.d().readFile(thisApp(), bugFileName);
+        try {
+            return new Logger.LogFileWriter(getBugFile(), false, null).readFileContent();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public void deleteBugs() {
         try {
-            Logger.d().deleteSavedFile(thisApp(), bugFileName);
+            //Log ger.d().deleteSavedFile(thisApp(), bugFileName);
+            getBugFile().deleteOnExit();
         } catch (Exception e) {
         }
     }
 
+    //----------------------------------------------------------------------------------------------
+
+//    public boolean isBugMessageDisplayed() {
+//        return isBugMessageDisplayed;
+//    }
+
+//    public void setOnBugMessageClosedListener(Runnable action) {
+//        this.onBugMessageClosed = action;
+//    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -281,29 +341,6 @@ public abstract class BaseApplication extends Application implements Application
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (activityCount == 1) {
                 onApplicationStartedFirstActivity(activity);
-
-                if (bugs.length() != 0 && Logger.d().getLogConfigs().isWriteToFileEnabled()) {
-                    hasBugs = true;
-                    isBugMessageDisplayed = true;
-                    try {
-                        MessageDialog.create(activity)
-                                .setMessage(bugs)
-                                .setButton1(R.string.ok, null)
-                                .setButton2(R.string.delete, dialog -> {
-                                    deleteBugs();
-                                })
-                                .setOnDismissListener(dialog -> {
-                                    isBugMessageDisplayed = false;
-                                    if (onBugMessageClosed != null) onBugMessageClosed.run();
-                                    onBugMessageClosed = null;
-                                })
-                                .show();
-                    } catch (Throwable t) {
-                        isBugMessageDisplayed = false;
-                    }
-
-                    bugs = "";
-                }
             }
         }, delayAmount);
 
@@ -364,8 +401,6 @@ public abstract class BaseApplication extends Application implements Application
 
     private void dispose() {
         current = null;
-
-        onBugMessageClosed = null;
 
         if (globalVariables != null) globalVariables.clear(globalVariables.secret);
         globalVariables = null;
