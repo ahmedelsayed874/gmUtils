@@ -20,9 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import gmutils.collections.dataGroup.DataGroup1;
-import gmutils.collections.dataGroup.DataGroup2;
 import gmutils.collections.dataGroup.DataGroup3;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.RecyclerViewPaginationListener;
@@ -54,6 +51,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     private OnLoadMoreListener<T> mOnLoadMoreListener;
     private Boolean isFirstItemInitialized = false;
     private RecyclerViewPaginationListener mPaginationListener;
+
 
 
     public BaseRecyclerAdapter(RecyclerView recyclerView) {
@@ -88,6 +86,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
         registerAdapterDataObserver();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     private void setupLayout(RecyclerView recyclerView, boolean linearLayout, boolean vertical, int gridColumnCount) {
         recyclerView.post(() -> {
@@ -184,7 +184,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                         removeAt(position, true);
                     } else {
                         try {
-                            boolean delete = onDelete.invoke(new DataGroup3<>(BaseRecyclerAdapter.this, mList.get(position), position));
+                            boolean delete = onDelete.invoke(new DataGroup3<>(BaseRecyclerAdapter.this, getItem(position), position));
                             if (delete) removeAt(position, true);
                             else notifyDataSetChanged();
                         } catch (Exception e) {
@@ -224,17 +224,19 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     protected abstract void onDispose();
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public void scrollToEnd() {
         RecyclerView recyclerView = getRecyclerView();
         if (recyclerView != null) {
-            recyclerView.scrollToPosition(mList.size() - 1);
+            recyclerView.scrollToPosition(getItemCount() - 1);
         }
     }
 
     public void smoothScrollToEnd() {
         RecyclerView recyclerView = getRecyclerView();
         if (recyclerView != null) {
-            recyclerView.smoothScrollToPosition(mList.size() - 1);
+            recyclerView.smoothScrollToPosition(getItemCount() - 1);
         }
     }
 
@@ -263,10 +265,6 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void replaceList(List<T> newList, boolean refresh) {
-        changeDataSet(newList, refresh);
-    }
-
-    public void changeDataSet(List<T> newList, boolean refresh) {
         isFirstItemInitialized = false;
 
         List<T> oldList = this.mList;
@@ -284,7 +282,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             return;
         }
 
-        mList.add(item);
+        getList().add(item);
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -296,7 +294,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             if (refresh) notifyDataSetChanged();
             return;
         }
-        mList.addAll(items);
+        getList().addAll(items);
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -309,7 +307,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             return;
         }
 
-        mList.add(0, item);
+        getList().add(0, item);
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -322,7 +320,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             return;
         }
 
-        mList.addAll(0, items);
+        getList().addAll(0, items);
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -335,12 +333,12 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             return;
         }
 
-        int i = mList.indexOf(oldItem);
-        if (i >= 0) mList.remove(i);
+        List<T> list = getList();
 
-//        if (i == 0) isFirstItemInitialized = false;
+        int i = list.indexOf(oldItem);
+        if (i >= 0) list.remove(i);
 
-        mList.add(i, newItem);
+        list.add(i, newItem);
 
         if (refresh) notifyDataSetChanged();
 
@@ -354,7 +352,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             return;
         }
 
-        mList.add(position, item);
+        getList().add(position, item);
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -366,8 +364,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             if (refresh) notifyDataSetChanged();
             return;
         }
-        int position = mList.indexOf(item);
-        mList.remove(position);
+        int position = getList().indexOf(item);
+        getList().remove(position);
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -376,8 +374,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     public void removeAt(int position, boolean refresh) {
         try {
-            T item = mList.get(position);
-            mList.remove(position);
+            T item = getList().get(position);
+            getList().remove(position);
             if (refresh) notifyDataSetChanged();
 
             if (mOnListItemsChangedListener != null)
@@ -393,7 +391,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
             if (refresh) notifyDataSetChanged();
             return;
         }
-        mList.removeAll(items);
+        getList().removeAll(items);
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -427,9 +425,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         int i = firstIndex;
         while (i <= lastIndex) {
             if (removedItems != null) {
-                removedItems.add(mList.get(firstIndex));
+                removedItems.add(getList().get(firstIndex));
             }
-            mList.remove(firstIndex);
+            getList().remove(firstIndex);
             i++;
         }
 
@@ -442,7 +440,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     public void clear(boolean refresh) {
         isFirstItemInitialized = false;
 
-        mList.clear();
+        getList().clear();
         if (refresh) notifyDataSetChanged();
 
         if (mOnListItemsChangedListener != null)
@@ -450,12 +448,13 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public T getItem(int position) {
-        if (position < mList.size()) return mList.get(position);
+        if (position < getList().size()) return getList().get(position);
         return null;
     }
 
     public boolean hasItem(@NotNull ActionCallback<T, Boolean> comparator) {
-        for (T it : mList) {
+        List<T> list = getList();
+        for (T it : list) {
             if (comparator.invoke(it)) return true;
         }
 
@@ -463,11 +462,12 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public boolean hasItem(T item) {
-        return mList.contains(item);
+        return getList().contains(item);
     }
 
     public boolean hasItems() {
-        return (mList != null && mList.size() > 0);
+        List<T> list = getList();
+        return (list != null && list.size() > 0);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -539,7 +539,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     @Override
     public int getItemCount() {
-        return mList.size();
+        return getList().size();
     }
 
     @Override
@@ -584,7 +584,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     @Override
     public void onBindViewHolder(@NotNull ViewHolder holder, int position) {
-        holder.setValuesInner(mList.get(position), position);
+        holder.setValuesInner(getItem(position), position);
 
         if (mOnLoadMoreListener != null) {
             try {
@@ -688,7 +688,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         protected abstract void setValues(T item);
 
         public T getItem() {
-            return mList.get(itemPosition);
+            return BaseRecyclerAdapter.this.getItem(itemPosition);
         }
 
         public int getItemPosition() {
