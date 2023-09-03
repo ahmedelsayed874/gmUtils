@@ -51,7 +51,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     private OnLoadMoreListener<T> mOnLoadMoreListener;
     private Boolean isFirstItemInitialized = false;
     private RecyclerViewPaginationListener mPaginationListener;
-
+    private boolean enableEndlessScroll = false;
 
 
     public BaseRecyclerAdapter(RecyclerView recyclerView) {
@@ -196,6 +196,14 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
             touchHelper.attachToRecyclerView(recyclerView);
         }
+    }
+
+    public void setEnableEndlessScroll(boolean enableEndlessScroll) {
+        this.enableEndlessScroll = enableEndlessScroll;
+    }
+
+    public boolean isEnableEndlessScroll() {
+        return enableEndlessScroll;
     }
 
     @Nullable
@@ -448,7 +456,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public T getItem(int position) {
-        if (position < getList().size()) return getList().get(position);
+        int size = getList().size();
+        if (enableEndlessScroll) position = position % size;
+        if (position < size) return getList().get(position);
         return null;
     }
 
