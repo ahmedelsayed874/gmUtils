@@ -52,6 +52,16 @@ public class Utils {
 
     //----------------------------------------------------------------------------------------------
 
+    public boolean isDeveloperOptionsModeEnabled(ContentResolver contentResolver) {
+        int x = Settings.Secure.getInt(
+                contentResolver,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                0
+        );
+
+        return x != 0;
+    }
+
     public long generateRandomId() {
         Calendar refDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         refDate.set(2020, 5, 1, 0, 0, 0);
