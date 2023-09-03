@@ -102,11 +102,11 @@ public class GeneralStorage {
                 list.add(v);
         }
 
-        saveListHelper(listName, list);
+        saveCollectionHelper(listName, list);
     }
 
 
-    private void saveListHelper(String listName, Collection<String> data) {
+    private void saveCollectionHelper(String listName, Collection<String> data) {
         try {
             JSONArray jsonArray = new JSONArray();
 
@@ -136,7 +136,7 @@ public class GeneralStorage {
             set.add(v);
         }
 
-        saveListHelper(setName, set);
+        saveCollectionHelper(setName, set);
     }
 
     //---------------------------------------------------------------------
@@ -177,8 +177,26 @@ public class GeneralStorage {
         List<String> list = retrieveList(listName);
 
         while (list.remove(value));
-        saveListHelper(listName, list);
+        saveCollectionHelper(listName, list);
 
+    }
+
+    public void removeFromSet(String setName, String value) {
+        Set<String> list = retrieveSet(setName);
+
+        list.remove(value);
+        saveCollectionHelper(setName, list);
+
+    }
+
+    //---------------------------------------------------------------------
+
+    public void clearList(String listName) {
+        remove(listName);
+    }
+
+    public void clearSet(String listName) {
+        remove(listName);
     }
 
 }
