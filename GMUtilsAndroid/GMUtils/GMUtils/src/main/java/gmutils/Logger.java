@@ -250,7 +250,10 @@ public class Logger {
         if (writeToFileAlso) {
             if (BaseApplication.current() != null) {
                 try {
-                    writeToFile(BaseApplication.current(), content);//, "APP_LOGS");
+                    String title2 = "";
+                    if (title != null) title2 = "<<|(" + title.getTitle() + ")|>>\n";
+
+                    writeToFile(BaseApplication.current(), title2 + content);//, "APP_LOGS");
                 } catch (Exception e) {
                 }
             }
@@ -259,27 +262,52 @@ public class Logger {
 
     //----------------
 
+    //region printMethod
     public void printMethod() {
-        printMethod(null, logConfigs.isWriteLogsToFileEnabled(), 0);
+        printMethod(null, null, logConfigs.isWriteLogsToFileEnabled(), 0);
+    }
+
+    public void printMethod(TitleGetter title) {
+        printMethod(title, null, logConfigs.isWriteLogsToFileEnabled(), 0);
     }
 
     public void printMethod(int exceptionIndexTuner) {
-        printMethod(null, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
+        printMethod(null, null, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
+    }
+
+    public void printMethod(TitleGetter title, int exceptionIndexTuner) {
+        printMethod(title, null, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
     }
 
     public void printMethod(ContentGetter moreInfoCallback) {
-        printMethod(moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), 0);
+        printMethod(null, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), 0);
+    }
+
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback) {
+        printMethod(title, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), 0);
     }
 
     public void printMethod(ContentGetter moreInfoCallback, int exceptionIndexTuner) {
-        printMethod(moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
+        printMethod(null, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
+    }
+
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, int exceptionIndexTuner) {
+        printMethod(title, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), exceptionIndexTuner);
     }
 
     public void printMethod(ContentGetter moreInfoCallback, boolean writeToFileAlso) {
-        printMethod(moreInfoCallback, writeToFileAlso, 0);
+        printMethod(null, moreInfoCallback, writeToFileAlso, 0);
+    }
+
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, boolean writeToFileAlso) {
+        printMethod(title, moreInfoCallback, writeToFileAlso, 0);
     }
 
     public void printMethod(ContentGetter moreInfoCallback, boolean writeToFileAlso, int exceptionIndexTuner) {
+        printMethod(null, moreInfoCallback, writeToFileAlso, exceptionIndexTuner);
+    }
+
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, boolean writeToFileAlso, int exceptionIndexTuner) {
         try {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             StackTraceElement stackTrace = null;
@@ -307,11 +335,12 @@ public class Logger {
                     "() -> line: " + stackTrace.getLineNumber() +
                     (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));
 
-            print(null, () -> msg, writeToFileAlso);
+            print(title, () -> msg, writeToFileAlso);
         } catch (Exception e) {
             print(null, e::toString, writeToFileAlso);
         }
     }
+    //endregion
 
     //----------------------------------------------------------------------------------------------
 
