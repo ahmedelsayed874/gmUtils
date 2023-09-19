@@ -590,6 +590,7 @@ public class Logger {
     private String sessionId() {
         if (_sessionId == null) {
             _sessionId = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
+            if (!logId().isEmpty()) _sessionId = logId() + "_" + _sessionId;
         }
         return _sessionId;
     }
