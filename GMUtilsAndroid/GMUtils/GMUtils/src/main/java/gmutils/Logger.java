@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
@@ -678,10 +679,53 @@ public class Logger {
 
     //----------------------------------------------------------------------------------------------
 
+    private LogFileWriter createLogFileWriter(File destinationFile) {
+        return new LogFileWriter(
+                destinationFile,
+                logConfigs.isFileContentEncryptEnabled(),
+                logConfigs.fileContentEncryptionKey
+        );
+    }
+
+    private LogFileWriter createLogFileWriter(Context context, String fileName) {
+        File file = TextUtils.isEmpty(fileName) ?
+                createOrGetLogFile(context) :
+                createOrGetLogFile(context, fileName);
+
+        return new LogFileWriter(
+                file,
+                logConfigs.isFileContentEncryptEnabled(),
+                logConfigs.fileContentEncryptionKey
+        );
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     public static class LogFileWriter {
-        private final File file;
-        private final boolean enableEncryption;
-        private final Integer encryptionKey;
+        public final File file;
+        public final boolean enableEncryption;
+        public final Integer encryptionKey;
+
+        public LogFileWriter(Context context, @Nullable String dirName, @NotNull String fileName, boolean enableEncryption, Integer encryptionKey) {
+            File root = context.getExternalFilesDir(null);
+            if (dirName != null && !dirName.isEmpty()) {
+                root = new File(root, dirName);
+                if (!root.exists()) root.mkdirs();
+            }
+
+            File file = new File(root, fileName);
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            this.file = file;
+            this.enableEncryption = enableEncryption;
+            this.encryptionKey = encryptionKey;
+        }
 
         public LogFileWriter(File file, boolean enableEncryption, Integer encryptionKey) {
             this.file = file;
@@ -777,36 +821,6 @@ public class Logger {
                 return "";
             }
         }
-    }
-
-    public LogFileWriter createLogFileWriter(File destinationFile) {
-        return new LogFileWriter(
-                destinationFile,
-                logConfigs.isFileContentEncryptEnabled(),
-                logConfigs.fileContentEncryptionKey
-        );
-    }
-
-    public LogFileWriter createLogFileWriter(Context context, String fileName) {
-        File file = TextUtils.isEmpty(fileName) ?
-                createOrGetLogFile(context) :
-                createOrGetLogFile(context, fileName);
-
-        return new LogFileWriter(
-                file,
-                logConfigs.isFileContentEncryptEnabled(),
-                logConfigs.fileContentEncryptionKey
-        );
-    }
-
-    public LogFileWriter createLogFileWriter(Context context, String dirName, String fileName) {
-        File file = createOrGetLogFile(context, dirName, fileName);
-
-        return new LogFileWriter(
-                file,
-                logConfigs.isFileContentEncryptEnabled(),
-                logConfigs.fileContentEncryptionKey
-        );
     }
 
 }
