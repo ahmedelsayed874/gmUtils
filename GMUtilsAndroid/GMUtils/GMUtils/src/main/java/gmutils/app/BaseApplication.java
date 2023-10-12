@@ -269,25 +269,15 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
-    public boolean hasBugs() {
-        File bugDir = getBugDir();
-        if (bugDir != null) {
-            String[] list = bugDir.list();
-            return list != null && list.length > 0;
-        }
-
-        return false;
-    }
-
-    public void showBugsDialog(Context context, Runnable onDismiss) {
+    public void checkBugsExist(Context context, Runnable onComplete) {
         if (!hasBugs()) {
-            if (onDismiss != null) onDismiss.run();
+            if (onComplete != null) onComplete.run();
             return;
         }
 
         String bugs = getReportedBugs();
         if (bugs.isEmpty()) {
-            if (onDismiss != null) onDismiss.run();
+            if (onComplete != null) onComplete.run();
             deleteBugs();
             return;
         }
@@ -299,15 +289,28 @@ public abstract class BaseApplication extends Application implements Application
                     deleteBugs();
                 })
                 .setOnDismissListener(dialog -> {
-                    if (onDismiss != null) onDismiss.run();
+                    if (onComplete != null) onComplete.run();
                 })
                 .show();
     }
 
+    public boolean hasBugs() {
+        File bugDir = getBugDir();
+        if (bugDir != null) {
+            String[] list = bugDir.list();
+            return list != null && list.length > 0;
+        }
+
+        return false;
+    }
+
     public String getReportedBugs() {
-        //return Log ger.d().readFile(thisApp(), bugFileName);
         try {
-            return new Logger.LogFileWriter(getBugFile(), false, null).readFileContent();
+            return new Logger.LogFileWriter(
+                    getBugFile(),
+                    Logger.d().getLogConfigs().isFileContentEncryptEnabled(),
+                    Logger.d().getLogConfigs().getFileContentEncryptionKey()
+            ).readFileContent();
         } catch (Exception e) {
             return "";
         }
@@ -315,21 +318,19 @@ public abstract class BaseApplication extends Application implements Application
 
     public void deleteBugs() {
         try {
-            //Log ger.d().deleteSavedFile(thisApp(), bugFileName);
-            getBugFile().deleteOnExit();
+            boolean b = getBugFile().delete();
+            Log.d(getClass().getSimpleName(), "deleteBugs: isBugFileDeleted: " + b);
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            boolean b = getBugDir().delete();
+            Log.d(getClass().getSimpleName(), "deleteBugs: isBugDirDeleted: " + b);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-
-    //----------------------------------------------------------------------------------------------
-
-//    public boolean isBugMessageDisplayed() {
-//        return isBugMessageDisplayed;
-//    }
-
-//    public void setOnBugMessageClosedListener(Runnable action) {
-//        this.onBugMessageClosed = action;
-//    }
 
     //----------------------------------------------------------------------------------------------
 

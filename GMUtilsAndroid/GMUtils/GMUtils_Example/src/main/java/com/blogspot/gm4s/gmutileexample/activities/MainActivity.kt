@@ -17,6 +17,7 @@ import gmutils.Activities
 import gmutils.DateOp
 import gmutils.Intents
 import gmutils.LooperThread
+import gmutils.app.BaseApplication
 import gmutils.net.SimpleHTTPRequest
 import gmutils.net.volley.example.URLs.TimeURLs
 import gmutils.ui.activities.BaseActivity
@@ -213,6 +214,11 @@ class MainActivity : BaseActivity() {
 
         this.view.logTv.viewTreeObserver.addOnGlobalLayoutListener {
             this.view.logSection.scrollTo(0, this.view.logTv.height - 1)
+        }
+
+        //val bug = 1 / 0
+        (application as BaseApplication).checkBugsExist(this) {
+            Log.d(this::class.java.name, "onCreate: ")
         }
     }
 

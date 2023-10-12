@@ -7,7 +7,7 @@
         tools:ignore="ProtectedPermissions" />
 
     <application
-        android:name=".app.AndroidApplicationAndBaseApplication"
+        android:name=".app.BaseApplicationExample"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
