@@ -127,6 +127,11 @@ public class Logger {
         }
         //endregion check enable status
 
+
+        public Integer getFileContentEncryptionKey() {
+            return fileContentEncryptionKey;
+        }
+
         @Override
         public String toString() {
             return "LogConfigs{" +
@@ -589,7 +594,7 @@ public class Logger {
 
     private String sessionId() {
         if (_sessionId == null) {
-            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmm", Locale.ENGLISH).format(new Date());
+            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ENGLISH).format(new Date());
             if (!logId().isEmpty()) _sessionId = logId() + "_" + _sessionId;
         }
         return _sessionId;
