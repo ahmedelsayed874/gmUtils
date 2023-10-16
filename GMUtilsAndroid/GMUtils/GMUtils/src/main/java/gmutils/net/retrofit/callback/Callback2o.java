@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.Map;
 
 import gmutils.Logger;
+import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import okhttp3.Request;
@@ -40,7 +41,16 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady
     ) {
-        this.callbackOperations = new CallbackOperations<>(request, responseClass, Callback2o.this::setResult);
+        this(request, responseClass, onResponseReady, null);
+    }
+
+    public Callback2o(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady2o<DT, R> onResponseReady,
+            Logger logger
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2o.this::setResult, logger);
         this.onResponseReady = onResponseReady;
     }
 
@@ -49,7 +59,16 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady
     ) {
-        this.callbackOperations = new CallbackOperations<>(requestInfo, responseClass, Callback2o.this::setResult);
+        this(requestInfo, responseClass, onResponseReady, null);
+    }
+
+    public Callback2o(
+            String requestInfo,
+            Class<R> responseClass,
+            OnResponseReady2o<DT, R> onResponseReady,
+            Logger logger
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback2o.this::setResult, logger);
         this.onResponseReady = onResponseReady;
     }
 

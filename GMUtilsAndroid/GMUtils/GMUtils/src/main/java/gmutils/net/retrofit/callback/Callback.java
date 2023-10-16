@@ -23,7 +23,10 @@ import retrofit2.Call;
  * +201022663988
  */
 public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
-    public static Logger getLogger() { return CallbackOperations.getLogger(); }
+    public static Logger getLogger() {
+        return CallbackOperations.getLogger();
+    }
+
     public static void setLogger(Logger logger) {
         CallbackOperations.setLogger(logger);
     }
@@ -37,7 +40,16 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady
     ) {
-        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult);
+        this(request, responseClass, onResponseReady, null);
+    }
+
+    public Callback(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady,
+            Logger logger
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult, logger);
         this.onResponseReady = onResponseReady;
     }
 
@@ -46,7 +58,16 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady
     ) {
-        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult);
+        this(requestInfo, responseClass, onResponseReady, null);
+    }
+
+    public Callback(
+            String requestInfo,
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady,
+            Logger logger
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult, logger);
         this.onResponseReady = onResponseReady;
     }
 

@@ -55,13 +55,12 @@ public final class CallbackOperations<R extends BaseResponse> {
     private final long requestTime;
 
 
-    public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener) {
+    /*public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener) {
         this(request, responseClass, listener, null);
     }
-
     public CallbackOperations(String requestInfo, Class<R> responseClass, Listener<R> listener) {
         this(requestInfo, responseClass, listener, null);
-    }
+    }*/
 
     public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener, Logger logger) {
         this(request.toString(), responseClass, listener, logger);
