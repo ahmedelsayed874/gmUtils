@@ -43,6 +43,18 @@ import gmutils.utils.Utils;
  * 'com.android.volley:volley:1.1.1'
  */
 public class ApiManager {
+    private static Logger _logger = null;
+    public static Logger getLogger() { return _logger; }
+    public static void setLogger(Logger logger) {
+        _logger = logger;
+    }
+    static Logger logger() {
+        if (_logger == null) return Logger.d();
+        else return _logger;
+    }
+
+    //---------------------------------------------
+
     private WeakReference<Activity> mActivity;
     private WeakReference<Fragment> mFragment;
     private WeakReference<android.app.Fragment> mFragment2;

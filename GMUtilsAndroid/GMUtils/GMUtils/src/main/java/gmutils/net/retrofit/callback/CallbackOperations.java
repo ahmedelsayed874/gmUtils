@@ -25,6 +25,23 @@ import retrofit2.Call;
  * +201022663988
  */
 public final class CallbackOperations<R extends BaseResponse> {
+    private static Logger _logger = null;
+
+    public static Logger getLogger() {
+        return _logger;
+    }
+
+    public static void setLogger(Logger logger) {
+        _logger = logger;
+    }
+
+    private static Logger logger() {
+        if (_logger == null) return Logger.d();
+        else return _logger;
+    }
+
+    //---------------------------------------------
+
     interface Listener<R> {
         void onResponseReady(R response);
     }
@@ -33,29 +50,33 @@ public final class CallbackOperations<R extends BaseResponse> {
     private Listener<R> listener;
     private Map<String, Object> extras;
     private CallbackErrorHandler errorListener;
+    private Logger logger = null;
 
     private final long requestTime;
 
 
     public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener) {
-        this("", responseClass, listener);
-        try {
-            if (Logger.d().getLogConfigs().isLogEnabled())
-                Logger.d().print(() -> "API:Request:", () -> request.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this(request, responseClass, listener, null);
     }
 
     public CallbackOperations(String requestInfo, Class<R> responseClass, Listener<R> listener) {
+        this(requestInfo, responseClass, listener, null);
+    }
+
+    public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener, Logger logger) {
+        this(request.toString(), responseClass, listener, logger);
+    }
+
+    public CallbackOperations(String requestInfo, Class<R> responseClass, Listener<R> listener, Logger logger) {
         this.responseClass = responseClass;
         this.listener = listener;
+        this.logger = logger != null ? logger : logger();
 
         this.requestTime = System.currentTimeMillis();
 
         if (requestInfo != null && !"".equals(requestInfo))
-            if (Logger.d().getLogConfigs().isLogEnabled())
-                Logger.d().print(() -> "API:Request:", () -> requestInfo);
+            if (this.logger.getLogConfigs().isLogEnabled())
+                this.logger.print(() -> "API:Request:", () -> requestInfo);
 
         try {
             responseClass.newInstance();
@@ -167,8 +188,8 @@ public final class CallbackOperations<R extends BaseResponse> {
     }
 
     private void setResult(R result, Map<String, List<String>> headers) {
-        if (Logger.d().getLogConfigs().isLogEnabled()) {
-            Logger.d().print(
+        if (this.logger.getLogConfigs().isLogEnabled()) {
+            this.logger.print(
                     () -> "EXTRA_INFO:",
                     () -> "[callbackStatus=" + result.getCallbackStatus() +
                             ", responseStatus=" + result.getResponseStatus() + "]"
@@ -192,7 +213,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     //----------------------------------------------------------------------------------------------
 
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response, String errorBody) {
-        if (!Logger.d().getLogConfigs().isLogEnabled()) return;
+        if (!this.logger.getLogConfigs().isLogEnabled()) return;
 
         String url = "";
 
@@ -215,7 +236,7 @@ public final class CallbackOperations<R extends BaseResponse> {
         if (response != null) {
             String finalUrl = url;
             String finalExtrasString = extrasString;
-            Logger.d().print(
+            this.logger.print(
                     () -> "API:Response:",
                     () -> "url: <" + finalUrl + ">," +
                             "\nresponseType: " + responseType + ", " +
@@ -228,7 +249,7 @@ public final class CallbackOperations<R extends BaseResponse> {
         } else {
             String finalUrl1 = url;
             String finalExtrasString1 = extrasString;
-            Logger.d().print(
+            this.logger.print(
                     () -> "API:Response:",
                     () -> "url: <" + finalUrl1 + ">," +
                             "\nresponseType: " + responseType + ", " +

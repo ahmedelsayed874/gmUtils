@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.util.Map;
 
+import gmutils.Logger;
 import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import okhttp3.Request;
@@ -25,6 +26,10 @@ import retrofit2.Call;
     use this when Response hold data inside it
  */
 public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit2.Callback<R> {
+    public static Logger getLogger() { return CallbackOperations.getLogger(); }
+    public static void setLogger(Logger logger) {
+        CallbackOperations.setLogger(logger);
+    }
 
     private CallbackOperations<R> callbackOperations;
     private OnResponseReady2<DT> onResponseReady;

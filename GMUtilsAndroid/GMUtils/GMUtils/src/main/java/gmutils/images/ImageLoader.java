@@ -56,6 +56,19 @@ import gmutils.app.BaseApplication;
  * 'com.squareup.picasso:picasso:2.5.2'
  */
 public class ImageLoader {
+
+    private static Logger _logger = null;
+    public static Logger getLogger() { return _logger; }
+    public static void setLogger(Logger logger) {
+        _logger = logger;
+    }
+    private static Logger logger() {
+        if (_logger == null) return Logger.d();
+        else return _logger;
+    }
+
+    //---------------------------------------------
+
     @SuppressLint("StaticFieldLeak")
     private static volatile Picasso INSTANCE;
     private static final Map<String, List<LoaderCallback>> currentRequests = new HashMap<>();
@@ -152,7 +165,7 @@ public class ImageLoader {
 
         if (currentRequests.containsKey(url)) {
             String finalUrl = url;
-            Logger.d().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl + " already IN-PROGRESS");
+            logger().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl + " already IN-PROGRESS");
 
             List<LoaderCallback> pendingRequests = currentRequests.get(url);
             if (pendingRequests == null) pendingRequests = new ArrayList<>();
@@ -163,7 +176,7 @@ public class ImageLoader {
         } else {
             currentRequests.put(url, null);
             String finalUrl1 = url;
-            Logger.d().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl1 + " will start");
+            logger().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl1 + " will start");
         }
 
         RequestCreator request = picasso.load(url);
@@ -299,7 +312,7 @@ public class ImageLoader {
 
                 if (loaderCallback2.imageView != null) {
                     imageViewDrawable = loaderCallback2.imageView.getDrawable();
-                    Logger.d().print(ImageLoader.class::getSimpleName, () -> "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
+                    logger().print(ImageLoader.class::getSimpleName, () -> "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
                 }
 
                 if (imageViewDrawable != null) {
@@ -346,19 +359,19 @@ public class ImageLoader {
                 imageView.setScaleType(options.loadingScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                Logger.d().print(() -> e.getMessage());
+                logger().print(() -> e.getMessage());
             }
         }
 
         public void onSuccess() {
-            Logger.d().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " COMPLETED");
+            logger().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " COMPLETED");
             onComplete(true);
 
             try {
                 imageView.setScaleType(options.successScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                Logger.d().print(() -> e.getMessage());
+                logger().print(() -> e.getMessage());
             }
 
             if (outerCallback != null) {
@@ -369,14 +382,14 @@ public class ImageLoader {
         }
 
         public void onError() {
-            Logger.d().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " FAILED");
+            logger().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " FAILED");
             onComplete(false);
 
             try {
                 imageView.setScaleType(options.errorScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                Logger.d().print(() -> e.getMessage());
+                logger().print(() -> e.getMessage());
             }
 
             if (outerCallback != null) {
@@ -586,7 +599,7 @@ public class ImageLoader {
             byte[] bytes = Base64.decode(base64Encoded, Base64.DEFAULT);
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         } catch (Exception e) {
-            Logger.d().print(e);
+            logger().print(e);
         }
 
         return bitmap;

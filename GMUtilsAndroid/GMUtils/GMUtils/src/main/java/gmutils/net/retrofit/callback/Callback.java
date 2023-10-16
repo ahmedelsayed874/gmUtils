@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.util.Map;
 
+import gmutils.Logger;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 import okhttp3.Request;
@@ -22,6 +23,11 @@ import retrofit2.Call;
  * +201022663988
  */
 public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
+    public static Logger getLogger() { return CallbackOperations.getLogger(); }
+    public static void setLogger(Logger logger) {
+        CallbackOperations.setLogger(logger);
+    }
+
 
     private CallbackOperations<R> callbackOperations;
     private OnResponseReady<R> onResponseReady;

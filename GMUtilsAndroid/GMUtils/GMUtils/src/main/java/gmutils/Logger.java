@@ -157,6 +157,7 @@ public class Logger {
     }
 
     public static Logger instance(String logId) {
+        if (logId != null && logId.isEmpty()) logId = null;
         if (_instances == null) _instances = new HashMap<>();
         if (!_instances.containsKey(logId)) _instances.put(logId, new Logger(logId));
         return _instances.get(logId);

@@ -56,6 +56,16 @@ import gmutils.storage.SettingsStorage;
  * 'com.android.volley:volley:1.1.1'
  */
 public class ApiRequestCreator {
+    public static Logger getLogger() { return ApiManager.getLogger(); }
+    public static void setLogger(Logger logger) {
+        ApiManager.setLogger(logger);
+    }
+    private static Logger logger() {
+        return ApiManager.logger();
+    }
+
+    //---------------------------------------------
+
     private static ApiRequestCreator mInstance;
     private final RequestQueue mRequestQueue;
     private boolean disableCache = true; //use this boolean to enable or disable cache feature
