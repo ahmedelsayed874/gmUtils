@@ -549,7 +549,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     @Override
     public int getItemCount() {
-        return getList().size();
+        return enableEndlessScroll ? Integer.MAX_VALUE : getList().size();
     }
 
     @Override
