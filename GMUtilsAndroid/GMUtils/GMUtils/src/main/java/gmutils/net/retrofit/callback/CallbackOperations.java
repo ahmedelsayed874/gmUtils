@@ -2,6 +2,7 @@ package gmutils.net.retrofit.callback;
 
 import android.text.TextUtils;
 
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,18 +56,23 @@ public final class CallbackOperations<R extends BaseResponse> {
     private final long requestTime;
 
 
-    /*public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener) {
-        this(request, responseClass, listener, null);
+    public CallbackOperations(
+            Request request,
+            Class<R> responseClass,
+            Listener<R> listener,
+            Logger logger,
+            String[] excludedTextsFromLog
+    ) {
+        this(request.toString(), responseClass, listener, logger, excludedTextsFromLog);
     }
-    public CallbackOperations(String requestInfo, Class<R> responseClass, Listener<R> listener) {
-        this(requestInfo, responseClass, listener, null);
-    }*/
 
-    public CallbackOperations(Request request, Class<R> responseClass, Listener<R> listener, Logger logger) {
-        this(request.toString(), responseClass, listener, logger);
-    }
-
-    public CallbackOperations(String requestInfo, Class<R> responseClass, Listener<R> listener, Logger logger) {
+    public CallbackOperations(
+            String requestInfo,
+            Class<R> responseClass,
+            Listener<R> listener,
+            Logger logger,
+            String[] excludedTextsFromLog
+    ) {
         this.responseClass = responseClass;
         this.listener = listener;
         this.logger = logger != null ? logger : logger();
@@ -74,9 +80,15 @@ public final class CallbackOperations<R extends BaseResponse> {
         this.requestTime = System.currentTimeMillis();
 
         if (requestInfo != null && !"".equals(requestInfo))
-            if (this.logger.getLogConfigs().isLogEnabled())
-                this.logger.print(() -> "API:Request:", () -> requestInfo);
-
+            this.logger.print(() -> "API:Request:", () -> {
+                String txt = requestInfo;
+                if (excludedTextsFromLog != null) {
+                    for (String t : excludedTextsFromLog) {
+                        txt = txt.replaceAll(t, "##########");
+                    }
+                }
+                return txt;
+            });
         try {
             responseClass.newInstance();
         } catch (Exception e) {

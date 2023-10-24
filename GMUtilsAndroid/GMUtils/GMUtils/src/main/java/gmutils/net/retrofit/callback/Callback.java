@@ -44,16 +44,6 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     }
 
     public Callback(
-            Request request,
-            Class<R> responseClass,
-            OnResponseReady<R> onResponseReady,
-            Logger logger
-    ) {
-        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult, logger);
-        this.onResponseReady = onResponseReady;
-    }
-
-    public Callback(
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady
@@ -62,12 +52,54 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     }
 
     public Callback(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady,
+            Logger logger
+    ) {
+        this(
+                request,
+                responseClass,
+                onResponseReady,
+                logger,
+                null
+        );
+    }
+
+    public Callback(
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
             Logger logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult, logger);
+        this(
+                requestInfo,
+                responseClass,
+                onResponseReady,
+                logger,
+                null
+        );
+    }
+
+    public Callback(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady,
+            Logger logger,
+            String[] excludedTextsFromLog
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult, logger, excludedTextsFromLog);
+        this.onResponseReady = onResponseReady;
+    }
+
+    public Callback(
+            String requestInfo,
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady,
+            Logger logger,
+            String[] excludedTextsFromLog
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult, logger, excludedTextsFromLog);
         this.onResponseReady = onResponseReady;
     }
 

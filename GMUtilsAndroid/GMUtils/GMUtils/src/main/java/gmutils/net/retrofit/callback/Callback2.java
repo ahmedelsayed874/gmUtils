@@ -27,7 +27,10 @@ import retrofit2.Call;
     use this when Response hold data inside it
  */
 public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit2.Callback<R> {
-    public static Logger getLogger() { return CallbackOperations.getLogger(); }
+    public static Logger getLogger() {
+        return CallbackOperations.getLogger();
+    }
+
     public static void setLogger(Logger logger) {
         CallbackOperations.setLogger(logger);
     }
@@ -45,16 +48,6 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
     }
 
     public Callback2(
-            Request request,
-            Class<R> responseClass,
-            OnResponseReady2<DT> onResponseReady,
-            Logger logger
-    ) {
-        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2.this::setResult, logger);
-        this.onResponseReady = onResponseReady;
-    }
-
-    public Callback2(
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady
@@ -63,12 +56,54 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
     }
 
     public Callback2(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady2<DT> onResponseReady,
+            Logger logger
+    ) {
+        this(
+                request,
+                responseClass,
+                onResponseReady,
+                logger,
+                null
+        );
+    }
+
+    public Callback2(
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady,
             Logger logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback2.this::setResult, logger);
+        this(
+                requestInfo,
+                responseClass,
+                onResponseReady,
+                logger,
+                null
+        );
+    }
+
+    public Callback2(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady2<DT> onResponseReady,
+            Logger logger,
+            String[] excludedTextsFromLog
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2.this::setResult, logger, excludedTextsFromLog);
+        this.onResponseReady = onResponseReady;
+    }
+
+    public Callback2(
+            String requestInfo,
+            Class<R> responseClass,
+            OnResponseReady2<DT> onResponseReady,
+            Logger logger,
+            String[] excludedTextsFromLog
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback2.this::setResult, logger, excludedTextsFromLog);
         this.onResponseReady = onResponseReady;
     }
 
