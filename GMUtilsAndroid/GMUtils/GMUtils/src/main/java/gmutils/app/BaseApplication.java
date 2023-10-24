@@ -152,7 +152,8 @@ public abstract class BaseApplication extends Application implements Application
         onPostCreate();
     }
 
-    protected void onPostCreate() {}
+    protected void onPostCreate() {
+    }
 
     private void printRecommendedResources() {
         String colors =
@@ -225,9 +226,12 @@ public abstract class BaseApplication extends Application implements Application
             }
 
             try {
-                File bugFile = getBugFile();
-                Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
-                fileWriter.append(stack.toString());
+                Logger.LogConfigs logConfigs = Logger.d().getLogConfigs();
+                if (logConfigs.isWriteToFileEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
+                    File bugFile = getBugFile();
+                    Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
+                    fileWriter.append(stack.toString());
+                }
             } catch (Exception e) {
                 Logger.d().writeToFile(thisApp(), stack.toString(), "BUGS");
             }
@@ -236,7 +240,8 @@ public abstract class BaseApplication extends Application implements Application
 
             try {
                 dispose();
-            } catch (Throwable ignore) {}
+            } catch (Throwable ignore) {
+            }
 
             if (defaultHandler != null) {
                 defaultHandler.uncaughtException(thread, throwable);
@@ -260,7 +265,7 @@ public abstract class BaseApplication extends Application implements Application
             try {
                 bugFile.createNewFile();
             } catch (Exception e) {
-                return  null;
+                return null;
             }
         }
 
@@ -375,7 +380,8 @@ public abstract class BaseApplication extends Application implements Application
             if (activityCount <= 0) {
                 onApplicationFinishedLastActivity(activity);
 
-                if (onApplicationFinishedLastActivity != null) onApplicationFinishedLastActivity.run();
+                if (onApplicationFinishedLastActivity != null)
+                    onApplicationFinishedLastActivity.run();
 
                 activityCount = 0;
 
@@ -386,9 +392,11 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
-    protected void onApplicationStartedFirstActivity(Activity activity) {}
+    protected void onApplicationStartedFirstActivity(Activity activity) {
+    }
 
-    protected void onApplicationFinishedLastActivity(Activity activity) {}
+    protected void onApplicationFinishedLastActivity(Activity activity) {
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -414,6 +422,7 @@ public abstract class BaseApplication extends Application implements Application
         onDispose();
     }
 
-    protected void onDispose() {}
+    protected void onDispose() {
+    }
 
 }
