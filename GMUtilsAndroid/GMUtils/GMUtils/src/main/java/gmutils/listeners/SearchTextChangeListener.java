@@ -6,7 +6,7 @@ import android.text.TextUtils;
 
 import java.lang.ref.WeakReference;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

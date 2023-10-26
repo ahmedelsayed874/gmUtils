@@ -9,14 +9,13 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.MessagingCenter;
 import gmutils.R;
 import gmutils.storage.StorageManager;

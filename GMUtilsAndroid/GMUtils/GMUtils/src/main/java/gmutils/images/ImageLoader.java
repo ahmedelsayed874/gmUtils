@@ -35,8 +35,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.app.BaseApplication;
+import gmutils.logger.LoggerAbs;
 
 
 /**
@@ -75,7 +76,7 @@ public class ImageLoader {
         return instance(null);
     }
 
-    public static ImageLoader instance(Logger logger) {
+    public static ImageLoader instance(LoggerAbs logger) {
         synchronized (ImageLoader.class) {
             if (_instance == null) {
                 _instance = new ImageLoader(logger);
@@ -86,9 +87,9 @@ public class ImageLoader {
 
     //--------------------------------------------------
 
-    private final Logger logger;
+    private final LoggerAbs logger;
 
-    private ImageLoader(Logger logger) {
+    private ImageLoader(LoggerAbs logger) {
         this.logger = logger != null ? logger : Logger.d();
     }
 
@@ -291,14 +292,14 @@ public class ImageLoader {
 
     private static class LoaderCallback implements com.squareup.picasso.Callback, LoaderCallback2.Delegate {
         private LoaderCallback2 loaderCallback2;
-        private final Logger logger;
+        private final LoggerAbs logger;
 
 
         public LoaderCallback(String imgUrl, ImageView imageView, Options options, Callback outerCallback) {
             this(imgUrl, imageView, options, outerCallback, Logger.d());
         }
 
-        public LoaderCallback(String imgUrl, ImageView imageView, Options options, Callback outerCallback, @NotNull Logger logger) {
+        public LoaderCallback(String imgUrl, ImageView imageView, Options options, Callback outerCallback, @NotNull LoggerAbs logger) {
             loaderCallback2 = new LoaderCallback2(imgUrl, imageView, options, outerCallback);
             loaderCallback2.delegate = this;
             this.logger = logger;
@@ -364,13 +365,13 @@ public class ImageLoader {
         Options options;
         Callback outerCallback;
         Delegate delegate;
-        private final Logger logger;
+        private final LoggerAbs logger;
 
         public LoaderCallback2(String imgUrl, ImageView imageView, Options options, Callback outerCallback) {
             this(imgUrl, imageView, options, outerCallback, Logger.d());
         }
 
-        public LoaderCallback2(String imgUrl, ImageView imageView, Options options, Callback outerCallback, Logger logger) {
+        public LoaderCallback2(String imgUrl, ImageView imageView, Options options, Callback outerCallback, LoggerAbs logger) {
             this.imgUrl = imgUrl;
             this.imageView = imageView;
             this.options = options;

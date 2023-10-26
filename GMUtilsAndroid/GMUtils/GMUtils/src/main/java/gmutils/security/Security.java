@@ -40,7 +40,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.x500.X500Principal;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.utils.TextHelper;
 
 /**

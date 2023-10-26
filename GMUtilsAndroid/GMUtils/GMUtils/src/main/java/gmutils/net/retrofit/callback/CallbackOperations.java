@@ -2,12 +2,12 @@ package gmutils.net.retrofit.callback;
 
 import android.text.TextUtils;
 
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
+import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 import okhttp3.Request;
@@ -34,7 +34,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     private Listener<R> listener;
     private Map<String, Object> extras;
     private CallbackErrorHandler errorListener;
-    private Logger logger;
+    private LoggerAbs logger;
 
     private final long requestTime;
 
@@ -43,7 +43,7 @@ public final class CallbackOperations<R extends BaseResponse> {
             Request request,
             Class<R> responseClass,
             Listener<R> listener,
-            Logger logger,
+            LoggerAbs logger,
             String[] excludedTextsFromLog
     ) {
         this(request.toString(), responseClass, listener, logger, excludedTextsFromLog);
@@ -53,7 +53,7 @@ public final class CallbackOperations<R extends BaseResponse> {
             String requestInfo,
             Class<R> responseClass,
             Listener<R> listener,
-            Logger logger,
+            LoggerAbs logger,
             String[] excludedTextsFromLog
     ) {
         this.responseClass = responseClass;

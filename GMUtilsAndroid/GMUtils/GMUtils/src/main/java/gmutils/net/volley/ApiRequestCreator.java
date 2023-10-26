@@ -36,7 +36,8 @@ import java.util.Set;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
+import gmutils.logger.LoggerAbs;
 import gmutils.storage.SettingsStorage;
 
 /**
@@ -216,7 +217,7 @@ public class ApiRequestCreator {
         return addRequest(urlObj, onDataReady, Logger.d());
     }
 
-    public Request addRequest(ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+    public Request addRequest(ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady, LoggerAbs logger) {
         Request stringRequest = new Request(urlObj, timeout, onDataReady, logger);
         addToRequestQueue(stringRequest);
 
@@ -230,7 +231,7 @@ public class ApiRequestCreator {
         return addMultipartRequest(contentResolver, urlObj, onDataReady, Logger.d());
     }
 
-    public MultipartRequest addMultipartRequest(@Nullable ContentResolver contentResolver, ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+    public MultipartRequest addMultipartRequest(@Nullable ContentResolver contentResolver, ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady, LoggerAbs logger) {
         MultipartRequest multipartRequest = new MultipartRequest(contentResolver, urlObj, timeout, onDataReady, logger);
         addToRequestQueue(multipartRequest);
         return multipartRequest;
@@ -242,13 +243,13 @@ public class ApiRequestCreator {
         ApiURL.IURL urlObject;
         OnResponseReadyCallback<T> onDataReady;
         private int timeout = 30000;
-        private final Logger logger;
+        private final LoggerAbs logger;
 
         /* todo BaseRequest(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<T> onDataReady) {
             this(urlObj, timeout, onDataReady, Logger.d());
         }*/
 
-        BaseRequest(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<T> onDataReady, Logger logger) {
+        BaseRequest(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<T> onDataReady, LoggerAbs logger) {
             this.urlObject = urlObj;
             this.onDataReady = onDataReady;
             this.timeout = timeout;
@@ -348,7 +349,7 @@ public class ApiRequestCreator {
 //            this(urlObj, timeout, onDataReady, Logger.d());
 //        }
 
-        Request(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+        Request(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady, LoggerAbs logger) {
             super(urlObj, timeout, onDataReady, logger);
 
             stringRequest = new StringRequest(
@@ -406,7 +407,7 @@ public class ApiRequestCreator {
         /**
          * @param contentResolver required in case of uploading file by Uri
          */
-        public MultipartRequest(ContentResolver contentResolver, ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+        public MultipartRequest(ContentResolver contentResolver, ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady, LoggerAbs logger) {
             super(urlObj, timeout, onDataReady, logger);
 
             multipartRequest = new VolleyMultipartRequest(

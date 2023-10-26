@@ -1,8 +1,7 @@
-package gmutils;
+package gmutils.logger;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,11 +15,10 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
+import gmutils.DateOp;
 import gmutils.app.BaseApplication;
 import gmutils.security.Security;
 
@@ -36,7 +34,7 @@ import gmutils.security.Security;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class Logger {
+public abstract class LoggerAbs {
     private final static int DEF_ENC_KEY = 112439;
     public int MAX_LOG_FILES_COUNT = 50;
 
@@ -147,28 +145,10 @@ public class Logger {
 
     //----------------------------------------------------------------------------------------------
 
-    private static Map<String, Logger> _instances;
-
-    /**
-     * d: for default
-     */
-    public static Logger d() {
-        return instance(null);
-    }
-
-    public static Logger instance(String logId) {
-        if (logId != null && logId.isEmpty()) logId = null;
-        if (_instances == null) _instances = new HashMap<>();
-        if (!_instances.containsKey(logId)) _instances.put(logId, new Logger(logId));
-        return _instances.get(logId);
-    }
-
-    //----------------------------------------------------------------------------------------------
-
     private final String logId;
     private LogConfigs logConfigs;
 
-    public Logger(@Nullable String logId) {
+    public LoggerAbs(@Nullable String logId) {
         this.logId = logId;
         this.logConfigs = new LogConfigs();
     }
@@ -181,14 +161,14 @@ public class Logger {
 
     //----------------------------------------------------------------------------------------------
 
-    public void setLogConfigs(@NotNull LogConfigs logConfigs) {
-        if (logConfigs == null) throw new IllegalArgumentException();
-        this.logConfigs = logConfigs;
-    }
-
     @NotNull
     public LogConfigs getLogConfigs() {
         return logConfigs;
+    }
+
+    public void setLogConfigs(@NotNull LogConfigs logConfigs) {
+        if (logConfigs == null) throw new IllegalArgumentException();
+        this.logConfigs = logConfigs;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -223,7 +203,7 @@ public class Logger {
         print(title, callback, logConfigs.isWriteLogsToFileEnabled());
     }
 
-    public void print(TitleGetter title, @NotNull ContentGetter callback, boolean writeToFileAlso) {
+    private void print(TitleGetter title, @NotNull ContentGetter callback, boolean writeToFileAlso) {
         String content = "";
 
         if (logConfigs.isLogEnabled() || writeToFileAlso) {
@@ -240,15 +220,15 @@ public class Logger {
 
             if (m.length == 1) {
                 if (t.length == 1)
-                    Log.e(t[0], m[0]);
+                    writeToLog(t[0], m[0]);
                 else
-                    Log.e(t[0], t[1] + ": " + m[0]);
+                    writeToLog(t[0], t[1] + ": " + m[0]);
             } else {
                 for (int i = 0; i < m.length; i++) {
                     if (t.length == 1) {
-                        Log.e(t[0], "LOG[" + i + "]-> " + m[i]);
+                        writeToLog(t[0], "LOG[" + i + "]-> " + m[i]);
                     } else {
-                        Log.e(t[0], t[1] + ": " + "LOG[" + i + "]-> " + m[i]);
+                        writeToLog(t[0], t[1] + ": " + "LOG[" + i + "]-> " + m[i]);
                     }
                 }
             }
@@ -266,6 +246,8 @@ public class Logger {
             }
         }
     }
+
+    protected abstract void writeToLog(String tag, String msg);
 
     //----------------
 
@@ -320,7 +302,7 @@ public class Logger {
             StackTraceElement stackTrace = null;
             int idx = -1;
             for (int s = 1; s < stackTraceList.length; s++) {
-                if (!Logger.class.getName().equals(stackTraceList[s].getClassName())) {
+                if (!thisClass().getName().equals(stackTraceList[s].getClassName())) {
                     idx = s;
                     break;
                 }
@@ -344,9 +326,12 @@ public class Logger {
 
             print(title, () -> msg, writeToFileAlso);
         } catch (Exception e) {
-            print(null, e::toString, writeToFileAlso);
+            print(title, e::toString, writeToFileAlso);
         }
     }
+
+    protected abstract Class<? extends LoggerAbs> thisClass();
+
     //endregion
 
     //----------------------------------------------------------------------------------------------
@@ -751,7 +736,7 @@ public class Logger {
 
                     try {
                         if (enableEncryption) {
-                            int encryptionKey2 = encryptionKey != null ? encryptionKey : Logger.DEF_ENC_KEY;
+                            int encryptionKey2 = encryptionKey != null ? encryptionKey : LoggerAbs.DEF_ENC_KEY;
                             String encText = Security.getSimpleInstance(encryptionKey2).encrypt(text);
                             sw.write(encText);
                         } else {
@@ -825,3 +810,5 @@ public class Logger {
     }
 
 }
+
+

@@ -15,7 +15,7 @@ import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import com.blogspot.gm4s.gmutileexample.R
 import gmutils.Activities
-import gmutils.Logger
+import gmutils.logger.Logger
 import gmutils.geography.LocationTracker
 import gmutils.geography.MapController
 import gmutils.storage.AccountStorage

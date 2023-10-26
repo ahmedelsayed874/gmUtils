@@ -24,7 +24,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import gmutils.Intents;
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.listeners.SimpleWindowAttachListener;
 
 /**
@@ -109,7 +109,7 @@ public class ImageSlider {
                     }
                 });
             } else {
-                gmutils.images.ImageLoader.load(
+                gmutils.images.ImageLoader.instance().load(
                         url,
                         imageView,
                         (imgUrl, imageView1, success) -> {

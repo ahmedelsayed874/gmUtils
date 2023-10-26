@@ -2,7 +2,6 @@ package gmutils.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -23,14 +22,10 @@ import androidx.viewbinding.ViewBinding;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gmutils.BackgroundTask;
 import gmutils.KeypadOp;
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.R;
-import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
 import gmutils.storage.SettingsStorage;
 import gmutils.ui.dialogs.MessageDialog;

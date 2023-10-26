@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.listeners.ResultCallback2;
 import gmutils.listeners.ResultCallback3;
 import gmutils.net.retrofit.RetrofitService;

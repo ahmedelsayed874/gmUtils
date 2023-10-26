@@ -4,7 +4,8 @@ import androidx.annotation.NonNull;
 
 import java.util.Map;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
+import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 import okhttp3.Request;
@@ -47,7 +48,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Request request,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
-            Logger logger
+            LoggerAbs logger
     ) {
         this(
                 request,
@@ -62,7 +63,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
-            Logger logger
+            LoggerAbs logger
     ) {
         this(
                 requestInfo,
@@ -77,7 +78,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Request request,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
-            Logger logger,
+            LoggerAbs logger,
             String[] excludedTextsFromLog
     ) {
         this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult, logger, excludedTextsFromLog);
@@ -88,7 +89,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
-            Logger logger,
+            LoggerAbs logger,
             String[] excludedTextsFromLog
     ) {
         this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult, logger, excludedTextsFromLog);

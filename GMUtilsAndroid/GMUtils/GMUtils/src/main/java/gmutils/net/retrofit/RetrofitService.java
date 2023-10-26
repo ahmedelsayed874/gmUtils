@@ -15,6 +15,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import gmutils.logger.Logger;
+import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 import okhttp3.OkHttpClient;
@@ -178,32 +180,19 @@ public class RetrofitService {
 
     private static RetrofitService sInstance; //singleton
 
-    public static <T> T create(@NotNull String baseURL, Class<T> servicesInterface) {
+    public static <T> T create(@NotNull String baseURL, @NotNull Class<T> servicesInterface) {
         return create(new Parameters(baseURL), servicesInterface);
     }
 
-    public static <T> T create(@NotNull Parameters parameters, Class<T> servicesInterface) {
-        return create(parameters, null, servicesInterface);
+    public static <T> T create(@NotNull Parameters parameters, @NotNull Class<T> servicesInterface) {
+        return create(parameters, servicesInterface, null);
     }
 
-    public static <T> T create(@NotNull Parameters parameters, @Nullable Callback tmpBuildCallback, Class<T> servicesInterface) {
+    public static <T> T create(@NotNull Parameters parameters, @NotNull Class<T> servicesInterface, @Nullable Callback tmpBuildCallback) {
         if (sInstance == null) {
             sInstance = new RetrofitService(parameters, tmpBuildCallback);
 
         } else {
-            /*String usedURL = "";
-
-            try {
-                usedURL = sInstance.mRetrofit.baseUrl().toString();
-
-            } catch (Exception e) {
-            }
-
-            if (!parameters.baseUrl.equals(usedURL)) {
-                destroy();
-                sInstance = new RetrofitService(parameters, tmpBuildCallback);
-            }*/
-
             if (!parameters.equals(sInstance.parameters)) {
                 destroy();
                 sInstance = new RetrofitService(parameters, tmpBuildCallback);
@@ -226,12 +215,30 @@ public class RetrofitService {
             Call<R> call,
             @Nullable OnResponseReady<R> callback
     ) {
+        return executeWebService(
+                async,
+                responseClass,
+                call,
+                callback,
+                Logger.d()
+        );
+    }
+
+    @Nullable
+    public static <R extends BaseResponse> R executeWebService(
+            boolean async,
+            Class<R> responseClass,
+            Call<R> call,
+            @Nullable OnResponseReady<R> callback,
+            LoggerAbs loggerAbs
+    ) {
         if (async) {
             gmutils.net.retrofit.callback.Callback<R> callback2;
             callback2 = new gmutils.net.retrofit.callback.Callback<>(
                     call.request(),
                     responseClass,
-                    callback
+                    callback,
+                    loggerAbs
             );
             call.enqueue(callback2);
             return null;
@@ -242,7 +249,8 @@ public class RetrofitService {
             callback2 = new gmutils.net.retrofit.callback.Callback<>(
                     call.request(),
                     responseClass,
-                    response::set
+                    response::set,
+                    loggerAbs
             );
 
             try {

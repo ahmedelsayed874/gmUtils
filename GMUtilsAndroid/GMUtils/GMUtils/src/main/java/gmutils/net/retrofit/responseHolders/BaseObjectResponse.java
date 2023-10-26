@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
  * Computer Engineer / 2012
  * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
  * Have precedent experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -89,7 +89,7 @@ public abstract class BaseObjectResponse<T> extends BaseResponse {
 
             @Override
             public void setData(T data) {
-                d= data;
+                d = data;
             }
 
             @Override

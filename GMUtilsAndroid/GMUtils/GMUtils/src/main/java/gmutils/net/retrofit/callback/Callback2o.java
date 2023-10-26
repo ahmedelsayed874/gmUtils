@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 
 import java.util.Map;
 
-import gmutils.Logger;
-import gmutils.net.retrofit.listeners.OnResponseReady;
+import gmutils.logger.Logger;
+import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import okhttp3.Request;
@@ -51,7 +51,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             Request request,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
-            Logger logger
+            LoggerAbs logger
     ) {
         this(
                 request,
@@ -66,7 +66,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
-            Logger logger
+            LoggerAbs logger
     ) {
         this(
                 requestInfo,
@@ -81,7 +81,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             Request request,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
-            Logger logger,
+            LoggerAbs logger,
             String[] excludedTextsFromLog
     ) {
         this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2o.this::setResult, logger, excludedTextsFromLog);
@@ -92,7 +92,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
-            Logger logger,
+            LoggerAbs logger,
             String[] excludedTextsFromLog
     ) {
         this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback2o.this::setResult, logger, excludedTextsFromLog);
