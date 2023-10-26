@@ -154,7 +154,7 @@ public abstract class LoggerAbs {
     }
 
     @NotNull
-    private String logId() {
+    public String logId() {
         if (logId != null && !(logId.trim()).isEmpty()) return logId.trim();
         return "";
     }

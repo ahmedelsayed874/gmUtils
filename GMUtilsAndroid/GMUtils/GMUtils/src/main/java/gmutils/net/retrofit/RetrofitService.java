@@ -220,7 +220,8 @@ public class RetrofitService {
                 responseClass,
                 call,
                 callback,
-                Logger.d()
+                Logger.d(),
+                null
         );
     }
 
@@ -232,13 +233,33 @@ public class RetrofitService {
             @Nullable OnResponseReady<R> callback,
             LoggerAbs loggerAbs
     ) {
+        return executeWebService(
+                async,
+                responseClass,
+                call,
+                callback,
+                loggerAbs,
+                null
+        );
+    }
+
+    @Nullable
+    public static <R extends BaseResponse> R executeWebService(
+            boolean async,
+            Class<R> responseClass,
+            Call<R> call,
+            @Nullable OnResponseReady<R> callback,
+            LoggerAbs loggerAbs,
+            String[] excludedTextsFromLog
+    ) {
         if (async) {
             gmutils.net.retrofit.callback.Callback<R> callback2;
             callback2 = new gmutils.net.retrofit.callback.Callback<>(
                     call.request(),
                     responseClass,
                     callback,
-                    loggerAbs
+                    loggerAbs,
+                    excludedTextsFromLog
             );
             call.enqueue(callback2);
             return null;
@@ -250,7 +271,8 @@ public class RetrofitService {
                     call.request(),
                     responseClass,
                     response::set,
-                    loggerAbs
+                    loggerAbs,
+                    excludedTextsFromLog
             );
 
             try {
