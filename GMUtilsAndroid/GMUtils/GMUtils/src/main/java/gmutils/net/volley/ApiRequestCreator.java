@@ -44,9 +44,9 @@ import gmutils.storage.SettingsStorage;
  * Computer Engineer / 2012
  * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
  * Have precedent experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -56,16 +56,6 @@ import gmutils.storage.SettingsStorage;
  * 'com.android.volley:volley:1.1.1'
  */
 public class ApiRequestCreator {
-    public static Logger getLogger() { return ApiManager.getLogger(); }
-    public static void setLogger(Logger logger) {
-        ApiManager.setLogger(logger);
-    }
-    private static Logger logger() {
-        return ApiManager.logger();
-    }
-
-    //---------------------------------------------
-
     private static ApiRequestCreator mInstance;
     private final RequestQueue mRequestQueue;
     private boolean disableCache = true; //use this boolean to enable or disable cache feature
@@ -223,7 +213,11 @@ public class ApiRequestCreator {
     }
 
     public Request addRequest(ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady) {
-        Request stringRequest = new Request(urlObj, timeout, onDataReady);
+        return addRequest(urlObj, onDataReady, Logger.d());
+    }
+
+    public Request addRequest(ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+        Request stringRequest = new Request(urlObj, timeout, onDataReady, logger);
         addToRequestQueue(stringRequest);
 
         return stringRequest;
@@ -233,7 +227,11 @@ public class ApiRequestCreator {
      * @param contentResolver required in case of uploading file by Uri
      */
     public MultipartRequest addMultipartRequest(@Nullable ContentResolver contentResolver, ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady) {
-        MultipartRequest multipartRequest = new MultipartRequest(contentResolver, urlObj, timeout, onDataReady);
+        return addMultipartRequest(contentResolver, urlObj, onDataReady, Logger.d());
+    }
+
+    public MultipartRequest addMultipartRequest(@Nullable ContentResolver contentResolver, ApiURL.IURL urlObj, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+        MultipartRequest multipartRequest = new MultipartRequest(contentResolver, urlObj, timeout, onDataReady, logger);
         addToRequestQueue(multipartRequest);
         return multipartRequest;
     }
@@ -244,11 +242,17 @@ public class ApiRequestCreator {
         ApiURL.IURL urlObject;
         OnResponseReadyCallback<T> onDataReady;
         private int timeout = 30000;
+        private final Logger logger;
 
-        BaseRequest(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<T> onDataReady) {
+        /* todo BaseRequest(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<T> onDataReady) {
+            this(urlObj, timeout, onDataReady, Logger.d());
+        }*/
+
+        BaseRequest(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<T> onDataReady, Logger logger) {
             this.urlObject = urlObj;
             this.onDataReady = onDataReady;
             this.timeout = timeout;
+            this.logger = logger;
         }
 
         DefaultRetryPolicy defaultRetryPolicy = new DefaultRetryPolicy(
@@ -320,7 +324,7 @@ public class ApiRequestCreator {
                         errorMsg = error.toString();
                     }
 
-                    Logger.d().print(() -> "WebRequest", () -> error.toString());
+                    logger.print(() -> "WebRequest", () -> error.toString());
                     onDataReady.onResponseFetchedFailed(errorMsg, response, statusCode);
                 }
             }
@@ -340,8 +344,12 @@ public class ApiRequestCreator {
     public static class Request extends BaseRequest<String> {
         private final StringRequest stringRequest;
 
-        Request(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady) {
-            super(urlObj, timeout, onDataReady);
+//todo        Request(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady) {
+//            this(urlObj, timeout, onDataReady, Logger.d());
+//        }
+
+        Request(ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+            super(urlObj, timeout, onDataReady, logger);
 
             stringRequest = new StringRequest(
                     urlObj.getRequestMethod(),
@@ -390,11 +398,16 @@ public class ApiRequestCreator {
 
         private final VolleyMultipartRequest multipartRequest;
 
+
+//        todo public MultipartRequest(ContentResolver contentResolver, ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady) {
+//            this(contentResolver, urlObj, timeout, onDataReady, Logger.d());
+//        }
+
         /**
          * @param contentResolver required in case of uploading file by Uri
          */
-        public MultipartRequest(ContentResolver contentResolver, ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady) {
-            super(urlObj, timeout, onDataReady);
+        public MultipartRequest(ContentResolver contentResolver, ApiURL.IURL urlObj, int timeout, OnResponseReadyCallback<String> onDataReady, Logger logger) {
+            super(urlObj, timeout, onDataReady, logger);
 
             multipartRequest = new VolleyMultipartRequest(
                     com.android.volley.Request.Method.POST,
@@ -473,7 +486,7 @@ public class ApiRequestCreator {
                             } catch (Exception e) {
                                 Log.e(ApiRequestCreator.class.getSimpleName(), "contentResolver required in case of uploading file by Uri");
                                 e.printStackTrace();
-                                Logger.d().print(e);
+                                logger.print(e);
                             }
                         }
                     }

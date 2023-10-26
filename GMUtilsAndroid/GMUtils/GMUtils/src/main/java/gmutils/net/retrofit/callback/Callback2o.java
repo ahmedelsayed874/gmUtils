@@ -27,14 +27,6 @@ import retrofit2.Call;
     use this when Response hold data inside it
  */
 public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofit2.Callback<R> {
-    public static Logger getLogger() {
-        return CallbackOperations.getLogger();
-    }
-
-    public static void setLogger(Logger logger) {
-        CallbackOperations.setLogger(logger);
-    }
-
     private CallbackOperations<R> callbackOperations;
     private OnResponseReady2o<DT, R> onResponseReady;
 

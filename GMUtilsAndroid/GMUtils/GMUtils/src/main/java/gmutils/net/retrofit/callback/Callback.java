@@ -23,14 +23,6 @@ import retrofit2.Call;
  * +201022663988
  */
 public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
-    public static Logger getLogger() {
-        return CallbackOperations.getLogger();
-    }
-
-    public static void setLogger(Logger logger) {
-        CallbackOperations.setLogger(logger);
-    }
-
 
     private CallbackOperations<R> callbackOperations;
     private OnResponseReady<R> onResponseReady;

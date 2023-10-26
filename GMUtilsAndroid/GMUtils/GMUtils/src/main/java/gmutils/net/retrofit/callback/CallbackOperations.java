@@ -26,23 +26,6 @@ import retrofit2.Call;
  * +201022663988
  */
 public final class CallbackOperations<R extends BaseResponse> {
-    private static Logger _logger = null;
-
-    public static Logger getLogger() {
-        return _logger;
-    }
-
-    public static void setLogger(Logger logger) {
-        _logger = logger;
-    }
-
-    private static Logger logger() {
-        if (_logger == null) return Logger.d();
-        else return _logger;
-    }
-
-    //---------------------------------------------
-
     interface Listener<R> {
         void onResponseReady(R response);
     }
@@ -51,7 +34,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     private Listener<R> listener;
     private Map<String, Object> extras;
     private CallbackErrorHandler errorListener;
-    private Logger logger = null;
+    private Logger logger;
 
     private final long requestTime;
 
@@ -75,7 +58,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     ) {
         this.responseClass = responseClass;
         this.listener = listener;
-        this.logger = logger != null ? logger : logger();
+        this.logger = logger != null ? logger : Logger.d();
 
         this.requestTime = System.currentTimeMillis();
 

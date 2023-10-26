@@ -3,6 +3,7 @@ package gmutils.net.volley;
 import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.collection.ArrayMap;
@@ -43,18 +44,6 @@ import gmutils.utils.Utils;
  * 'com.android.volley:volley:1.1.1'
  */
 public class ApiManager {
-    private static Logger _logger = null;
-    public static Logger getLogger() { return _logger; }
-    public static void setLogger(Logger logger) {
-        _logger = logger;
-    }
-    static Logger logger() {
-        if (_logger == null) return Logger.d();
-        else return _logger;
-    }
-
-    //---------------------------------------------
-
     private WeakReference<Activity> mActivity;
     private WeakReference<Fragment> mFragment;
     private WeakReference<android.app.Fragment> mFragment2;
@@ -64,39 +53,59 @@ public class ApiManager {
     private final Map<ApiURL.IURL, String> responses = new ArrayMap<>();
     private boolean disableCache = true;
     private int timeout = 30000;
+    private final Logger logger;
 
     /**
      * it's not recommend to use this constructor
      */
     @Deprecated
-    public ApiManager() {}
+    public ApiManager() {this(Logger.d());}
+    public ApiManager(Logger logger) {
+        this.logger = logger;
+    }
 
     public ApiManager(@NotNull Activity activity) {
+        this(activity, Logger.d());
+    }
+    public ApiManager(@NotNull Activity activity, Logger logger) {
         this.mActivity = new WeakReference<>(activity);
         try {
             this.mAppContext = activity.getApplicationContext();
         } catch (Exception e) {
         }
+        this.logger = logger;
     }
 
     public ApiManager(@NotNull Fragment fragment) {
+        this(fragment, Logger.d());
+    }
+    public ApiManager(@NotNull Fragment fragment, Logger logger) {
         this.mFragment = new WeakReference<>(fragment);
         try {
             this.mAppContext = fragment.getContext().getApplicationContext();
         } catch (Exception e) {
         }
+        this.logger = logger;
     }
 
     public ApiManager(@NotNull android.app.Fragment fragment) {
+        this(fragment, Logger.d());
+    }
+    public ApiManager(@NotNull android.app.Fragment fragment, Logger logger) {
         this.mFragment2 = new WeakReference<>(fragment);
         try {
             this.mAppContext = fragment.getActivity().getApplicationContext();
         } catch (Exception e) {
         }
+        this.logger = logger;
     }
 
     public ApiManager(@NotNull Context context) {
+        this(context, Logger.d());
+    }
+    public ApiManager(@NotNull Context context, Logger logger) {
         this.mAppContext = context.getApplicationContext();
+        this.logger = logger;
     }
 
     protected Context getContext() {
@@ -163,7 +172,7 @@ public class ApiManager {
 
 
     private void printLog(String msg) {
-        Logger.d().print(() -> "ApiManager", () -> msg);
+        logger.print(() -> "ApiManager", () -> msg);
     }
 
     //--------------------------------------------------------------------------------------------//
