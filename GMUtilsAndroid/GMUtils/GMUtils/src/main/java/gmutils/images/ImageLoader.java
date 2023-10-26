@@ -20,6 +20,7 @@ import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -57,18 +58,6 @@ import gmutils.app.BaseApplication;
  */
 public class ImageLoader {
 
-    private static Logger _logger = null;
-    public static Logger getLogger() { return _logger; }
-    public static void setLogger(Logger logger) {
-        _logger = logger;
-    }
-    private static Logger logger() {
-        if (_logger == null) return Logger.d();
-        else return _logger;
-    }
-
-    //---------------------------------------------
-
     @SuppressLint("StaticFieldLeak")
     private static volatile Picasso INSTANCE;
     private static final Map<String, List<LoaderCallback>> currentRequests = new HashMap<>();
@@ -78,24 +67,97 @@ public class ImageLoader {
     public static int DEFAULT_ERROR_PLACEHOLDER = android.R.drawable.stat_notify_error;
     public static long CACHE_SIZE_IN_BYTES = 50 /*mega*/ * 1024 /*kb*/ * 1024 /*byte*/;
 
-    public static void CACHE_SIZE_IN_BYTES(int mega) {
-        CACHE_SIZE_IN_BYTES = mega * 1024 /*kb*/ * 1024 /*byte*/;
+    //----------------------------------------------------------------------------------------------
+
+    private static volatile ImageLoader _instance;
+
+    public static ImageLoader instance() {
+        return instance(null);
     }
 
+    public static ImageLoader instance(Logger logger) {
+        synchronized (ImageLoader.class) {
+            if (_instance == null) {
+                _instance = new ImageLoader(logger);
+            }
+            return _instance;
+        }
+    }
 
-    public static void load(String url, ImageView imageView) {
+    //--------------------------------------------------
+
+    private final Logger logger;
+
+    private ImageLoader(Logger logger) {
+        this.logger = logger != null ? logger : Logger.d();
+    }
+
+    private Picasso createPicassoInstance(Context context) {
+        OkHttpClient client = new OkHttpClient();
+        client.setProtocols(Arrays.asList(Protocol.HTTP_1_1)); //i added this to solve "stream was reset:PROTOCOL_ERROR" error
+        client.setHostnameVerifier((s, sslSession) -> true);
+
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] x509Certificates,
+                    String s) throws java.security.cert.CertificateException {
+            }
+
+            @Override
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] x509Certificates,
+                    String s) throws java.security.cert.CertificateException {
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[]{};
+            }
+        }};
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            client.setSslSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        File cacheDir = new File(context.getCacheDir(), "images-cache");
+        if (!cacheDir.exists()) {
+            if (!cacheDir.mkdirs()) {
+                cacheDir = context.getCacheDir();
+            }
+        }
+        Cache cache = new Cache(cacheDir, CACHE_SIZE_IN_BYTES);
+        client.setCache(cache);
+        client.setConnectTimeout(15000, TimeUnit.MILLISECONDS);
+        client.setReadTimeout(20000, TimeUnit.MILLISECONDS);
+        client.setWriteTimeout(20000, TimeUnit.MILLISECONDS);
+
+        Picasso instance = new Picasso.Builder(context.getApplicationContext())
+                .downloader(new OkHttpDownloader(client))
+                .listener((picasso, uri, exception) -> Log.e("PICASSO", exception.getMessage()))
+                .build();
+
+        return instance;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public void load(String url, ImageView imageView) {
         load(url, imageView, null, null);
     }
 
-    public static void load(String url, ImageView imageView, Callback callback) {
+    public void load(String url, ImageView imageView, Callback callback) {
         load(url, imageView, null, callback);
     }
 
-    public static void load(String url, ImageView imageView, Options options) {
+    public void load(String url, ImageView imageView, Options options) {
         load(url, imageView, options, null);
     }
 
-    public static void load(String url, ImageView imageView, Options options, Callback callback) {
+    public void load(String url, ImageView imageView, Options options, Callback callback) {
         try {
             Class.forName("com.squareup.picasso.Picasso");
             Class.forName("com.squareup.okhttp.OkHttpClient");
@@ -165,7 +227,7 @@ public class ImageLoader {
 
         if (currentRequests.containsKey(url)) {
             String finalUrl = url;
-            logger().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl + " already IN-PROGRESS");
+            logger.print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl + " already IN-PROGRESS");
 
             List<LoaderCallback> pendingRequests = currentRequests.get(url);
             if (pendingRequests == null) pendingRequests = new ArrayList<>();
@@ -176,7 +238,7 @@ public class ImageLoader {
         } else {
             currentRequests.put(url, null);
             String finalUrl1 = url;
-            logger().print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl1 + " will start");
+            logger.print(ImageLoader.class::getSimpleName, () -> "loading image from " + finalUrl1 + " will start");
         }
 
         RequestCreator request = picasso.load(url);
@@ -201,7 +263,7 @@ public class ImageLoader {
         request.into(imageView, picassoCallback);
     }
 
-    public static void load(Context context, String url, Callback2 callback) {
+    public void load(Context context, String url, Callback2 callback) {
         ImageView imageView = new ImageView(context);
 
         Options options = new Options()
@@ -227,65 +289,19 @@ public class ImageLoader {
 
     //----------------------------------------------------------------------------------------------
 
-    private static Picasso createPicassoInstance(Context context) {
-        OkHttpClient client = new OkHttpClient();
-        client.setProtocols(Arrays.asList(Protocol.HTTP_1_1)); //i added this to solve "stream was reset:PROTOCOL_ERROR" error
-        client.setHostnameVerifier((s, sslSession) -> true);
-
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(
-                    java.security.cert.X509Certificate[] x509Certificates,
-                    String s) throws java.security.cert.CertificateException {
-            }
-
-            @Override
-            public void checkServerTrusted(
-                    java.security.cert.X509Certificate[] x509Certificates,
-                    String s) throws java.security.cert.CertificateException {
-            }
-
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new java.security.cert.X509Certificate[]{};
-            }
-        }};
-        try {
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            client.setSslSocketFactory(sc.getSocketFactory());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        File cacheDir = new File(context.getCacheDir(), "images-cache");
-        if (!cacheDir.exists()) {
-            if (!cacheDir.mkdirs()) {
-                cacheDir = context.getCacheDir();
-            }
-        }
-        Cache cache = new Cache(cacheDir, CACHE_SIZE_IN_BYTES);
-        client.setCache(cache);
-        client.setConnectTimeout(15000, TimeUnit.MILLISECONDS);
-        client.setReadTimeout(20000, TimeUnit.MILLISECONDS);
-        client.setWriteTimeout(20000, TimeUnit.MILLISECONDS);
-
-        Picasso instance = new Picasso.Builder(context.getApplicationContext())
-                .downloader(new OkHttpDownloader(client))
-                .listener((picasso, uri, exception) -> Log.e("PICASSO", exception.getMessage()))
-                .build();
-
-        return instance;
-    }
-
-    //----------------------------------------------------------------------------------------------
-
     private static class LoaderCallback implements com.squareup.picasso.Callback, LoaderCallback2.Delegate {
         private LoaderCallback2 loaderCallback2;
+        private final Logger logger;
+
 
         public LoaderCallback(String imgUrl, ImageView imageView, Options options, Callback outerCallback) {
+            this(imgUrl, imageView, options, outerCallback, Logger.d());
+        }
+
+        public LoaderCallback(String imgUrl, ImageView imageView, Options options, Callback outerCallback, @NotNull Logger logger) {
             loaderCallback2 = new LoaderCallback2(imgUrl, imageView, options, outerCallback);
             loaderCallback2.delegate = this;
+            this.logger = logger;
         }
 
         @Override
@@ -312,7 +328,7 @@ public class ImageLoader {
 
                 if (loaderCallback2.imageView != null) {
                     imageViewDrawable = loaderCallback2.imageView.getDrawable();
-                    logger().print(ImageLoader.class::getSimpleName, () -> "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
+                    logger.print(ImageLoader.class::getSimpleName, () -> "image from " + loaderCallback2.imgUrl + " will set to " + pendingCallbacks.size() + "-pending requests");
                 }
 
                 if (imageViewDrawable != null) {
@@ -348,30 +364,36 @@ public class ImageLoader {
         Options options;
         Callback outerCallback;
         Delegate delegate;
+        private final Logger logger;
 
         public LoaderCallback2(String imgUrl, ImageView imageView, Options options, Callback outerCallback) {
+            this(imgUrl, imageView, options, outerCallback, Logger.d());
+        }
+
+        public LoaderCallback2(String imgUrl, ImageView imageView, Options options, Callback outerCallback, Logger logger) {
             this.imgUrl = imgUrl;
             this.imageView = imageView;
             this.options = options;
             this.outerCallback = outerCallback;
+            this.logger = logger;
 
             try {
                 imageView.setScaleType(options.loadingScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                logger().print(() -> e.getMessage());
+                logger.print(() -> e.getMessage());
             }
         }
 
         public void onSuccess() {
-            logger().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " COMPLETED");
+            logger.print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " COMPLETED");
             onComplete(true);
 
             try {
                 imageView.setScaleType(options.successScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                logger().print(() -> e.getMessage());
+                logger.print(() -> e.getMessage());
             }
 
             if (outerCallback != null) {
@@ -382,14 +404,14 @@ public class ImageLoader {
         }
 
         public void onError() {
-            logger().print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " FAILED");
+            logger.print(ImageLoader.class::getSimpleName, () -> "image from " + imgUrl + " FAILED");
             onComplete(false);
 
             try {
                 imageView.setScaleType(options.errorScaleType);
             } catch (Exception e) {
                 //e.printStackTrace();
-                logger().print(() -> e.getMessage());
+                logger.print(() -> e.getMessage());
             }
 
             if (outerCallback != null) {
@@ -541,23 +563,23 @@ public class ImageLoader {
 
     //----------------------------------------------------------------------------------------------
 
-    public static void loadFromBase64(String base64Encoded, ImageView imageView) {
+    public void loadFromBase64(String base64Encoded, ImageView imageView) {
         loadFromBase64(base64Encoded, imageView, (Options) null);
     }
 
-    public static void loadFromBase64(String base64Encoded, ImageView imageView, String imageDebugName) {
+    public void loadFromBase64(String base64Encoded, ImageView imageView, String imageDebugName) {
         loadFromBase64(base64Encoded, imageView, null, imageDebugName);
     }
 
-    public static void loadFromBase64(String base64Encoded, ImageView imageView, Options options) {
+    public void loadFromBase64(String base64Encoded, ImageView imageView, Options options) {
         loadFromBase64(base64Encoded, imageView, options, "Base64");
     }
 
-    public static void loadFromBase64(String base64Encoded, ImageView imageView, Options options, String imageDebugName) {
+    public void loadFromBase64(String base64Encoded, ImageView imageView, Options options, String imageDebugName) {
         loadFromBase64(base64Encoded, imageView, options, imageDebugName, null);
     }
 
-    public static void loadFromBase64(String base64Encoded, ImageView imageView, Options options, String imageDebugName, Callback callback) {
+    public void loadFromBase64(String base64Encoded, ImageView imageView, Options options, String imageDebugName, Callback callback) {
         if (imageView == null) return;
 
         if (MIN_IMAGE_SIZE == null) {
@@ -592,14 +614,14 @@ public class ImageLoader {
         }
     }
 
-    public static Bitmap convertBase64(String base64Encoded) {
+    public Bitmap convertBase64(String base64Encoded) {
         Bitmap bitmap = null;
 
         try {
             byte[] bytes = Base64.decode(base64Encoded, Base64.DEFAULT);
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         } catch (Exception e) {
-            logger().print(e);
+            logger.print(e);
         }
 
         return bitmap;
