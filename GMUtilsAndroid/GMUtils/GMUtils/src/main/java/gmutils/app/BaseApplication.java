@@ -35,8 +35,20 @@ import gmutils.ui.dialogs.MessageDialog;
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
-    public interface GlobalVariableDisposal {
-        void dispose();
+    public static class GlobalVariableDisposal {
+        private Object instance;
+        private gmutils.listeners.Runnable<Object> onDispose;
+
+        public GlobalVariableDisposal(Object instance, gmutils.listeners.Runnable<Object> onDispose) {
+            this.instance = instance;
+            this.onDispose = onDispose;
+        }
+
+        private void dispose() {
+            if (onDispose != null) onDispose.run(instance);
+            instance = null;
+            onDispose = null;
+        }
     }
 
     public static final class GlobalVariables {
@@ -229,10 +241,10 @@ public abstract class BaseApplication extends Application implements Application
                 if (logConfigs.isWriteToFileEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
                     File bugFile = getBugFile();
                     Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
-                    fileWriter.append(stack.toString());
+                    fileWriter.write(stack.toString());
                 }
             } catch (Exception e) {
-                Logger.d().writeToFile(thisApp(), stack.toString(), "BUGS");
+                Logger.instance("bugs").writeToFile(thisApp(), stack.toString());
             }
 
             Logger.d().print(stack::toString);
