@@ -37,9 +37,9 @@ public abstract class BaseApplication extends Application implements Application
 
     public static class GlobalVariableDisposal {
         private Object instance;
-        private gmutils.listeners.Runnable<Object> onDispose;
+        private gmutils.listeners.Runnable2<Object> onDispose;
 
-        public GlobalVariableDisposal(Object instance, gmutils.listeners.Runnable<Object> onDispose) {
+        public GlobalVariableDisposal(Object instance, gmutils.listeners.Runnable2<Object> onDispose) {
             this.instance = instance;
             this.onDispose = onDispose;
         }

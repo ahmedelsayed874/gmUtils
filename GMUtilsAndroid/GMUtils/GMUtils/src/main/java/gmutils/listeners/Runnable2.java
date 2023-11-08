@@ -1,5 +1,5 @@
 package gmutils.listeners;
 
-public interface Runnable<Args> {
+public interface Runnable2<Args> {
     void run(Args args);
 }
