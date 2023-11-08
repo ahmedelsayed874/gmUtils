@@ -244,7 +244,7 @@ public abstract class BaseApplication extends Application implements Application
                     fileWriter.write(stack.toString());
                 }
             } catch (Exception e) {
-                Logger.instance("bugs").writeToFile(thisApp(), stack.toString());
+                Logger.instance("bugs").writeToFile(thisApp(), stack::toString);
             }
 
             Logger.d().print(stack::toString);

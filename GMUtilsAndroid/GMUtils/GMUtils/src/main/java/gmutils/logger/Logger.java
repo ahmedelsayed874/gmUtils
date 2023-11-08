@@ -66,8 +66,4 @@ public class Logger extends LoggerAbs {
         Log.e(tag, msg);
     }
 
-    @Override
-    protected Class<? extends LoggerAbs> thisClass() {
-        return this.getClass();
-    }
 }

@@ -183,7 +183,8 @@ public class ActivityFunctions implements BaseFragmentListener {
                 if (activity instanceof BaseActivity) {
                     ((BaseActivity) activity).showWaitView();
                 }
-                BackgroundTask.run(() -> Logger.d().readAllFilesContents(activity), (ResultCallback<String>) txt -> {
+
+                Logger.d().readAllFilesContents(activity, (txt) -> {
                     if (activity instanceof BaseActivity) {
                         ((BaseActivity) activity).hideWaitView();
                     }
@@ -198,7 +199,7 @@ public class ActivityFunctions implements BaseFragmentListener {
                                 }
                             })
                             .setButton2(R.string.delete, (d) -> {
-                                Logger.d().deleteSavedFiles(activity);
+                                Logger.d().deleteSavedFiles(activity, null);
                             })
                             .show();
                 });
@@ -302,7 +303,8 @@ public class ActivityFunctions implements BaseFragmentListener {
     public void updateWaitViewMsg(CharSequence msg) {
         try {
             if (waitDialog != null) waitDialog.textView().setText(msg);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     public boolean isWaitViewShown() {
@@ -356,7 +358,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     @Override
-    public MessageDialog showMessageDialog(Context context,CharSequence msg, ShowMessageDialogOptions options) {
+    public MessageDialog showMessageDialog(Context context, CharSequence msg, ShowMessageDialogOptions options) {
         MessageDialog dialog = MessageDialog.create(context);
 
         if (options != null && options.title != null) dialog.setTitle(options.title);

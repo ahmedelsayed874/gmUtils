@@ -18,6 +18,8 @@ import gmutils.DateOp
 import gmutils.Intents
 import gmutils.LooperThread
 import gmutils.app.BaseApplication
+import gmutils.logger.Logger
+import gmutils.logger.LoggerAbs
 import gmutils.net.SimpleHTTPRequest
 import gmutils.net.volley.example.URLs.TimeURLs
 import gmutils.ui.activities.BaseActivity
@@ -25,6 +27,7 @@ import gmutils.ui.toast.MyToast
 import gmutils.ui.utils.ViewSource
 import gmutils.utils.Utils
 import java.util.*
+import kotlin.concurrent.thread
 
 class MainActivity : BaseActivity() {
 
@@ -173,9 +176,11 @@ class MainActivity : BaseActivity() {
                         null
                     )
                 )
-                log("api", response.second.code.toString())
-                log("api", response.second.text)
-                log("api", "Exception: ${response.second.exception}")
+                runOnUiThread {
+                    log("api", response.second.code.toString())
+                    log("api", response.second.text)
+                    log("api", "Exception: ${response.second.exception}")
+                }
             }.start()
         }
 
@@ -206,6 +211,13 @@ class MainActivity : BaseActivity() {
             Intents.getInstance().imageIntents.pickImage(this, 456)!!
             log("pick image began", "")
         }
+
+        this.view.btn14.text = "Test Logger Functions"
+        this.view.btn14.setOnClickListener {
+            log("test logger", "")
+            testLogger()
+        }
+
 
         //Activities.start(ColorPickerActivity::class.java, thisActivity())
         //Activities.start(ColorPicker2Activity::class.java, thisActivity())
@@ -247,5 +259,50 @@ class MainActivity : BaseActivity() {
             log("action result pick image", data?.data?.toString())
             log("action result pick image", data?.extras?.toString())
         }
+    }
+
+    fun testLogger() {
+        thread {
+            val logger = Logger.instance("testLogger")
+            logger.logConfigs.apply {
+                val dl = DateOp.getInstance().increaseDays(1)
+                setLogDeadline(dl)
+                setWriteLogsToFileDeadline(dl)
+                setWriteToFileDeadline(dl)
+            }
+
+            for (i in 0 .. 10000) {
+                _testLogger(logger)
+            }
+        }
+    }
+    fun _testLogger(logger: LoggerAbs) {
+        try {
+            val x = 1 / 0
+        } catch (e: Exception) {
+            logger.print(e)
+            logger.print({logger.logId()}, e)
+        }
+
+        logger.print { "loggerTest()" }
+        logger.print({logger.logId()}) { "loggerTest()" }
+        Log.d("testLogger", logger.getLogFilesPath(this))
+
+        logger.printMethod()
+        logger.printMethod({logger.logId()})
+        logger.printMethod({logger.logId()}) { "this is more info" }
+        val r = Runnable {
+            logger.printMethod()
+            logger.printMethod({ logger.logId() })
+            logger.printMethod({ logger.logId() }, { "this is more info" }, true)
+        }
+        r.run()
+        logger.writeToFile(this) { "writing to file" }
+//        logger.readFromCurrentSessionFile(this) {
+//            Log.d("testLogger", "CURRENT FILE CONTENT: $it")
+//        }
+//        logger.readAllFilesContents(this) {
+//            Log.d("testLogger", "ALL FILES CONTENT: $it")
+//        }
     }
 }
