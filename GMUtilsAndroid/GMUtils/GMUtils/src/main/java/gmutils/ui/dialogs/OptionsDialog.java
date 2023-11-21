@@ -2,6 +2,7 @@ package gmutils.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.content.Context;
+
 import org.jetbrains.annotations.Nullable;
 
 import gmutils.R;
@@ -24,16 +25,18 @@ public class OptionsDialog {
         void onItemSelected(int position);
     }
 
-    public static void show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
-        show(context, title, list, 0, listener);
+    public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
+        return show(context, title, list, 0, listener);
     }
 
-    public static void show(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
-        new OptionsDialog(context, title, list, defaultSelect, listener);
+    public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
+        return new OptionsDialog(context, title, list, defaultSelect, listener);
     }
+
+    public final AlertDialog dialog;
 
     private OptionsDialog(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
-        new AlertDialog.Builder(context)
+        dialog = new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setSingleChoiceItems(list, defaultSelect, (dialog, which) -> {
                     if (listener != null) listener.onItemSelected(which);
