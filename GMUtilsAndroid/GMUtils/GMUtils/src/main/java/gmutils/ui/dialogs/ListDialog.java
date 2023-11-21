@@ -40,6 +40,7 @@ public class ListDialog extends BaseDialog {
 
     private TextView tvTitle;
     private TextView tvHint;
+    private EditText etSearchToken;
     private ListView lvList;
     private TextView tvNoResult;
     private TextView tvAddValue;
@@ -69,7 +70,7 @@ public class ListDialog extends BaseDialog {
         tvTitle = view.findViewById(R.id.text_title);
         tvHint = view.findViewById(R.id.text_hint);
         View ivClose = view.findViewById(R.id.image_close);
-        final EditText etSearchToken = view.findViewById(R.id.text_search_token);
+        etSearchToken = view.findViewById(R.id.text_search_token);
         lvList = view.findViewById(R.id.list);
         tvNoResult = view.findViewById(R.id.text_no_result);
         tvAddValue = view.findViewById(R.id.text_add_value);
@@ -176,6 +177,11 @@ public class ListDialog extends BaseDialog {
     public ListDialog setHint(CharSequence hint) {
         tvHint.setText(hint);
         tvHint.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public ListDialog hideSearchBox() {
+        etSearchToken.setVisibility(View.GONE);
         return this;
     }
 
