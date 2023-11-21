@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import gmutils.BackgroundTask;
 import gmutils.DateOp;
 import gmutils.LooperThread;
 import gmutils.app.BaseApplication;
@@ -28,7 +29,9 @@ import gmutils.listeners.ResultCallback;
 
 import java.lang.Runnable;
 
+import gmutils.listeners.ResultCallback2;
 import gmutils.security.Security;
+import gmutils.utils.ZipFileUtils;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -809,6 +812,51 @@ public abstract class LoggerAbs {
     }
 
     //endregion create file
+
+    //----------------------------------------------------------------------------------------------
+
+    public void exportAppBackup(Context context, File outDir, ResultCallback<String> onComplete) {
+        BackgroundTask.run(() -> {
+            File backupDir = new File(
+                    outDir,
+                    "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true)
+            );
+            backupDir.mkdirs();
+
+            File privateZip = null;
+            File publicZip = null;
+
+            if (backupDir.exists()) {
+                try {
+                    privateZip = new File(backupDir, "private.bac");
+                    privateZip.createNewFile();
+
+                    publicZip = new File(backupDir, "public.bac");
+                    publicZip.createNewFile();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            ZipFileUtils zipFileUtils = new ZipFileUtils();
+
+            File privateDir = context.getFilesDir();
+            ZipFileUtils.Error error = zipFileUtils.compressSync(privateZip, privateDir);
+            if (error != null) {
+                writeToLog("exportAppBackup", error.error);
+                return "Failed to backup [Reason: " + error.error + "]";
+            }
+
+            File publicDir = context.getExternalFilesDir(null);
+            error = zipFileUtils.compressSync(publicZip, publicDir);
+            if (error != null) {
+                writeToLog("exportAppBackup", error.error);
+                return "Failed to backup [Reason: " + error.error + "]";
+            }
+
+            return "Data backed-up successfully";
+        }, onComplete);
+    }
 }
 
 
