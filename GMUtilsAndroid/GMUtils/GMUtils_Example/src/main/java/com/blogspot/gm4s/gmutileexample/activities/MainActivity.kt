@@ -218,6 +218,13 @@ class MainActivity : BaseActivity() {
             testLogger()
         }
 
+        this.view.btn15.text = "Get App Backup"
+        this.view.btn15.setOnClickListener {
+            log("get-app-backup", "getting app backup started")
+            Logger.d().exportAppBackup(thisActivity()) {
+                log("get-app-backup", "getting app backup finished: $it")
+            }
+        }
 
         //Activities.start(ColorPickerActivity::class.java, thisActivity())
         //Activities.start(ColorPicker2Activity::class.java, thisActivity())

@@ -1,6 +1,7 @@
 package gmutils.logger;
 
 import android.content.Context;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -815,46 +816,65 @@ public abstract class LoggerAbs {
 
     //----------------------------------------------------------------------------------------------
 
-    public void exportAppBackup(Context context, File outDir, ResultCallback<String> onComplete) {
+    public void exportAppBackup(Context context, ResultCallback<String> onComplete) {
         BackgroundTask.run(() -> {
+            File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
             File backupDir = new File(
-                    outDir,
-                    "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true)
+                    root,
+                    context.getPackageName() + "/Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true)
             );
+
             backupDir.mkdirs();
 
             File privateZip = null;
-            File publicZip = null;
+            //File publicZip = null;
 
             if (backupDir.exists()) {
                 try {
                     privateZip = new File(backupDir, "private.bac");
                     privateZip.createNewFile();
 
-                    publicZip = new File(backupDir, "public.bac");
-                    publicZip.createNewFile();
+                    //publicZip = new File(backupDir, "public.bac");
+                    //publicZip.createNewFile();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    return e.getMessage();
                 }
             }
 
             ZipFileUtils zipFileUtils = new ZipFileUtils();
 
-            File privateDir = context.getFilesDir();
-            ZipFileUtils.Error error = zipFileUtils.compressSync(privateZip, privateDir);
+            File privateDir = context.getFilesDir().getParentFile();
+
+            ZipFileUtils.Error error = zipFileUtils.compressSync(
+                    privateZip,
+                    privateDir,
+                    (d) -> {
+                        if (d.getName().equalsIgnoreCase("databases")) {
+                            return false;
+                        } else if (d.getName().equalsIgnoreCase("files")) {
+                            return false;
+                        } else if (d.getName().equalsIgnoreCase("shared_prefs")) {
+                            return false;
+                        }
+
+                        return true;
+                    }
+            );
             if (error != null) {
                 writeToLog("exportAppBackup", error.error);
                 return "Failed to backup [Reason: " + error.error + "]";
             }
 
-            File publicDir = context.getExternalFilesDir(null);
+            /*File publicDir = context.getExternalFilesDir(null);
             error = zipFileUtils.compressSync(publicZip, publicDir);
             if (error != null) {
                 writeToLog("exportAppBackup", error.error);
                 return "Failed to backup [Reason: " + error.error + "]";
-            }
+            }*/
 
-            return "Data backed-up successfully";
+            return "Data backed-up successfully to: '" + backupDir.getAbsolutePath() + "'";
         }, onComplete);
     }
 }

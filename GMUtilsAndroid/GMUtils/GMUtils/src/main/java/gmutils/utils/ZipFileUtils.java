@@ -17,6 +17,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import gmutils.BackgroundTask;
+import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 
 public class ZipFileUtils {
@@ -31,11 +32,13 @@ public class ZipFileUtils {
     public void compress(
             File outZipFile,
             File rootDir,
+            ActionCallback<File, Boolean> isFileExcluded,
             ResultCallback<Error> onComplete
     ) {
         BackgroundTask.run(() -> compressSync(
                 outZipFile,
-                rootDir
+                rootDir,
+                isFileExcluded
         ), (e) -> {
             if (onComplete != null) onComplete.invoke(e);
         });
@@ -43,7 +46,8 @@ public class ZipFileUtils {
 
     public Error compressSync(
             File outZipFile,
-            File rootDir
+            File rootDir,
+            ActionCallback<File, Boolean> isFileExcluded
     ) {
         if (!outZipFile.exists()) {
             try {
@@ -70,7 +74,17 @@ public class ZipFileUtils {
             if (subFiles != null) {
                 for (File sf : subFiles) {
                     if (sf.isFile()) files.add(sf);
-                    else if (sf.isDirectory()) dirs.add(sf);
+                    else if (sf.isDirectory()) {
+                        if (isFileExcluded == null) {
+                            dirs.add(sf);
+                        } else {
+                            Boolean exclude = isFileExcluded.invoke(sf);
+                            if (exclude == null) exclude = false;
+                            if (!exclude) {
+                                dirs.add(sf);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -113,85 +127,59 @@ public class ZipFileUtils {
             return new Error("rootDir must be directory");
         }
 
-        OutputStream zipFileOutputStream = null;
-        ZipOutputStream zipStream = null;
-        try {
-            zipFileOutputStream = new FileOutputStream(outZipFile);
-            zipStream = new ZipOutputStream(zipFileOutputStream);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return new Error(e.getMessage());
-        } finally {
-            if (zipFileOutputStream != null) {
+        try(OutputStream zipFileOutputStream = new FileOutputStream(outZipFile)) {
+            ZipOutputStream zipStream = new ZipOutputStream(zipFileOutputStream);
+
+            final String rootDirPath = rootDir.getAbsolutePath() + "/";
+
+            Error error = null;
+
+            for (File file : toCompressFiles) {
+                String entryName = file.getAbsolutePath().replace(rootDirPath, "");
+
+                ZipEntry zipEntry = new ZipEntry(entryName);
+                FileInputStream fileInputStream = null;
                 try {
-                    zipFileOutputStream.close();
-                } catch (IOException e) {
+                    zipStream.putNextEntry(zipEntry);
+
+                    fileInputStream = new FileInputStream(file);
+                    var length = 0;
+                    byte[] buffer = new byte[1024];
+                    while ((length = fileInputStream.read(buffer)) > 0) {
+                        zipStream.write(buffer, 0, length);
+                    }
+
+                    fileInputStream.close();
+                    zipStream.closeEntry();
+                } catch (Exception e) {
                     e.printStackTrace();
-                }
-            }
-            if (zipStream != null) {
-                try {
-                    zipStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
-
-        final String rootDirPath = rootDir.getAbsolutePath() + "/";
-
-        for (File file : toCompressFiles) {
-            String entryName = file.getAbsolutePath().replace(rootDirPath, "");
-
-            ZipEntry zipEntry = new ZipEntry(entryName);
-            FileInputStream fileInputStream = null;
-            try {
-                zipStream.putNextEntry(zipEntry);
-
-                fileInputStream = new FileInputStream(file);
-                var length = 0;
-                byte[] buffer = new byte[1024];
-                while ((length = fileInputStream.read(buffer)) > 0) {
-                    zipStream.write(buffer, 0, length);
-                }
-
-                fileInputStream.close();
-                zipStream.closeEntry();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new Error(e.getMessage());
-            } finally {
-                if (fileInputStream != null) {
-                    try {
-                        fileInputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    error = new Error(e.getMessage());
+                    break;
+                } finally {
+                    if (fileInputStream != null) {
+                        try {
+                            fileInputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-                try {
-                    zipFileOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    zipStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
-        }
 
-        try {
-            zipStream.finish();
-            zipStream.close();
-            zipFileOutputStream.close();
+            try {
+                zipStream.finish();
+                zipStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new Error(e.getMessage());
+            }
+
+            return error;
         } catch (IOException e) {
-            e.printStackTrace();
-            return new Error(e.getMessage());
+            throw new RuntimeException(e);
         }
 
-        return null;
+
     }
 
     //----------------------------------------------------------------------------------------------
