@@ -822,10 +822,28 @@ public abstract class LoggerAbs {
 
             File backupDir = new File(
                     root,
-                    context.getPackageName() + "/Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true)
+                    context.getPackageName() +
+                            "/Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss",
+                            true
+                    )
             );
 
-            backupDir.mkdirs();
+            if (!backupDir.mkdirs()) {
+                int i = context.getPackageName().lastIndexOf("/");
+                String name;
+                if (i >= 0)
+                    name = context.getPackageName().substring(i + 1);
+                else
+                    name = context.getPackageName();
+
+                backupDir = new File(
+                        root,
+                        name +
+                                "/Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss",
+                                true
+                        )
+                );
+            }
 
             File privateZip = null;
             //File publicZip = null;
@@ -833,7 +851,8 @@ public abstract class LoggerAbs {
             if (backupDir.exists()) {
                 try {
                     privateZip = new File(backupDir, "private.bac");
-                    privateZip.createNewFile();
+                    boolean newFile = privateZip.createNewFile();
+                    boolean b = newFile;
 
                     //publicZip = new File(backupDir, "public.bac");
                     //publicZip.createNewFile();
@@ -841,6 +860,10 @@ public abstract class LoggerAbs {
                     e.printStackTrace();
                     return e.getMessage();
                 }
+            }
+
+            if (privateZip == null) {
+                return "Disabled to create in: '" + backupDir.getAbsolutePath() + "'";
             }
 
             ZipFileUtils zipFileUtils = new ZipFileUtils();

@@ -127,7 +127,10 @@ public class ZipFileUtils {
             return new Error("rootDir must be directory");
         }
 
-        try(OutputStream zipFileOutputStream = new FileOutputStream(outZipFile)) {
+        OutputStream zipFileOutputStream = null;
+        try {
+            zipFileOutputStream = new FileOutputStream(outZipFile);
+
             ZipOutputStream zipStream = new ZipOutputStream(zipFileOutputStream);
 
             final String rootDirPath = rootDir.getAbsolutePath() + "/";
@@ -177,6 +180,15 @@ public class ZipFileUtils {
             return error;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (zipFileOutputStream != null) {
+                try {
+                    zipFileOutputStream.flush();
+                    zipFileOutputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
 
