@@ -30,7 +30,6 @@ import gmutils.listeners.ResultCallback;
 
 import java.lang.Runnable;
 
-import gmutils.listeners.ResultCallback2;
 import gmutils.security.Security;
 import gmutils.utils.ZipFileUtils;
 
@@ -818,31 +817,35 @@ public abstract class LoggerAbs {
 
     public void exportAppBackup(Context context, ResultCallback<String> onComplete) {
         BackgroundTask.run(() -> {
-            File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            /*File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File packageDir = new File(root, context.getPackageName());
+            if (!packageDir.mkdir()) {
+                root = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                packageDir = root;
+                if (!packageDir.exists() && !packageDir.mkdirs()) {
+                    return "Couldn't create a folder in " +
+                            "\"" + root.getAbsolutePath() + "\" " +
+                            "folder with name:\n" +
+                            "" + packageDir.getName();
+                }
+            }*/
 
+            String backupDirName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmm", true);
             File backupDir = new File(
-                    root,
-                    context.getPackageName() +
-                            "/Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss",
-                            true
-                    )
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    context.getPackageName() + "/" + backupDirName
             );
-
-            if (!backupDir.mkdirs()) {
-                int i = context.getPackageName().lastIndexOf("/");
-                String name;
-                if (i >= 0)
-                    name = context.getPackageName().substring(i + 1);
-                else
-                    name = context.getPackageName();
-
+            if (!backupDir.exists() && !backupDir.mkdirs()) {
+                String path0 = backupDir.getAbsolutePath();
                 backupDir = new File(
-                        root,
-                        name +
-                                "/Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss",
-                                true
-                        )
+                        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                        backupDirName
                 );
+                if (!backupDir.exists() && !backupDir.mkdirs()) {
+                    return "Couldn't create a folder in any of those paths:\n" +
+                            "Path 1:" + path0 + "\n" +
+                            "Path 2:" + backupDir.getAbsolutePath();
+                }
             }
 
             File privateZip = null;
@@ -850,7 +853,8 @@ public abstract class LoggerAbs {
 
             if (backupDir.exists()) {
                 try {
-                    privateZip = new File(backupDir, "private.bac");
+                    String backupFileName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + ".bac";
+                    privateZip = new File(backupDir, backupFileName);
                     boolean newFile = privateZip.createNewFile();
                     boolean b = newFile;
 
@@ -863,7 +867,7 @@ public abstract class LoggerAbs {
             }
 
             if (privateZip == null) {
-                return "Disabled to create in: '" + backupDir.getAbsolutePath() + "'";
+                return "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'";
             }
 
             ZipFileUtils zipFileUtils = new ZipFileUtils();

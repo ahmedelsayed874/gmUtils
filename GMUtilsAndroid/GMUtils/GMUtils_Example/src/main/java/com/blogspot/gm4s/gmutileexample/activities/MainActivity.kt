@@ -1,5 +1,6 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
@@ -220,6 +222,19 @@ class MainActivity : BaseActivity() {
 
         this.view.btn15.text = "Get App Backup"
         this.view.btn15.setOnClickListener {
+            /*val grant = ContextCompat.checkSelfPermission(
+                thisActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            if (grant != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE.hashCode()
+                )
+                return@setOnClickListener
+            }*/
+
             log("get-app-backup", "getting app backup started")
             Logger.d().exportAppBackup(thisActivity()) {
                 log("get-app-backup", "getting app backup finished: $it")
@@ -262,7 +277,7 @@ class MainActivity : BaseActivity() {
         if (requestCode == 123) {
             log("action result from camera", data?.data?.toString())
             log("action result from camera", data?.extras?.toString())
-        } else if (requestCode == 456){
+        } else if (requestCode == 456) {
             log("action result pick image", data?.data?.toString())
             log("action result pick image", data?.extras?.toString())
         }
@@ -278,26 +293,27 @@ class MainActivity : BaseActivity() {
                 setWriteToFileDeadline(dl)
             }
 
-            for (i in 0 .. 10000) {
+            for (i in 0..10000) {
                 _testLogger(logger)
             }
         }
     }
+
     fun _testLogger(logger: LoggerAbs) {
         try {
             val x = 1 / 0
         } catch (e: Exception) {
             logger.print(e)
-            logger.print({logger.logId()}, e)
+            logger.print({ logger.logId() }, e)
         }
 
         logger.print { "loggerTest()" }
-        logger.print({logger.logId()}) { "loggerTest()" }
+        logger.print({ logger.logId() }) { "loggerTest()" }
         Log.d("testLogger", logger.getLogFilesPath(this))
 
         logger.printMethod()
-        logger.printMethod({logger.logId()})
-        logger.printMethod({logger.logId()}) { "this is more info" }
+        logger.printMethod({ logger.logId() })
+        logger.printMethod({ logger.logId() }) { "this is more info" }
         val r = Runnable {
             logger.printMethod()
             logger.printMethod({ logger.logId() })
