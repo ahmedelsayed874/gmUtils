@@ -14,7 +14,7 @@ class AndroidApplicationAndBaseApplication : Application() {
 
         app = BaseApplication.register(this)
 
-        Logger.d().logConfigs.setWriteToFileDeadline(22, 11, 2021)
+        Logger.d().logConfigs.setWriteLogsToFileDeadline(22, 11, 2021)
         Log.d("*****", "onCreate()")
 
         Log.d("*****", "reportedBugs: " + app.reportedBugs)

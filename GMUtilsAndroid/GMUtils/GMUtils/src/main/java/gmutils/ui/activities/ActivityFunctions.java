@@ -160,7 +160,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         //-----------------------------------------------------------------------------------
 
         public void onCreateOptionsMenu(Menu menu) {
-            if (Logger.d().getLogConfigs().isWriteToFileEnabled()) {
+            if (Logger.d().getLogConfigs().isWriteLogsToFileEnabled()) {
                 if (showBugsMenuItemId == 0) {
                     showBugsMenuItemId = "Show Log".hashCode();
                     if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;

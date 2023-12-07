@@ -290,7 +290,6 @@ class MainActivity : BaseActivity() {
                 val dl = DateOp.getInstance().increaseDays(1)
                 setLogDeadline(dl)
                 setWriteLogsToFileDeadline(dl)
-                setWriteToFileDeadline(dl)
             }
 
             for (i in 0..10000) {
@@ -316,8 +315,8 @@ class MainActivity : BaseActivity() {
         logger.printMethod({ logger.logId() }) { "this is more info" }
         val r = Runnable {
             logger.printMethod()
-            logger.printMethod({ logger.logId() })
-            logger.printMethod({ logger.logId() }, { "this is more info" }, true)
+            logger.printMethod { logger.logId() }
+            logger.printMethod({ logger.logId() }, { "this is more info" })
         }
         r.run()
         logger.writeToFile(this) { "writing to file" }

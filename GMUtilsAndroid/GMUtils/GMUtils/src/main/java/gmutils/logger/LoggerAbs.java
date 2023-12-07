@@ -48,7 +48,6 @@ import gmutils.utils.ZipFileUtils;
 public abstract class LoggerAbs {
     public static class LogConfigs {
         private DateOp logDeadline;
-        private DateOp writeToFileDeadline;
         private DateOp writeLogsToFileDeadline;
         private DateOp fileContentEncryptionDeadline;
 
@@ -69,21 +68,6 @@ public abstract class LoggerAbs {
         }
 
         //endregion set printing logs deadline
-
-        //region set writing to file deadline
-        public LogConfigs setWriteToFileDeadline(int d, int M, int y) {
-            return setWriteToFileDeadline(d, M, y, 23, 59);
-        }
-
-        public LogConfigs setWriteToFileDeadline(int d, int M, int y, int h, int m) {
-            return setWriteToFileDeadline(DateOp.getInstance().setDate(d, M, y).setTime(h, m, 59));
-        }
-
-        public LogConfigs setWriteToFileDeadline(DateOp dateOp) {
-            this.writeToFileDeadline = dateOp;
-            return this;
-        }
-        //endregion set writing to file deadline
 
         //region set writing <<<logs>>> to file deadline
         public LogConfigs setWriteLogsToFileDeadline(int d, int M, int y) {
@@ -121,10 +105,6 @@ public abstract class LoggerAbs {
             return logDeadline != null && logDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
 
-        public boolean isWriteToFileEnabled() {
-            return writeToFileDeadline != null && writeToFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
-        }
-
         public boolean isWriteLogsToFileEnabled() {
             return writeLogsToFileDeadline != null && writeLogsToFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
@@ -143,7 +123,6 @@ public abstract class LoggerAbs {
         public String toString() {
             return "LogConfigs{" +
                     "logDeadline=" + logDeadline +
-                    ", writeToFileDeadline=" + writeToFileDeadline +
                     ", writeLogsToFileDeadline=" + writeLogsToFileDeadline +
                     ", fileContentEncryptionDeadline=" + fileContentEncryptionDeadline +
                     ", fileContentEncryptionKey=" + fileContentEncryptionKey +
@@ -155,7 +134,6 @@ public abstract class LoggerAbs {
             super.finalize();
 
             logDeadline = null;
-            writeToFileDeadline = null;
             writeLogsToFileDeadline = null;
             fileContentEncryptionDeadline = null;
         }
@@ -397,11 +375,7 @@ public abstract class LoggerAbs {
     }
 
     public void print(TitleGetter title, @NotNull ContentGetter callback) {
-        print(title, callback, logConfigs.isWriteLogsToFileEnabled());
-    }
-
-    private void print(TitleGetter title, @NotNull ContentGetter callback, boolean writeToFileAlso) {
-        if (logConfigs.isLogEnabled() || writeToFileAlso) {
+        if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
             runOnLoggerThread(() -> {
                 String content = ("" + callback.getContent());
 
@@ -429,7 +403,7 @@ public abstract class LoggerAbs {
                     }
                 }
 
-                if (writeToFileAlso) {
+                if (logConfigs.isWriteLogsToFileEnabled()) {
                     if (BaseApplication.current() != null) {
                         try {
                             String[] title2 = new String[]{""};
@@ -454,51 +428,27 @@ public abstract class LoggerAbs {
 
     //region printMethod
     public void printMethod() {
-        printMethod(null, null, logConfigs.isWriteLogsToFileEnabled(), 0);
-    }
-
-    public void printMethod(TitleGetter title) {
-        printMethod(title, null, logConfigs.isWriteLogsToFileEnabled(), 0);
+        printMethod(null, null, 0);
     }
 
     public void printMethod(int tuner) { //Class<?> stopClass) {
-        printMethod(null, null, logConfigs.isWriteLogsToFileEnabled(), tuner);
-    }
-
-    public void printMethod(TitleGetter title, int tuner) { //Class<?> stopClass) {
-        printMethod(title, null, logConfigs.isWriteLogsToFileEnabled(), tuner);
+        printMethod(null, null, tuner);
     }
 
     public void printMethod(ContentGetter moreInfoCallback) {
-        printMethod(null, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), 0);
-    }
-
-    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback) {
-        printMethod(title, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), 0);
+        printMethod(null, moreInfoCallback, 0);
     }
 
     public void printMethod(ContentGetter moreInfoCallback, int tuner) { //Class<?> stopClass) {
-        printMethod(null, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), tuner);
+        printMethod(null, moreInfoCallback, tuner);
+    }
+
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback) {
+        printMethod(title, moreInfoCallback, 0);
     }
 
     public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, int tuner) { //Class<?> stopClass) {
-        printMethod(title, moreInfoCallback, logConfigs.isWriteLogsToFileEnabled(), tuner);
-    }
-
-    public void printMethod(ContentGetter moreInfoCallback, boolean writeToFileAlso) {
-        printMethod(null, moreInfoCallback, writeToFileAlso, 0);
-    }
-
-    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, boolean writeToFileAlso) {
-        printMethod(title, moreInfoCallback, writeToFileAlso, 0);
-    }
-
-    public void printMethod(ContentGetter moreInfoCallback, boolean writeToFileAlso, int tuner) { //Class<?> stopClass) {
-        printMethod(null, moreInfoCallback, writeToFileAlso, tuner);
-    }
-
-    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, boolean writeToFileAlso, int tuner) { //Class<?> stopClass) {
-        if (logConfigs.isLogEnabled() || writeToFileAlso) {
+        if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             runOnLoggerThread(() -> {
                 try {
@@ -527,13 +477,12 @@ public abstract class LoggerAbs {
                             "() -> line: " + stackTrace.getLineNumber() +
                             (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));
 
-                    print(title, () -> msg, writeToFileAlso);
+                    print(title, () -> msg);
                 } catch (Exception e) {
                     print(
-                            title, () ->
-                                    "printMethod failed with exception: " + e.getMessage() +
-                                            (moreInfoCallback == null ? "" : "\nMORE-INFO: " + moreInfoCallback.getContent()),
-                            writeToFileAlso
+                            title,
+                            () -> "printMethod failed with exception: " + e.getMessage() +
+                                    (moreInfoCallback == null ? "" : "\nMORE-INFO: " + moreInfoCallback.getContent())
                     );
                 }
             });
@@ -597,7 +546,7 @@ public abstract class LoggerAbs {
     //region FILE
     //region write to files
     public void writeToFile(Context context, ContentGetter text) {
-        if (logConfigs.isWriteToFileEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
+        if (logConfigs.isWriteLogsToFileEnabled()) {
             runOnLoggerThread(() -> {
                 getLogFileWriter(
                         context
@@ -606,7 +555,7 @@ public abstract class LoggerAbs {
                 );
             });
         } else {
-            if (!logConfigs.isWriteToFileEnabled() || !logConfigs.isWriteLogsToFileEnabled()) {
+            if (!logConfigs.isWriteLogsToFileEnabled()) {
                 deleteSavedFiles(context, null);
             }
         }

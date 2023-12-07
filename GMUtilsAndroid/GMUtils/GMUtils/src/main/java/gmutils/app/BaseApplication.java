@@ -238,7 +238,7 @@ public abstract class BaseApplication extends Application implements Application
 
             try {
                 Logger.LogConfigs logConfigs = Logger.d().getLogConfigs();
-                if (logConfigs.isWriteToFileEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
+                if (logConfigs.isWriteLogsToFileEnabled()) {
                     File bugFile = getBugFile();
                     Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
                     fileWriter.write(stack.toString());
