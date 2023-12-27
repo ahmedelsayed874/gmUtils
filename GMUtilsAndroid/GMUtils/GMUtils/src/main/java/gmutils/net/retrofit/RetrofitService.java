@@ -223,7 +223,7 @@ public class RetrofitService {
             //region get/create KeyStore
             File ksf = new File(keyStoreFilePath);
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (InputStream in = new FileInputStream(ksf)){
+            try (InputStream in = new FileInputStream(ksf)) {
                 keyStore.load(in, password2);
             } catch (Exception e) {
                 keyStore.load(null, password2);
@@ -265,7 +265,7 @@ public class RetrofitService {
                 ksf.deleteOnExit();
                 ksf.createNewFile();
 
-                try (OutputStream out = new FileOutputStream(ksf)){
+                try (OutputStream out = new FileOutputStream(ksf)) {
                     keyStore.store(out, password2);
                 } catch (Exception ee) {
                     ee.printStackTrace();
@@ -535,8 +535,8 @@ public class RetrofitService {
                 responseClass,
                 call,
                 callback,
-                Logger.d(),
-                null
+                null,
+                Logger.d()
         );
     }
 
@@ -553,8 +553,8 @@ public class RetrofitService {
                 responseClass,
                 call,
                 callback,
-                loggerAbs,
-                null
+                null,
+                loggerAbs
         );
     }
 
@@ -564,8 +564,8 @@ public class RetrofitService {
             Class<R> responseClass,
             Call<R> call,
             @Nullable OnResponseReady<R> callback,
-            LoggerAbs loggerAbs,
-            String[] excludedTextsFromLog
+            String[] excludedTextsFromLog,
+            LoggerAbs loggerAbs
     ) {
         if (async) {
             gmutils.net.retrofit.callback.Callback<R> callback2;
@@ -573,8 +573,8 @@ public class RetrofitService {
                     call.request(),
                     responseClass,
                     callback,
-                    loggerAbs,
-                    excludedTextsFromLog
+                    excludedTextsFromLog,
+                    loggerAbs
             );
             call.enqueue(callback2);
             return null;
@@ -586,8 +586,8 @@ public class RetrofitService {
                     call.request(),
                     responseClass,
                     response::set,
-                    loggerAbs,
-                    excludedTextsFromLog
+                    excludedTextsFromLog,
+                    loggerAbs
             );
 
             try {

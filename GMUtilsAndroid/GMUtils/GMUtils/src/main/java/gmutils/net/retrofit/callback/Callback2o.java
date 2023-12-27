@@ -55,8 +55,8 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
                 request,
                 responseClass,
                 onResponseReady,
-                logger,
-                null
+                null,
+                logger
         );
     }
 
@@ -70,8 +70,8 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
                 requestInfo,
                 responseClass,
                 onResponseReady,
-                logger,
-                null
+                null,
+                logger
         );
     }
 
@@ -79,10 +79,10 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             Request request,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
-            LoggerAbs logger,
-            String[] excludedTextsFromLog
+            String[] excludedTextsFromLog,
+            LoggerAbs logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2o.this::setResult, logger, excludedTextsFromLog);
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2o.this::setResult, excludedTextsFromLog, logger);
         this.onResponseReady = onResponseReady;
     }
 
@@ -90,10 +90,10 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
-            LoggerAbs logger,
-            String[] excludedTextsFromLog
+            String[] excludedTextsFromLog,
+            LoggerAbs logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback2o.this::setResult, logger, excludedTextsFromLog);
+        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback2o.this::setResult, excludedTextsFromLog, logger);
         this.onResponseReady = onResponseReady;
     }
 

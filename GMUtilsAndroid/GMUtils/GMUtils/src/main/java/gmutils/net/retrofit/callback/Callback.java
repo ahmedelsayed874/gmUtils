@@ -50,8 +50,8 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
                 request,
                 responseClass,
                 onResponseReady,
-                logger,
-                null
+                null,
+                logger
         );
     }
 
@@ -65,8 +65,8 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
                 requestInfo,
                 responseClass,
                 onResponseReady,
-                logger,
-                null
+                null,
+                logger
         );
     }
 
@@ -74,10 +74,10 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Request request,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
-            LoggerAbs logger,
-            String[] excludedTextsFromLog
+            String[] excludedTextsFromLog,
+            LoggerAbs logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult, logger, excludedTextsFromLog);
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback.this::setResult, excludedTextsFromLog, logger);
         this.onResponseReady = onResponseReady;
     }
 
@@ -85,10 +85,10 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
-            LoggerAbs logger,
-            String[] excludedTextsFromLog
+            String[] excludedTextsFromLog,
+            LoggerAbs logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult, logger, excludedTextsFromLog);
+        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult, excludedTextsFromLog, logger);
         this.onResponseReady = onResponseReady;
     }
 

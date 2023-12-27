@@ -43,18 +43,18 @@ public final class CallbackOperations<R extends BaseResponse> {
             Request request,
             Class<R> responseClass,
             Listener<R> listener,
-            LoggerAbs logger,
-            String[] excludedTextsFromLog
+            String[] excludedTextsFromLog,
+            LoggerAbs logger
     ) {
-        this(request.toString(), responseClass, listener, logger, excludedTextsFromLog);
+        this(request.toString(), responseClass, listener, excludedTextsFromLog, logger);
     }
 
     public CallbackOperations(
             String requestInfo,
             Class<R> responseClass,
             Listener<R> listener,
-            LoggerAbs logger,
-            String[] excludedTextsFromLog
+            String[] excludedTextsFromLog,
+            LoggerAbs logger
     ) {
         this.responseClass = responseClass;
         this.listener = listener;
