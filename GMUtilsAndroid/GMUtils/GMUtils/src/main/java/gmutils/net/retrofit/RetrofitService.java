@@ -518,7 +518,10 @@ public class RetrofitService {
     }
 
     public static void destroy() {
-        if (sInstance != null) sInstance.mRetrofit = null;
+        if (sInstance != null) {
+            sInstance.mRetrofit = null;
+            sInstance = null;
+        }
     }
 
     //----------------------------------------------------------------------------------------------
