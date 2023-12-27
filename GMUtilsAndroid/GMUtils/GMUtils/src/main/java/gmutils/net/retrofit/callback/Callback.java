@@ -1,10 +1,6 @@
 package gmutils.net.retrofit.callback;
-
-import androidx.annotation.NonNull;
-
+import org.jetbrains.annotations.NotNull;
 import java.util.Map;
-
-import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
@@ -117,12 +113,12 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     //----------------------------------------------------------------------------------------------
 
     @Override
-    public void onResponse(@NonNull Call<R> call, @NonNull retrofit2.Response<R> response) {
+    public void onResponse(@NotNull Call<R> call, @NotNull retrofit2.Response<R> response) {
         callbackOperations.onResponse(call, response);
     }
 
     @Override
-    public void onFailure(@NonNull Call<R> call, @NonNull Throwable t) {
+    public void onFailure(@NotNull Call<R> call, @NotNull Throwable t) {
         callbackOperations.onFailure(call, t);
     }
 }

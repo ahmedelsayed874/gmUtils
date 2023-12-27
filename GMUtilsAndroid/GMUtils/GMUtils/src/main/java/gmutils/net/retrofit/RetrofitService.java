@@ -1,20 +1,48 @@
 package gmutils.net.retrofit;
 
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import android.text.TextUtils;
+
+import androidx.annotation.RequiresApi;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import gmutils.listeners.ActionCallback0;
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
@@ -24,6 +52,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -47,16 +76,271 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * 'com.squareup.okhttp:okhttp:2.4.0'
  */
 public class RetrofitService {
-    public interface Callback {
-        void config(OkHttpClient.Builder httpClient);
+    public static class TrustManagerHelper {
+
+        public X509TrustManager getDefaultTrustManager() throws NoSuchAlgorithmException, KeyStoreException {
+            String algorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
+            trustManagerFactory.init((KeyStore) null);
+
+            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+            if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+                throw new IllegalStateException("Unexpected default trust managers:"
+                        + Arrays.toString(trustManagers));
+            }
+
+            return (X509TrustManager) trustManagers[0];
+        }
+
+        //-----------------------------------------------------------
+
+        public X509TrustManager getUnsafeTrustManager() {
+            X509TrustManager tm = new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+            };
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                return new X509ExtendedTrustManager() {
+                    //                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+                        tm.checkClientTrusted(chain, authType);
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+                        tm.checkServerTrusted(chain, authType);
+                    }
+
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+                        tm.checkClientTrusted(chain, authType);
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+                        tm.checkServerTrusted(chain, authType);
+                    }
+
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                        tm.checkClientTrusted(chain, authType);
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                        tm.checkServerTrusted(chain, authType);
+                    }
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return tm.getAcceptedIssuers();
+                    }
+                };
+            }
+            //
+            else {
+                return tm;
+            }
+        }
+
+        //-----------------------------------------------------------
+
+        /*public X509TrustManager createTrustManagerFromCertificate(
+                InputStream cert
+        ) throws Exception {
+            return createTrustManagerFromCertificate(cert, "ca");
+        }
+
+        public X509TrustManager createTrustManagerFromCertificate(
+                InputStream cert,
+                String desiredCertificateAlias
+        ) throws Exception {
+            // loading CAs from an InputStream
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Certificate ca;
+            try {
+                ca = cf.generateCertificate(cert);
+            } finally {
+                cert.close();
+            }
+
+            // creating a KeyStore containing our trusted CAs
+            KeyStore keyStore = getKeyStore(null, null);
+            keyStore.setCertificateEntry(desiredCertificateAlias, ca);
+
+            // creating a TrustManager that trusts the CAs in our KeyStore
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+            return (X509TrustManager) tmf.getTrustManagers()[0];
+        }*/
+
+        //-----------------------------------------------------------
+
+        /**
+         * @param cert stream file of extension .cert or .crt
+         * @return
+         */
+        /**
+         * Returns a trust manager that trusts {@code certificates} and none other. HTTPS services whose
+         * certificates have not been signed by these certificates will fail with a {@code
+         * SSLHandshakeException}.
+         *
+         * <p>This can be used to replace the host platform's built-in trusted certificates with a custom
+         * set. This is useful in development where certificate authority-trusted certificates aren't
+         * available. Or in production, to avoid reliance on third-party certificate authorities.
+         *
+         * <h3>Warning: Customizing Trusted Certificates is Dangerous!</h3>
+         *
+         * <p>Relying on your own trusted certificates limits your server team's ability to update their
+         * TLS certificates. By installing a specific set of trusted certificates, you take on additional
+         * operational complexity and limit your ability to migrate between certificate authorities. Do
+         * not use custom trusted certificates in production without the blessing of your server's TLS
+         * administrator.
+         */
+        public X509TrustManager getOrCreateTrustManagerFromCertificate(
+                String keyStoreFilePath,
+                String certificateAlias,
+                @Nullable String password,
+                @NotNull ActionCallback0<InputStream> certificateFile
+        ) throws Exception {
+            char[] password2 = password.toCharArray();
+
+            //region get/create KeyStore
+            File ksf = new File(keyStoreFilePath);
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            try (InputStream in = new FileInputStream(ksf)){
+                keyStore.load(in, password2);
+            } catch (Exception e) {
+                keyStore.load(null, password2);
+            }
+            //endregion
+
+            //region check if the certificate was registered in the keystore or not
+            boolean isCertRegistered = false;
+
+            for (int i = 0; i < 5; i++) {
+                try {
+                    String certificateAlias2 = certificateAlias + i;
+                    if (keyStore.containsAlias(certificateAlias2)) {
+                        isCertRegistered = true;
+                        break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            //endregion
+
+            //region register the certificate if not exist in keystore
+            if (!isCertRegistered) {
+                CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+                Collection<? extends Certificate> certificates;
+                certificates = certificateFactory.generateCertificates(certificateFile.invoke());
+                if (certificates.isEmpty()) {
+                    throw new IllegalArgumentException("expected non-empty set of trusted certificates");
+                }
+
+                // Put the certificates a key store.
+                int index = 0;
+                for (Certificate certificate : certificates) {
+                    String certificateAlias2 = certificateAlias + (index++);
+                    keyStore.setCertificateEntry(certificateAlias2, certificate);
+                }
+
+                ksf.deleteOnExit();
+                ksf.createNewFile();
+
+                try (OutputStream out = new FileOutputStream(ksf)){
+                    keyStore.store(out, password2);
+                } catch (Exception ee) {
+                    ee.printStackTrace();
+                }
+            }
+            //endregion
+
+            //region Use it to build an X509 trust manager.
+            String keyManagerAlgorithm = KeyManagerFactory.getDefaultAlgorithm();
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(keyManagerAlgorithm);
+            keyManagerFactory.init(keyStore, password2);
+
+            String trustManagerAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(trustManagerAlgorithm);
+            trustManagerFactory.init(keyStore);
+            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+            if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+                throw new IllegalStateException("Unexpected default trust managers:"
+                        + Arrays.toString(trustManagers));
+            }
+            //endregion
+
+            return (X509TrustManager) trustManagers[0];
+        }
+    }
+
+    public enum SSLContextProtocols {
+        Default("Default"),
+
+        //---------------------------------
+
+        SSL("SSL"),
+        @Deprecated(since = "allowed from API 10 till API 25")
+        SSLv3("SSLv3"),
+
+        //---------------------------------
+
+        TLS("TLS"),
+        TLSv1("TLSv1"),
+        @RequiresApi(value = 16)
+        TLSv1_1("TLSv1.1"),
+        @RequiresApi(value = 16)
+        TLSv1_2("TLSv1.2"),
+        @RequiresApi(value = 29)
+        TLSv1_3("TLSv1.3");
+
+        //---------------------------------
+
+        final String asString;
+
+        SSLContextProtocols(String string) {
+            asString = string;
+        }
+    }
+
+    public interface ClientBuildCallback {
+        @Nullable
+        default X509TrustManager getX509TrustManager() {
+            return null;
+        }
+
+        @NotNull
+        default SSLContextProtocols getSSLContextProtocol() {
+            return SSLContextProtocols.TLS;
+        }
+
+        void config(@NotNull OkHttpClient.Builder httpClient, String error);
     }
 
     public static class Parameters {
         private final String baseUrl;
         private boolean allowAllHostname = true;
 
-        private int connectionTimeoutInSeconds = 30;
-        private int readTimeoutInSeconds = 60;
+        private int connectionTimeoutInSeconds = 15;
+        private int readTimeoutInSeconds = 15;
 
         public Parameters(@NotNull String baseUrl) {
             this.baseUrl = baseUrl;
@@ -106,7 +390,7 @@ public class RetrofitService {
     private Retrofit mRetrofit;
     private final Parameters parameters;
 
-    public RetrofitService(@NotNull Parameters parameters, @Nullable Callback tmpBuildCallback) {
+    public RetrofitService(@NotNull Parameters parameters, @Nullable ClientBuildCallback clientBuildCallback) {
         try {
             Class.forName("retrofit2.Retrofit");
             Class.forName("okhttp3.OkHttpClient");
@@ -122,7 +406,7 @@ public class RetrofitService {
 
         this.parameters = parameters;
 
-        OkHttpClient client = createOkHttpClient(parameters, tmpBuildCallback)
+        OkHttpClient client = createOkHttpClient(parameters, clientBuildCallback)
                 .readTimeout(parameters.readTimeoutInSeconds, TimeUnit.SECONDS)
                 .connectTimeout(parameters.connectionTimeoutInSeconds, TimeUnit.SECONDS)
                 .build();
@@ -135,42 +419,67 @@ public class RetrofitService {
                 .build();
     }
 
-    private OkHttpClient.Builder createOkHttpClient(@NotNull Parameters parameters, Callback tmpBuildCallback) {
+    /**
+     * https://developer.android.com/privacy-and-security/security-ssl#UnknownCa
+     * https://developer.android.com/privacy-and-security/security-config#TrustingAdditionalCas
+     * ,
+     * https://www.positioniseverything.net/trust-anchor-for-certification-path-not-found
+     * https://stackoverflow.com/questions/6825226/trust-anchor-not-found-for-android-ssl-connection
+     * https://stackoverflow.com/questions/29273387/certpathvalidatorexception-trust-anchor-for-certificate-path-not-found-retro
+     */
+    private OkHttpClient.Builder createOkHttpClient(@NotNull Parameters parameters, ClientBuildCallback clientBuildCallback) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
+        String error = null;
+
         try {
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-                    TrustManagerFactory.getDefaultAlgorithm()
-            );
-            trustManagerFactory.init((KeyStore) null);
+            //region TrustManager
+            X509TrustManager trustManager;
 
-            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-            if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
-                throw new IllegalStateException("Unexpected default trust managers:"
-                        + Arrays.toString(trustManagers));
+            if (clientBuildCallback != null) {
+                trustManager = clientBuildCallback.getX509TrustManager();
+            } else {
+                trustManager = new TrustManagerHelper().getDefaultTrustManager();
             }
+            //endregion
 
-            X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
-
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{trustManager}, null);
-
+            //region ssl factory
+            String protocol = null;
+            if (clientBuildCallback != null) {
+                SSLContextProtocols sslContextProtocol = clientBuildCallback.getSSLContextProtocol();
+                if (sslContextProtocol != null) {
+                    protocol = sslContextProtocol.asString;
+                }
+            }
+            if (TextUtils.isEmpty(protocol)) protocol = SSLContextProtocols.TLS.asString;
+            SSLContext sslContext = SSLContext.getInstance(protocol);
+            sslContext.init(null, new TrustManager[]{trustManager}, null);//new java.security.SecureRandom()
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+            //endregion
 
             builder.sslSocketFactory(sslSocketFactory, trustManager);
-            if (parameters.allowAllHostname)
-                builder.hostnameVerifier(new AllowAllHostnameVerifier());
-
-            if (tmpBuildCallback != null) tmpBuildCallback.config(builder);
-            tmpBuildCallback = null;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.d().print(() -> RetrofitService.class.getSimpleName() + ".createOkHttpClient() >> EXCEPTION:: ");
+            Logger.d().print(e);
+            error = "Trusting establish failed: " + e.getMessage();
         }
 
+        if (parameters.allowAllHostname) {
+            builder.hostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+        }
+
+        if (clientBuildCallback != null) clientBuildCallback.config(builder, error);
 
         return builder;
     }
+
+    //----------------------------------------------------------------------------------------------
 
     public <T> T create(Class<T> servicesInterface) {
         return mRetrofit.create(servicesInterface);
@@ -184,18 +493,22 @@ public class RetrofitService {
         return create(new Parameters(baseURL), servicesInterface);
     }
 
+    public static <T> T create(@NotNull String baseURL, @NotNull Class<T> servicesInterface, @Nullable ClientBuildCallback clientBuildCallback) {
+        return create(new Parameters(baseURL), servicesInterface, clientBuildCallback);
+    }
+
     public static <T> T create(@NotNull Parameters parameters, @NotNull Class<T> servicesInterface) {
         return create(parameters, servicesInterface, null);
     }
 
-    public static <T> T create(@NotNull Parameters parameters, @NotNull Class<T> servicesInterface, @Nullable Callback tmpBuildCallback) {
+    public static <T> T create(@NotNull Parameters parameters, @NotNull Class<T> servicesInterface, @Nullable ClientBuildCallback clientBuildCallback) {
         if (sInstance == null) {
-            sInstance = new RetrofitService(parameters, tmpBuildCallback);
+            sInstance = new RetrofitService(parameters, clientBuildCallback);
 
         } else {
             if (!parameters.equals(sInstance.parameters)) {
                 destroy();
-                sInstance = new RetrofitService(parameters, tmpBuildCallback);
+                sInstance = new RetrofitService(parameters, clientBuildCallback);
             }
         }
 

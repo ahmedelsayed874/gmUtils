@@ -60,7 +60,7 @@ public class ApiRequestCreator {
     private static ApiRequestCreator mInstance;
     private final RequestQueue mRequestQueue;
     private boolean disableCache = true; //use this boolean to enable or disable cache feature
-    private int timeout = 60_000;
+    private int timeout = 15_000;
 
     @SuppressLint("ShowToast")
     public static synchronized ApiRequestCreator getInstance(Context context) {

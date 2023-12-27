@@ -4,15 +4,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
-
 import com.android.volley.Request;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-
 import gmutils.utils.TextHelper;
 
 /**
@@ -352,7 +351,7 @@ public final class ApiURL {
             super(params);
         }
 
-        public postURL(@NonNull Body body) {
+        public postURL(@NotNull Body body) {
             this.body = body;
             if (body == null)
                 throw new RuntimeException("Body can not be null for:\n" + getEndPointURL());

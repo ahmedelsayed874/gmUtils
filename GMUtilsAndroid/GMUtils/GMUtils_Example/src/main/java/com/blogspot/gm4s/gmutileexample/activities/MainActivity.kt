@@ -1,6 +1,5 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
-import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.blogspot.gm4s.gmutileexample.DB
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
@@ -23,12 +21,24 @@ import gmutils.app.BaseApplication
 import gmutils.logger.Logger
 import gmutils.logger.LoggerAbs
 import gmutils.net.SimpleHTTPRequest
+import gmutils.net.retrofit.RetrofitService
+import gmutils.net.retrofit.example.data.TimeOfArea
 import gmutils.net.volley.example.URLs.TimeURLs
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.toast.MyToast
 import gmutils.ui.utils.ViewSource
+import gmutils.utils.FileUtils
 import gmutils.utils.Utils
+import okhttp3.OkHttpClient
+import java.io.File
+import java.io.InputStream
+import java.math.BigInteger
+import java.security.Principal
+import java.security.PublicKey
+import java.security.cert.X509Certificate
+import java.security.interfaces.RSAPublicKey
 import java.util.*
+import javax.net.ssl.X509TrustManager
 import kotlin.concurrent.thread
 
 class MainActivity : BaseActivity() {
@@ -241,6 +251,11 @@ class MainActivity : BaseActivity() {
             }
         }
 
+        this.view.btn16.text = "Test Untrusted Connection"
+        this.view.btn16.setOnClickListener {
+            testUntrustedConnection()
+        }
+
         //Activities.start(ColorPickerActivity::class.java, thisActivity())
         //Activities.start(ColorPicker2Activity::class.java, thisActivity())
 
@@ -280,6 +295,8 @@ class MainActivity : BaseActivity() {
         } else if (requestCode == 456) {
             log("action result pick image", data?.data?.toString())
             log("action result pick image", data?.extras?.toString())
+        } else if (requestCode == 12313) {
+            testUntrustedConnection_openCertificate(contentResolver.openInputStream(data!!.data!!)!!)
         }
     }
 
@@ -326,5 +343,62 @@ class MainActivity : BaseActivity() {
 //        logger.readAllFilesContents(this) {
 //            Log.d("testLogger", "ALL FILES CONTENT: $it")
 //        }
+    }
+
+
+    private fun testUntrustedConnection() {
+        Logger.d().logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+        log("Test Untrusted Connection", "Test Untrusted Connection (Retrofit)")
+
+        FileUtils.createInstance().showFileExplorer(
+            this,
+            "*/*",
+            null,
+            12313
+        )
+
+
+    }
+    private fun testUntrustedConnection_openCertificate(inputStream: InputStream) {
+        val s = RetrofitService.create(
+            "https://192.168.100.1",
+            gmutils.net.retrofit.example.apiServices.TimeAPIsRequests::class.java,
+            object : RetrofitService.ClientBuildCallback {
+                override fun getX509TrustManager(): X509TrustManager {
+                    //it solved the issue of connecting https
+                    /*val ks = File(filesDir, "cert-keystore")
+                    if (!ks.exists()) ks.createNewFile()
+
+                    return RetrofitService
+                        .TrustManagerHelper()
+                        .getOrCreateTrustManagerFromCertificate(
+                            ks.path,
+                            "crt",
+                            "any-password",
+                        ) { inputStream }*/
+
+                    //it solved the issue of connecting https
+                    return RetrofitService
+                        .TrustManagerHelper()
+                        .unsafeTrustManager
+
+                    //it blocks not trusted connection by https
+                    /*return RetrofitService
+                        .TrustManagerHelper()
+                        .defaultTrustManager*/
+
+                }
+                override fun config(httpClient: OkHttpClient.Builder, error: String?) {
+                    log("Test Untrusted Connection", "ClientBuildCallback.config >> Error: $error")
+                }
+            }
+        )
+        val c = s.getCurrentTime("cairo")
+        c.enqueue(gmutils.net.retrofit.callback.Callback(
+            c.request(),
+            TimeOfArea::class.java
+        ) {
+            log("Test Untrusted Connection", it.toString())
+        })
     }
 }

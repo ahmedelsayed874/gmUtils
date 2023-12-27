@@ -1,30 +1,8 @@
 package gmutils.logger;
 
-import android.content.Context;
-import android.text.TextUtils;
 import android.util.Log;
-
-import androidx.annotation.Nullable;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-
-import gmutils.DateOp;
-import gmutils.app.BaseApplication;
-import gmutils.security.Security;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -57,7 +35,7 @@ public class Logger extends LoggerAbs {
 
     //----------------------------------------------------------------------------------------------
 
-    private Logger(@Nullable String logId) {
+    private Logger(String logId) {
         super(logId);
     }
 

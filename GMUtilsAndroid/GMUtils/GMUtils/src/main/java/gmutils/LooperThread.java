@@ -5,9 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-
-import androidx.annotation.NonNull;
-
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,7 +126,7 @@ public class LooperThread extends Thread {
         }
 
         @Override
-        public void handleMessage(@NonNull Message msg) {
+        public void handleMessage(@NotNull Message msg) {
             if (onMessageHandled != null)
                 onMessageHandled.onMessageHandled(msg);
         }
