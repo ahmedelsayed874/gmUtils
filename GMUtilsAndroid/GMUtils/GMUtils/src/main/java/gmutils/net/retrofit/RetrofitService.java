@@ -434,11 +434,13 @@ public class RetrofitService {
 
         try {
             //region TrustManager
-            X509TrustManager trustManager;
+            X509TrustManager trustManager = null;
 
             if (clientBuildCallback != null) {
                 trustManager = clientBuildCallback.getX509TrustManager();
-            } else {
+            }
+
+            if (trustManager == null) {
                 trustManager = new TrustManagerHelper().getDefaultTrustManager();
             }
             //endregion
