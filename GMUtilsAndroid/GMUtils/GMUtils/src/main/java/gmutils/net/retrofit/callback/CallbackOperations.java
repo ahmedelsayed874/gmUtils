@@ -182,7 +182,7 @@ public final class CallbackOperations<R extends BaseResponse> {
 
         response._isErrorDueException = exception;
         if (error.contains("Trust anchor for certification path not found")) {
-            response._isSLLCertificateRequired = true;
+            response._isSSLCertificateRequired = true;
         }
 
         response._code = code;
