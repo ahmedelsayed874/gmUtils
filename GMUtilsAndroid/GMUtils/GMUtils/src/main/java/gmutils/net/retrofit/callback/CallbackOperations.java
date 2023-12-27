@@ -121,20 +121,26 @@ public final class CallbackOperations<R extends BaseResponse> {
                 setResult(body, headers);
 
             } else {
-                setError("", response.code(), headers);
+                setError("", false, response.code(), headers);
             }
         } else {
-            setError(error, response.code(), headers);
+            setError(error, false, response.code(), headers);
         }
     }
 
     public void onFailure(Call<R> call, Throwable t) {
-        printCallInfo(call, null, "Exception[" + t.getMessage() + "]");
+        printCallInfo(
+                call,
+                null,
+                "Exception[" +
+                        t.getClass().getName() + ":: " + t.getMessage() +
+                        "]"
+        );
 
-        setError(t.getMessage(), 0, null);
+        setError(t.getClass().getName() + ":\n" + t.getMessage(), true, 0, null);
     }
 
-    private void setError(String error, int code, Map<String, List<String>> headers) {
+    private void setError(String error, boolean exception, int code, Map<String, List<String>> headers) {
         R response = null;
 
         try {
@@ -143,7 +149,6 @@ public final class CallbackOperations<R extends BaseResponse> {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-
 
         if (errorListener != null) {
             response.setCallbackStatus(errorListener.getInternalStatus(code, error));
@@ -173,6 +178,11 @@ public final class CallbackOperations<R extends BaseResponse> {
 
         if (extras != null) {
             response._extras = extras;
+        }
+
+        response._isErrorDueException = exception;
+        if (error.contains("Trust anchor for certification path not found")) {
+            response._isSLLCertificateRequired = true;
         }
 
         response._code = code;

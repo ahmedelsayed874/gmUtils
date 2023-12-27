@@ -364,7 +364,7 @@ class MainActivity : BaseActivity() {
             "https://192.168.100.1",
             gmutils.net.retrofit.example.apiServices.TimeAPIsRequests::class.java,
             object : RetrofitService.ClientBuildCallback {
-                override fun getX509TrustManager(): X509TrustManager {
+                override fun getX509TrustManager(): X509TrustManager? {
                     //it solved the issue of connecting https
                     /*val ks = File(filesDir, "cert-keystore")
                     if (!ks.exists()) ks.createNewFile()
@@ -387,6 +387,8 @@ class MainActivity : BaseActivity() {
                         .TrustManagerHelper()
                         .defaultTrustManager*/
 
+                    //it blocks not trusted connection by https
+                    //return null
                 }
                 override fun config(httpClient: OkHttpClient.Builder, error: String?) {
                     log("Test Untrusted Connection", "ClientBuildCallback.config >> Error: $error")
@@ -398,6 +400,7 @@ class MainActivity : BaseActivity() {
             c.request(),
             TimeOfArea::class.java
         ) {
+            Logger.d().print { it }
             log("Test Untrusted Connection", it.toString())
         })
     }

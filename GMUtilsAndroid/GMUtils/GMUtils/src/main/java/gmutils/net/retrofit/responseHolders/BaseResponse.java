@@ -18,9 +18,9 @@ import java.util.Set;
  * Computer Engineer / 2012
  * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
  * Have precedent experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -71,7 +71,7 @@ import java.util.Set;
  */
 
 public abstract class BaseResponse {
-    public enum Statuses { Succeeded, Error, ConnectionFailed }
+    public enum Statuses {Succeeded, Error, ConnectionFailed}
 
     @Expose(serialize = false, deserialize = false)
     @Ignore
@@ -88,6 +88,14 @@ public abstract class BaseResponse {
     @Expose(serialize = false, deserialize = false)
     @Ignore
     public String _error;
+
+    @Expose(serialize = false, deserialize = false)
+    @Ignore
+    public Boolean _isErrorDueException;
+
+    @Expose(serialize = false, deserialize = false)
+    @Ignore
+    public Boolean _isSLLCertificateRequired;
 
     @Expose(serialize = false, deserialize = false)
     @Ignore
@@ -155,14 +163,16 @@ public abstract class BaseResponse {
             header.append("}");
         }
 
-        return "BaseResponse{" +
-                "_callbackStatus='" + _callbackStatus + '\'' +
-                ", _code=" + _code +
-                ", _error='" + _error + '\'' +
-                ", _extras=" + _extras +
-                ", _requestTime=" + _requestTime +
-                ", _responseTime=" + _responseTime +
-                ", _header=" + header +
+        return "BaseResponse{" + "\n" +
+                "callbackStatus='" + _callbackStatus + "',\n" +
+                "code=" + _code + ",\n" +
+                "error='" + _error + '\'' + ",\n" +
+                "isErrorDueException='" + _isErrorDueException + '\'' + ",\n" +
+                "isSLLCertificateRequired='" + _isSLLCertificateRequired + '\'' + ",\n" +
+                "extras=" + _extras + ",\n" +
+                "requestTime=" + _requestTime + ",\n" +
+                "responseTime=" + _responseTime + ",\n" +
+                "header=" + header + "\n" +
                 '}';
     }
 }

@@ -35,13 +35,13 @@ public final class StringResponse extends BaseResponse {
 
     @Override
     public String toString() {
-        return "StringResponse{" +
-                "text='" + text + '\'' +
-                ", _code=" + _code +
-                ", _error='" + _error + '\'' +
-                ", _extras=" + _extras +
-                ", _requestTime=" + _requestTime +
-                ", _responseTime=" + _responseTime +
+        return "StringResponse{" + "\n" +
+                "text='" + text + '\'' + ",\n" +
+                "code=" + _code + ",\n" +
+                "error='" + _error + '\'' + ",\n" +
+                "extras=" + _extras + ",\n" +
+                "requestTime=" + _requestTime + ",\n" +
+                "responseTime=" + _responseTime + "\n" +
                 '}';
     }
 }
