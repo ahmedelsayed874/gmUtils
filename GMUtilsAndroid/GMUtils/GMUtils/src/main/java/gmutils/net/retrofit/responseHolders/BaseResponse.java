@@ -125,15 +125,19 @@ public abstract class BaseResponse {
         return getResponseStatus() == Statuses.Succeeded;
     }
 
-    public boolean hasErrors() {
-        return getResponseStatus() == Statuses.Error;
+    public boolean isConnectionFailed() {
+        return getResponseStatus() == Statuses.ConnectionFailed;
     }
 
-    public void cloneResponseStatus(@NotNull BaseResponse otherResponse) {
-        _error = otherResponse._error;
+    //----------------------------------------------------------------------------------------------
+
+    public void copyFrom(@NotNull BaseResponse otherResponse) {
         _callbackStatus = otherResponse._callbackStatus;
         _code = otherResponse._code;
         _headers = otherResponse._headers == null ? null : new HashMap<>(otherResponse._headers);
+        _error = otherResponse._error;
+        _isErrorDueException = otherResponse._isErrorDueException;
+        _isSSLCertificateRequired = otherResponse._isSSLCertificateRequired;
         _extras = otherResponse._extras == null ? null : new HashMap<>(otherResponse._extras);
 
         _requestTime = otherResponse._requestTime;

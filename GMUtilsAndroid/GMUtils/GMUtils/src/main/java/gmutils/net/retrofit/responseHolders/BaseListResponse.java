@@ -1,5 +1,7 @@
 package gmutils.net.retrofit.responseHolders;
 
+import androidx.annotation.NonNull;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,6 +10,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import gmutils.listeners.ActionCallback;
 
 public abstract class BaseListResponse<T> extends BaseResponse implements java.util.List<T> {
 
@@ -134,9 +138,36 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
         return list.subList(fromIndex, toIndex);
     }
 
-
     //----------------------------------------------------------------------------------------------
 
+    private boolean allowCopyList = true;
+
+    @Override
+    public void copyFrom(@NonNull BaseResponse otherResponse) {
+        super.copyFrom(otherResponse);
+        if (allowCopyList) {
+            if (otherResponse instanceof BaseListResponse) {
+                ArrayList otherList = ((BaseListResponse) otherResponse).list;
+                this.list.clear();
+                this.list.addAll((Collection<? extends T>) otherList);
+            }
+        }
+        allowCopyList = true;
+    }
+
+    public <Tc> void cast(BaseListResponse<Tc> otherResponse, ActionCallback<T, Tc> converter) {
+        otherResponse.allowCopyList = false;
+        otherResponse.copyFrom(this);
+
+        otherResponse.list.clear();
+        for (T item : this.list) {
+            Tc item2 = converter.invoke(item);
+            otherResponse.add(item2);
+        }
+    }
+
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public String toString() {

@@ -1,7 +1,11 @@
 package gmutils.net.retrofit.responseHolders;
 
 
+import androidx.annotation.NonNull;
+
 import org.jetbrains.annotations.Nullable;
+
+import gmutils.listeners.ActionCallback;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -79,6 +83,30 @@ public abstract class BaseObjectResponse<T> extends BaseResponse {
 
     @Nullable
     public abstract T getData();
+
+    //----------------------------------------------------------------------------------------------
+
+    private boolean allowDataCopy = true;
+
+    @Override
+    public void copyFrom(@NonNull BaseResponse otherResponse) {
+        super.copyFrom(otherResponse);
+        if (allowDataCopy) {
+            if (otherResponse instanceof BaseObjectResponse) {
+                this.setData((T) ((BaseObjectResponse) otherResponse).getData());
+            }
+        }
+        allowDataCopy = true;
+    }
+
+    public <Tc> void cast(BaseObjectResponse<Tc> otherResponse, ActionCallback<T, Tc> converter) {
+        otherResponse.allowDataCopy = false;
+        otherResponse.copyFrom(this);
+        if (converter != null) {
+            Tc t = converter.invoke(this.getData());
+            otherResponse.setData(t);
+        }
+    }
 
     //----------------------------------------------------------------------------------------------
 

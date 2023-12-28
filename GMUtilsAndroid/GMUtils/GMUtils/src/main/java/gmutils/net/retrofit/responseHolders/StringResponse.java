@@ -2,11 +2,13 @@ package gmutils.net.retrofit.responseHolders;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import gmutils.net.retrofit.RetrofitService;
 
 public final class StringResponse extends BaseResponse {
 
-    private final String text;
+    private String text;
 
     public StringResponse() {
         this(null);
@@ -14,10 +16,6 @@ public final class StringResponse extends BaseResponse {
 
     public StringResponse(String text) {
         this.text = text;
-
-        Log.d(StringResponse.class.getSimpleName(), "Please make sure of enable " +
-                "String Response Converter when calling " +
-                "\"" + RetrofitService.class.getName() + "\" through \"" + RetrofitService.Parameters.class.getName() + "\"");
     }
 
     public String getText() {
@@ -31,6 +29,14 @@ public final class StringResponse extends BaseResponse {
             return null != text ? Statuses.Succeeded : Statuses.Error;
 
         } else return callbackStatus;
+    }
+
+    @Override
+    public void copyFrom(@NonNull BaseResponse otherResponse) {
+        super.copyFrom(otherResponse);
+        if (otherResponse instanceof StringResponse) {
+            this.text = ((StringResponse) otherResponse).text;
+        }
     }
 
     @Override
