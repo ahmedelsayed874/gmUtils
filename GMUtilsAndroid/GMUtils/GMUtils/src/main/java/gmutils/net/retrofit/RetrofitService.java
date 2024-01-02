@@ -1,7 +1,10 @@
 package gmutils.net.retrofit;
 
+import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import org.jetbrains.annotations.NotNull;
@@ -9,11 +12,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -47,6 +54,7 @@ import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
+import gmutils.storage.GeneralStorage;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -337,7 +345,7 @@ public class RetrofitService {
 
     public static class Parameters {
         private final String baseUrl;
-        private boolean allowAllHostname = true;
+        private String allowedHostname;
 
         private int connectionTimeoutInSeconds = 15;
         private int readTimeoutInSeconds = 15;
@@ -346,9 +354,8 @@ public class RetrofitService {
             this.baseUrl = baseUrl;
         }
 
-
-        public Parameters setAllowAllHostname(boolean allowAllHostname) {
-            this.allowAllHostname = allowAllHostname;
+        public Parameters setAllowedHostname(String allowedHostname) {
+            this.allowedHostname = allowedHostname;
             return this;
         }
 
@@ -369,7 +376,7 @@ public class RetrofitService {
 
             Parameters that = (Parameters) o;
 
-            if (allowAllHostname != that.allowAllHostname) return false;
+            if (!TextUtils.equals(allowedHostname, that.allowedHostname)) return false;
             if (connectionTimeoutInSeconds != that.connectionTimeoutInSeconds) return false;
             if (readTimeoutInSeconds != that.readTimeoutInSeconds) return false;
             return baseUrl.equals(that.baseUrl);
@@ -378,10 +385,92 @@ public class RetrofitService {
         @Override
         public int hashCode() {
             int result = baseUrl.hashCode();
-            result = 31 * result + (allowAllHostname ? 1 : 0);
+            result = 31 * result + allowedHostname.hashCode();
             result = 31 * result + connectionTimeoutInSeconds;
             result = 31 * result + readTimeoutInSeconds;
             return result;
+        }
+    }
+
+    public static class CertificateConfigurations {
+        public static CertificateConfigurations getInstance() {
+            return new CertificateConfigurations();
+        }
+
+        //---------------------------------------------------------------------------------
+
+        private GeneralStorage storage = GeneralStorage.getInstance("net-connection-preference");
+
+        //------------------------------------------
+
+        @Nullable
+        public Boolean isAllowConnectToAnySSL() {
+            String v = storage.retrieve("allowAny", "");
+            if (v.isEmpty()) return null;
+            else return "a".equalsIgnoreCase(v);
+        }
+
+        public void setAllowConnectToAnySSL(boolean allowConnectToAnySSL) {
+            storage.save("allowAny", allowConnectToAnySSL ? "a" : "x");
+            gmutils.net.retrofit.RetrofitService.destroy();
+        }
+
+        //---------------------------------------------------------------------------------
+
+        @Nullable
+        public String getSSLCertificatePath() {
+            String v = storage.retrieve("sslcertpath", "");
+            if (v.isEmpty()) return null;
+            else return v;
+        }
+
+        public void setSSLCertificatePath(String sslCertificatePath) {
+            storage.save("sslcertpath", sslCertificatePath);
+            gmutils.net.retrofit.RetrofitService.destroy();
+        }
+
+        public void saveSSLCertificate(Context context, Uri fileUri) throws Exception {
+            String enc = Charset.defaultCharset().name();
+            String fileName = null;
+            try {
+                fileName = URLDecoder.decode(fileUri.toString(), enc);
+            } catch (Exception e) {
+                fileName = fileUri.toString();
+            }
+
+            int li = fileName.lastIndexOf("/");
+            fileName = fileName.substring(li + 1);
+
+            File certDir = new File(context.getFilesDir(), "certificates");
+            if (!certDir.exists()) certDir.mkdirs();
+            File certFile = new File(certDir, fileName);
+            if (!certFile.exists()) certFile.createNewFile();
+
+            InputStream instream = context.getContentResolver().openInputStream(fileUri);
+            FileOutputStream outstream = new FileOutputStream(certFile);
+
+            byte[] arr = new byte[instream.available()];
+            instream.read(arr);
+            outstream.write(arr);
+
+            outstream.flush();
+            outstream.close();
+
+            instream.close();
+
+            setAllowConnectToAnySSL(false);
+            setSSLCertificatePath(certFile.getPath());
+        }
+
+        //------------------------------------------
+
+        private String getKeystoreFilePath() {
+            String sslCertificatePath = getSSLCertificatePath();
+            int i = sslCertificatePath.lastIndexOf("/");
+            String dirPath = sslCertificatePath.substring(0, i);
+            String fileName = sslCertificatePath.substring(i + 1);
+            String keystorePath = dirPath + "/cert-keystore-" + fileName.hashCode();
+            return keystorePath;
         }
     }
 
@@ -467,14 +556,7 @@ public class RetrofitService {
             error = "Trusting establish failed: " + e.getMessage();
         }
 
-        if (parameters.allowAllHostname) {
-            builder.hostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
-        }
+        builder.hostnameVerifier((hostname, session) -> TextUtils.isEmpty(parameters.allowedHostname) || TextUtils.equals(parameters.allowedHostname, hostname));
 
         if (clientBuildCallback != null) clientBuildCallback.config(builder, error);
 
@@ -504,24 +586,77 @@ public class RetrofitService {
     }
 
     public static <T> T create(@NotNull Parameters parameters, @NotNull Class<T> servicesInterface, @Nullable ClientBuildCallback clientBuildCallback) {
-        if (sInstance == null) {
-            sInstance = new RetrofitService(parameters, clientBuildCallback);
-
-        } else {
+        if (sInstance != null) {
             if (!parameters.equals(sInstance.parameters)) {
                 destroy();
-                sInstance = new RetrofitService(parameters, clientBuildCallback);
             }
+            if (clientBuildCallback != null) {
+                if (TextUtils.equals(clientBuildCallbackId, clientBuildCallback.toString())) {
+                    destroy();
+                }
+            }
+        }
+
+        if (sInstance == null) {
+            if (clientBuildCallback == null) {
+                clientBuildCallback = getDefaultClientBuildCallback(parameters.baseUrl);
+            }
+            sInstance = new RetrofitService(parameters, clientBuildCallback);
+            clientBuildCallbackId = clientBuildCallback.toString();
         }
 
         return sInstance.mRetrofit.create(servicesInterface);
     }
+
+    private static String clientBuildCallbackId;
 
     public static void destroy() {
         if (sInstance != null) {
             sInstance.mRetrofit = null;
             sInstance = null;
         }
+    }
+
+    public static ClientBuildCallback getDefaultClientBuildCallback(String baseURL) {
+        return new ClientBuildCallback() {
+            @androidx.annotation.Nullable
+            @Override
+            public X509TrustManager getX509TrustManager() {
+                if (baseURL.startsWith("https://")) {
+                    CertificateConfigurations cert = CertificateConfigurations.getInstance();
+                    String sslCertificatePath = cert.getSSLCertificatePath();
+                    Boolean allowConnectToAnySSL = cert.isAllowConnectToAnySSL();
+
+                    if (!TextUtils.isEmpty(sslCertificatePath)) {
+                        try {
+                            return new TrustManagerHelper()
+                                    .getOrCreateTrustManagerFromCertificate(
+                                            cert.getKeystoreFilePath(),
+                                            "crt",
+                                            "crt-pw-pw",
+                                            () -> {
+                                                try {
+                                                    return new FileInputStream(sslCertificatePath);
+                                                } catch (FileNotFoundException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                            }
+                                    );
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else if (allowConnectToAnySSL != null && allowConnectToAnySSL) {
+                        return new RetrofitService.TrustManagerHelper().getUnsafeTrustManager();
+                    }
+                }
+
+                return null;
+            }
+
+            @Override
+            public void config(@NonNull OkHttpClient.Builder httpClient, String error) {
+            }
+        };
     }
 
     //----------------------------------------------------------------------------------------------
