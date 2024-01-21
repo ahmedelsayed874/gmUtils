@@ -3,6 +3,7 @@ package com.blogspot.gm4s.gmutileexample.activities
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
 import android.os.Message
 import android.util.Log
 import android.view.LayoutInflater
@@ -232,27 +233,30 @@ class MainActivity : BaseActivity() {
 
         this.view.btn15.text = "Get App Backup"
         this.view.btn15.setOnClickListener {
-            /*val grant = ContextCompat.checkSelfPermission(
-                thisActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            if (grant != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE.hashCode()
-                )
-                return@setOnClickListener
-            }*/
+            /*val r = this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            val f = File(r, System.currentTimeMillis().toString() + ".txt");
+            val b = f.createNewFile();*/
 
             log("get-app-backup", "getting app backup started")
-            Logger.d().exportAppBackup(thisActivity()) {
+            Logger.d().exportAppBackup(thisActivity(), true) {
                 log("get-app-backup", "getting app backup finished: $it")
             }
         }
 
-        this.view.btn16.text = "Test Untrusted Connection"
+        this.view.btn16.text = "Restore App Backup"
         this.view.btn16.setOnClickListener {
+            log("restore-app-backup", "restoring app backup started")
+            val b = FileUtils.createInstance().showFileExplorer(
+                this,
+                "application/*",
+                null,
+                12321
+            )
+            log("restore-app-backup", "restoring app backup started: $b")
+        }
+
+        this.view.btn17.text = "Test Untrusted Connection"
+        this.view.btn17.setOnClickListener {
             testUntrustedConnection()
         }
 
@@ -292,11 +296,21 @@ class MainActivity : BaseActivity() {
         if (requestCode == 123) {
             log("action result from camera", data?.data?.toString())
             log("action result from camera", data?.extras?.toString())
-        } else if (requestCode == 456) {
+        }
+        //
+        else if (requestCode == 456) {
             log("action result pick image", data?.data?.toString())
             log("action result pick image", data?.extras?.toString())
-        } else if (requestCode == 12313) {
+        }
+        //
+        else if (requestCode == 12313) {
             testUntrustedConnection_openCertificate(contentResolver.openInputStream(data!!.data!!)!!)
+        }
+        //
+        else if (requestCode == 12321) {
+            Logger.d().importAppBackup(thisActivity(), data!!.data) {
+                log("restore-app-backup", "restoring app backup finished: $it")
+            }
         }
     }
 

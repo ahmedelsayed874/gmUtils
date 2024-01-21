@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -32,12 +33,14 @@ public class ZipFileUtils {
     public void compress(
             File outZipFile,
             File rootDir,
+            ActionCallback<File, Boolean> isDirExcluded,
             ActionCallback<File, Boolean> isFileExcluded,
             ResultCallback<Error> onComplete
     ) {
         BackgroundTask.run(() -> compressSync(
                 outZipFile,
                 rootDir,
+                isDirExcluded,
                 isFileExcluded
         ), (e) -> {
             if (onComplete != null) onComplete.invoke(e);
@@ -47,6 +50,7 @@ public class ZipFileUtils {
     public Error compressSync(
             File outZipFile,
             File rootDir,
+            ActionCallback<File, Boolean> isDirExcluded,
             ActionCallback<File, Boolean> isFileExcluded
     ) {
         if (!outZipFile.exists()) {
@@ -73,12 +77,22 @@ public class ZipFileUtils {
             File[] subFiles = dir.listFiles();
             if (subFiles != null) {
                 for (File sf : subFiles) {
-                    if (sf.isFile()) files.add(sf);
+                    if (sf.isFile()) {
+                        if (isFileExcluded == null)
+                            files.add(sf);
+                        else {
+                            Boolean exclude = isFileExcluded.invoke(sf);
+                            if (exclude == null) exclude = false;
+                            if (!exclude) {
+                                files.add(sf);
+                            }
+                        }
+                    }
                     else if (sf.isDirectory()) {
-                        if (isFileExcluded == null) {
+                        if (isDirExcluded == null) {
                             dirs.add(sf);
                         } else {
-                            Boolean exclude = isFileExcluded.invoke(sf);
+                            Boolean exclude = isDirExcluded.invoke(sf);
                             if (exclude == null) exclude = false;
                             if (!exclude) {
                                 dirs.add(sf);
@@ -89,21 +103,21 @@ public class ZipFileUtils {
             }
         }
 
-        return compressSync(outZipFile, rootDir, files);
+        return compressSync(outZipFile, files, rootDir);
     }
 
     //-------------------------------------------------
 
     public void compress(
             File outZipFile,
-            File rootDir,
             List<File> toCompressFiles,
+            File rootDirOfFiles,
             ResultCallback<Error> onComplete
     ) {
         BackgroundTask.run(() -> compressSync(
                 outZipFile,
-                rootDir,
-                toCompressFiles
+                toCompressFiles,
+                rootDirOfFiles
         ), (e) -> {
             if (onComplete != null) onComplete.invoke(e);
         });
@@ -111,8 +125,8 @@ public class ZipFileUtils {
 
     public Error compressSync(
             File outZipFile,
-            File rootDir,
-            List<File> toCompressFiles
+            List<File> toCompressFiles,
+            File rootDirOfFiles
     ) {
         if (!outZipFile.exists()) {
             try {
@@ -123,7 +137,7 @@ public class ZipFileUtils {
             }
         }
 
-        if (!rootDir.isDirectory()) {
+        if (!rootDirOfFiles.isDirectory()) {
             return new Error("rootDir must be directory");
         }
 
@@ -133,7 +147,7 @@ public class ZipFileUtils {
 
             ZipOutputStream zipStream = new ZipOutputStream(zipFileOutputStream);
 
-            final String rootDirPath = rootDir.getAbsolutePath() + "/";
+            final String rootDirPath = rootDirOfFiles.getAbsolutePath() + "/";
 
             Error error = null;
 
@@ -191,7 +205,18 @@ public class ZipFileUtils {
             }
         }
 
+    }
 
+    public Error compressSync(
+            File outZipFile,
+            File[] toCompressFiles,
+            File rootDirOfFiles
+    ) {
+        return compressSync(
+                outZipFile,
+                Arrays.asList(toCompressFiles),
+                rootDirOfFiles
+        );
     }
 
     //----------------------------------------------------------------------------------------------

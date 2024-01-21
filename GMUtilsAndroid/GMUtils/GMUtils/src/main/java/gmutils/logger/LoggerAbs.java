@@ -1,6 +1,8 @@
 package gmutils.logger;
 
 import android.content.Context;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,10 +14,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +35,7 @@ import gmutils.app.BaseApplication;
 import gmutils.listeners.ResultCallback;
 
 import java.lang.Runnable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import gmutils.security.Security;
 import gmutils.utils.ZipFileUtils;
@@ -764,21 +771,12 @@ public abstract class LoggerAbs {
 
     //----------------------------------------------------------------------------------------------
 
-    public void exportAppBackup(Context context, ResultCallback<String> onComplete) {
-        BackgroundTask.run(() -> {
-            /*File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File packageDir = new File(root, context.getPackageName());
-            if (!packageDir.mkdir()) {
-                root = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-                packageDir = root;
-                if (!packageDir.exists() && !packageDir.mkdirs()) {
-                    return "Couldn't create a folder in " +
-                            "\"" + root.getAbsolutePath() + "\" " +
-                            "folder with name:\n" +
-                            "" + packageDir.getName();
-                }
-            }*/
+    public final String extensionOfBackupOfPrivate = "bac";
+    public final String extensionOfBackupOfPublic = "bacpub";
 
+    public void exportAppBackup(Context context, boolean includePublicFiles, ResultCallback<String> onComplete) {
+        BackgroundTask.run(() -> {
+            //region create Back up Directory
             String backupDirName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmm", true);
             File backupDir = new File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
@@ -796,62 +794,269 @@ public abstract class LoggerAbs {
                             "Path 2:" + backupDir.getAbsolutePath();
                 }
             }
+            //endregion
 
-            File privateZip = null;
-            //File publicZip = null;
+            //region get desired dirs
+            File[] dirsToZip;
+            if (!includePublicFiles) {
+                dirsToZip = new File[1];
+            } else {
+                //int size = 2;
+                int size = 1 + context.getExternalFilesDirs(null).length;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    size += context.getExternalMediaDirs().length;
+                }
+                dirsToZip = new File[size];
+            }
 
-            if (backupDir.exists()) {
+            dirsToZip[0] = context.getFilesDir().getParentFile();
+            if (includePublicFiles) {
+                //dirsToZip[1] = context.getExternalFilesDir(null);
+                File[] filesDirs = context.getExternalFilesDirs(null);
+                int i = 1;
+                for (File filesDir : filesDirs) {
+                    dirsToZip[i++] = filesDir;
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    File[] mediaDirs = context.getExternalMediaDirs();
+                    i = filesDirs.length + 1;
+                    for (File mediaDir : mediaDirs) {
+                        dirsToZip[i++] = mediaDir;
+                    }
+                }
+            }
+            //endregion
+
+            //region create out zip files
+            File[] outZipFiles = new File[dirsToZip.length];
+            final String mainBackupFileName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + "." + extensionOfBackupOfPrivate;
+            try {
+                for (int i = 0; i < outZipFiles.length; i++) {
+                    String backupFileName;
+                    if (i == 0) {
+                        backupFileName = mainBackupFileName;
+                    } else {
+                        backupFileName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + "-public" + i + "." + extensionOfBackupOfPublic;
+                    }
+
+                    //outZipFiles[i] = new File(backupDir, backupFileName);
+                    outZipFiles[i] = includePublicFiles ?
+                            new File(context.getCacheDir(), backupFileName) :
+                            new File(backupDir, backupFileName);
+                    outZipFiles[i].createNewFile();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
+                        "Details: " + e.getMessage();
+            }
+            //endregion
+
+            //region compress dirs
+            ZipFileUtils zipFileUtils = new ZipFileUtils();
+            AtomicInteger idx = new AtomicInteger();
+            for (int i = 0; i < outZipFiles.length; i++) {
+                File outZipFile = outZipFiles[i];
+                File dirToZip = dirsToZip[i];
+
+                idx.set(i);
+                File finalBackupDir = backupDir;
+                ZipFileUtils.Error error = zipFileUtils.compressSync(
+                        outZipFile,
+                        dirToZip,
+                        (dir) -> {
+                            if (idx.get() == 0) {//private
+                                if (dir.getName().equalsIgnoreCase("databases")) {
+                                    return false;
+                                }
+                                //
+                                else if (dir.getName().equalsIgnoreCase("files")) {
+                                    return false;
+                                }
+                                //
+                                else if (dir.getName().equalsIgnoreCase("shared_prefs")) {
+                                    return false;
+                                }
+
+                                return true;
+                            }
+                            //
+                            else {
+                                if (dir.getPath().equalsIgnoreCase(finalBackupDir.getPath())) {
+                                    return true;
+                                }
+
+                                return false;
+                            }
+                        },
+                        (file) -> {
+                            return false;
+                        }
+                );
+                if (error != null) {
+                    writeToLog("exportAppBackup", error.error);
+                    return "Failed to backup [Reason: " + error.error + "]";
+                }
+            }
+            //endregion
+
+            if (includePublicFiles) {
                 try {
-                    String backupFileName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + ".bac";
-                    privateZip = new File(backupDir, backupFileName);
-                    boolean newFile = privateZip.createNewFile();
-                    boolean b = newFile;
+                    File outZipFile = new File(backupDir, mainBackupFileName);
+                    outZipFile.createNewFile();
 
-                    //publicZip = new File(backupDir, "public.bac");
-                    //publicZip.createNewFile();
+                    zipFileUtils.compressSync(
+                            outZipFile,
+                            outZipFiles,
+                            context.getCacheDir()
+                    );
+
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return e.getMessage();
+                    return "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
+                            "Details: " + e.getMessage();
+                }
+
+                try {
+                    for (File zipFile : outZipFiles) {
+                        zipFile.delete();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
-            if (privateZip == null) {
-                return "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'";
+            return "Data backed-up successfully to: '" + backupDir.getAbsolutePath() + "'";
+        }, onComplete);
+    }
+
+    public void importAppBackup(Context context, Uri backupFile, ResultCallback<String> onComplete) {
+        BackgroundTask.run(() -> {
+            File cache = new File(context.getCacheDir(), "Cache-" + System.currentTimeMillis());
+            if (!cache.exists()) cache.mkdirs();
+
+            InputStream backupFileStream = null;
+            try {
+                backupFileStream = context.getContentResolver().openInputStream(backupFile);
+            } catch (Exception e) {
+                return "Couldn't open the file";
             }
 
             ZipFileUtils zipFileUtils = new ZipFileUtils();
-
-            File privateDir = context.getFilesDir().getParentFile();
-
-            ZipFileUtils.Error error = zipFileUtils.compressSync(
-                    privateZip,
-                    privateDir,
-                    (d) -> {
-                        if (d.getName().equalsIgnoreCase("databases")) {
-                            return false;
-                        } else if (d.getName().equalsIgnoreCase("files")) {
-                            return false;
-                        } else if (d.getName().equalsIgnoreCase("shared_prefs")) {
-                            return false;
-                        }
-
-                        return true;
-                    }
-            );
+            ZipFileUtils.Error error = zipFileUtils.extractSync(backupFileStream, cache);
             if (error != null) {
-                writeToLog("exportAppBackup", error.error);
-                return "Failed to backup [Reason: " + error.error + "]";
+                return "Couldn't open the file: " + error.error;
             }
 
-            /*File publicDir = context.getExternalFilesDir(null);
-            error = zipFileUtils.compressSync(publicZip, publicDir);
-            if (error != null) {
-                writeToLog("exportAppBackup", error.error);
-                return "Failed to backup [Reason: " + error.error + "]";
-            }*/
+            try {
+                backupFileStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            return "Data backed-up successfully to: '" + backupDir.getAbsolutePath() + "'";
+            File[] subFiles = cache.listFiles();
+            if (subFiles == null) subFiles = new File[0];
+
+            boolean privateSucceeded = true;
+            boolean publicSucceeded = true;
+
+            if (subFiles.length > 0) {
+                boolean containsOtherBacFiles = false;
+
+                int i = subFiles[0].getName().lastIndexOf(".");
+                if (i > 0) {
+                    String extension = subFiles[0].getName().substring(i + 1);
+                    if (extensionOfBackupOfPrivate.equalsIgnoreCase(extension) ||
+                            extensionOfBackupOfPublic.equalsIgnoreCase(extension)) {
+                        containsOtherBacFiles = true;
+                    }
+                }
+
+                if (containsOtherBacFiles) {
+                    for (File subBackupFile : subFiles) {
+                        boolean isPrivateFiles = false;
+                        i = subBackupFile.getName().lastIndexOf(".");
+                        String extension = subBackupFile.getName().substring(i + 1);
+                        if (extensionOfBackupOfPrivate.equalsIgnoreCase(extension)) {
+                            isPrivateFiles = true;
+                        }
+
+                        File cache2 = new File(cache, subBackupFile.getName().substring(0, i));
+                        if (!cache2.exists()) cache2.mkdirs();
+
+                        ZipFileUtils.Error error2 = null;
+
+                        try(InputStream is = new FileInputStream(subBackupFile)) {
+                            error2 = zipFileUtils.extractSync(is, cache2);
+                            if (error2 != null) {
+                                return "Couldn't open the file: " + error.error;
+                            }
+
+                            subFiles = cache2.listFiles();
+                            if (subFiles == null) subFiles = new File[0];
+
+                            if (isPrivateFiles) {
+                                File appPrivateDir = context.getFilesDir().getParentFile();
+                                boolean b = copyToTargetDir(subFiles, appPrivateDir);
+                                if (!b) privateSucceeded = false;
+                            } else {
+                                File appPublicDir = context.getExternalFilesDir(null);
+                                boolean b = copyToTargetDir(subFiles, appPublicDir);
+                                if (!b) publicSucceeded = false;
+                            }
+                        } catch (Exception e) {
+                            return "Couldn't open the file" + (error2 == null ? ".." : error2.error);
+                        }
+                    }
+
+                } else {
+                    //copy to private dir
+                    File appPrivateDir = context.getFilesDir().getParentFile();
+                    privateSucceeded = copyToTargetDir(subFiles, appPrivateDir);
+                }
+
+                boolean deleted = cache.delete();
+                boolean del = deleted;
+            }
+
+            if (privateSucceeded && publicSucceeded) {
+                return "All files restored successfully";
+            } else if (privateSucceeded) {
+                return "All private app data files restored successfully, but not all public.";
+            } else {
+                return "All public app data files restored successfully, but not all private.";
+            }
         }, onComplete);
+    }
+
+    private boolean copyToTargetDir(File[] extracted, File targetDir) {
+        boolean returningBool = true;
+
+        try {
+            for (File subFile : extracted) {
+                File dest = new File(targetDir, subFile.getName());
+
+                if (dest.exists()) {
+                    File[] subSubFiles = subFile.listFiles();
+                    if (subSubFiles == null) subSubFiles = new File[0];
+                    for (File subSubFile : subSubFiles) {
+                        File dest2 = new File(dest, subSubFile.getName());
+                        //if (!dest2.exists()) dest2.mkdirs();
+                        boolean b = subSubFile.renameTo(dest2);
+                        if (!b) returningBool = false;
+                    }
+                } else {
+                    //if (!dest.exists()) dest.mkdirs();
+                    boolean b = subFile.renameTo(dest);
+                    if (!b) returningBool = false;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return returningBool;
     }
 }
 
