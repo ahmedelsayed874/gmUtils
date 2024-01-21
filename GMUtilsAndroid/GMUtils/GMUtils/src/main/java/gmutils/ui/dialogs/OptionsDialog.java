@@ -2,10 +2,17 @@ package gmutils.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.util.Pair;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -20,32 +27,150 @@ import gmutils.R;
  * +201022663988
  */
 public class OptionsDialog {
+    static class SingleChoice {
+        public interface Listener {
+            void onItemSelected(Object item, Integer position);
+        }
 
-    public interface Listener {
-        void onItemSelected(int position);
+        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
+            return show(context, title, list, 0, listener);
+        }
+
+        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
+            return new OptionsDialog(context, title, d -> {
+                d.setSingleChoiceItems(list, defaultSelect, (dialog, which) -> {
+                            if (listener != null) listener.onItemSelected(list[which], which);
+                            dialog.dismiss();
+                        })
+                        .setPositiveButton(R.string.cancel, (dialog, which) -> {
+                            dialog.dismiss();
+                        });
+            });
+        }
+
+        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int defaultSelect, Listener listener) {
+            CharSequence[] items = new CharSequence[list.length];
+            for (int i = 0; i < list.length; i++) {
+                items[i] = list[i].toString();
+            }
+
+            return new OptionsDialog(context, title, d -> {
+                d.setSingleChoiceItems(items, defaultSelect, (dialog, which) -> {
+                            if (listener != null) listener.onItemSelected(list[which], which);
+                            dialog.dismiss();
+                        })
+                        .setPositiveButton(R.string.cancel, (dialog, which) -> {
+                            dialog.dismiss();
+                        });
+            });
+
+        }
     }
 
-    public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
-        return show(context, title, list, 0, listener);
+    static class MultiChoice {
+        public interface Listener {
+            void onItemsSelected(Pair<Object, Integer>[] itemsAndPositions);
+        }
+
+        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
+            return show(context, title, list, null, listener);
+        }
+
+        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int[] defaultSelect, Listener listener) {
+            boolean[] checkedItem;
+            if (defaultSelect != null && defaultSelect.length > 0) {
+                checkedItem = new boolean[list.length];
+                for (int idx : defaultSelect) {
+                    checkedItem[idx] = true;
+                }
+            } else {
+                checkedItem = null;
+            }
+
+            return new OptionsDialog(context, title, d -> {
+                Map<Integer, Object> selections = new HashMap<>();
+
+                d.setMultiChoiceItems(list, checkedItem, new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                if (isChecked) selections.put(which, list[which]);
+                                else selections.remove(which);
+                            }
+                        })
+                        .setPositiveButton(R.string.ok, (dialog, which) -> {
+                            Pair<Object, Integer>[] itemsAndPositions = new Pair[selections.size()];
+                            int i = 0;
+                            for (Integer integer : selections.keySet()) {
+                                itemsAndPositions[i] = new Pair<>(selections.get(integer), integer);
+                                i++;
+                            }
+                            if (listener != null) listener.onItemsSelected(itemsAndPositions);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                            dialog.dismiss();
+                        });
+            });
+        }
+
+        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int[] defaultSelect, Listener listener) {
+            CharSequence[] items = new CharSequence[list.length];
+            for (int i = 0; i < list.length; i++) {
+                items[i] = list[i].toString();
+            }
+
+            boolean[] checkedItem;
+            if (defaultSelect != null && defaultSelect.length > 0) {
+                checkedItem = new boolean[list.length];
+                for (int idx : defaultSelect) {
+                    checkedItem[idx] = true;
+                }
+            } else {
+                checkedItem = null;
+            }
+
+            return new OptionsDialog(context, title, d -> {
+                Map<Integer, Object> selections = new HashMap<>();
+
+                d.setMultiChoiceItems(items, checkedItem, new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                if (isChecked) selections.put(which, list[which]);
+                                else selections.remove(which);
+                            }
+                        })
+                        .setPositiveButton(R.string.ok, (dialog, which) -> {
+                            Pair<Object, Integer>[] itemsAndPositions = new Pair[selections.size()];
+                            int i = 0;
+                            for (Integer integer : selections.keySet()) {
+                                itemsAndPositions[i] = new Pair<>(selections.get(integer), integer);
+                                i++;
+                            }
+                            if (listener != null) listener.onItemsSelected(itemsAndPositions);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                            dialog.dismiss();
+                        });
+            });
+
+        }
     }
 
-    public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
-        return new OptionsDialog(context, title, list, defaultSelect, listener);
-    }
 
     public final AlertDialog dialog;
 
-    private OptionsDialog(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
+    private OptionsDialog(Context context, @Nullable String title, ResultCallback<AlertDialog.Builder> build) {//}, CharSequence[] list, int[] defaultSelection, Listener listener) {
         dialog = new AlertDialog.Builder(context)
                 .setTitle(title)
-                .setSingleChoiceItems(list, defaultSelect, (dialog, which) -> {
-                    if (listener != null) listener.onItemSelected(which);
-                    dialog.dismiss();
-                })
-                .setPositiveButton(R.string.cancel, (dialog, which) -> {
-                    dialog.dismiss();
-                })
                 .show();
+                /*.setMultiChoiceItems(list, null, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+
+                    }
+                })*/
+        /**/
     }
 
 }
