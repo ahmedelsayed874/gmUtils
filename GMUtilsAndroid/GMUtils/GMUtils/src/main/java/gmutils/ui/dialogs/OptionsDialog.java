@@ -27,7 +27,7 @@ import gmutils.listeners.ResultCallback;
  * +201022663988
  */
 public class OptionsDialog {
-    static class SingleChoice {
+    public static class SingleChoice {
         public interface Listener {
             void onItemSelected(Object item, Integer position);
         }
@@ -49,10 +49,7 @@ public class OptionsDialog {
         }
 
         public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int defaultSelect, Listener listener) {
-            CharSequence[] items = new CharSequence[list.length];
-            for (int i = 0; i < list.length; i++) {
-                items[i] = list[i].toString();
-            }
+            CharSequence[] items = convertObjectsToCharSequences(list);
 
             return new OptionsDialog(context, title, d -> {
                 d.setSingleChoiceItems(items, defaultSelect, (dialog, which) -> {
@@ -63,11 +60,10 @@ public class OptionsDialog {
                             dialog.dismiss();
                         });
             });
-
         }
     }
 
-    static class MultiChoice {
+    public static class MultiChoice {
         public interface Listener {
             void onItemsSelected(Pair<Object, Integer>[] itemsAndPositions);
         }
@@ -77,15 +73,7 @@ public class OptionsDialog {
         }
 
         public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int[] defaultSelect, Listener listener) {
-            boolean[] checkedItem;
-            if (defaultSelect != null && defaultSelect.length > 0) {
-                checkedItem = new boolean[list.length];
-                for (int idx : defaultSelect) {
-                    checkedItem[idx] = true;
-                }
-            } else {
-                checkedItem = null;
-            }
+            boolean[] checkedItem = checkedItems(list, defaultSelect);
 
             return new OptionsDialog(context, title, d -> {
                 Map<Integer, Object> selections = new HashMap<>();
@@ -114,20 +102,9 @@ public class OptionsDialog {
         }
 
         public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int[] defaultSelect, Listener listener) {
-            CharSequence[] items = new CharSequence[list.length];
-            for (int i = 0; i < list.length; i++) {
-                items[i] = list[i].toString();
-            }
+            CharSequence[] items = convertObjectsToCharSequences(list);
 
-            boolean[] checkedItem;
-            if (defaultSelect != null && defaultSelect.length > 0) {
-                checkedItem = new boolean[list.length];
-                for (int idx : defaultSelect) {
-                    checkedItem[idx] = true;
-                }
-            } else {
-                checkedItem = null;
-            }
+            boolean[] checkedItem = checkedItems(list, defaultSelect);
 
             return new OptionsDialog(context, title, d -> {
                 Map<Integer, Object> selections = new HashMap<>();
@@ -155,22 +132,41 @@ public class OptionsDialog {
             });
 
         }
+
+        private static boolean[] checkedItems(Object[] list, int[] defaultSelect) {
+            boolean[] checkedItem;
+
+            if (defaultSelect != null && defaultSelect.length > 0) {
+                checkedItem = new boolean[list.length];
+                for (int idx : defaultSelect) {
+                    checkedItem[idx] = true;
+                }
+            } else {
+                checkedItem = null;
+            }
+
+            return checkedItem;
+        }
     }
 
+    private static CharSequence[] convertObjectsToCharSequences(Object[] list) {
+        CharSequence[] items = new CharSequence[list.length];
+        for (int i = 0; i < list.length; i++) {
+            items[i] = list[i].toString();
+        }
+        return items;
+    }
 
     public final AlertDialog dialog;
 
-    private OptionsDialog(Context context, @Nullable String title, ResultCallback<AlertDialog.Builder> build) {//}, CharSequence[] list, int[] defaultSelection, Listener listener) {
-        dialog = new AlertDialog.Builder(context)
-                .setTitle(title)
-                .show();
-                /*.setMultiChoiceItems(list, null, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+    private OptionsDialog(Context context, @Nullable String title, ResultCallback<AlertDialog.Builder> build) {
+        AlertDialog.Builder builder = new AlertDialog
+                .Builder(context)
+                .setTitle(title);
 
-                    }
-                })*/
-        /**/
+        build.invoke(builder);
+
+        dialog = builder.show();
     }
 
 }
