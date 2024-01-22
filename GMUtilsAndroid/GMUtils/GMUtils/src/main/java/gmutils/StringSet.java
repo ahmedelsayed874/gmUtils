@@ -1,5 +1,7 @@
 package gmutils;
 
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +11,7 @@ public class StringSet {
     public static final String ENGLISH_LANG_CODE = "en";
     public static final String ARABIC_LANG_CODE = "ar";
 
-    Map<String, CharSequence> strings;
+    private Map<String, CharSequence> strings;
 
     public StringSet(CharSequence defaultString) {
         this(defaultString, null);
@@ -25,7 +27,7 @@ public class StringSet {
         this.strings = others;
     }
 
-    //
+    //----------------------------------------------------------------------------------------------
 
     public CharSequence getDefault() {
         return strings.get(ENGLISH_LANG_CODE);
@@ -39,6 +41,8 @@ public class StringSet {
         return strings.get(ARABIC_LANG_CODE);
     }
 
+    //----------------------------------------------------------------------------------------------
+
     public CharSequence get(String langCode) {
         return strings.get(langCode);
     }
@@ -47,9 +51,27 @@ public class StringSet {
         return new ArrayList<>(strings.keySet());
     }
 
-    //
+    //----------------------------------------------------------------------------------------------
 
     public void set(String langCode, CharSequence string) {
         strings.put(langCode, string);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public boolean isEmpty() {
+        if (strings.size() > 0) {
+            for (String k : strings.keySet()) {
+                if (!TextUtils.isEmpty(strings.get(k))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public boolean isNotEmpty() {
+        return !isEmpty();
     }
 }

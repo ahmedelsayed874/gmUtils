@@ -3,16 +3,19 @@ package gmutils.ui.utils;
 import android.content.Context;
 import android.text.TextUtils;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 import gmutils.R;
+import gmutils.StringSet;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.storage.SettingsStorage;
 import gmutils.ui.dialogs.MessageDialog;
-import gmutils.ui.toast.MyToast;
 import gmutils.ui.viewModels.BaseViewModel;
+import gmutils.utils.TextHelper;
 
 public class BaseViewModelObserversHandlers {
     public void onProgressOfViewModelTaskChanged(
@@ -22,19 +25,20 @@ public class BaseViewModelObserversHandlers {
             ResultCallback<CharSequence> updateWaitViewMsg,
             Runnable hideWaitView
     ) {
+        CharSequence msg = null;
+        if (progressStatus instanceof BaseViewModel.ProgressStatus.Show ps) {
+            msg = getText(context, ps);
+        }
+
         if (progressStatus instanceof BaseViewModel.ProgressStatus.Show) {
-            BaseViewModel.ProgressStatus.Show ps = (BaseViewModel.ProgressStatus.Show) progressStatus;
-            if (!TextUtils.isEmpty(ps.message)) showWaitView.invoke(ps.message);
-            else if (ps.messageId != 0) showWaitView.invoke(context.getString(ps.messageId));
-            else showWaitView.invoke(null);
-
-        } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Update) {
-            BaseViewModel.ProgressStatus.Update ps = (BaseViewModel.ProgressStatus.Update) progressStatus;
-            if (!TextUtils.isEmpty(ps.message)) updateWaitViewMsg.invoke(ps.message);
-            else if (ps.messageId != 0) updateWaitViewMsg.invoke(context.getString(ps.messageId));
-            else updateWaitViewMsg.invoke("");
-
-        } else if (progressStatus instanceof BaseViewModel.ProgressStatus.Hide) {
+            if (progressStatus instanceof BaseViewModel.ProgressStatus.Update) {
+                updateWaitViewMsg.invoke(msg);
+            } else {
+                showWaitView.invoke(msg);
+            }
+        }
+        //
+        else if (progressStatus instanceof BaseViewModel.ProgressStatus.Hide) {
             hideWaitView.run();
         }
     }
@@ -46,44 +50,22 @@ public class BaseViewModelObserversHandlers {
             ResultCallback<CharSequence> showToast,
             ResultCallback2<CharSequence, Runnable> showRetryPromptDialog
     ) {
-        CharSequence msg = "";
-        if (message.messageIds != null && !message.messageIds.isEmpty()) {
-            for (Integer messageId : message.messageIds) {
-                if (msg.length() > 0) msg += message.getMultiMessageIdsSeparator();
-                msg += message.getMultiMessageIdsPrefix() + " " + context.getString(messageId);
-            }
-        } else if (message.messageString != null) {
-            List<String> langCodes = message.messageString.getLangCodes();
-            if (langCodes.size() == 1) {
-                msg = message.messageString.getDefault();
-            } else {
-                if (SettingsStorage.Language.usingEnglish()) {
-                    msg = message.messageString.getEnglish();
-                } else {
-                    msg = message.messageString.getArabic();
-                }
-            }
-        }
+        CharSequence msg = getText(context, message);
 
-        if (message.type instanceof BaseViewModel.MessageType.Normal) {
-            if (message.popup) {
-                showMessageDialog.invoke(msg);
-            } else {
-                showToast.invoke(msg);
-            }
-        } else if (message.type instanceof BaseViewModel.MessageType.Error) {
-            BaseViewModel.MessageType.Error mt = (BaseViewModel.MessageType.Error) message.type;
+        if (message.type instanceof BaseViewModel.MessageType.Normal mt) {
             if (message.popup) {
                 MessageDialog dialog = showMessageDialog.invoke(msg);
+                dialog.setCancelable(message.isEnableOuterDismiss());
+
                 if (mt.button1() != null) {
                     Runnable runnable = mt.button1().value3;
                     MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
 
-                    if (!TextUtils.isEmpty(mt.button1().value2)) {
-                        dialog.setButton1(mt.button1().value2, listener);
+                    if (mt.button1().value1 == null) {
+                        dialog.setButton1(getText(mt.button1().value2), listener);
                     } else {
-                        Integer i = mt.button1().value1;
-                        if (i == null || i == 0) i = R.string.action;
+                        int i = mt.button1().value1;
+                        if (i == 0) i = R.string.action;
                         dialog.setButton1(i, listener);
                     }
                 }
@@ -91,11 +73,11 @@ public class BaseViewModelObserversHandlers {
                     Runnable runnable = mt.button2().value3;
                     MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
 
-                    if (!TextUtils.isEmpty(mt.button2().value2)) {
-                        dialog.setButton2(mt.button2().value2, listener);
+                    if (mt.button2().value1 == null) {
+                        dialog.setButton2(getText(mt.button2().value2), listener);
                     } else {
-                        Integer i = mt.button2().value1;
-                        if (i == null || i == 0) i = R.string.action;
+                        int i = mt.button2().value1;
+                        if (i == 0) i = R.string.action;
                         dialog.setButton2(i, listener);
                     }
                 }
@@ -103,11 +85,11 @@ public class BaseViewModelObserversHandlers {
                     Runnable runnable = mt.button3().value3;
                     MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
 
-                    if (!TextUtils.isEmpty(mt.button3().value2)) {
-                        dialog.setButton3(mt.button3().value2, listener);
+                    if (mt.button3().value1 == null) {
+                        dialog.setButton3(getText(mt.button3().value2), listener);
                     } else {
-                        Integer i = mt.button3().value1;
-                        if (i == null || i == 0) i = R.string.action;
+                        int i = mt.button3().value1;
+                        if (i == 0) i = R.string.action;
                         dialog.setButton3(i, listener);
                     }
                 }
@@ -116,8 +98,11 @@ public class BaseViewModelObserversHandlers {
             }
             mt.destroy();
 
-        } else if (message.type instanceof BaseViewModel.MessageType.Retry) {
-            BaseViewModel.MessageType.Retry mt = (BaseViewModel.MessageType.Retry) message.type;
+            if (message.type instanceof BaseViewModel.MessageType.Error) {
+            }
+        }
+        //
+        else if (message.type instanceof BaseViewModel.MessageType.Retry mt) {
             Runnable onRetry = mt.onRetry();
             mt.destroy();
             showRetryPromptDialog.invoke(msg, () -> {
@@ -125,4 +110,64 @@ public class BaseViewModelObserversHandlers {
             });
         }
     }
+
+    private CharSequence getText(@Nullable StringSet string) {
+        if (string == null) return "";
+
+        List<String> langCodes = string.getLangCodes();
+        if (langCodes.size() == 1) {
+            return string.getDefault();
+        } else {
+            if (SettingsStorage.Language.usingEnglish()) {
+                return string.getEnglish();
+            } else {
+                return string.getArabic();
+            }
+        }
+    }
+
+    private CharSequence getText(Context context, @Nullable BaseViewModel.MessageDependent message) {
+        if (message == null) return "";
+
+        CharSequence msg;
+        if (message.getMessagesCount() == 1) {
+            Object m = message.getMessage(0);
+            if (m instanceof Integer) {
+                msg = context.getString((Integer) m);
+            }
+            //
+            else if (m instanceof StringSet) {
+                msg = getText((StringSet) m);
+            }
+            //
+            else {
+                msg = m == null ? "" : m.toString();
+            }
+        }
+        //
+        else {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < message.getMessagesCount(); i++) {
+                //if (stringBuilder.length() > 0) stringBuilder.append(" ");
+
+                Object m = message.getMessage(i);
+                if (m instanceof Integer) {
+                    stringBuilder.append(context.getString((Integer) m));
+                }
+                //
+                else if (m instanceof StringSet) {
+                    stringBuilder.append(getText((StringSet) m));
+                }
+                //
+                else {
+                    stringBuilder.append(m == null ? "" : m.toString());
+                }
+            }
+
+            msg = TextHelper.createInstance().parseHtmlText(stringBuilder.toString());
+        }
+
+        return msg;
+    }
+
 }

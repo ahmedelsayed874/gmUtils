@@ -4,7 +4,6 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -12,12 +11,16 @@ import androidx.lifecycle.MutableLiveData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import gmutils.BackgroundTask;
 import gmutils.StringSet;
+import gmutils.collections.dataGroup.DataGroup2;
 import gmutils.collections.dataGroup.DataGroup3;
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
+import kotlin.Pair;
 
 
 /**
@@ -34,41 +37,84 @@ import gmutils.listeners.ResultCallback;
  */
 public class BaseViewModel extends AndroidViewModel {
 
-    public interface ProgressStatus {
+    public interface MessageDependent {
+        MessageDependent appendMessage(Integer messageId);
+        MessageDependent appendMessage(StringSet message);
+        int getMessagesCount();
+        Object getMessage(int idx);
+    }
 
-        class Show implements ProgressStatus {
-            public final String message;
-            public final int messageId;
+    public interface ProgressStatus {
+        class Show implements ProgressStatus, MessageDependent {
+            private final List<Object> message; // StringSet | int
 
             public Show() {
-                this.message = null;
-                this.messageId = 0;
+                this(new ArrayList<>());
             }
 
             public Show(int messageId) {
-                this.message = null;
-                this.messageId = messageId;
+                this(new ArrayList<>(List.of(messageId)));
             }
 
-            public Show(String message) {
-                this.message = message;
-                this.messageId = 0;
+            public Show(StringSet message) {
+                this(new ArrayList<>(List.of(message)));
+            }
+
+            private Show(List<Object> message) {
+                this.message = message != null ? message : new ArrayList<>();
+            }
+
+            //------------------------------------------------------------------------------
+
+            @Override
+            public Show appendMessage(Integer messageId) {
+                this.message.add(messageId);
+                return this;
+            }
+
+            @Override
+            public Show appendMessage(StringSet message) {
+                this.message.add(message);
+                return this;
+            }
+
+            @Override
+            public int getMessagesCount() {
+                if (message == null) return 0;
+                return message.size();
+            }
+
+            @Override
+            public Object getMessage(int idx) {
+                if (message == null) return null;
+                return message.get(idx);
             }
 
         }
 
-        class Update implements ProgressStatus {
-            public final String message;
-            public final int messageId;
-
-            public Update(int messageId) {
-                this.message = null;
-                this.messageId = messageId;
+        class Update extends Show {
+            public Update() {
+                super();
             }
 
-            public Update(String message) {
-                this.message = message;
-                this.messageId = 0;
+            public Update(int messageId) {
+                super(messageId);
+            }
+
+            public Update(StringSet message) {
+                super(message);
+            }
+
+            //---------------------------------------------------------------------------------
+
+            @Override
+            public Update appendMessage(Integer messageId) {
+                return (Update) super.appendMessage(messageId);
+            }
+
+            @Override
+            public Update appendMessage(StringSet message) {
+                return (Update) super.appendMessage(message);
             }
 
         }
@@ -77,164 +123,136 @@ public class BaseViewModel extends AndroidViewModel {
         }
     }
 
-    public static class Message {
-        public final List<Integer> messageIds;
-        public final StringSet messageString;
+    public static class Message implements MessageDependent {
+        private final List<Object> messages; //Integer | StringSet
         public final boolean popup;
         public final MessageType type;
-        private String multiMessageIdsPrefix = "-";
-        private String multiMessageIdsSeparator = "\n";
+        private boolean enableOuterDismiss = true;
 
-        public Message(Integer messageId) {
-            this(messageId, null, false, new MessageType.Normal());
+        public Message() {
+            this(new ArrayList<>(), false, new MessageType.Normal());
         }
 
-        public Message(String messageString) {
-            this(null, messageString, false, new MessageType.Normal());
+        public Message(boolean popup, MessageType type) {
+            this(new ArrayList<>(), popup, type);
+        }
+
+        public Message(Integer messageId) {
+            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), false, new MessageType.Normal());
         }
 
         public Message(Integer messageId, boolean popup, MessageType type) {
-            this(messageId, null, popup, type);
+            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), popup, type);
         }
 
-        public Message(String messageString, boolean popup, MessageType type) {
-            this(null, messageString, popup, type);
+        public Message(CharSequence message) {
+            this(message == null ? null : new ArrayList<>(List.of(message)), false, new MessageType.Normal());
         }
 
-        private Message(Integer messageId, String messageString, boolean popup, MessageType type) {
-            if (messageId != null) {
-                this.messageIds = new ArrayList<>();
-                this.messageIds.add(messageId);
-            } else {
-                this.messageIds = null;
-            }
+        public Message(CharSequence message, boolean popup, MessageType type) {
+            this(message == null ? null : new ArrayList<>(List.of(message)), popup, type);
+        }
 
-            if (messageString != null) {
-                this.messageString = new StringSet(messageString);
-            } else {
-                this.messageString = null;
-            }
-
+        private Message(List<Object> messages, boolean popup, MessageType type) {
+            this.messages = messages != null ? messages : new ArrayList<>();
             this.popup = popup;
             this.type = type;
         }
 
-        public Message(@NotNull List<Integer> messageIds, boolean popup, MessageType type) {
-            this.messageIds = messageIds;
-            this.messageString = null;
-            this.popup = popup;
-            this.type = type;
-        }
+        //------------------------------------------------------------------------------
 
-        public Message(@NotNull StringSet messageString, boolean popup, MessageType type) {
-            this.messageIds = null;
-            this.messageString = messageString;
-            this.popup = popup;
-            this.type = type;
-        }
-
-        public Message setMultiMessageIdsPrefix(String multiMessageIdsPrefix) {
-            this.multiMessageIdsPrefix = multiMessageIdsPrefix;
+        @Override
+        public Message appendMessage(Integer messageId) {
+            this.messages.add(messageId);
             return this;
         }
 
-        public String getMultiMessageIdsPrefix() {
-            return multiMessageIdsPrefix;
-        }
-
-        public Message setMultiMessageIdsSeparator(String multiMessageIdsSeparator) {
-            this.multiMessageIdsSeparator = multiMessageIdsSeparator;
+        @Override
+        public Message appendMessage(StringSet message) {
+            this.messages.add(message);
             return this;
         }
 
-        public String getMultiMessageIdsSeparator() {
-            return multiMessageIdsSeparator;
+        @Override
+        public int getMessagesCount() {
+            if (messages == null) return 0;
+            return messages.size();
         }
 
+        @Override
+        public Object getMessage(int idx) {
+            if (messages == null) return null;
+            return messages.get(idx);
+        }
+
+
+        public Message setEnableOuterDismiss(boolean enableOuterDismiss) {
+            this.enableOuterDismiss = enableOuterDismiss;
+            return this;
+        }
+
+        public boolean isEnableOuterDismiss() {
+            return enableOuterDismiss;
+        }
     }
 
     public interface MessageType {
         void destroy();
 
         class Normal implements MessageType {
-            @Override
-            public void destroy() {
-            }
-        }
+            private DataGroup3<Integer, StringSet, Runnable> button1;
+            private DataGroup3<Integer, StringSet, Runnable> button2;
+            private DataGroup3<Integer, StringSet, Runnable> button3;
 
-        class Error implements MessageType {
-            private DataGroup3<Integer, String, Runnable> button1;
-            private DataGroup3<Integer, String, Runnable> button2;
-            private DataGroup3<Integer, String, Runnable> button3;
-
-            public Error() {
+            public Normal() {
                 this(
-                        (String) null, null,
-                        (String) null, null,
-                        (String) null, null
+                        (Pair<Integer, Runnable>) null,
+                        (Pair<Integer, Runnable>) null,
+                        (Pair<Integer, Runnable>) null
                 );
             }
 
-            public Error(Integer button1Text, Runnable button1Action) {
-                this(
-                        button1Text, button1Action,
-                        (Integer) null, null,
-                        (Integer) null, null
-                );
+            public Normal(Integer buttonText, Runnable buttonAction) {
+                this(new Pair<>(buttonText, buttonAction), null, null);
             }
 
-            public Error(String button1Text, Runnable button1Action) {
-                this(
-                        button1Text, button1Action,
-                        (String) null, null,
-                        (String) null, null
-                );
+            public Normal(StringSet buttonText, Runnable buttonAction) {
+                this(new DataGroup2<>(buttonText, buttonAction), null, null);
             }
 
-
-            public Error(Integer button1Text, Runnable button1Action, Integer button2Text, Runnable button2Action) {
-                this(
-                        button1Text, button1Action,
-                        button2Text, button2Action,
-                        (Integer) null, null
-                );
+            public Normal(
+                    Pair<Integer, Runnable> button1,
+                    Pair<Integer, Runnable> button2,
+                    Pair<Integer, Runnable> button3
+            ) {
+                this.button1 = button1 == null ? null : new DataGroup3<>(button1.getFirst(), null, button1.getSecond());
+                this.button2 = button2 == null ? null : new DataGroup3<>(button2.getFirst(), null, button2.getSecond());
+                this.button3 = button3 == null ? null : new DataGroup3<>(button3.getFirst(), null, button3.getSecond());
             }
 
-            public Error(String button1Text, Runnable button1Action, String button2Text, Runnable button2Action) {
-                this(
-                        button1Text, button1Action,
-                        button2Text, button2Action,
-                        (String) null, null
-                );
+            public Normal(
+                    DataGroup2<StringSet, Runnable> button1,
+                    DataGroup2<StringSet, Runnable> button2,
+                    DataGroup2<StringSet, Runnable> button3
+            ) {
+                this.button1 = button1 == null ? null : new DataGroup3<>(null, button1.value1, button1.value2);
+                this.button2 = button2 == null ? null : new DataGroup3<>(null, button2.value1, button2.value2);
+                this.button3 = button3 == null ? null : new DataGroup3<>(null, button3.value1, button3.value2);
             }
-
-
-            public Error(Integer button1Text, Runnable button1Action, Integer button2Text, Runnable button2Action, Integer button3Text, Runnable button3Action) {
-                this.button1 = (button1Text == null || button1Text == 0) && button1Action == null ? null : new DataGroup3<>(button1Text, null, button1Action);
-                this.button2 = (button2Text == null || button2Text == 0) && button2Action == null ? null : new DataGroup3<>(button2Text, null, button2Action);
-                this.button3 = (button3Text == null || button3Text == 0) && button3Action == null ? null : new DataGroup3<>(button3Text, null, button3Action);
-            }
-
-            public Error(String button1Text, Runnable button1Action, String button2Text, Runnable button2Action, String button3Text, Runnable button3Action) {
-                this.button1 = TextUtils.isEmpty(button1Text) && button1Action == null ? null : new DataGroup3<>(null, button1Text, button1Action);
-                this.button2 = TextUtils.isEmpty(button2Text) && button2Action == null ? null : new DataGroup3<>(null, button2Text, button2Action);
-                this.button3 = TextUtils.isEmpty(button3Text) && button3Action == null ? null : new DataGroup3<>(null, button3Text, button3Action);
-            }
-
 
             public boolean hasSpecialButtons() {
                 return button1 != null || button2 != null || button3 != null;
             }
 
-            public final DataGroup3<Integer, String, Runnable> button1() {
+            public final DataGroup3<Integer, StringSet, Runnable> button1() {
                 return button1;
             }
 
-            public final DataGroup3<Integer, String, Runnable> button2() {
+            public final DataGroup3<Integer, StringSet, Runnable> button2() {
                 return button2;
             }
 
-            public final DataGroup3<Integer, String, Runnable> button3() {
+            public final DataGroup3<Integer, StringSet, Runnable> button3() {
                 return button3;
             }
 
@@ -245,6 +263,8 @@ public class BaseViewModel extends AndroidViewModel {
                 button3 = null;
             }
         }
+
+        class Error extends Normal {}
 
         class Retry implements MessageType {
             private Runnable _onRetry;
@@ -289,10 +309,6 @@ public class BaseViewModel extends AndroidViewModel {
 
     //----------------------------------------------------------------------------------------------
 
-    public void postProgressStatusOnUIThread(ProgressStatus progressStatus) {
-        runOnUIThread(() -> postProgressStatus(progressStatus));
-    }
-
     public void postProgressStatus(ProgressStatus progressStatus) {
         progressStatusLiveData.postValue(progressStatus);
     }
@@ -306,7 +322,7 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postPopMessage(String message) {
+    public void postPopMessage(CharSequence message) {
         Message m = new Message(message, true, new MessageType.Normal());
         postMessage(m);
     }
@@ -316,7 +332,7 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postPopMessage(String message, MessageType messageType) {
+    public void postPopMessage(CharSequence message, MessageType messageType) {
         Message m = new Message(message, true, messageType);
         postMessage(m);
     }
@@ -326,63 +342,86 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postToastMessage(String message, boolean error) {
+    public void postToastMessage(CharSequence message, boolean error) {
         Message m = new Message(message, false, error ? new MessageType.Error() : new MessageType.Normal());
         postMessage(m);
     }
 
-    public void postRetryMessage(String message, Runnable onRetry) {
+    public void postRetryMessage(CharSequence message, Runnable onRetry) {
         Message m = new Message(message, true, new MessageType.Retry(onRetry));
         postMessage(m);
     }
 
     //----------------------------------------------------------------------------------------------
 
-    public void runOnUIThread(Runnable runnable) {
+    public void runOnUiThread(Runnable runnable) {
         if (handler == null) handler = new Handler(Looper.getMainLooper());
         handler.post(runnable);
     }
 
-    public void runOnUIThread(Runnable runnable, long delay) {
+    public void runOnUiThread(Runnable runnable, long delay) {
         if (handler == null) handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(runnable, delay);
     }
 
-    public <T> void runOnBackgroundThread(ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
-        runOnBackgroundThread(null, task, 0, dispatchResultOnUIThread, onFinish);
+    public <T> void runOnBackgroundThread(
+            ActionCallback0<T> task,
+            ResultCallback<T> onFinish,
+            boolean dispatchResultOnUIThread
+    ) {
+        runOnBackgroundThread(
+                task,
+                onFinish,
+                dispatchResultOnUIThread,
+                0,
+                null
+        );
     }
 
-    public <T> void runOnBackgroundThread(ActionCallback0<T> task, long delay, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
-        runOnBackgroundThread(null, task, delay, dispatchResultOnUIThread, onFinish);
+    public <T> void runOnBackgroundThread(
+            ActionCallback0<T> task,
+            ResultCallback<T> onFinish,
+            boolean dispatchResultOnUIThread,
+            long delay
+    ) {
+        runOnBackgroundThread(
+                task,
+                onFinish,
+                dispatchResultOnUIThread,
+                delay,
+                null
+        );
     }
 
-    public <T> void runOnBackgroundThread(String name, ActionCallback0<T> task, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
-        runOnBackgroundThread(name, task, 0, dispatchResultOnUIThread, onFinish);
-    }
-
-    public <T> void runOnBackgroundThread(String name, ActionCallback0<T> task, long delay, boolean dispatchResultOnUIThread, ResultCallback<T> onFinish) {
+    public <T> void runOnBackgroundThread(
+            ActionCallback0<T> task,
+            ResultCallback<T> onFinish,
+            boolean dispatchResultOnUIThread,
+            long delay,
+            String threadName
+    ) {
         if (task == null) return;
 
         Runnable target = () -> {
             T result = task.invoke();
             if (onFinish != null) {
                 if (dispatchResultOnUIThread)
-                    runOnUIThread(() -> onFinish.invoke(result));
+                    runOnUiThread(() -> onFinish.invoke(result));
                 else
                     onFinish.invoke(result);
             }
         };
 
         Runnable startThread = () -> {
-            if (TextUtils.isEmpty(name)) {
+            if (TextUtils.isEmpty(threadName)) {
                 new Thread(target).start();
             } else {
-                new Thread(target, name).start();
+                new Thread(target, threadName).start();
             }
         };
 
         if (delay > 0) {
-            runOnUIThread(startThread, delay);
+            runOnUiThread(startThread, delay);
         } else {
             startThread.run();
         }
@@ -396,21 +435,22 @@ public class BaseViewModel extends AndroidViewModel {
         if (task == null) return;
 
         runOnBackgroundThread(
-                "",
-
                 //task
                 () -> {
                     task.run();
                     return null;
                 },
 
+                //onFinish
+                null,
+
+                //dispatchResultOnUIThread
+                true,
+
                 //delay
                 delay,
 
-                //dispatchResultOnUIThread
-                false,
-
-                //onFinish
+                //threadName
                 null
         );
     }
