@@ -3,11 +3,15 @@ package gmutils.ui.dialogs;
 
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -41,6 +45,7 @@ public class MessageDialogFunctions {
 
 
     private View lyContainer;
+    private ImageView iconIv;
     private TextView tvTitle;
     private TextView tvMsg;
     private View lyDontShowAgain;
@@ -58,6 +63,7 @@ public class MessageDialogFunctions {
 
         View view = listener.getView();
         lyContainer = view.findViewById(R.id.lyContainer);
+        iconIv = view.findViewById(R.id.iconIv);
         tvTitle = view.findViewById(R.id.tv_title);
         tvMsg = view.findViewById(R.id.tv_msg);
         lyDontShowAgain = view.findViewById(R.id.lyDontShowAgain);
@@ -93,6 +99,20 @@ public class MessageDialogFunctions {
         lyContainer.setBackgroundColor(color);
         return this;
     }
+
+
+    public MessageDialogFunctions setIcon(int imageRes) {
+        iconIv.setImageResource(imageRes);
+        iconIv.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public MessageDialogFunctions setIcon(Uri image) {
+        iconIv.setImageURI(image);
+        iconIv.setVisibility(View.VISIBLE);
+        return this;
+    }
+
 
     public MessageDialogFunctions setTextColor(int color) {
         tvTitle.setTextColor(color);

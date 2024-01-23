@@ -300,11 +300,16 @@ public class ActivityFunctions implements BaseFragmentListener {
     }
 
     @Override
-    public void updateWaitViewMsg(CharSequence msg) {
+    public boolean updateWaitViewMsg(CharSequence msg) {
         try {
-            if (waitDialog != null) waitDialog.textView().setText(msg);
+            if (waitDialog != null) {
+                waitDialog.textView().setText(msg);
+                return true;
+            }
         } catch (Exception e) {
         }
+
+        return false;
     }
 
     public boolean isWaitViewShown() {

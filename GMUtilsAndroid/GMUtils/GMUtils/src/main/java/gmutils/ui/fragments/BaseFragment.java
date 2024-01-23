@@ -122,10 +122,11 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected ViewModelProvider.Factory onCreateViewModelFactory(int id) {
-        ViewModelProvider.AndroidViewModelFactory viewModelFactory = ViewModelProvider
+        ViewModelProvider.AndroidViewModelFactory viewModelFactory;
+        viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getActivity().getApplication());
-        return viewModelFactory;
+        return (ViewModelProvider.Factory) viewModelFactory;
     }
 
     public ViewModel getViewModel() {
@@ -164,8 +165,8 @@ public abstract class BaseFragment extends Fragment {
                 viewModels.put(id, viewModel);
 
                 if (viewModel instanceof BaseViewModel) {
-                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(this, getProgressStatusLiveData());
-                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(this, getAlertMessageLiveData());
+                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(getViewLifecycleOwner(), getProgressStatusLiveData());
+                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(getViewLifecycleOwner(), getAlertMessageLiveData());
                 }
             }
         }
@@ -213,10 +214,13 @@ public abstract class BaseFragment extends Fragment {
                 m -> listener.showMessageDialog(getContext(), m, null),
 
                 //showToast
-                m -> MyToast.show(this.getContext(), m),
+                (m, normal) -> {
+                    if (normal) MyToast.show(this.getContext(), m);
+                    else MyToast.showError(this.getContext(), m);
+                },
 
                 //showRetryPromptDialog
-                (m , a) -> showRetryPromptDialog(m, d -> a.run())
+                (m, a) -> showRetryPromptDialog(m, d -> a.run())
         );
     }
 
@@ -269,8 +273,8 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    public void showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry) {
-        showRetryPromptDialog(msg, onRetry, null);
+    public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry) {
+        return showRetryPromptDialog(msg, onRetry, null);
     }
 
     public RetryPromptDialog showRetryPromptDialog(CharSequence msg, RetryPromptDialog.Listener onRetry, RetryPromptDialog.Listener onCancel) {

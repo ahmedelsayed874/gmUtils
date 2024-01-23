@@ -3,6 +3,7 @@ package gmutils.ui.dialogs;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,6 +88,16 @@ public class MessageDialog extends BaseDialog {
 
     public MessageDialog setBackgroundColor(int color) {
         functions.setBackgroundColor(color);
+        return this;
+    }
+
+    public MessageDialog setIcon(int imageRes) {
+        functions.setIcon(imageRes);
+        return this;
+    }
+
+    public MessageDialog setIcon(Uri image) {
+        functions.setIcon(image);
         return this;
     }
 

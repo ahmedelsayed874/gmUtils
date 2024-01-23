@@ -21,7 +21,7 @@ public interface BaseFragmentListener {
 
     void hideWaitViewImmediately();
 
-    void updateWaitViewMsg(CharSequence msg);
+    boolean updateWaitViewMsg(CharSequence msg);
 
     MessageDialog showMessageDialog(Context context, CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options);
 

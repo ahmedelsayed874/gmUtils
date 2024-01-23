@@ -39,8 +39,19 @@ public class BaseViewModel extends AndroidViewModel {
 
     public interface MessageDependent {
         MessageDependent appendMessage(Integer messageId);
+
         MessageDependent appendMessage(StringSet message);
+
+        MessageDependent appendMessage(CharSequence message);
+
         int getMessagesCount();
+
+        /**
+         * returns the inserted message by "appendMessage"
+         *
+         * @param idx index
+         * @return String Resource ID, StringSet, CharSequence
+         */
         Object getMessage(int idx);
     }
 
@@ -79,11 +90,23 @@ public class BaseViewModel extends AndroidViewModel {
             }
 
             @Override
+            public Show appendMessage(CharSequence message) {
+                this.message.add(message);
+                return this;
+            }
+
+            @Override
             public int getMessagesCount() {
                 if (message == null) return 0;
                 return message.size();
             }
 
+            /**
+             * returns the inserted message by "appendMessage"
+             *
+             * @param idx index
+             * @return String Resource ID, StringSet, CharSequence
+             */
             @Override
             public Object getMessage(int idx) {
                 if (message == null) return null;
@@ -153,10 +176,18 @@ public class BaseViewModel extends AndroidViewModel {
             this(message == null ? null : new ArrayList<>(List.of(message)), popup, type);
         }
 
+        public Message(StringSet message) {
+            this(message == null ? null : new ArrayList<>(List.of(message)), false, new MessageType.Normal());
+        }
+
+        public Message(StringSet message, boolean popup, MessageType type) {
+            this(message == null ? null : new ArrayList<>(List.of(message)), popup, type);
+        }
+
         private Message(List<Object> messages, boolean popup, MessageType type) {
             this.messages = messages != null ? messages : new ArrayList<>();
             this.popup = popup;
-            this.type = type;
+            this.type = type != null ? type : new MessageType.Normal();
         }
 
         //------------------------------------------------------------------------------
@@ -174,17 +205,30 @@ public class BaseViewModel extends AndroidViewModel {
         }
 
         @Override
+        public Message appendMessage(CharSequence message) {
+            this.messages.add(message);
+            return this;
+        }
+
+        @Override
         public int getMessagesCount() {
             if (messages == null) return 0;
             return messages.size();
         }
 
+        /**
+         * returns the inserted message by "appendMessage"
+         *
+         * @param idx index
+         * @return String Resource ID, StringSet, CharSequence
+         */
         @Override
         public Object getMessage(int idx) {
             if (messages == null) return null;
             return messages.get(idx);
         }
 
+        //----------------------------------------------------------------------
 
         public Message setEnableOuterDismiss(boolean enableOuterDismiss) {
             this.enableOuterDismiss = enableOuterDismiss;
@@ -200,6 +244,7 @@ public class BaseViewModel extends AndroidViewModel {
         void destroy();
 
         class Normal implements MessageType {
+            private int iconRes;
             private DataGroup3<Integer, StringSet, Runnable> button1;
             private DataGroup3<Integer, StringSet, Runnable> button2;
             private DataGroup3<Integer, StringSet, Runnable> button3;
@@ -240,6 +285,19 @@ public class BaseViewModel extends AndroidViewModel {
                 this.button3 = button3 == null ? null : new DataGroup3<>(null, button3.value1, button3.value2);
             }
 
+            //------------------------------------------------------
+
+            public Normal setIconRes(int iconRes) {
+                this.iconRes = iconRes;
+                return this;
+            }
+
+            public int getIconRes() {
+                return iconRes;
+            }
+
+            //------------------------------------------------------
+
             public boolean hasSpecialButtons() {
                 return button1 != null || button2 != null || button3 != null;
             }
@@ -264,14 +322,47 @@ public class BaseViewModel extends AndroidViewModel {
             }
         }
 
-        class Error extends Normal {}
+        class Error extends Normal {
+            public Error() {
+            }
+
+            public Error(Integer buttonText, Runnable buttonAction) {
+                super(buttonText, buttonAction);
+            }
+
+            public Error(StringSet buttonText, Runnable buttonAction) {
+                super(buttonText, buttonAction);
+            }
+
+            public Error(Pair<Integer, Runnable> button1, Pair<Integer, Runnable> button2, Pair<Integer, Runnable> button3) {
+                super(button1, button2, button3);
+            }
+
+            public Error(DataGroup2<StringSet, Runnable> button1, DataGroup2<StringSet, Runnable> button2, DataGroup2<StringSet, Runnable> button3) {
+                super(button1, button2, button3);
+            }
+        }
 
         class Retry implements MessageType {
+            private int iconRes;
             private Runnable _onRetry;
 
             public Retry(Runnable onRetry) {
                 this._onRetry = onRetry;
             }
+
+            //-----------------------------------------------------------
+
+            public Retry setIconRes(int iconRes) {
+                this.iconRes = iconRes;
+                return this;
+            }
+
+            public int getIconRes() {
+                return iconRes;
+            }
+
+            //-----------------------------------------------------------
 
             public final Runnable onRetry() {
                 return _onRetry;
@@ -364,94 +455,105 @@ public class BaseViewModel extends AndroidViewModel {
         handler.postDelayed(runnable, delay);
     }
 
-    public <T> void runOnBackgroundThread(
-            ActionCallback0<T> task,
-            ResultCallback<T> onFinish,
-            boolean dispatchResultOnUIThread
-    ) {
-        runOnBackgroundThread(
-                task,
-                onFinish,
-                dispatchResultOnUIThread,
-                0,
-                null
-        );
+    //----------------------------------------------------------
+
+    public static class BackgroundThreadArgs<T> {
+        private ActionCallback0<T> task;
+        private ResultCallback<T> onFinish;
+        private ResultCallback<Throwable> onException;
+        private boolean dispatchResultOnUIThread;
+        private long delay;
+        private String threadName;
+
+        public BackgroundThreadArgs(ActionCallback0<T> task) {
+            this.task = task;
+        }
+
+        public BackgroundThreadArgs<T> setOnFinish(ResultCallback<T> onFinish, boolean dispatchResultOnUIThread) {
+            this.onFinish = onFinish;
+            this.dispatchResultOnUIThread = dispatchResultOnUIThread;
+            return this;
+        }
+
+        public BackgroundThreadArgs<T> setOnException(ResultCallback<Throwable> onException) {
+            this.onException = onException;
+            return this;
+        }
+
+        public BackgroundThreadArgs<T> setDelay(long delay) {
+            this.delay = delay;
+            return this;
+        }
+
+        public BackgroundThreadArgs<T> setThreadName(String threadName) {
+            this.threadName = threadName;
+            return this;
+        }
     }
 
-    public <T> void runOnBackgroundThread(
-            ActionCallback0<T> task,
-            ResultCallback<T> onFinish,
-            boolean dispatchResultOnUIThread,
-            long delay
-    ) {
-        runOnBackgroundThread(
-                task,
-                onFinish,
-                dispatchResultOnUIThread,
-                delay,
-                null
-        );
-    }
-
-    public <T> void runOnBackgroundThread(
-            ActionCallback0<T> task,
-            ResultCallback<T> onFinish,
-            boolean dispatchResultOnUIThread,
-            long delay,
-            String threadName
-    ) {
-        if (task == null) return;
+    public <T> void runOnBackgroundThread(BackgroundThreadArgs<T> args) {
+        if (args.task == null) return;
 
         Runnable target = () -> {
-            T result = task.invoke();
-            if (onFinish != null) {
-                if (dispatchResultOnUIThread)
-                    runOnUiThread(() -> onFinish.invoke(result));
+            T result;
+            if (args.onException == null) {
+                result = args.task.invoke();
+            } else {
+                try {
+                    result = args.task.invoke();
+                } catch (Throwable e) {
+                    if (args.dispatchResultOnUIThread)
+                        runOnUiThread(() -> args.onException.invoke(e));
+                    else
+                        args.onException.invoke(e);
+
+                    return;
+                }
+            }
+
+            if (args.onFinish != null) {
+                if (args.dispatchResultOnUIThread)
+                    runOnUiThread(() -> args.onFinish.invoke(result));
                 else
-                    onFinish.invoke(result);
+                    args.onFinish.invoke(result);
             }
         };
 
         Runnable startThread = () -> {
-            if (TextUtils.isEmpty(threadName)) {
+            if (TextUtils.isEmpty(args.threadName)) {
                 new Thread(target).start();
             } else {
-                new Thread(target, threadName).start();
+                new Thread(target, args.threadName).start();
             }
         };
 
-        if (delay > 0) {
-            runOnUiThread(startThread, delay);
+        if (args.delay > 0) {
+            runOnUiThread(startThread, args.delay);
         } else {
             startThread.run();
         }
     }
 
+    //---------------------------------------------------------
+
     public void runOnBackgroundThread(Runnable task) {
-        runOnBackgroundThread(task, 0);
+        runOnBackgroundThread(task, 0, null);
     }
 
     public void runOnBackgroundThread(Runnable task, long delay) {
+        runOnBackgroundThread(task, delay, null);
+    }
+
+    public void runOnBackgroundThread(Runnable task, long delay, ResultCallback<Throwable> onException) {
         if (task == null) return;
 
-        runOnBackgroundThread(
-                //task
-                () -> {
-                    task.run();
-                    return null;
-                },
-
-                //onFinish
-                null,
-
-                //dispatchResultOnUIThread
-                true,
-
-                //delay
-                delay,
-
-                //threadName
-                null
+        runOnBackgroundThread(new BackgroundThreadArgs<>(
+                        //task
+                        () -> {
+                            task.run();
+                            return null;
+                        }
+                ).setDelay(delay).setOnException(onException)
         );
     }
 

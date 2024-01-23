@@ -272,8 +272,14 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     @Override
-    public void updateWaitViewMsg(CharSequence msg) {
-        getActivityFunctions().updateWaitViewMsg(msg);
+    public boolean updateWaitViewMsg(CharSequence msg) {
+        boolean b = getActivityFunctions().updateWaitViewMsg(msg);
+        if (!b) {
+            getActivityFunctions().hideWaitViewImmediately();
+            getActivityFunctions().showWaitView(this, msg);
+            return true;
+        }
+        return b;
     }
 
     public void updateWaitViewMsg(int msg) {
@@ -484,7 +490,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 m -> showMessageDialog(m, null),
 
                 //showToast
-                m -> MyToast.show(this, m),
+                (m, normal) -> {
+                    if (normal) MyToast.show(this, m);
+                    else MyToast.showError(this, m);
+                },
 
                 //showRetryPromptDialog
                 (m, a) -> showRetryPromptDialog(m, d -> a.run())

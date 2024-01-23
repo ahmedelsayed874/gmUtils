@@ -10,10 +10,12 @@ import java.util.List;
 import gmutils.R;
 import gmutils.StringSet;
 import gmutils.listeners.ActionCallback;
+import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.storage.SettingsStorage;
 import gmutils.ui.dialogs.MessageDialog;
+import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.viewModels.BaseViewModel;
 import gmutils.utils.TextHelper;
 
@@ -47,8 +49,8 @@ public class BaseViewModelObserversHandlers {
             Context context,
             BaseViewModel.Message message,
             ActionCallback<CharSequence, MessageDialog> showMessageDialog,
-            ResultCallback<CharSequence> showToast,
-            ResultCallback2<CharSequence, Runnable> showRetryPromptDialog
+            ResultCallback2<CharSequence, Boolean/*normal?*/> showToast,
+            ActionCallback2<CharSequence, Runnable, RetryPromptDialog> showRetryPromptDialog
     ) {
         CharSequence msg = getText(context, message);
 
@@ -57,57 +59,71 @@ public class BaseViewModelObserversHandlers {
                 MessageDialog dialog = showMessageDialog.invoke(msg);
                 dialog.setCancelable(message.isEnableOuterDismiss());
 
-                if (mt.button1() != null) {
-                    Runnable runnable = mt.button1().value3;
-                    MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
-
-                    if (mt.button1().value1 == null) {
-                        dialog.setButton1(getText(mt.button1().value2), listener);
-                    } else {
-                        int i = mt.button1().value1;
-                        if (i == 0) i = R.string.action;
-                        dialog.setButton1(i, listener);
-                    }
+                if (mt.getIconRes() > 0) {
+                    dialog.setIcon(mt.getIconRes());
                 }
-                if (mt.button2() != null) {
-                    Runnable runnable = mt.button2().value3;
-                    MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
 
-                    if (mt.button2().value1 == null) {
-                        dialog.setButton2(getText(mt.button2().value2), listener);
-                    } else {
-                        int i = mt.button2().value1;
-                        if (i == 0) i = R.string.action;
-                        dialog.setButton2(i, listener);
-                    }
-                }
-                if (mt.button3() != null) {
-                    Runnable runnable = mt.button3().value3;
-                    MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
+                if (mt.hasSpecialButtons()) {
+                    if (mt.button1() != null) {
+                        Runnable runnable = mt.button1().value3;
+                        MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
 
-                    if (mt.button3().value1 == null) {
-                        dialog.setButton3(getText(mt.button3().value2), listener);
-                    } else {
-                        int i = mt.button3().value1;
-                        if (i == 0) i = R.string.action;
-                        dialog.setButton3(i, listener);
+                        if (mt.button1().value1 == null) {
+                            dialog.setButton1(getText(mt.button1().value2), listener);
+                        } else {
+                            int i = mt.button1().value1;
+                            if (i == 0) i = R.string.action;
+                            dialog.setButton1(i, listener);
+                        }
                     }
+                    if (mt.button2() != null) {
+                        Runnable runnable = mt.button2().value3;
+                        MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
+
+                        if (mt.button2().value1 == null) {
+                            dialog.setButton2(getText(mt.button2().value2), listener);
+                        } else {
+                            int i = mt.button2().value1;
+                            if (i == 0) i = R.string.action;
+                            dialog.setButton2(i, listener);
+                        }
+                    }
+                    if (mt.button3() != null) {
+                        Runnable runnable = mt.button3().value3;
+                        MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
+
+                        if (mt.button3().value1 == null) {
+                            dialog.setButton3(getText(mt.button3().value2), listener);
+                        } else {
+                            int i = mt.button3().value1;
+                            if (i == 0) i = R.string.action;
+                            dialog.setButton3(i, listener);
+                        }
+                    }
+                } else {
+
                 }
             } else {
-                showToast.invoke(msg);
+                if (mt instanceof BaseViewModel.MessageType.Error) {
+                    showToast.invoke(msg, false);
+                } else {
+                    showToast.invoke(msg, true);
+                }
             }
             mt.destroy();
-
-            if (message.type instanceof BaseViewModel.MessageType.Error) {
-            }
         }
         //
         else if (message.type instanceof BaseViewModel.MessageType.Retry mt) {
             Runnable onRetry = mt.onRetry();
             mt.destroy();
-            showRetryPromptDialog.invoke(msg, () -> {
+
+            RetryPromptDialog dialog = showRetryPromptDialog.invoke(msg, () -> {
                 if (onRetry != null) onRetry.run();
             });
+
+            if (mt.getIconRes() > 0) {
+                dialog.dialog.setIcon(mt.getIconRes());
+            }
         }
     }
 
@@ -148,8 +164,6 @@ public class BaseViewModelObserversHandlers {
         else {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < message.getMessagesCount(); i++) {
-                //if (stringBuilder.length() > 0) stringBuilder.append(" ");
-
                 Object m = message.getMessage(i);
                 if (m instanceof Integer) {
                     stringBuilder.append(context.getString((Integer) m));
