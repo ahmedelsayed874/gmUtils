@@ -457,78 +457,60 @@ public class BaseViewModel extends AndroidViewModel {
 
     //----------------------------------------------------------
 
-    public static class BackgroundThreadArgs<T> {
-        private ActionCallback0<T> task;
-        private ResultCallback<T> onFinish;
-        private ResultCallback<Throwable> onException;
-        private boolean dispatchResultOnUIThread;
-        private long delay;
-        private String threadName;
-
-        public BackgroundThreadArgs(ActionCallback0<T> task) {
-            this.task = task;
-        }
-
-        public BackgroundThreadArgs<T> setOnFinish(ResultCallback<T> onFinish, boolean dispatchResultOnUIThread) {
-            this.onFinish = onFinish;
-            this.dispatchResultOnUIThread = dispatchResultOnUIThread;
-            return this;
-        }
-
-        public BackgroundThreadArgs<T> setOnException(ResultCallback<Throwable> onException) {
-            this.onException = onException;
-            return this;
-        }
-
-        public BackgroundThreadArgs<T> setDelay(long delay) {
-            this.delay = delay;
-            return this;
-        }
-
-        public BackgroundThreadArgs<T> setThreadName(String threadName) {
-            this.threadName = threadName;
-            return this;
-        }
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish) {
+        runOnBackgroundThread(task, onFinish, true, 0, null, null);
     }
 
-    public <T> void runOnBackgroundThread(BackgroundThreadArgs<T> args) {
-        if (args.task == null) return;
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread) {
+        runOnBackgroundThread(task, onFinish, dispatchResultOnUIThread, 0, null, null);
+    }
+
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay) {
+        runOnBackgroundThread(task, onFinish, dispatchResultOnUIThread, delay, null, null);
+    }
+
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay, ResultCallback<Throwable> onException) {
+        runOnBackgroundThread(task, onFinish, dispatchResultOnUIThread, delay, onException, null);
+    }
+
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay, ResultCallback<Throwable> onException, String threadName) {
+        if (task == null) return;
 
         Runnable target = () -> {
             T result;
-            if (args.onException == null) {
-                result = args.task.invoke();
+            if (onException == null) {
+                result = task.invoke();
             } else {
                 try {
-                    result = args.task.invoke();
+                    result = task.invoke();
                 } catch (Throwable e) {
-                    if (args.dispatchResultOnUIThread)
-                        runOnUiThread(() -> args.onException.invoke(e));
+                    if (dispatchResultOnUIThread)
+                        runOnUiThread(() -> onException.invoke(e));
                     else
-                        args.onException.invoke(e);
+                        onException.invoke(e);
 
                     return;
                 }
             }
 
-            if (args.onFinish != null) {
-                if (args.dispatchResultOnUIThread)
-                    runOnUiThread(() -> args.onFinish.invoke(result));
+            if (onFinish != null) {
+                if (dispatchResultOnUIThread)
+                    runOnUiThread(() -> onFinish.invoke(result));
                 else
-                    args.onFinish.invoke(result);
+                    onFinish.invoke(result);
             }
         };
 
         Runnable startThread = () -> {
-            if (TextUtils.isEmpty(args.threadName)) {
+            if (TextUtils.isEmpty(threadName)) {
                 new Thread(target).start();
             } else {
-                new Thread(target, args.threadName).start();
+                new Thread(target, threadName).start();
             }
         };
 
-        if (args.delay > 0) {
-            runOnUiThread(startThread, args.delay);
+        if (delay > 0) {
+            runOnUiThread(startThread, delay);
         } else {
             startThread.run();
         }
@@ -547,13 +529,27 @@ public class BaseViewModel extends AndroidViewModel {
     public void runOnBackgroundThread(Runnable task, long delay, ResultCallback<Throwable> onException) {
         if (task == null) return;
 
-        runOnBackgroundThread(new BackgroundThreadArgs<>(
-                        //task
-                        () -> {
-                            task.run();
-                            return null;
-                        }
-                ).setDelay(delay).setOnException(onException)
+        runOnBackgroundThread(
+                //task
+                () -> {
+                    task.run();
+                    return null;
+                },
+
+                //onFinish
+                null,
+
+                //dispatchToUi
+                true,
+
+                //delay
+                delay,
+
+                //onException
+                onException,
+
+                //threadName
+                null
         );
     }
 
