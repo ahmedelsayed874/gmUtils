@@ -197,11 +197,6 @@ public class ListDialog extends BaseDialog {
         return this;
     }
 
-    public ListDialog setListener(Listener listener) {
-        this.mListener = listener;
-        return this;
-    }
-
     public ListDialog setOnNewValueInsertedListener(Listener2 listener2) {
         mListener2 = listener2;
         return this;
@@ -226,7 +221,7 @@ public class ListDialog extends BaseDialog {
         dialog.setTitle(this.tvTitle.getText());
         dialog.setList(this.mList);
         dialog.setAdapter(this.mCustomAdapter);
-        dialog.setListener(this.mListener);
+        dialog.mListener = this.mListener;
         dialog.setOnNewValueInsertedListener(this.mListener2);
         return dialog;
     }

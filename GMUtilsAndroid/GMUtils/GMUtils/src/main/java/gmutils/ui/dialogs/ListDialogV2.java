@@ -39,6 +39,7 @@ public class ListDialogV2<T> extends BaseDialog {
 
     private TextView tvTitle;
     private TextView tvHint;
+    private EditText etSearchToken;
     private ListView lvList;
     private TextView tvNoResult;
     private TextView tvAddValue;
@@ -67,6 +68,7 @@ public class ListDialogV2<T> extends BaseDialog {
         View view = getView();
         tvTitle = view.findViewById(R.id.text_title);
         tvHint = view.findViewById(R.id.text_hint);
+        etSearchToken = view.findViewById(R.id.text_search_token);
         View ivClose = view.findViewById(R.id.image_close);
         final EditText etSearchToken = view.findViewById(R.id.text_search_token);
         lvList = view.findViewById(R.id.list);
@@ -179,6 +181,10 @@ public class ListDialogV2<T> extends BaseDialog {
         return this;
     }
 
+    public ListDialogV2<T> hideSearchBox() {
+        etSearchToken.setVisibility(View.GONE);
+        return this;
+    }
     public ListDialogV2<T> setList(List<T> list) {
         mList = list;
         return this;
@@ -188,11 +194,6 @@ public class ListDialogV2<T> extends BaseDialog {
         this.mCustomAdapter = adapterListener;
         if (adapterListener != null) setList(adapterListener.getList());
         else setList(null);
-        return this;
-    }
-
-    public ListDialogV2<T> setListener(Listener<T> listener) {
-        this.mListener = listener;
         return this;
     }
 
@@ -220,7 +221,7 @@ public class ListDialogV2<T> extends BaseDialog {
         dialog.setTitle(this.tvTitle.getText());
         dialog.setList(this.mList);
         dialog.setAdapter(this.mCustomAdapter);
-        dialog.setListener(this.mListener);
+        dialog.mListener = this.mListener;
         dialog.setOnNewValueInsertedListener(this.mListener2);
         return dialog;
     }
