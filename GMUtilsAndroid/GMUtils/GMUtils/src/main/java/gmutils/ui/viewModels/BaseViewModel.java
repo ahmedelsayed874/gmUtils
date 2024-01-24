@@ -148,46 +148,44 @@ public class BaseViewModel extends AndroidViewModel {
 
     public static class Message implements MessageDependent {
         private final List<Object> messages; //Integer | StringSet
-        public final boolean popup;
         public final MessageType type;
         private boolean enableOuterDismiss = true;
 
         public Message() {
-            this(new ArrayList<>(), false, new MessageType.Normal());
+            this(new ArrayList<>(), new MessageType.Hint());
         }
 
-        public Message(boolean popup, MessageType type) {
-            this(new ArrayList<>(), popup, type);
+        public Message(MessageType type) {
+            this(new ArrayList<>(), type);
         }
 
         public Message(Integer messageId) {
-            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), false, new MessageType.Normal());
+            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), new MessageType.Hint());
         }
 
-        public Message(Integer messageId, boolean popup, MessageType type) {
-            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), popup, type);
+        public Message(Integer messageId, MessageType type) {
+            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), type);
         }
 
         public Message(CharSequence message) {
-            this(message == null ? null : new ArrayList<>(List.of(message)), false, new MessageType.Normal());
+            this(message == null ? null : new ArrayList<>(List.of(message)), new MessageType.Hint());
         }
 
-        public Message(CharSequence message, boolean popup, MessageType type) {
-            this(message == null ? null : new ArrayList<>(List.of(message)), popup, type);
+        public Message(CharSequence message, MessageType type) {
+            this(message == null ? null : new ArrayList<>(List.of(message)), type);
         }
 
         public Message(StringSet message) {
-            this(message == null ? null : new ArrayList<>(List.of(message)), false, new MessageType.Normal());
+            this(message == null ? null : new ArrayList<>(List.of(message)), new MessageType.Hint());
         }
 
-        public Message(StringSet message, boolean popup, MessageType type) {
-            this(message == null ? null : new ArrayList<>(List.of(message)), popup, type);
+        public Message(StringSet message, MessageType type) {
+            this(message == null ? null : new ArrayList<>(List.of(message)), type);
         }
 
-        private Message(List<Object> messages, boolean popup, MessageType type) {
+        private Message(List<Object> messages, MessageType type) {
             this.messages = messages != null ? messages : new ArrayList<>();
-            this.popup = popup;
-            this.type = type != null ? type : new MessageType.Normal();
+            this.type = type != null ? type : new MessageType.Hint();
         }
 
         //------------------------------------------------------------------------------
@@ -243,13 +241,13 @@ public class BaseViewModel extends AndroidViewModel {
     public interface MessageType {
         void destroy();
 
-        class Normal implements MessageType {
+        class Dialog implements MessageType {
             private int iconRes;
             private DataGroup3<Integer, StringSet, Runnable> button1;
             private DataGroup3<Integer, StringSet, Runnable> button2;
             private DataGroup3<Integer, StringSet, Runnable> button3;
 
-            public Normal() {
+            public Dialog() {
                 this(
                         (Pair<Integer, Runnable>) null,
                         (Pair<Integer, Runnable>) null,
@@ -257,15 +255,15 @@ public class BaseViewModel extends AndroidViewModel {
                 );
             }
 
-            public Normal(Integer buttonText, Runnable buttonAction) {
+            public Dialog(Integer buttonText, Runnable buttonAction) {
                 this(new Pair<>(buttonText, buttonAction), null, null);
             }
 
-            public Normal(StringSet buttonText, Runnable buttonAction) {
+            public Dialog(StringSet buttonText, Runnable buttonAction) {
                 this(new DataGroup2<>(buttonText, buttonAction), null, null);
             }
 
-            public Normal(
+            public Dialog(
                     Pair<Integer, Runnable> button1,
                     Pair<Integer, Runnable> button2,
                     Pair<Integer, Runnable> button3
@@ -275,7 +273,7 @@ public class BaseViewModel extends AndroidViewModel {
                 this.button3 = button3 == null ? null : new DataGroup3<>(button3.getFirst(), null, button3.getSecond());
             }
 
-            public Normal(
+            public Dialog(
                     DataGroup2<StringSet, Runnable> button1,
                     DataGroup2<StringSet, Runnable> button2,
                     DataGroup2<StringSet, Runnable> button3
@@ -287,7 +285,7 @@ public class BaseViewModel extends AndroidViewModel {
 
             //------------------------------------------------------
 
-            public Normal setIconRes(int iconRes) {
+            public Dialog setIconRes(int iconRes) {
                 this.iconRes = iconRes;
                 return this;
             }
@@ -322,24 +320,19 @@ public class BaseViewModel extends AndroidViewModel {
             }
         }
 
-        class Error extends Normal {
-            public Error() {
+        class Hint implements MessageType {
+            public final boolean error;
+
+            public Hint() {
+                this(false);
             }
 
-            public Error(Integer buttonText, Runnable buttonAction) {
-                super(buttonText, buttonAction);
+            public Hint(boolean error) {
+                this.error = error;
             }
 
-            public Error(StringSet buttonText, Runnable buttonAction) {
-                super(buttonText, buttonAction);
-            }
-
-            public Error(Pair<Integer, Runnable> button1, Pair<Integer, Runnable> button2, Pair<Integer, Runnable> button3) {
-                super(button1, button2, button3);
-            }
-
-            public Error(DataGroup2<StringSet, Runnable> button1, DataGroup2<StringSet, Runnable> button2, DataGroup2<StringSet, Runnable> button3) {
-                super(button1, button2, button3);
+            @Override
+            public void destroy() {
             }
         }
 
@@ -409,37 +402,37 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     public void postPopMessage(int messageId) {
-        Message m = new Message(messageId, true, new MessageType.Normal());
+        Message m = new Message(messageId, new MessageType.Dialog());
         postMessage(m);
     }
 
     public void postPopMessage(CharSequence message) {
-        Message m = new Message(message, true, new MessageType.Normal());
+        Message m = new Message(message, new MessageType.Dialog());
         postMessage(m);
     }
 
-    public void postPopMessage(int messageId, MessageType messageType) {
-        Message m = new Message(messageId, true, messageType);
+    public void postPopMessage(int messageId, MessageType.Dialog messageType) {
+        Message m = new Message(messageId, messageType);
         postMessage(m);
     }
 
-    public void postPopMessage(CharSequence message, MessageType messageType) {
-        Message m = new Message(message, true, messageType);
+    public void postPopMessage(CharSequence message, MessageType.Dialog messageType) {
+        Message m = new Message(message, messageType);
         postMessage(m);
     }
 
     public void postToastMessage(int messageId, boolean error) {
-        Message m = new Message(messageId, false, error ? new MessageType.Error() : new MessageType.Normal());
+        Message m = new Message(messageId, new MessageType.Hint(error));
         postMessage(m);
     }
 
     public void postToastMessage(CharSequence message, boolean error) {
-        Message m = new Message(message, false, error ? new MessageType.Error() : new MessageType.Normal());
+        Message m = new Message(message, new MessageType.Hint(error));
         postMessage(m);
     }
 
     public void postRetryMessage(CharSequence message, Runnable onRetry) {
-        Message m = new Message(message, true, new MessageType.Retry(onRetry));
+        Message m = new Message(message, new MessageType.Retry(onRetry));
         postMessage(m);
     }
 

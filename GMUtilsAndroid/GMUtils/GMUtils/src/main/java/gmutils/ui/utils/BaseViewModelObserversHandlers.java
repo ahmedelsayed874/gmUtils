@@ -54,8 +54,7 @@ public class BaseViewModelObserversHandlers {
     ) {
         CharSequence msg = getText(context, message);
 
-        if (message.type instanceof BaseViewModel.MessageType.Normal mt) {
-            if (message.popup) {
+        if (message.type instanceof BaseViewModel.MessageType.Dialog mt) {
                 MessageDialog dialog = showMessageDialog.invoke(msg);
                 dialog.setCancelable(message.isEnableOuterDismiss());
 
@@ -100,16 +99,14 @@ public class BaseViewModelObserversHandlers {
                             dialog.setButton3(i, listener);
                         }
                     }
-                } else {
+                }
 
-                }
-            } else {
-                if (mt instanceof BaseViewModel.MessageType.Error) {
-                    showToast.invoke(msg, false);
-                } else {
-                    showToast.invoke(msg, true);
-                }
-            }
+            mt.destroy();
+        }
+        //
+        else if (message.type instanceof BaseViewModel.MessageType.Hint mt) {
+            showToast.invoke(msg, !mt.error);
+
             mt.destroy();
         }
         //
