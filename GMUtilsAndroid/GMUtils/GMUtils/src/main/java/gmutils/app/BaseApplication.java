@@ -3,10 +3,12 @@ package gmutils.app;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -15,6 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import gmutils.Intents;
 import gmutils.logger.Logger;
 import gmutils.MessagingCenter;
 import gmutils.R;
@@ -300,9 +303,13 @@ public abstract class BaseApplication extends Application implements Application
 
         MessageDialog.create(context)
                 .setMessage(bugs)
-                .setButton1(R.string.ok, null)
+                .setMessageGravity(Gravity.START)
+                .setButton1(R.string.dismiss, null)
                 .setButton2(R.string.delete, dialog -> {
                     deleteBugs();
+                })
+                .setButton3("Send", dialog -> {
+                    onSendBugClick(bugs, getBugFile());
                 })
                 .setOnDismissListener(dialog -> {
                     if (onComplete != null) onComplete.run();
@@ -346,6 +353,16 @@ public abstract class BaseApplication extends Application implements Application
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void onSendBugClick(String bugs, File bugFile) {
+        Intents.getInstance().composeEmail(
+                this,
+                null,
+                "REPORTEDBUG: " + this.getPackageName(),
+                bugs,
+                Uri.fromFile(bugFile)
+        );
     }
 
     //----------------------------------------------------------------------------------------------

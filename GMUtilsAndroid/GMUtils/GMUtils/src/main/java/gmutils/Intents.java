@@ -386,6 +386,8 @@ public class Intents {
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_TEXT, body);
 
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
         if (attachments != null) {
             if (attachments.size() == 1) {
                 intent.putExtra(Intent.EXTRA_STREAM, attachments.get(0));
