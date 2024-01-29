@@ -11,10 +11,8 @@ import androidx.lifecycle.MutableLiveData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import gmutils.BackgroundTask;
 import gmutils.StringSet;
 import gmutils.collections.dataGroup.DataGroup2;
 import gmutils.collections.dataGroup.DataGroup3;
@@ -65,6 +63,7 @@ public class BaseViewModel extends AndroidViewModel {
 
             public Show(int messageId) {
                 this(new ArrayList<>(List.of(messageId)));
+                assert messageId > 0;
             }
 
             public Show(StringSet message) {
@@ -79,6 +78,7 @@ public class BaseViewModel extends AndroidViewModel {
 
             @Override
             public Show appendMessage(Integer messageId) {
+                assert messageId > 0;
                 this.message.add(messageId);
                 return this;
             }
@@ -122,6 +122,7 @@ public class BaseViewModel extends AndroidViewModel {
 
             public Update(int messageId) {
                 super(messageId);
+                assert messageId > 0;
             }
 
             public Update(StringSet message) {
@@ -132,6 +133,7 @@ public class BaseViewModel extends AndroidViewModel {
 
             @Override
             public Update appendMessage(Integer messageId) {
+                assert messageId > 0;
                 return (Update) super.appendMessage(messageId);
             }
 
@@ -143,6 +145,15 @@ public class BaseViewModel extends AndroidViewModel {
         }
 
         class Hide implements ProgressStatus {
+            public final boolean forceHide;
+
+            public Hide() {
+                this(false);
+            }
+
+            public Hide(boolean forceHide) {
+                this.forceHide = forceHide;
+            }
         }
     }
 
@@ -160,11 +171,11 @@ public class BaseViewModel extends AndroidViewModel {
         }
 
         public Message(Integer messageId) {
-            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), new MessageType.Hint());
+            this(messageId, new MessageType.Hint());
         }
 
         public Message(Integer messageId, MessageType type) {
-            this(messageId == null ? null : new ArrayList<>(List.of(messageId)), type);
+            this(messageId == null || messageId <= 0 ? null : new ArrayList<>(List.of(messageId)), type);
         }
 
         public Message(CharSequence message) {
@@ -192,6 +203,7 @@ public class BaseViewModel extends AndroidViewModel {
 
         @Override
         public Message appendMessage(Integer messageId) {
+            assert messageId > 0;
             this.messages.add(messageId);
             return this;
         }
@@ -239,6 +251,8 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     public interface MessageType {
+        boolean isErrorMessage();
+
         void destroy();
 
         class Dialog implements MessageType {
@@ -246,21 +260,35 @@ public class BaseViewModel extends AndroidViewModel {
             private DataGroup3<Integer, StringSet, Runnable> button1;
             private DataGroup3<Integer, StringSet, Runnable> button2;
             private DataGroup3<Integer, StringSet, Runnable> button3;
+            private boolean error;
 
             public Dialog() {
+                this(false);
+            }
+
+            public Dialog(boolean error) {
                 this(
                         (Pair<Integer, Runnable>) null,
                         (Pair<Integer, Runnable>) null,
-                        (Pair<Integer, Runnable>) null
+                        (Pair<Integer, Runnable>) null,
+                        error
                 );
             }
 
             public Dialog(Integer buttonText, Runnable buttonAction) {
-                this(new Pair<>(buttonText, buttonAction), null, null);
+                this(new Pair<>(buttonText, buttonAction), null, null, false);
+            }
+
+            public Dialog(Integer buttonText, Runnable buttonAction, boolean error) {
+                this(new Pair<>(buttonText, buttonAction), null, null, error);
             }
 
             public Dialog(StringSet buttonText, Runnable buttonAction) {
-                this(new DataGroup2<>(buttonText, buttonAction), null, null);
+                this(new DataGroup2<>(buttonText, buttonAction), null, null, false);
+            }
+
+            public Dialog(StringSet buttonText, Runnable buttonAction, boolean error) {
+                this(new DataGroup2<>(buttonText, buttonAction), null, null, error);
             }
 
             public Dialog(
@@ -268,9 +296,19 @@ public class BaseViewModel extends AndroidViewModel {
                     Pair<Integer, Runnable> button2,
                     Pair<Integer, Runnable> button3
             ) {
+                this(button1, button2, button3, false);
+            }
+
+            public Dialog(
+                    Pair<Integer, Runnable> button1,
+                    Pair<Integer, Runnable> button2,
+                    Pair<Integer, Runnable> button3,
+                    boolean error
+            ) {
                 this.button1 = button1 == null ? null : new DataGroup3<>(button1.getFirst(), null, button1.getSecond());
                 this.button2 = button2 == null ? null : new DataGroup3<>(button2.getFirst(), null, button2.getSecond());
                 this.button3 = button3 == null ? null : new DataGroup3<>(button3.getFirst(), null, button3.getSecond());
+                this.error = error;
             }
 
             public Dialog(
@@ -278,9 +316,19 @@ public class BaseViewModel extends AndroidViewModel {
                     DataGroup2<StringSet, Runnable> button2,
                     DataGroup2<StringSet, Runnable> button3
             ) {
+                this(button1, button2, button3, false);
+            }
+
+            public Dialog(
+                    DataGroup2<StringSet, Runnable> button1,
+                    DataGroup2<StringSet, Runnable> button2,
+                    DataGroup2<StringSet, Runnable> button3,
+                    boolean error
+            ) {
                 this.button1 = button1 == null ? null : new DataGroup3<>(null, button1.value1, button1.value2);
                 this.button2 = button2 == null ? null : new DataGroup3<>(null, button2.value1, button2.value2);
                 this.button3 = button3 == null ? null : new DataGroup3<>(null, button3.value1, button3.value2);
+                this.error = error;
             }
 
             //------------------------------------------------------
@@ -318,6 +366,11 @@ public class BaseViewModel extends AndroidViewModel {
                 button2 = null;
                 button3 = null;
             }
+
+            @Override
+            public boolean isErrorMessage() {
+                return error;
+            }
         }
 
         class Hint implements MessageType {
@@ -333,6 +386,11 @@ public class BaseViewModel extends AndroidViewModel {
 
             @Override
             public void destroy() {
+            }
+
+            @Override
+            public boolean isErrorMessage() {
+                return error;
             }
         }
 
@@ -363,6 +421,11 @@ public class BaseViewModel extends AndroidViewModel {
 
             public void destroy() {
                 this._onRetry = null;
+            }
+
+            @Override
+            public boolean isErrorMessage() {
+                return true;
             }
         }
     }

@@ -193,7 +193,12 @@ public abstract class BaseFragment extends Fragment {
                 this::updateWaitViewMsg,
 
                 //hideWaitView
-                this::hideWaitView
+                (forceHide) -> {
+                    if (forceHide)
+                        hideWaitViewImmediately();
+                    else
+                        hideWaitView();
+                }
         );
     }
 

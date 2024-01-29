@@ -469,7 +469,12 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 this::updateWaitViewMsg,
 
                 //hideWaitView
-                this::hideWaitView
+                (forceHide) -> {
+                    if (forceHide)
+                        hideWaitViewImmediately();
+                    else
+                        hideWaitView();
+                }
         );
     }
 

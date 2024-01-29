@@ -25,11 +25,15 @@ public class BaseViewModelObserversHandlers {
             BaseViewModel.ProgressStatus progressStatus,
             ResultCallback<CharSequence> showWaitView,
             ResultCallback<CharSequence> updateWaitViewMsg,
-            Runnable hideWaitView
+            ResultCallback<Boolean /*forceHide*/> hideWaitView
     ) {
         CharSequence msg = null;
         if (progressStatus instanceof BaseViewModel.ProgressStatus.Show ps) {
-            msg = getText(context, ps);
+            try {
+                msg = getText(context, ps);
+            } catch (Exception e) {
+                msg = null;
+            }
         }
 
         if (progressStatus instanceof BaseViewModel.ProgressStatus.Show) {
@@ -40,8 +44,8 @@ public class BaseViewModelObserversHandlers {
             }
         }
         //
-        else if (progressStatus instanceof BaseViewModel.ProgressStatus.Hide) {
-            hideWaitView.run();
+        else if (progressStatus instanceof BaseViewModel.ProgressStatus.Hide ps) {
+            hideWaitView.invoke(ps.forceHide);
         }
     }
 
