@@ -52,6 +52,7 @@ import javax.net.ssl.X509TrustManager;
 import gmutils.listeners.ActionCallback0;
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
+import gmutils.net.retrofit.callback.LogsOptions;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 import gmutils.storage.GeneralStorage;
@@ -702,7 +703,7 @@ public class RetrofitService {
             Class<R> responseClass,
             Call<R> call,
             @Nullable OnResponseReady<R> callback,
-            String[] excludedTextsFromLog,
+            LogsOptions logsOptions,
             LoggerAbs loggerAbs
     ) {
         if (async) {
@@ -711,7 +712,7 @@ public class RetrofitService {
                     call.request(),
                     responseClass,
                     callback,
-                    excludedTextsFromLog,
+                    logsOptions,
                     loggerAbs
             );
             call.enqueue(callback2);
@@ -724,7 +725,7 @@ public class RetrofitService {
                     call.request(),
                     responseClass,
                     response::set,
-                    excludedTextsFromLog,
+                    logsOptions,
                     loggerAbs
             );
 

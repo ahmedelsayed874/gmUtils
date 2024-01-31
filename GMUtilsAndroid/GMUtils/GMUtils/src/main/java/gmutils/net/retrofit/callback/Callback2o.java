@@ -3,6 +3,7 @@ package gmutils.net.retrofit.callback;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
@@ -28,21 +29,12 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
     private CallbackOperations<R> callbackOperations;
     private OnResponseReady2o<DT, R> onResponseReady;
 
-
     public Callback2o(
             Request request,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady
     ) {
         this(request, responseClass, onResponseReady, null);
-    }
-
-    public Callback2o(
-            String requestInfo,
-            Class<R> responseClass,
-            OnResponseReady2o<DT, R> onResponseReady
-    ) {
-        this(requestInfo, responseClass, onResponseReady, null);
     }
 
     public Callback2o(
@@ -61,6 +53,25 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
     }
 
     public Callback2o(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady2o<DT, R> onResponseReady,
+            LogsOptions logsOptions,
+            LoggerAbs logger
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2o.this::setResult, logsOptions, logger);
+        this.onResponseReady = onResponseReady;
+    }
+
+    public Callback2o(
+            String requestInfo,
+            Class<R> responseClass,
+            OnResponseReady2o<DT, R> onResponseReady
+    ) {
+        this(requestInfo, responseClass, onResponseReady, null);
+    }
+
+    public Callback2o(
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
@@ -73,17 +84,6 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
                 null,
                 logger
         );
-    }
-
-    public Callback2o(
-            Request request,
-            Class<R> responseClass,
-            OnResponseReady2o<DT, R> onResponseReady,
-            String[] excludedTextsFromLog,
-            LoggerAbs logger
-    ) {
-        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2o.this::setResult, excludedTextsFromLog, logger);
-        this.onResponseReady = onResponseReady;
     }
 
     public Callback2o(

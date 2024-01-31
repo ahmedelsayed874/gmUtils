@@ -43,10 +43,42 @@ public final class CallbackOperations<R extends BaseResponse> {
             Request request,
             Class<R> responseClass,
             Listener<R> listener,
-            String[] excludedTextsFromLog,
+            LogsOptions logsOptions,
             LoggerAbs logger
     ) {
-        this(request.toString(), responseClass, listener, excludedTextsFromLog, logger);
+        this.responseClass = responseClass;
+        this.requestTime = System.currentTimeMillis();
+
+        if (logsOptions == null) {
+            init(request.toString(), responseClass, listener, null, logger);
+        } else if (logsOptions.printRequestParameters) {
+            init(request.toString(), responseClass, listener, logsOptions.excludedTextsFromLog, logger);
+        } else {
+            StringBuilder req = new StringBuilder();
+            req.append("Request{method=");
+            req.append(request.method());
+            req.append(", url=");
+            req.append(request.url());
+            if (logsOptions.printHeaders) {
+                if (request.headers().size() != 0) {
+                    req.append(", headers=[");
+                    int i = 0;
+                    for (String name : request.headers().names()) {
+                        i++;
+                        if (i > 1) {
+                            req.append(", ");
+                        }
+                        req.append(name);
+                        req.append(':');
+                        req.append(request.headers().values(name));
+                    }
+                    req.append(']');
+                }
+            }
+            req.append('}');
+
+            init(req.toString(), responseClass, listener, logsOptions.excludedTextsFromLog, logger);
+        }
     }
 
     public CallbackOperations(
@@ -57,10 +89,21 @@ public final class CallbackOperations<R extends BaseResponse> {
             LoggerAbs logger
     ) {
         this.responseClass = responseClass;
+        this.requestTime = System.currentTimeMillis();
+
+        init(requestInfo, responseClass, listener, excludedTextsFromLog, logger);
+    }
+
+    private void init(
+            String requestInfo,
+            Class<R> responseClass,
+            Listener<R> listener,
+            String[] excludedTextsFromLog,
+            LoggerAbs logger
+    ) {
+
         this.listener = listener;
         this.logger = logger != null ? logger : Logger.d();
-
-        this.requestTime = System.currentTimeMillis();
 
         if (requestInfo != null && !"".equals(requestInfo))
             this.logger.print(() -> "API:Request:", () -> {

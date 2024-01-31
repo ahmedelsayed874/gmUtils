@@ -38,14 +38,6 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
     }
 
     public Callback2(
-            String requestInfo,
-            Class<R> responseClass,
-            OnResponseReady2<DT> onResponseReady
-    ) {
-        this(requestInfo, responseClass, onResponseReady, null);
-    }
-
-    public Callback2(
             Request request,
             Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady,
@@ -61,6 +53,25 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
     }
 
     public Callback2(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady2<DT> onResponseReady,
+            LogsOptions logsOptions,
+            LoggerAbs logger
+    ) {
+        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2.this::setResult, logsOptions, logger);
+        this.onResponseReady = onResponseReady;
+    }
+
+    public Callback2(
+            String requestInfo,
+            Class<R> responseClass,
+            OnResponseReady2<DT> onResponseReady
+    ) {
+        this(requestInfo, responseClass, onResponseReady, null);
+    }
+
+    public Callback2(
             String requestInfo,
             Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady,
@@ -73,17 +84,6 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
                 null,
                 logger
         );
-    }
-
-    public Callback2(
-            Request request,
-            Class<R> responseClass,
-            OnResponseReady2<DT> onResponseReady,
-            String[] excludedTextsFromLog,
-            LoggerAbs logger
-    ) {
-        this.callbackOperations = new CallbackOperations<R>(request, responseClass, Callback2.this::setResult, excludedTextsFromLog, logger);
-        this.onResponseReady = onResponseReady;
     }
 
     public Callback2(

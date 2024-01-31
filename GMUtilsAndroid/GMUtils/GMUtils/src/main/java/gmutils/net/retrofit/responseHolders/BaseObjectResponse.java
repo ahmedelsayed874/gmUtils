@@ -86,56 +86,29 @@ public abstract class BaseObjectResponse<T> extends BaseResponse {
 
     //----------------------------------------------------------------------------------------------
 
-    private boolean allowDataCopy = true;
-
     @Override
     public void copyFrom(@NonNull BaseResponse otherResponse) {
         super.copyFrom(otherResponse);
-        if (allowDataCopy) {
             if (otherResponse instanceof BaseObjectResponse) {
-                this.setData((T) ((BaseObjectResponse) otherResponse).getData());
+                try {
+                    Object data = ((BaseObjectResponse) otherResponse).getData();
+                    this.setData((T) data);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        allowDataCopy = true;
     }
 
-    public <Tc> void cast(BaseObjectResponse<Tc> otherResponse, ActionCallback<T, Tc> converter) {
-        otherResponse.allowDataCopy = false;
-        otherResponse.copyFrom(this);
-        if (converter != null) {
-            Tc t = converter.invoke(this.getData());
-            otherResponse.setData(t);
+    public <To> void copyFrom(@NonNull BaseObjectResponse<To> otherResponse, ActionCallback<To, T> dataConverter) {
+        super.copyFrom(otherResponse);
+
+        if (dataConverter != null) {
+            T data = dataConverter.invoke(otherResponse.getData());
+            this.setData(data);
         }
     }
 
     //----------------------------------------------------------------------------------------------
-
-    public static <T> BaseObjectResponse<T> createInstance(Class<T> c) {
-
-        BaseObjectResponse<T> response = new BaseObjectResponse<T>() {
-            T d;
-
-            @Override
-            public void setData(T data) {
-                d = data;
-            }
-
-            @Override
-            public T getData() {
-                return d;
-            }
-
-            @Override
-            public Statuses getResponseStatus() {
-                return d != null ? Statuses.Succeeded : Statuses.Error;
-            }
-        };
-
-        return response;
-    }
-
-    //----------------------------------------------------------------------------------------------
-
 
     @Override
     public String toString() {
