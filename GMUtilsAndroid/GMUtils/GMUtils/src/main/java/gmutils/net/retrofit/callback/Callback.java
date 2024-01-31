@@ -3,6 +3,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
+import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
 import okhttp3.Request;
 import retrofit2.Call;
@@ -59,36 +60,36 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
     }
 
     public Callback(
-            String requestInfo,
             Class<R> responseClass,
-            OnResponseReady<R> onResponseReady
+            OnResponseReady<R> onResponseReady,
+            LoggerAbs.ContentGetter requestInfo
     ) {
-        this(requestInfo, responseClass, onResponseReady, null);
+        this(responseClass, onResponseReady,requestInfo,  null);
     }
 
     public Callback(
-            String requestInfo,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
+            LoggerAbs.ContentGetter requestInfo,
             LoggerAbs logger
     ) {
         this(
-                requestInfo,
                 responseClass,
                 onResponseReady,
+                requestInfo,
                 null,
                 logger
         );
     }
 
     public Callback(
-            String requestInfo,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
-            String[] excludedTextsFromLog,
+            LoggerAbs.ContentGetter requestInfo,
+            LogsOptions.Replacements replacedTextsInLog,
             LoggerAbs logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback.this::setResult, excludedTextsFromLog, logger);
+        this.callbackOperations = new CallbackOperations<R>(responseClass, Callback.this::setResult, requestInfo, replacedTextsInLog, logger);
         this.onResponseReady = onResponseReady;
     }
 

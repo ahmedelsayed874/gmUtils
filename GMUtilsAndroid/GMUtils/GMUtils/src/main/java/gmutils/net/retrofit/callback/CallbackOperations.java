@@ -1,6 +1,7 @@
 package gmutils.net.retrofit.callback;
 
 import android.text.TextUtils;
+import android.util.Pair;
 
 import java.util.List;
 import java.util.Map;
@@ -50,70 +51,95 @@ public final class CallbackOperations<R extends BaseResponse> {
         this.requestTime = System.currentTimeMillis();
 
         if (logsOptions == null) {
-            init(request.toString(), responseClass, listener, null, logger);
-        } else if (logsOptions.printRequestParameters) {
-            init(request.toString(), responseClass, listener, logsOptions.excludedTextsFromLog, logger);
-        } else {
-            StringBuilder req = new StringBuilder();
-            req.append("Request{method=");
-            req.append(request.method());
-            req.append(", url=");
-            req.append(request.url());
-            if (logsOptions.printHeaders) {
-                if (request.headers().size() != 0) {
-                    req.append(", headers=[");
-                    int i = 0;
-                    for (String name : request.headers().names()) {
-                        i++;
-                        if (i > 1) {
-                            req.append(", ");
-                        }
-                        req.append(name);
-                        req.append(':');
-                        req.append(request.headers().values(name));
-                    }
-                    req.append(']');
-                }
-            }
-            req.append('}');
+            init(request::toString, responseClass, listener, null, logger);
 
-            init(req.toString(), responseClass, listener, logsOptions.excludedTextsFromLog, logger);
+        }
+        //
+        else if (logsOptions.printRequestParameters()) {
+            init(() -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.toString());
+                if (logsOptions.getExtraInfo() != null) {
+                    sb.append("\nExtraInfo:");
+                    sb.append(logsOptions.getExtraInfo().invoke());
+                }
+                return sb;
+            }, responseClass, listener, logsOptions.getReplacements(), logger);
+
+        }
+        //
+        else {
+            init(() -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Request{method=");
+                sb.append(request.method());
+                sb.append(", url=");
+                sb.append(request.url());
+
+                if (logsOptions.printHeaders()) {
+                    if (request.headers().size() != 0) {
+                        sb.append(", headers=[");
+                        int i = 0;
+                        for (String name : request.headers().names()) {
+                            i++;
+                            if (i > 1) sb.append(", ");
+                            sb.append(name);
+                            sb.append(':');
+                            sb.append(request.headers().values(name));
+                        }
+                        sb.append(']');
+                    }
+                }
+
+                sb.append('}');
+
+                if (logsOptions.getExtraInfo() != null) {
+                    sb.append("\nExtraInfo:");
+                    sb.append(logsOptions.getExtraInfo().invoke());
+                }
+
+                return sb;
+            }, responseClass, listener, logsOptions.getReplacements(), logger);
         }
     }
 
     public CallbackOperations(
-            String requestInfo,
             Class<R> responseClass,
             Listener<R> listener,
-            String[] excludedTextsFromLog,
+            LoggerAbs.ContentGetter requestInfo,
+            LogsOptions.Replacements replacedTextsInLog,
             LoggerAbs logger
     ) {
         this.responseClass = responseClass;
         this.requestTime = System.currentTimeMillis();
 
-        init(requestInfo, responseClass, listener, excludedTextsFromLog, logger);
+        init(requestInfo, responseClass, listener, replacedTextsInLog, logger);
     }
 
     private void init(
-            String requestInfo,
+            LoggerAbs.ContentGetter requestInfo,
             Class<R> responseClass,
             Listener<R> listener,
-            String[] excludedTextsFromLog,
+            LogsOptions.Replacements replacedTextsInLog,
             LoggerAbs logger
     ) {
 
         this.listener = listener;
         this.logger = logger != null ? logger : Logger.d();
 
-        if (requestInfo != null && !"".equals(requestInfo))
+        if (requestInfo != null)
             this.logger.print(() -> "API:Request:", () -> {
-                String txt = requestInfo;
-                if (excludedTextsFromLog != null) {
-                    for (String t : excludedTextsFromLog) {
-                        txt = txt.replaceAll(t, "##########");
+                try {
+                    String txt = requestInfo.getContent().toString();
+                    if (replacedTextsInLog != null) {
+                        for (Pair<String, String> replacement : replacedTextsInLog.getReplacements()) {
+                            txt = txt.replaceAll(replacement.first, replacement.second);
+                        }
                     }
+                    return txt;
+                } catch (Exception e) {
+                    return " <[EXCEPTION:: " + e.getMessage() + "]>";
                 }
-                return txt;
             });
         try {
             responseClass.newInstance();

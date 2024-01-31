@@ -64,36 +64,36 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
     }
 
     public Callback2o(
-            String requestInfo,
             Class<R> responseClass,
-            OnResponseReady2o<DT, R> onResponseReady
+            OnResponseReady2o<DT, R> onResponseReady,
+            LoggerAbs.ContentGetter requestInfo
     ) {
-        this(requestInfo, responseClass, onResponseReady, null);
+        this(responseClass, onResponseReady,requestInfo,  null);
     }
 
     public Callback2o(
-            String requestInfo,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
+            LoggerAbs.ContentGetter requestInfo,
             LoggerAbs logger
     ) {
         this(
-                requestInfo,
                 responseClass,
                 onResponseReady,
+                requestInfo,
                 null,
                 logger
         );
     }
 
     public Callback2o(
-            String requestInfo,
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
-            String[] excludedTextsFromLog,
+            LoggerAbs.ContentGetter requestInfo,
+            LogsOptions.Replacements replacedTextsInLog,
             LoggerAbs logger
     ) {
-        this.callbackOperations = new CallbackOperations<R>(requestInfo, responseClass, Callback2o.this::setResult, excludedTextsFromLog, logger);
+        this.callbackOperations = new CallbackOperations<R>(responseClass, Callback2o.this::setResult, requestInfo, replacedTextsInLog, logger);
         this.onResponseReady = onResponseReady;
     }
 

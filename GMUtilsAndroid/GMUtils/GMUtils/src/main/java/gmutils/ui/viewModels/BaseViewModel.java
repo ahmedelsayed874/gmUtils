@@ -54,6 +54,21 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     public interface ProgressStatus {
+        /**
+         * @param messages int - CharSequence - StringSet
+         */
+        static ProgressStatus show(List<Object> messages) {
+            return new Show(messages);
+        }
+
+        static ProgressStatus update(StringSet message) {
+            return new Update(message);
+        }
+
+        static ProgressStatus hide(boolean forceHide) {
+            return new Hide(forceHide);
+        }
+
         class Show implements ProgressStatus, MessageDependent {
             private final List<Object> message; // StringSet | int
 
