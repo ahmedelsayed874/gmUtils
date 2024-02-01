@@ -3,7 +3,9 @@ package gmutils.net.retrofit.callback;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+
 import gmutils.logger.LoggerAbs;
+import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
@@ -35,7 +37,7 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
             Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady
     ) {
-        this(request, responseClass, onResponseReady, null);
+        this(request, responseClass, onResponseReady, null, null);
     }
 
     public Callback2(
@@ -57,6 +59,21 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
             Request request,
             Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady,
+            LogsOptions logsOptions
+    ) {
+        this(
+                request,
+                responseClass,
+                onResponseReady,
+                logsOptions,
+                null
+        );
+    }
+
+    public Callback2(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady2<DT> onResponseReady,
             LogsOptions logsOptions,
             LoggerAbs logger
     ) {
@@ -69,7 +86,7 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
             OnResponseReady2<DT> onResponseReady,
             LoggerAbs.ContentGetter requestInfo
     ) {
-        this(responseClass, onResponseReady,requestInfo,  null);
+        this(responseClass, onResponseReady, requestInfo, null, null);
     }
 
     public Callback2(
@@ -84,6 +101,21 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
                 requestInfo,
                 null,
                 logger
+        );
+    }
+
+    public Callback2(
+            Class<R> responseClass,
+            OnResponseReady2<DT> onResponseReady,
+            LoggerAbs.ContentGetter requestInfo,
+            LogsOptions.Replacements replacedTextsInLog
+    ) {
+        this(
+                responseClass,
+                onResponseReady,
+                requestInfo,
+                replacedTextsInLog,
+                null
         );
     }
 

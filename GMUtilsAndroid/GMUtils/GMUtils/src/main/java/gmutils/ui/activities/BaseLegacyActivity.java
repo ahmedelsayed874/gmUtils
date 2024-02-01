@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,11 +14,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
+import gmutils.listeners.ResultCallback;
 import gmutils.logger.Logger;
 import gmutils.R;
 import gmutils.ui.dialogs.MessageDialog;
@@ -303,5 +307,54 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     public boolean onOptionsItemSelected(MenuItem item) {
         if (getActivityFunctions().lifecycle().onOptionsItemSelected(thisActivity(), item)) return true;
         return super.onOptionsItemSelected(item);
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
+    @Override
+    public void startActivityForResult(@NonNull Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, @androidx.annotation.Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, ResultCallback<Intent> callback) {
+        getActivityFunctions().startActivityForResult(
+                this,
+                intent,
+                (int) System.currentTimeMillis(),
+                callback,
+                null
+        );
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback) {
+        getActivityFunctions().startActivityForResult(
+                this,
+                intent,
+                requestCode,
+                callback,
+                null
+        );
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback, Bundle options) {
+        getActivityFunctions().startActivityForResult(
+                this,
+                intent,
+                requestCode,
+                callback,
+                options
+        );
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        getActivityFunctions().onActivityResult(requestCode, resultCode, data);
     }
 }

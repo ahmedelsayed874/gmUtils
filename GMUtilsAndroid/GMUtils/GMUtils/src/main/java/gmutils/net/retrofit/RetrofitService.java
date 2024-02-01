@@ -703,6 +703,24 @@ public class RetrofitService {
             Class<R> responseClass,
             Call<R> call,
             @Nullable OnResponseReady<R> callback,
+            LogsOptions logsOptions
+    ) {
+        return executeWebService(
+                async,
+                responseClass,
+                call,
+                callback,
+                logsOptions,
+                null
+        );
+    }
+
+    @Nullable
+    public static <R extends BaseResponse> R executeWebService(
+            boolean async,
+            Class<R> responseClass,
+            Call<R> call,
+            @Nullable OnResponseReady<R> callback,
             LogsOptions logsOptions,
             LoggerAbs loggerAbs
     ) {

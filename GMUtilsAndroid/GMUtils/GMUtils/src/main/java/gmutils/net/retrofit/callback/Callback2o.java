@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 import gmutils.logger.LoggerAbs;
+import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import okhttp3.Request;
@@ -34,7 +35,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady
     ) {
-        this(request, responseClass, onResponseReady, null);
+        this(request, responseClass, onResponseReady, null, null);
     }
 
     public Callback2o(
@@ -64,11 +65,26 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
     }
 
     public Callback2o(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady2o<DT, R> onResponseReady,
+            LogsOptions logsOptions
+    ) {
+        this(
+                request,
+                responseClass,
+                onResponseReady,
+                logsOptions,
+                null
+        );
+    }
+
+    public Callback2o(
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady,
             LoggerAbs.ContentGetter requestInfo
     ) {
-        this(responseClass, onResponseReady,requestInfo,  null);
+        this(responseClass, onResponseReady, requestInfo, null, null);
     }
 
     public Callback2o(
@@ -83,6 +99,21 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
                 requestInfo,
                 null,
                 logger
+        );
+    }
+
+    public Callback2o(
+            Class<R> responseClass,
+            OnResponseReady2o<DT, R> onResponseReady,
+            LoggerAbs.ContentGetter requestInfo,
+            LogsOptions.Replacements replacedTextsInLog
+    ) {
+        this(
+                responseClass,
+                onResponseReady,
+                requestInfo,
+                replacedTextsInLog,
+                null
         );
     }
 

@@ -3,6 +3,7 @@ package gmutils.ui.activities;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -17,10 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import gmutils.BackgroundTask;
 import gmutils.KeypadOp;
@@ -392,6 +397,30 @@ public class ActivityFunctions implements BaseFragmentListener {
         dialog.show();
 
         return dialog;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    private Map<Integer, ResultCallback<Intent>> activityResultCallback;
+
+    public void startActivityForResult(Activity activity, @NonNull Intent intent, int requestCode, ResultCallback<Intent> callback, Bundle options) {
+        if (activityResultCallback == null) activityResultCallback = new HashMap<>();
+        activityResultCallback.put(requestCode, callback);
+        activity.startActivityForResult(intent, requestCode, options);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (activityResultCallback != null) {
+            if (activityResultCallback.containsKey(requestCode)) {
+                ResultCallback<Intent> callback = activityResultCallback.remove(requestCode);
+                if (callback == null) {
+                    Logger.d().print(() -> "startActivityForResult called with NULL callback");
+                    return;
+                }
+
+                callback.invoke(resultCode == Activity.RESULT_OK ? data : null);
+            }
+        }
     }
 
     //----------------------------------------------------------------------------------------------

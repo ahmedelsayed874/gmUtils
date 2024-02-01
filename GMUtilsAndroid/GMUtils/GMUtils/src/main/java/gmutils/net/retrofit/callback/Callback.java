@@ -1,6 +1,9 @@
 package gmutils.net.retrofit.callback;
+
 import org.jetbrains.annotations.NotNull;
+
 import java.util.Map;
+
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.listeners.OnResponseReady2;
@@ -30,7 +33,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady
     ) {
-        this(request, responseClass, onResponseReady, null);
+        this(request, responseClass, onResponseReady, null, null);
     }
 
     public Callback(
@@ -52,6 +55,21 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Request request,
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady,
+            LogsOptions logsOptions
+    ) {
+        this(
+                request,
+                responseClass,
+                onResponseReady,
+                logsOptions,
+                null
+        );
+    }
+
+    public Callback(
+            Request request,
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady,
             LogsOptions logsOptions,
             LoggerAbs logger
     ) {
@@ -64,7 +82,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             OnResponseReady<R> onResponseReady,
             LoggerAbs.ContentGetter requestInfo
     ) {
-        this(responseClass, onResponseReady,requestInfo,  null);
+        this(responseClass, onResponseReady, requestInfo, null, null);
     }
 
     public Callback(
@@ -79,6 +97,21 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
                 requestInfo,
                 null,
                 logger
+        );
+    }
+
+    public Callback(
+            Class<R> responseClass,
+            OnResponseReady<R> onResponseReady,
+            LoggerAbs.ContentGetter requestInfo,
+            LogsOptions.Replacements replacedTextsInLog
+    ) {
+        this(
+                responseClass,
+                onResponseReady,
+                requestInfo,
+                replacedTextsInLog,
+                null
         );
     }
 

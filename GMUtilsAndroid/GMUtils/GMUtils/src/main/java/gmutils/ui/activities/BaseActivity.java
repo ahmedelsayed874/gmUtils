@@ -3,6 +3,7 @@ package gmutils.ui.activities;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 
+import gmutils.listeners.ResultCallback;
 import gmutils.logger.Logger;
 import gmutils.R;
 import gmutils.ui.dialogs.MessageDialog;
@@ -505,4 +507,51 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         );
     }
 
+    //----------------------------------------------------------------------------------------------
+
+    @Override
+    public void startActivityForResult(@NonNull Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, @androidx.annotation.Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, ResultCallback<Intent> callback) {
+        getActivityFunctions().startActivityForResult(
+                this,
+                intent,
+                (int) System.currentTimeMillis(),
+                callback,
+                null
+        );
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback) {
+        getActivityFunctions().startActivityForResult(
+                this,
+                intent,
+                requestCode,
+                callback,
+                null
+        );
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback, Bundle options) {
+        getActivityFunctions().startActivityForResult(
+                this,
+                intent,
+                requestCode,
+                callback,
+                options
+        );
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        getActivityFunctions().onActivityResult(requestCode, resultCode, data);
+    }
 }

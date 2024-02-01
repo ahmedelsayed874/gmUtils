@@ -51,56 +51,83 @@ public final class CallbackOperations<R extends BaseResponse> {
         this.requestTime = System.currentTimeMillis();
 
         if (logsOptions == null) {
-            init(request::toString, responseClass, listener, null, logger);
-
+            logsOptions = new LogsOptions();
+            if (!request.method().equalsIgnoreCase("get")) {
+                logsOptions.printRequestParameters();
+            }
         }
-        //
-        else if (logsOptions.printRequestParameters()) {
-            init(() -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append(request.toString());
-                if (logsOptions.getExtraInfo() != null) {
-                    sb.append("\nExtraInfo:");
-                    sb.append(logsOptions.getExtraInfo().invoke());
-                }
-                return sb;
-            }, responseClass, listener, logsOptions.getReplacements(), logger);
 
-        }
-        //
-        else {
-            init(() -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Request{method=");
-                sb.append(request.method());
-                sb.append(", url=");
-                sb.append(request.url());
+        LogsOptions finalLogsOptions = logsOptions;
+        init(
+                responseClass,
+                listener,
+                () -> {
+                    StringBuilder sb = new StringBuilder();
 
-                if (logsOptions.printHeaders()) {
-                    if (request.headers().size() != 0) {
-                        sb.append(", headers=[");
-                        int i = 0;
-                        for (String name : request.headers().names()) {
-                            i++;
-                            if (i > 1) sb.append(", ");
-                            sb.append(name);
-                            sb.append(':');
-                            sb.append(request.headers().values(name));
-                        }
-                        sb.append(']');
+                    if (finalLogsOptions.allowPrintRequestParameters()) {
+                        sb.append(request.toString());
+                /*String requestInfo = request.toString();
+                int headerIdx = requestInfo.indexOf(", headers=[");
+                int paramsIdx = requestInfo.indexOf(", tags=", Math.max(headerIdx, 0));
+
+                if (headerIdx < 0 && paramsIdx < 0) {
+                    sb.append(requestInfo);
+                } else {
+                    String header = "";
+                    if (finalLogsOptions.allowPrintHeaders() && headerIdx > 0) {
+                        header = requestInfo.substring(headerIdx, Math.min(paramsIdx, requestInfo.length()));
                     }
-                }
 
-                sb.append('}');
+                    String params = "";
+                    if (finalLogsOptions.allowPrintRequestParameters() && paramsIdx > 0) {
+                        params = requestInfo.substring(paramsIdx, requestInfo.length() - 1);
+                    }
 
-                if (logsOptions.getExtraInfo() != null) {
-                    sb.append("\nExtraInfo:");
-                    sb.append(logsOptions.getExtraInfo().invoke());
-                }
+                    int end = -1;
+                    if (headerIdx > 0) end = headerIdx;
+                    else if (paramsIdx > 0) end = paramsIdx;
+                    if (end < 0) end = requestInfo.length();
 
-                return sb;
-            }, responseClass, listener, logsOptions.getReplacements(), logger);
-        }
+                    sb.append(requestInfo.substring(0, end))
+                            .append(header)
+                            .append(params);
+                }*/
+                    }
+                    //
+                    else {
+                        sb.append("Request{method=");
+                        sb.append(request.method());
+                        sb.append(", url=");
+                        sb.append(request.url());
+
+                        if (finalLogsOptions.allowPrintHeaders()) {
+                            if (request.headers().size() != 0) {
+                                sb.append(", headers=[");
+                                int i = 0;
+                                for (String name : request.headers().names()) {
+                                    i++;
+                                    if (i > 1) sb.append(", ");
+                                    sb.append(name);
+                                    sb.append(':');
+                                    sb.append(request.headers().values(name));
+                                }
+                                sb.append(']');
+                            }
+                        }
+
+                        sb.append('}');
+                    }
+
+                    if (finalLogsOptions.getExtraInfo() != null) {
+                        sb.append("\nExtraInfo:");
+                        sb.append(finalLogsOptions.getExtraInfo().invoke());
+                    }
+
+                    return sb;
+                },
+                logsOptions.getReplacements(),
+                logger
+        );
     }
 
     public CallbackOperations(
@@ -113,17 +140,16 @@ public final class CallbackOperations<R extends BaseResponse> {
         this.responseClass = responseClass;
         this.requestTime = System.currentTimeMillis();
 
-        init(requestInfo, responseClass, listener, replacedTextsInLog, logger);
+        init(responseClass, listener, requestInfo, replacedTextsInLog, logger);
     }
 
     private void init(
-            LoggerAbs.ContentGetter requestInfo,
             Class<R> responseClass,
             Listener<R> listener,
+            LoggerAbs.ContentGetter requestInfo,
             LogsOptions.Replacements replacedTextsInLog,
             LoggerAbs logger
     ) {
-
         this.listener = listener;
         this.logger = logger != null ? logger : Logger.d();
 

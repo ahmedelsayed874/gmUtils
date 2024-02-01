@@ -22,6 +22,10 @@ public class LogsOptions {
             return this;
         }
 
+        public Replacements coverText(String text) {
+            return coverText(text, null);
+        }
+
         public Replacements coverText(String text, CoverOptions coverOptions) {
             if (TextUtils.isEmpty(text)) return this;
             //asd-efghi-jk
@@ -94,21 +98,21 @@ public class LogsOptions {
 
     }
 
-    private boolean printHeaders;
-    private boolean printRequestParameters;
+    private boolean printHeaders = false;
+    private boolean printRequestParameters = false;
     private Replacements replacements;
     private ActionCallback0<String> extraInfo;
 
     public LogsOptions() {
     }
 
-    public LogsOptions setPrintHeaders(boolean printHeaders) {
-        this.printHeaders = printHeaders;
+    public LogsOptions printHeaders() {
+        this.printHeaders = true;
         return this;
     }
 
-    public LogsOptions setPrintRequestParameters(boolean printRequestParameters) {
-        this.printRequestParameters = printRequestParameters;
+    public LogsOptions printRequestParameters() {
+        this.printRequestParameters = true;
         return this;
     }
 
@@ -116,6 +120,10 @@ public class LogsOptions {
         if (this.replacements == null) this.replacements = new Replacements();
         this.replacements.replace(text, alter);
         return this;
+    }
+
+    public LogsOptions coverText(String text) {
+        return coverText(text, null);
     }
 
     public LogsOptions coverText(String text, Replacements.CoverOptions coverOptions) {
@@ -131,11 +139,11 @@ public class LogsOptions {
 
     //--------------------------------------------------------------------
 
-    boolean printHeaders() {
+    boolean allowPrintHeaders() {
         return printHeaders;
     }
 
-    boolean printRequestParameters() {
+    boolean allowPrintRequestParameters() {
         return printRequestParameters;
     }
 
