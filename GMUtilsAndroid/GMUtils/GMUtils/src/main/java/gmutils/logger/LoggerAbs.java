@@ -35,6 +35,7 @@ import gmutils.app.BaseApplication;
 import gmutils.listeners.ResultCallback;
 
 import java.lang.Runnable;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import gmutils.security.Security;
@@ -267,6 +268,15 @@ public abstract class LoggerAbs {
             }
         }
 
+        public double fileSizeInMb() {
+            long bytes = file.length();
+            double mb = bytes / 1024f / 1024f; //12.34567  | 12.0
+            int mbi = (int) mb;                  //12        | 12
+            mb -= mbi;                           //0.34567   |  0.0
+            mb *= 100;                           //34.567    |  0.0
+            int mbfi = (int) mb;                 //34        |  0
+            return mbi + (mbfi / 100f);
+        }
     }
 
     public interface TitleGetter {
@@ -691,13 +701,13 @@ public abstract class LoggerAbs {
 
     private synchronized File createOrGetLogFile(Context context) {
         File logFilesDir = getLogDirector(context);
-        String fileName = "/LOG_FILE_" + sessionId();
+        int filesCount = 0;
+        try {
+            filesCount = Objects.requireNonNull(logFilesDir.list()).length;
+        } catch (Exception ignored) {}
+        String fileName = "/LOG_FILE_" + (filesCount + 1) + "_" + sessionId();
 
         try {
-            if (TextUtils.isEmpty(fileName)) {
-                fileName = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ENGLISH).format(new Date());
-            }
-
             String filePath = logFilesDir.getPath() + "/" + fileName + ".txt";
             File file = new File(filePath);
             if (!file.exists()) {
@@ -762,6 +772,11 @@ public abstract class LoggerAbs {
                     logConfigs.isFileContentEncryptEnabled(),
                     logConfigs.fileContentEncryptionKey
             );
+        }
+
+        if (logFileWriter.fileSizeInMb() > 2) {
+            logFileWriter = null;
+            logFileWriter = getLogFileWriter(context);
         }
 
         return logFileWriter;
