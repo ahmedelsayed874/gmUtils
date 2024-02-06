@@ -693,7 +693,7 @@ public abstract class LoggerAbs {
 
     private String sessionId() {
         if (_sessionId == null) {
-            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ENGLISH).format(new Date());
+            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmmssSSS", Locale.ENGLISH).format(new Date());
             if (!logId().isEmpty()) _sessionId = logId() + "_" + _sessionId;
         }
         return _sessionId;
@@ -705,7 +705,7 @@ public abstract class LoggerAbs {
         try {
             filesCount = Objects.requireNonNull(logFilesDir.list()).length;
         } catch (Exception ignored) {}
-        String fileName = "/LOG_FILE_" + (filesCount + 1) + "_" + sessionId();
+        String fileName = "/LOG_FILE_" + sessionId() + "_" + (filesCount + 1);
 
         try {
             String filePath = logFilesDir.getPath() + "/" + fileName + ".txt";
@@ -775,6 +775,7 @@ public abstract class LoggerAbs {
         }
 
         if (logFileWriter.fileSizeInMb() > 2) {
+            _sessionId = null;
             logFileWriter = null;
             logFileWriter = getLogFileWriter(context);
         }
