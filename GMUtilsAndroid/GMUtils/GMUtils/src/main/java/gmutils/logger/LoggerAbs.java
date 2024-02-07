@@ -60,6 +60,8 @@ public abstract class LoggerAbs {
         private DateOp fileContentEncryptionDeadline;
 
         private Integer fileContentEncryptionKey;
+        private int maxFileSizeInKiloBytes = 5 /*MB*/ * 1024 /*KB*/;
+        public int maxLogsFilesCount = 20;
 
         //region set printing logs deadline
         public LogConfigs setLogDeadline(int d, int M, int y) {
@@ -108,7 +110,25 @@ public abstract class LoggerAbs {
         }
         //endregion set encrypting file content deadline
 
-        //region check enable status
+        //region set maxFileSizeInKiloBytes
+        public LogConfigs setMaxFileSizeInKiloBytes(int maxFileSizeInKiloBytes) {
+            this.maxFileSizeInKiloBytes = maxFileSizeInKiloBytes;
+            return this;
+        }
+
+        //endregion
+
+        //region set maxLogsFilesCount
+        public LogConfigs setMaxLogsFilesCount(int maxLogsFilesCount) {
+            this.maxLogsFilesCount = maxLogsFilesCount;
+            return this;
+        }
+
+        //endregion
+
+        //--------------------------------------------------------
+
+        //region getters: check enable status, fileContentEncryptionKey, maxFileSizeInKiloBytes,maxLogsFilesCount
         public boolean isLogEnabled() {
             return logDeadline != null && logDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
@@ -120,12 +140,19 @@ public abstract class LoggerAbs {
         public boolean isFileContentEncryptEnabled() {
             return fileContentEncryptionDeadline != null && fileContentEncryptionDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
-        //endregion check enable status
-
 
         public Integer getFileContentEncryptionKey() {
             return fileContentEncryptionKey;
         }
+
+        public int getMaxFileSizeInKiloBytes() {
+            return maxFileSizeInKiloBytes;
+        }
+
+        public int getMaxLogsFilesCount() {
+            return maxLogsFilesCount;
+        }
+        //endregion
 
         @Override
         public String toString() {
@@ -268,14 +295,16 @@ public abstract class LoggerAbs {
             }
         }
 
-        public double fileSizeInMb() {
-            long bytes = file.length();
-            double mb = bytes / 1024f / 1024f; //12.34567  | 12.0
-            int mbi = (int) mb;                  //12        | 12
-            mb -= mbi;                           //0.34567   |  0.0
-            mb *= 100;                           //34.567    |  0.0
-            int mbfi = (int) mb;                 //34        |  0
-            return mbi + (mbfi / 100f);
+        public int fileSizeInKb() {
+            long bytes = file.length();          //123456    | 12288
+            double kb = bytes / 1024f;           //120.5625  | 12.0
+            int kbi = (int) kb;                  //120       | 12
+            kb -= kbi;                           //0.5625    |  0.0
+            //kb *= 100;                           //34.56     |  0.0
+            //int kbfi = (int) kb;                 //34        |  0
+            //return mbi + (mbfi / 100f);
+
+            return kbi + (kb >= 0.5 ? 1 : 0);
         }
     }
 
@@ -290,7 +319,6 @@ public abstract class LoggerAbs {
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     private final static int DEF_ENC_KEY = 112439;
-    public int MAX_LOG_FILES_COUNT = 50;
 
     //----------------------------------------------------------------------------------------------
 
@@ -742,7 +770,7 @@ public abstract class LoggerAbs {
             }
 
             String[] list = logFiles.list();
-            final int max_file_count = MAX_LOG_FILES_COUNT;
+            final int max_file_count = logConfigs.maxLogsFilesCount;
 
             if (list != null && list.length > max_file_count) {
                 int fc = list.length - max_file_count;
@@ -774,7 +802,7 @@ public abstract class LoggerAbs {
             );
         }
 
-        if (logFileWriter.fileSizeInMb() > 2) {
+        if (logFileWriter.fileSizeInKb() >= logConfigs.maxFileSizeInKiloBytes) {
             _sessionId = null;
             logFileWriter = null;
             logFileWriter = getLogFileWriter(context);
