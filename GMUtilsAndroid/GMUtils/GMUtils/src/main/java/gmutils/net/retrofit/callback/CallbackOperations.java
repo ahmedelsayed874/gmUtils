@@ -35,7 +35,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     private Listener<R> listener;
     private Map<String, Object> extras;
     private CallbackErrorHandler errorListener;
-    private LoggerAbs logger;
+    private final LoggerAbs logger;
 
     private final long requestTime;
 
@@ -49,8 +49,9 @@ public final class CallbackOperations<R extends BaseResponse> {
     ) {
         this.responseClass = responseClass;
         this.requestTime = System.currentTimeMillis();
+        this.logger = logger;// != null ? log ger : Log ger.d();
 
-        if (logsOptions == null) {
+        if (logger != null && logsOptions == null) {
             logsOptions = new LogsOptions();
             if (!request.method().equalsIgnoreCase("get")) {
                 logsOptions.printRequestParameters();
@@ -61,11 +62,13 @@ public final class CallbackOperations<R extends BaseResponse> {
         init(
                 responseClass,
                 listener,
-                () -> {
-                    StringBuilder sb = new StringBuilder();
+                logsOptions == null ?
+                        null :
+                        () -> {
+                            StringBuilder sb = new StringBuilder();
 
-                    if (finalLogsOptions.allowPrintRequestParameters()) {
-                        sb.append(request.toString());
+                            if (finalLogsOptions.allowPrintRequestParameters()) {
+                                sb.append(request.toString());
                 /*String requestInfo = request.toString();
                 int headerIdx = requestInfo.indexOf(", headers=[");
                 int paramsIdx = requestInfo.indexOf(", tags=", Math.max(headerIdx, 0));
@@ -92,41 +95,42 @@ public final class CallbackOperations<R extends BaseResponse> {
                             .append(header)
                             .append(params);
                 }*/
-                    }
-                    //
-                    else {
-                        sb.append("Request{method=");
-                        sb.append(request.method());
-                        sb.append(", url=");
-                        sb.append(request.url());
-
-                        if (finalLogsOptions.allowPrintHeaders()) {
-                            if (request.headers().size() != 0) {
-                                sb.append(", headers=[");
-                                int i = 0;
-                                for (String name : request.headers().names()) {
-                                    i++;
-                                    if (i > 1) sb.append(", ");
-                                    sb.append(name);
-                                    sb.append(':');
-                                    sb.append(request.headers().values(name));
-                                }
-                                sb.append(']');
                             }
-                        }
+                            //
+                            else {
+                                sb.append("Request{method=");
+                                sb.append(request.method());
+                                sb.append(", url=");
+                                sb.append(request.url());
 
-                        sb.append('}');
-                    }
+                                if (finalLogsOptions.allowPrintHeaders()) {
+                                    if (request.headers().size() != 0) {
+                                        sb.append(", headers=[");
+                                        int i = 0;
+                                        for (String name : request.headers().names()) {
+                                            i++;
+                                            if (i > 1) sb.append(", ");
+                                            sb.append(name);
+                                            sb.append(':');
+                                            sb.append(request.headers().values(name));
+                                        }
+                                        sb.append(']');
+                                    }
+                                }
 
-                    if (finalLogsOptions.getExtraInfo() != null) {
-                        sb.append("\nExtraInfo:");
-                        sb.append(finalLogsOptions.getExtraInfo().invoke());
-                    }
+                                sb.append('}');
+                            }
 
-                    return sb;
-                },
-                logsOptions.getReplacements(),
-                logger
+                            if (finalLogsOptions.getExtraInfo() != null) {
+                                sb.append("\nExtraInfo:");
+                                sb.append(finalLogsOptions.getExtraInfo().invoke());
+                            }
+
+                            return sb;
+                        },
+                logsOptions == null ?
+                        null :
+                        logsOptions.getReplacements()
         );
     }
 
@@ -139,21 +143,20 @@ public final class CallbackOperations<R extends BaseResponse> {
     ) {
         this.responseClass = responseClass;
         this.requestTime = System.currentTimeMillis();
+        this.logger = logger; //!= null ? log ger : Log ger.d();
 
-        init(responseClass, listener, requestInfo, replacedTextsInLog, logger);
+        init(responseClass, listener, requestInfo, replacedTextsInLog);
     }
 
     private void init(
             Class<R> responseClass,
             Listener<R> listener,
             LoggerAbs.ContentGetter requestInfo,
-            LogsOptions.Replacements replacedTextsInLog,
-            LoggerAbs logger
+            LogsOptions.Replacements replacedTextsInLog
     ) {
         this.listener = listener;
-        this.logger = logger != null ? logger : Logger.d();
 
-        if (requestInfo != null)
+        if (requestInfo != null && this.logger != null) {
             this.logger.print(() -> "API:Request:", () -> {
                 try {
                     String txt = requestInfo.getContent().toString();
@@ -167,6 +170,8 @@ public final class CallbackOperations<R extends BaseResponse> {
                     return " <[EXCEPTION:: " + e.getMessage() + "]>";
                 }
             });
+        }
+
         try {
             responseClass.newInstance();
         } catch (Exception e) {
@@ -287,7 +292,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     }
 
     private void setResult(R result, Map<String, List<String>> headers) {
-        if (this.logger.getLogConfigs().isLogEnabled()) {
+        if (this.logger != null && this.logger.getLogConfigs().isLogEnabled()) {
             this.logger.print(
                     () -> "EXTRA_INFO:",
                     () -> "[callbackStatus=" + result.getCallbackStatus() +
@@ -312,7 +317,7 @@ public final class CallbackOperations<R extends BaseResponse> {
     //----------------------------------------------------------------------------------------------
 
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response, String errorBody) {
-        if (!this.logger.getLogConfigs().isLogEnabled()) return;
+        if (this.logger == null || !this.logger.getLogConfigs().isLogEnabled()) return;
 
         String url = "";
 

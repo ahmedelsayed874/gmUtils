@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.listeners.OnResponseReady2;
@@ -33,22 +34,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             Class<R> responseClass,
             OnResponseReady<R> onResponseReady
     ) {
-        this(request, responseClass, onResponseReady, null, null);
-    }
-
-    public Callback(
-            Request request,
-            Class<R> responseClass,
-            OnResponseReady<R> onResponseReady,
-            LoggerAbs logger
-    ) {
-        this(
-                request,
-                responseClass,
-                onResponseReady,
-                null,
-                logger
-        );
+        this(request, responseClass, onResponseReady, null, Logger.d());
     }
 
     public Callback(
@@ -62,7 +48,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
                 responseClass,
                 onResponseReady,
                 logsOptions,
-                null
+                Logger.d()
         );
     }
 
@@ -82,22 +68,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
             OnResponseReady<R> onResponseReady,
             LoggerAbs.ContentGetter requestInfo
     ) {
-        this(responseClass, onResponseReady, requestInfo, null, null);
-    }
-
-    public Callback(
-            Class<R> responseClass,
-            OnResponseReady<R> onResponseReady,
-            LoggerAbs.ContentGetter requestInfo,
-            LoggerAbs logger
-    ) {
-        this(
-                responseClass,
-                onResponseReady,
-                requestInfo,
-                null,
-                logger
-        );
+        this(responseClass, onResponseReady, requestInfo, null, Logger.d());
     }
 
     public Callback(
@@ -111,7 +82,7 @@ public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
                 onResponseReady,
                 requestInfo,
                 replacedTextsInLog,
-                null
+                Logger.d()
         );
     }
 

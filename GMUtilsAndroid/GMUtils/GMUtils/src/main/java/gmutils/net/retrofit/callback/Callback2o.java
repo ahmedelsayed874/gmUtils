@@ -1,9 +1,12 @@
 package gmutils.net.retrofit.callback;
 
+import android.util.Log;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.listeners.OnResponseReady2o;
@@ -35,22 +38,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             Class<R> responseClass,
             OnResponseReady2o<DT, R> onResponseReady
     ) {
-        this(request, responseClass, onResponseReady, null, null);
-    }
-
-    public Callback2o(
-            Request request,
-            Class<R> responseClass,
-            OnResponseReady2o<DT, R> onResponseReady,
-            LoggerAbs logger
-    ) {
-        this(
-                request,
-                responseClass,
-                onResponseReady,
-                null,
-                logger
-        );
+        this(request, responseClass, onResponseReady, null, Logger.d());
     }
 
     public Callback2o(
@@ -75,7 +63,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
                 responseClass,
                 onResponseReady,
                 logsOptions,
-                null
+                Logger.d()
         );
     }
 
@@ -84,22 +72,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
             OnResponseReady2o<DT, R> onResponseReady,
             LoggerAbs.ContentGetter requestInfo
     ) {
-        this(responseClass, onResponseReady, requestInfo, null, null);
-    }
-
-    public Callback2o(
-            Class<R> responseClass,
-            OnResponseReady2o<DT, R> onResponseReady,
-            LoggerAbs.ContentGetter requestInfo,
-            LoggerAbs logger
-    ) {
-        this(
-                responseClass,
-                onResponseReady,
-                requestInfo,
-                null,
-                logger
-        );
+        this(responseClass, onResponseReady, requestInfo, null, Logger.d());
     }
 
     public Callback2o(
@@ -113,7 +86,7 @@ public class Callback2o<DT, R extends BaseObjectResponse<DT>> implements retrofi
                 onResponseReady,
                 requestInfo,
                 replacedTextsInLog,
-                null
+                Logger.d()
         );
     }
 

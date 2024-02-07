@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.listeners.OnResponseReady2;
@@ -37,22 +38,7 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
             Class<R> responseClass,
             OnResponseReady2<DT> onResponseReady
     ) {
-        this(request, responseClass, onResponseReady, null, null);
-    }
-
-    public Callback2(
-            Request request,
-            Class<R> responseClass,
-            OnResponseReady2<DT> onResponseReady,
-            LoggerAbs logger
-    ) {
-        this(
-                request,
-                responseClass,
-                onResponseReady,
-                null,
-                logger
-        );
+        this(request, responseClass, onResponseReady, null, Logger.d());
     }
 
     public Callback2(
@@ -66,7 +52,7 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
                 responseClass,
                 onResponseReady,
                 logsOptions,
-                null
+                Logger.d()
         );
     }
 
@@ -86,22 +72,7 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
             OnResponseReady2<DT> onResponseReady,
             LoggerAbs.ContentGetter requestInfo
     ) {
-        this(responseClass, onResponseReady, requestInfo, null, null);
-    }
-
-    public Callback2(
-            Class<R> responseClass,
-            OnResponseReady2<DT> onResponseReady,
-            LoggerAbs.ContentGetter requestInfo,
-            LoggerAbs logger
-    ) {
-        this(
-                responseClass,
-                onResponseReady,
-                requestInfo,
-                null,
-                logger
-        );
+        this(responseClass, onResponseReady, requestInfo, null, Logger.d());
     }
 
     public Callback2(
@@ -115,7 +86,7 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
                 onResponseReady,
                 requestInfo,
                 replacedTextsInLog,
-                null
+                Logger.d()
         );
     }
 
