@@ -103,9 +103,9 @@ public class FileUtils {
                 //root = context.getExternalFilesDir(null);
                 //dir = new File(root, dirName);
                 //if (!dir.exists()) {
-                    //if (!dir.mkdirs()) {
-                        return null;
-                    //}
+                //if (!dir.mkdirs()) {
+                return null;
+                //}
                 //}
             }
         }
@@ -291,8 +291,31 @@ public class FileUtils {
         sb.append("\n");
         sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
         sb.append("<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">");
-        sb.append("\n\t<files-path name=\"files\" path=\"Files/\" />");
-        sb.append("\n\t<external-files-path name=\"files\" path=\"Files/\" />");
+
+        sb.append("\n\n\t<!-- ============== INTERNAL-FILES ============== -->");
+
+        sb.append("\n\t<!-- Context.getFilesDir() -->");
+        sb.append("\n\t<files-path name=\"files\" path=\"_Files/\" />");
+
+        sb.append("\n\n\t<!-- getCacheDir() -->");
+        sb.append("\n\t<cache-path name=\"files\" path=\"_Files/\" />");
+
+        sb.append("\n\n\t<!-- ============== EXTERNAL-FILES ============== -->");
+
+        sb.append("\n\t<!-- Environment.getExternalStorageDirectory() -->");
+        sb.append("\n\t<external-path name=\"files\" path=\"_Files/\" />");
+
+        sb.append("\n\t<!-- Context#getExternalFilesDir(String) || Context.getExternalFilesDir(null) -->");
+        sb.append("\n\t<external-files-path name=\"pics\" path=\"Pictures/\" />");
+
+        sb.append("\n\t<external-files-path name=\"files\" path=\"_Files/\" />");
+
+        sb.append("\n\t<!-- Context.getExternalCacheDir() -->");
+        sb.append("\n\t<external-cache-path name=\"files\" path=\"_Files/\" />");
+
+        sb.append("\n\t<!-- Context.getExternalMediaDirs() -->");
+        sb.append("\n\t<external-media-path name=\"files\" path=\"_Files/\" />");
+
         sb.append("\n");
         sb.append("</paths>\n");
         sb.append("-----------------------------------------------------");
@@ -395,6 +418,7 @@ public class FileUtils {
     public void showFolderExplorer(Activity activity, int requestCode) {
         showFolderExplorer(activity, null, null, null, requestCode);
     }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void showFolderExplorer(Activity activity, Uri uriToLoad, int requestCode) {
         showFolderExplorer(activity, null, null, uriToLoad, requestCode);
@@ -404,6 +428,7 @@ public class FileUtils {
     public void showFolderExplorer(Fragment fragment, int requestCode) {
         showFolderExplorer(null, fragment, null, null, requestCode);
     }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void showFolderExplorer(Fragment fragment, Uri uriToLoad, int requestCode) {
         showFolderExplorer(null, fragment, null, uriToLoad, requestCode);
@@ -413,6 +438,7 @@ public class FileUtils {
     public void showFolderExplorer(android.app.Fragment fragment, int requestCode) {
         showFolderExplorer(null, null, fragment, null, requestCode);
     }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void showFolderExplorer(android.app.Fragment fragment, Uri uriToLoad, int requestCode) {
         showFolderExplorer(null, null, fragment, uriToLoad, requestCode);
