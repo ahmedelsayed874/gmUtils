@@ -30,6 +30,7 @@ import java.util.List;
 
 import gmutils.images.ImageUtils;
 import gmutils.storage.SettingsStorage;
+import gmutils.utils.FileUtils;
 import gmutils.utils.Utils;
 
 /**
@@ -129,6 +130,21 @@ public class Intents {
 
     public ImageIntents getImageIntents() {
         return mImageIntents;
+    }
+
+    public boolean showDir(Context context, String dirPath) {
+        try {
+            Uri uri = FileUtils.createInstance().createUriForFileUsingFileProvider(context, new File(dirPath));
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     public static class ImageIntents {

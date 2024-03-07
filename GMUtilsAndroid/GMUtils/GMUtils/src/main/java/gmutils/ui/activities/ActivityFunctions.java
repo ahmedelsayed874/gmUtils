@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+import gmutils.Intents;
 import gmutils.KeypadOp;
 import gmutils.logger.Logger;
 import gmutils.R;
@@ -188,27 +189,13 @@ public class ActivityFunctions implements BaseFragmentListener {
                 MessageDialog.create(activity)
                         .setMessage("Go to this path to find logs:\n" + Logger.d().getLogDirector(activity).getAbsolutePath())
                         .setMessageGravity(Gravity.START)
-                        .setButton1(R.string.ok, null)
+                        .setButton1(R.string.ok, () -> {
+                            Intents.getInstance().showDir(
+                                    activity,
+                                    Logger.d().getLogDirector(activity).getAbsolutePath()
+                            );
+                        })
                         .show();
-                /*Logger.d().readAllFilesContents(activity, (txt) -> {
-                    if (activity instanceof BaseActivity) {
-                        ((BaseActivity) activity).hideWaitView();
-                    }
-                    MessageDialog.create(activity)
-                            .setMessage(txt)
-                            .setMessageGravity(Gravity.START)
-                            .setButton1(R.string.copy, (d) -> {
-                                if (Utils.createInstance().copyText(activity, txt)) {
-                                    MyToast.showError(activity, "copied");
-                                } else {
-                                    MyToast.showError(activity, "failed");
-                                }
-                            })
-                            .setButton2(R.string.delete, (d) -> {
-                                Logger.d().deleteSavedFiles(activity, null);
-                            })
-                            .show();
-                });*/
 
                 return true;
             }
