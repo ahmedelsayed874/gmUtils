@@ -23,7 +23,7 @@ public interface BaseFragmentListener {
 
     boolean updateWaitViewMsg(CharSequence msg);
 
-    MessageDialog showMessageDialog(Context context, CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options);
+    MessageDialog showMessageDialog(Context context, CharSequence msg);
 
     RetryPromptDialog showRetryPromptDialog(
             Context context,

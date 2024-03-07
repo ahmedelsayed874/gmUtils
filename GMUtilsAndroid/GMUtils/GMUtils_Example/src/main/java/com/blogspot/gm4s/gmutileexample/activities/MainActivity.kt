@@ -3,7 +3,6 @@ package com.blogspot.gm4s.gmutileexample.activities
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Environment
 import android.os.Message
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,7 +16,7 @@ import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
 import gmutils.Activities
 import gmutils.DateOp
 import gmutils.Intents
-import gmutils.LooperThread
+import gmutils.backgroundWorkers.LooperThread
 import gmutils.app.BaseApplication
 import gmutils.logger.Logger
 import gmutils.logger.LoggerAbs
@@ -26,19 +25,14 @@ import gmutils.net.retrofit.RetrofitService
 import gmutils.net.retrofit.example.data.TimeOfArea
 import gmutils.net.volley.example.URLs.TimeURLs
 import gmutils.ui.activities.BaseActivity
+import gmutils.ui.dialogs.InputDialog
+import gmutils.ui.dialogs.ListDialog
 import gmutils.ui.toast.MyToast
 import gmutils.ui.utils.ViewSource
 import gmutils.utils.FileUtils
 import gmutils.utils.Utils
 import okhttp3.OkHttpClient
-import java.io.File
 import java.io.InputStream
-import java.math.BigInteger
-import java.security.Principal
-import java.security.PublicKey
-import java.security.cert.X509Certificate
-import java.security.interfaces.RSAPublicKey
-import java.util.*
 import javax.net.ssl.X509TrustManager
 import kotlin.concurrent.thread
 
@@ -211,6 +205,7 @@ class MainActivity : BaseActivity() {
         this.view.btn11.text = "ColorPickerActivity"
         this.view.btn11.setOnClickListener {
             Activities.start(ColorPickerActivity::class.java, thisActivity())
+            Activities.start(ColorPicker2Activity::class.java, thisActivity())
         }
 
         this.view.btn12.text = "take photo"
@@ -239,7 +234,7 @@ class MainActivity : BaseActivity() {
 
             log("get-app-backup", "getting app backup started")
             Logger.d().exportAppBackup(thisActivity(), true) {
-                log("get-app-backup", "getting app backup finished: $it")
+                log("get-app-backup", "getting app backup finished: ${it.message}")
             }
         }
 
@@ -260,8 +255,40 @@ class MainActivity : BaseActivity() {
             testUntrustedConnection()
         }
 
-        //Activities.start(ColorPickerActivity::class.java, thisActivity())
-        //Activities.start(ColorPicker2Activity::class.java, thisActivity())
+        this.view.btn18.text = "Input Dialog with 3 inputs"
+        this.view.btn18.setOnClickListener {
+            InputDialog.create(this)
+                .setTitle("title")
+                .setMessage("message")
+                .addInputField {
+                    it.setTitle("Title 1")
+                    it.setHint("input 1")
+                }
+                .addInputField {
+                    it.setHint("input 2")
+                }
+                .addInputField {
+                    it.setHint("input 3")
+                }
+                .setPositiveButtonCallback {INP ->
+                    INP.forEach {
+                        log("input dialog", it)
+                    }
+                    Array<String>(INP.size) { INP[it] }
+                }
+                .show()
+        }
+
+        this.view.btn19.text = "List Dialog"
+        this.view.btn19.setOnClickListener {
+            ListDialog<String>(this) { inp, idx ->
+                log("List Dialog", inp)
+            }.setTitle("Title")
+                .setHint("Hint")
+                .setList(listOf("Item 1", "Item 2", "Item 3"))
+                .show()
+        }
+
 
         //------------------------------------------------------------------------------------------
 
@@ -308,7 +335,7 @@ class MainActivity : BaseActivity() {
         }
         //
         else if (requestCode == 12321) {
-            Logger.d().importAppBackup(thisActivity(), data!!.data) {
+            Logger.d().importAppBackup(thisActivity(), data!!.data) {b, it ->
                 log("restore-app-backup", "restoring app backup finished: $it")
             }
         }
@@ -373,6 +400,7 @@ class MainActivity : BaseActivity() {
 
 
     }
+
     private fun testUntrustedConnection_openCertificate(inputStream: InputStream) {
         val s = RetrofitService.create(
             "https://192.168.100.1",
@@ -404,6 +432,7 @@ class MainActivity : BaseActivity() {
                     //it blocks not trusted connection by https
                     //return null
                 }
+
                 override fun config(httpClient: OkHttpClient.Builder, error: String?) {
                     log("Test Untrusted Connection", "ClientBuildCallback.config >> Error: $error")
                 }

@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 
 import org.json.JSONArray;
 
@@ -90,6 +91,31 @@ public class MessageDialogFunctions {
 
     }
 
+    public MessageDialogFunctions setTitleColorRes(int resid) {
+        tvTitle.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions setTextColorRes(int resid) {
+        tvMsg.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions setButton1ColorRes(int resid) {
+        tvButton1.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions setButton2ColorRes(int resid) {
+        tvButton2.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions setButton3ColorRes(int resid) {
+        tvButton3.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
     public MessageDialogFunctions setBackground(int resId) {
         lyContainer.setBackgroundResource(resId);
         return this;
@@ -129,14 +155,14 @@ public class MessageDialogFunctions {
     }
 
 
-    public MessageDialogFunctions setTitle(int msg) {
-        tvTitle.setText(msg);
+    public MessageDialogFunctions setTitle(int txt) {
+        tvTitle.setText(txt);
         tvTitle.setVisibility(View.VISIBLE);
         return this;
     }
 
-    public MessageDialogFunctions setTitle(CharSequence msg) {
-        tvTitle.setText(msg);
+    public MessageDialogFunctions setTitle(CharSequence txt) {
+        tvTitle.setText(txt);
         tvTitle.setVisibility(View.VISIBLE);
         return this;
     }

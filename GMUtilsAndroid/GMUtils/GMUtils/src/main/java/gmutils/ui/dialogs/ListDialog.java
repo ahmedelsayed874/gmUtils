@@ -1,7 +1,6 @@
 package gmutils.ui.dialogs;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,7 @@ import gmutils.Animations;
 import gmutils.KeypadOp;
 import gmutils.R;
 import gmutils.listeners.SearchTextChangeListener;
+import gmutils.ui.adapters.BaseListAdapter;
 
 
 /**
@@ -36,7 +37,7 @@ import gmutils.listeners.SearchTextChangeListener;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class ListDialog extends BaseDialog {
+public class ListDialog<T> extends BaseDialog {
 
     private TextView tvTitle;
     private TextView tvHint;
@@ -45,11 +46,11 @@ public class ListDialog extends BaseDialog {
     private TextView tvNoResult;
     private TextView tvAddValue;
 
-    private List mList;
-    private CustomListAdapter mCustomAdapter;
-    private Listener mListener;
+    private List<T> mList;
+    private BaseListAdapter<T> mCustomAdapter;
+    private Listener<T> mListener;
     private Listener2 mListener2;
-    private SearchDelegate mSearchDelegate;
+    private SearchDelegate<T> mSearchDelegate;
 
     @NonNull
     @Override
@@ -57,7 +58,7 @@ public class ListDialog extends BaseDialog {
         return layoutInflater.inflate(R.layout.dialog_list_gm4s, null);
     }
 
-    public ListDialog(Context context, Listener listener) {
+    public ListDialog(Context context, Listener<T> listener) {
         super(context);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -69,8 +70,9 @@ public class ListDialog extends BaseDialog {
         View view = getView();
         tvTitle = view.findViewById(R.id.text_title);
         tvHint = view.findViewById(R.id.text_hint);
-        View ivClose = view.findViewById(R.id.image_close);
         etSearchToken = view.findViewById(R.id.text_search_token);
+        View ivClose = view.findViewById(R.id.image_close);
+        final EditText etSearchToken = view.findViewById(R.id.text_search_token);
         lvList = view.findViewById(R.id.list);
         tvNoResult = view.findViewById(R.id.text_no_result);
         tvAddValue = view.findViewById(R.id.text_add_value);
@@ -83,11 +85,10 @@ public class ListDialog extends BaseDialog {
         });
 
         etSearchToken.addTextChangedListener(getTextChangeListener());
-        lvList.setOnItemClickListener(getOnListItemClickListener());
 
         tvAddValue.setOnClickListener(v -> {
             if (mListener2 != null) {
-                mListener2.onNewValueInserted(ListDialog.this, etSearchToken.getText().toString());
+                mListener2.onNewValueInserted(etSearchToken.getText().toString());
             }
 
             dismiss();
@@ -98,15 +99,15 @@ public class ListDialog extends BaseDialog {
         return SearchTextChangeListener.create(500, text -> {
             text = text.toLowerCase();
 
-            final List newList = new ArrayList();
-            for (Object o : ListDialog.this.mList) {
+            final List<T> newList = new ArrayList<>();
+            for (T o : ListDialog.this.mList) {
                 if (o != null) {
                     if (mSearchDelegate == null) {
                         if (o.toString().toLowerCase().contains(text)) {
                             newList.add(o);
                         }
                     } else {
-                        if (mSearchDelegate.onSearchingTextChanged(ListDialog.this, text, o)) {
+                        if (mSearchDelegate.onSearchingTextChanged(text, o)) {
                             newList.add(o);
                         }
                     }
@@ -130,26 +131,34 @@ public class ListDialog extends BaseDialog {
     private AdapterView.OnItemClickListener getOnListItemClickListener() {
         return (adapterView, view, i, l) -> {
             if (mListener != null)
-                mListener.onItemSelected(ListDialog.this, adapterView.getItemAtPosition(i));
+                mListener.onItemSelected((T) adapterView.getItemAtPosition(i), i);
             dismiss();
         };
     }
 
 
-    private void setListAdapter(@NonNull List list, boolean isNewList) {
+    private void setListAdapter(@NonNull List<T> list, boolean isNewList) {
         if (mCustomAdapter == null) {
-            ArrayAdapter adapter = new ArrayAdapter<String>(
+
+            ArrayAdapter<T> adapter = new ArrayAdapter<T>(
                     lvList.getContext(),
-                    android.R.layout.simple_list_item_1,
-                    list);
+                    R.layout.list_dialog_adapter_simple_text,
+                    list
+            );
             lvList.setAdapter(adapter);
+            lvList.setOnItemClickListener(getOnListItemClickListener());
 
         } else {
-            if (!isNewList) {
-                lvList.setAdapter(mCustomAdapter.createAdapter());
-            } else {
-                mCustomAdapter.updateAdapter((BaseAdapter) lvList.getAdapter(), list);
+            if (isNewList) {
+                mCustomAdapter.replaceList(list);
             }
+
+            lvList.setAdapter(mCustomAdapter);
+            mCustomAdapter.setOnItemClickListener((adapter, item, position) -> {
+                if (mListener != null)
+                    mListener.onItemSelected(item, position);
+                dismiss();
+            });
         }
 
         lvList.setVisibility(View.VISIBLE);
@@ -158,59 +167,86 @@ public class ListDialog extends BaseDialog {
     }
 
 
-    public ListDialog setTitle(@StringRes int title) {
+    public ListDialog<T> setTitle(@StringRes int title) {
         tvTitle.setText(title);
         return this;
     }
 
-    public ListDialog setTitle(CharSequence title) {
+    public ListDialog<T> setTitle(CharSequence title) {
         tvTitle.setText(title);
         return this;
     }
 
-    public ListDialog setHint(@StringRes int hint) {
+    @Override
+    public ListDialog<T> setTitleColorRes(int resid) {
+        tvTitle.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public ListDialog<T> setHint(@StringRes int hint) {
         tvHint.setText(hint);
         tvHint.setVisibility(View.VISIBLE);
         return this;
     }
 
-    public ListDialog setHint(CharSequence hint) {
+    public ListDialog<T> setHint(CharSequence hint) {
         tvHint.setText(hint);
         tvHint.setVisibility(View.VISIBLE);
         return this;
     }
 
-    public ListDialog hideSearchBox() {
+    @Override
+    public BaseDialog setTextColorRes(int resid) {
+        throw new IllegalStateException();
+    }
+
+    public ListDialog<T> setAddButtonText(CharSequence text) {
+        tvAddValue.setText(text);
+        return this;
+    }
+
+    public ListDialog<T> setAddButtonTextColor(int resid) {
+        tvAddValue.setTextColor(ContextCompat.getColor(tvAddValue.getContext(), resid));
+        return this;
+    }
+
+    public ListDialog<T> hideSearchBox() {
         etSearchToken.setVisibility(View.GONE);
         return this;
     }
 
-    public ListDialog setList(List<?> list) {
+    public ListDialog<T> setList(List<T> list) {
         mList = list;
         return this;
     }
 
-    public ListDialog setAdapter(CustomListAdapter adapterListener) {
+    public ListDialog<T> setAdapter(BaseListAdapter<T> adapterListener) {
         this.mCustomAdapter = adapterListener;
         if (adapterListener != null) setList(adapterListener.getList());
         else setList(null);
         return this;
     }
 
-    public ListDialog setOnNewValueInsertedListener(Listener2 listener2) {
+    public ListDialog<T> setOnNewValueInsertedListener(Listener2<T> listener2) {
         mListener2 = listener2;
         return this;
     }
 
-    public ListDialog setSearchDelegate(SearchDelegate searchDelegate) {
+    public ListDialog<T> setSearchDelegate(SearchDelegate<T> searchDelegate) {
         this.mSearchDelegate = searchDelegate;
         return this;
     }
 
-    public ListDialog show() {
+    public ListDialog<T> show() {
         setListAdapter(mList, false);
         super.show();
         return this;
+    }
+
+    @Override
+    public void dismiss() {
+        KeypadOp.hide(etSearchToken);
+        super.dismiss();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -224,6 +260,13 @@ public class ListDialog extends BaseDialog {
         dialog.mListener = this.mListener;
         dialog.setOnNewValueInsertedListener(this.mListener2);
         return dialog;
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+
+    public TextView getAddValueButton() {
+        return tvAddValue;
     }
 
 
@@ -246,23 +289,16 @@ public class ListDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
-    public interface Listener {
-        void onItemSelected(ListDialog dialog, Object item);
+    public interface Listener<T> {
+        void onItemSelected(T item, int position);
     }
 
-    public interface Listener2 {
-        void onNewValueInserted(ListDialog dialog, String text);
+    public interface Listener2<T> {
+        void onNewValueInserted(String text);
     }
 
-    public interface SearchDelegate {
-        boolean onSearchingTextChanged(ListDialog dialog, String text, Object item);
+    public interface SearchDelegate<T> {
+        boolean onSearchingTextChanged(String text, T item);
     }
 
-    public interface CustomListAdapter {
-        List getList();
-
-        BaseAdapter createAdapter();
-
-        void updateAdapter(BaseAdapter adapter, List newList);
-    }
 }

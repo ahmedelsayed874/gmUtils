@@ -8,6 +8,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,11 +17,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-import gmutils.CountryPhoneCodes;
+import gmutils.geography.CountryPhoneCodes;
 import gmutils.R;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.SearchTextChangeListener;
 import gmutils.ui.adapters.BaseRecyclerAdapter;
+import gmutils.ui.adapters.BaseRecyclerAdapterViewHolder;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -46,6 +49,7 @@ public class CountryCodeDialog extends BaseDialog {
     private Listener mListener;
 
     public final CountryPhoneCodes countryPhoneCodes;
+    private final CountryCodesAdapter adapter;
 
     private CountryCodeDialog(Context context, boolean hideDialCode, Listener listener) {
         super(context);
@@ -58,9 +62,9 @@ public class CountryCodeDialog extends BaseDialog {
         RecyclerView recyclerCountryCodes = view.findViewById(R.id.recycler_country_code);
         recyclerCountryCodes.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
 
-        CountryCodesAdapter adapter = new CountryCodesAdapter(recyclerCountryCodes, hideDialCode);
+        adapter = new CountryCodesAdapter(recyclerCountryCodes, hideDialCode);
         adapter.add(countryPhoneCodes.sortByName().getCountryCodes(), true);
-        adapter.setOnItemClickListener((adapter1, itemView, item, position) -> {
+        adapter.setOnItemClickListener((itemView, item, position) -> {
             if (mListener != null) mListener.onCountryPhoneCodeSelected(item);
             dismiss();
         });
@@ -88,14 +92,28 @@ public class CountryCodeDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
-    public void setListBackground(int color) {
-        RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
-        recyclerCountryCodes.setBackgroundColor(color);
+    @Override
+    public CountryCodeDialog setTitleColorRes(int resid) {
+        return this;
     }
 
-    public void setListBackgroundRes(@DrawableRes int resid) {
+    @Override
+    public CountryCodeDialog setTextColorRes(int resid) {
+        adapter.setTextColor(resid);
+        adapter.notifyDataSetChanged();
+        return this;
+    }
+
+    public CountryCodeDialog setListBackground(int color) {
+        RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
+        recyclerCountryCodes.setBackgroundColor(color);
+        return this;
+    }
+
+    public CountryCodeDialog setListBackgroundRes(@DrawableRes int resid) {
         RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
         recyclerCountryCodes.setBackgroundResource(resid);
+        return this;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -121,9 +139,9 @@ public class CountryCodeDialog extends BaseDialog {
             mHideDialCode = hideDialCode;
         }
 
-        @NotNull
+        @NonNull
         @Override
-        protected ViewHolder getViewHolder(int viewType, @NotNull LayoutInflater inflater, ViewGroup container) {
+        protected BaseRecyclerAdapterViewHolder<CountryPhoneCodes.CountryCode> getViewHolder(int viewType, @NonNull LayoutInflater inflater, ViewGroup container) {
             return new CViewHolder(R.layout.adapter_country_codes, inflater, container);
         }
 
@@ -131,7 +149,12 @@ public class CountryCodeDialog extends BaseDialog {
         protected void onDispose() {
         }
 
-        private class CViewHolder extends BaseRecyclerAdapter<CountryPhoneCodes.CountryCode>.ViewHolder {
+        private int customTextColor = 0;
+        public void setTextColor(int resid) {
+            customTextColor = resid;
+        }
+
+        private class CViewHolder extends BaseRecyclerAdapterViewHolder<CountryPhoneCodes.CountryCode> {
             TextView txtCode, txtName;
 
             public CViewHolder(int resId, @NotNull LayoutInflater inflater, ViewGroup container) {
@@ -152,10 +175,15 @@ public class CountryCodeDialog extends BaseDialog {
 
                 txtCode.setText("+" + object.getDialCode());
                 txtName.setText(object.getName());
+
+                if (customTextColor != 0) {
+                    txtCode.setTextColor(ContextCompat.getColor(txtCode.getContext(), customTextColor));
+                    txtName.setTextColor(ContextCompat.getColor(txtCode.getContext(), customTextColor));
+                }
             }
 
             @Override
-            protected void dispose() {
+            protected void onDispose() {
                 txtCode = null;
                 txtName = null;
             }

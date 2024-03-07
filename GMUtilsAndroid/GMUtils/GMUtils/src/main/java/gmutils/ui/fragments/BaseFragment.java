@@ -1,6 +1,5 @@
 package gmutils.ui.fragments;
 
-
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -87,36 +86,6 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    @Nullable
-    @Override
-    public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ViewSource viewSource = getViewSource(inflater, container);
-        assert viewSource != null;
-        View view = null;
-
-        if (viewSource instanceof ViewSource.LayoutResource) {
-            int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
-            view = inflater.inflate(resId, container, false);
-
-        } else if (viewSource instanceof ViewSource.View) {
-            view = ((ViewSource.View) viewSource).getView();
-
-        } else if (viewSource instanceof ViewSource.ViewBinding) {
-            fragmentViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-            view = fragmentViewBinding.getRoot();
-        }
-
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        listenerX.onFragmentStarted(this);
-    }
-
-//----------------------------------------------------------------------------------------------
-
     protected HashMap<Integer, Class<? extends ViewModel>> onPreparingViewModels() {
         return null;
     }
@@ -143,9 +112,28 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
+    @Nullable
     @Override
-    public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ViewSource viewSource = getViewSource(inflater, container);
+        assert viewSource != null;
+        View view = null;
+
+        if (viewSource instanceof ViewSource.LayoutResource) {
+            int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
+            view = inflater.inflate(resId, container, false);
+
+        }
+        //
+        else if (viewSource instanceof ViewSource.View) {
+            view = ((ViewSource.View) viewSource).getView();
+
+        }
+        //
+        else if (viewSource instanceof ViewSource.ViewBinding) {
+            fragmentViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+            view = fragmentViewBinding.getRoot();
+        }
 
         //------------------------------------------------------------------------------------------
 
@@ -165,16 +153,30 @@ public abstract class BaseFragment extends Fragment {
                 viewModels.put(id, viewModel);
 
                 if (viewModel instanceof BaseViewModel) {
-                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(getViewLifecycleOwner(), getProgressStatusLiveData());
-                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(getViewLifecycleOwner(), getAlertMessageLiveData());
+                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(getViewLifecycleOwner(), getProgressStatusLiveDataObserver());
+                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(getViewLifecycleOwner(), getAlertMessageLiveDataObserver());
+                    ((BaseViewModel) viewModel).updateUiLiveData().observe(getViewLifecycleOwner(), getUpdateUiLiveDataObserver());
                 }
             }
         }
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        listenerX.onFragmentStarted(this);
     }
 
     //----------------------------------------------------------------------------------------------
 
-    private Observer<BaseViewModel.ProgressStatus> getProgressStatusLiveData() {
+    private Observer<BaseViewModel.ProgressStatus> getProgressStatusLiveDataObserver() {
         return progressStatus -> {
             if (progressStatus != null)
                 onProgressOfViewModelTaskChanged(progressStatus);
@@ -202,7 +204,7 @@ public abstract class BaseFragment extends Fragment {
         );
     }
 
-    private Observer<BaseViewModel.Message> getAlertMessageLiveData() {
+    private Observer<BaseViewModel.Message> getAlertMessageLiveDataObserver() {
         return message -> {
             if (message != null) {
                 onMessageReceivedFromViewModel(message);
@@ -216,7 +218,7 @@ public abstract class BaseFragment extends Fragment {
                 message,
 
                 //showMessageDialog,
-                m -> listener.showMessageDialog(getContext(), m, null),
+                m -> listener.showMessageDialog(getContext(), m),
 
                 //showToast
                 (m, normal) -> {
@@ -229,6 +231,12 @@ public abstract class BaseFragment extends Fragment {
         );
     }
 
+    private Observer<String> getUpdateUiLiveDataObserver() {
+        return this::onViewModelUpdatesUi;
+    }
+
+    protected void onViewModelUpdatesUi(String args) {
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -274,6 +282,16 @@ public abstract class BaseFragment extends Fragment {
 
     public void updateWaitViewMsg(CharSequence msg) {
         listener.updateWaitViewMsg(msg);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public MessageDialog showMessageDialog(int msg) {
+        return showMessageDialog(getString(msg));
+    }
+
+    public MessageDialog showMessageDialog(CharSequence msg) {
+        return listener.showMessageDialog(getContext(), msg);
     }
 
     //----------------------------------------------------------------------------------------------

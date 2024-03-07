@@ -1,6 +1,7 @@
 package gmutils.ui.utils;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.text.TextUtils;
 
 import org.jetbrains.annotations.Nullable;
@@ -61,6 +62,15 @@ public class BaseViewModelObserversHandlers {
         if (message.type instanceof BaseViewModel.MessageType.Dialog mt) {
                 MessageDialog dialog = showMessageDialog.invoke(msg);
                 dialog.setCancelable(message.isEnableOuterDismiss());
+                if (mt.getOnDismiss() != null) {
+                    Runnable onDismiss = mt.getOnDismiss();
+                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            onDismiss.run();
+                        }
+                    });
+                }
 
                 if (mt.getIconRes() > 0) {
                     dialog.setIcon(mt.getIconRes());
@@ -69,7 +79,7 @@ public class BaseViewModelObserversHandlers {
                 if (mt.hasSpecialButtons()) {
                     if (mt.button1() != null) {
                         Runnable runnable = mt.button1().value3;
-                        MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
+                        MessageDialog.Listener listener = runnable == null ? null : () -> runnable.run();
 
                         if (mt.button1().value1 == null) {
                             dialog.setButton1(getText(mt.button1().value2), listener);
@@ -81,7 +91,7 @@ public class BaseViewModelObserversHandlers {
                     }
                     if (mt.button2() != null) {
                         Runnable runnable = mt.button2().value3;
-                        MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
+                        MessageDialog.Listener listener = runnable == null ? null : () -> runnable.run();
 
                         if (mt.button2().value1 == null) {
                             dialog.setButton2(getText(mt.button2().value2), listener);
@@ -93,7 +103,7 @@ public class BaseViewModelObserversHandlers {
                     }
                     if (mt.button3() != null) {
                         Runnable runnable = mt.button3().value3;
-                        MessageDialog.Listener listener = runnable == null ? null : d -> runnable.run();
+                        MessageDialog.Listener listener = runnable == null ? null : () -> runnable.run();
 
                         if (mt.button3().value1 == null) {
                             dialog.setButton3(getText(mt.button3().value2), listener);

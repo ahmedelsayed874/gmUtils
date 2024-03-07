@@ -179,7 +179,7 @@ public class LocationTracker implements LocationListener {
         MessageDialog.create(context)
                 .setMessage(message)
                 .setTitle(title)
-                .setButton1(mainButtonTitle, dialog -> {
+                .setButton1(mainButtonTitle, () -> {
                     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     context.startActivity(intent);
 
@@ -189,7 +189,7 @@ public class LocationTracker implements LocationListener {
                                     10_000
                             );
                 })
-                .setButton2(cancelButtonTitle, dialog -> {
+                .setButton2(cancelButtonTitle, () -> {
                     if (cancel != null) cancel.run();
                 })
                 .setCancelable(false)

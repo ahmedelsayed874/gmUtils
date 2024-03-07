@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.blogspot.gm4s.gmutileexample.R
 import gmutils.ui.adapters.BaseRecyclerAdapter
+import gmutils.ui.adapters.BaseRecyclerAdapterViewHolder
 import gmutils.ui.customViews.ColorPicker
 
 class ColorPicker2Activity : AppCompatActivity() {
@@ -24,7 +25,7 @@ class ColorPicker2Activity : AppCompatActivity() {
         val text = findViewById<TextView>(R.id.text)
 
         val adapter = Adapter(rv, generateColorList())
-        adapter.setOnItemClickListener { adapter, view, item, position ->
+        adapter.setOnItemClickListener { _, item, position ->
             text.text = item.toString() + "\n" + item.color
             Log.e("****", item.toString() + " ---- " + item.color)
         }
@@ -135,12 +136,12 @@ class ColorPicker2Activity : AppCompatActivity() {
             viewType: Int,
             inflater: LayoutInflater,
             container: ViewGroup?
-        ): ViewHolder {
+        ): BaseRecyclerAdapterViewHolder<ColorX> {
             return VH(R.layout.adapter_color_picker_item, inflater, container)
         }
 
         inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
-            ViewHolder(resId, inflater, container) {
+            BaseRecyclerAdapterViewHolder<ColorX>(resId, inflater, container) {
 
             val view = findViewById<View>(R.id.view)
 
@@ -148,9 +149,8 @@ class ColorPicker2Activity : AppCompatActivity() {
                 view.setBackgroundColor(item.color)
             }
 
-            override fun dispose() {
+            override fun onDispose() {
             }
-
         }
 
     }

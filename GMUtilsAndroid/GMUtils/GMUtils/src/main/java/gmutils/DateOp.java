@@ -1125,7 +1125,6 @@ public class DateOp implements Serializable {
 
     public static String getDayName(int day, boolean en) {
         try {
-
             switch (day) {
                 case Calendar.SUNDAY:
                     return en ? "Sunday" : "الأحد";

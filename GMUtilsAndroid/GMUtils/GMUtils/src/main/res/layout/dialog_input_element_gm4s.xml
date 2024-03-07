@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:paddingTop="@dimen/size_5"
+    android:paddingBottom="@dimen/size_2"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/inputEt"
+        style="@style/editText"
+        android:layout_marginStart="@dimen/size_5"
+        android:layout_marginTop="@dimen/size_12"
+        android:layout_marginEnd="@dimen/size_5"
+        tools:text="hint"
+        android:textColor="@color/gmDialogText" />
+
+    <TextView
+        android:id="@+id/titleTv"
+        style="@style/textView.noPadding"
+        android:layout_marginStart="@dimen/size_10"
+        android:inputType="text"
+        android:maxLines="1"
+        tools:text="title"
+        android:textColor="@color/gmDialogText"
+        android:textSize="@dimen/font_10"
+        android:textStyle="bold" />
+
+</RelativeLayout>
+
+    <!--<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+    <!--    xmlns:tools="http://schemas.android.com/tools"-->
+    <!--    android:id="@+id/tv_input"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    app:counterEnabled="true">-->
+
+    <!--    <com.google.android.material.textfield.TextInputEditText-->
+    <!--        android:id="@+id/tv_input_inner"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--android:textColor="@color/gmDialogText"-->
+    <!--        tools:hint="Hint" />-->
+    <!--</com.google.android.material.textfield.TextInputLayout>-->

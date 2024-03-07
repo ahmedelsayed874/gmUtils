@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/gmDialogBackground"
     android:padding="@dimen/gmDefaultMargin">
 
     <FrameLayout
@@ -18,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/select_one"
-            android:textColor="@color/black"
+            android:textColor="@color/gmDialogText"
             android:textSize="@dimen/font_16"
             android:textStyle="bold" />
 
@@ -30,7 +31,8 @@
             android:layout_marginStart="@dimen/size_5"
             android:layout_marginEnd="@dimen/size_5"
             android:padding="@dimen/size_7"
-            android:src="@drawable/dismiss" />
+            android:src="@drawable/dismiss"
+            android:tint="@color/gmDialogText" />
 
     </FrameLayout>
 
@@ -44,7 +46,8 @@
         android:textColor="@color/gray2"
         android:textSize="@dimen/font_12"
         android:visibility="gone"
-        tools:text="@string/select_one" />
+        tools:text="@string/select_one"
+        tools:visibility="visible" />
 
     <EditText
         android:id="@+id/text_search_token"
@@ -52,7 +55,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawableStart="@drawable/search"
-        android:hint="@string/what_you_are_looking_for" />
+        android:drawableTint="@color/gmDialogText"
+        android:hint="@string/what_you_are_looking_for"
+        android:textColor="@color/gmDialogText" />
 
     <TextView
         android:id="@+id/text_no_result"
@@ -61,6 +66,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/size_10"
         android:text="@string/there_is_no_result"
+        android:textColor="@color/gmHint"
         android:visibility="gone"
         tools:visibility="visible" />
 
@@ -72,6 +78,7 @@
         android:gravity="center"
         android:minHeight="@dimen/size_35"
         android:text="@string/click_here_to_add"
+        android:textColor="@color/gmButtonLink"
         android:visibility="gone"
         tools:visibility="visible" />
 

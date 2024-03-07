@@ -8,7 +8,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-import gmutils.BackgroundTask;
 import gmutils.KeypadOp;
 import gmutils.logger.Logger;
 import gmutils.R;
@@ -37,9 +35,7 @@ import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.dialogs.WaitDialog;
 import gmutils.ui.fragments.BaseFragmentListener;
-import gmutils.ui.toast.MyToast;
 import gmutils.ui.utils.ViewSource;
-import gmutils.utils.Utils;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -189,7 +185,12 @@ public class ActivityFunctions implements BaseFragmentListener {
                     ((BaseActivity) activity).showWaitView();
                 }
 
-                Logger.d().readAllFilesContents(activity, (txt) -> {
+                MessageDialog.create(activity)
+                        .setMessage("Go to this path to find logs:\n" + Logger.d().getLogDirector(activity).getAbsolutePath())
+                        .setMessageGravity(Gravity.START)
+                        .setButton1(R.string.ok, null)
+                        .show();
+                /*Logger.d().readAllFilesContents(activity, (txt) -> {
                     if (activity instanceof BaseActivity) {
                         ((BaseActivity) activity).hideWaitView();
                     }
@@ -207,7 +208,7 @@ public class ActivityFunctions implements BaseFragmentListener {
                                 Logger.d().deleteSavedFiles(activity, null);
                             })
                             .show();
-                });
+                });*/
 
                 return true;
             }
@@ -334,66 +335,17 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     //----------------------------------------------------------------------------------------------
 
-    public static class ShowMessageDialogOptions {
-        private CharSequence title;
-        private Pair<String, MessageDialog.Listener> button1;
-        private Pair<String, MessageDialog.Listener> button2;
-        private Pair<String, MessageDialog.Listener> button3;
-
-        public ShowMessageDialogOptions setTitle(@NotNull CharSequence title) {
-            this.title = title;
-            return this;
-        }
-
-        public ShowMessageDialogOptions setButton1(String text, MessageDialog.Listener listener) {
-            button1 = new Pair<>(text, listener);
-            return this;
-        }
-
-        public ShowMessageDialogOptions setButton2(String text, MessageDialog.Listener listener) {
-            button2 = new Pair<>(text, listener);
-            return this;
-        }
-
-        public ShowMessageDialogOptions setButton3(String text, MessageDialog.Listener listener) {
-            button3 = new Pair<>(text, listener);
-            return this;
-        }
-
-
-    }
-
-    public MessageDialog showMessageDialog(Context context, int msg, ShowMessageDialogOptions options) {
-        return showMessageDialog(context, context.getString(msg), options);
+    public MessageDialog showMessageDialog(Context context, int msg) {
+        return showMessageDialog(context, context.getString(msg));
     }
 
     @Override
-    public MessageDialog showMessageDialog(Context context, CharSequence msg, ShowMessageDialogOptions options) {
+    public MessageDialog showMessageDialog(Context context, CharSequence msg) {
         MessageDialog dialog = MessageDialog.create(context);
 
-        if (options != null && options.title != null) dialog.setTitle(options.title);
-        else dialog.setTitle(R.string.message);
-
+        dialog.setTitle(R.string.message);
         dialog.setMessage(msg);
-
-        //Pair<String, MessageDialog.Listener> button1;
-        if (options != null && (options.button1 != null || options.button2 != null || options.button3 != null)) {
-            if (options.button1 != null) {
-                dialog.setButton1(options.button1.first, options.button1.second);
-            }
-
-            if (options.button2 != null) {
-                dialog.setButton2(options.button2.first, options.button2.second);
-            }
-
-            if (options.button3 != null) {
-                dialog.setButton3(options.button3.first, options.button3.second);
-            }
-
-        } else {
-            dialog.setButton1(R.string.ok, null);
-        }
-
+        dialog.setButton1(R.string.ok, null);
         dialog.show();
 
         return dialog;

@@ -1,13 +1,17 @@
-package gmutils;
+package gmutils.backgroundWorkers;
 
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import gmutils.listeners.ValueGetter;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -23,11 +27,11 @@ import java.util.List;
  */
 public class LooperThread extends Thread {
     public static class MessageArgs {
-        private final Message msg;
+        private Message msg;
         private final int handledMessageCount;
-        private final int totalMessageCount;
+        private ValueGetter<Integer> totalMessageCount;
 
-        private MessageArgs(Message msg, int handledMessageCount, int totalMessageCount) {
+        private MessageArgs(Message msg, int handledMessageCount, ValueGetter<Integer> totalMessageCount) {
             this.msg = msg;
             this.handledMessageCount = handledMessageCount;
             this.totalMessageCount = totalMessageCount;
@@ -41,8 +45,13 @@ public class LooperThread extends Thread {
             return handledMessageCount;
         }
 
-        public int getTotalMessageCount() {
+        public ValueGetter<Integer> getTotalMessageCount() {
             return totalMessageCount;
+        }
+
+        private void destroy() {
+            msg = null;
+            totalMessageCount = null;
         }
     }
 
@@ -78,7 +87,10 @@ public class LooperThread extends Thread {
             MessageHandler handler = onMessageHandled;
             if (handler != null) {
                 handledMsgCount++;
-                handler.onMessageHandled(new MessageArgs(msg, handledMsgCount, totalMsgCount));
+
+                MessageArgs args = new MessageArgs(msg, handledMsgCount, totalMessageCountGetter);
+                handler.onMessageHandled(args);
+                args.destroy();
             }
         });
 
@@ -97,6 +109,8 @@ public class LooperThread extends Thread {
         Looper.loop();
     }
 
+    private ValueGetter<Integer> totalMessageCountGetter = () -> totalMsgCount;
+
     public void sendMessage(Message msg) {
         if (handler != null) {
             totalMsgCount++;
@@ -111,6 +125,7 @@ public class LooperThread extends Thread {
         handler.destroy();
         handler = null;
         onMessageHandled = null;
+        totalMessageCountGetter = null;
     }
 
     public static class MyHandler extends Handler {

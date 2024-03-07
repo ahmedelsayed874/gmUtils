@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gmutils.StringSet;
+import gmutils.backgroundWorkers.BackgroundTask;
+import gmutils.backgroundWorkers.BackgroundTaskAbs;
 import gmutils.collections.dataGroup.DataGroup2;
 import gmutils.collections.dataGroup.DataGroup3;
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
+import gmutils.ui.utils.UiHandlerAbs;
 import kotlin.Pair;
 
 
@@ -275,6 +278,7 @@ public class BaseViewModel extends AndroidViewModel {
             private DataGroup3<Integer, StringSet, Runnable> button1;
             private DataGroup3<Integer, StringSet, Runnable> button2;
             private DataGroup3<Integer, StringSet, Runnable> button3;
+            private Runnable onDismiss;
             private boolean error;
 
             public Dialog() {
@@ -353,8 +357,9 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
-            public int getIconRes() {
-                return iconRes;
+            public Dialog setOnDismiss(Runnable onDismiss) {
+                this.onDismiss = onDismiss;
+                return this;
             }
 
             //------------------------------------------------------
@@ -375,11 +380,20 @@ public class BaseViewModel extends AndroidViewModel {
                 return button3;
             }
 
+            public int getIconRes() {
+                return iconRes;
+            }
+
+            public Runnable getOnDismiss() {
+                return onDismiss;
+            }
+
             @Override
             public void destroy() {
                 button1 = null;
                 button2 = null;
                 button3 = null;
+                onDismiss = null;
             }
 
             @Override
@@ -447,15 +461,16 @@ public class BaseViewModel extends AndroidViewModel {
 
     //----------------------------------------------------------------------------------------------
 
-    private Handler handler = null;
     private final MutableLiveData<ProgressStatus> progressStatusLiveData;
     private final MutableLiveData<Message> alertMessageLiveData;
+    private final MutableLiveData<String> updateUiLiveData;
 
     public BaseViewModel(@NotNull Application application) {
         super(application);
 
         progressStatusLiveData = new MutableLiveData<>();
         alertMessageLiveData = new MutableLiveData<>();
+        updateUiLiveData = new MutableLiveData<>();
 
     }
 
@@ -467,6 +482,10 @@ public class BaseViewModel extends AndroidViewModel {
 
     public MutableLiveData<Message> alertMessageLiveData() {
         return alertMessageLiveData;
+    }
+
+    public MutableLiveData<String> updateUiLiveData() {
+        return updateUiLiveData;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -489,12 +508,22 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
+    public void postPopMessage(StringSet message) {
+        Message m = new Message(message, new MessageType.Dialog());
+        postMessage(m);
+    }
+
     public void postPopMessage(int messageId, MessageType.Dialog messageType) {
         Message m = new Message(messageId, messageType);
         postMessage(m);
     }
 
     public void postPopMessage(CharSequence message, MessageType.Dialog messageType) {
+        Message m = new Message(message, messageType);
+        postMessage(m);
+    }
+
+    public void postPopMessage(StringSet message, MessageType.Dialog messageType) {
         Message m = new Message(message, messageType);
         postMessage(m);
     }
@@ -509,21 +538,34 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
+    public void postToastMessage(StringSet message, boolean error) {
+        Message m = new Message(message, new MessageType.Hint(error));
+        postMessage(m);
+    }
+
     public void postRetryMessage(CharSequence message, Runnable onRetry) {
+        Message m = new Message(message, new MessageType.Retry(onRetry));
+        postMessage(m);
+    }
+
+    public void postRetryMessage(StringSet message, Runnable onRetry) {
         Message m = new Message(message, new MessageType.Retry(onRetry));
         postMessage(m);
     }
 
     //----------------------------------------------------------------------------------------------
 
+    @NotNull
+    public UiHandlerAbs getHandler() {
+        return UiHandlerAbs.getInstance();
+    }
+
     public void runOnUiThread(Runnable runnable) {
-        if (handler == null) handler = new Handler(Looper.getMainLooper());
-        handler.post(runnable);
+        getHandler().post(0, runnable);
     }
 
     public void runOnUiThread(Runnable runnable, long delay) {
-        if (handler == null) handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(runnable, delay);
+        getHandler().post((int) delay, runnable);
     }
 
     //----------------------------------------------------------
@@ -573,11 +615,7 @@ public class BaseViewModel extends AndroidViewModel {
         };
 
         Runnable startThread = () -> {
-            if (TextUtils.isEmpty(threadName)) {
-                new Thread(target).start();
-            } else {
-                new Thread(target, threadName).start();
-            }
+            getBackgroundTaskInstance(threadName).execute(target, null);
         };
 
         if (delay > 0) {
@@ -585,6 +623,10 @@ public class BaseViewModel extends AndroidViewModel {
         } else {
             startThread.run();
         }
+    }
+
+    protected BackgroundTaskAbs getBackgroundTaskInstance(String threadName) {
+        return new BackgroundTask(threadName);
     }
 
     //---------------------------------------------------------
@@ -626,8 +668,15 @@ public class BaseViewModel extends AndroidViewModel {
 
     //----------------------------------------------------------------------------------------------
 
+    private boolean isCleared = false;
+
+    public boolean isCleared() {
+        return isCleared;
+    }
+
     @Override
     protected void onCleared() {
+        isCleared = true;
         super.onCleared();
     }
 

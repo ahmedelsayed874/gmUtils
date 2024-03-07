@@ -190,8 +190,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 viewModels.put(id, viewModel);
 
                 if (viewModel instanceof BaseViewModel) {
-                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(this, getProgressStatusLiveData());
-                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(this, getAlertMessageLiveData());
+                    ((BaseViewModel) viewModel).progressStatusLiveData().observe(this, getProgressStatusLiveDataObserver());
+                    ((BaseViewModel) viewModel).alertMessageLiveData().observe(this, getAlertMessageLiveDataObserver());
+                    ((BaseViewModel) viewModel).updateUiLiveData().observe(this, getUpdateUiLiveDataObserver());
                 }
             }
         }
@@ -309,17 +310,17 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    public MessageDialog showMessageDialog(int msg, ActivityFunctions.ShowMessageDialogOptions options) {
-        return showMessageDialog(getString(msg), options);
+    public MessageDialog showMessageDialog(int msg) {
+        return showMessageDialog(getString(msg));
     }
 
-    public MessageDialog showMessageDialog(CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
-        return getActivityFunctions().showMessageDialog(this, msg, options);
+    public MessageDialog showMessageDialog(CharSequence msg) {
+        return getActivityFunctions().showMessageDialog(this, msg);
     }
 
     @Override
-    public MessageDialog showMessageDialog(Context context, CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
-        return getActivityFunctions().showMessageDialog(context, msg, options);
+    public MessageDialog showMessageDialog(Context context, CharSequence msg) {
+        return getActivityFunctions().showMessageDialog(context, msg);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -452,7 +453,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     //----------------------------------------------------------------------------------------------
 
-    private Observer<BaseViewModel.ProgressStatus> getProgressStatusLiveData() {
+    private Observer<BaseViewModel.ProgressStatus> getProgressStatusLiveDataObserver() {
         return progressStatus -> {
             if (progressStatus != null)
                 onProgressOfViewModelTaskChanged(progressStatus);
@@ -480,21 +481,20 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         );
     }
 
-    private Observer<BaseViewModel.Message> getAlertMessageLiveData() {
+    private Observer<BaseViewModel.Message> getAlertMessageLiveDataObserver() {
         return message -> {
             if (message != null) {
                 onMessageReceivedFromViewModel(message);
             }
         };
     }
-
     protected void onMessageReceivedFromViewModel(BaseViewModel.Message message) {
         new BaseViewModelObserversHandlers().onMessageReceivedFromViewModel(
                 this,
                 message,
 
                 //showMessageDialog,
-                m -> showMessageDialog(m, null),
+                m -> showMessageDialog(m),
 
                 //showToast
                 (m, normal) -> {
@@ -505,6 +505,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 //showRetryPromptDialog
                 (m, a) -> showRetryPromptDialog(m, d -> a.run())
         );
+    }
+
+    private Observer<String> getUpdateUiLiveDataObserver() {
+        return this::onViewModelUpdatesUi;
+    }
+
+    protected void onViewModelUpdatesUi(String args) {
     }
 
     //----------------------------------------------------------------------------------------------

@@ -23,7 +23,7 @@ public class LogsOptions {
         }
 
         public Replacements coverText(String text) {
-            return coverText(text, null);
+            return coverText(text, CoverOptions.all());
         }
 
         public Replacements coverText(String text, CoverOptions coverOptions) {
@@ -60,8 +60,14 @@ public class LogsOptions {
                         end = text.substring(x - opt.lettersFromTrailing);
                     }
 
-                    x -= (opt.lettersFromLeading + opt.lettersFromTrailing);
-                    String middle = coveredText.invoke(x);
+                    String middle = "";
+                    if (opt.middleAlterText == null) {
+                        x -= (opt.lettersFromLeading + opt.lettersFromTrailing);
+                        middle = coveredText.invoke(x);
+                    } else {
+                        middle = opt.middleAlterText;
+                    }
+
                     return replace(text, start + middle + end);
                 }
             }
@@ -78,8 +84,8 @@ public class LogsOptions {
                 return new CoverOptions.All();
             }
 
-            static CoverOptions allExcept(int lettersFromLeading, int lettersFromTrailing) {
-                return new CoverOptions.AllExcept(lettersFromLeading, lettersFromTrailing);
+            static CoverOptions allExcept(int lettersFromLeading, String middleAlterText, int lettersFromTrailing) {
+                return new CoverOptions.AllExcept(lettersFromLeading, middleAlterText, lettersFromTrailing);
             }
 
             class All implements CoverOptions {
@@ -87,10 +93,20 @@ public class LogsOptions {
 
             class AllExcept implements CoverOptions {
                 public final int lettersFromLeading;
+                public final String middleAlterText;
                 public final int lettersFromTrailing;
 
+                public AllExcept(int lettersFromLeading) {
+                    this(lettersFromLeading, null, 0);
+                }
+
                 public AllExcept(int lettersFromLeading, int lettersFromTrailing) {
+                    this(lettersFromLeading, null, lettersFromTrailing);
+                }
+
+                public AllExcept(int lettersFromLeading, String middleAlterText, int lettersFromTrailing) {
                     this.lettersFromLeading = lettersFromLeading;
+                    this.middleAlterText = middleAlterText;
                     this.lettersFromTrailing = lettersFromTrailing;
                 }
             }
@@ -98,21 +114,34 @@ public class LogsOptions {
 
     }
 
-    private boolean printHeaders = false;
-    private boolean printRequestParameters = false;
+    public static class RequestOptions {
+        private boolean printHeaders = false;
+        private boolean printRequestParameters = false;
+
+        public RequestOptions(boolean printHeaders, boolean printRequestParameters) {
+            this.printHeaders = printHeaders;
+            this.printRequestParameters = printRequestParameters;
+        }
+
+        boolean allowPrintHeaders() {
+            return printHeaders;
+        }
+
+        boolean allowPrintRequestParameters() {
+            return printRequestParameters;
+        }
+    }
+
+
+    private RequestOptions requestOptions;
     private Replacements replacements;
     private ActionCallback0<String> extraInfo;
 
     public LogsOptions() {
     }
 
-    public LogsOptions printHeaders() {
-        this.printHeaders = true;
-        return this;
-    }
-
-    public LogsOptions printRequestParameters() {
-        this.printRequestParameters = true;
+    public LogsOptions setRequestOptions(RequestOptions requestOptions) {
+        this.requestOptions = requestOptions;
         return this;
     }
 
@@ -139,12 +168,8 @@ public class LogsOptions {
 
     //--------------------------------------------------------------------
 
-    boolean allowPrintHeaders() {
-        return printHeaders;
-    }
-
-    boolean allowPrintRequestParameters() {
-        return printRequestParameters;
+    RequestOptions getRequestOptions() {
+        return requestOptions;
     }
 
     Replacements getReplacements() {

@@ -8,9 +8,9 @@ import android.content.Context;
  * Computer Engineer / 2012
  * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
  * Have precedent experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -31,8 +31,15 @@ public class StorageManager {
             return registeredCallback.getApplication();
 
         } else {
-            throw new RuntimeException("you haven't PreferencesManager.Callback in your Application class");
+            throw new RuntimeException(
+                    "you haven't " +
+                            StorageManager.class.getSimpleName() +
+                            ".Callback in your Application class"
+            );
         }
     }
 
+    public static boolean isCallbackRegistered() {
+        return registeredCallback != null;
+    }
 }

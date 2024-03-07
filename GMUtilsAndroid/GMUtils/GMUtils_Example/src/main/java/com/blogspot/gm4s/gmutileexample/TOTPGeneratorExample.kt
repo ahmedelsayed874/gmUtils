@@ -1,7 +1,7 @@
 package com.blogspot.gm4s.gmutileexample
 
 import android.graphics.Bitmap
-import gmutils.TOTPGenerator
+import gmutils.security.TOTPGenerator
 
 class TOTPGeneratorExample {
 

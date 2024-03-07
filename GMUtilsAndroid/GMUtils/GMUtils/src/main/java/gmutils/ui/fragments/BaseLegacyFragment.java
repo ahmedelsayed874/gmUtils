@@ -86,12 +86,9 @@ public abstract class BaseLegacyFragment extends Fragment {
         return view;
     }
 
-    //----------------------------------------------------------------------------------------------
-
     @Override
     public void onViewCreated(@NotNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
     }
 
     //----------------------------------------------------------------------------------------------

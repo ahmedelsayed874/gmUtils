@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 
 import org.json.JSONArray;
 
@@ -32,7 +33,7 @@ import gmutils.listeners.ResultCallback2;
 public class MessageDialog extends BaseDialog {
 
     public interface Listener {
-        void invoke(MessageDialog dialog);
+        void invoke();
     }
 
     public static MessageDialog create(Context context) {
@@ -64,20 +65,48 @@ public class MessageDialog extends BaseDialog {
             public void onButtonClick(MessageDialogFunctions dialog, int button) {
                 if (button == 1) {
                     if (listenerBtn1 != null)
-                        listenerBtn1.invoke(MessageDialog.this);
+                        listenerBtn1.invoke();
 
                 } else if (button == 2) {
                     if (listenerBtn2 != null)
-                        listenerBtn2.invoke(MessageDialog.this);
+                        listenerBtn2.invoke();
 
                 } else if (button == 3) {
                     if (listenerBtn3 != null)
-                        listenerBtn3.invoke(MessageDialog.this);
+                        listenerBtn3.invoke();
                 }
 
                 dismiss();
             }
         });
+    }
+
+    @Override
+    public MessageDialog setTitleColorRes(int resid) {
+        functions.setTitleColorRes(resid);
+        return this;
+    }
+
+    @Override
+    public MessageDialog setTextColorRes(int resid) {
+        functions.setTextColorRes(resid);
+        return this;
+    }
+
+
+    public MessageDialog setButton1ColorRes(int resid) {
+        functions.setButton1ColorRes(resid);
+        return this;
+    }
+
+    public MessageDialog setButton2ColorRes(int resid) {
+        functions.setButton2ColorRes(resid);
+        return this;
+    }
+
+    public MessageDialog setButton3ColorRes(int resid) {
+        functions.setButton3ColorRes(resid);
+        return this;
     }
 
 
@@ -107,13 +136,13 @@ public class MessageDialog extends BaseDialog {
     }
 
 
-    public MessageDialog setTitle(int msg) {
-        functions.setTitle(msg);
+    public MessageDialog setTitle(int txt) {
+        functions.setTitle(txt);
         return this;
     }
 
-    public MessageDialog setTitle(CharSequence msg) {
-        functions.setTitle(msg);
+    public MessageDialog setTitle(CharSequence txt) {
+        functions.setTitle(txt);
         return this;
     }
 

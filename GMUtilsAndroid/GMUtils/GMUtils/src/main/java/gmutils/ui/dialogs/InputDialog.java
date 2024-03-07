@@ -9,11 +9,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import gmutils.KeypadOp;
 import gmutils.R;
+import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 
@@ -38,13 +48,14 @@ public class InputDialog extends BaseDialog {
     private View lyContainer;
     private TextView tvTitle;
     private TextView tvMsg;
-    private EditText tvInput;
+    private LinearLayout inputFieldsContainer;
+    private List<InputField> inputFields = new ArrayList<>();
     private TextView tvPositiveBtn;
     private TextView tvCancelBtn;
 
-    private ResultCallback2<InputDialog, String> positiveButtonCallback;
-    private ResultCallback<InputDialog> cancelButtonCallback;
-    
+    private ActionCallback<String[], CharSequence[]> positiveButtonCallback;
+    private Runnable cancelButtonCallback;
+
 
     @NonNull
     @Override
@@ -59,25 +70,62 @@ public class InputDialog extends BaseDialog {
         lyContainer = view.findViewById(R.id.lyContainer);
         tvTitle = view.findViewById(R.id.tv_title);
         tvMsg = view.findViewById(R.id.tv_msg);
-        tvInput = view.findViewById(R.id.tv_input);
+        inputFieldsContainer = view.findViewById(R.id.inputFieldsContainer);
         tvPositiveBtn = view.findViewById(R.id.tv_done);
         tvCancelBtn = view.findViewById(R.id.tv_cancel);
 
         tvPositiveBtn.setOnClickListener(v -> {
-            if (positiveButtonCallback != null)
-                positiveButtonCallback.invoke(InputDialog.this, tvInput.getText().toString());
-            dismiss();
+            if (positiveButtonCallback != null) {
+                String[] inputs = new String[inputFields.size()];
+                for (int i = 0; i < inputFields.size(); i++) {
+                    inputs[i] = inputFields.get(i).inputEditText.getText().toString();
+                }
+
+                CharSequence[] errors = positiveButtonCallback.invoke(inputs);
+                if (errors != null) {
+                    assert inputs.length == errors.length;
+                    int x = 0;
+
+                    for (int i = 0; i < errors.length; i++) {
+                        try {
+                            if (!TextUtils.isEmpty(errors[i])) {
+                                x++;
+                                inputFields.get(i).inputEditText.setError(errors[i]);
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    if (x == 0) dismiss();
+                } else {
+                    dismiss();
+                }
+            } else {
+                dismiss();
+            }
         });
 
         tvCancelBtn.setOnClickListener(v -> {
             if (cancelButtonCallback != null)
-                cancelButtonCallback.invoke(InputDialog.this);
+                cancelButtonCallback.run();
             dismiss();
         });
+
     }
-    
+
+    @Override
+    public void dismiss() {
+        for (InputField inputField : inputFields) {
+            try {
+                KeypadOp.hide(inputField.inputEditText);
+            } catch (Exception e) {
+            }
+        }
+        super.dismiss();
+    }
+
     //----------------------------------------------------------------------------------------------
-    
+
     public InputDialog setTitle(int msg) {
         tvTitle.setText(msg);
         tvTitle.setVisibility(View.VISIBLE);
@@ -126,27 +174,57 @@ public class InputDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
+    public InputDialog addInputField(ResultCallback<InputField> inputFieldBuilder) {
+        InputField inputField1 = InputField.addTo(inputFieldsContainer);
+        if (inputFieldBuilder != null) inputFieldBuilder.invoke(inputField1);
+        inputFields.add(inputField1);
+        return this;
+    }
+
+    public InputDialog getInputFieldAt(int index, ResultCallback<InputField> inputFieldBuilder) {
+        if (inputFields.isEmpty()) addInputField(null);
+        if (index >= 0 && index < inputFields.size()) {
+            inputFieldBuilder.invoke(inputFields.get(index));
+        } else {
+            inputFieldBuilder.invoke(null);
+        }
+        return this;
+    }
+
+    //------------------------------------------------------
+
+    public InputDialog setInputTitle(int textId) {
+        getInputFieldAt(0, tf -> tf.setTitle(textId));
+        return this;
+    }
+
+    public InputDialog setInputTitle(CharSequence text) {
+        getInputFieldAt(0, tf -> tf.setTitle(text));
+        return this;
+    }
+
     public InputDialog setInputHint(int textId) {
-        tvInput.setHint(textId);
+        getInputFieldAt(0, tf -> tf.setHint(textId));
         return this;
     }
 
     public InputDialog setInputHint(CharSequence text) {
-        tvInput.setHint(text);
+        getInputFieldAt(0, tf -> tf.setHint(text));
         return this;
     }
 
     public InputDialog setInputText(CharSequence text) {
-        tvInput.setText(text);
+        getInputFieldAt(0, tf -> tf.setText(text));
         return this;
     }
 
     /**
      * {@link EditorInfo#inputType}
+     *
      * @see android.text.InputType
      */
     public InputDialog setInputTextType(int type) {
-        tvInput.setInputType(type);
+        getInputFieldAt(0, tf -> tf.setTextType(type));
         return this;
     }
 
@@ -172,7 +250,7 @@ public class InputDialog extends BaseDialog {
         return this;
     }
 
-    public InputDialog setPositiveButtonCallback(ResultCallback2<InputDialog, String> callback) {
+    public InputDialog setPositiveButtonCallback(ActionCallback<String[], CharSequence[]> callback) {
         this.positiveButtonCallback = callback;
         return this;
     }
@@ -199,7 +277,7 @@ public class InputDialog extends BaseDialog {
         return this;
     }
 
-    public InputDialog setCancelButtonCallback(ResultCallback<InputDialog> callback) {
+    public InputDialog setCancelButtonCallback(Runnable callback) {
         this.cancelButtonCallback = callback;
         return this;
     }
@@ -211,12 +289,39 @@ public class InputDialog extends BaseDialog {
         return this;
     }
 
-    public InputDialog setTextColor(int color) {
-        tvTitle.setTextColor(color);
-        tvMsg.setTextColor(color);
-        tvInput.setTextColor(color);
+    @Override
+    public InputDialog setTitleColorRes(int resid) {
+        tvTitle.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
 
+    public InputDialog setTitleColor(int color) {
+        tvTitle.setTextColor(color);
+        return this;
+    }
+
+    @Override
+    public InputDialog setTextColorRes(int resid) {
+        setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public InputDialog setTextColor(int color) {
+        tvMsg.setTextColor(color);
+
+        for (InputField inputField : inputFields) {
+            inputField.setTextColor(color);
+        }
+
+        return this;
+    }
+
+    public InputDialog setPositiveButtonColor(int color) {
         tvPositiveBtn.setTextColor(color);
+        return this;
+    }
+
+    public InputDialog setCancelButtonColor(int color) {
         tvCancelBtn.setTextColor(color);
 
         return this;
@@ -251,6 +356,8 @@ public class InputDialog extends BaseDialog {
 
     @Override
     public InputDialog show() {
+        if (inputFields.isEmpty()) addInputField(null);
+
         super.show();
         return this;
     }
@@ -260,8 +367,9 @@ public class InputDialog extends BaseDialog {
         InputDialog dialog = new InputDialog(context);
         dialog.setTitle(tvTitle.getText());
         dialog.setMessage(tvMsg.getText());
-        dialog.setInputHint(tvInput.getHint());
-        dialog.setInputTextType(tvInput.getInputType());
+        for (InputField inputField : inputFields) {
+            dialog.addInputField((tf) -> tf.cloneFrom(inputField));
+        }
         dialog.setPositiveButtonText(tvPositiveBtn.getText());
         dialog.setPositiveButtonCallback(positiveButtonCallback);
         dialog.setCancelButtonText(tvCancelBtn.getText());
@@ -277,7 +385,10 @@ public class InputDialog extends BaseDialog {
         this.lyContainer = null;
         this.tvTitle = null;
         this.tvMsg = null;
-        this.tvInput = null;
+        this.inputFieldsContainer = null;
+
+        for (InputField inputField : inputFields) inputField.destroy();
+        this.inputFields.clear();
 
         this.tvPositiveBtn = null;
         this.tvCancelBtn = null;
@@ -285,4 +396,152 @@ public class InputDialog extends BaseDialog {
         this.positiveButtonCallback = null;
         this.cancelButtonCallback = null;
     }
+
+    //----------------------------------------------------------------------------------------------
+
+    public static class InputField {
+        static InputField addTo(ViewGroup container) {
+            View view = LayoutInflater.from(container.getContext()).inflate(R.layout.dialog_input_element_gm4s, null);
+            container.addView(view);
+            return new InputField(view);
+        }
+
+        //public final TextInputLayout textInputLayout;
+        public final TextView titleTextView;
+        public final EditText inputEditText;
+
+        public InputField(View view) {
+            titleTextView = view.findViewById(R.id.titleTv);
+            inputEditText = view.findViewById(R.id.inputEt);
+        }
+
+        public InputField getTitleTextView(ResultCallback<TextView> callback) {
+            callback.invoke(titleTextView);
+            return this;
+        }
+
+        public InputField getEditText(ResultCallback<EditText> callback) {
+            callback.invoke(inputEditText);
+            return this;
+        }
+
+        public InputField setTitle(int textId) {
+            titleTextView.setText(textId);
+            return this;
+        }
+
+        public InputField setTitle(CharSequence text) {
+            titleTextView.setText(text);
+            return this;
+        }
+
+        public InputField setHint(int textId) {
+            inputEditText.setHint(textId);
+            return this;
+        }
+
+        public InputField setHint(CharSequence text) {
+            inputEditText.setHint(text);
+            return this;
+        }
+
+        public InputField setText(CharSequence text) {
+            inputEditText.setText(text);
+            return this;
+        }
+
+        /**
+         * {@link EditorInfo#inputType}
+         *
+         * @see android.text.InputType
+         */
+        public InputField setTextType(int type) {
+            inputEditText.setInputType(type);
+            return this;
+        }
+
+        public InputField setTextColor(int color) {
+            inputEditText.setTextColor(color);
+            return this;
+        }
+
+        void cloneFrom(InputField inputField) {
+            setHint(inputField.inputEditText.getHint());
+            setText(inputField.inputEditText.getText());
+            setTextType(inputField.inputEditText.getInputType());
+            setTextColor(inputField.inputEditText.getCurrentTextColor());
+        }
+
+        public void destroy() {
+
+        }
+
+    }
+
+    /*public static class InputField {
+        static InputField addTo(ViewGroup container) {
+            View view = LayoutInflater.from(container.getContext()).inflate(R.layout.dialog_input_element_gm4s, null);
+            container.addView(view);
+            return new InputField(view);
+        }
+
+        public final TextInputLayout textInputLayout;
+
+        public InputField(View view) {
+            if (view instanceof TextInputLayout) {
+                textInputLayout = (TextInputLayout) view;
+            } else {
+                textInputLayout = view.findViewById(R.id.tv_input);
+            }
+
+        }
+
+        public InputField getTextInputLayout(ResultCallback<TextInputLayout> callback) {
+            callback.invoke(textInputLayout);
+            return this;
+        }
+
+        public InputField setHint(int textId) {
+            textInputLayout.setHint(textId);
+            return this;
+        }
+
+        public InputField setHint(CharSequence text) {
+            textInputLayout.setHint(text);
+            return this;
+        }
+
+        public InputField setText(CharSequence text) {
+            textInputLayout.getEditText().setText(text);
+            return this;
+        }
+
+        *//**
+     * {@link EditorInfo#inputType}
+     *
+     * @see android.text.InputType
+     *//*
+        public InputField setTextType(int type) {
+            textInputLayout.getEditText().setInputType(type);
+            return this;
+        }
+
+        public InputField setTextColor(int color) {
+            textInputLayout.getEditText().setTextColor(color);
+            return this;
+        }
+
+        void cloneFrom(InputField inputField) {
+            setHint(inputField.textInputLayout.getHint());
+            setText(inputField.textInputLayout.getEditText().getText());
+            setTextType(inputField.textInputLayout.getEditText().getInputType());
+            setTextColor(inputField.textInputLayout.getEditText().getCurrentTextColor());
+        }
+
+        public void destroy() {
+
+        }
+
+    }*/
+
 }

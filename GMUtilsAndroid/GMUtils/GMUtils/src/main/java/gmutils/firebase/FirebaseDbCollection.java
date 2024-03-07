@@ -17,7 +17,7 @@ import gmutils.listeners.ResultCallback2;
  * <p>
  * implementation 'com.google.firebase:firebase-database:19.5.1'
  */
-public class FirebaseDatabase<T> {
+public class FirebaseDbCollection<T> {
     /*
         AVAILABLE DATA-TYPES::
             String
@@ -28,15 +28,15 @@ public class FirebaseDatabase<T> {
             List<Object>
      */
 
-    public static <T> FirebaseDatabase<T> getInstance(String path, Class<T> valueType) {
-        return new FirebaseDatabase<T>(path, valueType);
+    public static <T> FirebaseDbCollection<T> getInstance(String path, Class<T> valueType) {
+        return new FirebaseDbCollection<T>(path, valueType);
     }
 
     private final Class<T> mValueType;
     private final DatabaseReference myRef;
     private Map<ResultCallback2<T, String>, ValueEventListener> readObservers;
 
-    private FirebaseDatabase(String path, Class<T> valueType) {
+    private FirebaseDbCollection(String path, Class<T> valueType) {
         try {
             Class.forName("com.google.firebase.database.FirebaseDatabase");
         } catch (ClassNotFoundException e) {

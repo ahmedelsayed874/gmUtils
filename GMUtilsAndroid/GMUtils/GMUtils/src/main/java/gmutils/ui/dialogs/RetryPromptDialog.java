@@ -3,6 +3,7 @@ package gmutils.ui.dialogs;
 import android.content.Context;
 
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -32,18 +33,18 @@ public class RetryPromptDialog {
         return dialog;
     }
 
-    public final MessageDialog dialog;
 
+    public final MessageDialog dialog;
 
     RetryPromptDialog(Context context, CharSequence msg, Listener onRetry, Listener onCancel) {
         dialog = new MessageDialog(context);
         dialog.setMessage(msg);
-        dialog.setButton1(R.string.retry, d -> {
+        dialog.setButton1(R.string.retry, () -> {
             if (onRetry != null) onRetry.invoke(this);
             dialog.dismiss();
         });
 
-        dialog.setButton2(R.string.cancel, d -> {
+        dialog.setButton2(R.string.cancel, () -> {
             if (onCancel != null) onCancel.invoke(this);
             dialog.dismiss();
         });
@@ -72,4 +73,8 @@ public class RetryPromptDialog {
         return this;
     }
 
+    public RetryPromptDialog getDialog(ResultCallback<MessageDialog> callback) {
+        callback.invoke(dialog);
+        return this;
+    }
 }

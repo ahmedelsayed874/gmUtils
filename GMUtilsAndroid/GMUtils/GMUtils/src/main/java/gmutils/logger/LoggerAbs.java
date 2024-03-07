@@ -8,29 +8,27 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import gmutils.BackgroundTask;
+import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.DateOp;
-import gmutils.LooperThread;
+import gmutils.backgroundWorkers.LooperThread;
 import gmutils.app.BaseApplication;
 import gmutils.listeners.ResultCallback;
 
@@ -38,6 +36,7 @@ import java.lang.Runnable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import gmutils.listeners.ResultCallback2;
 import gmutils.security.Security;
 import gmutils.utils.ZipFileUtils;
 
@@ -60,7 +59,7 @@ public abstract class LoggerAbs {
         private DateOp fileContentEncryptionDeadline;
 
         private Integer fileContentEncryptionKey;
-        private int maxFileSizeInKiloBytes = 5 /*MB*/ * 1024 /*KB*/;
+        private int maxFileSizeInKiloBytes = 2 /*MB*/ * 1024 /*KB*/;
         public int maxLogsFilesCount = 20;
 
         //region set printing logs deadline
@@ -607,8 +606,8 @@ public abstract class LoggerAbs {
     }
     //endregion write to files
 
-    //region read files
-    public void readFromCurrentSessionFile(Context context, ResultCallback<String> callback) {
+    //region read files xxxxxxxxxx
+    /*public void readFromCurrentSessionFile(Context context, ResultCallback<String> callback) {
         runOnLoggerThread(() -> {
             try {
                 //File file = createOrGetLogFile(context);
@@ -619,9 +618,9 @@ public abstract class LoggerAbs {
                 runOnUiThread(() -> callback.invoke(""));
             }
         });
-    }
+    }*/
 
-    public void readAllFilesContents(Context context, ResultCallback<String> callback) {
+    /*public void readAllFilesContents(Context context, ResultCallback<String> callback) {
         runOnLoggerThread(() -> {
             String content = "";
 
@@ -657,7 +656,7 @@ public abstract class LoggerAbs {
             String finalContent = content;
             runOnUiThread(() -> callback.invoke(finalContent));
         });
-    }
+    }*/
     //endregion read files
 
     //region list saved files
@@ -721,7 +720,7 @@ public abstract class LoggerAbs {
 
     private String sessionId() {
         if (_sessionId == null) {
-            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmmssSSS", Locale.ENGLISH).format(new Date());
+            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ENGLISH).format(new Date());
             if (!logId().isEmpty()) _sessionId = logId() + "_" + _sessionId;
         }
         return _sessionId;
@@ -732,7 +731,8 @@ public abstract class LoggerAbs {
         int filesCount = 0;
         try {
             filesCount = Objects.requireNonNull(logFilesDir.list()).length;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         String fileName = "/LOG_FILE_" + sessionId() + "_" + (filesCount + 1);
 
         try {
@@ -750,7 +750,7 @@ public abstract class LoggerAbs {
 
 
     // get/create directory
-    private synchronized File getLogDirector(Context context) {
+    public synchronized File getLogDirector(Context context) {
         String dirName = "LOGS";
         if (!logId().isEmpty()) dirName += "/" + logId();
 
@@ -818,7 +818,19 @@ public abstract class LoggerAbs {
     public final String extensionOfBackupOfPrivate = "bac";
     public final String extensionOfBackupOfPublic = "bacpub";
 
-    public void exportAppBackup(Context context, boolean includePublicFiles, ResultCallback<String> onComplete) {
+    public static class ExportBackupFeedback {
+        public final boolean successful;
+        public final String message;
+        public final String filePath;
+
+        public ExportBackupFeedback(boolean successful, String message, String filePath) {
+            this.successful = successful;
+            this.message = message;
+            this.filePath = filePath;
+        }
+    }
+
+    public void exportAppBackup(Context context, boolean includePublicFiles, ResultCallback<ExportBackupFeedback> onComplete) {
         BackgroundTask.run(() -> {
             //region create Back up Directory
             String backupDirName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmm", true);
@@ -833,9 +845,13 @@ public abstract class LoggerAbs {
                         backupDirName
                 );
                 if (!backupDir.exists() && !backupDir.mkdirs()) {
-                    return "Couldn't create a folder in any of those paths:\n" +
-                            "Path 1:" + path0 + "\n" +
-                            "Path 2:" + backupDir.getAbsolutePath();
+                    return new ExportBackupFeedback(
+                            false,
+                            "Couldn't create a folder in any of those paths:\n" +
+                                    "Path 1:" + path0 + "\n" +
+                                    "Path 2:" + backupDir.getAbsolutePath(),
+                            null
+                    );
                 }
             }
             //endregion
@@ -892,8 +908,12 @@ public abstract class LoggerAbs {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
-                        "Details: " + e.getMessage();
+                return new ExportBackupFeedback(
+                        false,
+                        "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
+                                "Details: " + e.getMessage(),
+                        null
+                );
             }
             //endregion
 
@@ -940,7 +960,11 @@ public abstract class LoggerAbs {
                 );
                 if (error != null) {
                     writeToLog("exportAppBackup", error.error);
-                    return "Failed to backup [Reason: " + error.error + "]";
+                    return new ExportBackupFeedback(
+                            false,
+                            "Failed to backup [Reason: " + error.error + "]",
+                            null
+                    );
                 }
             }
             //endregion
@@ -958,8 +982,12 @@ public abstract class LoggerAbs {
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
-                            "Details: " + e.getMessage();
+                    return new ExportBackupFeedback(
+                            false,
+                            "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
+                                    "Details: " + e.getMessage(),
+                            null
+                    );
                 }
 
                 try {
@@ -971,11 +999,15 @@ public abstract class LoggerAbs {
                 }
             }
 
-            return "Data backed-up successfully to: '" + backupDir.getAbsolutePath() + "'";
+            return new ExportBackupFeedback(
+                    true,
+                    "Data backed-up successfully to: '" + backupDir.getAbsolutePath() + "'",
+                    backupDir.getAbsolutePath()
+            );
         }, onComplete);
     }
 
-    public void importAppBackup(Context context, Uri backupFile, ResultCallback<String> onComplete) {
+    public void importAppBackup(Context context, Uri backupFile, ResultCallback2<Boolean, String> onComplete) {
         BackgroundTask.run(() -> {
             File cache = new File(context.getCacheDir(), "Cache-" + System.currentTimeMillis());
             if (!cache.exists()) cache.mkdirs();
@@ -984,13 +1016,13 @@ public abstract class LoggerAbs {
             try {
                 backupFileStream = context.getContentResolver().openInputStream(backupFile);
             } catch (Exception e) {
-                return "Couldn't open the file";
+                return new Pair<Boolean, String>(false, "Couldn't open the file");
             }
 
             ZipFileUtils zipFileUtils = new ZipFileUtils();
             ZipFileUtils.Error error = zipFileUtils.extractSync(backupFileStream, cache);
             if (error != null) {
-                return "Couldn't open the file: " + error.error;
+                return new Pair<Boolean, String>(false, "Couldn't open the file: " + error.error);
             }
 
             try {
@@ -1031,10 +1063,10 @@ public abstract class LoggerAbs {
 
                         ZipFileUtils.Error error2 = null;
 
-                        try(InputStream is = new FileInputStream(subBackupFile)) {
+                        try (InputStream is = new FileInputStream(subBackupFile)) {
                             error2 = zipFileUtils.extractSync(is, cache2);
                             if (error2 != null) {
-                                return "Couldn't open the file: " + error.error;
+                                return new Pair<Boolean, String>(false, "Couldn't open the file: " + error.error);
                             }
 
                             subFiles = cache2.listFiles();
@@ -1050,7 +1082,7 @@ public abstract class LoggerAbs {
                                 if (!b) publicSucceeded = false;
                             }
                         } catch (Exception e) {
-                            return "Couldn't open the file" + (error2 == null ? ".." : error2.error);
+                            return new Pair<Boolean, String>(false, "Couldn't open the file" + (error2 == null ? ".." : error2.error));
                         }
                     }
 
@@ -1065,13 +1097,15 @@ public abstract class LoggerAbs {
             }
 
             if (privateSucceeded && publicSucceeded) {
-                return "All files restored successfully";
+                return new Pair<Boolean, String>(true, "All files restored successfully");
             } else if (privateSucceeded) {
-                return "All private app data files restored successfully, but not all public.";
+                return new Pair<Boolean, String>(true, "All private app data files restored successfully, but not all public.");
             } else {
-                return "All public app data files restored successfully, but not all private.";
+                return new Pair<Boolean, String>(true, "All public app data files restored successfully, but not all private.");
             }
-        }, onComplete);
+        }, (p) -> {
+            if (onComplete != null) onComplete.invoke(p.first, p.second);
+        });
     }
 
     private boolean copyToTargetDir(File[] extracted, File targetDir) {

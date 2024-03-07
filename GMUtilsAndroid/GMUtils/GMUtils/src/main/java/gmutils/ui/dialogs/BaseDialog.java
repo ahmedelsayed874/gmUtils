@@ -7,9 +7,11 @@ import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
+import gmutils.KeypadOp;
 import gmutils.listeners.SimpleWindowAttachListener;
 
 /**
@@ -25,7 +27,7 @@ import gmutils.listeners.SimpleWindowAttachListener;
  * +201022663988
  */
 public abstract class BaseDialog {
-    protected AlertDialog dialog;
+    public final AlertDialog dialog;
     private View view;
 
     @NonNull
@@ -63,7 +65,7 @@ public abstract class BaseDialog {
     private void destroy() {
         onDestroy();
 
-        this.dialog = null;
+//        this.dialog = null;
         this.view = null;
     }
 
@@ -96,6 +98,9 @@ public abstract class BaseDialog {
         dialog.setCanceledOnTouchOutside(cancellable);
         return this;
     }
+
+    public abstract BaseDialog setTitleColorRes(@ColorRes int resid);
+    public abstract BaseDialog setTextColorRes(@ColorRes int resid);
 
     public BaseDialog setBackground(int color) {
         getView().setBackgroundColor(color);

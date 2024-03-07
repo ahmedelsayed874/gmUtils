@@ -40,7 +40,7 @@ import gmutils.ui.utils.DumbViewBinding;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerAdapterViewHolder<T>> {
+public abstract class BaseRecyclerAdapter0<T> extends RecyclerView.Adapter<BaseRecyclerAdapter0<T>.ViewHolder> {
 
     private final WeakReference<RecyclerView> mRecyclerView;
     private RecyclerView.AdapterDataObserver adapterDataObserver;
@@ -55,23 +55,23 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     private boolean enableEndlessScroll = false;
 
 
-    public BaseRecyclerAdapter(RecyclerView recyclerView) {
+    public BaseRecyclerAdapter0(RecyclerView recyclerView) {
         this(recyclerView, new ArrayList<T>());
     }
 
-    public BaseRecyclerAdapter(RecyclerView recyclerView, List<T> list) {
+    public BaseRecyclerAdapter0(RecyclerView recyclerView, List<T> list) {
         this(recyclerView, list, true);
     }
 
-    public BaseRecyclerAdapter(RecyclerView recyclerView, List<T> list, boolean vertical) {
+    public BaseRecyclerAdapter0(RecyclerView recyclerView, List<T> list, boolean vertical) {
         this(recyclerView, list, true, vertical, 0);
     }
 
-    public BaseRecyclerAdapter(RecyclerView recyclerView, List<T> list, int gridColumnCount, boolean horizontal) {
+    public BaseRecyclerAdapter0(RecyclerView recyclerView, List<T> list, int gridColumnCount, boolean horizontal) {
         this(recyclerView, list, false, !horizontal, gridColumnCount);
     }
 
-    private BaseRecyclerAdapter(RecyclerView recyclerView, List<T> list, boolean linearLayout, boolean vertical, int gridColumnCount) {
+    private BaseRecyclerAdapter0(RecyclerView recyclerView, List<T> list, boolean linearLayout, boolean vertical, int gridColumnCount) {
         mRecyclerView = new WeakReference<>(recyclerView);
 
         mList = list;
@@ -167,7 +167,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         enableDeleteItemOnSwipe(null);
     }
 
-    public void enableDeleteItemOnSwipe(ActionCallback<DataGroup3<BaseRecyclerAdapter<T>, T, Integer>, Boolean> onDelete) {
+    public void enableDeleteItemOnSwipe(ActionCallback<DataGroup3<BaseRecyclerAdapter0<T>, T, Integer>, Boolean> onDelete) {
         RecyclerView recyclerView = getRecyclerView();
         if (recyclerView != null) {
             ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
@@ -185,7 +185,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
                         removeAt(position, true);
                     } else {
                         try {
-                            boolean delete = onDelete.invoke(new DataGroup3<>(BaseRecyclerAdapter.this, getItem(position), position));
+                            boolean delete = onDelete.invoke(new DataGroup3<>(BaseRecyclerAdapter0.this, getItem(position), position));
                             if (delete) removeAt(position, true);
                             else notifyDataSetChanged();
                         } catch (Exception e) {
@@ -214,11 +214,9 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void dispose() {
-        onDispose();
-
         try {
             unregisterAdapterDataObserver(adapterDataObserver);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
 
         }
         adapterDataObserver = null;
@@ -229,6 +227,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         mOnDataSetChangedListener = null;
         mOnListItemsChangedListener = null;
         mOnLoadMoreListener = null;
+
+        onDispose();
     }
 
     protected abstract void onDispose();
@@ -519,6 +519,33 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         }
     }
 
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public ClickListener<T> getClickListener() {
+        return mClickListener;
+    }
+
+    public LongClickListener<T> getLongClickListener() {
+        return mLongClickListener;
+    }
+
+    public OnLoadMoreListener<T> getOnLoadMoreListener() {
+        return mOnLoadMoreListener;
+    }
+
+    public RecyclerViewPaginationListener getPaginationListener() {
+        return mPaginationListener;
+    }
+
+    public OnDataSetChangedListener<T> getOnDataSetChangedListener() {
+        return mOnDataSetChangedListener;
+    }
+
+    public OnListItemsChangedListener<T> getOnListItemsChangedListener() {
+        return mOnListItemsChangedListener;
+    }
+
     //------------------------------------------------------------------------------------------------------------------
 
     @Override
@@ -538,19 +565,37 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     //----------------------------------------------------------------------------------------------
 
     @NotNull
-    protected abstract BaseRecyclerAdapterViewHolder<T> getViewHolder(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
+    protected abstract ViewHolder getViewHolder(int viewType, @NotNull LayoutInflater inflater, ViewGroup container);
 
     @NotNull
     @Override
-    public BaseRecyclerAdapterViewHolder<T> onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
+        /*ViewSource viewSource = getViewSource(viewType, LayoutInflater.from(parent.getContext()), parent);
+        assert viewSource != null;
+
+        ViewBinding viewBinding = null;
+
+        if (viewSource instanceof ViewSource.LayoutResource) {
+            int resId = ((ViewSource.LayoutResource) viewSource).getResourceId();
+            View view = LayoutInflater.from(parent.getContext()).inflate(resId, parent, false);
+            viewBinding = new DumbViewBinding(view);
+
+        } else if (viewSource instanceof ViewSource.ViewBinding) {
+            viewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+
+        } else if (viewSource instanceof ViewSource.View) {
+            View view = ((ViewSource.View) viewSource).getView();
+            viewBinding = new DumbViewBinding(view);
+        }
+
+        return getViewHolder(viewBinding, viewType);*/
+
         return getViewHolder(viewType, LayoutInflater.from(parent.getContext()), parent);
     }
 
     @Override
-    public void onBindViewHolder(@NotNull BaseRecyclerAdapterViewHolder<T> holder, int position) {
-        holder.mClickListener = mClickListener;
-        holder.mLongClickListener = mLongClickListener;
-        holder.setValuesAndPosition(getItem(position), position);
+    public void onBindViewHolder(@NotNull ViewHolder holder, int position) {
+        holder.setValuesInner(getItem(position), position);
 
         if (mOnLoadMoreListener != null) {
             try {
@@ -572,36 +617,144 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
     //------------------------------------------------------------------------------------------------------------------
 
+    public abstract class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        private ViewBinding viewBinding;
+        private int itemPosition;
+
+        public ViewHolder(@LayoutRes int resId, @NotNull LayoutInflater inflater, ViewGroup container) {
+            this(inflater.inflate(resId, container, false));
+        }
+
+        public ViewHolder(View view) {
+            super(view);
+
+            view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                view.getViewTreeObserver().addOnWindowAttachListener(
+                        new SimpleWindowAttachListener() {
+                            @Override
+                            public void onWindowAttached() {
+                            }
+
+                            @Override
+                            public void onWindowDetached() {
+                                dispose();
+                            }
+                        }
+                );
+            }
+        }
+
+        public ViewHolder(ViewBinding viewBinding) {
+            this(viewBinding.getRoot());
+            this.viewBinding = viewBinding;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                SimpleWindowAttachListener listener = new SimpleWindowAttachListener() {
+                    @Override
+                    public void onWindowAttached() {
+                    }
+
+                    @Override
+                    public void onWindowDetached() {
+                        try {
+                            if (BaseRecyclerAdapter0.ViewHolder.this.viewBinding instanceof DumbViewBinding) {
+                                ((DumbViewBinding) BaseRecyclerAdapter0.ViewHolder.this.viewBinding).dispose();
+                            }
+                        } catch (Exception ignored) {
+                        }
+
+                        try {
+                            BaseRecyclerAdapter0.ViewHolder.this.viewBinding = null;
+                        } catch (Exception ignored) {
+                        }
+
+                        dispose();
+                    }
+                };
+
+                try {
+                    viewBinding.getRoot().getViewTreeObserver().addOnWindowAttachListener(listener);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        @Nullable
+        public ViewBinding getViewBinding() {
+            return viewBinding;
+        }
+
+        public <V extends View> V findViewById(@IdRes int resId) {
+            return itemView.findViewById(resId);
+        }
+
+        private void setValuesInner(T item, int position) {
+            this.itemPosition = position;
+            setValues(item);
+        }
+
+        protected abstract void setValues(T item);
+
+        public T getItem() {
+            return BaseRecyclerAdapter0.this.getItem(itemPosition);
+        }
+
+        public int getItemPosition() {
+            return itemPosition;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mClickListener != null)
+                mClickListener.onItemClicked(BaseRecyclerAdapter0.this, itemView, getItem(), itemPosition);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (mLongClickListener != null)
+                return mLongClickListener.onItemLongClicked(BaseRecyclerAdapter0.this, itemView, getItem(), getAdapterPosition());
+            else
+                return false;
+        }
+
+        protected abstract void dispose();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
     public interface ClickListener<T> {
-        void onItemClicked(BaseRecyclerAdapterViewHolder<T> viewHolder, T item, int position);
+        void onItemClicked(BaseRecyclerAdapter0<T> adapter, View itemView, T item, int position);
     }
 
     public interface LongClickListener<T> {
-        boolean onItemLongClicked(BaseRecyclerAdapterViewHolder<T> viewHolder, T item, int position);
+        boolean onItemLongClicked(BaseRecyclerAdapter0<T> adapter, View itemView, T item, int position);
     }
 
     public interface OnLoadMoreListener<T> {
-        void onLoadingMore(BaseRecyclerAdapter<T> adapter, boolean toBottom);
+        void onLoadingMore(BaseRecyclerAdapter0<T> adapter, boolean toBottom);
     }
 
     public interface OnDataSetChangedListener<T> {
-        void onDataSetChanged(BaseRecyclerAdapter<T> adapter, List oldList, List newList);
+        void onDataSetChanged(BaseRecyclerAdapter0<T> adapter, List oldList, List newList);
     }
 
     public abstract static class OnListItemsChangedListener<T> {
-        public void onItemAdded(BaseRecyclerAdapter<T> adapter, T item) {
+        public void onItemAdded(BaseRecyclerAdapter0<T> adapter, T item) {
         }
 
-        public void onItemsAdded(BaseRecyclerAdapter<T> adapter, List<T> item) {
+        public void onItemsAdded(BaseRecyclerAdapter0<T> adapter, List<T> item) {
         }
 
-        public void onItemRemoved(BaseRecyclerAdapter<T> adapter, T item, int position) {
+        public void onItemRemoved(BaseRecyclerAdapter0<T> adapter, T item, int position) {
         }
 
-        public void onItemsRemoved(BaseRecyclerAdapter<T> adapter, List<T> item) {
+        public void onItemsRemoved(BaseRecyclerAdapter0<T> adapter, List<T> item) {
         }
 
-        public void onItemCleared(BaseRecyclerAdapter<T> adapter) {
+        public void onItemCleared(BaseRecyclerAdapter0<T> adapter) {
         }
     }
 

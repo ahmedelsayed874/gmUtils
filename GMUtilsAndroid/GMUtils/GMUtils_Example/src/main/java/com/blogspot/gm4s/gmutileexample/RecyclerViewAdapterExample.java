@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import gmutils.ui.adapters.BaseRecyclerAdapter;
+import gmutils.ui.adapters.BaseRecyclerAdapterViewHolder;
 
 public class RecyclerViewAdapterExample extends BaseRecyclerAdapter<String> {
 
@@ -33,7 +34,7 @@ public class RecyclerViewAdapterExample extends BaseRecyclerAdapter<String> {
 
     @NonNull
     @Override
-    protected ViewHolder getViewHolder(int viewType, @NonNull LayoutInflater inflater, ViewGroup container) {
+    protected BaseRecyclerAdapterViewHolder<String> getViewHolder(int viewType, @NonNull LayoutInflater inflater, ViewGroup container) {
         return new VH(android.R.layout.simple_list_item_1, inflater, container);
 
         /*TextView tv = new TextView(container.getContext());
@@ -43,7 +44,7 @@ public class RecyclerViewAdapterExample extends BaseRecyclerAdapter<String> {
         //return new VH(new AdapterLayoutBinding()); //for view binding
     }
 
-    class VH extends BaseRecyclerAdapter<String>.ViewHolder {
+    class VH extends BaseRecyclerAdapterViewHolder<String> {
 
         TextView tv;
 
@@ -71,7 +72,7 @@ public class RecyclerViewAdapterExample extends BaseRecyclerAdapter<String> {
         }
 
         @Override
-        protected void dispose() {
+        protected void onDispose() {
             tv = null;
         }
     }
@@ -79,7 +80,6 @@ public class RecyclerViewAdapterExample extends BaseRecyclerAdapter<String> {
 
 
 class HowToUseRecyclerViewAdapterExample {
-
     void onCreate(Context context) {
         RecyclerView rv = new RecyclerView(context);
 
@@ -89,7 +89,7 @@ class HowToUseRecyclerViewAdapterExample {
 
         adapter.setOnItemClickListener(new BaseRecyclerAdapter.ClickListener<String>() {
             @Override
-            public void onItemClicked(BaseRecyclerAdapter<String> adapter, View itemView, String item, int position) {
+            public void onItemClicked(BaseRecyclerAdapterViewHolder<String> viewHolder, String item, int position) {
                 System.out.println(position + ": " +item);
             }
         });

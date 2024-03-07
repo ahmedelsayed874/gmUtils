@@ -33,7 +33,7 @@ public class OptionsDialog {
         }
 
         public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
-            return show(context, title, list, 0, listener);
+            return show(context, title, list, -1, listener);
         }
 
         public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
@@ -46,6 +46,10 @@ public class OptionsDialog {
                             dialog.dismiss();
                         });
             });
+        }
+
+        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, Listener listener) {
+            return show(context, title, list, -1, listener);
         }
 
         public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int defaultSelect, Listener listener) {
@@ -99,6 +103,10 @@ public class OptionsDialog {
                             dialog.dismiss();
                         });
             });
+        }
+
+        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, Listener listener) {
+            return show(context, title, list, null, listener);
         }
 
         public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int[] defaultSelect, Listener listener) {
@@ -169,4 +177,8 @@ public class OptionsDialog {
         dialog = builder.show();
     }
 
+    public OptionsDialog getDialog(ResultCallback<AlertDialog> callback) {
+        callback.invoke(dialog);
+        return this;
+    }
 }

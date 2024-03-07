@@ -23,6 +23,7 @@ import gmutils.inputFilters.IntegerRangeFilter
 import gmutils.listeners.TextChangedListener
 import gmutils.storage.GeneralStorage
 import gmutils.ui.adapters.BaseRecyclerAdapter
+import gmutils.ui.adapters.BaseRecyclerAdapterViewHolder
 import gmutils.utils.TextHelper
 import org.json.JSONArray
 import kotlin.math.max
@@ -258,7 +259,7 @@ class ColorPicker @JvmOverloads constructor(
         ) = VH(R.layout.adapter_colors, inflater, container)
 
         inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
-            ViewHolder(resId, inflater, container) {
+            BaseRecyclerAdapterViewHolder<Colors>(resId, inflater, container) {
 
             val card1 = findViewById<CardView>(R.id.card1)
 
@@ -280,7 +281,7 @@ class ColorPicker @JvmOverloads constructor(
                 card1.setCardBackgroundColor(Color.rgb(item.one, item.two, item.three))
             }
 
-            override fun dispose() {
+            override fun onDispose() {
             }
 
             override fun onClick(v: View?) {
@@ -353,7 +354,7 @@ class ColorPicker @JvmOverloads constructor(
         ) = VH(R.layout.adapter_single_color, inflater, container)
 
         inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
-            ViewHolder(resId, inflater, container) {
+            BaseRecyclerAdapterViewHolder<Int>(resId, inflater, container) {
 
             val card = findViewById<CardView>(R.id.card)
 
@@ -372,7 +373,7 @@ class ColorPicker @JvmOverloads constructor(
                 card.setCardBackgroundColor(item)
             }
 
-            override fun dispose() {
+            override fun onDispose() {
             }
 
             override fun onClick(v: View?) {

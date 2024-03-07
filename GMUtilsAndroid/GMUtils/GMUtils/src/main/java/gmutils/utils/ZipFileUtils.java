@@ -1,11 +1,7 @@
 package gmutils.utils;
 
-import android.content.Context;
-import android.net.Uri;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import gmutils.BackgroundTask;
+import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 

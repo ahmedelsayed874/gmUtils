@@ -188,11 +188,11 @@ public abstract class BaseApplication extends Application implements Application
                         "    <color name=\"gmButtonDestructive\">@color/red1</color>\n" +
                         "    <color name=\"gmButtonDark\">@color/black</color>\n" +
                         "\n" +
-                        "    <color name=\"gmDialogBackground\">@color/gmUtilsPrimary</color>\n" +
+                        "    <color name=\"gmDialogBackground\">@color/gmPrimary</color>\n" +
                         "    <color name=\"gmDialogText\">#fff</color>\n" +
                         "\n" +
                         "    <color name=\"gmSeparateLine\">@color/gray1</color>\n" +
-                        "    <color name=\"gmRatingBar\">@color/gmUtilsPrimary</color>\n" +
+                        "    <color name=\"gmRatingBar\">@color/gmPrimary</color>\n" +
                         "    <color name=\"gmEditTextBackground\">@color/white</color>";
 
         Log.i("*** " + thisApp().getClass().getSimpleName(), colors);
@@ -257,10 +257,16 @@ public abstract class BaseApplication extends Application implements Application
             } catch (Throwable ignore) {
             }
 
-            if (defaultHandler != null) {
-                defaultHandler.uncaughtException(thread, throwable);
+            if (!onAppCrashed(thread, throwable, defaultHandler)) {
+                if (defaultHandler != null) {
+                    defaultHandler.uncaughtException(thread, throwable);
+                }
             }
         });
+    }
+
+    protected boolean onAppCrashed(Thread thread, Throwable throwable, Thread.UncaughtExceptionHandler defaultHandler) {
+        return false;
     }
 
     private File getBugDir() {
@@ -305,10 +311,10 @@ public abstract class BaseApplication extends Application implements Application
                 .setMessage(bugs)
                 .setMessageGravity(Gravity.START)
                 .setButton1(R.string.dismiss, null)
-                .setButton2(R.string.delete, dialog -> {
+                .setButton2(R.string.delete, () -> {
                     deleteBugs();
                 })
-                .setButton3("Send", dialog -> {
+                .setButton3("Send", () -> {
                     onSendBugClick(bugs, getBugFile());
                 })
                 .setOnDismissListener(dialog -> {
@@ -453,4 +459,9 @@ public abstract class BaseApplication extends Application implements Application
     protected void onDispose() {
     }
 
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        StorageManager.registerCallback(null);
+    }
 }

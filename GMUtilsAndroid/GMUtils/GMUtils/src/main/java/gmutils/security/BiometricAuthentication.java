@@ -1,4 +1,4 @@
-package gmutils;
+package gmutils.security;
 
 /*
     implementation 'androidx.biometric:biometric:1.0.0'

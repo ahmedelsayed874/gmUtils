@@ -1,4 +1,4 @@
-package gmutils;
+package gmutils.geography;
 
 import android.content.Context;
 import android.os.Handler;

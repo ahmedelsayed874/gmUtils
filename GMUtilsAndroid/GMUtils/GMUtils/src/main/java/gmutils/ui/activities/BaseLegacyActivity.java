@@ -203,12 +203,12 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     //----------------------------------------------------------------------------------------------
 
-    public MessageDialog showMessageDialog(int msg, ActivityFunctions.ShowMessageDialogOptions options) {
-        return showMessageDialog(getString(msg), options);
+    public MessageDialog showMessageDialog(int msg) {
+        return showMessageDialog(getString(msg));
     }
 
-    public MessageDialog showMessageDialog(CharSequence msg, ActivityFunctions.ShowMessageDialogOptions options) {
-        return getActivityFunctions().showMessageDialog(this, msg, options);
+    public MessageDialog showMessageDialog(CharSequence msg) {
+        return getActivityFunctions().showMessageDialog(this, msg);
     }
 
     //----------------------------------------------------------------------------------------------

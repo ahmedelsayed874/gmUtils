@@ -53,9 +53,12 @@ public final class CallbackOperations<R extends BaseResponse> {
 
         if (logger != null && logsOptions == null) {
             logsOptions = new LogsOptions();
-            if (!request.method().equalsIgnoreCase("get")) {
-                logsOptions.printRequestParameters();
-            }
+            /*if (!request.method().equalsIgnoreCase("get")) {
+                logsOptions.setRequest Options(new LogsOptions.Request Options(
+                        false,
+                        true
+                ));
+            }*/
         }
 
         LogsOptions finalLogsOptions = logsOptions;
@@ -67,34 +70,15 @@ public final class CallbackOperations<R extends BaseResponse> {
                         () -> {
                             StringBuilder sb = new StringBuilder();
 
-                            if (finalLogsOptions.allowPrintRequestParameters()) {
+                            LogsOptions.RequestOptions requestOptions = finalLogsOptions.getRequestOptions();
+                            /*if (request Options == null)
+                                request Options = new LogsOptions.Request Options(
+                                        false,
+                                        false
+                                );*/
+
+                            if (requestOptions == null || requestOptions.allowPrintRequestParameters()) {
                                 sb.append(request.toString());
-                /*String requestInfo = request.toString();
-                int headerIdx = requestInfo.indexOf(", headers=[");
-                int paramsIdx = requestInfo.indexOf(", tags=", Math.max(headerIdx, 0));
-
-                if (headerIdx < 0 && paramsIdx < 0) {
-                    sb.append(requestInfo);
-                } else {
-                    String header = "";
-                    if (finalLogsOptions.allowPrintHeaders() && headerIdx > 0) {
-                        header = requestInfo.substring(headerIdx, Math.min(paramsIdx, requestInfo.length()));
-                    }
-
-                    String params = "";
-                    if (finalLogsOptions.allowPrintRequestParameters() && paramsIdx > 0) {
-                        params = requestInfo.substring(paramsIdx, requestInfo.length() - 1);
-                    }
-
-                    int end = -1;
-                    if (headerIdx > 0) end = headerIdx;
-                    else if (paramsIdx > 0) end = paramsIdx;
-                    if (end < 0) end = requestInfo.length();
-
-                    sb.append(requestInfo.substring(0, end))
-                            .append(header)
-                            .append(params);
-                }*/
                             }
                             //
                             else {
@@ -103,7 +87,7 @@ public final class CallbackOperations<R extends BaseResponse> {
                                 sb.append(", url=");
                                 sb.append(request.url());
 
-                                if (finalLogsOptions.allowPrintHeaders()) {
+                                if (requestOptions.allowPrintHeaders()) {
                                     if (request.headers().size() != 0) {
                                         sb.append(", headers=[");
                                         int i = 0;
@@ -158,17 +142,20 @@ public final class CallbackOperations<R extends BaseResponse> {
 
         if (requestInfo != null && this.logger != null) {
             this.logger.print(() -> "API:Request:", () -> {
+                String txt = "";
                 try {
-                    String txt = requestInfo.getContent().toString();
-                    if (replacedTextsInLog != null) {
+                    txt += requestInfo.getContent().toString();
+
+                    if (replacedTextsInLog != null && replacedTextsInLog.getReplacements() != null) {
                         for (Pair<String, String> replacement : replacedTextsInLog.getReplacements()) {
-                            txt = txt.replaceAll(replacement.first, replacement.second);
+                            txt = txt.replace(replacement.first, replacement.second);
                         }
                     }
-                    return txt;
                 } catch (Exception e) {
-                    return " <[EXCEPTION:: " + e.getMessage() + "]>";
+                    txt += "\n<[EXCEPTION:: " + e.getMessage() + "]>";
                 }
+
+                return txt;
             });
         }
 
