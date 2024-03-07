@@ -190,10 +190,14 @@ public class ActivityFunctions implements BaseFragmentListener {
                         .setMessage("Go to this path to find logs:\n" + Logger.d().getLogDirector(activity).getAbsolutePath())
                         .setMessageGravity(Gravity.START)
                         .setButton1(R.string.ok, () -> {
-                            Intents.getInstance().showDir(
-                                    activity,
-                                    Logger.d().getLogDirector(activity).getAbsolutePath()
-                            );
+                            try {
+                                Intents.getInstance().showDir(
+                                        activity,
+                                        Logger.d().getLogDirector(activity).getAbsolutePath()
+                                );
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         })
                         .show();
 

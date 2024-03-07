@@ -133,15 +133,11 @@ public class Intents {
     }
 
     public boolean showDir(Context context, String dirPath) {
-        try {
-            Uri uri = FileUtils.createInstance().createUriForFileUsingFileProvider(context, new File(dirPath));
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            if (intent.resolveActivity(context.getPackageManager()) != null) {
-                context.startActivity(intent);
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        Uri uri = FileUtils.createInstance().createUriForFileUsingFileProvider(context, new File(dirPath));
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(intent);
+            return true;
         }
 
         return false;
