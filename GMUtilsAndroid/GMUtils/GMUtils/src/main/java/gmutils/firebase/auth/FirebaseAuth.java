@@ -1,4 +1,4 @@
-package gmutils.firebase;
+package gmutils.firebase.auth;
 
 import android.net.Uri;
 import android.util.Pair;

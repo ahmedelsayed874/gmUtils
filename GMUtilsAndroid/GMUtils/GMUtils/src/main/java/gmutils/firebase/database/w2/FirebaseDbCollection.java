@@ -1,11 +1,17 @@
-package gmutils.firebase;
+package gmutils.firebase.database.w2;
+
+import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,21 +89,57 @@ public class FirebaseDbCollection<T> {
 
     //----------------------------------------------------------------------------------------------
 
-    public void read(ResultCallback2<T, String> callback) {
-        read(myRef, callback);
+    public void retrieve(ResultCallback2<List<T>, String> callback) {
+        retrieve(myRef, callback);
     }
 
-    public void read(String path, ResultCallback2<T, String> callback) {
+    public void retrieve(String path, ResultCallback2<List<T>, String> callback) {
         DatabaseReference child = myRef.child(refinePath(path));
-        read(child, callback);
+        retrieve(child, callback);
     }
 
-    private void read(DatabaseReference ref, ResultCallback2<T, String> callback) {
+    private void retrieve(DatabaseReference ref, ResultCallback2<List<T>, String> callback) {
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                T value = dataSnapshot.getValue(mValueType);
-                callback.invoke(value, "");
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Object value = snapshot.getValue();
+                    try {
+                        if (value instanceof List) {
+                            GenericTypeIndicator<List<T>> type = new GenericTypeIndicator<List<T>>() {
+                            };
+                            List<T> values = snapshot.getValue(type);
+                            callback.invoke(values, null);
+                        }
+                        //
+                        else if (value instanceof Map) {
+                            try {
+                                GenericTypeIndicator<Map<String, T>> type = new GenericTypeIndicator<>() {
+                                };
+                                Map<String, T> map = snapshot.getValue(type);
+                                callback.invoke(new ArrayList<>(map.values()), null);
+                            } catch (Exception e) {
+                                GenericTypeIndicator<Map<String, List<T>>> type = new GenericTypeIndicator<>() {
+                                };
+                                Map<String, List<T>> map = snapshot.getValue(type);
+                                List<T> values = new ArrayList<>();
+                                for (var entry : map.values()) {
+                                    values.addAll(entry);
+                                }
+                                callback.invoke(values, null);
+                            }
+                        }
+                        //
+                        else {
+                            T value2 = snapshot.getValue(mValueType);
+                            callback.invoke(Arrays.asList(value2), null);
+                        }
+                    } catch (Exception e) {
+                        Log.e("*****", e.getMessage() + "\n--------\n" + value);
+                    }
+                } else {
+                    callback.invoke(null, "No data");
+                }
             }
 
             @Override
