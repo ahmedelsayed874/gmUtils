@@ -32,7 +32,8 @@
             android:layout_marginEnd="@dimen/size_5"
             android:padding="@dimen/size_7"
             android:src="@drawable/dismiss"
-            android:tint="@color/gmDialogText" />
+            android:tint="@color/gmDialogText"
+            tools:ignore="UseAppTint" />
 
     </FrameLayout>
 

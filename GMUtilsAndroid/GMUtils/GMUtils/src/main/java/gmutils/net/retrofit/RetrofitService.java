@@ -336,9 +336,9 @@ public class RetrofitService {
             return null;
         }
 
-        @NotNull
+        @Nullable
         default SSLContextProtocols getSSLContextProtocol() {
-            return SSLContextProtocols.TLS;
+            return null;
         }
 
         void config(@NotNull OkHttpClient.Builder httpClient, String error);
@@ -544,6 +544,7 @@ public class RetrofitService {
                 }
             }
             if (TextUtils.isEmpty(protocol)) protocol = SSLContextProtocols.TLS.asString;
+
             SSLContext sslContext = SSLContext.getInstance(protocol);
             sslContext.init(null, new TrustManager[]{trustManager}, null);//new java.security.SecureRandom()
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();

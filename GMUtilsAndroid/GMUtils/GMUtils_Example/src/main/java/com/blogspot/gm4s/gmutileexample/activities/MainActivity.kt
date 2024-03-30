@@ -403,7 +403,7 @@ class MainActivity : BaseActivity() {
 
     private fun testUntrustedConnection_openCertificate(inputStream: InputStream) {
         val s = RetrofitService.create(
-            "https://192.168.100.1",
+            "https://famsproductdemo.mnc-control.com/",
             gmutils.net.retrofit.example.apiServices.TimeAPIsRequests::class.java,
             object : RetrofitService.ClientBuildCallback {
                 override fun getX509TrustManager(): X509TrustManager? {
