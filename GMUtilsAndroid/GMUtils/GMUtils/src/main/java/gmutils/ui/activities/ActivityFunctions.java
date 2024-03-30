@@ -28,6 +28,7 @@ import java.util.Map;
 
 import gmutils.Intents;
 import gmutils.KeypadOp;
+import gmutils.firebase.fcm.FCM;
 import gmutils.logger.Logger;
 import gmutils.R;
 import gmutils.listeners.ResultCallback;
@@ -146,6 +147,16 @@ public class ActivityFunctions implements BaseFragmentListener {
                     activity.setContentView(activityViewBinding.getRoot());
                 }
             }
+
+            checkIntent(activity.getIntent());
+        }
+
+        public void onNewIntent(Activity activity, Intent intent) {
+            checkIntent(intent);
+        }
+
+        private void checkIntent(@NotNull  Intent intent) {
+            FCM.instance().onActivityStarted(intent.getExtras());
         }
 
         public void onStart(Activity activity) {
@@ -182,10 +193,6 @@ public class ActivityFunctions implements BaseFragmentListener {
             }
 
             if (item.getItemId() == showBugsMenuItemId) {
-                if (activity instanceof BaseActivity) {
-                    ((BaseActivity) activity).showWaitView();
-                }
-
                 MessageDialog.create(activity)
                         .setMessage("Go to this path to find logs:\n" + Logger.d().getLogDirector(activity).getAbsolutePath())
                         .setMessageGravity(Gravity.START)

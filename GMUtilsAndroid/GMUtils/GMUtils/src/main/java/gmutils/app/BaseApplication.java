@@ -18,6 +18,7 @@ import java.util.Random;
 import java.util.Set;
 
 import gmutils.Intents;
+import gmutils.firebase.fcm.GmFirebaseMessagingService;
 import gmutils.logger.Logger;
 import gmutils.MessagingCenter;
 import gmutils.R;
@@ -37,7 +38,6 @@ import gmutils.ui.dialogs.MessageDialog;
  * +201022663988
  */
 public abstract class BaseApplication extends Application implements Application.ActivityLifecycleCallbacks {
-
     public static class GlobalVariableDisposal {
         private Object instance;
         private gmutils.listeners.Runnable2<Object> onDispose;
@@ -117,9 +117,6 @@ public abstract class BaseApplication extends Application implements Application
                 return app.get();
             }
 
-            @Override
-            protected void onPreCreate() {
-            }
         };
 
         baseApplication.onCreate();
@@ -146,11 +143,9 @@ public abstract class BaseApplication extends Application implements Application
         return this;
     }
 
-    protected abstract void onPreCreate();
-
     @Override
     public void onCreate() {
-        onPreCreate();
+        current = this;
 
         if (thisApp() == this)
             super.onCreate();
@@ -453,6 +448,12 @@ public abstract class BaseApplication extends Application implements Application
 
         onApplicationFinishedLastActivity = null;
 
+        if (disposeCallbacks != null) {
+            for (Runnable value : disposeCallbacks.values()) {
+                if (value != null) value.run();
+            }
+        }
+
         onDispose();
     }
 
@@ -463,5 +464,17 @@ public abstract class BaseApplication extends Application implements Application
     public void onTerminate() {
         super.onTerminate();
         StorageManager.registerCallback(null);
+        try {
+            dispose();
+        } catch (Exception ignored) {}
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    private Map<String, Runnable> disposeCallbacks;
+
+    public void registerOnDispose(Class<?> owner, Runnable callback) {
+        if (disposeCallbacks == null) disposeCallbacks = new HashMap<>();
+        disposeCallbacks.put(owner.getName(), callback);
     }
 }

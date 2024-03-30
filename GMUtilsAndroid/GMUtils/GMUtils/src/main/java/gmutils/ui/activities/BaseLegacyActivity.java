@@ -132,6 +132,12 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        getActivityFunctions().lifecycle().onNewIntent(thisActivity(), intent);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         getActivityFunctions().lifecycle().onStart(thisActivity());

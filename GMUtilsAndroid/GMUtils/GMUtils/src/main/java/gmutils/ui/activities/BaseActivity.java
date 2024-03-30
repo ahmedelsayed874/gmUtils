@@ -199,6 +199,12 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        getActivityFunctions().lifecycle().onNewIntent(thisActivity(), intent);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         getActivityFunctions().lifecycle().onStart(thisActivity());
