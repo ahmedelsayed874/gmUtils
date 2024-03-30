@@ -36,6 +36,9 @@ import gmutils.utils.Utils;
  * +201022663988
  */
 public class Notifier {
+    public static final String DEFAULT_NOTIFICATION_CHANNEL_ID = "default";
+    public static final String DEFAULT_NOTIFICATION_CHANNEL_Name = "Default";
+
     private NotificationCompat.Builder notificationBuilder;
     private final int notificationIconRes;
     private int iconBackgroundColor = Color.WHITE;
@@ -149,8 +152,8 @@ public class Notifier {
             if (notificationBuilder != null)
                 throw new IllegalStateException("Can't create channel after create notification");
 
-            channelId = TextUtils.isEmpty(channelId) ? "default" : channelId;
-            channelName = TextUtils.isEmpty(channelName) ? "Default" : channelName;
+            channelId = TextUtils.isEmpty(channelId) ? DEFAULT_NOTIFICATION_CHANNEL_ID : channelId;
+            channelName = TextUtils.isEmpty(channelName) ? DEFAULT_NOTIFICATION_CHANNEL_Name : channelName;
 
             this.createdChannelId = channelId;
 
@@ -234,7 +237,7 @@ public class Notifier {
             intent.addFlags(intentFlag);
             pendingIntent = PendingIntent.getActivity(
                     context,
-                    5 /* Request code */,
+                    intent.getAction().hashCode() /* Request code */,
                     intent,
                     pendingIntentFlag
             );
@@ -327,7 +330,12 @@ public class Notifier {
 
 
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 10, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                10,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE
+        );
 
         return addAction(title, pendingIntent);
     }
@@ -386,7 +394,9 @@ public class Notifier {
 
         if (removeAllPreviousNotifications) {
             notificationManager.cancelAll();
-        } else if (notificationIdToRemove != null) {
+        }
+        //
+        else if (notificationIdToRemove != null) {
             notificationManager.cancel(notificationIdToRemove);
         }
 
