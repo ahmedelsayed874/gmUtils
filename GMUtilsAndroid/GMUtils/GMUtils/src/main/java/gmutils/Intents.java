@@ -139,7 +139,6 @@ public class Intents {
             context.startActivity(intent);
             return true;
         }
-
         return false;
     }
 
