@@ -2,6 +2,7 @@ package gmutils.firebase.fcm;
 
 import android.os.Bundle;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -21,7 +22,12 @@ import gmutils.listeners.ResultCallback;
 //             android:name="com.google.firebase.messaging.default_notification_icon"
 //             android:resource="@drawable/notif_icon" />
 public interface FCMFunctions {
-    void init(FCMParameters fcmParameters);
+    FCMFunctions init(
+            @NotNull Class<? extends FcmMessageHandler> fcmMessageHandlerClass,
+            @NotNull FcmMessageHandler fcmMessageHandler,
+            @Nullable ResultCallback<String> onDeviceTokenRefresh,
+            @Nullable String firebaseProjectMessageKey
+    );
 
     void getDeviceToken(ResultCallback<String> callback);
 

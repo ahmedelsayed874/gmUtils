@@ -27,7 +27,7 @@ import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 
 class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
-    private DatabaseReference databaseReference;
+    public final DatabaseReference databaseReference;
 
     public FirebaseDatabaseOp(String rootNodeName) {
         try {

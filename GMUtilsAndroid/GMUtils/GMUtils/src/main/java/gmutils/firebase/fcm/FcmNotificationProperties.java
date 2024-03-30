@@ -1,6 +1,5 @@
 package gmutils.firebase.fcm;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
@@ -39,8 +38,8 @@ public class FcmNotificationProperties {
 
     private boolean allowPopup = true;
     private int notificationId = 1;
-    private String title;
-    private String body;
+    private String customTitle;
+    private String customBody;
     private String payload;
     private String channelId = Notifier.DEFAULT_NOTIFICATION_CHANNEL_ID;
     private String channelName = Notifier.DEFAULT_NOTIFICATION_CHANNEL_Name;
@@ -70,13 +69,13 @@ public class FcmNotificationProperties {
         return this;
     }
 
-    public FcmNotificationProperties setTitle(String title) {
-        this.title = title;
+    public FcmNotificationProperties setCustomTitle(String customTitle) {
+        this.customTitle = customTitle;
         return this;
     }
 
-    public FcmNotificationProperties setBody(String body) {
-        this.body = body;
+    public FcmNotificationProperties setCustomBody(String customBody) {
+        this.customBody = customBody;
         return this;
     }
 
@@ -132,12 +131,12 @@ public class FcmNotificationProperties {
         return notificationId;
     }
 
-    public String getTitle() {
-        return title;
+    public String getCustomTitle() {
+        return customTitle;
     }
 
-    public String getBody() {
-        return body;
+    public String getCustomBody() {
+        return customBody;
     }
 
     public String getPayload() {

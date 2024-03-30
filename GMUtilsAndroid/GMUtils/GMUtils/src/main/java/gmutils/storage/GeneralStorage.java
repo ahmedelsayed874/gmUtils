@@ -47,10 +47,10 @@ public class GeneralStorage {
         Context appContext = StorageManager.getAppContext();
 
         if (TextUtils.isEmpty(name)) {
-            name = appContext.getPackageName() + "_" + getClass().getSimpleName().toUpperCase();
-        } else {
+            name = /*appContext.getPackageName() + "_" + */getClass().getSimpleName().toUpperCase();
+        } /*else {
             name = appContext.getPackageName() + "_" + name;
-        }
+        }*/
 
         mPreference = appContext.getSharedPreferences(name, Context.MODE_PRIVATE);
 

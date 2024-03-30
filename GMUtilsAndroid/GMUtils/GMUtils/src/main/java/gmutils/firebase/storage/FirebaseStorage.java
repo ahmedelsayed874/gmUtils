@@ -17,7 +17,7 @@ import gmutils.listeners.ResultCallback;
 
 
 public class FirebaseStorage implements IFirebaseStorage {
-    com.google.firebase.storage.FirebaseStorage storage;
+    public final com.google.firebase.storage.FirebaseStorage storage;
 
     public FirebaseStorage() {
         try {

@@ -39,12 +39,13 @@ public class FCM implements FCMFunctions {
 
     //----------------------------------------------------------------
 
-    public final FirebaseMessaging messaging;
-    private FCMParameters fcmParameters;
+    public final FirebaseMessaging firebaseMessaging;
+    private ResultCallback<String> onDeviceTokenRefresh;
+    private String firebaseProjectMessageKey;//get from the firebase console (settings) .... ex:: 'AAAAKbiiUMw:APA91...JRP';
 
     private FCM() {
 
-        messaging = FirebaseMessaging.getInstance();
+        firebaseMessaging = FirebaseMessaging.getInstance();
     }
 
     private void printLog(LoggerAbs.ContentGetter content) {
@@ -58,22 +59,28 @@ public class FCM implements FCMFunctions {
     //----------------------------------------------------------------
 
     @Override
-    public void init(FCMParameters fcmParameters) {
+    public FCMFunctions init(
+            @NotNull Class<? extends FcmMessageHandler> fcmMessageHandlerClass,
+            @NotNull FcmMessageHandler fcmMessageHandler,
+            @Nullable ResultCallback<String> onDeviceTokenRefresh,
+            @Nullable String firebaseProjectMessageKey
+    ) {
         printLog(() -> "Fcm.init");
 
-        this.fcmParameters = fcmParameters;
+        this.onDeviceTokenRefresh = onDeviceTokenRefresh;
+        this.firebaseProjectMessageKey = firebaseProjectMessageKey;
 
         //--------------------------------------------------------------------------
 
-        GmFirebaseMessagingService.onMessage = fcmParameters.fcmMessageHandler;
+        GmFirebaseMessagingService.onMessage = fcmMessageHandler;
 
-        GmFirebaseMessagingService.registerBackgroundMessageHandler(fcmParameters.fcmMessageHandlerClass);
+        GmFirebaseMessagingService.registerBackgroundMessageHandler(fcmMessageHandlerClass);
 
-        if (fcmParameters.onDeviceTokenRefresh != null) {
-            getDeviceToken((s) -> this.fcmParameters.onDeviceTokenRefresh.invoke(s));
+        if (onDeviceTokenRefresh != null) {
+            getDeviceToken((s) -> this.onDeviceTokenRefresh.invoke(s));
 
             GmFirebaseMessagingService.onNewToken = (context, newToken) -> {
-                this.fcmParameters.onDeviceTokenRefresh.invoke(newToken);
+                this.onDeviceTokenRefresh.invoke(newToken);
             };
         }
 
@@ -122,11 +129,12 @@ public class FCM implements FCMFunctions {
         );
         //endregion
 
+        return this;
     }
 
     @Override
     public void getDeviceToken(ResultCallback<String> callback) {
-        messaging.getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+        firebaseMessaging.getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
             public void onComplete(@NotNull Task<String> task) {
                 if (task.isSuccessful()) {
@@ -168,7 +176,7 @@ public class FCM implements FCMFunctions {
 
         for (String topic : topics) {
             try {
-                messaging.subscribeToTopic(topic);
+                firebaseMessaging.subscribeToTopic(topic);
                 printLog(() -> "FCM: subscribed to \"" + topic + "\"");
             } catch (Exception e) {
                 printLog(() -> "FCM: failed to subscribe to \"" + topic + "\"");
@@ -184,7 +192,7 @@ public class FCM implements FCMFunctions {
 
         for (String topic : topics) {
             try {
-                messaging.unsubscribeFromTopic(topic);
+                firebaseMessaging.unsubscribeFromTopic(topic);
                 printLog(() -> "FCM: unsubscribe from " + topic);
             } catch (Exception e) {
                 printLog(() -> "FCM: failed to unsubscribe from " + topic);
@@ -352,7 +360,7 @@ public class FCM implements FCMFunctions {
 
         var headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/json; charset=UTF-8");
-        headers.put("Authorization", "key=" + fcmParameters.firebaseProjectMessageKeyForSend);
+        headers.put("Authorization", "key=" + firebaseProjectMessageKey);
 
         var requestBody = notificationBody.toString();
 
@@ -371,7 +379,7 @@ public class FCM implements FCMFunctions {
         public final Map<String, String> headers;
         public final String body;
 
-        public HttpRequest(String url, Map<String, String> headers, String body) {
+        private HttpRequest(String url, Map<String, String> headers, String body) {
             this.url = url;
             this.headers = headers;
             this.body = body;
@@ -406,6 +414,7 @@ public class FCM implements FCMFunctions {
     //------------------------------------------------------------------------------
 
     private Bundle lastReceivedNotification;
+
     public Bundle lastReceivedNotification() {
         return lastReceivedNotification;
     }

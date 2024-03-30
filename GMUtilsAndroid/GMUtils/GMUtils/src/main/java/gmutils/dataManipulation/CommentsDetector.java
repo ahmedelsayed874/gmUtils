@@ -1,6 +1,4 @@
-package com.blogspot.gm4s.gmutileexample;
-
-import android.text.TextUtils;
+package gmutils.dataManipulation;
 
 import java.util.ArrayList;
 import java.util.List;

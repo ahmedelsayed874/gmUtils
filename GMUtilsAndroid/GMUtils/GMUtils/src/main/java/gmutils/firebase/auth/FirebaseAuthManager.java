@@ -29,7 +29,7 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
 
     //------------------------------------------------------------------------------------------------
 
-    private com.google.firebase.auth.FirebaseAuth fbAuth;
+    public com.google.firebase.auth.FirebaseAuth fbAuth;
 
     public FirebaseAuthManager() {
         try {

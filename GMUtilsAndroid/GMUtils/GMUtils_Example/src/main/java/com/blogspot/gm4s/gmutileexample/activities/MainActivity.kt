@@ -1,5 +1,6 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -18,6 +19,9 @@ import gmutils.DateOp
 import gmutils.Intents
 import gmutils.backgroundWorkers.LooperThread
 import gmutils.app.BaseApplication
+import gmutils.firebase.fcm.FCM
+import gmutils.firebase.fcm.FcmMessageHandler
+import gmutils.firebase.fcm.FcmNotificationProperties
 import gmutils.logger.Logger
 import gmutils.logger.LoggerAbs
 import gmutils.net.SimpleHTTPRequest
@@ -270,7 +274,7 @@ class MainActivity : BaseActivity() {
                 .addInputField {
                     it.setHint("input 3")
                 }
-                .setPositiveButtonCallback {INP ->
+                .setPositiveButtonCallback { INP ->
                     INP.forEach {
                         log("input dialog", it)
                     }
@@ -300,6 +304,8 @@ class MainActivity : BaseActivity() {
         (application as BaseApplication).checkBugsExist(this) {
             Log.d(this::class.java.name, "onCreate: ")
         }
+
+
     }
 
     fun log(tag: String, text: String?) {
@@ -335,7 +341,7 @@ class MainActivity : BaseActivity() {
         }
         //
         else if (requestCode == 12321) {
-            Logger.d().importAppBackup(thisActivity(), data!!.data) {b, it ->
+            Logger.d().importAppBackup(thisActivity(), data!!.data) { b, it ->
                 log("restore-app-backup", "restoring app backup finished: $it")
             }
         }
@@ -447,4 +453,28 @@ class MainActivity : BaseActivity() {
             log("Test Untrusted Connection", it.toString())
         })
     }
+
+    private fun fcmTest() {
+        FCM.instance().init(
+            NotificationHandler::class.java,
+            NotificationHandler(),
+            {
+                Logger.d().print { "new fcm token: $it" }
+            },
+            ""
+        )
+    }
+}
+
+class NotificationHandler : FcmMessageHandler {
+    override fun onMessageReceived(
+        context: Context?,
+        message: com.google.firebase.messaging.RemoteMessage?
+    ): FcmNotificationProperties {
+        return FcmNotificationProperties(
+            R.mipmap.ic_launcher,
+            R.color.gmAccent
+        );
+    }
+
 }

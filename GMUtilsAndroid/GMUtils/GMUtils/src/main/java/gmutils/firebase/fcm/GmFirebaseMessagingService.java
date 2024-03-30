@@ -9,17 +9,13 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 import gmutils.Notifier;
 import gmutils.app.BaseApplication;
-import gmutils.listeners.ActionCallback4;
 import gmutils.logger.Logger;
 import gmutils.storage.GeneralStorage;
 import gmutils.storage.SettingsStorage;
@@ -136,8 +132,8 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
         );
 
         String title;
-        if (!TextUtils.isEmpty(notificationProperties.getTitle())) {
-            title = notificationProperties.getTitle();
+        if (!TextUtils.isEmpty(notificationProperties.getCustomTitle())) {
+            title = notificationProperties.getCustomTitle();
         }
         //
         else if (message.getNotification() != null && !TextUtils.isEmpty(message.getNotification().getTitle())) {
@@ -149,8 +145,8 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         String body;
-        if (!TextUtils.isEmpty(notificationProperties.getBody())) {
-            body = notificationProperties.getBody();
+        if (!TextUtils.isEmpty(notificationProperties.getCustomBody())) {
+            body = notificationProperties.getCustomBody();
         }
         //
         else if (message.getNotification() != null && !TextUtils.isEmpty(message.getNotification().getBody())) {

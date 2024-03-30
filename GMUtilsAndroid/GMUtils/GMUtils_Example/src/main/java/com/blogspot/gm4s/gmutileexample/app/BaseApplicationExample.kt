@@ -5,10 +5,6 @@ import gmutils.app.BaseApplication
 
 class BaseApplicationExample : BaseApplication() {
 
-    override fun onPreCreate() {
-
-    }
-
     override fun onPostCreate() {
     }
 

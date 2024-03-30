@@ -1,4 +1,4 @@
-package gmutils.firebase.auth;
+package gmutils.firebase.auth.w2;
 
 import android.net.Uri;
 import android.util.Pair;
@@ -24,7 +24,7 @@ public class FirebaseAuth {
         void onAccountNotCreated(FirebaseAuth obj, String msg);
     }
 
-    private final com.google.firebase.auth.FirebaseAuth mAuth;
+    public final com.google.firebase.auth.FirebaseAuth fAuth;
 
     public static FirebaseAuth init() {
         return new FirebaseAuth();
@@ -41,16 +41,16 @@ public class FirebaseAuth {
         }
 
         // Initialize Firebase Auth
-        mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
+        fAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     }
 
     //----------------------------------------------------------------------------------------------
 
     public void createNewAccount(String email, String password, CreateAccountCallback callback) {
-        mAuth.createUserWithEmailAndPassword(email, password)
+        fAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
+                        FirebaseUser user = fAuth.getCurrentUser();
                         if (callback != null)
                             callback.onAccountCreated(FirebaseAuth.this, user);
 
@@ -74,12 +74,12 @@ public class FirebaseAuth {
     //----------------------------------------------------------------------------------------------
 
     public void signIn(String email, String password, ResultCallback<Pair<FirebaseUser, String>> callback) {
-        mAuth.signInWithEmailAndPassword(email, password)
+        fAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
+                            FirebaseUser user = fAuth.getCurrentUser();
                             if (callback != null)
                                 callback.invoke(new Pair<>(user, ""));
 
@@ -92,21 +92,21 @@ public class FirebaseAuth {
     }
 
     public void signOut() {
-        mAuth.signOut();
+        fAuth.signOut();
     }
 
     //----------------------------------------------------------------------------------------------
 
     public FirebaseUser getCurrentUser() {
-        return mAuth.getCurrentUser();
+        return fAuth.getCurrentUser();
     }
 
     public void changeLanguageCode(String langCode) {
-        mAuth.setLanguageCode(langCode);
+        fAuth.setLanguageCode(langCode);
     }
 
     public String getLanguageCode() {
-        return mAuth.getLanguageCode();
+        return fAuth.getLanguageCode();
     }
 
     public void changeAccountPhoto(Uri uri, ResultCallback<Boolean> callback) {
@@ -161,7 +161,7 @@ public class FirebaseAuth {
     public void sendPasswordResetEmail(ResultCallback<Boolean> callback) {
         String emailAddress = getCurrentUser().getEmail();
 
-        mAuth.sendPasswordResetEmail(emailAddress)
+        fAuth.sendPasswordResetEmail(emailAddress)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(Task<Void> task) {
