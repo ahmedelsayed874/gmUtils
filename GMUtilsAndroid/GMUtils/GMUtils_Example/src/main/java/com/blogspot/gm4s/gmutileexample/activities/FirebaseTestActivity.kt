@@ -286,7 +286,14 @@ class FirebaseTestActivity : BaseActivity() {
                     {
                         log(this.view.btn14.text.toString(), "FCM-TOKEN:: $it")
                     },
-                    "AAAAmUbdOeE:APA91bFkCMheNuX_CKBbHMbonnCjLip5uxilmb-GMRh9khyEA5LmK1osEd-eLhLtll1cBF8H9T6-1DLDptLO26gme63W3hfil5hLjlItrlaQph-tEclZIOFynzTaQ5eA_zpCJlJ0B7Qa"
+                    "AAAA
+mUbdOeE:
+APA91bFkCMheNuX
+_CKBbHMbonnCjLip5uxilmb
+-GMRh9khyEA5LmK1osEd
+-eLhLtll1cBF8H9T6
+-1DLDptLO26gme63W3hfil5hLjlItrlaQph
+-tEclZIOFynzTaQ5eA_zpCJlJ0B7Qa"
                 )
                 .subscribeToTopics(mutableListOf("test")) {
                     log(this.view.btn14.text.toString(), "TOPIC-SUBSCRIPTION:: $it")
