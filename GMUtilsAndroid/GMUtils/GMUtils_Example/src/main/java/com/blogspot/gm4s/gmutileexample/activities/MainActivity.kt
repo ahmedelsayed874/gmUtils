@@ -293,6 +293,11 @@ class MainActivity : BaseActivity() {
                 .show()
         }
 
+        this.view.btn20.text = "Firebase"
+        this.view.btn20.setOnClickListener {
+            startActivity(Intent(this, FirebaseTestActivity::class.java))
+        }
+
 
         //------------------------------------------------------------------------------------------
 
@@ -309,7 +314,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun log(tag: String, text: String?) {
-        this.view.logTv.append("$tag: $text\n")
+        this.view.logTv.append("$tag: $text\n---------------------\n\n")
     }
 
     fun onShowOrHideLogClick(view: View) {
@@ -321,6 +326,10 @@ class MainActivity : BaseActivity() {
             this.view.logSection.visibility = View.GONE
             (view as TextView).text = "Show Log"
         }
+    }
+
+    fun clearLog(v: View) {
+        this.view.logTv.text = ""
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -468,8 +477,8 @@ class MainActivity : BaseActivity() {
 
 class NotificationHandler : FcmMessageHandler {
     override fun onMessageReceived(
-        context: Context?,
-        message: com.google.firebase.messaging.RemoteMessage?
+        context: Context,
+        message: com.google.firebase.messaging.RemoteMessage
     ): FcmNotificationProperties {
         return FcmNotificationProperties(
             R.mipmap.ic_launcher,

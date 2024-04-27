@@ -10,13 +10,22 @@ import org.json.JSONObject;
 public class JsonBuilder {
     private final Object rootJson;
 
-    public JsonBuilder(@NotNull JSONObject rootJson) {
+    private JsonBuilder(@NotNull JSONObject rootJson) {
         this.rootJson = rootJson;
     }
 
-    public JsonBuilder(@NotNull JSONArray rootJson) {
+    private JsonBuilder(@NotNull JSONArray rootJson) {
         this.rootJson = rootJson;
     }
+
+    public static JsonBuilder ofJsonObject() {
+        return new JsonBuilder(new JSONObject());
+    }
+
+    public static JsonBuilder ofJsonArray() {
+        return new JsonBuilder(new JSONArray());
+    }
+
 
     //----------------------------------------------------------------------------------------------
 

@@ -169,27 +169,24 @@ public class FirebaseStorage implements IFirebaseStorage {
     public void delete(String atPath, ResultCallback<Response<Boolean>> callback) {
         atPath = _refinePath(atPath);
         var reference = storage.getReference(atPath);
-        reference.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    if (callback != null) {
-                        callback.invoke(Response.success(true));
+        reference.delete().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (callback != null) {
+                    callback.invoke(Response.success(true));
+                }
+            } else {
+                if (callback != null) {
+                    String erEn;
+                    String erAr;
+                    Exception exception = task.getException();
+                    if (exception != null) {
+                        erEn = exception.getMessage();
+                        erAr = erEn;
+                    } else {
+                        erEn = "Creating download link failed";
+                        erAr = "تعذر انشاء رابط للتحميل";
                     }
-                } else {
-                    if (callback != null) {
-                        String erEn;
-                        String erAr;
-                        Exception exception = task.getException();
-                        if (exception != null) {
-                            erEn = exception.getMessage();
-                            erAr = erEn;
-                        } else {
-                            erEn = "Creating download link failed";
-                            erAr = "تعذر انشاء رابط للتحميل";
-                        }
-                        callback.invoke(Response.failed(new StringSet(erEn, erAr)));
-                    }
+                    callback.invoke(Response.failed(new StringSet(erEn, erAr)));
                 }
             }
         });

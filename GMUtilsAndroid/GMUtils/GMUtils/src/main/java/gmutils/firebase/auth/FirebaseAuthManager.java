@@ -19,11 +19,8 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
     public static final String anonymousPassword = "pw0fAnonymous123";
 
     public static void anonymousLogin(ResultCallback<Response<FBUser>> callback) {
-        new FirebaseAuthManager().loginByEmail(anonymousUserName, anonymousPassword, new ResultCallback<Response<FBUser>>() {
-            @Override
-            public void invoke(Response<FBUser> result) {
-                if (callback != null) callback.invoke(result);
-            }
+        new FirebaseAuthManager().loginByEmail(anonymousUserName, anonymousPassword, result -> {
+            if (callback != null) callback.invoke(result);
         });
     }
 

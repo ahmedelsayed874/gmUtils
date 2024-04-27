@@ -200,6 +200,15 @@ public class SimpleHTTPRequest {
         public int getCode() {
             return code;
         }
+
+        @Override
+        public String toString() {
+            return "Response{" +
+                    "time=" + time +
+                    ", exception=" + exception +
+                    ", code=" + code +
+                    '}';
+        }
     }
 
     public static class TextResponse extends Response {
@@ -220,6 +229,14 @@ public class SimpleHTTPRequest {
         public String getText() {
             return text;
         }
+
+        @Override
+        public String toString() {
+            return "TextResponse{" +
+                    "text='" + text + "', " +
+                    super.toString() +
+                    '}';
+        }
     }
 
     public static class FileResponse extends Response {
@@ -239,6 +256,14 @@ public class SimpleHTTPRequest {
 
         public File getFile() {
             return file;
+        }
+
+        @Override
+        public String toString() {
+            return "FileResponse{" +
+                    "file=" + file + ", " +
+                    super.toString() +
+                    '}';
         }
     }
 

@@ -1,16 +1,19 @@
 package gmutils.firebase.database;
 
+import android.util.Pair;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 
+import gmutils.StringSet;
 import gmutils.firebase.Response;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 
-abstract class IFirebaseDatabaseOp {
+public abstract class IFirebaseDatabaseOp {
 
     /*public void isConnectionAvailable(ResultCallback<Boolean> callback) {
         FirebaseUtils.isConnectionAvailable(callback);
@@ -27,7 +30,7 @@ abstract class IFirebaseDatabaseOp {
     public abstract <T> void retrieveAll(
             FBFilterOption filterOption,
             Class<T> dataType,
-            ActionCallback<Object, List<T>> collectionSource,
+            ActionCallback<Object, List<T>> customConverter,
             ResultCallback<Response<List<T>>> callback
     );
 
@@ -36,6 +39,7 @@ abstract class IFirebaseDatabaseOp {
     public abstract <T> void retrieveSingle(
             String subNodePath,
             Class<T> dataType,
+            ActionCallback<Object, Pair<T, StringSet>> customConverter,
             ResultCallback<Response<T>> callback
     );
 
@@ -48,6 +52,14 @@ abstract class IFirebaseDatabaseOp {
         public Updates(T item, Boolean isNew) {
             this.item = item;
             this.isNew = isNew;
+        }
+
+        @Override
+        public String toString() {
+            return "Updates{" +
+                    "item=" + item +
+                    ", isNew=" + isNew +
+                    '}';
         }
     }
     

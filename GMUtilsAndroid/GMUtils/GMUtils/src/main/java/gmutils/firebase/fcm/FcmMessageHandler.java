@@ -8,5 +8,5 @@ import org.jetbrains.annotations.NotNull;
 
 public interface FcmMessageHandler {
     @NotNull
-    FcmNotificationProperties onMessageReceived(Context context, RemoteMessage message);
+    FcmNotificationProperties onMessageReceived(@NotNull Context context, @NotNull RemoteMessage message);
 }

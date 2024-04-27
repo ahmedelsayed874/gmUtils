@@ -22,13 +22,13 @@ public class FirebaseUtils {
 
     //region refinePath
     public static String refinePathFragmentNames(String path) throws Exception {
-        var frags = path.split("/");
+        var frags = path.split("/");//a,b
         StringBuilder pathBuilder = new StringBuilder();
         for (String value : frags) {
-            value += refineKeyName(value);
+            value = refineKeyName(value);
             if (value.isEmpty()) throw new Exception("invalid_node_name");
 
-            if (!pathBuilder.toString().isEmpty()) pathBuilder = new StringBuilder("/");
+            if (!pathBuilder.toString().isEmpty()) pathBuilder.append("/");
             pathBuilder.append(value);
         }
         path = pathBuilder.toString();

@@ -15,6 +15,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.jetbrains.annotations.NotNull;
 
 import gmutils.Notifier;
+import gmutils.R;
 import gmutils.app.BaseApplication;
 import gmutils.logger.Logger;
 import gmutils.storage.GeneralStorage;
@@ -112,10 +113,16 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
             }
         }
 
-        if (fcmNotificationProperties != null) {
+        if (fcmNotificationProperties == null) {
+            fcmNotificationProperties = new FcmNotificationProperties(
+                    0,
+                    R.color.gmAccent
+            );
+        }
+
             boolean en = SettingsStorage.Language.usingEnglish();
             releaseNotification(this, message, fcmNotificationProperties, en);
-        }
+
     }
 
     protected int releaseNotification(

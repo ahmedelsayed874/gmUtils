@@ -38,7 +38,6 @@ public interface FCMFunctions {
     void unsubscribeFromSavedTopics(List<String> exceptedTopics, ResultCallback<Boolean> callback);
 
     void sendMessageToSpecificDevice(
-            @Nullable Integer notificationId,
             String deviceToken,
             //
             String title,
@@ -54,7 +53,6 @@ public interface FCMFunctions {
     );
 
     void sendMessageToTopic(
-            @Nullable Integer notificationId,
             String topic,
             //
             String title,

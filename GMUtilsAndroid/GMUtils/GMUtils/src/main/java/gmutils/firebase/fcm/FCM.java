@@ -8,7 +8,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,10 +41,15 @@ public class FCM implements FCMFunctions {
     public final FirebaseMessaging firebaseMessaging;
     private ResultCallback<String> onDeviceTokenRefresh;
     private String firebaseProjectMessageKey;//get from the firebase console (settings) .... ex:: 'AAAAKbiiUMw:APA91...JRP';
+    private LoggerAbs logger;
 
     private FCM() {
-
         firebaseMessaging = FirebaseMessaging.getInstance();
+
+        LoggerAbs loggerTmp = logger;
+        logger = Logger.d();
+        printInstallationHint();
+        logger = loggerTmp;
     }
 
     private void printLog(LoggerAbs.ContentGetter content) {
@@ -54,37 +58,12 @@ public class FCM implements FCMFunctions {
         }
     }
 
-    public Logger logger;
+    public FCM setLogger(LoggerAbs logger) {
+        this.logger = logger;
+        return this;
+    }
 
-    //----------------------------------------------------------------
-
-    @Override
-    public FCMFunctions init(
-            @NotNull Class<? extends FcmMessageHandler> fcmMessageHandlerClass,
-            @NotNull FcmMessageHandler fcmMessageHandler,
-            @Nullable ResultCallback<String> onDeviceTokenRefresh,
-            @Nullable String firebaseProjectMessageKey
-    ) {
-        printLog(() -> "Fcm.init");
-
-        this.onDeviceTokenRefresh = onDeviceTokenRefresh;
-        this.firebaseProjectMessageKey = firebaseProjectMessageKey;
-
-        //--------------------------------------------------------------------------
-
-        GmFirebaseMessagingService.onMessage = fcmMessageHandler;
-
-        GmFirebaseMessagingService.registerBackgroundMessageHandler(fcmMessageHandlerClass);
-
-        if (onDeviceTokenRefresh != null) {
-            getDeviceToken((s) -> this.onDeviceTokenRefresh.invoke(s));
-
-            GmFirebaseMessagingService.onNewToken = (context, newToken) -> {
-                this.onDeviceTokenRefresh.invoke(newToken);
-            };
-        }
-
-        //region hints logs
+    public FCM printInstallationHint() {
         printLog(() -> "[Fcm.init()] -> " +
                 "don\"t forget to use FCM.instance.redirectToPendingScreen(); " +
                 "in your home screen"
@@ -127,19 +106,46 @@ public class FCM implements FCMFunctions {
                 "     //TODO don't do anything here" +
                 "}"
         );
-        //endregion
+
+        return this;
+    }
+
+    //----------------------------------------------------------------
+
+    @Override
+    public FCMFunctions init(
+            @NotNull Class<? extends FcmMessageHandler> fcmMessageHandlerClass,
+            @NotNull FcmMessageHandler fcmMessageHandler,
+            @Nullable ResultCallback<String> onDeviceTokenRefresh,
+            @Nullable String firebaseProjectMessageKey
+    ) {
+        printLog(() -> "Fcm.init");
+
+        this.onDeviceTokenRefresh = onDeviceTokenRefresh;
+        this.firebaseProjectMessageKey = firebaseProjectMessageKey;
+
+        //--------------------------------------------------------------------------
+
+        GmFirebaseMessagingService.onMessage = fcmMessageHandler;
+
+        GmFirebaseMessagingService.registerBackgroundMessageHandler(fcmMessageHandlerClass);
+
+        if (onDeviceTokenRefresh != null) {
+            getDeviceToken((s) -> this.onDeviceTokenRefresh.invoke(s));
+
+            GmFirebaseMessagingService.onNewToken = (context, newToken) -> {
+                this.onDeviceTokenRefresh.invoke(newToken);
+            };
+        }
 
         return this;
     }
 
     @Override
     public void getDeviceToken(ResultCallback<String> callback) {
-        firebaseMessaging.getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-            @Override
-            public void onComplete(@NotNull Task<String> task) {
-                if (task.isSuccessful()) {
-                    callback.invoke(task.getResult());
-                }
+        firebaseMessaging.getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                callback.invoke(task.getResult());
             }
         });
     }
@@ -165,21 +171,29 @@ public class FCM implements FCMFunctions {
     public void subscribeToTopics(List<String> topics, ResultCallback<Boolean> callback) {
         unsubscribeFromSavedTopics(topics, null);
 
-        if (topics == null || topics.isEmpty()) return;
+        if (topics == null || topics.isEmpty()) {
+            if (callback != null) callback.invoke(false);
+            return;
+        }
 
         var savedTopics = savedTopics();
         if (savedTopics.size() > 0) {
             topics.removeAll(savedTopics);
         }
 
-        if (topics.isEmpty()) return;
+        if (topics.isEmpty()) {
+            if (callback != null) callback.invoke(true);
+            return;
+        }
 
         for (String topic : topics) {
             try {
                 firebaseMessaging.subscribeToTopic(topic);
                 printLog(() -> "FCM: subscribed to \"" + topic + "\"");
+                if (callback != null) callback.invoke(true);
             } catch (Exception e) {
                 printLog(() -> "FCM: failed to subscribe to \"" + topic + "\"");
+                if (callback != null) callback.invoke(false);
             }
         }
 
@@ -188,14 +202,19 @@ public class FCM implements FCMFunctions {
 
     @Override
     public void unsubscribeFromTopics(List<String> topics, ResultCallback<Boolean> callback) {
-        if (topics == null) return;
+        if (topics == null) {
+            if (callback != null) callback.invoke(false);
+            return;
+        }
 
         for (String topic : topics) {
             try {
                 firebaseMessaging.unsubscribeFromTopic(topic);
                 printLog(() -> "FCM: unsubscribe from " + topic);
+                if (callback != null) callback.invoke(true);
             } catch (Exception e) {
                 printLog(() -> "FCM: failed to unsubscribe from " + topic);
+                if (callback != null) callback.invoke(false);
             }
         }
     }
@@ -209,10 +228,12 @@ public class FCM implements FCMFunctions {
         }
 
         if (savedTopics.size() > 0) {
-            unsubscribeFromTopics(savedTopics, null);
+            unsubscribeFromTopics(savedTopics, callback);
             for (var t : savedTopics) {
                 _prefs().removeFromList("FCM_Topics", t);
             }
+        } else {
+            if (callback != null) callback.invoke(true);
         }
     }
 
@@ -224,7 +245,6 @@ public class FCM implements FCMFunctions {
 
     @Override
     public void sendMessageToSpecificDevice(
-            @Nullable Integer notificationId,
             String deviceToken,
             //
             String title,
@@ -239,7 +259,6 @@ public class FCM implements FCMFunctions {
             ResultCallback<Boolean> callback
     ) {
         _sendMessageTo(
-                notificationId,
                 deviceToken,
                 //
                 title,
@@ -257,7 +276,6 @@ public class FCM implements FCMFunctions {
 
     @Override
     public void sendMessageToTopic(
-            @Nullable Integer notificationId,
             String topic,
             //
             String title,
@@ -272,8 +290,7 @@ public class FCM implements FCMFunctions {
             ResultCallback<Boolean> callback
     ) {
         _sendMessageTo(
-                notificationId,
-                "/topics/$topic",
+                "/topics/" + topic,
                 //
                 title,
                 message,
@@ -296,7 +313,6 @@ public class FCM implements FCMFunctions {
      * FIVE TOPICS IN ONE REQUEST
      */
     private void _sendMessageTo(
-            @Nullable Integer notificationId,
             String to,
             //
             String title,
@@ -310,12 +326,12 @@ public class FCM implements FCMFunctions {
             //
             ResultCallback<Boolean> callback
     ) {
-        JsonBuilder notificationBody = new JsonBuilder(new JSONObject());
+        JsonBuilder notificationBody = JsonBuilder.ofJsonObject();
         notificationBody.addString("to", to);
 
         notificationBody.addSubObject(
                 "android",
-                new JsonBuilder(new JSONObject())
+                JsonBuilder.ofJsonObject()
                         .addString("title", title)
                         .addString("body", message)
                         .addString("android_channel_id", channelId)
@@ -325,10 +341,10 @@ public class FCM implements FCMFunctions {
 
         notificationBody.addSubObject(
                 "apns",
-                new JsonBuilder(new JSONObject())
+                JsonBuilder.ofJsonObject()
                         .addSubObject(
                                 "aps",
-                                new JsonBuilder(new JSONObject())
+                                JsonBuilder.ofJsonObject()
                                         .addString("title", title)
                                         .addString("body", message)
                         )
@@ -348,7 +364,7 @@ public class FCM implements FCMFunctions {
         if (!isDataNotification) {
             notificationBody.addSubObject(
                     "notification",
-                    new JsonBuilder(new JSONObject())
+                    JsonBuilder.ofJsonObject()
                             .addString("title", title)
                             .addString("body", message)
             );
@@ -362,16 +378,13 @@ public class FCM implements FCMFunctions {
         headers.put("Content-Type", "application/json; charset=UTF-8");
         headers.put("Authorization", "key=" + firebaseProjectMessageKey);
 
-        var requestBody = notificationBody.toString();
+        var requestBody = notificationBody.toString(8).replace("\\/", "/");
 
-        httpExecuteDelegate.invoke(
-                new HttpRequest(
-                        url,
-                        headers,
-                        requestBody
-                ),
-                callback
-        );
+        HttpRequest httpRequest = new HttpRequest(url, headers, requestBody);
+
+        printLog(() -> "sendFcmNotification(" + httpRequest + ")");
+
+        httpExecuteDelegate.invoke(httpRequest, callback);
     }
 
     public static class HttpRequest {
@@ -384,6 +397,28 @@ public class FCM implements FCMFunctions {
             this.headers = headers;
             this.body = body;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder headersStr = new StringBuilder("{");
+            if (headers != null) {
+                for (String k : headers.keySet()) {
+                    if (headersStr.length() > 1) headersStr.append(",");
+                    headersStr
+                            .append("\n\t")
+                            .append(k)
+                            .append(": ")
+                            .append(headers.get(k));
+                }
+            }
+            headersStr.append("}");
+
+            return "HttpRequest{\n" +
+                    "url='" + url + "'\n" +
+                    ", headers=" + headersStr + "\n" +
+                    ", body='" + body + "'\n" +
+                    '}';
+        }
     }
 
     @NotNull
@@ -395,16 +430,12 @@ public class FCM implements FCMFunctions {
                 request.body,
                 null,
                 (request2, response) -> {
-                    //return response; //{ "message_id": 3598509887081198072 }
-                    printLog(() -> "" +
-                            "sendFcmNotification(notification: " + request.body + ")" +
-                            "\n\n-----------------------------------------------------------\n\n" +
-                            "RESPONSE::: " + response.getText()
-                    );
+                    printLog(() -> "sendFcmNotification(RESPONSE::: " + response + ")");
 
                     int code = response.getCode();
                     callback.invoke(code == 200);
-                });
+                }
+        );
 
         return null;
     };

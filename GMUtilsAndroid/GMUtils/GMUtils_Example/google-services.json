@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "658318899681",
+    "project_id": "gmutils-4a29b",
+    "storage_bucket": "gmutils-4a29b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:658318899681:android:99bdeac9fd1fe87a163aa0",
+        "android_client_info": {
+          "package_name": "com.blogspot.gm4s.gmutileexample"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkRFFKyO9484uj_Ze2Fbduo90_vnBzp00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
