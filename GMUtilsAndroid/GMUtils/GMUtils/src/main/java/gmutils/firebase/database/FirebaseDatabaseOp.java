@@ -1,16 +1,20 @@
 package gmutils.firebase.database;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -56,17 +60,13 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
 
     //----------------------------------------------------------------------------
 
-    private String _refineKeyName(String name) {
-        return FirebaseUtils.refineKeyName(name);
-    }
-
     private DatabaseReference _getReferenceOfNode(String subNodePath) {
         if (TextUtils.isEmpty(subNodePath)) return databaseReference;
 
         try {
             subNodePath = FirebaseUtils.refinePathFragmentNames(subNodePath);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Exception at _getReferenceOfNode: " + e);
         }
 
         var ref = databaseReference;
@@ -159,79 +159,99 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
             ActionCallback<Object, List<T>> customConverter,
             ResultCallback<Response<List<T>>> callback
     ) {
-        /*isConnectionAvailable(r -> {
-            if (r) {
-                retrieveAll2(filterOption, customConverter, callback);
-            } else {
-                callback.invoke(
-                        Response.failed(
-                                new StringSet("No Connection", "لا يوجد اتصال"),
-                                true
-                        )
-                );
-            }
-        });*/
-
         var ref = databaseReference;
+        Query query = null;
 
         if (filterOption != null) {
-            ref.orderByChild(filterOption.key);
+            query = ref.orderByChild(filterOption.key);
 
             if (filterOption.type == FBFilterTypes.Equal) {
                 if (filterOption.args instanceof String) {
-                    ref.equalTo((String) filterOption.args);
-                } else if (filterOption.args instanceof Double) {
-                    ref.equalTo((Double) filterOption.args);
-                } else if (filterOption.args instanceof Boolean) {
-                    ref.equalTo((Boolean) filterOption.args);
+                    query = ref.equalTo((String) filterOption.args);
                 }
-            } else if (filterOption.type == FBFilterTypes.GreaterThan) {
-                if (filterOption.args instanceof String) {
-                    ref.startAfter((String) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Double) {
-                    ref.startAfter((Double) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Boolean) {
-                    ref.startAfter((Boolean) filterOption.args, filterOption.key);
+                //
+                else if (filterOption.args instanceof Double) {
+                    query = ref.equalTo((Double) filterOption.args);
                 }
-            } else if (filterOption.type == FBFilterTypes.GreaterThanOrEqual) {
-                if (filterOption.args instanceof String) {
-                    ref.startAt((String) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Double) {
-                    ref.startAt((Double) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Boolean) {
-                    ref.startAt((Boolean) filterOption.args, filterOption.key);
+                //
+                else if (filterOption.args instanceof Boolean) {
+                    query = ref.equalTo((Boolean) filterOption.args);
                 }
-            } else if (filterOption.type == FBFilterTypes.LessThan) {
+            }
+            //
+            else if (filterOption.type == FBFilterTypes.GreaterThan) {
                 if (filterOption.args instanceof String) {
-                    ref.endBefore((String) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Double) {
-                    ref.endBefore((Double) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Boolean) {
-                    ref.endBefore((Boolean) filterOption.args, filterOption.key);
+                    query = query.startAfter((String) filterOption.args);
                 }
-            } else if (filterOption.type == FBFilterTypes.LessThanOrEqual) {
+                //
+                else if (filterOption.args instanceof Double) {
+                    query = query.startAfter((Double) filterOption.args);
+                }
+                //
+                else if (filterOption.args instanceof Boolean) {
+                    query = query.startAfter((Boolean) filterOption.args);
+                }
+            }
+            //
+            else if (filterOption.type == FBFilterTypes.GreaterThanOrEqual) {
                 if (filterOption.args instanceof String) {
-                    ref.endAt((String) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Double) {
-                    ref.endAt((Double) filterOption.args, filterOption.key);
-                } else if (filterOption.args instanceof Boolean) {
-                    ref.endAt((Boolean) filterOption.args, filterOption.key);
+                    query = query.startAt((String) filterOption.args);
+                }
+                //
+                else if (filterOption.args instanceof Double) {
+                    query = query.startAt((Double) filterOption.args);
+                }
+                //
+                else if (filterOption.args instanceof Boolean) {
+                    query = query.startAt((Boolean) filterOption.args);
+                }
+            }
+            //
+            else if (filterOption.type == FBFilterTypes.LessThan) {
+                if (filterOption.args instanceof String) {
+                    query = query.endBefore((String) filterOption.args);
+                }
+                //
+                else if (filterOption.args instanceof Double) {
+                    query = query.endBefore((Double) filterOption.args);
+                }
+                //
+                else if (filterOption.args instanceof Boolean) {
+                    query = query.endBefore((Boolean) filterOption.args);
+                }
+            }
+            //
+            else if (filterOption.type == FBFilterTypes.LessThanOrEqual) {
+                if (filterOption.args instanceof String) {
+                    query = query.endAt((String) filterOption.args);
+                }
+                //
+                else if (filterOption.args instanceof Double) {
+                    query = query.endAt((Double) filterOption.args);
+                }
+                //
+                else if (filterOption.args instanceof Boolean) {
+                    query = query.endAt((Boolean) filterOption.args);
                 }
             }
 
             if (filterOption.limit != null) {
-                ref.limitToFirst(filterOption.limit);
+                if (filterOption.limit.fromStart) {
+                    query = query.limitToFirst(filterOption.limit.count);
+                } else {
+                    query = query.limitToLast(filterOption.limit.count);
+                }
             }
         }
 
-        ref.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DataSnapshot snapshot = task.getResult();
-
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     backgroundTask().execute(() -> {
                         List<T> list = new ArrayList<>();
                         Object value = snapshot.getValue();
+
                         if (value != null) {
                             if (customConverter == null) {
                                 try {
@@ -243,29 +263,12 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                                     }
                                     //
                                     else if (value instanceof Map) {
-                                        try {
-                                            Map valueAsMap = (Map) value;
-                                            for (Object key : valueAsMap.keySet()) {
-                                                Object o = valueAsMap.get(key);
-                                                String json = new Gson().toJson(o);
-                                                T t = new Gson().fromJson(json, dataType);
-                                                list.add(t);
-                                            }
-//                                            String json = new Gson().toJson(((Map<?, ?>) value).values());
-//                                            Type type1 = new TypeToken<List<T>>() {
-//                                            }.getType();
-//                                            List<T> o = new Gson().fromJson(json, type1);
-
-//                                            GenericTypeIndicator<Map<String, T>> type = new GenericTypeIndicator<>() {};
-//                                            Map<String, T> map = snapshot.getValue(type);
-//                                            list.addAll(map.values());
-                                        } catch (Exception e) {
-                                            GenericTypeIndicator<Map<String, List<T>>> type = new GenericTypeIndicator<>() {
-                                            };
-                                            Map<String, List<T>> map = snapshot.getValue(type);
-                                            for (var entry : map.values()) {
-                                                list.addAll(entry);
-                                            }
+                                        Map valueAsMap = (Map) value;
+                                        for (Object key : valueAsMap.keySet()) {
+                                            Object o = valueAsMap.get(key);
+                                            String json = new Gson().toJson(o);
+                                            T t = new Gson().fromJson(json, dataType);
+                                            list.add(t);
                                         }
                                     }
                                     //
@@ -275,7 +278,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                                     }
                                 } catch (Exception e) {
                                     //Log.e("*****", e.getMessage() + "\n--------\n" + value);
-                                    throw new RuntimeException(e.getMessage() + "\n--------\n" + value);
+                                    throw new RuntimeException("Exception at retrieveAll: " + e.getMessage() + "\n--------\n" + value);
                                 }
                             }
                             //
@@ -290,7 +293,6 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                         callback.invoke(Response.success(list));
                     });
                 }
-
                 //
                 else {
                     callback.invoke(
@@ -299,12 +301,21 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                             )
                     );
                 }
-            } else {
-                callback.invoke(Response.failed(
-                        new StringSet(task.getException() != null ? task.getException().getMessage() : "Retrieving failed")
-                ));
             }
-        });
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.invoke(Response.failed(new StringSet(error.getMessage())));
+            }
+        };
+
+        if (query == null) {
+            ref.addListenerForSingleValueEvent(eventListener);
+        }
+        //
+        else {
+            query.addListenerForSingleValueEvent(eventListener);
+        }
     }
 
     protected BackgroundTaskAbs backgroundTask() {
@@ -330,19 +341,15 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
             ActionCallback<Object, Pair<T, StringSet>> customConverter,
             ResultCallback<Response<T>> callback
     ) {
-        /*if (isConnectionAvailable() == false) {
-            return Response.failed(new StringSet('No Connection', 'لا يوجد اتصال'), true);
-        }*/
-
-        ref.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DataSnapshot snapshot = task.getResult();
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 handleReceivedDataSnapshot(snapshot, dataType, customConverter, callback);
+            }
 
-            } else {
-                callback.invoke(Response.failed(
-                        new StringSet(task.getException() != null ? task.getException().getMessage() : "Retrieving failed")
-                ));
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.invoke(Response.failed(new StringSet(error.getMessage())));
             }
         });
     }
@@ -364,7 +371,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                         try {
                             obj = snapshot.getValue(dataType);
                         } catch (Exception e) {
-                            throw new RuntimeException(e.getMessage() + "\nValue: " + snapshot.getValue());
+                            throw new RuntimeException("Exception at handleReceivedDataSnapshot: " + e.getMessage() + "\nValue: " + snapshot.getValue());
                         }
 
                         if (obj != null) {

@@ -3,6 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('/Users/Shared/_Projects/GM4S/GMUtils/gmUtils/GMUtilsAndroid/GMUtils/GMUtils_Example/ks')
+            storePassword '123456'
+            keyAlias 'key0'
+            keyPassword '123456'
+        }
+    }
     namespace 'com.blogspot.gm4s.gmutileexample'
     compileSdk 34
     //buildToolsVersion "30.0.3"
@@ -24,6 +32,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -77,9 +86,11 @@ dependencies {
 
 
     //firebase
+    implementation 'com.google.firebase:firebase-analytics:21.6.2'
     implementation 'com.google.firebase:firebase-auth:22.3.1'
     implementation 'com.google.firebase:firebase-database:20.3.1'
     implementation 'com.google.firebase:firebase-storage:20.3.0'
     implementation 'com.google.firebase:firebase-messaging:23.4.1'
+    implementation 'com.google.firebase:firebase-config:21.6.3'
 
 }

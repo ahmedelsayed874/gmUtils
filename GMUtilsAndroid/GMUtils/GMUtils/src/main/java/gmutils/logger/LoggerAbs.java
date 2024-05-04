@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -326,8 +327,12 @@ public abstract class LoggerAbs {
     private LogFileWriter logFileWriter;
 
     public LoggerAbs(@Nullable String logId) {
+        this(logId, null);
+    }
+
+    public LoggerAbs(@Nullable String logId, LogConfigs logConfigs) {
         this.logId = logId;
-        this.logConfigs = new LogConfigs();
+        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
 
         numberOnInstances++;
     }
@@ -342,28 +347,24 @@ public abstract class LoggerAbs {
 
     private static int numberOnInstances = 0;
     private static LooperThread _looperThread;
-//    private List<Runnable> _tasks = new ArrayList<>();
 
     protected void runOnLoggerThread(Runnable task) {
-//        _tasks.add(task);
-
         if (_looperThread == null) {
             _looperThread = new LooperThread(
                     "logger-thread",
                     args -> {
-//                        if (_tasks.size() > 0) {
-//                            Runnable r = _tasks.remove(0);
-//                            if (r != null) r.run();
-//                        }
                         Object o = args.getMsg().obj;
                         if (o instanceof Runnable) {
-                            ((Runnable) o).run();
+                            try {
+                                ((Runnable) o).run();
+                            } catch (Exception ignored) {}
                         }
                     }
             );
         }
 
         Message message = Message.obtain();
+        //Message message = new Message();
         message.obj = task;
         _looperThread.sendMessage(message);
     }
@@ -606,59 +607,6 @@ public abstract class LoggerAbs {
     }
     //endregion write to files
 
-    //region read files xxxxxxxxxx
-    /*public void readFromCurrentSessionFile(Context context, ResultCallback<String> callback) {
-        runOnLoggerThread(() -> {
-            try {
-                //File file = createOrGetLogFile(context);
-                String text = getLogFileWriter(context).readFileContent();
-                runOnUiThread(() -> callback.invoke(text));
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> callback.invoke(""));
-            }
-        });
-    }*/
-
-    /*public void readAllFilesContents(Context context, ResultCallback<String> callback) {
-        runOnLoggerThread(() -> {
-            String content = "";
-
-            try {
-                File logFiles = getLogDirector(context);
-                String[] list = logFiles.list();
-
-                if (list != null) {
-                    for (String fileName : list) {
-                        try {
-                            File f = new File(logFiles.getPath() + "/" + fileName);
-                            LogFileWriter logFileWriter = new LogFileWriter(
-                                    f,
-                                    logConfigs.isFileContentEncryptEnabled(),
-                                    logConfigs.fileContentEncryptionKey
-                            );
-
-                            content += fileName;
-                            content += ":\n\n";
-                            content += logFileWriter.readFileContent();
-                            content += "\n\n+++++++++++ END_OF_FILE<" + fileName + "> +++++++++++++\n\n";
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            String finalContent = content;
-            runOnUiThread(() -> callback.invoke(finalContent));
-        });
-    }*/
-    //endregion read files
-
     //region list saved files
     public void getSavedFiles(Context context, ResultCallback<List<File>> callback) {
         File logFiles = getLogDirector(context);
@@ -831,7 +779,14 @@ public abstract class LoggerAbs {
     }
 
     public void exportAppBackup(Context context, boolean includePublicFiles, ResultCallback<ExportBackupFeedback> onComplete) {
+        printMethod();
+
         BackgroundTask.run(() -> {
+            StringBuilder log = new StringBuilder();
+            log.append("exportAppBackup(includePublicFiles: ")
+                    .append(includePublicFiles)
+                    .append(")\n");
+
             //region create Back up Directory
             String backupDirName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmm", true);
             File backupDir = new File(
@@ -845,6 +800,9 @@ public abstract class LoggerAbs {
                         backupDirName
                 );
                 if (!backupDir.exists() && !backupDir.mkdirs()) {
+                    log.append(">>> ERROR: COULDN'T CREATE BACKUP DIR\n");
+                    print(() -> log);
+
                     return new ExportBackupFeedback(
                             false,
                             "Couldn't create a folder in any of those paths:\n" +
@@ -854,6 +812,8 @@ public abstract class LoggerAbs {
                     );
                 }
             }
+
+            log.append(">>> backupDir created at: ").append(backupDir).append("\n");
             //endregion
 
             //region get desired dirs
@@ -886,6 +846,10 @@ public abstract class LoggerAbs {
                     }
                 }
             }
+
+            log.append(">>> target file pathes collected: ")
+                    .append(Arrays.toString(dirsToZip))
+                    .append("\n");
             //endregion
 
             //region create out zip files
@@ -907,6 +871,9 @@ public abstract class LoggerAbs {
                     outZipFiles[i].createNewFile();
                 }
             } catch (Exception e) {
+                log.append(">>> ERROR: COULDN'T CREATE ZIP FILE\n");
+                print(() -> log);
+
                 e.printStackTrace();
                 return new ExportBackupFeedback(
                         false,
@@ -915,14 +882,21 @@ public abstract class LoggerAbs {
                         null
                 );
             }
+            log.append(">>> files to zip created at: ")
+                    .append(Arrays.toString(outZipFiles))
+                    .append("\n");
             //endregion
 
             //region compress dirs
-            ZipFileUtils zipFileUtils = new ZipFileUtils();
+            log.append(">>> zipping PRIVATE files going to start....\n");
+
+            ZipFileUtils zipFileUtils = new ZipFileUtils(LoggerAbs.this);
             AtomicInteger idx = new AtomicInteger();
             for (int i = 0; i < outZipFiles.length; i++) {
                 File outZipFile = outZipFiles[i];
                 File dirToZip = dirsToZip[i];
+
+                log.append("\n--------------------\n>>> zipping [").append(dirToZip).append("]\n");
 
                 idx.set(i);
                 File finalBackupDir = backupDir;
@@ -930,36 +904,53 @@ public abstract class LoggerAbs {
                         outZipFile,
                         dirToZip,
                         (dir) -> {
+                            log.append(">>> >>> compress ask: exclude DIR (")
+                                    .append(dir.getName())
+                                    .append(")?\n");
+
                             if (idx.get() == 0) {//private
                                 if (dir.getName().equalsIgnoreCase("databases")) {
+                                    log.append(">>> >>> >>> NO\n");
                                     return false;
                                 }
                                 //
                                 else if (dir.getName().equalsIgnoreCase("files")) {
+                                    log.append(">>> >>> >>> NO\n");
                                     return false;
                                 }
                                 //
                                 else if (dir.getName().equalsIgnoreCase("shared_prefs")) {
+                                    log.append(">>> >>> >>> NO\n");
                                     return false;
                                 }
+
+                                log.append(">>> >>> >>> YES\n");
 
                                 return true;
                             }
                             //
                             else {
                                 if (dir.getPath().equalsIgnoreCase(finalBackupDir.getPath())) {
+                                    log.append(">>> >>> >>> YES\n");
                                     return true;
                                 }
 
+                                log.append(">>> >>> >>> NO\n");
                                 return false;
                             }
                         },
                         (file) -> {
+                            log.append(">>> >>> compress ask: exclude FILE (")
+                                    .append(file.getName())
+                                    .append(")? NO\n");
+
                             return false;
                         }
                 );
                 if (error != null) {
-                    writeToLog("exportAppBackup", error.error);
+                    log.append(">>> zipping files GOT-ERROR .. ").append(error.error).append("\n");
+                    print(() -> log);
+
                     return new ExportBackupFeedback(
                             false,
                             "Failed to backup [Reason: " + error.error + "]",
@@ -967,12 +958,17 @@ public abstract class LoggerAbs {
                     );
                 }
             }
+            log.append(">>> zipping PRIVATE files COMPLETED √√√\n");
             //endregion
 
             if (includePublicFiles) {
+                log.append(">>> zipping PUBLIC files going to start....");
+
                 try {
                     File outZipFile = new File(backupDir, mainBackupFileName);
                     outZipFile.createNewFile();
+
+                    log.append(">>> zipping PUBLIC files :: ").append(Arrays.toString(outZipFiles)).append("\n");
 
                     zipFileUtils.compressSync(
                             outZipFile,
@@ -981,6 +977,9 @@ public abstract class LoggerAbs {
                     );
 
                 } catch (Exception e) {
+                    log.append(">>> zipping PUBLIC files ... EXCEPTION: ").append(e.getMessage()).append("\n");
+                    print(() -> log);
+
                     e.printStackTrace();
                     return new ExportBackupFeedback(
                             false,
@@ -989,15 +988,17 @@ public abstract class LoggerAbs {
                             null
                     );
                 }
-
-                try {
-                    for (File zipFile : outZipFiles) {
-                        zipFile.delete();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
+
+            try {
+                for (File zipFile : outZipFiles) {
+                    zipFile.delete();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            print(() -> log);
 
             return new ExportBackupFeedback(
                     true,
@@ -1019,7 +1020,7 @@ public abstract class LoggerAbs {
                 return new Pair<Boolean, String>(false, "Couldn't open the file");
             }
 
-            ZipFileUtils zipFileUtils = new ZipFileUtils();
+            ZipFileUtils zipFileUtils = new ZipFileUtils(LoggerAbs.this);
             ZipFileUtils.Error error = zipFileUtils.extractSync(backupFileStream, cache);
             if (error != null) {
                 return new Pair<Boolean, String>(false, "Couldn't open the file: " + error.error);

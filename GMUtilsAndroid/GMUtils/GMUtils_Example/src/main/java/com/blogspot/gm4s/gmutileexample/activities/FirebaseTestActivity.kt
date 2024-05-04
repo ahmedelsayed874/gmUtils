@@ -7,10 +7,13 @@ import android.view.View
 import android.widget.TextView
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
-import com.google.firebase.messaging.RemoteMessage
+//import com.google.firebase.messaging.RemoteMessage
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import gmutils.DateOp
 import gmutils.collections.ListWrapper
 import gmutils.collections.MapWrapper
+import gmutils.firebase.configs.FBConfigSet
+import gmutils.firebase.configs.FirebaseConfigs
 import gmutils.firebase.database.FBFilterOption
 import gmutils.firebase.database.FBFilterTypes
 import gmutils.firebase.database.FirebaseDatabaseOp
@@ -19,6 +22,7 @@ import gmutils.firebase.fcm.FcmMessageHandler
 import gmutils.firebase.fcm.FcmNotificationProperties
 import gmutils.logger.LoggerAbs
 import gmutils.ui.activities.BaseActivity
+import gmutils.ui.dialogs.InputDialog
 import gmutils.ui.utils.ViewSource
 
 class FirebaseTestActivity : BaseActivity() {
@@ -75,7 +79,12 @@ class FirebaseTestActivity : BaseActivity() {
                     AnyData::class.java,
                     null
                 ) {
-                    log(this.view.btn3.text.toString(), "completed ... RESPONSE:: $it")
+                    log(
+                        this.view.btn3.text.toString(), "completed ... " +
+                                "\nRESPONSE:: " +
+                                "\n\terror: ${it.error}" +
+                                "\n\tdata: ${it.data.size}-items --- \n${it.data.joinToString { "$it\n" }}"
+                    )
                 }
 
         }
@@ -92,13 +101,15 @@ class FirebaseTestActivity : BaseActivity() {
                         FBFilterOption(
                             FBFilterTypes.GreaterThanOrEqual,
                             "id",
-                            node,
-                            5
+                            node
                         ),
                         AnyData::class.java,
                         null
                     ) {
-                        log(this.view.btn4.text.toString(), "completed ... RESPONSE:: $it")
+                        log(
+                            this.view.btn4.text.toString(), "completed ... " +
+                                    "RESPONSE:: ${it.data.size}-items --- \n$it"
+                        )
                     }
 
             }
@@ -117,50 +128,66 @@ class FirebaseTestActivity : BaseActivity() {
                         listOf<AnyData>()
                     }
                 ) {
-                    log(this.view.btn5.text.toString(), "completed ... RESPONSE:: $it")
+                    log(
+                        this.view.btn5.text.toString(), "completed ... " +
+                                "RESPONSE:: ${it.data.size}-items --- \n$it"
+                    )
                 }
 
         }
 
         this.view.btn6.text = "Retrieve Single (data)"
         this.view.btn6.setOnClickListener {
-            DateOp.getInstance().showDateThenTimePickerDialog(this) {
-                val node = it.formatDate("yyMMdd-HHmmss", true)
+            InputDialog.create(this)
+                .setMessage("Enter the value")
+                .setInputHint("value")
+                .setPositiveButtonCallback {
+                    val node = it[0]
 
-                log(this.view.btn6.text.toString(), "($node):: starting....")
+                    log(this.view.btn6.text.toString(), "($node):: starting....")
 
-                FirebaseDatabaseOp("data")
-                    .retrieveSingle(
-                        node,
-                        AnyData::class.java,
-                        null
-                    ) {
-                        log(this.view.btn6.text.toString(), "completed ... RESPONSE:: $it")
-                    }
+                    FirebaseDatabaseOp("data")
+                        .retrieveSingle(
+                            node,
+                            AnyData::class.java,
+                            null
+                        ) {
+                            log(this.view.btn6.text.toString(), "completed ... RESPONSE:: $it")
+                        }
 
-            }
+                    null
+                }
+                .show()
         }
 
         this.view.btn7.text = "Retrieve Single (data) (with custom converter)"
         this.view.btn7.setOnClickListener {
-            DateOp.getInstance().showDateThenTimePickerDialog(this) {
-                val node = it.formatDate("yyMMdd-HHmmss", true)
+            InputDialog.create(this)
+                .setMessage("Enter the value")
+                .setInputHint("value")
+                .setPositiveButtonCallback {
+                    val node = it[0]
 
-                log(this.view.btn7.text.toString(), "($node):: starting....")
+                    log(this.view.btn7.text.toString(), "($node):: starting....")
 
-                FirebaseDatabaseOp("data")
-                    .retrieveSingle(
-                        node,
-                        AnyData::class.java,
-                        {
-                            log(this.view.btn7.text.toString(), "Custom Converter Received:: $it")
-                            null
+                    FirebaseDatabaseOp("data")
+                        .retrieveSingle(
+                            node,
+                            AnyData::class.java,
+                            {
+                                log(
+                                    this.view.btn7.text.toString(),
+                                    "Custom Converter Received:: $it"
+                                )
+                                null
+                            }
+                        ) {
+                            log(this.view.btn7.text.toString(), "completed ... RESPONSE:: $it")
                         }
-                    ) {
-                        log(this.view.btn7.text.toString(), "completed ... RESPONSE:: $it")
-                    }
 
-            }
+                    null
+                }
+                .show()
         }
 
         /////////////////////////////////////////////////////////////////////////
@@ -271,46 +298,75 @@ class FirebaseTestActivity : BaseActivity() {
         this.view.btn1314sep.visibility = View.VISIBLE //......................
 
         this.view.btn14.text = "Send FCM message"
-        this.view.btn14.setOnClickListener {
-            log(this.view.btn14.text.toString(), "starting....")
-
-            FCM.instance()
-                .setLogger(LoggerImpl())
-                .init(
-                    FcmMessageHandlerImpl::class.java,
-                    FcmMessageHandlerImpl().also {
-                        it.onMessageReceived = {
-                            log(this.view.btn14.text.toString(), "FCM-MESSAGE-RECEIVED:: $it")
-                        }
-                    },
-                    {
-                        log(this.view.btn14.text.toString(), "FCM-TOKEN:: $it")
-                    },
-                    "AAAA
-mUbdOeE:
-APA91bFkCMheNuX
-_CKBbHMbonnCjLip5uxilmb
--GMRh9khyEA5LmK1osEd
--eLhLtll1cBF8H9T6
--1DLDptLO26gme63W3hfil5hLjlItrlaQph
--tEclZIOFynzTaQ5eA_zpCJlJ0B7Qa"
-                )
-                .subscribeToTopics(mutableListOf("test")) {
-                    log(this.view.btn14.text.toString(), "TOPIC-SUBSCRIPTION:: $it")
-
-                    FCM.instance().sendMessageToTopic(
-                        "test",
-                        "Title: test",
-                        "Message: test",
-                        false,
-                        "data: test",
-                        null, //"default",
-                        null,
-                    ) {
-                        log(this.view.btn14.text.toString(), "NOTIFICATION-SENT:: $it")
-                    }
-                }
-        }
+//        this.view.btn14.setOnClickListener {
+//            log(this.view.btn14.text.toString(), "starting....")
+//
+//            FirebaseConfigs.createInstance(listOf(
+//                object : FBConfigSet() {
+//                    val keyName = "fcm_message_key"
+//
+//                    override fun getDefaults() = mutableMapOf(keyName to "")
+//
+//                    override fun onFetchCompleteAbs(
+//                        firebaseRemoteConfig: FirebaseRemoteConfig?,
+//                        success: Boolean
+//                    ) {
+//                        val key = firebaseRemoteConfig?.getString(keyName)
+//
+//                        log(
+//                            this@FirebaseTestActivity.view.btn14.text.toString(),
+//                            "remote configurations fetched ($success)...." +
+//                                    "MessageKey: $key"
+//                        )
+//
+//                        if (success) {
+//                            FCM.instance()
+//                                .setLogger(LoggerImpl())
+//                                .init(
+//                                    FcmMessageHandlerImpl::class.java,
+//                                    FcmMessageHandlerImpl().also {
+//                                        it.onMessageReceived = {
+//                                            log(
+//                                                this@FirebaseTestActivity.view.btn14.text.toString(),
+//                                                "FCM-MESSAGE-RECEIVED:: $it"
+//                                            )
+//                                        }
+//                                    },
+//                                    {
+//                                        log(
+//                                            this@FirebaseTestActivity.view.btn14.text.toString(),
+//                                            "FCM-TOKEN:: $it"
+//                                        )
+//                                    },
+//                                    key
+//                                )
+//                                .subscribeToTopics(mutableListOf("test")) {
+//                                    log(
+//                                        this@FirebaseTestActivity.view.btn14.text.toString(),
+//                                        "TOPIC-SUBSCRIPTION:: $it"
+//                                    )
+//
+//                                    FCM.instance().sendMessageToTopic(
+//                                        "test",
+//                                        "Title: test",
+//                                        "Message: test",
+//                                        false,
+//                                        "data: test",
+//                                        null, //"default",
+//                                        null,
+//                                    ) {
+//                                        log(
+//                                            this@FirebaseTestActivity.view.btn14.text.toString(),
+//                                            "NOTIFICATION-SENT:: $it"
+//                                        )
+//                                    }
+//                                }
+//                        }
+//                    }
+//
+//                }
+//            ))
+//        }
 
         //
 
@@ -386,26 +442,65 @@ data class AnyData(
             listOfString = listOf(id, "#$id#", "**$id**"),
             listOfNum = listOf(1, 2, 4, 5, 6, 7, 8),
             mapOfString = mapOf(
-                "#0" to "0",
-                "#1" to "1",
-                "#2" to "2",
+                "+0" to "0",
+                "+1" to "1",
+                "+2" to "2",
             )
         )
     }
-}
 
-class FcmMessageHandlerImpl : FcmMessageHandler {
-    var onMessageReceived: ((RemoteMessage) -> Unit)? = null
+    constructor() : this(
+        "",
+        "",
+        0,
+        0,
+        0.0,
+        0f,
+        false,
+        emptyList(),
+        emptyList(),
+        mapOf()
+    )
 
-    override fun onMessageReceived(
-        context: Context,
-        message: RemoteMessage
-    ): FcmNotificationProperties {
-        onMessageReceived?.invoke(message)
-        return FcmNotificationProperties(
-            R.mipmap.ic_launcher,
-            R.color.gmAccent
-        )
+    override fun toString(): String {
+        return "AnyData(" +
+                "\n" +
+                "\tid='$id', " +
+                "\n" +
+                "\ttext='$text', " +
+                "\n" +
+                "\tintNum=$intNum, " +
+                "\n" +
+                "\tlongNum=$longNum, " +
+                "\n" +
+                "\tdoubleNum=$doubleNum, " +
+                "\n" +
+                "\tfloatNum=$floatNum, " +
+                "\n" +
+                "\tboolValue=$boolValue, " +
+                "\n" +
+                "\tlistOfString=$listOfString, " +
+                "\n" +
+                "\tlistOfNum=$listOfNum, \n" +
+                "\tmapOfString=$mapOfString\n" +
+                ")"
     }
 
+
 }
+
+//class FcmMessageHandlerImpl : FcmMessageHandler {
+//    var onMessageReceived: ((RemoteMessage) -> Unit)? = null
+//
+//    override fun onMessageReceived(
+//        context: Context,
+//        message: RemoteMessage
+//    ): FcmNotificationProperties {
+//        onMessageReceived?.invoke(message)
+//        return FcmNotificationProperties(
+//            R.mipmap.ic_launcher,
+//            R.color.gmAccent
+//        )
+//    }
+//
+//}

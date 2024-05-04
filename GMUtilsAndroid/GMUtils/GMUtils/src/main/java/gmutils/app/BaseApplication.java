@@ -247,7 +247,7 @@ public abstract class BaseApplication extends Application implements Application
             } catch (Throwable ignore) {
             }
 
-            if (!onAppCrashed(thread, throwable, defaultHandler)) {
+            if (!onAppCrashed(thread, throwable, stack.toString(), defaultHandler)) {
                 if (defaultHandler != null) {
                     defaultHandler.uncaughtException(thread, throwable);
                 }
@@ -255,7 +255,7 @@ public abstract class BaseApplication extends Application implements Application
         });
     }
 
-    protected boolean onAppCrashed(Thread thread, Throwable throwable, Thread.UncaughtExceptionHandler defaultHandler) {
+    protected boolean onAppCrashed(Thread thread, Throwable throwable, String stack, Thread.UncaughtExceptionHandler defaultHandler) {
         return false;
     }
 

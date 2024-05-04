@@ -156,7 +156,11 @@ public class ActivityFunctions implements BaseFragmentListener {
         }
 
         private void checkIntent(@NotNull  Intent intent) {
-            FCM.instance().onActivityStarted(intent.getExtras());
+            try {
+                Class<?> cls = Class.forName("com.google.firebase.messaging.FirebaseMessaging");
+                FCM.instance().onActivityStarted(intent.getExtras());
+            } catch (ClassNotFoundException ignored) {
+            }
         }
 
         public void onStart(Activity activity) {

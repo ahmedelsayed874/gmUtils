@@ -23,7 +23,9 @@ public interface IFirebaseAuthManager {
         public Map<String, Object> extraInfo;
     }
 
-    public static String DEFAULT_EMAIL_HOST_NAME = "myusers.org";
+    void setHostNameForNonEmailLogin(String hostName);
+
+    String getHostNameForNonEmailLogin();
 
     void registerByNonEmail(String text, String password, ResultCallback<Response<Boolean>> callback);
 
@@ -40,7 +42,7 @@ public interface IFirebaseAuthManager {
     default String formatNonEmailToEmail(String text) {
         text = FirebaseUtils.refinePhoneNumber(text);
         text = FirebaseUtils.refineKeyName(text);
-        return "un" + text + DEFAULT_EMAIL_HOST_NAME;
+        return "un" + text + getHostNameForNonEmailLogin();
     }
 
     //----------------------------------------------------------------------------

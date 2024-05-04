@@ -15,17 +15,6 @@ import gmutils.listeners.ResultCallback;
 
 
 public class FirebaseAuthManager implements IFirebaseAuthManager {
-    public static final String anonymousUserName = "anonymous@anonymous.com";
-    public static final String anonymousPassword = "pw0fAnonymous123";
-
-    public static void anonymousLogin(ResultCallback<Response<FBUser>> callback) {
-        new FirebaseAuthManager().loginByEmail(anonymousUserName, anonymousPassword, result -> {
-            if (callback != null) callback.invoke(result);
-        });
-    }
-
-    //------------------------------------------------------------------------------------------------
-
     public com.google.firebase.auth.FirebaseAuth fbAuth;
 
     public FirebaseAuthManager() {
@@ -39,6 +28,24 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
         }
 
         fbAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
+    }
+
+    //----------------------------------------------------------------------------
+
+    public static String DEFAULT_EMAIL_HOST_NAME = "myusers.org";
+
+    private String hostNameForNonEmailLogin;
+
+    @Override
+    public void setHostNameForNonEmailLogin(String hostName) {
+        hostNameForNonEmailLogin = hostName;
+    }
+
+    @Override
+    public String getHostNameForNonEmailLogin() {
+        return !TextUtils.isEmpty(hostNameForNonEmailLogin) ?
+                hostNameForNonEmailLogin :
+                DEFAULT_EMAIL_HOST_NAME;
     }
 
     //----------------------------------------------------------------------------

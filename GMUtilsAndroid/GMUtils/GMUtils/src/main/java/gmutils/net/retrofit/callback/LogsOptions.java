@@ -28,10 +28,11 @@ public class LogsOptions {
 
         public Replacements coverText(String text, CoverOptions coverOptions) {
             if (TextUtils.isEmpty(text)) return this;
-            //asd-efghi-jk
-            int x = text.length(); //12
 
             if (coverOptions != null) {
+                //asd-efghi-jk
+                int x = text.length(); //12
+
                 ActionCallback<Integer, String> coveredText = length -> {
                     if (length <= 0) return "";
                     else return String.format(
@@ -42,7 +43,6 @@ public class LogsOptions {
 
                 if (coverOptions instanceof CoverOptions.All) {
                     return replace(text, coveredText.invoke(x));
-
                 }
                 //
                 else if (coverOptions instanceof CoverOptions.AllExcept opt) {

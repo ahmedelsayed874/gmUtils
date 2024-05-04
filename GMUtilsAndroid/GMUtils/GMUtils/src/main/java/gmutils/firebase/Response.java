@@ -27,10 +27,10 @@ public class Response<DATA> {
 
     @Override
     public String toString() {
-        return "Response{" +
-                "data=" + data +
-                ", error=" + error +
-                ", connectionFailed=" + connectionFailed +
-                '}';
+        return "Response{\n" +
+                "\n\tdata=" + data +
+                ",\n\terror=" + error +
+                ",\n\tconnectionFailed=" + connectionFailed +
+                "\n}";
     }
 }

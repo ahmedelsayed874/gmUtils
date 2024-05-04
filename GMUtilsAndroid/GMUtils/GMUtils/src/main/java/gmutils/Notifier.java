@@ -234,10 +234,21 @@ public class Notifier {
                 pendingIntentFlag |= PendingIntent.FLAG_IMMUTABLE;
             }
 
+            int requestCode;
+            try {
+                requestCode = intent.getComponent().getClassName().hashCode();
+            } catch (Exception e1) {
+                try {
+                    requestCode = intent .getAction().hashCode();
+                } catch (Exception e2) {
+                    requestCode = ("" + title + body + "").hashCode();
+                }
+            }
+
             intent.addFlags(intentFlag);
             pendingIntent = PendingIntent.getActivity(
                     context,
-                    intent.getAction().hashCode() /* Request code */,
+                    requestCode,
                     intent,
                     pendingIntentFlag
             );

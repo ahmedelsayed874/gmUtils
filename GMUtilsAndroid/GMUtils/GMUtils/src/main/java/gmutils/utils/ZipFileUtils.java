@@ -16,6 +16,8 @@ import java.util.zip.ZipOutputStream;
 import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
+import gmutils.logger.Logger;
+import gmutils.logger.LoggerAbs;
 
 public class ZipFileUtils {
     public static class Error {
@@ -24,6 +26,23 @@ public class ZipFileUtils {
         public Error(String error) {
             this.error = error;
         }
+
+        @Override
+        public String toString() {
+            return "Error{" +
+                    "error='" + error + '\'' +
+                    '}';
+        }
+    }
+
+    private LoggerAbs logger;
+
+    public ZipFileUtils() {
+        this(Logger.d());
+    }
+
+    public ZipFileUtils(LoggerAbs logger) {
+        this.logger = logger;
     }
 
     public void compress(
@@ -33,12 +52,20 @@ public class ZipFileUtils {
             ActionCallback<File, Boolean> isFileExcluded,
             ResultCallback<Error> onComplete
     ) {
+        if (logger != null) logger.printMethod();
+
         BackgroundTask.run(() -> compressSync(
                 outZipFile,
                 rootDir,
                 isDirExcluded,
                 isFileExcluded
         ), (e) -> {
+            if (logger != null) logger.print(() -> {
+                return new StringBuilder()
+                        .append("compress() ---> COMPLETED")
+                        .append(" ... ERROR: ").append(e);
+
+            });
             if (onComplete != null) onComplete.invoke(e);
         });
     }
@@ -49,16 +76,35 @@ public class ZipFileUtils {
             ActionCallback<File, Boolean> isDirExcluded,
             ActionCallback<File, Boolean> isFileExcluded
     ) {
+        if (logger != null) logger.printMethod(() -> {
+            return new StringBuilder()
+                    .append("outZipFile: ")
+                    .append(outZipFile)
+                    .append(", rootDir: ")
+                    .append(rootDir);
+
+        });
+
         if (!outZipFile.exists()) {
             try {
                 outZipFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                if (logger != null) logger.print(() -> {
+                    return new StringBuilder()
+                            .append("compressSync() ---> EXCEPTION: ")
+                            .append(e.getMessage());
+
+                });
                 return new Error(e.getMessage());
             }
         }
 
         if (!rootDir.isDirectory()) {
+            if (logger != null) logger.print(() -> {
+                return new StringBuilder()
+                        .append("ERROR:: rootDir must be directory");
+
+            });
             return new Error("rootDir must be directory");
         }
 
@@ -83,8 +129,7 @@ public class ZipFileUtils {
                                 files.add(sf);
                             }
                         }
-                    }
-                    else if (sf.isDirectory()) {
+                    } else if (sf.isDirectory()) {
                         if (isDirExcluded == null) {
                             dirs.add(sf);
                         } else {
@@ -110,11 +155,18 @@ public class ZipFileUtils {
             File rootDirOfFiles,
             ResultCallback<Error> onComplete
     ) {
+        if (logger != null) logger.printMethod();
+
         BackgroundTask.run(() -> compressSync(
                 outZipFile,
                 toCompressFiles,
                 rootDirOfFiles
         ), (e) -> {
+            if (logger != null) logger.print(() -> {
+                return new StringBuilder()
+                        .append("compress() ---> COMPLETED .. ERROR: ").append(e);
+
+            });
             if (onComplete != null) onComplete.invoke(e);
         });
     }
@@ -124,16 +176,35 @@ public class ZipFileUtils {
             List<File> toCompressFiles,
             File rootDirOfFiles
     ) {
+        if (logger != null) logger.printMethod(() -> new StringBuilder()
+                .append("outZipFile: ").append(outZipFile)
+                .append(", toCompressFiles: ")
+                .append(toCompressFiles == null ? 0 : toCompressFiles.size())
+                .append("-files, ")
+                .append("rootDirOfFiles: ").append(rootDirOfFiles)
+
+        );
+
         if (!outZipFile.exists()) {
             try {
                 outZipFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                if (logger != null) logger.print(() -> {
+                    return new StringBuilder()
+                            .append("compressSync() ---> EXCEPTION: ")
+                            .append(e.getMessage());
+
+                });
                 return new Error(e.getMessage());
             }
         }
 
         if (!rootDirOfFiles.isDirectory()) {
+            if (logger != null) logger.print(() -> {
+                return new StringBuilder()
+                        .append("ERROR:: rootDir must be directory");
+
+            });
             return new Error("rootDir must be directory");
         }
 
@@ -187,8 +258,24 @@ public class ZipFileUtils {
                 return new Error(e.getMessage());
             }
 
+            if (logger != null) {
+                Error finalError = error;
+                logger.print(() -> {
+                    return new StringBuilder()
+                            .append("compressSync() --> COMPLETED .... ERROR: ")
+                            .append(finalError == null ? "-" : finalError.error);
+
+                });
+            }
+
             return error;
         } catch (IOException e) {
+            if (logger != null) logger.print(() -> {
+                return new StringBuilder()
+                        .append("EXCEPTION:: ")
+                        .append(e.getMessage());
+
+            });
             throw new RuntimeException(e);
         } finally {
             if (zipFileOutputStream != null) {
@@ -222,10 +309,13 @@ public class ZipFileUtils {
             File outputDir,
             ResultCallback<Error> onComplete
     ) {
+        if (logger != null) logger.printMethod();
+
         BackgroundTask.run(() -> extractSync(
                 fileInputStream,
                 outputDir
         ), (e) -> {
+            if (logger != null) logger.print(() -> "extract() ---> COMPLETED ... ERROR: " + e);
             if (onComplete != null) onComplete.invoke(e);
         });
     }
@@ -234,6 +324,8 @@ public class ZipFileUtils {
             InputStream fileInputStream,
             File outputDir
     ) {
+        if (logger != null) logger.printMethod(() -> "outputDir: " + outputDir);
+
         if (!outputDir.isDirectory()) {
             return new Error("outputDir must be directory");
         }
@@ -254,7 +346,7 @@ public class ZipFileUtils {
                 if (!outFile.exists()) try {
                     outFile.createNewFile();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if (logger != null) logger.print(() -> "extractSync() --> EXCEPTION: " + e.getMessage());
                     return new Error(e.getMessage());
                 }
 
@@ -270,8 +362,9 @@ public class ZipFileUtils {
 
                 zipInputStream.closeEntry();
             }
+
         } catch (Exception e) {
-            e.printStackTrace();
+            if (logger != null) logger.print(() -> "extractSync() --> EXCEPTION: " + e.getMessage());
             return new Error(e.getMessage());
         } finally {
             if (fileOutputStream != null) {

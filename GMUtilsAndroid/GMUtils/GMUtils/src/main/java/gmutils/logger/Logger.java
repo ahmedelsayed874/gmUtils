@@ -1,8 +1,12 @@
 package gmutils.logger;
 
 import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import gmutils.DateOp;
+import gmutils.net.retrofit.callback.LogsOptions;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -27,9 +31,26 @@ public class Logger extends LoggerAbs {
     }
 
     public static LoggerAbs instance(String logId) {
+        return instance(logId, (LogConfigs) null);
+    }
+
+    public static LoggerAbs instance(String logId, DateOp deadline) {
+        LogConfigs logsOptions = null;
+        if (deadline != null) {
+            logsOptions = new LogConfigs()
+                    .setLogDeadline(deadline)
+                    .setWriteLogsToFileDeadline(deadline);
+        }
+        return instance(logId, logsOptions);
+    }
+
+    public static LoggerAbs instance(String logId, LogConfigs logsOptions) {
         if (logId != null && logId.isEmpty()) logId = null;
         if (_instances == null) _instances = new HashMap<>();
-        if (!_instances.containsKey(logId)) _instances.put(logId, new Logger(logId));
+        if (!_instances.containsKey(logId)) {
+            Logger logger = new Logger(logId, logsOptions);
+            _instances.put(logId, logger);
+        }
         return _instances.get(logId);
     }
 
@@ -37,6 +58,10 @@ public class Logger extends LoggerAbs {
 
     private Logger(String logId) {
         super(logId);
+    }
+
+    private Logger(String logId, LogConfigs logConfigs) {
+        super(logId, logConfigs);
     }
 
     @Override

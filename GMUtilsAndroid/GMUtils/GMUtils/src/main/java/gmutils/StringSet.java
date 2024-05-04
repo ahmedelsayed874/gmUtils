@@ -74,4 +74,14 @@ public class StringSet {
     public boolean isNotEmpty() {
         return !isEmpty();
     }
+
+    @Override
+    public String toString() {
+        String kv = "";
+        for (String s : strings.keySet()) {
+            if (!kv.isEmpty()) kv += "\n";
+            kv += "\t" + s + ": " + strings.get(s);
+        }
+        return "StringSet{\n" + kv + "\n}";
+    }
 }

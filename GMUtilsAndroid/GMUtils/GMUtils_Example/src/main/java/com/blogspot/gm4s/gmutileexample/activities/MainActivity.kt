@@ -39,6 +39,7 @@ import okhttp3.OkHttpClient
 import java.io.InputStream
 import javax.net.ssl.X509TrustManager
 import kotlin.concurrent.thread
+import kotlin.random.Random
 
 class MainActivity : BaseActivity() {
 
@@ -237,6 +238,10 @@ class MainActivity : BaseActivity() {
             val b = f.createNewFile();*/
 
             log("get-app-backup", "getting app backup started")
+            Logger.d().logConfigs
+                .setLogDeadline(DateOp.getInstance().increaseDays(1))
+                .setWriteLogsToFileDeadline(DateOp.getInstance().increaseDays(1))
+
             Logger.d().exportAppBackup(thisActivity(), true) {
                 log("get-app-backup", "getting app backup finished: ${it.message}")
             }
@@ -357,18 +362,28 @@ class MainActivity : BaseActivity() {
     }
 
     fun testLogger() {
-        thread {
-            val logger = Logger.instance("testLogger")
-            logger.logConfigs.apply {
-                val dl = DateOp.getInstance().increaseDays(1)
-                setLogDeadline(dl)
-                setWriteLogsToFileDeadline(dl)
-            }
+        val logger = Logger.instance("testLogger")
+        logger.logConfigs.apply {
+            val dl = DateOp.getInstance().increaseDays(1)
+            setLogDeadline(dl)
+            setWriteLogsToFileDeadline(dl)
+        }
 
-            for (i in 0..10000) {
-                _testLogger(logger)
+        thread {
+            for (i in 0..200) {
+                //_testLogger(logger)
+                logger.print { "A$i," }
+//                Thread.sleep(Random.nextLong(1, 5))
             }
         }
+
+//        thread {
+//            for (i in 0..100) {
+//                //_testLogger(logger)
+//                logger.print { "B$i," }
+//                Thread.sleep(Random.nextLong(1, 5))
+//            }
+//        }
     }
 
     fun _testLogger(logger: LoggerAbs) {
@@ -393,12 +408,6 @@ class MainActivity : BaseActivity() {
         }
         r.run()
         logger.writeToFile(this) { "writing to file" }
-//        logger.readFromCurrentSessionFile(this) {
-//            Log.d("testLogger", "CURRENT FILE CONTENT: $it")
-//        }
-//        logger.readAllFilesContents(this) {
-//            Log.d("testLogger", "ALL FILES CONTENT: $it")
-//        }
     }
 
 
@@ -461,29 +470,6 @@ class MainActivity : BaseActivity() {
             Logger.d().print { it }
             log("Test Untrusted Connection", it.toString())
         })
-    }
-
-    private fun fcmTest() {
-        FCM.instance().init(
-            NotificationHandler::class.java,
-            NotificationHandler(),
-            {
-                Logger.d().print { "new fcm token: $it" }
-            },
-            ""
-        )
-    }
-}
-
-class NotificationHandler : FcmMessageHandler {
-    override fun onMessageReceived(
-        context: Context,
-        message: com.google.firebase.messaging.RemoteMessage
-    ): FcmNotificationProperties {
-        return FcmNotificationProperties(
-            R.mipmap.ic_launcher,
-            R.color.gmAccent
-        );
     }
 
 }
