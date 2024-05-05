@@ -245,6 +245,7 @@ class FirebaseTestActivity : BaseActivity() {
                 .listenToChanges(
                     null as String?,
                     AnyData::class.java,
+                    null,
                     {
                         log(this.view.btn11.text.toString(), "RESPONSE:: $it")
                     },
@@ -265,6 +266,7 @@ class FirebaseTestActivity : BaseActivity() {
                     .listenToChanges(
                         node,
                         AnyData::class.java,
+                        FBFilterOption(FBFilterTypes.GreaterThanOrEqual, "id", node),
                         {
                             log(this.view.btn12.text.toString(), "RESPONSE:: $it")
                         },
@@ -288,6 +290,7 @@ class FirebaseTestActivity : BaseActivity() {
                 .listenToChanges(
                     null as String?,
                     AnyData::class.java,
+                    null,
                     {
                         log(this.view.btn13.text.toString(), "RESPONSE:: $it")
                     },

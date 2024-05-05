@@ -66,36 +66,36 @@ public abstract class IFirebaseDatabaseOp {
     public abstract <T> void listenToChanges(
             String subNodePath,
             Class<T> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<T>> onChange,
-            //Runnable onDone,
             ResultCallback<String> onError
     );
 
     public abstract <N> void listenToChangesSpecific(
             String subNodePath,
             Class<N> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<N>> onChange,
-            //Runnable onDone,
             ResultCallback<String> onError
     );
 
     public abstract <T> void listenToAdding(
             String subNodePath,
             Class<T> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<T>> onAdd,
-            //Runnable onDone,
             ResultCallback<String> onError
     );
 
     public abstract <N> void listenToAddingSpecific(
             String subNodePath,
             Class<N> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<N>> onAdd,
-            //Runnable onDone,
             ResultCallback<String> onError
     );
 
-    public abstract void removeListeners(String subNodePath);
+    public abstract void removeListeners(String subNodePath, FBFilterOption filterOption);
 
     //----------------------------------------------------------------------------
 

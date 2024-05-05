@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -148,89 +149,6 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
             ResultCallback<Response<List<T>>> callback
     ) {
         var ref = databaseReference;
-        Query query = null;
-
-        if (filterOption != null) {
-            query = ref.orderByChild(filterOption.key);
-
-            if (filterOption.type == FBFilterTypes.Equal) {
-                if (filterOption.args instanceof String) {
-                    query = ref.equalTo((String) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Double) {
-                    query = ref.equalTo((Double) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Boolean) {
-                    query = ref.equalTo((Boolean) filterOption.args);
-                }
-            }
-            //
-            else if (filterOption.type == FBFilterTypes.GreaterThan) {
-                if (filterOption.args instanceof String) {
-                    query = query.startAfter((String) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Double) {
-                    query = query.startAfter((Double) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Boolean) {
-                    query = query.startAfter((Boolean) filterOption.args);
-                }
-            }
-            //
-            else if (filterOption.type == FBFilterTypes.GreaterThanOrEqual) {
-                if (filterOption.args instanceof String) {
-                    query = query.startAt((String) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Double) {
-                    query = query.startAt((Double) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Boolean) {
-                    query = query.startAt((Boolean) filterOption.args);
-                }
-            }
-            //
-            else if (filterOption.type == FBFilterTypes.LessThan) {
-                if (filterOption.args instanceof String) {
-                    query = query.endBefore((String) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Double) {
-                    query = query.endBefore((Double) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Boolean) {
-                    query = query.endBefore((Boolean) filterOption.args);
-                }
-            }
-            //
-            else if (filterOption.type == FBFilterTypes.LessThanOrEqual) {
-                if (filterOption.args instanceof String) {
-                    query = query.endAt((String) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Double) {
-                    query = query.endAt((Double) filterOption.args);
-                }
-                //
-                else if (filterOption.args instanceof Boolean) {
-                    query = query.endAt((Boolean) filterOption.args);
-                }
-            }
-
-            if (filterOption.limit != null) {
-                if (filterOption.limit.fromStart) {
-                    query = query.limitToFirst(filterOption.limit.count);
-                } else {
-                    query = query.limitToLast(filterOption.limit.count);
-                }
-            }
-        }
 
         ValueEventListener eventListener = new ValueEventListener() {
             @Override
@@ -305,11 +223,10 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
             }
         };
 
-        if (query == null) {
+        if (filterOption == null) {
             ref.addListenerForSingleValueEvent(eventListener);
-        }
-        //
-        else {
+        } else {
+            Query query = buildQuery(ref, filterOption);
             query.addListenerForSingleValueEvent(eventListener);
         }
     }
@@ -416,12 +333,14 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
     public <T> void listenToChanges(
             String subNodePath,
             Class<T> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<T>> onChange,
             ResultCallback<String> onError
     ) {
         listenToChanges(
                 _getReferenceOfNode(subNodePath),
                 dataType,
+                filterOption,
                 onChange,
                 onError
         );
@@ -430,6 +349,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
     public <T> void listenToChanges(
             @NotNull DatabaseReference ref,
             Class<T> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<T>> onChange,
             ResultCallback<String> onError
     ) {
@@ -437,6 +357,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                 ref,
                 true,
                 dataType,
+                filterOption,
                 onChange,
                 onError
         );
@@ -446,6 +367,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
     public <N> void listenToChangesSpecific(
             String subNodePath,
             Class<N> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<N>> onChange,
             ResultCallback<String> onError
     ) {
@@ -453,6 +375,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                 _getReferenceOfNode(subNodePath),
                 true,
                 dataType,
+                filterOption,
                 onChange,
                 onError
         );
@@ -462,12 +385,14 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
     public <T> void listenToAdding(
             String subNodePath,
             Class<T> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<T>> onAdd,
             ResultCallback<String> onError
     ) {
         listenToAdding(
                 _getReferenceOfNode(subNodePath),
                 dataType,
+                filterOption,
                 onAdd,
                 onError
         );
@@ -476,6 +401,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
     public <T> void listenToAdding(
             DatabaseReference ref,
             Class<T> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<T>> onAdd,
             ResultCallback<String> onError
     ) {
@@ -483,6 +409,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                 ref,
                 false,
                 dataType,
+                filterOption,
                 onAdd,
                 onError
         );
@@ -492,6 +419,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
     public <N> void listenToAddingSpecific(
             String subNodePath,
             Class<N> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<N>> onAdd,
             ResultCallback<String> onError
     ) {
@@ -499,6 +427,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                 _getReferenceOfNode(subNodePath),
                 false,
                 dataType,
+                filterOption,
                 onAdd,
                 onError
         );
@@ -508,6 +437,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
             DatabaseReference ref,
             boolean listenToAnyChange,
             Class<T2> dataType,
+            FBFilterOption filterOption,
             ResultCallback<Updates<T2>> onUpdate,
             ResultCallback<String> onError
     ) {
@@ -515,8 +445,10 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
             _listners = new HashMap<>();
         }
 
+        ChildEventListener listener;
+
         if (listenToAnyChange) {
-            var listener = new ChildEventListener() {
+            listener = new FirebaseDatabaseOp.ChildEventListener() {
                 @Override
                 void onAnyChange(DataSnapshot snapshot, Boolean wasAdded) {
                     onChangeReceived(dataType, snapshot, wasAdded, onUpdate, onError);
@@ -529,10 +461,10 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                     }
                 }
             };
-            _listners.put(getRefPath(ref), listener);
-            ref.addChildEventListener(listener);
-        } else {
-            var listener = new ChildEventListener() {
+        }
+        //
+        else {
+            listener = new FirebaseDatabaseOp.ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @androidx.annotation.Nullable String previousChildName) {
                     onChangeReceived(dataType, snapshot, true, onUpdate, onError);
@@ -545,8 +477,17 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                     }
                 }
             };
+        }
+
+        if (filterOption == null) {
             _listners.put(getRefPath(ref), listener);
             ref.addChildEventListener(listener);
+        }
+        //
+        else {
+            Query query = buildQuery(ref, filterOption);
+            _listners.put(getRefPath(ref) + "/" + filterOption.toString().hashCode(), listener);
+            query.addChildEventListener(listener);
         }
     }
 
@@ -593,18 +534,25 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
     //--------------------------------------------------------
 
     @Override
-    public void removeListeners(String subNodePath) {
+    public void removeListeners(String subNodePath, FBFilterOption filterOption) {
         var ref = _getReferenceOfNode(subNodePath);
-        removeListeners(ref);
+        removeListeners(ref, filterOption);
     }
 
-    public void removeListeners(DatabaseReference ref) {
+    public void removeListeners(DatabaseReference ref, FBFilterOption filterOption) {
         if (_listners == null) return;
 
-        var listener = _listners.get(getRefPath(ref));
-        if (listener == null) return;
+        if (filterOption == null) {
+            var listener = _listners.get(getRefPath(ref));
+            if (listener == null) return;
 
-        ref.removeEventListener(listener);
+            ref.removeEventListener(listener);
+        } else {
+            var listener = _listners.get(getRefPath(ref) + "/" + filterOption.toString().hashCode());
+            if (listener == null) return;
+
+            ref.removeEventListener(listener);
+        }
     }
 
     //--------------------------------------------------------
@@ -680,4 +628,89 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
         });
     }
 
+    //------------------------------------------------------------------------------
+
+    private Query buildQuery(DatabaseReference ref, @NotNull FBFilterOption filterOption) {
+        Query query = ref.orderByChild(filterOption.key);
+
+        if (filterOption.type == FBFilterTypes.Equal) {
+            if (filterOption.args instanceof String) {
+                query = ref.equalTo((String) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Double) {
+                query = ref.equalTo((Double) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Boolean) {
+                query = ref.equalTo((Boolean) filterOption.args);
+            }
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.GreaterThan) {
+            if (filterOption.args instanceof String) {
+                query = query.startAfter((String) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Double) {
+                query = query.startAfter((Double) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Boolean) {
+                query = query.startAfter((Boolean) filterOption.args);
+            }
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.GreaterThanOrEqual) {
+            if (filterOption.args instanceof String) {
+                query = query.startAt((String) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Double) {
+                query = query.startAt((Double) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Boolean) {
+                query = query.startAt((Boolean) filterOption.args);
+            }
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.LessThan) {
+            if (filterOption.args instanceof String) {
+                query = query.endBefore((String) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Double) {
+                query = query.endBefore((Double) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Boolean) {
+                query = query.endBefore((Boolean) filterOption.args);
+            }
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.LessThanOrEqual) {
+            if (filterOption.args instanceof String) {
+                query = query.endAt((String) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Double) {
+                query = query.endAt((Double) filterOption.args);
+            }
+            //
+            else if (filterOption.args instanceof Boolean) {
+                query = query.endAt((Boolean) filterOption.args);
+            }
+        }
+
+        if (filterOption.limit != null) {
+            if (filterOption.limit.fromStart) {
+                query = query.limitToFirst(filterOption.limit.count);
+            } else {
+                query = query.limitToLast(filterOption.limit.count);
+            }
+        }
+
+        return query;
+    }
 }
