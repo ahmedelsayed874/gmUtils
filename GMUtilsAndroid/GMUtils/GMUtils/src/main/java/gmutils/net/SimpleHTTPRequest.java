@@ -3,11 +3,14 @@ package gmutils.net;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,12 +25,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 
 import gmutils.listeners.ResultCallback;
@@ -58,8 +63,8 @@ public class SimpleHTTPRequest {
     public static final String MIME_TEXT_PLAIN = "text/plain";
 
     public static class Configurations {
-        private int connectionTimeOut = 30_000;
-        private int readTimeOut = 60_000;
+        private int connectionTimeOut = 10_000;
+        private int readTimeOut = 10_000;
         private String charEncoding = "UTF-8";
         public boolean allowCaching;
         private HostnameVerifier hostnameVerifier;
@@ -165,9 +170,10 @@ public class SimpleHTTPRequest {
     }
 
     public static class Response {
-        private final long time;
-        private Exception exception;
         private int code;
+        private final long time;
+        private String error;
+        private Exception exception;
 
         protected Response() {
             this.time = System.currentTimeMillis();
@@ -179,14 +185,25 @@ public class SimpleHTTPRequest {
             this.setException(other.exception);
         }
 
+        protected Response setCode(int code) {
+            this.code = code;
+            return this;
+        }
+
+        protected Response setError(String error) {
+            this.error = error;
+            return this;
+        }
+
         protected Response setException(Exception exception) {
             this.exception = exception;
             return this;
         }
 
-        protected Response setCode(int code) {
-            this.code = code;
-            return this;
+        //-----------------------------------------------------------
+
+        public int getCode() {
+            return code;
         }
 
         public long getTime() {
@@ -197,16 +214,17 @@ public class SimpleHTTPRequest {
             return exception;
         }
 
-        public int getCode() {
-            return code;
+        public String getError() {
+            return error;
         }
 
         @Override
         public String toString() {
             return "Response{" +
-                    "time=" + time +
+                    "code=" + code +
+                    ", time=" + time +
+                    ", error=" + error +
                     ", exception=" + exception +
-                    ", code=" + code +
                     '}';
         }
     }
@@ -334,29 +352,35 @@ public class SimpleHTTPRequest {
 
         protected void executeRequestInternally(ResultCallback<OutputStream> writeDataDelegate, ResultCallback2<Response, InputStream> resultCallback) {
             HttpURLConnection urlConnection = null;
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
+            BufferedInputStream inputStream = null;
+            BufferedOutputStream outputStream = null;
             Response response = new Response();
 
             try {
                 URL url = new URL(request.url);
                 URLConnection connection = url.openConnection();
 
-                if (connection instanceof HttpURLConnection) {
-                    urlConnection = (HttpURLConnection) connection;
-
-                } else {
-                    HttpsURLConnection urlConnectionSecure = (HttpsURLConnection) connection;
+                if (connection instanceof HttpsURLConnection urlConnectionSecure) {
                     urlConnection = urlConnectionSecure;
 
                     if (configurations.hostnameVerifier != null) {
                         urlConnectionSecure.setHostnameVerifier(configurations.hostnameVerifier);
+                    } else {
+                        urlConnectionSecure.setHostnameVerifier(new HostnameVerifier() {
+                            @Override
+                            public boolean verify(String hostname, SSLSession session) {
+                                return true;
+                            }
+                        });
                     }
 
                     if (configurations.sslSocketFactory != null) {
                         urlConnectionSecure.setSSLSocketFactory(configurations.sslSocketFactory);
                     }
-
+                }
+                //
+                else {
+                    urlConnection = (HttpURLConnection) connection;
                 }
 
                 urlConnection.setRequestMethod(request.method.name());
@@ -384,44 +408,67 @@ public class SimpleHTTPRequest {
 
                         urlConnection.setRequestProperty(CONTENT_TYPE, MIME_FORM_ENCODED);
                         urlConnection.setRequestProperty(CONTENT_LENGTH, "" + postDataBytes.length);
-                        //urlConnection.setRequestProperty(CONTENT_LANGUAGE, "en-US");
 
-                    } else if (request.postBody != null) {
+                    }
+                    //
+                    else if (request.postBody != null) {
                         postDataBytes = request.postBody.getBytes(configurations.charEncoding);
                         urlConnection.setRequestProperty(CONTENT_TYPE, MIME_APPLICATION_JSON);
+                        urlConnection.setRequestProperty(ACCEPT, MIME_APPLICATION_JSON);
                         urlConnection.setRequestProperty(CONTENT_LENGTH, "" + postDataBytes.length);
-                        //urlConnection.setRequestProperty(CONTENT_LANGUAGE, "en-US");
                     }
-                } else if (request.method == Method.DELETE) {
+                }
+                //
+                else if (request.method == Method.DELETE) {
                     urlConnection.setRequestProperty(CONTENT_TYPE, MIME_FORM_ENCODED);
                 }
 
                 if (request.headers != null) {
+                    //Map<String, List<String>> requestProperties = urlConnection.getRequestProperties();
+
                     Set<Map.Entry<String, String>> entries = request.headers.entrySet();
                     for (Map.Entry<String, String> entry : entries) {
-                        urlConnection.setRequestProperty(entry.getKey(), entry.getKey());
+                        urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
                     }
+
+                    //requestProperties = urlConnection.getRequestProperties();
+                    //requestProperties.size();
                 }
 
                 urlConnection.connect();
 
                 if (postDataBytes != null) {
-                    outputStream = urlConnection.getOutputStream();
+                    outputStream = new BufferedOutputStream( urlConnection.getOutputStream() );
                     outputStream.write(postDataBytes);
                 }
 
                 if (writeDataDelegate != null) {
-                    outputStream = urlConnection.getOutputStream();
+                    if (outputStream == null) {
+                        outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+                    }
                     writeDataDelegate.invoke(outputStream);
                 }
 
-                if (outputStream != null) outputStream.flush();
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
 
                 response.setCode(urlConnection.getResponseCode());
 
-                inputStream = urlConnection.getInputStream();
-
-                resultCallback.invoke(response, inputStream);
+                if (response.code == 200) {
+                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                    resultCallback.invoke(response, inputStream);
+                } else {
+                    try (var errorStream = urlConnection.getErrorStream()) {
+                        byte[] bytes = new byte[errorStream.available()];
+                        errorStream.read(bytes);
+                        String error = new String(bytes);
+                        response.setError(error);
+                    } catch (Exception e) {
+                        Log.i(getClass().getSimpleName(), e.getMessage());
+                    }
+                }
 
             } catch (Exception e) {
                 response.setException(e);
@@ -679,9 +726,9 @@ public class SimpleHTTPRequest {
         }
     }
 
-    /* ===================*/
+
     //==============================================================================================
-    /* ===================*/
+
 
     public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
         new TextRequestExecutor(new Request(url, Method.GET, null)).executeAsynchronously(callback);

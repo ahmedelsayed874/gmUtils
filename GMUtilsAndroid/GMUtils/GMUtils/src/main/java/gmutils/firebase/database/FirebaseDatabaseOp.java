@@ -66,7 +66,10 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
         try {
             subNodePath = FirebaseUtils.refinePathFragmentNames(subNodePath);
         } catch (Exception e) {
-            throw new RuntimeException("Exception at _getReferenceOfNode: " + e);
+            throw new RuntimeException(
+                    "Exception at _getReferenceOfNode: ",
+                    e
+            );
         }
 
         var ref = databaseReference;
@@ -134,21 +137,6 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
             }
         });
     }
-
-    /*public <T> void saveMultipleData(
-            DatabaseReference ref,
-            Map<String, T> nodesAndData,
-            ResultCallback<Response<Boolean>> callback
-    ) {
-        ref.setValue(nodesAndData)
-                .addOnSuccessListener(task -> {
-                    if (callback != null) callback.invoke(Response.success(true));
-                })
-                .addOnFailureListener(e -> {
-                    if (callback != null)
-                        callback.invoke(Response.failed(new StringSet(e.getMessage())));
-                });
-    }*/
 
     //----------------------------------------------------------------------------
 
@@ -264,9 +252,15 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                                     //
                                     else if (value instanceof Map) {
                                         Map valueAsMap = (Map) value;
-                                        for (Object key : valueAsMap.keySet()) {
-                                            Object o = valueAsMap.get(key);
-                                            String json = new Gson().toJson(o);
+                                        try {
+                                            for (Object key : valueAsMap.keySet()) {
+                                                Object o = valueAsMap.get(key);
+                                                String json = new Gson().toJson(o);
+                                                T t = new Gson().fromJson(json, dataType);
+                                                list.add(t);
+                                            }
+                                        } catch (Exception e) {
+                                            String json = new Gson().toJson(valueAsMap);
                                             T t = new Gson().fromJson(json, dataType);
                                             list.add(t);
                                         }
@@ -277,8 +271,10 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                                         list.add(value2);
                                     }
                                 } catch (Exception e) {
-                                    //Log.e("*****", e.getMessage() + "\n--------\n" + value);
-                                    throw new RuntimeException("Exception at retrieveAll: " + e.getMessage() + "\n--------\n" + value);
+                                    throw new RuntimeException(
+                                            "Exception at retrieveAll: " + e.getMessage() + "\n--------\n" + value,
+                                            e
+                                    );
                                 }
                             }
                             //
@@ -371,7 +367,10 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                         try {
                             obj = snapshot.getValue(dataType);
                         } catch (Exception e) {
-                            throw new RuntimeException("Exception at handleReceivedDataSnapshot: " + e.getMessage() + "\nValue: " + snapshot.getValue());
+                            throw new RuntimeException(
+                                    "Exception at handleReceivedDataSnapshot: " + e.getMessage() + "\nValue: " + snapshot.getValue(),
+                                    e
+                            );
                         }
 
                         if (obj != null) {

@@ -10,11 +10,11 @@ import org.json.JSONObject;
 public class JsonBuilder {
     private final Object rootJson;
 
-    private JsonBuilder(@NotNull JSONObject rootJson) {
+    public JsonBuilder(@NotNull JSONObject rootJson) {
         this.rootJson = rootJson;
     }
 
-    private JsonBuilder(@NotNull JSONArray rootJson) {
+    public JsonBuilder(@NotNull JSONArray rootJson) {
         this.rootJson = rootJson;
     }
 
@@ -199,8 +199,37 @@ public class JsonBuilder {
         return this;
     }
 
+    public JsonBuilder addSubObject(Object value) {
+        if (rootJson instanceof JSONArray) {
+            ((JSONArray) rootJson).put(value);
+        } else {
+            throw new IllegalStateException("rootJson is not JSONArray");
+        }
+
+        return this;
+    }
+
+    public JsonBuilder addSubObject(@NotNull String key, Object value) {
+        if (rootJson instanceof JSONObject) {
+            try {
+                ((JSONObject) rootJson).put(key, value);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return this;
+    }
+
     //------------------------------------------
 
+
+    /**
+     * @return JSONObject or JSONArray
+     */
+    public Object getJson() {
+        return rootJson;
+    }
 
     @NonNull
     @Override

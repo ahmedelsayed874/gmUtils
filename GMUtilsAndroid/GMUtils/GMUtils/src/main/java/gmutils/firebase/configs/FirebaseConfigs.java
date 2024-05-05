@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gmutils.DateOp;
 import gmutils.logger.LoggerAbs;
 
 public class FirebaseConfigs {
@@ -77,7 +78,8 @@ public class FirebaseConfigs {
                     .setDefaultsAsync(defaults)
                     .addOnCompleteListener((it) -> {
                         log(() -> "firebaseRemoteConfig.setDefaultsAsync:: " + it.isSuccessful());
-                        fetch();
+                        isFetchReady = true;
+                        if (isFetchCalled) fetch();
                     });
         }
         //
@@ -90,8 +92,30 @@ public class FirebaseConfigs {
         }
     }
 
-    private void fetch() {
+    private boolean isFetchReady = false;
+    private boolean isFetchCalled = false;
+
+    public void fetch() {
+        isFetchCalled = true;
+        if (!isFetchReady) return;
+
         log(() -> " FETCHING...");
+
+        int x = 0;
+        long tn = System.currentTimeMillis();
+        for (FBConfigSet configSet : configSets) {
+            if (configSet.fetchTime() != null) {
+                long d = tn - configSet.fetchTime();
+                if (d < configSet.getCacheInterval()) x++;
+            }
+        }
+        if (configSets.size() == x) {
+            log(() -> " DATA ALREADY FETCHED");
+            for (FBConfigSet configSet : configSets) {
+                configSet.onFetchComplete(firebaseRemoteConfig, false);
+            }
+            return;
+        }
 
         firebaseRemoteConfig.fetchAndActivate().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -114,10 +138,6 @@ public class FirebaseConfigs {
                 }
             }
         });
-    }
-
-    public void refresh() {
-        fetch();
     }
 
     public int getConfigSetsCount() {

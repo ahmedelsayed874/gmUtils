@@ -388,10 +388,14 @@
 
     <TextView
         style="@style/textView.click_effect"
+        android:background="@color/red"
+        android:textStyle="bold"
+        android:paddingStart="@dimen/size_50"
+        android:paddingEnd="@dimen/size_50"
         android:layout_gravity="center_horizontal"
         android:onClick="onShowOrHideLogClick"
         android:text="Show Log"
-        android:textColor="@color/blue3" />
+        android:textColor="@color/white" />
 
     <ScrollView
         android:id="@+id/logSection"

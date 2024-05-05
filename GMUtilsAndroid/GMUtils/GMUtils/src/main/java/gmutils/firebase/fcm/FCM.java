@@ -8,6 +8,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -251,7 +252,7 @@ public class FCM implements FCMFunctions {
             String message,
             //
             boolean isDataNotification,
-            String dataPayload,
+            JSONObject dataPayload,
             //
             String channelId,
             String soundFileName,
@@ -282,7 +283,7 @@ public class FCM implements FCMFunctions {
             String message,
             //
             boolean isDataNotification,
-            String dataPayload,
+            JSONObject dataPayload,
             //
             String channelId,
             String soundFileName,
@@ -319,7 +320,7 @@ public class FCM implements FCMFunctions {
             String message,
             //
             boolean isDataNotification,
-            String dataPayload,
+            JSONObject dataPayload,
             //
             String channelId,
             String soundFileName,
@@ -350,16 +351,13 @@ public class FCM implements FCMFunctions {
                         )
                         .addString("title", title)
                         .addString("body", message)
-                        .addString(PAYLOAD_KEY_NAME, dataPayload)
+                        .addSubObject(PAYLOAD_KEY_NAME, dataPayload)
                         .addString("sound", soundFileName)
         );
 
         notificationBody.addString("priority", "high"); //or normal
 
-        notificationBody.addString(
-                PAYLOAD_KEY_NAME,//must be "data",
-                dataPayload
-        );
+        notificationBody.addSubObject(PAYLOAD_KEY_NAME, dataPayload);
 
         if (!isDataNotification) {
             notificationBody.addSubObject(
@@ -374,11 +372,11 @@ public class FCM implements FCMFunctions {
 
         var url = "https://fcm.googleapis.com/fcm/send";
 
-        var headers = new HashMap<String, String>();
+        HashMap<String, String> headers =new HashMap<String, String>();
         headers.put("Content-Type", "application/json; charset=UTF-8");
         headers.put("Authorization", "key=" + firebaseProjectMessageKey);
 
-        var requestBody = notificationBody.toString(8).replace("\\/", "/");
+        var requestBody = notificationBody.toString();//.replace("\\/", "/");
 
         HttpRequest httpRequest = new HttpRequest(url, headers, requestBody);
 

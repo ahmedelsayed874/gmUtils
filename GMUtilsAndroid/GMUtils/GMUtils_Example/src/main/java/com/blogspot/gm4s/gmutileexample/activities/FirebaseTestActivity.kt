@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.TextView
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
+import com.google.firebase.messaging.RemoteMessage
 //import com.google.firebase.messaging.RemoteMessage
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import gmutils.DateOp
@@ -20,10 +21,13 @@ import gmutils.firebase.database.FirebaseDatabaseOp
 import gmutils.firebase.fcm.FCM
 import gmutils.firebase.fcm.FcmMessageHandler
 import gmutils.firebase.fcm.FcmNotificationProperties
+import gmutils.json.JsonBuilder
 import gmutils.logger.LoggerAbs
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.InputDialog
 import gmutils.ui.utils.ViewSource
+import org.json.JSONArray
+import org.json.JSONObject
 
 class FirebaseTestActivity : BaseActivity() {
     override fun getViewSource(inflater: LayoutInflater) =
@@ -192,7 +196,7 @@ class FirebaseTestActivity : BaseActivity() {
 
         /////////////////////////////////////////////////////////////////////////
 
-        this.view.btn0809sep.visibility = View.VISIBLE //......................
+        this.view.btn0708sep.visibility = View.VISIBLE //......................
 
         this.view.btn8.text = "Add New Data Directly"
         this.view.btn8.setOnClickListener {
@@ -298,75 +302,75 @@ class FirebaseTestActivity : BaseActivity() {
         this.view.btn1314sep.visibility = View.VISIBLE //......................
 
         this.view.btn14.text = "Send FCM message"
-//        this.view.btn14.setOnClickListener {
-//            log(this.view.btn14.text.toString(), "starting....")
-//
-//            FirebaseConfigs.createInstance(listOf(
-//                object : FBConfigSet() {
-//                    val keyName = "fcm_message_key"
-//
-//                    override fun getDefaults() = mutableMapOf(keyName to "")
-//
-//                    override fun onFetchCompleteAbs(
-//                        firebaseRemoteConfig: FirebaseRemoteConfig?,
-//                        success: Boolean
-//                    ) {
-//                        val key = firebaseRemoteConfig?.getString(keyName)
-//
-//                        log(
-//                            this@FirebaseTestActivity.view.btn14.text.toString(),
-//                            "remote configurations fetched ($success)...." +
-//                                    "MessageKey: $key"
-//                        )
-//
-//                        if (success) {
-//                            FCM.instance()
-//                                .setLogger(LoggerImpl())
-//                                .init(
-//                                    FcmMessageHandlerImpl::class.java,
-//                                    FcmMessageHandlerImpl().also {
-//                                        it.onMessageReceived = {
-//                                            log(
-//                                                this@FirebaseTestActivity.view.btn14.text.toString(),
-//                                                "FCM-MESSAGE-RECEIVED:: $it"
-//                                            )
-//                                        }
-//                                    },
-//                                    {
-//                                        log(
-//                                            this@FirebaseTestActivity.view.btn14.text.toString(),
-//                                            "FCM-TOKEN:: $it"
-//                                        )
-//                                    },
-//                                    key
-//                                )
-//                                .subscribeToTopics(mutableListOf("test")) {
-//                                    log(
-//                                        this@FirebaseTestActivity.view.btn14.text.toString(),
-//                                        "TOPIC-SUBSCRIPTION:: $it"
-//                                    )
-//
-//                                    FCM.instance().sendMessageToTopic(
-//                                        "test",
-//                                        "Title: test",
-//                                        "Message: test",
-//                                        false,
-//                                        "data: test",
-//                                        null, //"default",
-//                                        null,
-//                                    ) {
-//                                        log(
-//                                            this@FirebaseTestActivity.view.btn14.text.toString(),
-//                                            "NOTIFICATION-SENT:: $it"
-//                                        )
-//                                    }
-//                                }
-//                        }
-//                    }
-//
-//                }
-//            ))
-//        }
+        this.view.btn14.setOnClickListener {
+            log(this.view.btn14.text.toString(), "starting....")
+
+            FirebaseConfigs.createInstance(listOf(
+                object : FBConfigSet() {
+                    val keyName = "fcm_message_key"
+
+                    override fun getDefaults() = mutableMapOf(keyName to "")
+
+                    override fun onFetchCompleteAbs(
+                        firebaseRemoteConfig: FirebaseRemoteConfig?,
+                        success: Boolean
+                    ) {
+                        val key = firebaseRemoteConfig?.getString(keyName)
+
+                        log(
+                            this@FirebaseTestActivity.view.btn14.text.toString(),
+                            "remote configurations fetched ($success)...." +
+                                    "MessageKey: $key"
+                        )
+
+                        if (success) {
+                            FCM.instance()
+                                .setLogger(LoggerImpl())
+                                .init(
+                                    FcmMessageHandlerImpl::class.java,
+                                    FcmMessageHandlerImpl().also {
+                                        it.onMessageReceived = {
+                                            log(
+                                                this@FirebaseTestActivity.view.btn14.text.toString(),
+                                                "FCM-MESSAGE-RECEIVED:: $it"
+                                            )
+                                        }
+                                    },
+                                    {
+                                        log(
+                                            this@FirebaseTestActivity.view.btn14.text.toString(),
+                                            "FCM-TOKEN:: $it"
+                                        )
+                                    },
+                                    key
+                                )
+                                .subscribeToTopics(mutableListOf("test")) {
+                                    log(
+                                        this@FirebaseTestActivity.view.btn14.text.toString(),
+                                        "TOPIC-SUBSCRIPTION:: $it"
+                                    )
+
+                                    FCM.instance().sendMessageToTopic(
+                                        "test",
+                                        "Title: test",
+                                        "Message: test",
+                                        false,
+                                        JsonBuilder.ofJsonObject().addString("data", "test").json as JSONObject,
+                                        null, //"default",
+                                        null,
+                                    ) {
+                                        log(
+                                            this@FirebaseTestActivity.view.btn14.text.toString(),
+                                            "NOTIFICATION-SENT:: $it"
+                                        )
+                                    }
+                                }
+                        }
+                    }
+
+                }
+            )).fetch();
+        }
 
         //
 
@@ -489,18 +493,18 @@ data class AnyData(
 
 }
 
-//class FcmMessageHandlerImpl : FcmMessageHandler {
-//    var onMessageReceived: ((RemoteMessage) -> Unit)? = null
-//
-//    override fun onMessageReceived(
-//        context: Context,
-//        message: RemoteMessage
-//    ): FcmNotificationProperties {
-//        onMessageReceived?.invoke(message)
-//        return FcmNotificationProperties(
-//            R.mipmap.ic_launcher,
-//            R.color.gmAccent
-//        )
-//    }
-//
-//}
+class FcmMessageHandlerImpl : FcmMessageHandler {
+    var onMessageReceived: ((RemoteMessage) -> Unit)? = null
+
+    override fun onMessageReceived(
+        context: Context,
+        message: RemoteMessage
+    ): FcmNotificationProperties {
+        onMessageReceived?.invoke(message)
+        return FcmNotificationProperties(
+            R.mipmap.ic_launcher,
+            R.color.gmAccent
+        )
+    }
+
+}

@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public interface FCMFunctions {
             String message,
             //
             boolean isDataNotification,
-            String dataPayload,
+            JSONObject dataPayload,
             //
             String channelId,
             String soundFileName,
@@ -59,7 +60,7 @@ public interface FCMFunctions {
             String message,
             //
             boolean isDataNotification,
-            String dataPayload,
+            JSONObject dataPayload,
             //
             String channelId,
             String soundFileName,

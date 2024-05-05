@@ -9,16 +9,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
+import gmutils.DateOp;
+
 public abstract class FBConfigSet {
     public abstract Map<String, Object> getDefaults();
 
-    private Boolean isFetchCompleted = null;
+    private long cacheInterval = DateOp.ONE_MINUTE_MILLIS * 5;
+    private Long fetchTime = null;
 
     void onFetchComplete(@Nullable FirebaseRemoteConfig firebaseRemoteConfig, boolean success) {
         onFetchCompleteAbs(firebaseRemoteConfig, success);
 
         if (firebaseRemoteConfig != null) {
-            isFetchCompleted = success;
+            fetchTime = success ? System.currentTimeMillis() : null;
         }
 
         ((MutableLiveData) configs).postValue(this);
@@ -26,8 +29,16 @@ public abstract class FBConfigSet {
 
     protected abstract void onFetchCompleteAbs(@Nullable FirebaseRemoteConfig firebaseRemoteConfig, boolean success);
 
-    public Boolean isFetchCompleted() {
-        return isFetchCompleted;
+    public void setCacheInterval(long cacheInterval) {
+        this.cacheInterval = cacheInterval;
+    }
+
+    public long getCacheInterval() {
+        return cacheInterval;
+    }
+
+    public Long fetchTime() {
+        return fetchTime;
     }
 
     //----------------------------------
