@@ -32,28 +32,27 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
 
     //----------------------------------------------------------------------------
 
-    public static String DEFAULT_EMAIL_HOST_NAME = "myusers.org";
-
+    /*public static String DEFAULT_EMAIL_HOST_NAME = "myusers.org";
     private String hostNameForNonEmailLogin;
-
     @Override
     public void setHostNameForNonEmailLogin(String hostName) {
         hostNameForNonEmailLogin = hostName;
-    }
-
-    @Override
+    }*/
+    /*@Override
     public String getHostNameForNonEmailLogin() {
         return !TextUtils.isEmpty(hostNameForNonEmailLogin) ?
                 hostNameForNonEmailLogin :
                 DEFAULT_EMAIL_HOST_NAME;
-    }
+    }*/
 
-    //----------------------------------------------------------------------------
-
-    @Override
+    /*@Override
     public void registerByNonEmail(String text, String password, ResultCallback<Response<Boolean>> callback) {
         registerByEmail(formatNonEmailToEmail(text), password, callback);
-    }
+    }*/
+    /*@Override
+    public void loginByNonEmail(String text, String password, ResultCallback<Response<FBUser>> callback) {
+        loginByEmail(formatNonEmailToEmail(text), password, callback);
+    }*/
 
     @Override
     public void registerByEmail(String email, String password, ResultCallback<Response<Boolean>> callback) {
@@ -79,11 +78,6 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
                 }
             }
         });
-    }
-
-    @Override
-    public void loginByNonEmail(String text, String password, ResultCallback<Response<FBUser>> callback) {
-        loginByEmail(formatNonEmailToEmail(text), password, callback);
     }
 
     @Override
@@ -126,8 +120,7 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
     //----------------------------------------------------------------------------
 
     @Override
-    public void startPasswordReset(String identifier, boolean isEmailIdentifier, ResultCallback<Response<Boolean>> callback) {
-        String email = isEmailIdentifier ? identifier : formatNonEmailToEmail(identifier);
+    public void startPasswordReset(String email, ResultCallback<Response<Boolean>> callback) {
         fbAuth.sendPasswordResetEmail(email.trim()).addOnCompleteListener(task -> {
             if (callback != null) {
                 if (task.isSuccessful()) {
@@ -153,8 +146,7 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
     }
 
     @Override
-    public void verifyResetPasswordCode(String identifier, boolean isEmailIdentifier, String resetPasswordCode, ResultCallback<Response<Boolean>> callback) {
-        String email = isEmailIdentifier ? identifier : formatNonEmailToEmail(identifier);
+    public void verifyResetPasswordCode(String email, String resetPasswordCode, ResultCallback<Response<Boolean>> callback) {
         fbAuth.verifyPasswordResetCode(resetPasswordCode).addOnCompleteListener(task -> {
             var emailRelatedCode = task.getResult();
             if (TextUtils.equals(emailRelatedCode, email)) {
@@ -192,9 +184,7 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
     //----------------------------------------------------------------------------
 
     @Override
-    public void changePassword(String identifier, boolean isEmailIdentifier, String currentPassword, String newPassword, ResultCallback<Response<Boolean>> callback) {
-        String email = isEmailIdentifier ? identifier : formatNonEmailToEmail(identifier);
-
+    public void changePassword(String email, String currentPassword, String newPassword, ResultCallback<Response<Boolean>> callback) {
         if (fbAuth.getCurrentUser() == null) {
             fbAuth.signInWithEmailAndPassword(email, currentPassword).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -245,7 +235,6 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
     }
 
     //----------------------------------------------------------------------------
-
 
     @Override
     public <T> Response<T> firebaseAuthExceptionMessage(FirebaseAuthException e) {

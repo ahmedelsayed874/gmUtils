@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,21 +170,32 @@ public class FCM implements FCMFunctions {
     }
 
     @Override
-    public void subscribeToTopics(List<String> topics, ResultCallback<Boolean> callback) {
-        unsubscribeFromSavedTopics(topics, null);
-
+    public void subscribeToTopics(List<String> topics, ResultCallback<Map<String, Boolean>> callback) {
         if (topics == null || topics.isEmpty()) {
-            if (callback != null) callback.invoke(false);
+            if (callback != null) callback.invoke(null);
             return;
         }
 
+        var result = new HashMap<String, Boolean>();
+
         var savedTopics = savedTopics();
         if (savedTopics.size() > 0) {
-            topics.removeAll(savedTopics);
+            for (int i = 0; i < topics.size(); i++) {
+                var topic = topics.get(i);
+                var idx = topics.indexOf(topic);
+                if (idx >= 0) {
+                    topics.remove(idx);
+                    result.put(topic, true);
+                } else {
+                    result.put(topic, false);
+                }
+            }
         }
 
         if (topics.isEmpty()) {
-            if (callback != null) callback.invoke(true);
+            if (callback != null) {
+                callback.invoke(result);
+            }
             return;
         }
 
@@ -191,37 +203,43 @@ public class FCM implements FCMFunctions {
             try {
                 firebaseMessaging.subscribeToTopic(topic);
                 printLog(() -> "FCM: subscribed to \"" + topic + "\"");
-                if (callback != null) callback.invoke(true);
+                result.put(topic, true);
             } catch (Exception e) {
                 printLog(() -> "FCM: failed to subscribe to \"" + topic + "\"");
-                if (callback != null) callback.invoke(false);
+                result.put(topic, false);
             }
         }
+
+        if (callback != null) callback.invoke(result);
 
         _prefs().saveToList("FCM_Topics", topics);
     }
 
     @Override
-    public void unsubscribeFromTopics(List<String> topics, ResultCallback<Boolean> callback) {
+    public void unsubscribeFromTopics(List<String> topics, ResultCallback<Map<String, Boolean>> callback) {
         if (topics == null) {
-            if (callback != null) callback.invoke(false);
+            if (callback != null) callback.invoke(null);
             return;
         }
+
+        var result = new HashMap<String, Boolean>();
 
         for (String topic : topics) {
             try {
                 firebaseMessaging.unsubscribeFromTopic(topic);
                 printLog(() -> "FCM: unsubscribe from " + topic);
-                if (callback != null) callback.invoke(true);
+                result.put(topic, true);
             } catch (Exception e) {
                 printLog(() -> "FCM: failed to unsubscribe from " + topic);
-                if (callback != null) callback.invoke(false);
+                result.put(topic, false);
             }
         }
+
+        if (callback != null) callback.invoke(result);
     }
 
     @Override
-    public void unsubscribeFromSavedTopics(List<String> exceptedTopics, ResultCallback<Boolean> callback) {
+    public void unsubscribeFromSavedTopics(List<String> exceptedTopics, ResultCallback<Map<String, Boolean>> callback) {
         var savedTopics = savedTopics();
 
         if (exceptedTopics != null && exceptedTopics.size() > 0) {
@@ -234,7 +252,7 @@ public class FCM implements FCMFunctions {
                 _prefs().removeFromList("FCM_Topics", t);
             }
         } else {
-            if (callback != null) callback.invoke(true);
+            if (callback != null) callback.invoke(null);
         }
     }
 

@@ -12,7 +12,7 @@ import gmutils.listeners.ResultCallback;
 
 
 public interface IFirebaseAuthManager {
-    public static class FBUser {
+    class FBUser {
         public String email;
         public String displayName;
         public Uri photoUrl;
@@ -23,15 +23,12 @@ public interface IFirebaseAuthManager {
         public Map<String, Object> extraInfo;
     }
 
-    void setHostNameForNonEmailLogin(String hostName);
-
-    String getHostNameForNonEmailLogin();
-
-    void registerByNonEmail(String text, String password, ResultCallback<Response<Boolean>> callback);
+//    void setHostNameForNonEmailLogin(String hostName);
+//    String getHostNameForNonEmailLogin();
+//    void registerByNonEmail(String text, String password, ResultCallback<Response<Boolean>> callback);
+//    void loginByNonEmail(String text, String password, ResultCallback<Response<FBUser>> callback);
 
     void registerByEmail(String email, String password, ResultCallback<Response<Boolean>> callback);
-
-    void loginByNonEmail(String text, String password, ResultCallback<Response<FBUser>> callback);
 
     void loginByEmail(String email, String password, ResultCallback<Response<FBUser>> callback);
 
@@ -39,23 +36,23 @@ public interface IFirebaseAuthManager {
 
     //----------------------------------------------------------------------------
 
-    default String formatNonEmailToEmail(String text) {
+    /*default String formatNonEmailToEmail(String text) {
         text = FirebaseUtils.refinePhoneNumber(text);
         text = FirebaseUtils.refineKeyName(text);
         return "un" + text + getHostNameForNonEmailLogin();
-    }
+    }*/
 
     //----------------------------------------------------------------------------
 
-    void startPasswordReset(String identifier, boolean isEmailIdentifier, ResultCallback<Response<Boolean>> callback);
+    void startPasswordReset(String email, ResultCallback<Response<Boolean>> callback);
 
-    void verifyResetPasswordCode(String identifier, boolean isEmailIdentifier, String resetPasswordCode, ResultCallback<Response<Boolean>> callback);
+    void verifyResetPasswordCode(String email, String resetPasswordCode, ResultCallback<Response<Boolean>> callback);
 
     void changePasswordAfterResetting(String resetPasswordCode, String newPassword, ResultCallback<Response<Boolean>> callback);
 
     //----------------------------------------------------------------------------
 
-    void changePassword(String identifier, boolean isEmailIdentifier, String currentPassword, String newPassword, ResultCallback<Response<Boolean>> callback);
+    void changePassword(String email, String currentPassword, String newPassword, ResultCallback<Response<Boolean>> callback);
 
     //----------------------------------------------------------------------------
 

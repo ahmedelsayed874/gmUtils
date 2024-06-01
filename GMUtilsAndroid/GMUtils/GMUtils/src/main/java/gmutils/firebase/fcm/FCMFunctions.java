@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Map;
 
 import gmutils.listeners.ResultCallback;
 
@@ -32,11 +33,11 @@ public interface FCMFunctions {
 
     void getDeviceToken(ResultCallback<String> callback);
 
-    void subscribeToTopics(List<String> topics, ResultCallback<Boolean> callback);
+    void subscribeToTopics(List<String> topics, ResultCallback<Map<String, Boolean>> callback);
 
-    void unsubscribeFromTopics(List<String> topics, ResultCallback<Boolean> callback);
+    void unsubscribeFromTopics(List<String> topics, ResultCallback<Map<String, Boolean>> callback);
 
-    void unsubscribeFromSavedTopics(List<String> exceptedTopics, ResultCallback<Boolean> callback);
+    void unsubscribeFromSavedTopics(List<String> exceptedTopics, ResultCallback<Map<String, Boolean>> callback);
 
     void sendMessageToSpecificDevice(
             String deviceToken,
