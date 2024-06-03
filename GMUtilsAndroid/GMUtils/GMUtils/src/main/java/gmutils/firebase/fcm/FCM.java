@@ -1,6 +1,7 @@
 package gmutils.firebase.fcm;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -20,6 +21,7 @@ import gmutils.Notifier;
 import gmutils.json.JsonBuilder;
 import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ResultCallback;
+import gmutils.listeners.ResultCallback2;
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.SimpleHTTPRequest;
@@ -275,7 +277,7 @@ public class FCM implements FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback<Boolean> callback
+            ResultCallback2<Boolean, String> callback
     ) {
         _sendMessageTo(
                 deviceToken,
@@ -306,7 +308,7 @@ public class FCM implements FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback<Boolean> callback
+            ResultCallback2<Boolean, String> callback
     ) {
         _sendMessageTo(
                 "/topics/" + topic,
@@ -343,7 +345,7 @@ public class FCM implements FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback<Boolean> callback
+            ResultCallback2<Boolean, String> callback
     ) {
         JsonBuilder notificationBody = JsonBuilder.ofJsonObject();
         notificationBody.addString("to", to);
@@ -438,7 +440,7 @@ public class FCM implements FCMFunctions {
     }
 
     @NotNull
-    public ActionCallback2<HttpRequest, ResultCallback<Boolean>, Void> httpExecuteDelegate
+    public ActionCallback2<HttpRequest, ResultCallback2<Boolean, String>, Void> httpExecuteDelegate
             = (request, callback) -> {
         SimpleHTTPRequest.post(
                 request.url,
@@ -449,7 +451,15 @@ public class FCM implements FCMFunctions {
                     printLog(() -> "sendFcmNotification(RESPONSE::: " + response + ")");
 
                     int code = response.getCode();
-                    callback.invoke(code == 200);
+                    String err = null;
+                    if (response.getException() != null) {
+                        err = response.getException().getMessage();
+                    }
+                    if (!TextUtils.isEmpty(response.getError())) {
+                        if (!TextUtils.isEmpty(err)) err += "\n";
+                        err += response.getError();
+                    }
+                    callback.invoke(code == 200, err);
                 }
         );
 

@@ -9,7 +9,9 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Map;
 
+import gmutils.json.JsonBuilder;
 import gmutils.listeners.ResultCallback;
+import gmutils.listeners.ResultCallback2;
 
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/
@@ -51,7 +53,7 @@ public interface FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback<Boolean> callback
+            ResultCallback2<Boolean, String> callback
     );
 
     void sendMessageToTopic(
@@ -66,7 +68,7 @@ public interface FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback<Boolean> callback
+            ResultCallback2<Boolean, String> callback
     );
 
     void onActivityStarted(Bundle intentExtras);

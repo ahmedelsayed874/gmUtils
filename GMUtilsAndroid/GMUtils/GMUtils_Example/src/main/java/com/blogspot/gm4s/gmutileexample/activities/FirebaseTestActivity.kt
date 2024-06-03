@@ -361,10 +361,10 @@ class FirebaseTestActivity : BaseActivity() {
                                         JsonBuilder.ofJsonObject().addString("data", "test").json as JSONObject,
                                         null, //"default",
                                         null,
-                                    ) {
+                                    ) {suc, err ->
                                         log(
                                             this@FirebaseTestActivity.view.btn14.text.toString(),
-                                            "NOTIFICATION-SENT:: $it"
+                                            "NOTIFICATION-SENT:: $it [ERR: $err]"
                                         )
                                     }
                                 }
