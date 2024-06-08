@@ -6,7 +6,7 @@ import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.backgroundWorkers.BackgroundTaskAbs;
 
 public interface UiHandlerAbs {
-    public static UiHandlerAbs getInstance() {
+    static UiHandlerAbs getInstance() {
         return new UiHandler();
     }
 

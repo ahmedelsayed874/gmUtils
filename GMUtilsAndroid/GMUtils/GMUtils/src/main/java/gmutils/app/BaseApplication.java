@@ -55,7 +55,7 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     public static final class GlobalVariables {
-        private int secret;
+        private final int secret;
         private final Map<String, Object> globalInstances = new HashMap<>();
 
         private GlobalVariables() {

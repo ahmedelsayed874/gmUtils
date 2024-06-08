@@ -1337,7 +1337,7 @@ public class DateOp implements Serializable {
             }
         }
 
-        return (isNeg ? "(-) " : "(+) ") + string.toString();
+        return (isNeg ? "(-) " : "(+) ") + string;
     }
 
 }

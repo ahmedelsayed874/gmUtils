@@ -168,8 +168,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                                         list.addAll(values);
                                     }
                                     //
-                                    else if (value instanceof Map) {
-                                        Map valueAsMap = (Map) value;
+                                    else if (value instanceof Map valueAsMap) {
                                         try {
                                             for (Object key : valueAsMap.keySet()) {
                                                 Object o = valueAsMap.get(key);
@@ -524,7 +523,7 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
                     onError.invoke(
                             "Error in handling value: " + snapshot.getValue() +
                                     "\nKey: " + snapshot.getKey() +
-                                    "\nDetails: " + snapshot.toString()
+                                    "\nDetails: " + snapshot
                     );
                 }
             }

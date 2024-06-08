@@ -172,10 +172,10 @@ public abstract class BaseListResponse<T> extends BaseResponse implements java.u
                 s.append(", ");
 
             if (t != null)
-                s.append(t.toString());
+                s.append(t);
         }
         return "BaseListResponse{" + "\n" +
-                "list=' [" + list.size() + "-items] [" + s.toString() + "]" + '\'' + ",\n" +
+                "list=' [" + list.size() + "-items] [" + s + "]" + '\'' + ",\n" +
                 "callbackStatus='" + getCallbackStatus() + '\'' + ",\n" +
                 "code=" + _code + ",\n" +
                 "error='" + _error + '\'' + ",\n" +

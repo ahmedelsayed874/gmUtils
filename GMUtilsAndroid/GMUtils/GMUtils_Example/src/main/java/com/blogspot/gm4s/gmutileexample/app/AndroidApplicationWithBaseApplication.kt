@@ -20,7 +20,7 @@ class AndroidApplicationAndBaseApplication : Application() {
         Log.d("*****", "reportedBugs: " + app.reportedBugs)
 
         app.globalVariables().add("zx", 123)
-        val s = app.globalVariables().size();
+        val s = app.globalVariables().size()
         Log.d("****", "global var count: $s")
         Log.d("****", "var val (zx)" +  app.globalVariables().retrieve("zx").toString())
 

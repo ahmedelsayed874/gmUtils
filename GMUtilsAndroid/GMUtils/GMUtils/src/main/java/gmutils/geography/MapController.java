@@ -181,8 +181,7 @@ public class MapController {
             if (obj == null) return false;
             if (obj == this) return true;
 
-            if (obj instanceof MapPin) {
-                MapPin otherObj = (MapPin) obj;
+            if (obj instanceof MapPin otherObj) {
 
                 if (!TextUtils.equals(this.id, otherObj.id)) return false;
                 //if (!TextUtils.equals(this.name, otherObj.name)) return false;

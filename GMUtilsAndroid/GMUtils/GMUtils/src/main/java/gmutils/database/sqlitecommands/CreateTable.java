@@ -74,7 +74,7 @@ public class CreateTable implements ICommand {
     public static class Constraint implements ICommand {
         private final ConstraintKeywords constraint;
         private final Object extra;
-        private boolean isFunction;
+        private final boolean isFunction;
 
         public Constraint(@NotNull ConstraintKeywords name) {
             this(name, null, false);
@@ -184,7 +184,7 @@ public class CreateTable implements ICommand {
         if (cols.length() == 0)
             throw new RuntimeException("No Column are added to " + this.tableName + " table");
         else {
-            return "CREATE TABLE " + this.tableName + " (" + cols.toString() + ");";
+            return "CREATE TABLE " + this.tableName + " (" + cols + ");";
         }
     }
 

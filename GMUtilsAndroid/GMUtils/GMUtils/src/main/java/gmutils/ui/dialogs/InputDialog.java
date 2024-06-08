@@ -49,7 +49,7 @@ public class InputDialog extends BaseDialog {
     private TextView tvTitle;
     private TextView tvMsg;
     private LinearLayout inputFieldsContainer;
-    private List<InputField> inputFields = new ArrayList<>();
+    private final List<InputField> inputFields = new ArrayList<>();
     private TextView tvPositiveBtn;
     private TextView tvCancelBtn;
 

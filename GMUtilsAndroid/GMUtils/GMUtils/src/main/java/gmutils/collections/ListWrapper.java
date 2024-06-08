@@ -211,7 +211,7 @@ public class ListWrapper<T> {
             sb.append(prefix);
 
             if (item != null)
-                sb.append(item.toString());
+                sb.append(item);
             else
                 sb.append("null");
 

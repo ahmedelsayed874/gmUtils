@@ -164,7 +164,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
         entityProperties.tableName = entity.getSimpleName();
 
         Annotation[] annotations = entity.getDeclaredAnnotations();
-        if (annotations != null && annotations.length > 0) {
+        if (annotations != null) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == Entity.class) {
                     Entity anEntity = entity.getAnnotation(Entity.class);
@@ -192,7 +192,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         Annotation[] annotations = field.getDeclaredAnnotations();
 
-        if (annotations != null && annotations.length > 0) {
+        if (annotations != null) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == PrimaryKey.class) {
                     constraints.add(new CreateTable.Constraint(CreateTable.ConstraintKeywords.PRIMARY_KEY));
@@ -259,7 +259,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                     boolean ignore = false;
 
                     Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
-                    if (fieldAnnotations != null && fieldAnnotations.length > 0) {
+                    if (fieldAnnotations != null) {
                         for (Annotation annotation : fieldAnnotations) {
                             if (annotation.annotationType() == Ignore.class) {
                                 ignore = true;
@@ -421,7 +421,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
                 boolean ignore = false;
                 Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
-                if (fieldAnnotations != null && fieldAnnotations.length > 0) {
+                if (fieldAnnotations != null) {
                     for (Annotation annotation : fieldAnnotations) {
                         if (annotation.annotationType() == Ignore.class) {
                             ignore = true;
@@ -489,7 +489,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     //region select multiple items
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken) {
-        return select(entity, typeToken, (WhereClause) null, (Boolean) null);
+        return select(entity, typeToken, (WhereClause) null, null);
     }
 
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, @NotNull String[] specialColumns) {
@@ -947,7 +947,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
                 boolean ignore = false;
                 Annotation[] fieldAnnotations = field.getDeclaredAnnotations();
-                if (fieldAnnotations != null && fieldAnnotations.length > 0) {
+                if (fieldAnnotations != null) {
                     for (Annotation annotation : fieldAnnotations) {
                         if (annotation.annotationType() == Ignore.class) {
                             ignore = true;
@@ -1021,7 +1021,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
         Annotation[] annotations = field.getDeclaredAnnotations();
 
-        if (annotations != null && annotations.length > 0) {
+        if (annotations != null) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == SerializedName.class) {
                     SerializedName serializedName = field.getAnnotation(SerializedName.class);

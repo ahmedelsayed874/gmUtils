@@ -221,7 +221,7 @@ class MainActivity : BaseActivity() {
 
         this.view.btn13.text = "pick photo from gallery"
         this.view.btn13.setOnClickListener {
-            Intents.getInstance().imageIntents.pickImage(this, 456)!!
+            Intents.getInstance().imageIntents.pickImage(this, 456)
             log("pick image began", "")
         }
 

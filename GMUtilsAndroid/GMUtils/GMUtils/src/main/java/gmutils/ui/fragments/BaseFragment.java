@@ -95,7 +95,7 @@ public abstract class BaseFragment extends Fragment {
         viewModelFactory = ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getActivity().getApplication());
-        return (ViewModelProvider.Factory) viewModelFactory;
+        return viewModelFactory;
     }
 
     public ViewModel getViewModel() {

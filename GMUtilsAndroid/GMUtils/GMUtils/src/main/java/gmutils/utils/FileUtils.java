@@ -281,62 +281,51 @@ public class FileUtils {
     }
 
     private String getFileProviderExceptionMessage() {
-        StringBuilder sb = new StringBuilder();
 
-        sb.append("please create a file in 'res/xml' path with a name of 'file_paths' or whatever you want");
-        sb.append("\n");
-        sb.append("this file will contain the following: (for example) .. (I already created one for you)");
-        sb.append("\n");
-        sb.append("check this for more info: https://developer.android.com/reference/androidx/core/content/FileProvider");
-        sb.append("\n");
-        sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-        sb.append("<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">");
+        String sb = "please create a file in 'res/xml' path with a name of 'file_paths' or whatever you want" +
+                "\n" +
+                "this file will contain the following: (for example) .. (I already created one for you)" +
+                "\n" +
+                "check this for more info: https://developer.android.com/reference/androidx/core/content/FileProvider" +
+                "\n" +
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">" +
+                "\n\n\t<!-- ============== INTERNAL-FILES ============== -->" +
+                "\n\t<!-- Context.getFilesDir() -->" +
+                "\n\t<files-path name=\"files\" path=\"_Files/\" />" +
+                "\n\n\t<!-- getCacheDir() -->" +
+                "\n\t<cache-path name=\"files\" path=\"_Files/\" />" +
+                "\n\n\t<!-- ============== EXTERNAL-FILES ============== -->" +
+                "\n\t<!-- Environment.getExternalStorageDirectory() -->" +
+                "\n\t<external-path name=\"files\" path=\"_Files/\" />" +
+                "\n\t<!-- Context#getExternalFilesDir(String) || Context.getExternalFilesDir(null) -->" +
+                "\n\t<external-files-path name=\"pics\" path=\"Pictures/\" />" +
+                "\n\t<external-files-path name=\"files\" path=\"_Files/\" />" +
+                "\n\t<!-- Context.getExternalCacheDir() -->" +
+                "\n\t<external-cache-path name=\"files\" path=\"_Files/\" />" +
+                "\n\t<!-- Context.getExternalMediaDirs() -->" +
+                "\n\t<external-media-path name=\"files\" path=\"_Files/\" />" +
+                "\n" +
+                "</paths>\n" +
+                "-----------------------------------------------------" +
+                "\n\n" +
+                "then add The following to your manifest file:" +
+                "\n" +
+                "<provider" +
+                "\n\tandroid:name=\"androidx.core.content.FileProvider\"" +
+                "\n\tandroid:authorities=\"APP_PACKAGE_NAME.fileprovider\"" +
+                "\n\tandroid:exported=\"false\"" +
+                "\n\tandroid:grantUriPermissions=\"true\">" +
+                "\n\t<meta-data" +
+                "\n\t\tandroid:name=\"android.support.FILE_PROVIDER_PATHS\"" +
+                "\n\t\tandroid:resource=\"@xml/file_paths\" />\n" +
+                "</provider>" +
+                "\n" +
+                "\n----------------------------------------------------" +
+                "\n" +
+                "\nmake sure to replace APP_PACKAGE_NAME with your own package name; ex: (com.example)";
 
-        sb.append("\n\n\t<!-- ============== INTERNAL-FILES ============== -->");
-
-        sb.append("\n\t<!-- Context.getFilesDir() -->");
-        sb.append("\n\t<files-path name=\"files\" path=\"_Files/\" />");
-
-        sb.append("\n\n\t<!-- getCacheDir() -->");
-        sb.append("\n\t<cache-path name=\"files\" path=\"_Files/\" />");
-
-        sb.append("\n\n\t<!-- ============== EXTERNAL-FILES ============== -->");
-
-        sb.append("\n\t<!-- Environment.getExternalStorageDirectory() -->");
-        sb.append("\n\t<external-path name=\"files\" path=\"_Files/\" />");
-
-        sb.append("\n\t<!-- Context#getExternalFilesDir(String) || Context.getExternalFilesDir(null) -->");
-        sb.append("\n\t<external-files-path name=\"pics\" path=\"Pictures/\" />");
-
-        sb.append("\n\t<external-files-path name=\"files\" path=\"_Files/\" />");
-
-        sb.append("\n\t<!-- Context.getExternalCacheDir() -->");
-        sb.append("\n\t<external-cache-path name=\"files\" path=\"_Files/\" />");
-
-        sb.append("\n\t<!-- Context.getExternalMediaDirs() -->");
-        sb.append("\n\t<external-media-path name=\"files\" path=\"_Files/\" />");
-
-        sb.append("\n");
-        sb.append("</paths>\n");
-        sb.append("-----------------------------------------------------");
-        sb.append("\n\n");
-        sb.append("then add The following to your manifest file:");
-        sb.append("\n");
-        sb.append("<provider");
-        sb.append("\n\tandroid:name=\"androidx.core.content.FileProvider\"");
-        sb.append("\n\tandroid:authorities=\"APP_PACKAGE_NAME.fileprovider\"");
-        sb.append("\n\tandroid:exported=\"false\"");
-        sb.append("\n\tandroid:grantUriPermissions=\"true\">");
-        sb.append("\n\t<meta-data");
-        sb.append("\n\t\tandroid:name=\"android.support.FILE_PROVIDER_PATHS\"");
-        sb.append("\n\t\tandroid:resource=\"@xml/file_paths\" />\n");
-        sb.append("</provider>");
-        sb.append("\n");
-        sb.append("\n----------------------------------------------------");
-        sb.append("\n");
-        sb.append("\nmake sure to replace APP_PACKAGE_NAME with your own package name; ex: (com.example)");
-
-        return sb.toString();
+        return sb;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -483,7 +472,7 @@ public class FileUtils {
 
     private List<File> findFiles(String[] extensions, File dir, List<File> fileList) {
         File[] listFile = dir.listFiles();
-        if (listFile != null && listFile.length > 0) {
+        if (listFile != null) {
             for (File file : listFile) {
                 if (file.isDirectory()) {
                     findFiles(extensions, file, fileList);
@@ -856,7 +845,6 @@ public class FileUtils {
         String text = null;
 
         if (inputStream != null) {
-
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             String line;

@@ -35,7 +35,7 @@ public class ZipFileUtils {
         }
     }
 
-    private LoggerAbs logger;
+    private final LoggerAbs logger;
 
     public ZipFileUtils() {
         this(Logger.d());

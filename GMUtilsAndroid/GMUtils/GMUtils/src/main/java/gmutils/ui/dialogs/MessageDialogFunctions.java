@@ -46,7 +46,7 @@ public class MessageDialogFunctions {
 
 
     private View lyContainer;
-    private ImageView iconIv;
+    private final ImageView iconIv;
     private TextView tvTitle;
     private TextView tvMsg;
     private View lyDontShowAgain;

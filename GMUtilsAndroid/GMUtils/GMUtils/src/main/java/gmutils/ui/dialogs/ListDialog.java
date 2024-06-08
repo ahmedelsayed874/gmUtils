@@ -40,8 +40,8 @@ import gmutils.ui.adapters.BaseListAdapter;
 public class ListDialog<T> extends BaseDialog {
 
     private TextView tvTitle;
-    private TextView tvHint;
-    private EditText etSearchToken;
+    private final TextView tvHint;
+    private final EditText etSearchToken;
     private ListView lvList;
     private TextView tvNoResult;
     private TextView tvAddValue;

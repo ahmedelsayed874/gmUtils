@@ -571,8 +571,7 @@ public class CountryPhoneCodes {
             if (obj != null) {
                 if (this == obj) return true;
 
-                if (obj instanceof CountryCode) {
-                    CountryCode nObj = (CountryCode) obj;
+                if (obj instanceof CountryCode nObj) {
                     if (!TextUtils.equals(nameEn, nObj.nameEn)) return false;
                     if (!TextUtils.equals(nameAr, nObj.nameAr)) return false;
                     if (!TextUtils.equals(alpha2Code, nObj.alpha2Code)) return false;

@@ -328,7 +328,7 @@ public final class ApiURL {
             if (params != null) {
                 sb.append("Parameters:");
                 sb.append("\n");
-                sb.append(params.toString());
+                sb.append(params);
                 sb.append(".\n");
             }
 
@@ -336,7 +336,7 @@ public final class ApiURL {
             if (body != null) {
                 sb.append("Body:");
                 sb.append("\n");
-                sb.append(body.toString());
+                sb.append(body);
                 sb.append("\n.\n");
             }
 

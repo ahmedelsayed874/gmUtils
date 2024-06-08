@@ -45,7 +45,7 @@ public class CountryCodeDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
-    private boolean hideDialCode;
+    private final boolean hideDialCode;
     private Listener mListener;
 
     public final CountryPhoneCodes countryPhoneCodes;

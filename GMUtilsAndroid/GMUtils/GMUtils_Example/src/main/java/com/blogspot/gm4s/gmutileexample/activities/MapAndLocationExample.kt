@@ -163,7 +163,7 @@ class MapAndLocationExample : BaseActivity() {
     private fun createMapInfoWindowView(info: String?): View? {
         if (info != null) {
             val view = TextView(this)
-            view.setText(info)
+            view.text = info
             view.setBackgroundResource(R.drawable.shape_solid_round_accent)
             view.setPadding(15, 15, 15, 15)
 

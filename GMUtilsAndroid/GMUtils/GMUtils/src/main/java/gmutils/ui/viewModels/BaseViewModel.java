@@ -279,7 +279,7 @@ public class BaseViewModel extends AndroidViewModel {
             private DataGroup3<Integer, StringSet, Runnable> button2;
             private DataGroup3<Integer, StringSet, Runnable> button3;
             private Runnable onDismiss;
-            private boolean error;
+            private final boolean error;
 
             public Dialog() {
                 this(false);
@@ -287,8 +287,8 @@ public class BaseViewModel extends AndroidViewModel {
 
             public Dialog(boolean error) {
                 this(
-                        (Pair<Integer, Runnable>) null,
-                        (Pair<Integer, Runnable>) null,
+                        null,
+                        null,
                         (Pair<Integer, Runnable>) null,
                         error
                 );

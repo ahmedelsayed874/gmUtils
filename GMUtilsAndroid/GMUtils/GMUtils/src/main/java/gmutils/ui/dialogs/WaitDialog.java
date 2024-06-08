@@ -60,8 +60,8 @@ public class WaitDialog extends BaseDialog {
     private static boolean useHorizontalLayout = true;
 
 
-    private LinearLayout container;
-    private ProgressBar progressBar;
+    private final LinearLayout container;
+    private final ProgressBar progressBar;
     private TextView textView;
 
     @NonNull

@@ -7,7 +7,7 @@ import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
 
 public interface BackgroundTaskAbs {
-    public static BackgroundTaskAbs getInstance() {
+    static BackgroundTaskAbs getInstance() {
         return new BackgroundTask();
     }
 

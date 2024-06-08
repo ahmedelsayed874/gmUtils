@@ -27,8 +27,8 @@ public class TextBoxWithTitle_Way2 {
     //----------------------------------------------------------------------------------------------
 
     private View view;
-    private TextView titleTv;
-    private EditText inputEt;
+    private final TextView titleTv;
+    private final EditText inputEt;
 
 
     public TextBoxWithTitle_Way2(View view) {

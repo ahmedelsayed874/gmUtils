@@ -61,7 +61,7 @@ class ObservableList<E> : Iterable<E> {
 
     fun removeAt(index: Int): Boolean {
         val s0 = size
-        val e = items[index];
+        val e = items[index]
         items.removeAt(index)
         removingObserver?.invoke(this, listOf(e), listOf(index))
         return s0 > size

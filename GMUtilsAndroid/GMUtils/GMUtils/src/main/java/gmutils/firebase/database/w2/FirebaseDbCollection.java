@@ -10,6 +10,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +133,7 @@ public class FirebaseDbCollection<T> {
                         //
                         else {
                             T value2 = snapshot.getValue(mValueType);
-                            callback.invoke(Arrays.asList(value2), null);
+                            callback.invoke(Collections.singletonList(value2), null);
                         }
                     } catch (Exception e) {
                         Log.e("*****", e.getMessage() + "\n--------\n" + value);

@@ -400,7 +400,7 @@ public class RetrofitService {
 
         //---------------------------------------------------------------------------------
 
-        private GeneralStorage storage = GeneralStorage.getInstance("net-connection-preference");
+        private final GeneralStorage storage = GeneralStorage.getInstance("net-connection-preference");
 
         //------------------------------------------
 

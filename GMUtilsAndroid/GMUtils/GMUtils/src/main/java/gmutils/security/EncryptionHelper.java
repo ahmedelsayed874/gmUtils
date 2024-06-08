@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
 import java.security.KeyPairGenerator;
@@ -214,7 +215,7 @@ public class EncryptionHelper {
                 e.printStackTrace();
             }
         }
-        byte[] encodedBytes = c.doFinal(input.getBytes("UTF-8"));
+        byte[] encodedBytes = c.doFinal(input.getBytes(StandardCharsets.UTF_8));
         return Base64.encodeToString(encodedBytes, Base64.DEFAULT);
     }
 
@@ -241,7 +242,7 @@ public class EncryptionHelper {
             }
         }
 
-        byte[] decodedValue = Base64.decode(encrypted.getBytes("UTF-8"), Base64.DEFAULT);
+        byte[] decodedValue = Base64.decode(encrypted.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
         byte[] decryptedVal = c.doFinal(decodedValue);
         return new String(decryptedVal);
     }

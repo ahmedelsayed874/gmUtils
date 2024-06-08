@@ -13,11 +13,11 @@ import com.google.gson.reflect.TypeToken
 
 class DB(context: Context) : BaseDatabase(context) {
     override fun databaseName(): String {
-        return "db";
+        return "db"
     }
 
     override fun databaseVersion(): Int {
-        return 18;
+        return 18
     }
 
     override fun databaseEntities(): Array<Class<*>> {

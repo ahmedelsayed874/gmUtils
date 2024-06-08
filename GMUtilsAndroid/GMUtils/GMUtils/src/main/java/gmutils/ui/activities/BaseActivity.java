@@ -138,7 +138,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     protected ViewModelProvider.Factory onCreateViewModelFactory(int viewModelId) {
-        return (ViewModelProvider.Factory) ViewModelProvider
+        return ViewModelProvider
                 .AndroidViewModelFactory
                 .getInstance(getApplication());
     }

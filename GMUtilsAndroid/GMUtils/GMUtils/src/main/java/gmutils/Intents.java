@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,7 +95,7 @@ public class Intents {
     public void showMap(Context context, String lat, String lng, String label) {
         if (TextUtils.isEmpty(lat) || TextUtils.isEmpty(lng)) return;
         try {
-            label = URLEncoder.encode(label, "utf8");
+            label = URLEncoder.encode(label, StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -455,11 +456,7 @@ public class Intents {
     }
 
     public boolean openMapApp(Context context, double lat, double lon, String title) {
-        try {
-            title = URLEncoder.encode(title, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        title = URLEncoder.encode(title, StandardCharsets.UTF_8);
         Uri geoLocation = Uri.parse(String.format("geo:0,0?q=%f,%f(%s)", lat, lon, title));
 
         Intent intent = new Intent(Intent.ACTION_VIEW);

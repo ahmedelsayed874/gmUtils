@@ -26,10 +26,12 @@ import androidx.annotation.RequiresPermission;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.TimeZone;
 
 /**
@@ -75,11 +77,7 @@ public class Utils {
     }
 
     public String urlEncode(String url) {
-        try {
-            return URLEncoder.encode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("URLEncoder.encode() failed for " + url);
-        }
+        return URLEncoder.encode(url, StandardCharsets.UTF_8);
     }
 
     public String getSingingKeyHash(Context context, String packageName) {
@@ -118,7 +116,7 @@ public class Utils {
     }
 
     public boolean checkEquality(Object a, Object b) {
-        return (a == b) || (a != null && a.equals(b));
+        return Objects.equals(a, b);
     }
 
     @RequiresPermission(value = Manifest.permission.VIBRATE)

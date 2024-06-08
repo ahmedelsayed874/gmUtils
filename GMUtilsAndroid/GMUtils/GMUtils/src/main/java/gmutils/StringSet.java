@@ -11,7 +11,7 @@ public class StringSet {
     public static final String ENGLISH_LANG_CODE = "en";
     public static final String ARABIC_LANG_CODE = "ar";
 
-    private Map<String, CharSequence> strings;
+    private final Map<String, CharSequence> strings;
 
     public StringSet(CharSequence defaultString) {
         this(defaultString, null);

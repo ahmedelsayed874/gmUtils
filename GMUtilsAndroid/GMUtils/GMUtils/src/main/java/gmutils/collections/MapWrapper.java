@@ -208,7 +208,7 @@ public class MapWrapper<K, V> {
             sb.append(keyPrefix);
 
             if (entry.getKey() != null)
-                sb.append(entry.toString());
+                sb.append(entry);
             else
                 sb.append("null");
 

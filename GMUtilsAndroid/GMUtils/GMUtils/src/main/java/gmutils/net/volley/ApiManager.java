@@ -535,8 +535,7 @@ public class ApiManager {
             if (obj == null) return false;
             if (obj == this) return true;
 
-            if (obj instanceof Request) {
-                Request request = ((Request) obj);
+            if (obj instanceof Request request) {
                 ApiURL.IURL requestRrl = request.url;
 
                 if (TextUtils.equals(requestRrl.getEndPointURL(), this.url.getEndPointURL())) {

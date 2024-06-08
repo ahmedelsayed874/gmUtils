@@ -185,7 +185,7 @@ public class SetWrapper<T> {
             sb.append(prefix);
 
             if (item != null)
-                sb.append(item.toString());
+                sb.append(item);
             else
                 sb.append("null");
 

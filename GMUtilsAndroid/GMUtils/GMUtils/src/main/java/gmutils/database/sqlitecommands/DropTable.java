@@ -13,7 +13,7 @@ package gmutils.database.sqlitecommands;
  * +201022663988
  */
 public class DropTable implements ICommand {
-    private String tableName;
+    private final String tableName;
 
     public DropTable(String tableName) {
         if (tableName == null || tableName.length() == 0) {

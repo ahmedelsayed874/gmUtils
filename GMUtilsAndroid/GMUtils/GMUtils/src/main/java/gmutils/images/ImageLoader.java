@@ -95,7 +95,7 @@ public class ImageLoader {
 
     private Picasso createPicassoInstance(Context context) {
         OkHttpClient client = new OkHttpClient();
-        client.setProtocols(Arrays.asList(Protocol.HTTP_1_1)); //i added this to solve "stream was reset:PROTOCOL_ERROR" error
+        client.setProtocols(List.of(Protocol.HTTP_1_1)); //i added this to solve "stream was reset:PROTOCOL_ERROR" error
         client.setHostnameVerifier((s, sslSession) -> true);
 
         TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {

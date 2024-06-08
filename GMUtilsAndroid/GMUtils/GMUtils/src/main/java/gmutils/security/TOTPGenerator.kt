@@ -239,7 +239,7 @@ class TOTPGenerator {
             CONFIGS.DIGIT_LENGTH
         )
 
-        val verifier = DefaultCodeVerifier(codeGenerator, timeProvider);
+        val verifier = DefaultCodeVerifier(codeGenerator, timeProvider)
         verifier.setTimePeriod(30) // sets the time period for codes to be valid for to 30 seconds
         verifier.setAllowedTimePeriodDiscrepancy(2) // allow codes valid for 2 time periods before/after to pass as valid
 

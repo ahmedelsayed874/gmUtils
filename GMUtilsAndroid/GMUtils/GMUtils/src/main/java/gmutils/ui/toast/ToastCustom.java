@@ -29,7 +29,7 @@ public class ToastCustom implements MyToast.IToast {
     private View textContainer;
     private TextView tv;
     private long duration = defaultDuration;
-    private boolean isFast;
+    private final boolean isFast;
     
 
     public ToastCustom(Activity activity, int msg, boolean fastShow, boolean systemStyle) {

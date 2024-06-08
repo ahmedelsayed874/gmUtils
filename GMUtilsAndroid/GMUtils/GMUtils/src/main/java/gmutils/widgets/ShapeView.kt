@@ -144,7 +144,7 @@ class ShapeView @JvmOverloads constructor(
         mRectStroke.left = constant + paddingLeft
         mRectStroke.right = width - constant - paddingRight
         mRectStroke.top = cy - halfLineWidth - constant
-        mRectStroke.bottom = cy + halfLineWidth + constant;
+        mRectStroke.bottom = cy + halfLineWidth + constant
 
         canvas.drawRect(mRectStroke, mPaintStroke)
 
