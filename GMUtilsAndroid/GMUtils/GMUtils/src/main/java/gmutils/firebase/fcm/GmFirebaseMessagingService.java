@@ -56,7 +56,7 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     //---------------------------------------------------------------------------------------------
-    
+
     @Override
     public void onNewToken(@NonNull String token) {
         Logger.d().printMethod(() -> token);
@@ -74,9 +74,9 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage message) {
         Logger.d().printMethod(() -> {
             StringBuilder sb = new StringBuilder();
-            
+
             sb.append("MessageId: ").append(message.getMessageId()).append("\n");
-            
+
             if (message.getNotification() != null) {
                 sb.append("Title: ").append(message.getNotification().getTitle()).append("\n");
                 sb.append("Body: ").append(message.getNotification().getBody()).append("\n");
@@ -86,7 +86,7 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
             for (String key : message.getData().keySet()) {
                 sb.append(key).append(": ").append(message.getData().get(key)).append("\n");
             }
-            
+
             return sb;
         });
 
@@ -116,12 +116,12 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
         if (fcmNotificationProperties == null) {
             fcmNotificationProperties = new FcmNotificationProperties(
                     0,
-                    R.color.gmAccent
+                    R.color.gmPrimary
             );
         }
 
-            boolean en = SettingsStorage.Language.usingEnglish();
-            releaseNotification(this, message, fcmNotificationProperties, en);
+        boolean en = SettingsStorage.Language.usingEnglish();
+        releaseNotification(this, message, fcmNotificationProperties, en);
 
     }
 

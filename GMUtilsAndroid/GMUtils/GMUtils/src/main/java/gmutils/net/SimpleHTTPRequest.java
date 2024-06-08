@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -181,8 +182,9 @@ public class SimpleHTTPRequest {
 
         protected Response(Response other) {
             this();
-            this.setCode(other.code);
-            this.setException(other.exception);
+            this.code = other.code;
+            this.error = other.error;
+            this.exception = other.exception;
         }
 
         protected Response setCode(int code) {
@@ -216,6 +218,10 @@ public class SimpleHTTPRequest {
 
         public String getError() {
             return error;
+        }
+
+        public boolean hasError() {
+            return !TextUtils.isEmpty(error) || exception != null;
         }
 
         @Override
@@ -458,17 +464,23 @@ public class SimpleHTTPRequest {
 
                 if (response.code == 200) {
                     inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                    resultCallback.invoke(response, inputStream);
                 } else {
                     try (var errorStream = urlConnection.getErrorStream()) {
-                        byte[] bytes = new byte[errorStream.available()];
-                        errorStream.read(bytes);
-                        String error = new String(bytes);
-                        response.setError(error);
+                        BufferedReader in = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8));
+                        String err = "";
+                        String ln;
+                        do {
+                            ln = in.readLine();
+                            if (!TextUtils.isEmpty(ln)) err += ln;
+                        } while (!TextUtils.isEmpty(ln));
+
+                        response.setError(err);
                     } catch (Exception e) {
-                        Log.i(getClass().getSimpleName(), e.getMessage());
+                        Log.e(SimpleHTTPRequest.class.getSimpleName(), e.getMessage());
                     }
                 }
+
+                resultCallback.invoke(response, inputStream);
 
             } catch (Exception e) {
                 response.setException(e);
@@ -605,7 +617,7 @@ public class SimpleHTTPRequest {
     public static class FileUploadRequestExecutor extends RequestExecutor<TextResponse> {
         private final String parameterName;
         private File uploadingFile;
-        private ResultCallback2<Request, Integer> progressCallback;
+        private final ResultCallback2<Request, Integer> progressCallback;
         private final String boundary;
         private static final String LINE_FEED = "\r\n";
         private final String mimeType;

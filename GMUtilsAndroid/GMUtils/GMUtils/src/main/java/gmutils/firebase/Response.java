@@ -27,7 +27,7 @@ public class Response<DATA> {
 
     @Override
     public String toString() {
-        return "Response{\n" +
+        return "Response{" +
                 "\n\tdata=" + data +
                 ",\n\terror=" + error +
                 ",\n\tconnectionFailed=" + connectionFailed +

@@ -3,14 +3,17 @@ package gmutils.firebase.fcm;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,10 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import gmutils.Notifier;
+import gmutils.app.BaseApplication;
+import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.json.JsonBuilder;
 import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
+import gmutils.listeners.ResultCallback3;
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.SimpleHTTPRequest;
@@ -44,7 +50,7 @@ public class FCM implements FCMFunctions {
 
     public final FirebaseMessaging firebaseMessaging;
     private ResultCallback<String> onDeviceTokenRefresh;
-    private String firebaseProjectMessageKey;//get from the firebase console (settings) .... ex:: 'AAAAKbiiUMw:APA91...JRP';
+    private SendFcmMessageParameters sendFcmMessageParameters;
     private LoggerAbs logger;
 
     private FCM() {
@@ -121,12 +127,12 @@ public class FCM implements FCMFunctions {
             @NotNull Class<? extends FcmMessageHandler> fcmMessageHandlerClass,
             @NotNull FcmMessageHandler fcmMessageHandler,
             @Nullable ResultCallback<String> onDeviceTokenRefresh,
-            @Nullable String firebaseProjectMessageKey
+            @Nullable SendFcmMessageParameters sendFcmMessageParameters
     ) {
         printLog(() -> "Fcm.init");
 
         this.onDeviceTokenRefresh = onDeviceTokenRefresh;
-        this.firebaseProjectMessageKey = firebaseProjectMessageKey;
+        this.sendFcmMessageParameters = sendFcmMessageParameters;
 
         //--------------------------------------------------------------------------
 
@@ -277,10 +283,11 @@ public class FCM implements FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback2<Boolean, String> callback
+            ResultCallback<SendFcmCallbackArgs> callback
     ) {
         _sendMessageTo(
-                deviceToken,
+                deviceToken + "",
+                null,
                 //
                 title,
                 message,
@@ -308,10 +315,11 @@ public class FCM implements FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback2<Boolean, String> callback
+            ResultCallback<SendFcmCallbackArgs> callback
     ) {
         _sendMessageTo(
-                "/topics/" + topic,
+                null,
+                "" + topic,
                 //
                 title,
                 message,
@@ -329,12 +337,16 @@ public class FCM implements FCMFunctions {
     public static final String PAYLOAD_KEY_NAME = "data";
 
     /**
-     * https://firebase.google.com/docs/cloud-messaging/http-server-ref
-     * https://firebase.google.com/docs/cloud-messaging/send-message?hl=en&authuser=0#send-messages-to-topics-legacy
+     * https://firebase.google.com/docs/cloud-messaging/migrate-v1?hl=en&authuser=0#java
+     * https://firebase.google.com/docs/cloud-messaging/send-message?authuser=0
+     * https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=0
+     * <deprecated> https://firebase.google.com/docs/cloud-messaging/http-server-ref
+     * <deprecated> https://firebase.google.com/docs/cloud-messaging/send-message?hl=en&authuser=0#send-messages-to-topics-legacy
      * FIVE TOPICS IN ONE REQUEST
      */
     private void _sendMessageTo(
-            String to,
+            String fcmToken,
+            String topic,
             //
             String title,
             String message,
@@ -345,39 +357,77 @@ public class FCM implements FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback2<Boolean, String> callback
+            ResultCallback<SendFcmCallbackArgs> callback
     ) {
+        try {
+            Class.forName("com.google.auth.oauth2.GoogleCredentials");
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "this dependency is required 'com.google.api-client:google-api-client:2.4.0' .... " +
+                            "add it to gradle .... " +
+                            "also add this: packagingOptions { resources.excludes.add(\"META-INF/*\") } " +
+                            "inside: android {..}"
+            );
+        }
+
+        if (sendFcmMessageParameters == null)
+            throw new IllegalArgumentException("sendFcmMessageParameters must not be null .. use FCM.init()");
+
+        //----------------------------------------------
+
+        BackgroundTask.run(() -> {
+            var url = "https://fcm.googleapis.com/v1/projects/" + sendFcmMessageParameters.firebaseProjectId + "/messages:send";
+
+            HashMap<String, String> headers = new HashMap<String, String>();
+            headers.put("Content-Type", "application/json; UTF-8");
+            headers.put("Authorization", "Bearer " + getAccessToken());
+
+            JsonBuilder messageJson = buildRequestData(
+                    fcmToken,
+                    topic,
+                    title,
+                    message,
+                    isDataNotification,
+                    dataPayload,
+                    channelId,
+                    soundFileName
+            );
+            var requestBody = messageJson.toString();
+
+            HttpRequest httpRequest = new HttpRequest(url, headers, requestBody);
+
+            printLog(() -> "sendFcmNotification(" + httpRequest + ")");
+
+            return httpRequest;
+        }, (httpRequest) -> {
+            httpExecuteDelegate.invoke(httpRequest, callback);
+        });
+    }
+
+    private JsonBuilder buildRequestData(
+            String fcmToken,
+            String topic,
+            //
+            String title,
+            String message,
+            //
+            boolean isDataNotification,
+            JSONObject dataPayload,
+            //
+            String channelId,
+            String soundFileName
+    ) {
+        //https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=0
         JsonBuilder notificationBody = JsonBuilder.ofJsonObject();
-        notificationBody.addString("to", to);
-
-        notificationBody.addSubObject(
-                "android",
-                JsonBuilder.ofJsonObject()
-                        .addString("title", title)
-                        .addString("body", message)
-                        .addString("android_channel_id", channelId)
-                        .addString("channel_id", channelId)
-                        .addString("sound", soundFileName)
-        );
-
-        notificationBody.addSubObject(
-                "apns",
-                JsonBuilder.ofJsonObject()
-                        .addSubObject(
-                                "aps",
-                                JsonBuilder.ofJsonObject()
-                                        .addString("title", title)
-                                        .addString("body", message)
-                        )
-                        .addString("title", title)
-                        .addString("body", message)
-                        .addSubObject(PAYLOAD_KEY_NAME, dataPayload)
-                        .addString("sound", soundFileName)
-        );
-
-        notificationBody.addString("priority", "high"); //or normal
-
-        notificationBody.addSubObject(PAYLOAD_KEY_NAME, dataPayload);
+        if (!TextUtils.isEmpty(fcmToken)) {
+            notificationBody.addString("token", fcmToken);
+        }
+        //
+        else if (!TextUtils.isEmpty(topic)) {
+            notificationBody.addString("topic", topic);
+        } else {
+            throw new IllegalArgumentException("topic or token must set");
+        }
 
         if (!isDataNotification) {
             notificationBody.addSubObject(
@@ -388,21 +438,101 @@ public class FCM implements FCMFunctions {
             );
         }
 
-        //----------------------------------------------
+        notificationBody.addSubObject(
+                "android",
+                JsonBuilder.ofJsonObject()
+                        //.addString("collapse_key", "")
+                        //.addString("priority", "NORMAL" /*or HIGH*/)
+                        .addSubObject(
+                                "notification",
+                                JsonBuilder.ofJsonObject()
+                                        .addString("title", title)
+                                        .addString("body", message)
+                                        //.addString("notification_priority", "PRIORITY_DEFAULT") //PRIORITY_HIGH - PRIORITY_MAX - PRIORITY_LOW - PRIORITY_MIN
+                                        .addString("channel_id", channelId)
+                                        .addString("sound", soundFileName)
+                                //.addString("icon", "stock_ticker_update")
+                                //.addString("color", "#7e55c3")
+                                //.addString("tag", "")
+                                //.addString("click_action", "")
+                                //.addString("ticker", "")
+                                //.add("sticky", true)
+                                //.add("default_sound", true)
+                                //.addString("visibility", "PUBLIC") //PRIVATE - SECRET
+                                //.addString("notification_count", 1)
+                                //.addString("image", "http://....")
+                                //.addBoolean("direct_boot_ok", false);
+                        )
+        );
 
-        var url = "https://fcm.googleapis.com/fcm/send";
+        notificationBody.addSubObject(
+                "apns",
+                JsonBuilder.ofJsonObject()
+                        /*.addSubObject(
+                                "headers",
+                                JsonBuilder.ofJsonObject()
+                        )*/
+                        .addSubObject(
+                                "payload",
+                                JsonBuilder.ofJsonObject()
+                                        .addSubObject(
+                                                "aps",
+                                                JsonBuilder.ofJsonObject()
+                                                        .addString("title", title)
+                                                        .addString("body", message)
+                                        )
+                        )
+                        .addString("sound", soundFileName)
+        );
 
-        HashMap<String, String> headers =new HashMap<String, String>();
-        headers.put("Content-Type", "application/json; charset=UTF-8");
-        headers.put("Authorization", "key=" + firebaseProjectMessageKey);
+        notificationBody.addSubObject(PAYLOAD_KEY_NAME, dataPayload);
 
-        var requestBody = notificationBody.toString();//.replace("\\/", "/");
+        JsonBuilder messageJson = JsonBuilder.ofJsonObject();
+        messageJson.addSubObject("message", notificationBody);
 
-        HttpRequest httpRequest = new HttpRequest(url, headers, requestBody);
+        return messageJson;
+    }
 
-        printLog(() -> "sendFcmNotification(" + httpRequest + ")");
+    private String getAccessToken() {
+        final String MESSAGING_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
+        final String[] SCOPES = {MESSAGING_SCOPE};
 
-        httpExecuteDelegate.invoke(httpRequest, callback);
+        InputStream serviceAccountFile;
+        if (sendFcmMessageParameters.firebaseServiceAccountFileSource == SendFcmMessageParameters.FileSource.RawResources) {
+            serviceAccountFile = BaseApplication
+                    .current().
+                    getResources().
+                    openRawResource((Integer) sendFcmMessageParameters.firebaseServiceAccountFileAddress);
+        } else if (sendFcmMessageParameters.firebaseServiceAccountFileSource == SendFcmMessageParameters.FileSource.Storage) {
+            try {
+                serviceAccountFile = new FileInputStream((String) sendFcmMessageParameters.firebaseServiceAccountFileAddress);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new IllegalStateException(sendFcmMessageParameters.firebaseServiceAccountFileSource + " type is not handled");
+        }
+
+        GoogleCredentials googleCredentials = null;
+        try {
+            googleCredentials = GoogleCredentials
+                    .fromStream(serviceAccountFile)
+                    .createScoped(Arrays.asList(SCOPES));
+
+            googleCredentials.refresh();
+
+            var value = googleCredentials.getAccessToken().getTokenValue();
+
+            return value;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                serviceAccountFile.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public static class HttpRequest {
@@ -440,7 +570,7 @@ public class FCM implements FCMFunctions {
     }
 
     @NotNull
-    public ActionCallback2<HttpRequest, ResultCallback2<Boolean, String>, Void> httpExecuteDelegate
+    public ActionCallback2<HttpRequest, ResultCallback<SendFcmCallbackArgs>, Void> httpExecuteDelegate
             = (request, callback) -> {
         SimpleHTTPRequest.post(
                 request.url,
@@ -448,18 +578,18 @@ public class FCM implements FCMFunctions {
                 request.body,
                 null,
                 (request2, response) -> {
+                    //success response: { "name":"projects/{project_id}/messages/{message_id}" }
                     printLog(() -> "sendFcmNotification(RESPONSE::: " + response + ")");
 
-                    int code = response.getCode();
-                    String err = null;
-                    if (response.getException() != null) {
-                        err = response.getException().getMessage();
-                    }
-                    if (!TextUtils.isEmpty(response.getError())) {
-                        if (!TextUtils.isEmpty(err)) err += "\n";
-                        err += response.getError();
-                    }
-                    callback.invoke(code == 200, err);
+                    callback.invoke(
+                            new FCMFunctions.SendFcmCallbackArgs(
+                                    200 == response.getCode(),
+                                    0 + response.getCode(),
+                                    "" + response.getText(),
+                                    "" + (response.getException() != null ? response.getException().getMessage() :
+                                            response.getError())
+                            )
+                    );
                 }
         );
 
@@ -488,4 +618,5 @@ public class FCM implements FCMFunctions {
             lastReceivedNotification = intentExtras;
         }
     }
+
 }

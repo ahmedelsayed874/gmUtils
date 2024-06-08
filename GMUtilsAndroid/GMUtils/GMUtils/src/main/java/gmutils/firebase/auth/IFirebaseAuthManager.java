@@ -21,6 +21,20 @@ public interface IFirebaseAuthManager {
         public long lastSignInTimestamp;
         public String username;
         public Map<String, Object> extraInfo;
+
+        @Override
+        public String toString() {
+            return "FBUser{" +
+                    "email='" + email + '\'' +
+                    ", displayName='" + displayName + '\'' +
+                    ", photoUrl=" + photoUrl +
+                    ", phoneNumber='" + phoneNumber + '\'' +
+                    ", creationTimestamp=" + creationTimestamp +
+                    ", lastSignInTimestamp=" + lastSignInTimestamp +
+                    ", username='" + username + '\'' +
+                    ", extraInfo=" + extraInfo +
+                    '}';
+        }
     }
 
 //    void setHostNameForNonEmailLogin(String hostName);
@@ -31,6 +45,8 @@ public interface IFirebaseAuthManager {
     void registerByEmail(String email, String password, ResultCallback<Response<Boolean>> callback);
 
     void loginByEmail(String email, String password, ResultCallback<Response<FBUser>> callback);
+
+    FBUser currentUser();
 
     void logout();
 
@@ -56,7 +72,7 @@ public interface IFirebaseAuthManager {
 
     //----------------------------------------------------------------------------
 
-    public static final String EMAIL_ALREADY_IN_USE = "User identifier already in use";
+    String EMAIL_ALREADY_IN_USE = "User identifier already in use";
 
     <T> Response<T> firebaseAuthExceptionMessage(FirebaseAuthException e);
 }

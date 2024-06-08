@@ -15,7 +15,6 @@ import gmutils.firebase.FirebaseUtils;
 import gmutils.firebase.Response;
 import gmutils.listeners.ResultCallback;
 
-
 public class FirebaseStorage implements IFirebaseStorage {
     public final com.google.firebase.storage.FirebaseStorage storage;
 
@@ -31,20 +30,20 @@ public class FirebaseStorage implements IFirebaseStorage {
         storage = com.google.firebase.storage.FirebaseStorage.getInstance();
     }
 
-    private String _refinePath(String path) {
+    /*private String _refinePath(String path) {
         try {
             path = FirebaseUtils.refinePathFragmentNames(path);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return path;
-    }
+    }*/
 
     //----------------------------------------------------------------------------
 
     @Override
     public void upload(Uri fileUri, String toPath, ResultCallback<Response<String>> callback) {
-        toPath = _refinePath(toPath);
+        //toPath = _refine Path(toPath);
         var ref = storage.getReference(toPath);
         upload(fileUri, ref, callback);
     }
@@ -81,7 +80,7 @@ public class FirebaseStorage implements IFirebaseStorage {
 
     @Override
     public void getDownloadURL(String firebasePath, ResultCallback<Response<String>> callback) {
-        firebasePath = _refinePath(firebasePath);
+        //firebasePath = _refine Path(firebasePath);
         var reference = storage.getReference(firebasePath);
         getDownloadURL(reference, callback);
     }
@@ -113,16 +112,16 @@ public class FirebaseStorage implements IFirebaseStorage {
     //----------------------------------------------------------------------------
 
     @Override
-    public void download(String fromPath, File toDir, @Nullable File suggestedOutFile, ResultCallback<Response<File>> callback) {
+    public void download(String firebasePath, File toDir, @Nullable File suggestedOutFile, ResultCallback<Response<File>> callback) {
         File outFile;
 
         if (suggestedOutFile != null) {
             outFile = suggestedOutFile;
         } else {
-            var i = fromPath.lastIndexOf('/');
+            var i = firebasePath.lastIndexOf('/');
             String fileName;
-            if (i >= 0 && i < fromPath.length()) {
-                fileName = fromPath.substring(i + 1);
+            if (i >= 0) {
+                fileName = firebasePath.substring(i + 1);
             } else {
                 fileName = DateOp.getInstance().formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss, true).replace(
                         "-",
@@ -130,7 +129,7 @@ public class FirebaseStorage implements IFirebaseStorage {
                 );
             }
 
-            outFile = new File(toDir.getPath(), fileName);
+            outFile = new File(toDir, fileName);
         }
 
         if (!outFile.exists()) {
@@ -141,8 +140,8 @@ public class FirebaseStorage implements IFirebaseStorage {
             }
         }
 
-        fromPath = _refinePath(fromPath);
-        storage.getReference(fromPath).getFile(outFile).addOnCompleteListener(task -> {
+        //fromPath = _refine Path(fromPath);
+        storage.getReference(firebasePath).getFile(outFile).addOnCompleteListener(task -> {
             if (callback != null) {
                 if (task.isSuccessful()) {
                     callback.invoke(Response.success(outFile));
@@ -167,7 +166,7 @@ public class FirebaseStorage implements IFirebaseStorage {
 
     @Override
     public void delete(String atPath, ResultCallback<Response<Boolean>> callback) {
-        atPath = _refinePath(atPath);
+        //atPath = _refine Path(atPath);
         var reference = storage.getReference(atPath);
         reference.delete().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

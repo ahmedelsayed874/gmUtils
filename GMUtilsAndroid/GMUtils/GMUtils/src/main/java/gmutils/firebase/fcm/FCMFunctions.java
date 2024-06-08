@@ -30,7 +30,7 @@ public interface FCMFunctions {
             @NotNull Class<? extends FcmMessageHandler> fcmMessageHandlerClass,
             @NotNull FcmMessageHandler fcmMessageHandler,
             @Nullable ResultCallback<String> onDeviceTokenRefresh,
-            @Nullable String firebaseProjectMessageKey
+            @Nullable SendFcmMessageParameters sendFcmMessageParameters
     );
 
     void getDeviceToken(ResultCallback<String> callback);
@@ -53,7 +53,7 @@ public interface FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback2<Boolean, String> callback
+            ResultCallback<SendFcmCallbackArgs> callback
     );
 
     void sendMessageToTopic(
@@ -68,8 +68,32 @@ public interface FCMFunctions {
             String channelId,
             String soundFileName,
             //
-            ResultCallback2<Boolean, String> callback
+            ResultCallback<SendFcmCallbackArgs> callback
     );
 
     void onActivityStarted(Bundle intentExtras);
+
+    class SendFcmCallbackArgs {
+        public final boolean success;
+        public final int httpCode;
+        public final String response;
+        public final String error;
+
+        public SendFcmCallbackArgs(boolean success, int httpCode, String response, String error) {
+            this.httpCode = httpCode;
+            this.success = success;
+            this.response = response;
+            this.error = error;
+        }
+
+        @Override
+        public String toString() {
+            return "SendFcmCallbackArgs{" +
+                    "success=" + success +
+                    ", httpCode=" + httpCode +
+                    ", response='" + response + '\'' +
+                    ", error='" + error + '\'' +
+                    '}';
+        }
+    }
 }

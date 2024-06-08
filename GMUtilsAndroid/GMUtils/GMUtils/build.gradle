@@ -28,6 +28,10 @@ android {
         viewBinding true
     }
     namespace 'gmutils'
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
 }
 
 dependencies {
@@ -68,6 +72,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:20.3.0'
     implementation 'com.google.firebase:firebase-messaging:23.4.1'
     implementation 'com.google.firebase:firebase-config:21.6.3'
+    //
+    //implementation 'com.google.firebase:firebase-admin:9.3.0'
+    //implementation 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
+    implementation 'com.google.api-client:google-api-client:2.4.0'
 
     //implementation 'com.github.aabhasr1:OtpView:v1.1.2'
     //implementation 'com.google.zxing:core:3.4.0'

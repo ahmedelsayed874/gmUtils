@@ -12,7 +12,7 @@ public interface IFirebaseStorage {
 
   void getDownloadURL(String firebasePath, ResultCallback<Response<String>> callback);
 
-  void download(String fromPath, File toDir, @Nullable File suggestedOutFile, ResultCallback<Response<File>> callback);
+  void download(String firebasePath, File toDir, @Nullable File suggestedOutFile, ResultCallback<Response<File>> callback);
 
   void delete(String atPath, ResultCallback<Response<Boolean>> callback);
 }

@@ -1,7 +1,10 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
+import android.app.DownloadManager
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
@@ -13,6 +16,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import gmutils.DateOp
 import gmutils.collections.ListWrapper
 import gmutils.collections.MapWrapper
+import gmutils.firebase.auth.FirebaseAuthManager
 import gmutils.firebase.configs.FBConfigSet
 import gmutils.firebase.configs.FirebaseConfigs
 import gmutils.firebase.database.FBFilterOption
@@ -21,13 +25,18 @@ import gmutils.firebase.database.FirebaseDatabaseOp
 import gmutils.firebase.fcm.FCM
 import gmutils.firebase.fcm.FcmMessageHandler
 import gmutils.firebase.fcm.FcmNotificationProperties
+import gmutils.firebase.fcm.SendFcmMessageParameters
+import gmutils.firebase.storage.FirebaseStorage
 import gmutils.json.JsonBuilder
 import gmutils.logger.LoggerAbs
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.InputDialog
+import gmutils.ui.toast.MyToast
 import gmutils.ui.utils.ViewSource
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
+import kotlin.concurrent.thread
 
 class FirebaseTestActivity : BaseActivity() {
     override fun getViewSource(inflater: LayoutInflater) =
@@ -305,7 +314,7 @@ class FirebaseTestActivity : BaseActivity() {
         this.view.btn1314sep.visibility = View.VISIBLE //......................
 
         this.view.btn14.text = "Send FCM message"
-        this.view.btn14.setOnClickListener {
+        /*this.view.btn14.setOnClickListener {
             log(this.view.btn14.text.toString(), "starting....")
 
             FirebaseConfigs.createInstance(listOf(
@@ -373,6 +382,17 @@ class FirebaseTestActivity : BaseActivity() {
 
                 }
             )).fetch();
+        }*/
+        this.view.btn14.setOnClickListener {
+            log(this.view.btn14.text.toString(), "starting....")
+            FcmOp(
+                loggerAbs = LoggerImpl(),
+                filesDir = filesDir
+            ) {
+                log(this.view.btn14.text.toString(), it)
+            }.sendMsg(
+                this
+            )
         }
 
         //
@@ -407,6 +427,168 @@ class FirebaseTestActivity : BaseActivity() {
 
     fun clearLog(v: View) {
         this.view.logTv.text = ""
+    }
+
+    //================================================
+
+    class FcmOp(val loggerAbs: LoggerAbs, val filesDir: File, val log: (String) -> Unit) {
+
+        fun sendMsg(context: Context) {
+            step1Auth(context) {
+                step2DownloadFile {
+                    step3InitFcm(it) {topic, s ->
+                        step4SendMsg(topic)
+                    }
+                }
+            }
+        }
+
+        private fun step1Auth(context: Context, callback: () -> Unit) {
+            log("authenticating ....")
+
+            val user = FirebaseAuthManager().currentUser()
+            if (user != null) {
+                callback()
+            } else {
+                InputDialog.create(context)
+                    .setMessage("enter user name & pw")
+                    .addInputField {
+                        it.setTitle("User name:")
+                    }
+                    .addInputField {
+                        it.setTitle("pw:")
+                    }
+                    .setPositiveButtonCallback {
+                        FirebaseAuthManager().loginByEmail(
+                            it[0],
+                            it[1]
+                        ) {
+                            log("authenticating completed: $it")
+
+                            if (it.data != null) {
+                                callback()
+                            } else {
+                                log("auth failed")
+                            }
+                        }
+                        null
+                    }
+                    .show()
+            }
+        }
+
+        private fun step2DownloadFile(callback: (File) -> Unit) {
+            log("serviceAccountFileName downloading.....")
+
+            val serviceAccountFileName = "gmutils-4a29b-firebase-adminsdk-m28u7-24ba6aaffd.json"
+
+            /*FirebaseStorage().getDownloadURL(
+                serviceAccountFileName
+            ) {
+                if (!TextUtils.isEmpty(it.data)) {
+                    log(
+                        "serviceAccountFileName download url: ${it.data}"
+                    )
+
+                    val file = File(filesDir, serviceAccountFileName)
+
+                    if (file.exists()) {
+                        callback(file)
+
+                    } else {
+                        file.createNewFile()
+
+                        gmutils.net.SimpleHTTPRequest.downloadFile(
+                            it.data,
+                            file
+                        ) { request, response ->
+                            log("serviceAccountFileName download response: $response")
+
+                            if (!response.hasError()) {
+                                callback(response.file)
+                            } else {
+                                var error = response.error
+
+                                if (TextUtils.isEmpty(error)) error += ""
+                                else error += "\n"
+
+                                if (response.exception != null) {
+                                    error += response.exception.message
+                                }
+
+                            }
+                        }
+                    }
+                } else {
+                    log("Error: ${it.error.default}")
+                }
+            }*/
+
+            val file = File(filesDir, serviceAccountFileName)
+
+            if (file.exists()) {
+                callback(file)
+
+            } else {
+                FirebaseStorage().download(
+                    serviceAccountFileName,
+                    filesDir,
+                    file
+                ) {response ->
+                    log("serviceAccountFileName download response: $response")
+
+                    if (response.data != null) {
+                        callback(response.data)
+                    }
+                }
+            }
+        }
+
+        private fun step3InitFcm(file: File, callback: (String, Boolean) -> Unit) {
+            log("setup fcm started.....")
+
+            FCM.instance()
+                .setLogger(loggerAbs)
+                .init(
+                    FcmMessageHandlerImpl::class.java,
+                    FcmMessageHandlerImpl().also {
+                        it.onMessageReceived = {
+                            log("FCM-MESSAGE-RECEIVED:: $it")
+                        }
+                    },
+                    {
+                        log("FCM-TOKEN:: $it")
+                    },
+                    SendFcmMessageParameters(
+                        "gmutils-4a29b",
+                        SendFcmMessageParameters.FileSource.Storage,
+                        file.path
+                    )
+                )
+                .subscribeToTopics(mutableListOf("test")) {
+                    log("TOPIC-SUBSCRIPTION:: $it \nsending message to topic \"test\"")
+                    callback("test", it["test"] == true)
+                }
+        }
+
+        private fun step4SendMsg(topic: String) {
+            log("sending msg.....")
+
+            FCM.instance().sendMessageToTopic(
+                topic,
+                "Title: $topic",
+                "Message: $topic",
+                false,
+                JsonBuilder
+                    .ofJsonObject()
+                    .addString("data", "test").json as JSONObject,
+                null, //"default",
+                null,
+            ) {
+                log("NOTIFICATION-SENT:: response: $it")
+            }
+        }
+
     }
 
     inner class LoggerImpl : LoggerAbs(FirebaseTestActivity::class.java.simpleName) {

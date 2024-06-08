@@ -2,12 +2,8 @@ package gmutils.firebase.auth;
 
 import android.text.TextUtils;
 
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.concurrent.Future;
 
 import gmutils.StringSet;
 import gmutils.firebase.Response;
@@ -84,13 +80,7 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
     public void loginByEmail(String email, String password, ResultCallback<Response<FBUser>> callback) {
         fbAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                FBUser user = new FBUser();
-                user.email = task.getResult().getUser().getEmail();
-                user.displayName = task.getResult().getUser().getDisplayName();
-                user.photoUrl = task.getResult().getUser().getPhotoUrl();
-                user.phoneNumber = task.getResult().getUser().getPhoneNumber();
-                user.creationTimestamp = task.getResult().getUser().getMetadata().getCreationTimestamp();
-                user.lastSignInTimestamp = task.getResult().getUser().getMetadata().getLastSignInTimestamp();
+                FBUser user = convert2FBUser(task.getResult().getUser());
                 user.username = task.getResult().getAdditionalUserInfo().getUsername();
                 user.extraInfo = task.getResult().getAdditionalUserInfo().getProfile();
 
@@ -110,6 +100,29 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
                 ));
             }
         });
+    }
+
+    private FBUser convert2FBUser(FirebaseUser firebaseUser) {
+        FBUser user = new FBUser();
+
+        user.email = firebaseUser.getEmail();
+        user.displayName = firebaseUser.getDisplayName();
+        user.photoUrl = firebaseUser.getPhotoUrl();
+        user.phoneNumber = firebaseUser.getPhoneNumber();
+
+        if (firebaseUser.getMetadata() != null) {
+            user.creationTimestamp = firebaseUser.getMetadata().getCreationTimestamp();
+            user.lastSignInTimestamp = firebaseUser.getMetadata().getLastSignInTimestamp();
+        }
+
+        return user;
+    }
+
+    @Override
+    public FBUser currentUser() {
+        FirebaseUser user = fbAuth.getCurrentUser();
+        if (user == null) return null;
+        return convert2FBUser(user);
     }
 
     @Override

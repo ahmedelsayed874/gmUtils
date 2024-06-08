@@ -235,9 +235,9 @@ public class JsonBuilder {
     @Override
     public String toString() {
         if (rootJson instanceof JSONObject) {
-            return ((JSONObject) rootJson).toString();
+            return rootJson.toString();
         } else if (rootJson instanceof JSONArray) {
-            return ((JSONArray) rootJson).toString();
+            return rootJson.toString();
         } else {
             return "";
         }
