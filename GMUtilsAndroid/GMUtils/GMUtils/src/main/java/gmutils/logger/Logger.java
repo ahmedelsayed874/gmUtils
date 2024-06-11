@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import gmutils.DateOp;
 import gmutils.net.retrofit.callback.LogsOptions;
@@ -52,6 +53,11 @@ public class Logger extends LoggerAbs {
             _instances.put(logId, logger);
         }
         return _instances.get(logId);
+    }
+
+    public static Set<String> loggersNames() {
+        if (_instances == null) _instances = new HashMap<>();
+        return _instances.keySet();
     }
 
     //----------------------------------------------------------------------------------------------

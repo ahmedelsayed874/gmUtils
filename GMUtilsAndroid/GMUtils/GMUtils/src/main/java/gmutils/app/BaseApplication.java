@@ -230,8 +230,16 @@ public abstract class BaseApplication extends Application implements Application
             }
 
             try {
-                Logger.LogConfigs logConfigs = Logger.d().getLogConfigs();
-                if (logConfigs.isWriteLogsToFileEnabled()) {
+                boolean isLoggerActive = false;
+
+                for (String loggerName : Logger.loggersNames()) {
+                    if (Logger.instance(loggerName).getLogConfigs().isWriteLogsToFileEnabled()) {
+                        isLoggerActive = true;
+                        break;
+                    }
+                }
+
+                if (isLoggerActive) {
                     File bugFile = getBugFile();
                     Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
                     fileWriter.write(stack.toString());
@@ -240,7 +248,9 @@ public abstract class BaseApplication extends Application implements Application
                 Logger.instance("bugs").writeToFile(thisApp(), stack::toString);
             }
 
-            Logger.d().print(stack::toString);
+            for (String loggerName : Logger.loggersNames()) {
+                Logger.instance(loggerName).print(stack::toString);
+            }
 
             try {
                 dispose();
