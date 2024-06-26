@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 //path_provider: ^2.0.3
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart' as filesProvider;
 
 ///Directory tempDir = await getTemporaryDirectory();
 /// String tempPath = tempDir.path;
@@ -10,14 +10,35 @@ import 'package:path_provider/path_provider.dart';
 ///String appDocPath = appDocDir.path;
 class Files {
   String _fileName;
+  String _fileExtension;
+  bool _saveToCacheDir;
+  bool _privateDir = true;
 
-  Files(this._fileName);
+  Files.private(
+    this._fileName,
+    this._fileExtension, [
+    this._saveToCacheDir = false,
+  ]) : _privateDir = true;
+
+  Files.public(
+    this._fileName,
+    this._fileExtension, [
+    this._saveToCacheDir = false,
+  ]) : _privateDir = false;
 
   //----------------------------------------------------------------------------
 
   Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
+    Directory? directory = _privateDir
+        ? (_saveToCacheDir
+            ? await filesProvider.getApplicationCacheDirectory()
+            : await filesProvider.getApplicationDocumentsDirectory())
+        : (_saveToCacheDir
+            ? (await filesProvider.getExternalCacheDirectories())?.first
+            : await filesProvider.getExternalStorageDirectory());
+
+    return directory?.path ??
+        (await filesProvider.getTemporaryDirectory()).path;
   }
 
   //----------------------------------------------------------------------------
@@ -27,7 +48,7 @@ class Files {
   Future<File> get localFile async {
     if (__localFile == null) {
       final path = await _localPath;
-      __localFile = File('$path/$_fileName');
+      __localFile = File('$path/$_fileName.$_fileExtension');
       if (!__localFile!.existsSync()) {
         __localFile!.createSync(recursive: true);
       }
@@ -68,10 +89,9 @@ class Files {
     return file.writeAsBytes(bytes, flush: true);
   }
 
-
   Future<Files> append(String text) async {
     final file = await localFile;
-    await file.writeAsString('$text', mode: FileMode.append);
+    await file.writeAsString(text, mode: FileMode.append);
     return this;
   }
 
@@ -80,7 +100,6 @@ class Files {
     await file.writeAsBytes(bytes, mode: FileMode.append, flush: true);
     return this;
   }
-
 
   //============================================================
 

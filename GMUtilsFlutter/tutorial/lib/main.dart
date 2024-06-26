@@ -1,16 +1,15 @@
-// import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
-import 'package:tutorial/ui/screens/start/start_screen.dart';
-import 'package:tutorial/zgmutils/data_utils/firebase/fcm.dart';
-import 'package:tutorial/zgmutils/gm_main.dart';
-import 'package:tutorial/zgmutils/utils/notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'resources/_resources.dart';
 import 'resources/strings.dart';
+import 'services/notifications/notifications_handler.dart';
+import 'ui/screens/start/start_screen.dart';
+import 'zgmutils/data_utils/firebase/fcm.dart';
+import 'zgmutils/gm_main.dart';
 import 'zgmutils/utils/logs.dart';
+import 'zgmutils/utils/notifications.dart';
 
 const bool useProductionData = false; //todo
-
 
 void main() {
   GMMain.init(
@@ -27,29 +26,29 @@ void main() {
       return Res.themes.colors;
     },
     toolbarTitleFontFamily: () => Res.fonts.toolbarTitle,
-    startScreen: StartScreen(),
+    startScreen: const StartScreen(),
     localNotificationsConfigurations: null,
-    // fcmRequirements: FcmRequirements(
-    //   fcmConfigurations: FCMConfigurations(
-    //     notificationsConfigurations: NotificationsConfigurations(
-    //       androidNotificationIconName: 'notif_icon',
-    //       defaultNotificationSound: null,
-    //       androidExtraNotificationChannels: null,
-    //       androidNotificationChannelsIdsToDelete: null,
-    //       openCorrespondingScreen: (payload) {
-    //         // NotificationsHandler.openCorrespondingScreen(payload, onError: () {
-    //         //   NotificationsScreen.show();
-    //         // });
-    //       },
-    //     ),
-    //     firebaseProjectMessageKeyForSend: null,
-    //     onDeviceTokenRefresh: (newToken) {
-    //       Logs.print(() => 'main.init.onDeviceTokenRefresh:: $newToken');
-    //       //todo
-    //     },
-    //   ),
-    //   onFcmInitialized: null, firebaseOptions: null,
-    // ),
+    fcmRequirements: FcmRequirements(
+      fcmConfigurations: FCMConfigurations(
+        notificationsConfigurations: NotificationsConfigurations(
+          androidNotificationIconName: 'notif_icon',
+          defaultNotificationSound: null,
+          androidExtraNotificationChannels: null,
+          androidNotificationChannelsIdsToDelete: null,
+          openCorrespondingScreen: (payload) {
+            NotificationsHandler.openCorrespondingScreen(payload, onError: () {
+              //todo take proper action
+            });
+          },
+        ),
+        firebaseProjectMessageKeyForSend: null,
+        onDeviceTokenRefresh: (newToken) {
+          Logs.print(() => 'main.init.onDeviceTokenRefresh:: $newToken');
+          //todo take proper action
+        },
+      ),
+      onFcmInitialized: null, firebaseOptions: null,
+    ),
     onInitialize: (ctx) {
       // AppInfoStorage().saveFirstAppLaunchDateTimeIfMissed();
     },
@@ -57,7 +56,7 @@ void main() {
 
 }
 
-// @pragma('vm:entry-point')
-// FcmNotificationProperties resolveNotification(RemoteMessage message) {
-//   return FcmNotificationProperties(title: 'title', body: 'body');
-// }
+@pragma('vm:entry-point')
+FcmNotificationProperties resolveNotification(RemoteMessage message) {
+  return NotificationsHandler.resolveNotification(message);
+}

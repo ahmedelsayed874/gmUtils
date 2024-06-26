@@ -1,7 +1,6 @@
-import 'package:tutorial/data/data_source/users/users_datasource.dart';
-import 'package:tutorial/data/data_source/users/users_datasource_mockup.dart';
-
 import '../../main.dart';
+import 'users/users_datasource.dart';
+import 'users/users_datasource_mockup.dart';
 import 'users/users_datasource_production.dart';
 
 class Datasource {

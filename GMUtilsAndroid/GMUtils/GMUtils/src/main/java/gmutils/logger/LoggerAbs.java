@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -357,7 +358,8 @@ public abstract class LoggerAbs {
                         if (o instanceof Runnable) {
                             try {
                                 ((Runnable) o).run();
-                            } catch (Exception ignored) {}
+                            } catch (Exception ignored) {
+                            }
                         }
                     }
             );
@@ -801,7 +803,7 @@ public abstract class LoggerAbs {
                 );
                 if (!backupDir.exists() && !backupDir.mkdirs()) {
                     log.append(">>> ERROR: COULDN'T CREATE BACKUP DIR\n");
-                    print(() -> log);
+                    print(() -> "Backup::: " + log);
 
                     return new ExportBackupFeedback(
                             false,
@@ -816,45 +818,261 @@ public abstract class LoggerAbs {
             log.append(">>> backupDir created at: ").append(backupDir).append("\n");
             //endregion
 
-            //region get desired dirs
-            File[] dirsToZip;
-            if (!includePublicFiles) {
-                dirsToZip = new File[1];
-            } else {
-                //int size = 2;
-                int size = 1 + context.getExternalFilesDirs(null).length;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    size += context.getExternalMediaDirs().length;
-                }
-                dirsToZip = new File[size];
-            }
-
-            dirsToZip[0] = context.getFilesDir().getParentFile();
+            //region collect desired dirs
+            List<File> dirsToZip = new ArrayList<>();
+            dirsToZip.add(context.getFilesDir().getParentFile());
             if (includePublicFiles) {
-                //dirsToZip[1] = context.getExternalFilesDir(null);
                 File[] filesDirs = context.getExternalFilesDirs(null);
-                int i = 1;
-                for (File filesDir : filesDirs) {
-                    dirsToZip[i++] = filesDir;
-                }
+                Collections.addAll(dirsToZip, filesDirs);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     File[] mediaDirs = context.getExternalMediaDirs();
-                    i = filesDirs.length + 1;
-                    for (File mediaDir : mediaDirs) {
-                        dirsToZip[i++] = mediaDir;
-                    }
+                    Collections.addAll(dirsToZip, mediaDirs);
                 }
             }
 
-            log.append(">>> target file pathes collected: ")
-                    .append(Arrays.toString(dirsToZip))
+            log.append(">>> target file paths collected: ")
+                    .append(Arrays.toString(dirsToZip.toArray(new File[0])))
                     .append("\n");
             //endregion
 
             //region create out zip files
-            File[] outZipFiles = new File[dirsToZip.length];
+            File[] outZipFiles = new File[dirsToZip.size()];
+            final String baseBackupFileName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true);
+
+            try {
+                for (int i = 0; i < outZipFiles.length; i++) {
+                    String backupFileName;
+                    if (i == 0) {
+                        backupFileName = baseBackupFileName +
+                                "." +
+                                extensionOfBackupOfPrivate;
+                    }
+                    //
+                    else {
+                        backupFileName = baseBackupFileName +
+                                "-public" +
+                                String.format(Locale.ENGLISH, "%02d", i) +
+                                "." +
+                                extensionOfBackupOfPrivate;
+                    }
+
+                    /*outZipFiles[i] = includePublicFiles ?
+                            new File(context.getCacheDir(), backupFileName) :
+                            new File(backupDir, backupFileName);*/
+                    outZipFiles[i] = new File(backupDir, backupFileName);
+                    boolean b = outZipFiles[i].createNewFile();
+                    if (!b) throw new IllegalStateException();
+                }
+            } catch (Exception e) {
+                log.append(">>> ERROR: COULDN'T CREATE ZIP FILE\n");
+                print(() -> "Backup::: " + log);
+
+                e.printStackTrace();
+                return new ExportBackupFeedback(
+                        false,
+                        "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
+                                "Details: " + e.getMessage(),
+                        null
+                );
+            }
+
+            log.append(">>> files to zip created at: ")
+                    .append(Arrays.toString(outZipFiles))
+                    .append("\n");
+            //endregion
+
+            //region compress dirs
+            log.append(">>> zipping files going to start....\n");
+
+            ZipFileUtils zipFileUtils = new ZipFileUtils(LoggerAbs.this);
+            AtomicInteger idx = new AtomicInteger();
+            for (int i = 0; i < outZipFiles.length; i++) {
+                File outZipFile = outZipFiles[i];
+                File dirToZip = dirsToZip.get(i);
+
+                log.append("\n--------------------\n>>> zipping [")
+                        .append(dirToZip)
+                        .append("]\nTO [")
+                        .append(outZipFile)
+                        .append("]\n");
+
+                idx.set(i);
+                File finalBackupDir = backupDir;
+                ZipFileUtils.Error error = zipFileUtils.compressSync(
+                        outZipFile,
+                        dirToZip,
+                        (dir) -> {
+                            log.append(">>> >>> compress ask: exclude DIR (")
+                                    .append(dir.getName())
+                                    .append(")?\n");
+
+                            if (idx.get() == 0) {//private
+                                if (dir.getName().equalsIgnoreCase("databases")) {
+                                    log.append(">>> >>> >>> NO\n");
+                                    return false;
+                                }
+                                //
+                                else if (dir.getName().equalsIgnoreCase("files")) {
+                                    log.append(">>> >>> >>> NO\n");
+                                    return false;
+                                }
+                                //
+                                else if (dir.getName().equalsIgnoreCase("shared_prefs")) {
+                                    log.append(">>> >>> >>> NO\n");
+                                    return false;
+                                }
+
+                                log.append(">>> >>> >>> YES\n");
+
+                                return true;
+                            }
+                            //
+                            else {
+                                if (dir.getPath().equalsIgnoreCase(finalBackupDir.getPath())) {
+                                    log.append(">>> >>> >>> YES\n");
+                                    return true;
+                                }
+
+                                log.append(">>> >>> >>> NO\n");
+                                return false;
+                            }
+                        },
+                        (file) -> {
+                            log.append(">>> >>> compress ask: exclude FILE (")
+                                    .append(file.getName())
+                                    .append(")? NO\n");
+
+                            return false;
+                        }
+                );
+                if (error != null) {
+                    log.append(">>> zipping files GOT-ERROR .. ").append(error.error).append("\n");
+                    print(() -> "Backup::: " + log);
+
+                    return new ExportBackupFeedback(
+                            false,
+                            "Failed to backup [Reason: " + error.error + "]",
+                            null
+                    );
+                }
+            }
+
+            log.append(">>> zipping files COMPLETED √√√\n");
+            //endregion
+
+            /*if (includePublicFiles) {
+                log.append(">>> zipping PUBLIC files going to start....");
+
+                try {
+                    File outZipFile = new File(backupDir, mainBackupFileName);
+                    outZipFile.createNewFile();
+
+                    log.append(">>> zipping PUBLIC files :: ")
+                            .append(Arrays.toString(outZipFiles))
+                            .append("\n");
+
+                    zipFileUtils.compressSync(
+                            outZipFile,
+                            outZipFiles,
+                            context.getCacheDir()
+                    );
+
+                } catch (Exception e) {
+                    log.append(">>> zipping PUBLIC files ... EXCEPTION: ").append(e.getMessage()).append("\n");
+                    print(() -> "Backup::: " + log);
+
+                    e.printStackTrace();
+                    return new ExportBackupFeedback(
+                            false,
+                            "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
+                                    "Details: " + e.getMessage(),
+                            null
+                    );
+                }
+
+                //region delete
+                try {
+                    for (File zipFile : outZipFiles) {
+                        boolean deleted = zipFile.delete();
+                        log.append(">>> DELETE " + (deleted ? "COMPLETED" : "FAILED") + " ... for file: " + zipFile);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //endregion
+            }*/
+
+            print(() -> "Backup::: " + log);
+
+            return new ExportBackupFeedback(
+                    true,
+                    "Data backed-up successfully to: '" + backupDir.getAbsolutePath() + "'",
+                    backupDir.getAbsolutePath()
+            );
+        }, onComplete);
+    }
+
+    /*public void exportAppBackup(Context context, boolean includePublicFiles, ResultCallback<ExportBackupFeedback> onComplete) {
+        printMethod();
+
+        BackgroundTask.run(() -> {
+            StringBuilder log = new StringBuilder();
+            log.append("exportAppBackup(includePublicFiles: ")
+                    .append(includePublicFiles)
+                    .append(")\n");
+
+            //region create Back up Directory
+            String backupDirName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmm", true);
+            File backupDir = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    context.getPackageName() + "/" + backupDirName
+            );
+            if (!backupDir.exists() && !backupDir.mkdirs()) {
+                String path0 = backupDir.getAbsolutePath();
+                backupDir = new File(
+                        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                        backupDirName
+                );
+                if (!backupDir.exists() && !backupDir.mkdirs()) {
+                    log.append(">>> ERROR: COULDN'T CREATE BACKUP DIR\n");
+                    print(() -> "Backup::: " + log);
+
+                    return new ExportBackupFeedback(
+                            false,
+                            "Couldn't create a folder in any of those paths:\n" +
+                                    "Path 1:" + path0 + "\n" +
+                                    "Path 2:" + backupDir.getAbsolutePath(),
+                            null
+                    );
+                }
+            }
+
+            log.append(">>> backupDir created at: ").append(backupDir).append("\n");
+            //endregion
+
+            //region collect desired dirs
+            List<File> dirsToZip = new ArrayList<>();
+            dirsToZip.add(context.getFilesDir().getParentFile());
+            if (includePublicFiles) {
+                File[] filesDirs = context.getExternalFilesDirs(null);
+                Collections.addAll(dirsToZip, filesDirs);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    File[] mediaDirs = context.getExternalMediaDirs();
+                    Collections.addAll(dirsToZip, mediaDirs);
+                }
+            }
+
+            log.append(">>> target file paths collected: ")
+                    .append(Arrays.toString(dirsToZip.toArray(new File[0])))
+                    .append("\n");
+            //endregion
+
+            //region create out zip files
+            File[] outZipFiles = new File[dirsToZip.size()];
             final String mainBackupFileName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + "." + extensionOfBackupOfPrivate;
+
             try {
                 for (int i = 0; i < outZipFiles.length; i++) {
                     String backupFileName;
@@ -864,7 +1082,6 @@ public abstract class LoggerAbs {
                         backupFileName = "Backup-" + DateOp.getInstance().formatDate("yyyyMMddHHmmss", true) + "-public" + i + "." + extensionOfBackupOfPublic;
                     }
 
-                    //outZipFiles[i] = new File(backupDir, backupFileName);
                     outZipFiles[i] = includePublicFiles ?
                             new File(context.getCacheDir(), backupFileName) :
                             new File(backupDir, backupFileName);
@@ -872,7 +1089,7 @@ public abstract class LoggerAbs {
                 }
             } catch (Exception e) {
                 log.append(">>> ERROR: COULDN'T CREATE ZIP FILE\n");
-                print(() -> log);
+                print(() -> "Backup::: " + log);
 
                 e.printStackTrace();
                 return new ExportBackupFeedback(
@@ -888,7 +1105,7 @@ public abstract class LoggerAbs {
             //endregion
 
             //region compress dirs
-            log.append(">>> zipping PRIVATE files going to start....\n");
+            log.append(">>> zipping files going to start....\n");
 
             ZipFileUtils zipFileUtils = new ZipFileUtils(LoggerAbs.this);
             AtomicInteger idx = new AtomicInteger();
@@ -949,7 +1166,7 @@ public abstract class LoggerAbs {
                 );
                 if (error != null) {
                     log.append(">>> zipping files GOT-ERROR .. ").append(error.error).append("\n");
-                    print(() -> log);
+                    print(() -> "Backup::: " + log);
 
                     return new ExportBackupFeedback(
                             false,
@@ -958,7 +1175,7 @@ public abstract class LoggerAbs {
                     );
                 }
             }
-            log.append(">>> zipping PRIVATE files COMPLETED √√√\n");
+            log.append(">>> zipping files COMPLETED √√√\n");
             //endregion
 
             if (includePublicFiles) {
@@ -968,7 +1185,9 @@ public abstract class LoggerAbs {
                     File outZipFile = new File(backupDir, mainBackupFileName);
                     outZipFile.createNewFile();
 
-                    log.append(">>> zipping PUBLIC files :: ").append(Arrays.toString(outZipFiles)).append("\n");
+                    log.append(">>> zipping PUBLIC files :: ")
+                            .append(Arrays.toString(outZipFiles))
+                            .append("\n");
 
                     zipFileUtils.compressSync(
                             outZipFile,
@@ -978,7 +1197,7 @@ public abstract class LoggerAbs {
 
                 } catch (Exception e) {
                     log.append(">>> zipping PUBLIC files ... EXCEPTION: ").append(e.getMessage()).append("\n");
-                    print(() -> log);
+                    print(() -> "Backup::: " + log);
 
                     e.printStackTrace();
                     return new ExportBackupFeedback(
@@ -990,15 +1209,18 @@ public abstract class LoggerAbs {
                 }
             }
 
+            //region delete
             try {
                 for (File zipFile : outZipFiles) {
-                    zipFile.delete();
+                    boolean deleted = zipFile.delete();
+                    log.append(">>> DELETE " + (deleted ? "COMPLETED" : "FAILED") + " ... for file: " + zipFile);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            //endregion
 
-            print(() -> log);
+            print(() -> "Backup::: " + log);
 
             return new ExportBackupFeedback(
                     true,
@@ -1006,7 +1228,7 @@ public abstract class LoggerAbs {
                     backupDir.getAbsolutePath()
             );
         }, onComplete);
-    }
+    }*/
 
     public void importAppBackup(Context context, Uri backupFile, ResultCallback2<Boolean, String> onComplete) {
         BackgroundTask.run(() -> {

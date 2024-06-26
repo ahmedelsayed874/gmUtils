@@ -1,6 +1,4 @@
-
-import 'package:tutorial/data/models/user.dart';
-
+import '../../models/user.dart';
 import 'users_datasource.dart';
 
 class UsersDataSourceProduction extends UsersDataSource {

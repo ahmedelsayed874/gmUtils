@@ -355,7 +355,9 @@ class MainActivity : BaseActivity() {
         }
         //
         else if (requestCode == 12321) {
-            Logger.d().importAppBackup(thisActivity(), data!!.data) { b, it ->
+            if (data?.data == null) return
+
+            Logger.d().importAppBackup(thisActivity(), data.data) { b, it ->
                 log("restore-app-backup", "restoring app backup finished: $it")
             }
         }

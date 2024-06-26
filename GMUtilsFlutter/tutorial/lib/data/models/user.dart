@@ -1,5 +1,5 @@
 
-import 'package:tutorial/zgmutils/utils/mappable.dart';
+import '../../zgmutils/utils/mappable.dart';
 
 class User {
   int id;

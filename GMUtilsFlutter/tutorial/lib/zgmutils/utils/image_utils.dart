@@ -1,10 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
-
+import 'dart:ui';
+import 'dart:convert';
 
 class ImageUtils {
   Future<File?> resizeImage(
@@ -53,6 +55,36 @@ class ImageUtils {
     } else {
       return null;
     }
+  }
+
+
+  //----------------------------------------------------------------------------
+
+  Uint8List decodeImageFromBase64(String photoAsBase64) {
+    var bytes = base64Decode(photoAsBase64);
+    return bytes;
+  }
+
+  Future<Image> decodeImageFromBase64IntoUiImage(String photoAsBase64) async {
+    var bytes = decodeImageFromBase64(photoAsBase64);
+    var completer = Completer<Image>();
+    decodeImageFromList(bytes, (result) {
+      completer.complete(result);
+    });
+    return completer.future;
+  }
+
+  Future<String?> encodeImageToBase64_2(Image image) async {
+    var bytes = await image.toByteData(format: ImageByteFormat.rawRgba);
+    if (bytes == null) return null;
+
+    Uint8List list = bytes.buffer.asUint8List();
+    return encodeImageToBase64(list);
+  }
+
+  Future<String?> encodeImageToBase64(Uint8List bytes) async {
+    var encoded = base64Encode(bytes);
+    return encoded;
   }
 
 }

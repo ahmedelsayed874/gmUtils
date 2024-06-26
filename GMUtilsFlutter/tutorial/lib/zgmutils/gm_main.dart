@@ -1,4 +1,4 @@
-// import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -22,7 +22,7 @@ class GMMain {
     required AppColors Function(BuildContext context) appColors,
     required String? Function()? toolbarTitleFontFamily,
     required Widget startScreen,
-    // required FcmRequirements? fcmRequirements,
+    required FcmRequirements? fcmRequirements,
     required NotificationsConfigurations? localNotificationsConfigurations,
     required OnInitialize? onInitialize,
   }) async {
@@ -32,19 +32,19 @@ class GMMain {
       await Notifications.instance.init(localNotificationsConfigurations);
     }
 
-    // if (fcmRequirements != null && localNotificationsConfigurations == null) {
-    //   throw 'while you need to init FCM, so you need to set localNotificationsConfigurations too';
-    // }
+    if (fcmRequirements != null && localNotificationsConfigurations == null) {
+      throw 'while you need to init FCM, so you need to set localNotificationsConfigurations too';
+    }
 
-    // if (fcmRequirements != null) {
-    //   await Firebase.initializeApp(
-    //     options: fcmRequirements.firebaseOptions,
-    //   );
-    //   await FCM.instance.init(
-    //     fcmRequirements.fcmConfigurations,
-    //   );
-    //   fcmRequirements.onFcmInitialized?.call(FCM.instance);
-    // }
+    if (fcmRequirements != null) {
+      await Firebase.initializeApp(
+        options: fcmRequirements.firebaseOptions,
+      );
+      await FCM.instance.init(
+        fcmRequirements.fcmConfigurations,
+      );
+      fcmRequirements.onFcmInitialized?.call(FCM.instance);
+    }
 
     LocalePreference().isEn().then(
       (value) {
@@ -62,17 +62,17 @@ class GMMain {
   }
 }
 
-// class FcmRequirements {
-//   FCMConfigurations fcmConfigurations;
-//   FirebaseOptions? firebaseOptions;
-//   void Function(FCM fcm)? onFcmInitialized;
-//
-//   FcmRequirements({
-//     required this.fcmConfigurations,
-//     required this.firebaseOptions,
-//     required this.onFcmInitialized,
-//   });
-// }
+class FcmRequirements {
+  FCMConfigurations fcmConfigurations;
+  FirebaseOptions? firebaseOptions;
+  void Function(FCM fcm)? onFcmInitialized;
+
+  FcmRequirements({
+    required this.fcmConfigurations,
+    required this.firebaseOptions,
+    required this.onFcmInitialized,
+  });
+}
 
 //==============================================================================
 

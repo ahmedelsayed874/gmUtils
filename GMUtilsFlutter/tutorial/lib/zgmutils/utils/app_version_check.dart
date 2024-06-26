@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'logs.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../ui/dialogs/message_dialog.dart';
 import 'launcher.dart';
-import 'logs.dart';
 import 'package_info.dart';
 
 class AppVersionCheck {
@@ -18,31 +18,31 @@ class AppVersionCheck {
 
   final String runningAndroidVersion;
   final String runningIosVersion;
-  //final String? publishedAndroidVersion;
-  //final String? publishedIosVersion;
+  final String? publishedAndroidVersion;
+  final String? publishedIosVersion;
   final String iosAppId;
 
   AppVersionCheck({
     required this.runningAndroidVersion,
     required this.runningIosVersion,
-    //required this.publishedAndroidVersion,
-    //required this.publishedIosVersion,
+    required this.publishedAndroidVersion,
+    required this.publishedIosVersion,
     required this.iosAppId,
   }) {
     Logs.print(() => [
           'AppVersionCheck.constructor()',
           'runningAndroidVersion: $runningAndroidVersion',
           'runningIosVersion: $runningIosVersion',
-          //'publishedAndroidVersion: $publishedAndroidVersion',
-          //'publishedIosVersion: $publishedIosVersion',
+          'publishedAndroidVersion: $publishedAndroidVersion',
+          'publishedIosVersion: $publishedIosVersion',
           'iosAppId: $iosAppId',
         ]);
   }
 
   void check(BuildContext Function() context, bool en) async {
     var b = hasNewVersion(
-      publishedAndroidVersion: await getPlayStoreVersion() ?? '0',
-      publishedIosVersion: await getAppStoreVersion() ?? '0',
+      globalAndroidVersion: await getPlayStoreVersion(),
+      globalIosVersion: await getAppStoreVersion(),
     );
 
     if (b == true) {
@@ -72,20 +72,20 @@ class AppVersionCheck {
   }
 
   bool? hasNewVersion({
-    required String publishedAndroidVersion,
-    required String publishedIosVersion,
+    String? globalAndroidVersion,
+    String? globalIosVersion,
   }) {
     String? localVersion;
     String? globalVersion;
 
     if (Platform.isAndroid) {
       localVersion = runningAndroidVersion;
-      globalVersion = publishedAndroidVersion;
+      globalVersion = publishedAndroidVersion ?? globalAndroidVersion;
     }
     //
     else if (Platform.isIOS) {
       localVersion = runningIosVersion;
-      globalVersion = publishedIosVersion;
+      globalVersion = publishedIosVersion ?? globalIosVersion;
     }
 
     if (localVersion == null || globalVersion == null) return null;

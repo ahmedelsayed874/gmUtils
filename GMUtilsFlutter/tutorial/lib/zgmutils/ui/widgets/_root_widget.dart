@@ -183,7 +183,7 @@ class RootWidget {
               title,
               style: titleStyle ??
                   AppTheme.textStyleOfScreenTitle(
-                      fontFamily: Res.fonts.lobster),
+                      fontFamily: Res.fonts.cairo,),
               textAlign: TextAlign.center,
             ),
             if (hint != null)

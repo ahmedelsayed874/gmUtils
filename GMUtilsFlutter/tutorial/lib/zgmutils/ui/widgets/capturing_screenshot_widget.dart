@@ -41,8 +41,8 @@ class CapturingScreenshotWidget extends StatefulWidget {
           .replaceAll(":", '-');
 
       //create file and write data
-      var files = Files(
-        '$fileName.png'
+      var files = Files.private(
+        fileName, 'png'
       );
       var createdFile = await files.writeBytes(imageBytes);
 
@@ -115,7 +115,7 @@ class WidgetCapture {
               .replaceAll(":", '-');
 
       //create file and write data
-      var files = Files('$fileName2.png');
+      var files = Files.private(fileName2, 'png');
       var createdFile = await files.writeBytes(imageBytes);
       return createdFile;
     }

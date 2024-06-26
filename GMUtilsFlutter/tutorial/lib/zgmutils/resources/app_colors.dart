@@ -6,6 +6,7 @@ abstract class AppColors {
   AppColors({required this.isLightMode});
 
   Color get primary;
+  Color get secondary;
 
   Color get background;
 

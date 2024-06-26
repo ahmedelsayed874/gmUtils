@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tutorial/zgmutils/ui/utils/base_stateful_state.dart';
 
+import '../../../zgmutils/ui/utils/base_stateful_state.dart';
 import 'start_screen_driver.dart';
 
 class StartScreen extends StatefulWidget {

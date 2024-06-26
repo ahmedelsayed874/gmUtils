@@ -4,20 +4,24 @@ import android.util.Pair;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Calculator {
     private BigDecimal result = BigDecimal.valueOf(0);
 
     //----------------------------------------------------------------------------------------------
 
-    public void calculateEquation(String equation) {
+    public enum CalculationMode { Standard, Linear }
+    
+    public void calculateEquation(String equation, CalculationMode mode) {
         //equation = 1+(2+3)-(4*5/(6*7))+(9*10/1)
-        double v = doCalculateEquation(equation);
+        double v = doCalculateEquation(equation, mode);
         result = result.add(BigDecimal.valueOf(v));
     }
 
-    private double doCalculateEquation(String eq) throws IllegalArgumentException {
+    private double doCalculateEquation(String eq, CalculationMode mode) throws IllegalArgumentException {
         StringBuilder equation = new StringBuilder(eq);//1+(2+3)-(4*5/(6*(7-1)))+(9*10/1
         boolean canEnd = false;
 
@@ -36,7 +40,7 @@ public class Calculator {
                 if (parenthesesEndIndex < parenthesesStartIndex)
                     parenthesesEndIndex = equation.length();
                 String subEquation = equation.substring(parenthesesStartIndex + 1, parenthesesEndIndex);
-                double r = doCalculateEquation(subEquation);
+                double r = doCalculateEquation(subEquation, mode);
 
                 if (parenthesesEndIndex == equation.length()) {
                     equation.delete(parenthesesStartIndex, parenthesesEndIndex);
@@ -49,10 +53,34 @@ public class Calculator {
 
             //region manipulation * / + -
             else {
-                //region manipulation * /
                 int multiplyIndex = equation.indexOf("*");
                 int divideIndex = equation.indexOf("/");
-                if (multiplyIndex > 0 || divideIndex > 0) {
+                int addIndex = equation.indexOf("+");
+                int subtractIndex = equation.indexOf("-");
+
+                boolean multiplyOrDivide = false;
+
+                if (mode == CalculationMode.Standard) {
+                    multiplyOrDivide = multiplyIndex > 0 || divideIndex > 0;
+
+                }
+                //
+                else if (mode == CalculationMode.Linear) {
+                    int min = Integer.MAX_VALUE;
+                    for (int num : Arrays.asList(multiplyIndex, divideIndex, addIndex, subtractIndex)) {
+                        if (num < 0) continue;
+                        if (min > num) min = num;
+                    }
+
+                    multiplyOrDivide = min == multiplyIndex || min == divideIndex;
+                }
+                //
+                else {
+                    throw new IllegalArgumentException();
+                }
+
+                //region manipulation * /
+                if (multiplyOrDivide) {
                     int symIndex = Math.min(multiplyIndex, divideIndex);
                     if (symIndex == -1) symIndex = Math.max(multiplyIndex, divideIndex);
 
@@ -92,9 +120,6 @@ public class Calculator {
 
                 //region manipulation - +
                 else {
-                    int addIndex = equation.indexOf("+");
-                    int subtractIndex = equation.indexOf("-");
-
                     if (addIndex == 0 || subtractIndex == 0) {
                         if (equation.length() > 1) {
                             addIndex = equation.indexOf("+", 1);
@@ -171,8 +196,7 @@ public class Calculator {
                 if (c >= '0' && c <= '9' || c == '.') {
                     startIndex = index + 1;
                     rightTerm.insert(0, c);
-                } else {
-                    if (c == '-' || c == '+') {
+                } else if (c == '-' || c == '+') {
                         if (rightTerm.length() > 0 && rightTerm.charAt(0) == '.') {
                             rightTerm.insert(0, 0);
                         }
@@ -191,7 +215,8 @@ public class Calculator {
                                 break;
                             }
                         }
-                    }
+                } else {
+                    break;
                 }
             } while (index >= 0);
 
@@ -225,6 +250,8 @@ public class Calculator {
                     } else {
                         break;
                     }
+                } else {
+                    break;
                 }
             } while (index < equation.length());
 

@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:tutorial/data/data_source/datasource.dart';
-import 'package:tutorial/data/data_source/users/users_datasource.dart';
-import 'package:tutorial/zgmutils/ui/utils/base_stateful_state.dart';
-import 'package:tutorial/zgmutils/ui/utils/drivers_interfaces.dart';
+import '../../../data/data_source/datasource.dart';
+import '../../../data/data_source/users/users_datasource.dart';
+import '../../../zgmutils/ui/utils/drivers_interfaces.dart';
 
 abstract class StartScreenDelegate extends IScreenDriverDependantDelegate {
   void showMsg(String m);
@@ -18,16 +16,15 @@ abstract class StartScreenDriverAbs extends IScreenDriver {
   }) : super(delegate);
 
   void getUser(String username) async {
-delegete.showWaitDialog(); //todo i just added this for more clarification
+    delegate.showWaitView();
 
     var user = await usersDataSource.getUser(username: username);
 
-await delegete.hideWaitDialog(); //todo i just added this for more clarification
+    await delegate.hideWaitView();
 
     if (user == null) {
       delegate.showMsg('Returned user: nothing');
-    }
-    else {
+    } else {
       delegate.showMsg('Returned user: ${user.name}');
     }
   }

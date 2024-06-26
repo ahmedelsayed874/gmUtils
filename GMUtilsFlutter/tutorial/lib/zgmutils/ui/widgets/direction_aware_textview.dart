@@ -14,7 +14,8 @@ class DirectionAwareTextView extends StatelessWidget {
   final int? maxLines;
   final Color? selectionColor;
 
-  DirectionAwareTextView(this.text, {
+  DirectionAwareTextView(
+    this.text, {
     this.style,
     this.textAlign,
     TextDirection? textDirection,
@@ -29,7 +30,7 @@ class DirectionAwareTextView extends StatelessWidget {
         super(key: key) {
     _initState(textDirection);
   }
-  
+
   DirectionAwareTextView.rich({
     required InlineSpan this.textSpan,
     this.style,
@@ -50,49 +51,73 @@ class DirectionAwareTextView extends StatelessWidget {
   TextDirection? _finalTextDirection;
 
   void _initState(TextDirection? textDirection) {
-    _finalTextDirection = textDirection;
+    // Logs.print(() => [
+    //       "DirectionAwareTextView._initState()",
+    //       "textDirection: $textDirection",
+    //     ]);
 
-    if (textDirection == null) {
+    if (textDirection != null) {
+      _finalTextDirection = textDirection;
+      return;
+    }
+
+    String? startText;
+
+    if (textSpan != null) {
+      var i = 0;
+      var codes = <int>[];
       int? c;
-      if (textSpan != null) {
-        var s = textSpan!.toStringShort().trim();
-        if (s.isNotEmpty) {
-          c = s.codeUnitAt(0);
-        }
+      while (i < 20) {
+        c = textSpan!.codeUnitAt(i);
+        if (c == null) break;
+        codes.add(c);
+        i++;
+      }
+
+      if (codes.isNotEmpty) {
+        startText = String.fromCharCodes(codes);
+      }
+    }
+    //
+    else {
+      if (text.length > 20) {
+        startText = text.substring(0, 20);
       } else {
-        if (text.trim().isNotEmpty) {
-          c = text.codeUnitAt(0);
-        }
+        startText = text;
       }
+    }
 
-      String firstLetter = '';
-      if (c != null) {
-        firstLetter = String.fromCharCode(c);
-      }
+    if (TextUtils().isStartWithArabic(startText ?? '') == true) {
+      // Logs.print(() => [
+      //       "DirectionAwareTextView._initState()",
+      //       "from textSpan? ${textSpan != null}",
+      //       "startText: |$startText|",
+      //       'start with ar? true',
+      //     ]);
 
-      if (firstLetter.length == 1) {
-        var e = TextUtils().isEnglishLetter(firstLetter);
-        if (e != null) {
-          if (e) {
-            if (_finalTextDirection != TextDirection.ltr) {
-              //setState(() {
-              _finalTextDirection = TextDirection.ltr;
-              //});
-            }
-          } else {
-            if (_finalTextDirection != TextDirection.rtl) {
-              //setState(() {
-              _finalTextDirection = TextDirection.rtl;
-              //});
-            }
-          }
-        }
-      }
+      _finalTextDirection = TextDirection.rtl;
+    }
+    //
+    else {
+      // Logs.print(() => [
+      //       "DirectionAwareTextView._initState()",
+      //       "from textSpan? ${textSpan != null}",
+      //       "startText: |$startText|",
+      //       'start with ar? false',
+      //     ]);
+
+      _finalTextDirection = TextDirection.ltr;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Logs.print(() => [
+    //   "DirectionAwareTextView.build()",
+    //   'rich: $rich, textAlign: $textAlign, '
+    //       'finalTextDirection: $_finalTextDirection, '
+    // ]);
+
     if (rich) {
       return Text.rich(
         textSpan!,

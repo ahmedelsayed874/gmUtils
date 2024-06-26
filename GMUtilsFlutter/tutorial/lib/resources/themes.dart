@@ -91,15 +91,18 @@ class _LightColors extends _AppColors {
   _LightColors() : super(isLightMode: true);
 
   @override
-  Color get primary => const Color(0xff050000);
+  Color get primary => const Color(0xff31263A);
+  @override
+  Color get secondary => const Color(0xffD94A19);
+
   @override
   Color background = const Color(0xffffffff);
   @override
   Color sideMenu = const Color(0xd3050505);
   @override
-  Color toolbar = const Color(0xffffffff);
+  Color get toolbar => primary;
   @override
-  Color toolbarTextColor = const Color(0xff0e0000);
+  Color get toolbarTextColor => secondary;
 
   @override
   Color card = Colors.white;
@@ -115,8 +118,6 @@ class _LightColors extends _AppColors {
   @override
   Color hint = const Color(0xffB8B6B6);
 
-  Color chatBg = const Color(0xff18508D);
-
   @override
   Color red = const Color(0xfff6540e);
   @override
@@ -127,7 +128,10 @@ class _DarkColors extends _AppColors {
   _DarkColors() : super(isLightMode: false);
 
   @override
-  Color primary = const Color(0xff000305);
+  Color primary = const Color(0xff31263A);
+  @override
+  Color get secondary => const Color(0xff5e1f0a);
+
   @override
   Color background = const Color(0xff7c7878);
   @override
