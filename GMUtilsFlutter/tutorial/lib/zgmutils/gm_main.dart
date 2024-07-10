@@ -21,6 +21,7 @@ class GMMain {
     required AppMeasurement Function(BuildContext context) measurements,
     required AppColors Function(BuildContext context) appColors,
     required String? Function()? toolbarTitleFontFamily,
+    required String? Function()? defaultFontFamily,
     required Widget startScreen,
     required FcmRequirements? fcmRequirements,
     required NotificationsConfigurations? localNotificationsConfigurations,
@@ -32,8 +33,8 @@ class GMMain {
       await Notifications.instance.init(localNotificationsConfigurations);
     }
 
-    if (fcmRequirements != null && localNotificationsConfigurations == null) {
-      throw 'while you need to init FCM, so you need to set localNotificationsConfigurations too';
+    if (fcmRequirements != null && localNotificationsConfigurations != null) {
+      throw 'while you need to init FCM, so you don\'t need to set localNotificationsConfigurations too';
     }
 
     if (fcmRequirements != null) {
@@ -54,6 +55,7 @@ class GMMain {
           measurements: measurements,
           appColors: appColors,
           toolbarTitleFontFamily: toolbarTitleFontFamily,
+          defaultFontFamily: defaultFontFamily,
           startScreen: startScreen,
           onInitialize: onInitialize,
         ));
@@ -81,6 +83,7 @@ class App extends StatefulWidget {
   AppMeasurement Function(BuildContext context)? measurements;
   AppColors Function(BuildContext context)? appColors;
   String? Function()? toolbarTitleFontFamily;
+  String? Function()? defaultFontFamily;
   Widget? startScreen;
   OnInitialize? onInitialize;
 
@@ -89,6 +92,7 @@ class App extends StatefulWidget {
     required this.measurements,
     required this.appColors,
     required this.toolbarTitleFontFamily,
+    required this.defaultFontFamily,
     required Widget startScreen,
     required this.onInitialize,
     Key? key,
@@ -279,6 +283,7 @@ class _AppState extends State<App> {
         measurements: widget.measurements,
         appColors: widget.appColors,
         toolbarTitleFontFamily: widget.toolbarTitleFontFamily,
+        defaultFontFamily: widget.defaultFontFamily,
         onInitialize: widget.onInitialize,
       ),
       navigatorObservers: [_NavigatorObserver()],
@@ -293,6 +298,7 @@ class _AppState extends State<App> {
     widget.measurements = null;
     widget.appColors = null;
     widget.toolbarTitleFontFamily = null;
+    widget.defaultFontFamily = null;
     widget.onInitialize = null;
 
     App.clearObservers();
@@ -308,6 +314,7 @@ class StarterWidget extends StatefulWidget {
   AppMeasurement Function(BuildContext context)? measurements;
   AppColors Function(BuildContext context)? appColors;
   String? Function()? toolbarTitleFontFamily;
+  String? Function()? defaultFontFamily;
   OnInitialize? onInitialize;
 
   StarterWidget({
@@ -315,6 +322,7 @@ class StarterWidget extends StatefulWidget {
     required this.measurements,
     required this.appColors,
     required this.toolbarTitleFontFamily,
+    required this.defaultFontFamily,
     required this.onInitialize,
     Key? key,
   }) : super(key: key);
@@ -336,6 +344,7 @@ class _StarterWidgetState extends State<StarterWidget> {
       appColors: appColors!(context),
       appMeasurement: measurements!(context),
       toolbarTitleFontFamily: widget.toolbarTitleFontFamily?.call(),
+      defaultFontFamily: widget.defaultFontFamily?.call(),
     );
     widget.onInitialize?.call(context);
 
@@ -349,6 +358,7 @@ class _StarterWidgetState extends State<StarterWidget> {
     widget.measurements = null;
     widget.appColors = null;
     widget.toolbarTitleFontFamily = null;
+    widget.defaultFontFamily = null;
     widget.onInitialize = null;
   }
 }

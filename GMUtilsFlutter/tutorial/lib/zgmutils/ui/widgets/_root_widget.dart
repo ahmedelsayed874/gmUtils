@@ -9,7 +9,7 @@ import '../../gm_main.dart';
 import '../../resources/app_theme.dart';
 import '../../utils/logs.dart';
 
-class RootWidget {
+class MyRootWidget {
   String toolbarTitle = '';
   bool awareTopSafeArea = true;
   PreferredSizeWidget? _appBar;
@@ -24,7 +24,7 @@ class RootWidget {
   bool? _resizeToAvoidBottomInset;
   Widget? _bottomNavigationBar;
 
-  RootWidget.withToolbar(this.toolbarTitle) {
+  MyRootWidget.withToolbar(this.toolbarTitle) {
     setupToolbar(null);
     _showBackButton = false;
 
@@ -32,7 +32,7 @@ class RootWidget {
     _body = const Text('use \"setBody\" method');
   }
 
-  RootWidget.withoutToolbar({
+  MyRootWidget.withoutToolbar({
     bool? awareTopSafeArea,
     bool showBackButton = false,
     Color? backButtonColor,
@@ -64,7 +64,7 @@ class RootWidget {
     );
   }
 
-  RootWidget setToolbarActions({
+  MyRootWidget setToolbarActions({
     List<IconButton>? actions,
     PopupMenuButton? popupMenuButton,
     Widget? leading,
@@ -79,33 +79,33 @@ class RootWidget {
     return this;
   }
 
-  RootWidget setAppBar(AppBar? appBar) {
+  MyRootWidget setAppBar(AppBar? appBar) {
     _appBar = appBar;
     return this;
   }
 
-  RootWidget removeToolbar() {
+  MyRootWidget removeToolbar() {
     _appBar = null;
     return this;
   }
 
-  RootWidget setDrawer(Widget widget, {DrawerCallback? onDrawerChanged}) {
+  MyRootWidget setDrawer(Widget widget, {DrawerCallback? onDrawerChanged}) {
     _drawer = widget;
     _onDrawerChanged = onDrawerChanged;
     return this;
   }
 
-  RootWidget changeBackground(Color bgColor) {
+  MyRootWidget changeBackground(Color bgColor) {
     _background = bgColor;
     return this;
   }
 
-  RootWidget changeBackgroundForSplash() {
+  MyRootWidget changeBackgroundForSplash() {
     changeBackground(AppTheme.appColors!.primary);
     return this;
   }
 
-  RootWidget setScreenPadding(
+  MyRootWidget setScreenPadding(
     double top,
     double left,
     double right,
@@ -120,12 +120,12 @@ class RootWidget {
     return this;
   }
 
-  RootWidget resizeToAvoidBottomInset(bool b) {
+  MyRootWidget resizeToAvoidBottomInset(bool b) {
     _resizeToAvoidBottomInset = b;
     return this;
   }
 
-  RootWidget setBody(Widget body, {bool scrollable = false}) {
+  MyRootWidget setBody(Widget body, {bool scrollable = false}) {
     if (scrollable) {
       _body = SingleChildScrollView(child: body);
     } else {
@@ -135,7 +135,7 @@ class RootWidget {
     return this;
   }
 
-  RootWidget setBodyWithTitle(
+  MyRootWidget setBodyWithTitle(
     String title,
     Widget body, {
     String? hint,
@@ -182,8 +182,7 @@ class RootWidget {
             Text(
               title,
               style: titleStyle ??
-                  AppTheme.textStyleOfScreenTitle(
-                      fontFamily: Res.fonts.cairo,),
+                  AppTheme.textStyleOfScreenTitle(),
               textAlign: TextAlign.center,
             ),
             if (hint != null)
@@ -202,105 +201,12 @@ class RootWidget {
     );
   }
 
-  RootWidget setBodyInsideRoundedBorder(Widget body) {
-    _body = createBodyInsideRoundedBorder(body);
-    return this;
-  }
-
-  RootWidget setBodyInsideRoundedBorderWithScreenTitle(
-    String title,
-    Widget body, {
-    String? hint,
-    Widget? belowBorder,
-    double titleHeight = 150,
-    bool scrollable = false,
-    TextStyle? titleStyle,
-    TextStyle? hintStyle,
-  }) {
-    var widgets = <Widget>[];
-
-    //title
-    widgets.add(titleWidget(
-      title,
-      hint: hint,
-      titleHeight: titleHeight,
-      titleStyle: titleStyle,
-      hintStyle: hintStyle,
-    ));
-
-    if (scrollable) {
-      widgets.add(createBodyInsideRoundedBorderWithScrollview(body));
-    } else {
-      widgets.add(createBodyInsideRoundedBorder(body));
-    }
-
-    if (belowBorder != null) widgets.add(belowBorder);
-
-    if (scrollable) {
-      _body = Column(
-        children: widgets,
-      );
-    } else {
-      _body = SingleChildScrollView(
-        child: Column(
-          children: widgets,
-        ),
-      );
-    }
-
-    return this;
-  }
-
-  Widget createBodyInsideRoundedBorderWithScrollview(Widget body) {
-    return Expanded(
-      child: Container(
-        padding: _screenPadding ??
-            EdgeInsets.only(
-              top: AppTheme.appMeasurement?.screenPaddingTop ?? 1.0,
-              left: AppTheme.appMeasurement?.screenPaddingLeft ?? 1.0,
-              right: AppTheme.appMeasurement?.screenPaddingRight ?? 1.0,
-              bottom: AppTheme.appMeasurement?.screenPaddingBottom ?? 1.0,
-            ),
-        decoration: BoxDecoration(
-          border: Border.all(),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(7.0),
-          ),
-        ),
-        child: SingleChildScrollView(
-          child: body,
-        ),
-      ),
-    );
-  }
-
-  Widget createBodyInsideRoundedBorder(Widget body) {
-    var widget = Container(
-      padding: _screenPadding ??
-          EdgeInsets.only(
-            top: AppTheme.appMeasurement?.screenPaddingTop ?? 1.0,
-            left: AppTheme.appMeasurement?.screenPaddingLeft ?? 1.0,
-            right: AppTheme.appMeasurement?.screenPaddingRight ?? 1.0,
-            bottom: AppTheme.appMeasurement?.screenPaddingBottom ?? 1.0,
-          ),
-      decoration: BoxDecoration(
-        border: Border.all(),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(7.0),
-        ),
-      ),
-      child: body,
-    );
-
-    return widget;
-  }
-
-  RootWidget setFloatingActionButton(Widget? widget) {
+  MyRootWidget setFloatingActionButton(Widget? widget) {
     _floatingActionButton = widget;
     return this;
   }
 
-  RootWidget setBottomNavigationBar(Widget? widget) {
+  MyRootWidget setBottomNavigationBar(Widget? widget) {
     _bottomNavigationBar = widget;
     return this;
   }

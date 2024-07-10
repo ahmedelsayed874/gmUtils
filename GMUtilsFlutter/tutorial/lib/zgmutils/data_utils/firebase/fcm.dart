@@ -10,10 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 import '../../utils/logs.dart';
 
 import '../../../main.dart' as main;
-/*add this method to main file
-@pragma('vm:entry-point')
-FcmNotificationProperties resolveNotification(RemoteMessage message) {}
-*/
+
 
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/
@@ -202,7 +199,7 @@ class FCM extends FCMFunctions {
     var title = '•${message.notification?.title ?? 'Notification'}';
     var body = message.notification?.body ?? '';
 
-    var localNotification = resolveNotification(message);
+    var localNotification = resolveNotification(message, en);
     var payload = localNotification.payload;
     if (payload == null) {
       try {
@@ -442,7 +439,7 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
   Logs.print(() => 'FCM._handleBackgroundMessage('
       'title: ${message.notification?.title}, '
       'body: ${message.notification?.body}, '
-      'data: ${message.data}, '
+      'data: ${message.data}'
       ')');
 
   await Firebase.initializeApp();
@@ -451,12 +448,12 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
 }
 
 @pragma('vm:entry-point')
-FcmNotificationProperties resolveNotification(RemoteMessage message) {
+FcmNotificationProperties resolveNotification(RemoteMessage message, bool? en) {
   /*add this method to main file
     @pragma('vm:entry-point')
-    FcmNotificationProperties resolveNotification(RemoteMessage message) {}
+    FcmNotificationProperties resolveNotification(RemoteMessage message, bool? en) {}
   */
-  return main.resolveNotification(message);
+  return main.resolveNotification(message, en);
 }
 
 //------------------------------------------------------------------------------

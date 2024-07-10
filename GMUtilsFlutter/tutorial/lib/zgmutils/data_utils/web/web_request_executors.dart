@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:bilingual_learning_schools_ksa/main.dart';
+import 'package:bilingual_learning_schools_ksa/zgmutils/utils/mappable.dart';
+import 'package:bilingual_learning_schools_ksa/zgmutils/utils/pairs.dart';
+import 'package:bilingual_learning_schools_ksa/zgmutils/utils/string_set.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -11,6 +15,31 @@ import 'response.dart';
 import 'web_url.dart';
 
 class WebRequestExecutor {
+  Future<Response<DT>> execute<DT>(
+    Url<DT> url, {
+    int? cacheIntervalInSeconds,
+  }) async {
+    if (url is PostUrl) {
+      return executePost(
+        url as PostUrl<DT>,
+        cacheIntervalInSeconds: cacheIntervalInSeconds,
+      );
+    }
+    //
+    else if (url is GetUrl) {
+      return executeGet(
+        url as GetUrl<DT>,
+        cacheIntervalInSeconds: cacheIntervalInSeconds,
+      );
+    }
+    //
+    else {
+      throw 'this method supports only PostUrl and GetUrl only';
+    }
+  }
+
+  //---------------------------------------------------------------------------
+
   Future<Response<DT>> executePost<DT>(
     PostUrl<DT> url, {
     int? cacheIntervalInSeconds,
@@ -191,6 +220,8 @@ class WebRequestExecutor {
     }
   }
 
+  //---------------------------------------------------------------------------
+
   Future<Response<DT>> _resolveResponse<DT>(
     Url<DT> url,
     http.Response response, {
@@ -247,38 +278,87 @@ class WebRequestExecutor {
 
   //============================================================================
 
-  Future<Response<DT>> createDummyResponse<DT>(
-    String apiName,
-    Result<DT> Function() data,
-  ) async {
-    Logs.print(() => 'API-Dummy:: $apiName');
+  Future<Response<Result<DT>>> createDummyResponse<DT>({
+    required String apiName,
+    required Pair<Result<DT>, Mappable?> Function() onSuccessResponse,
+    int delayInSeconds = 1,
+  }) async {
+    Logs.print(() => 'API-Dummy-Request:: http://$apiName');
 
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: delayInSeconds));
+
+    Response<Result<DT>> response;
 
     final r = Random().nextInt(100);
-
-    Response<DT> response;
-
     if (r > 0 && r < 5) {
       response = Response.failed(
         error: "no connection",
         httpCode: 0,
       );
-    } else if (r < 10) {
+    }
+    //
+    else if (r < 10) {
       response = Response.failed(
-        error: "dummy error",
+        error: "Supposed error on server side",
         httpCode: 400,
       );
-    } else {
-      var d = data();
-      response = Response.success(
-        //error: d.message?.en,
-        data: d.result,
-        //httpCode: 200,
-      );
+    }
+    //
+    else {
+      DT? data;
+      String? error;
+
+      var resultAndMapper = onSuccessResponse();
+      if (resultAndMapper.value1.result != null) {
+        if (resultAndMapper.value2 == null) throw 'set mapper class if data is exist';
+        if (resultAndMapper.value1.result is List) {
+          List<Map<String, dynamic>>? map;
+          try {
+            map = resultAndMapper.value2!.toMapList(resultAndMapper.value1.result as List,);
+          } catch (e) {
+            error = 'Error in toMapList() in '
+                '${resultAndMapper.value2!.runtimeType} class for '
+                'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
+          }
+          if (error == null) {
+            try {
+              data = resultAndMapper.value2!.fromMapList(map) as DT?;
+            } catch (e) {
+              error = 'Error in fromMapList() in '
+                  '${resultAndMapper.value2!.runtimeType} class for '
+                  'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
+            }
+          }
+        } else {
+          Map<String, dynamic>? map;
+          try {
+            map = resultAndMapper.value2!.toMap(resultAndMapper.value1.result);
+          } catch (e) {
+            error = 'Error in toMap() in '
+                '${resultAndMapper.value2!.runtimeType} class for '
+                'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
+          }
+          if (error == null) {
+            try {
+              data = resultAndMapper.value2!.fromMap(map!);
+            } catch (e) {
+              error = 'Error in fromMap() in '
+                  '${resultAndMapper.value2!.runtimeType} class for '
+                  'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
+            }
+          }
+        }
+      }
+
+      if (data != null) {
+        response = Response.success(data: Result(data));
+      } else {
+        response = Response.failed(error: error, httpCode: 200);
+      }
     }
 
-    Logs.print(() => 'API-Dummy:: $apiName -> $response');
+    Logs.print(() => 'API-Dummy-Response:: http://$apiName -> $response');
+
     return response;
   }
 }

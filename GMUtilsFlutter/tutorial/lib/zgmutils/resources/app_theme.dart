@@ -7,15 +7,18 @@ class AppTheme {
   static AppColors? appColors;
   static AppMeasurement? appMeasurement;
   static String? toolbarTitleFontFamily;
+  static String? defaultFontFamily;
 
   AppTheme({
     required AppColors appColors,
     required AppMeasurement appMeasurement,
-    String? toolbarTitleFontFamily,
+    required String? toolbarTitleFontFamily,
+    required String? defaultFontFamily,
   }) {
     AppTheme.appColors = appColors;
     AppTheme.appMeasurement = appMeasurement;
     AppTheme.toolbarTitleFontFamily = toolbarTitleFontFamily;
+    AppTheme.defaultFontFamily = defaultFontFamily;
   }
 
   AppColors get app_colors => AppTheme.appColors!;
@@ -34,7 +37,7 @@ class AppTheme {
       color: textColor ?? appColors?.text,
       fontSize: textSize ?? appMeasurement?.textSize,
       fontWeight: fontWeight,
-      fontFamily: fontFamily,
+      fontFamily: fontFamily ?? defaultFontFamily,
       overflow: overflow,
       shadows: shadows,
     );
@@ -50,7 +53,7 @@ class AppTheme {
         textColor: textColor ?? appColors?.primary,
         textSize: textSize ?? appMeasurement?.screenTitleSize,
         fontWeight: FontWeight.w800,
-        fontFamily: fontFamily,
+        fontFamily: fontFamily ?? defaultFontFamily,
         shadows: shadows,
       );
 
@@ -64,7 +67,7 @@ class AppTheme {
         textColor: textColor,
         textSize: textSize,
         fontWeight: FontWeight.w800,
-        fontFamily: fontFamily,
+        fontFamily: fontFamily ?? defaultFontFamily,
         shadows: shadows,
       );
 }

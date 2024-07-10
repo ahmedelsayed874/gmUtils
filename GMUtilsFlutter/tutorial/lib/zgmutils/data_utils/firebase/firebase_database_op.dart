@@ -236,30 +236,36 @@
 //
 //     var ref = await databaseReference;
 //     DataSnapshot? snapshot;
+//     Query? query;
 //
 //     try {
 //       if (filterOption != null) {
-//         ref.orderByChild(filterOption.key);
+//         query = ref.orderByChild(filterOption.key);
 //
 //         if (filterOption.type == FBFilterTypes.equal) {
-//           ref.equalTo(filterOption.args);
+//           query = query.equalTo(filterOption.args);
 //         } else if (filterOption.type == FBFilterTypes.greaterThan) {
-//           ref.startAfter(filterOption.args);
+//           query = query.startAfter(filterOption.args);
 //         } else if (filterOption.type == FBFilterTypes.greaterThanOrEqual) {
-//           ref.startAt(filterOption.args);
+//           query = query.startAt(filterOption.args);
 //         } else if (filterOption.type == FBFilterTypes.lessThan) {
-//           ref.endBefore(filterOption.args);
+//           query = query.endBefore(filterOption.args);
 //         } else if (filterOption.type == FBFilterTypes.lessThanOrEqual) {
-//           ref.endAt(filterOption.args);
+//           query = query.endAt(filterOption.args);
 //         }
 //
 //         if (filterOption.limit != null) {
-//           ref.limitToFirst(filterOption.limit!);
+//           query = query.limitToFirst(filterOption.limit!);
 //         }
 //       }
 //
-//       var result = await ref.once();
-//       snapshot = result.snapshot;
+//       if (query != null) {
+//          DatabaseEvent de = await query.once();
+//          snapshot = de.snapshot;
+//       } else {
+//         var result = await ref.once();
+//         snapshot = result.snapshot;
+//       }
 //
 //       if (snapshot.exists) {
 //         List<T> list = await _mapData(

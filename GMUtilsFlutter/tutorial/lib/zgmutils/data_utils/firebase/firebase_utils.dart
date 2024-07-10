@@ -22,7 +22,7 @@ class FirebaseUtils {
     var frags = path.split("/");
     path = '';
     for (var value in frags) {
-      value += refineKeyName(value);
+      value = refineKeyName(value);
       if (value.isEmpty) throw Exception("invalid_node_name");
 
       if (path.isNotEmpty) path = '/';
