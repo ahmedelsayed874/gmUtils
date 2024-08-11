@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../utils/pairs.dart';
+import '../dialogs/message_dialog.dart';
 import 'drivers_interfaces.dart';
 import 'screen_utils.dart';
 
@@ -27,13 +28,22 @@ abstract class BaseStatelessWidget extends StatelessWidget
     return _screenUtils.hideWaitView(forceHide: forceHide);
   }
 
+  //-----------------------------------------------------------------
+
+  @override
+  void showQuickMessage(String message) {
+    _screenUtils.showQuickMessage(message);
+  }
+
+  //-----------------------------------------------------------------
+
   String? get defaultMessageTitle => null;
 
   @override
-  void showMessage(
-    String? title, {
+  void showMessage({
+    String? title,
     required String message,
-    List<Pair<String, VoidCallback?>>? actions,
+    List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
     VoidCallback? onDismiss,
   }) {

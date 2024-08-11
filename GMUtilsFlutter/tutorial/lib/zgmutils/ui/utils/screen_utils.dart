@@ -1,3 +1,4 @@
+import 'package:bilingual_learning_schools_ksa/zgmutils/ui/widgets/_root_widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../gm_main.dart';
@@ -60,10 +61,17 @@ class ScreenUtils {
     }
   }
 
+  ///root widget must be MyRootWidget to let this method works
+  void showQuickMessage(String message) {
+    try {
+      MyRootWidget.showSnackBar(App.context, message: message);
+    } catch (e) {}
+  }
+
   void showMessage(
     String message, {
     String? title,
-    List<Pair<String, VoidCallback?>>? actions,
+    List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
     VoidCallback? onDismiss,
   }) {
@@ -77,11 +85,11 @@ class ScreenUtils {
 
     if (actions?.isNotEmpty == true) {
       for (var action in actions!) {
-        md.addAction(action.value1, action.value2);
+        md.addAction(action);
       }
     } else {
       md.addAction(
-        App.isEnglish ? 'Dismiss' : 'إغلاق',
+        MessageDialogActionButton(App.isEnglish ? 'Dismiss' : 'إغلاق'),
       );
     }
 
@@ -101,10 +109,10 @@ class ScreenUtils {
         .setEnableOuterDismiss(false);
 
     if (onRetry != null) {
-      m.addAction(App.isEnglish ? 'Retry' : 'إعادة', onRetry);
-      m.addAction(App.isEnglish ? 'Cancel' : 'إلغاء');
+      m.addAction(MessageDialogActionButton(App.isEnglish ? 'Retry' : 'إعادة', action: onRetry));
+      m.addAction(MessageDialogActionButton(App.isEnglish ? 'Cancel' : 'إلغاء'));
     } else {
-      m.addAction(App.isEnglish ? 'Dismiss' : 'إغلاق');
+      m.addAction(MessageDialogActionButton(App.isEnglish ? 'Dismiss' : 'إغلاق'));
     }
     m.show(() => App.context);
   }

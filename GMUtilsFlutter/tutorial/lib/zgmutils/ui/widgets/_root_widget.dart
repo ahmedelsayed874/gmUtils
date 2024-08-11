@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../resources/_resources.dart';
 import '../../gm_main.dart';
 import '../../resources/app_theme.dart';
 import '../../utils/logs.dart';
@@ -23,6 +23,8 @@ class MyRootWidget {
   EdgeInsets? _screenPadding;
   bool? _resizeToAvoidBottomInset;
   Widget? _bottomNavigationBar;
+  Color? _statusBarColor;
+  bool _isStatusBarThemeLight = true;
 
   MyRootWidget.withToolbar(this.toolbarTitle) {
     setupToolbar(null);
@@ -46,6 +48,11 @@ class MyRootWidget {
     _body = const Text('use \"setBody\" method');
   }
 
+  void configStatusBar({required Color statusBarColor, bool isStatusBarThemeLight = true,}) {
+    _statusBarColor = statusBarColor;
+    _isStatusBarThemeLight = isStatusBarThemeLight;
+  }
+  
   void setupToolbar(Widget? leading, [List<Widget>? action]) {
     _appBar = AppBar(
       centerTitle: true,
@@ -181,8 +188,7 @@ class MyRootWidget {
             const SizedBox(height: 10),
             Text(
               title,
-              style: titleStyle ??
-                  AppTheme.textStyleOfScreenTitle(),
+              style: titleStyle ?? AppTheme.textStyleOfScreenTitle(),
               textAlign: TextAlign.center,
             ),
             if (hint != null)
@@ -224,27 +230,31 @@ class MyRootWidget {
       appBar: _appBar,
       drawer: _drawer,
       onDrawerChanged: _onDrawerChanged,
-      backgroundColor: _background,
+      backgroundColor: _statusBarColor ?? Colors.black,
       body: _appBar == null
           ? SafeArea(
               top: awareTopSafeArea,
               bottom: Platform.isIOS ? false : true,
               child: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle.dark,
-                child: Stack(children: [
-                  _defaultWidget(),
-                  if (_showBackButton)
-                    IconButton(
-                      onPressed: () => App.navBack(),
-                      icon: Transform.rotate(
-                        angle: App.isEnglish ? 0 : pi,
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
+                value: _isStatusBarThemeLight ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+                child: Container(
+                  color: _background,
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                  child: Stack(children: [
+                    _defaultWidget(),
+                    if (_showBackButton)
+                      IconButton(
+                        onPressed: () => App.navBack(),
+                        icon: Icon(
+                          App.isEnglish
+                              ? Icons.arrow_back_ios_new
+                              : Icons.arrow_forward_ios,
                           color: _backButtonColor,
                         ),
                       ),
-                    ),
-                ]),
+                  ]),
+                ),
               ),
             )
           : _defaultWidget(),

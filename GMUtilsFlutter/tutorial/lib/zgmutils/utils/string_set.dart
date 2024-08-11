@@ -2,9 +2,9 @@
 class StringSet {
   Map<String, String> _strings = {};
 
-  StringSet(String en, String ar) {
+  StringSet(String en, [String? ar]) {
     _strings['en'] = en;
-    _strings['ar'] = ar;
+    _strings['ar'] = (ar ?? en);
   }
 
   StringSet.multiple(Map<String, String> strings) {

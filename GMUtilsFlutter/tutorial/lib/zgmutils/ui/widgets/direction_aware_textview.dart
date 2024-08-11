@@ -13,6 +13,7 @@ class DirectionAwareTextView extends StatelessWidget {
   final double? textScaleFactor;
   final int? maxLines;
   final Color? selectionColor;
+  final bool selectable;
 
   DirectionAwareTextView(
     this.text, {
@@ -24,6 +25,7 @@ class DirectionAwareTextView extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.selectionColor,
+    this.selectable = false,
     Key? key,
   })  : rich = false,
         textSpan = null,
@@ -41,11 +43,15 @@ class DirectionAwareTextView extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.selectionColor,
+    this.selectable = false,
     Key? key,
   })  : rich = true,
         text = '',
         super(key: key) {
     _initState(textDirection);
+    if (selectable) {
+      if (textSpan !is TextSpan) throw 'selectable rich text must depend on TextSpan';
+    }
   }
 
   TextDirection? _finalTextDirection;
@@ -118,30 +124,58 @@ class DirectionAwareTextView extends StatelessWidget {
     //       'finalTextDirection: $_finalTextDirection, '
     // ]);
 
-    if (rich) {
-      return Text.rich(
-        textSpan!,
-        style: style,
-        textAlign: textAlign,
-        textDirection: _finalTextDirection,
-        softWrap: softWrap,
-        overflow: overflow,
-        textScaleFactor: textScaleFactor,
-        maxLines: maxLines,
-        selectionColor: selectionColor,
-      );
+    if (selectable) {
+      if (rich) {
+        return SelectableText.rich(
+          textSpan as TextSpan,
+          style: style,
+          textAlign: textAlign,
+          textDirection: _finalTextDirection,
+          //softWrap: softWrap,
+          //overflow: overflow,
+          textScaler: textScaleFactor == null ?  TextScaler.noScaling : TextScaler.linear(textScaleFactor!),
+          maxLines: maxLines,
+          //selectionColor: selectionColor,
+        );
+      } else {
+        return SelectableText(
+          text,
+          style: style,
+          textAlign: textAlign,
+          textDirection: _finalTextDirection,
+          //softWrap: softWrap,
+          //overflow: overflow,
+          textScaler: textScaleFactor == null ?  TextScaler.noScaling : TextScaler.linear(textScaleFactor!),
+          maxLines: maxLines,
+          //selectionColor: selectionColor,
+        );
+      }
     } else {
-      return Text(
-        text,
-        style: style,
-        textAlign: textAlign,
-        textDirection: _finalTextDirection,
-        softWrap: softWrap,
-        overflow: overflow,
-        textScaleFactor: textScaleFactor,
-        maxLines: maxLines,
-        selectionColor: selectionColor,
-      );
+      if (rich) {
+        return Text.rich(
+          textSpan!,
+          style: style,
+          textAlign: textAlign,
+          textDirection: _finalTextDirection,
+          softWrap: softWrap,
+          overflow: overflow,
+          textScaler: textScaleFactor == null ?  TextScaler.noScaling : TextScaler.linear(textScaleFactor!),
+          maxLines: maxLines,
+          selectionColor: selectionColor,
+        );
+      } else {
+        return Text(
+          text,
+          style: style,
+          textAlign: textAlign,
+          textDirection: _finalTextDirection,
+          softWrap: softWrap,
+          overflow: overflow,
+          textScaler: textScaleFactor == null ?  TextScaler.noScaling : TextScaler.linear(textScaleFactor!),
+          maxLines: maxLines,
+          selectionColor: selectionColor,
+        );
+      }
     }
   }
 }

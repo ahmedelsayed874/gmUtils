@@ -146,6 +146,18 @@ class App extends StatefulWidget {
     _observers?.clear();
   }
 
+  static bool isObserverCategoryExist(String category) {
+    return _observers?.containsKey(category) == true;
+  }
+
+  static bool isObserverNameExist({required String category, required String observerName,}) {
+    if (_observers?.containsKey(category) == true) {
+      return _observers?[category]?.containsKey(observerName) == true;
+    }
+
+    return false;
+  }
+
   //endregion
 
   //============================================================================
@@ -261,7 +273,6 @@ class _AppState extends State<App> {
             primary: colors.primary,
             secondary: colors.primary,
             background: colors.background),
-        //backgroundColor: colors.background,
         brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
         bottomSheetTheme: BottomSheetThemeData(
           backgroundColor: colors.background,
@@ -379,4 +390,4 @@ class _NavigatorObserver extends NavigatorObserver {
 
 //==============================================================================
 
-typedef ObserverDelegate = Function(String observerName, dynamic /*args*/);
+typedef ObserverDelegate = void Function(String observerName, dynamic /*args*/);

@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../zgmutils/utils/logs.dart';
 
 class Images {
-  late Size size;
-  late double devicePixelRatio;
-  late int density; //1, 2, 3
+  late int _density; //1, 2, 3
 
   Images(BuildContext context) {
     MediaQueryData? mediaQuery;
@@ -13,19 +11,22 @@ class Images {
       mediaQuery = MediaQuery.of(context);
     } catch (e) {}
 
-    devicePixelRatio = mediaQuery?.devicePixelRatio ?? 1;
-    size = mediaQuery?.size ?? const Size(0, 0);
-    density = size.width >= 2000 ? 3 : (size.width >= 1000 ? 2 : 1);
+    var devicePixelRatio = mediaQuery?.devicePixelRatio ?? 1;
+    var size = mediaQuery?.size ?? const Size(0, 0);
+    _density = size.width >= 2000 ? 3 : (size.width >= 1000 ? 2 : 1);
     Logs.print(() => [
           'Resources -> Images',
           'devicePixelRatio: $devicePixelRatio',
           'screen size: ${size.width},${size.height}',
-          'density: $density',
+          'density: $_density',
         ]);
   }
 
   String rootDir = 'assets/images/';
 
-  String get logo => '${rootDir}logo.png';
+  String get logoWhite => '${rootDir}logo_white@${_density}x.png';
+  String get logoColored => '${rootDir}logo_colored@${_density}x.png';
+  String get logoColoredSmall => '${rootDir}logo_colored_small.png';
+  String get logoColoredSmallWithoutText => '${rootDir}logo_colored_small_without_txt.png';
 
 }

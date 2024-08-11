@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 //path_provider: ^2.0.3
+import 'package:bilingual_learning_schools_ksa/zgmutils/utils/logs.dart';
 import 'package:path_provider/path_provider.dart' as filesProvider;
 
 ///Directory tempDir = await getTemporaryDirectory();
@@ -29,13 +30,24 @@ class Files {
   //----------------------------------------------------------------------------
 
   Future<String> get _localPath async {
-    Directory? directory = _privateDir
-        ? (_saveToCacheDir
+    Directory? directory;
+    if (Platform.isAndroid) {
+      if (_privateDir) {
+        directory = _saveToCacheDir
             ? await filesProvider.getApplicationCacheDirectory()
-            : await filesProvider.getApplicationDocumentsDirectory())
-        : (_saveToCacheDir
+            : await filesProvider.getApplicationDocumentsDirectory();
+      } else {
+        directory = _saveToCacheDir
             ? (await filesProvider.getExternalCacheDirectories())?.first
-            : await filesProvider.getExternalStorageDirectory());
+            : await filesProvider.getExternalStorageDirectory();
+      }
+    } else {
+      if (_privateDir) {
+        directory = await filesProvider.getApplicationSupportDirectory();
+      } else {
+        directory = await filesProvider.getApplicationDocumentsDirectory();
+      }
+    }
 
     return directory?.path ??
         (await filesProvider.getTemporaryDirectory()).path;
@@ -103,11 +115,68 @@ class Files {
 
   //============================================================
 
-  static Future<double> computeSizeInMB(File file) async {
+  static Future<double> computeSize(
+    File file,
+    FileSizeUnit unit, {
+    bool actualSize = false,
+  }) async {
     var fl = await file.length();
-    double length = fl / 1024 / 1024 + 0.07;
-    int i = length.toInt();
-    int fraction = ((length - i) * 100).toInt();
-    return i + (fraction / 100);
+    Logs.print(() => 'Files.computeSizeInMB --> $fl bytes');
+
+    if (unit == FileSizeUnit.Bytes) {
+      return fl.toDouble();
+    }
+    //
+    else {
+      double divisor = actualSize ? 1024 : 1000;
+      double length = 0;
+
+      if (unit == FileSizeUnit.KB) {
+        length = fl / divisor;
+      }
+      //
+      else if (unit == FileSizeUnit.MB) {
+        length = fl / divisor / divisor;
+      }
+      //
+      else if (unit == FileSizeUnit.GB) {
+        length = fl / divisor / divisor / divisor;
+      }
+
+      Logs.print(
+        () => 'Files.computeSize --> $length $unit '
+            '(actualSize: $actualSize)',
+      );
+
+      int i = length.toInt();
+      int fraction = ((length - i) * 100).toInt();
+      return i + (fraction / 100);
+    }
+  }
+
+  static String fileName(File file) {
+    var txt = '';
+
+    var idx = file.path.lastIndexOf('/');
+    if (idx > 0) {
+      txt = file.path.substring(idx + 1);
+    } else {
+      txt = file.path;
+    }
+
+    return txt;
+  }
+
+  static String fileExtension(File file) {
+    var txt = '';
+
+    var idx = file.path.lastIndexOf('.');
+    if (idx > 0) {
+      txt = file.path.substring(idx + 1).toLowerCase();
+    }
+
+    return txt;
   }
 }
+
+enum FileSizeUnit { Bytes, KB, MB, GB }

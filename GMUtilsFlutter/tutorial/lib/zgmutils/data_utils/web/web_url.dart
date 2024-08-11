@@ -222,7 +222,7 @@ class PostMultiPartFileUrl<RDT> extends GetUrl<RDT> {
     if (i < 0) i = file.path.lastIndexOf('\\');
 
     if (i >= 0) {
-      return file.path.substring(i);
+      return file.path.substring(i + 1);
     } else {
       return 'file';
     }

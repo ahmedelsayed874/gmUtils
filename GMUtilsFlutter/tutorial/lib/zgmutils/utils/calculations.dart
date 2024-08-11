@@ -1,5 +1,6 @@
 
 import 'dart:math';
+
 import '../../resources/_resources.dart';
 import 'date_op.dart';
 
@@ -58,14 +59,14 @@ class Calculations {
     required String birthday,
     bool short = false,
   }) {
-    return _calculateAgeAsString(age: calculateAge(birthday: birthday));
+    return _calculateAgeAsString(age: calculateAge(birthday: birthday), short: short,);
   }
 
   String calculateAgeAsString2({
     required DateTime birthday,
     bool short = false,
   }) {
-    return _calculateAgeAsString(age: calculateAge2(birthday: birthday));
+    return _calculateAgeAsString(age: calculateAge2(birthday: birthday), short: short,);
   }
 
   String _calculateAgeAsString({required double age, bool short = false}) {

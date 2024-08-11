@@ -33,6 +33,7 @@ class DirectionAwareTextField extends StatefulWidget {
   final ScrollPhysics? scrollPhysics;
   final ScrollController? scrollController;
   final bool? enabled;
+  final void Function(TextDirection)? onDirectionChanged;
 
   const DirectionAwareTextField({
     this.controller,
@@ -65,6 +66,7 @@ class DirectionAwareTextField extends StatefulWidget {
     this.scrollPhysics,
     this.scrollController,
     this.enabled,
+    this.onDirectionChanged,
     Key? key,
   }) : super(key: key);
 
@@ -73,13 +75,17 @@ class DirectionAwareTextField extends StatefulWidget {
       _DirectionAwareTextFieldState();
 }
 
-class _DirectionAwareTextFieldState extends State<DirectionAwareTextField> {
+class _DirectionAwareTextFieldState extends State<DirectionAwareTextField>  {
   TextDirection? _finalTextDirection;
 
   @override
   void initState() {
     super.initState();
     _finalTextDirection = widget.textDirection;
+
+    if (widget.controller?.text.isNotEmpty == true) {
+      _adjustDirection(widget.controller!.text);
+    }
   }
 
   @override
@@ -109,27 +115,7 @@ class _DirectionAwareTextFieldState extends State<DirectionAwareTextField> {
       cursorColor: widget.cursorColor,
       onChanged: (text) {
         widget.onChanged?.call(text);
-
-        if (widget.textDirection == null) {
-          if (text.length == 1) {
-            var e = TextUtils().isEnglishLetter(text);
-            if (e != null) {
-              if (e) {
-                if (_finalTextDirection != TextDirection.ltr) {
-                  setState(() {
-                    _finalTextDirection = TextDirection.ltr;
-                  });
-                }
-              } else {
-                if (_finalTextDirection != TextDirection.rtl) {
-                  setState(() {
-                    _finalTextDirection = TextDirection.rtl;
-                  });
-                }
-              }
-            }
-          }
-        }
+        _adjustDirection(text);
       },
       onEditingComplete: widget.onEditingComplete,
       onSubmitted: widget.onSubmitted,
@@ -140,5 +126,30 @@ class _DirectionAwareTextFieldState extends State<DirectionAwareTextField> {
       enabled: widget.enabled,
       //focusNode: FocusNode(),
     );
+  }
+
+  void _adjustDirection(String text) {
+    if (widget.textDirection == null) {
+      if (text.length == 1) {
+        var e = TextUtils().isEnglishLetter(text);
+        if (e != null) {
+          if (e) {
+            if (_finalTextDirection != TextDirection.ltr) {
+              setState(() {
+                _finalTextDirection = TextDirection.ltr;
+                widget.onDirectionChanged?.call(_finalTextDirection!);
+              });
+            }
+          } else {
+            if (_finalTextDirection != TextDirection.rtl) {
+              setState(() {
+                _finalTextDirection = TextDirection.rtl;
+                widget.onDirectionChanged?.call(_finalTextDirection!);
+              });
+            }
+          }
+        }
+      }
+    }
   }
 }

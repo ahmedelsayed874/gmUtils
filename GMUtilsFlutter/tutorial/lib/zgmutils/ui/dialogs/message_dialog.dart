@@ -51,15 +51,21 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog addAction(String title, [Function? action]) {
+  MessageDialog addAction(MessageDialogActionButton action) {
     _actions.insert(
       0,
       TextButton(
-          onPressed: () {
-            dismiss();
-            action?.call();
-          },
-          child: Text(title)),
+        onPressed: () {
+          dismiss();
+          action.action?.call();
+        },
+        child: Text(
+          action.title,
+          style: AppTheme.defaultTextStyle(
+            textColor: action.color,
+          ),
+        ),
+      ),
     );
 
     return this;
@@ -87,7 +93,7 @@ class MessageDialog {
         Duration(
           milliseconds: _tries > 2 ? 500 : (_tries > 1 ? 800 : 1300),
         ),
-            () {
+        () {
           if (_tries-- == 0) {
             _context = null;
             return;
@@ -109,7 +115,7 @@ class MessageDialog {
     _context = context;
 
     if (_actions.isEmpty) {
-      addAction(App.isEnglish ? 'OK' : 'حسنا');
+      addAction(MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا'));
     }
 
     Widget textWidget;
@@ -167,13 +173,13 @@ class MessageDialog {
             content: _extraWidget == null
                 ? textWidget
                 : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                textWidget,
-                _extraWidget!,
-              ],
-            ),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      textWidget,
+                      _extraWidget!,
+                    ],
+                  ),
             actions: _actions,
             backgroundColor: AppTheme.appColors?.background ?? Colors.white,
           );
@@ -196,4 +202,12 @@ class MessageDialog {
       Navigator.pop(_context!());
     }
   }
+}
+
+class MessageDialogActionButton {
+  final String title;
+  final Color? color;
+  final Function? action;
+
+  MessageDialogActionButton(this.title, {this.color, this.action});
 }

@@ -1,5 +1,11 @@
 
+import 'dart:ui';
+
 abstract class AppMeasurement {
+  final Size screenSize;
+
+  AppMeasurement({required this.screenSize});
+
   abstract double toolbarTitleSize;
   abstract double screenTitleSize;
   abstract double screenPaddingTop;

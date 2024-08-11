@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../gm_main.dart';
-import '../../utils/pairs.dart';
+import '../dialogs/message_dialog.dart';
 import 'drivers_interfaces.dart';
 import 'screen_utils.dart';
 
@@ -10,13 +10,20 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
   final ScreenUtils _screenUtils = const ScreenUtils();
 
   bool _isBuildCalled = false;
+  bool get isBuildCalled => _isBuildCalled;
 
   String? get defaultWaitViewMessage => null;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 1), () => _isBuildCalled = true);
+    // Future.delayed(const Duration(seconds: 1), () => _isBuildCalled = true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    _isBuildCalled = true;
+    super.didChangeDependencies();
   }
 
   @override
@@ -38,13 +45,22 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     return _screenUtils.hideWaitView(forceHide: forceHide);
   }
 
+  //-----------------------------------------------------------------
+
+  @override
+  void showQuickMessage(String message) {
+    _screenUtils.showQuickMessage(message);
+  }
+
+  //-----------------------------------------------------------------
+
   String? get defaultMessageTitle => null;
 
   @override
-  void showMessage(
-    String? title, {
+  void showMessage({
+    String? title,
     required String message,
-    List<Pair<String, VoidCallback?>>? actions,
+    List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
     VoidCallback? onDismiss,
   }) {

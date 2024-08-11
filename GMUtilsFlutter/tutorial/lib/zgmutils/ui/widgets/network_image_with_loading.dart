@@ -87,25 +87,33 @@ class NetworkImageWithLoading extends StatelessWidget {
       }
 
       var cache = _getCachedImage(imgUrl!);
+
       if (cache != null) {
         return loadImageFromCachedMemory(cache);
-      } else if (cachedFile?.existsSync() == true) {
+      }
+      //
+      else if (cachedFile?.existsSync() == true) {
         return loadImageFromCachedFile();
-      } else {
+      }
+      //
+      else {
         return loadImageFromWeb();
       }
-    } else {
+    }
+    //
+    else {
       return loadImageFromWeb();
     }
   }
 
   Widget loadImageFromCachedMemory(_CachedImage cache) {
+    //Logs.print(() => 'NetworkImageWithLoading.loadImageFromCachedMemory --> url: $imgUrl}');
     return GestureDetector(
       onTap: imgUrl == null
           ? null
           : () {
               if (allowEnlargeOnClick) {
-                Logs.print(() => imgUrl);
+                //Logs.print(() => imgUrl);
                 ImageViewerScreen.showFromUrl(
                   toolbarTitle: toolbarTitle,
                   photoUrl: imgUrl!,
@@ -133,12 +141,19 @@ class NetworkImageWithLoading extends StatelessWidget {
   }
 
   Widget loadImageFromCachedFile() {
+    //Logs.print(() => 'NetworkImageWithLoading.loadImageFromCachedFile --> url: $imgUrl}');
+
+    Uint8List imgBytes = cachedFile!.readAsBytesSync();
+    if (imgUrl != null) {
+      _appendCachedImage(_CachedImage(name: imgUrl!, imageBytes: imgBytes));
+    }
+
     return GestureDetector(
       onTap: imgUrl == null
           ? null
           : () {
               if (allowEnlargeOnClick) {
-                Logs.print(() => imgUrl);
+                //Logs.print(() => 'NetworkImageWithLoading.loadImageFromCachedFile.enlarge --> $imgUrl');
                 ImageViewerScreen.showFromUrl(
                   toolbarTitle: toolbarTitle,
                   photoUrl: imgUrl!,
@@ -150,7 +165,7 @@ class NetworkImageWithLoading extends StatelessWidget {
               }
             },
       child: Image.memory(
-        cachedFile!.readAsBytesSync(),
+        imgBytes,
         width: desiredImageWidth,
         height: desiredImageHeight,
         errorBuilder: (context, error, stackTrace) {
@@ -162,12 +177,30 @@ class NetworkImageWithLoading extends StatelessWidget {
   }
 
   Widget loadImageFromWeb() {
+    //Logs.print(() => 'NetworkImageWithLoading.loadImageFromWeb --> url: $imgUrl}');
+
+    var errorWidget = Center(
+      child: Container(
+        color: errorPlaceHolderBackgroundColor,
+        width: errorPlaceHolderSize?.toDouble(),
+        height: errorPlaceHolderSize?.toDouble(),
+        child: onClick == null
+            ? errorPlaceHolder
+            : GestureDetector(
+          onTap: () => onClick?.call(imgUrl ?? ''),
+          child: errorPlaceHolder,
+        ),
+      ),
+    );
+    var lnk = imgUrl ?? '';
+    if (lnk.isEmpty) return errorWidget;
+
     var image = Image.network(
-      imgUrl ?? '',
+      lnk,
       width: desiredImageWidth,
       height: desiredImageHeight,
       loadingBuilder: (ctx, child, loadingProgress) {
-        /*Logs.print(() => 'NetworkImageWithLoading -> Image -> loadingBuilder[ '
+        /*//Logs.print(() => 'NetworkImageWithLoading -> Image -> loadingBuilder[ '
             'imgUrl: $imgUrl, '
             'child: $child, '
             'progress: ['
@@ -180,7 +213,7 @@ class NetworkImageWithLoading extends StatelessWidget {
         if (allowEnlargeOnClick) {
           widget = GestureDetector(
             onTap: () {
-              Logs.print(() => imgUrl);
+              //Logs.print(() => imgUrl);
               ImageViewerScreen.showFromUrl(
                 toolbarTitle: toolbarTitle,
                 photoUrl: imgUrl ?? '',
@@ -234,19 +267,7 @@ class NetworkImageWithLoading extends StatelessWidget {
         }
       },
       errorBuilder: (context, error, stackTrace) {
-        return Center(
-          child: Container(
-            color: errorPlaceHolderBackgroundColor,
-            width: errorPlaceHolderSize?.toDouble(),
-            height: errorPlaceHolderSize?.toDouble(),
-            child: onClick == null
-                ? errorPlaceHolder
-                : GestureDetector(
-                    onTap: () => onClick?.call(imgUrl ?? ''),
-                    child: errorPlaceHolder,
-                  ),
-          ),
-        );
+        return errorWidget;
       },
       fit: fit,
     );
@@ -271,7 +292,6 @@ class NetworkImageWithLoading extends StatelessWidget {
           var b = await image.image.toByteData(format: ImageByteFormat.png);
           if (b != null) {
             var imgBytes = b.buffer.asUint8List();
-
             if (cachedFile?.existsSync() == true) {
               cachedFile?.deleteSync();
             }
@@ -288,6 +308,7 @@ class NetworkImageWithLoading extends StatelessWidget {
 
     return image;
   }
+
 }
 
 //==============================================================================

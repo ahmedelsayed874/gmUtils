@@ -56,7 +56,7 @@ class CapturingScreenshotWidget extends StatefulWidget {
       MessageDialog.create
           .setTitle(App.isEnglish ? 'Error' : 'خطأ')
           .setMessage(onFailedMessage)
-          .addAction(App.isEnglish ? 'OK' : 'حسنا')
+          .addAction(MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا'))
           .show(() => context);
     }
   }

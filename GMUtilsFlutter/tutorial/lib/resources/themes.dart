@@ -1,3 +1,5 @@
+import 'package:bilingual_learning_schools_ksa/resources/_resources.dart';
+import 'package:bilingual_learning_schools_ksa/resources/fonts.dart';
 import 'package:flutter/material.dart';
 
 import '../zgmutils/resources/app_colors.dart';
@@ -7,19 +9,14 @@ import '../zgmutils/resources/app_theme.dart';
 class Themes {
   bool isLightTheme = true;
 
-  Themes(BuildContext? context, {bool? light, String? toolbarTitleFontFamily}) {
-    // int density = 1;
-    // double textScaleFactor = 1;
+  Themes(BuildContext context, {bool? light}) {
+    isLightTheme = Theme.of(context).brightness == Brightness.light;
 
-    if (context != null) {
-      isLightTheme = Theme.of(context).brightness == Brightness.light;
-
-      // try {
-      //   var mediaQuery = MediaQuery.of(context);
-      //   textScaleFactor = mediaQuery.textScaleFactor;
-      // } catch (e) {}
-      // density = 1; //to do set it's value based on devicePixelRatio
-    }
+    // try {
+    //   var mediaQuery = MediaQuery.of(context);
+    //   textScaleFactor = mediaQuery.textScaleFactor;
+    // } catch (e) {}
+    // density = 1; //to do set it's value based on devicePixelRatio
 
     if (light != null) {
       isLightTheme = light;
@@ -27,8 +24,11 @@ class Themes {
 
     AppTheme(
       appColors: isLightTheme ? _LightColors() : _DarkColors(),
-      appMeasurement: _AppMeasurement(),
-      toolbarTitleFontFamily: toolbarTitleFontFamily,
+      appMeasurement: _AppMeasurement(
+        screenSize: MediaQuery.of(context).size,
+      ),
+      toolbarTitleFontFamily: fonts.toolbarTitle,
+      defaultFontFamily: fonts.cairo,
     );
   }
 
@@ -36,10 +36,13 @@ class Themes {
 
   AppMeasurement get measurement => AppTheme.appMeasurement!;
 
+  final Fonts fonts = Fonts();
+
   TextStyle defaultTextStyle({
     Color? textColor,
     double? textSize,
     FontWeight? fontWeight,
+    String? fontFamily,
     TextOverflow? overflow,
     List<Shadow>? shadows,
   }) =>
@@ -47,6 +50,7 @@ class Themes {
         textColor: textColor,
         textSize: textSize,
         fontWeight: fontWeight,
+        fontFamily: fontFamily,
         overflow: overflow,
         shadows: shadows,
       );
@@ -54,22 +58,26 @@ class Themes {
   TextStyle textStyleOfScreenTitle({
     Color? textColor,
     double? textSize,
+    String? fontFamily,
     List<Shadow>? shadows,
   }) =>
       AppTheme.textStyleOfScreenTitle(
         textColor: textColor,
         textSize: textSize,
+        fontFamily: fontFamily,
         shadows: shadows,
       );
 
   TextStyle textStyleOfSectionTitle({
     Color? textColor,
     double? fontSize,
+    String? fontFamily,
     List<Shadow>? shadows,
   }) =>
       AppTheme.textStyleOfSectionTitle(
         textColor: textColor,
         textSize: fontSize,
+        fontFamily: fontFamily,
         shadows: shadows,
       );
 }
@@ -92,6 +100,7 @@ class _LightColors extends _AppColors {
 
   @override
   Color get primary => const Color(0xff31263A);
+
   @override
   Color get secondary => const Color(0xffD94A19);
 
@@ -99,8 +108,10 @@ class _LightColors extends _AppColors {
   Color background = const Color(0xffffffff);
   @override
   Color sideMenu = const Color(0xd3050505);
+
   @override
   Color get toolbar => primary;
+
   @override
   Color get toolbarTextColor => secondary;
 
@@ -114,7 +125,7 @@ class _LightColors extends _AppColors {
   @override
   Color text = const Color(0xff000000);
   @override
-  Color textOnPrimary = const Color(0xff070000);
+  Color textOnPrimary = const Color(0xffffffff);
   @override
   Color hint = const Color(0xffB8B6B6);
 
@@ -129,6 +140,7 @@ class _DarkColors extends _AppColors {
 
   @override
   Color primary = const Color(0xff31263A);
+
   @override
   Color get secondary => const Color(0xff5e1f0a);
 
@@ -166,6 +178,8 @@ class _DarkColors extends _AppColors {
 //==============================================================================
 
 class _AppMeasurement extends AppMeasurement {
+  _AppMeasurement({required super.screenSize});
+
   @override
   double toolbarTitleSize = 18;
 
@@ -173,16 +187,16 @@ class _AppMeasurement extends AppMeasurement {
   double screenTitleSize = 17;
 
   @override
-  double screenPaddingTop = 0.3;
+  double screenPaddingTop = 0.1;
 
   @override
-  double screenPaddingLeft = 0.3;
+  double screenPaddingLeft = 0.1;
 
   @override
-  double screenPaddingRight = 0.3;
+  double screenPaddingRight = 0.1;
 
   @override
-  double screenPaddingBottom = 0.3;
+  double screenPaddingBottom = 0.1;
 
   @override
   double paragraphTextSize = 17;

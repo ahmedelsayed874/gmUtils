@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:bilingual_learning_schools_ksa/main.dart';
 import 'package:bilingual_learning_schools_ksa/zgmutils/utils/mappable.dart';
 import 'package:bilingual_learning_schools_ksa/zgmutils/utils/pairs.dart';
-import 'package:bilingual_learning_schools_ksa/zgmutils/utils/string_set.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -60,28 +58,15 @@ class WebRequestExecutor {
           ]);
     }
 
-    _Cache<DT>? cache = _createOrGetCacheStorage(
-      key: () => url.signature,
+    return _executeWithTries(
+      url: url,
       cacheIntervalInSeconds: cacheIntervalInSeconds,
-    );
-    if (cache != null) {
-      return cache.response;
-    }
-
-    try {
-      var response = await http.post(
+      run: () async => await http.post(
         url.uri,
         headers: url.headers,
         body: url.postObject,
-      );
-
-      return _resolveResponse(url, response, cache: cache);
-    } catch (e) {
-      return Response.failed(
-        httpCode: 0,
-        error: e.toString(),
-      );
-    }
+      ),
+    );
   }
 
   Future<Response<DT>> executePostMultiPartFile<DT>(
@@ -92,7 +77,7 @@ class WebRequestExecutor {
       Logs.print(() => [
             '********',
             'API::Call',
-            '[POST]',
+            '[POST / MULTIPART]',
             'url: ${url.uri}',
             //'\n',
             'headers: ${url.headers}',
@@ -108,73 +93,59 @@ class WebRequestExecutor {
           ]);
     }
 
-    _Cache<DT>? cache = _createOrGetCacheStorage(
-      key: () => url.signature,
+    return _executeWithTries(
+      url: url,
       cacheIntervalInSeconds: cacheIntervalInSeconds,
-    );
-    if (cache != null) {
-      return cache.response;
-    }
+      run: () async {
+        var request = http.MultipartRequest('POST', url.uri);
+        final httpImage = http.MultipartFile.fromBytes(
+          url.fileMappedKey,
+          url.fileBytes,
+          filename: url.fileName,
+          contentType: url.fileMimeType == null
+              ? null
+              : MediaType.parse(url.fileMimeType!),
+        );
 
-    try {
-      var request = http.MultipartRequest('POST', url.uri);
-      final httpImage = http.MultipartFile.fromBytes(
-        url.fileMappedKey,
-        url.fileBytes,
-        filename: url.fileName,
-        contentType: url.fileMimeType == null
-            ? null
-            : MediaType.parse(url.fileMimeType!),
-      );
+        request.headers.addAll(url.headers);
+        request.files.add(httpImage);
+        if (url.formFields != null) {
+          request.fields.addAll(url.formFields!);
+        }
 
-      request.headers.addAll(url.headers);
-      request.files.add(httpImage);
-      if (url.formFields != null) {
-        request.fields.addAll(url.formFields!);
-      }
+        final response1 = await request.send();
 
-      final response1 = await request.send();
+        if (response1.statusCode == 200) {
+          Completer<http.Response> completer = Completer();
 
-      if (response1.statusCode == 200) {
-        Completer<Response<DT>> completer = Completer();
+          response1.stream.listen((value) {
+            final response2 = String.fromCharCodes(value);
 
-        response1.stream.listen((value) {
-          final response2 = String.fromCharCodes(value);
+            http.Response response = http.Response(
+              response2,
+              response1.statusCode,
+              request: response1.request,
+              headers: response1.headers,
+              isRedirect: response1.isRedirect,
+              persistentConnection: response1.persistentConnection,
+              reasonPhrase: response1.reasonPhrase,
+            );
 
-          http.Response response = http.Response(
-            response2,
+            completer.complete(response);
+          });
+
+          return completer.future;
+        } else {
+          return http.Response(
+            response1.reasonPhrase ?? '',
             response1.statusCode,
-            request: response1.request,
             headers: response1.headers,
-            isRedirect: response1.isRedirect,
-            persistentConnection: response1.persistentConnection,
+            request: response1.request,
             reasonPhrase: response1.reasonPhrase,
           );
-
-          _resolveResponse(url, response, cache: cache).then((finalResponse) {
-            //callback(finalResponse);
-            completer.complete(finalResponse);
-          });
-        });
-
-        return completer.future;
-      } else {
-        return Response.failed(
-          httpCode: response1.statusCode,
-          error: response1.reasonPhrase,
-          responseHeader: response1.headers,
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        Logs.print(() =>
-            'WebRequestExecutor.executePostMultiPartFile() -> Error:: $e');
-      }
-      return Response.failed(
-        httpCode: 0,
-        error: e.toString(),
-      );
-    }
+        }
+      },
+    );
   }
 
   Future<Response<DT>> executeGet<DT>(
@@ -197,35 +168,117 @@ class WebRequestExecutor {
           ]);
     }
 
+    return _executeWithTries(
+      url: url,
+      cacheIntervalInSeconds: cacheIntervalInSeconds,
+      run: () async => await http.get(
+        url.uri,
+        headers: url.headers,
+      ),
+    );
+  }
+
+  //---------------------------------------------------------------------------
+
+  Future<Response<DT>> _executeWithTries<DT>({
+    required Url<DT> url,
+    required int? cacheIntervalInSeconds,
+    required Future<http.Response> Function() run,
+  }) async {
     _Cache<DT>? cache = _createOrGetCacheStorage(
       key: () => url.signature,
       cacheIntervalInSeconds: cacheIntervalInSeconds,
     );
     if (cache != null) {
+      if (kDebugMode) {
+        Logs.print(() => [
+          '********',
+          'API::Response',
+          'url: ${url.uri}',
+          '\n',
+          '<[RESULT WILL RETURN FROM CACHE]>',
+          '\n',
+          'cachedResponse: ${cache.response}',
+          '\n',
+        ]);
+      }
+
       return cache.response;
     }
 
-    try {
-      var response = await http.get(
-        url.uri,
-        headers: url.headers,
-      );
+    const supposedTries = 3;
 
-      return _resolveResponse(url, response, cache: cache);
-    } catch (e) {
-      return Response.failed(
-        httpCode: 0,
-        error: e.toString(),
+    int tries = 0;
+    dynamic exception;
+
+    while (tries < supposedTries) {
+      tries++;
+
+      int code = 0;
+      try {
+        exception = null;
+        var response = await run();
+        code = response.statusCode;
+
+        if (code != 0) {
+          return _resolveResponse(
+            url,
+            response,
+            cache: cache,
+            tries: tries,
+          );
+        }
+      } catch (e) {
+        exception = e;
+      }
+
+      if (tries < supposedTries) {
+        if (Logs.allowLogs) {
+          Logs.print(() => [
+                '****',
+                'API::Response(OF_TRY_NUMBER: $tries)',
+                'url: ${url.uri}',
+                '\n',
+                'code: $code',
+                '\n',
+                'exception: $exception',
+                '\n',
+                'A NEW TRY WILL EXECUTE AFTER 1500 MS',
+                '\n',
+              ]);
+        }
+
+        await Future.delayed(const Duration(milliseconds: 1500));
+      }
+    }
+
+    if (exception != null) {
+      var error = '';
+      try {
+        error = '$exception';
+      } catch (e) {}
+
+      return _resolveResponse(
+        url,
+        http.Response(error, -1),
+        cache: cache,
+        tries: tries,
       );
     }
-  }
 
-  //---------------------------------------------------------------------------
+    return _resolveResponse(
+      url,
+      http.Response('Can\'t connect the server', 0),
+      cache: cache,
+      tries: tries,
+    );
+  }
 
   Future<Response<DT>> _resolveResponse<DT>(
     Url<DT> url,
     http.Response response, {
     required _Cache<DT>? cache,
+    required int tries,
   }) async {
     final code = response.statusCode;
 
@@ -242,6 +295,8 @@ class WebRequestExecutor {
             'error: ${response.reasonPhrase}',
             '\n',
             'headers: ${response.headers}',
+            '\n',
+            'numberOfTries: $tries',
             '\n',
           ]);
     }
@@ -310,11 +365,14 @@ class WebRequestExecutor {
 
       var resultAndMapper = onSuccessResponse();
       if (resultAndMapper.value1.result != null) {
-        if (resultAndMapper.value2 == null) throw 'set mapper class if data is exist';
+        if (resultAndMapper.value2 == null)
+          throw 'set mapper class if data is exist';
         if (resultAndMapper.value1.result is List) {
           List<Map<String, dynamic>>? map;
           try {
-            map = resultAndMapper.value2!.toMapList(resultAndMapper.value1.result as List,);
+            map = resultAndMapper.value2!.toMapList(
+              resultAndMapper.value1.result as List,
+            );
           } catch (e) {
             error = 'Error in toMapList() in '
                 '${resultAndMapper.value2!.runtimeType} class for '
@@ -413,7 +471,15 @@ _Cache<DT>? _createOrGetCacheStorage<DT>({
     _cacheStorage[key2] = cache;
   }
 
-  return cache as _Cache<DT>?;
+  if (cache == null) {
+    return null;
+  } else {
+    try {
+      return cache as _Cache<DT>?;
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
 void _removeExpiredCaches() async {

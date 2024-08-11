@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'logs.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../ui/dialogs/message_dialog.dart';
 import 'launcher.dart';
+import 'logs.dart';
 import 'package_info.dart';
 
 class AppVersionCheck {
@@ -57,15 +57,18 @@ class AppVersionCheck {
                     : 'تم اصدار تحديث جديد من التطبيق، يرجى التحديث',
               )
               .addAction(
-            en ? 'Update' : 'تحديث',
-            () {
-              if (Platform.isIOS) {
-                openAppleStore();
-              } else {
-                openPlayStore();
-              }
-            },
-          ).show(context);
+                MessageDialogActionButton(
+                  en ? 'Update' : 'تحديث',
+                  action: () {
+                    if (Platform.isIOS) {
+                      openAppleStore();
+                    } else {
+                      openPlayStore();
+                    }
+                  },
+                ),
+              )
+              .show(context);
         },
       );
     }
