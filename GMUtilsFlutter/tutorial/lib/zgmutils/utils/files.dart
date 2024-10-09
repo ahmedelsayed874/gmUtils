@@ -13,19 +13,25 @@ class Files {
   String _fileName;
   String _fileExtension;
   bool _saveToCacheDir;
+  bool _downloadDir;
   bool _privateDir = true;
 
   Files.private(
     this._fileName,
-    this._fileExtension, [
-    this._saveToCacheDir = false,
-  ]) : _privateDir = true;
+    this._fileExtension, {
+    bool saveToCacheDir = false,
+  })  : _saveToCacheDir = saveToCacheDir,
+        _privateDir = true,
+        _downloadDir = false;
 
   Files.public(
     this._fileName,
-    this._fileExtension, [
-    this._saveToCacheDir = false,
-  ]) : _privateDir = false;
+    this._fileExtension, {
+    bool downloadDir = false,
+    bool saveToCacheDir = false,
+  })  : _downloadDir = downloadDir,
+        _saveToCacheDir = saveToCacheDir,
+        _privateDir = false;
 
   //----------------------------------------------------------------------------
 
@@ -36,16 +42,47 @@ class Files {
         directory = _saveToCacheDir
             ? await filesProvider.getApplicationCacheDirectory()
             : await filesProvider.getApplicationDocumentsDirectory();
-      } else {
-        directory = _saveToCacheDir
-            ? (await filesProvider.getExternalCacheDirectories())?.first
-            : await filesProvider.getExternalStorageDirectory();
       }
-    } else {
+      //
+      else {
+        if (_saveToCacheDir) {
+          directory =
+              (await filesProvider.getExternalCacheDirectories())?.first;
+        }
+        //
+        else {
+          if (_downloadDir) {
+            try {
+              directory = await filesProvider.getDownloadsDirectory();
+            } catch (e) {
+              directory = await filesProvider.getExternalStorageDirectory();
+            }
+          }
+          //
+          else {
+            directory = await filesProvider.getExternalStorageDirectory();
+          }
+        }
+      }
+    }
+    //
+    else {
       if (_privateDir) {
         directory = await filesProvider.getApplicationSupportDirectory();
-      } else {
-        directory = await filesProvider.getApplicationDocumentsDirectory();
+      }
+      //
+      else {
+        if (_downloadDir) {
+          try {
+            directory = await filesProvider.getDownloadsDirectory();
+          } catch (e) {
+            directory = await filesProvider.getApplicationDocumentsDirectory();
+          }
+        }
+        //
+        else {
+          directory = await filesProvider.getApplicationDocumentsDirectory();
+        }
       }
     }
 

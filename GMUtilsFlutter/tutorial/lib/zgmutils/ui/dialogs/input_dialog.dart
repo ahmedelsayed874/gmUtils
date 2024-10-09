@@ -12,6 +12,7 @@ class InputDialog {
   String _inputText = '';
   String _inputHint = '';
   int? _minInputLines;
+  int? _maxInputLines;
   bool Function(String input)? _validationInputHandler;
   void Function(String input)? _inputHandler;
   void Function()? _onDismiss;
@@ -51,6 +52,13 @@ class InputDialog {
 
   InputDialog setMinInputLines(int minInputLines) {
     _minInputLines = minInputLines;
+    _maxInputLines ??= minInputLines + 1;
+    return this;
+  }
+
+  InputDialog setMaxInputLines(int maxInputLines) {
+    _maxInputLines = maxInputLines;
+    _minInputLines ??= 1;
     return this;
   }
 
@@ -165,13 +173,28 @@ class InputDialog {
                           border: const OutlineInputBorder()),
                       keyboardType: _keyboardType,
                       minLines: _minInputLines,
-                      maxLines:
-                          _minInputLines == null ? null : (_minInputLines! + 3),
+                      maxLines: _maxInputLines,
                     ),
                     if (_extraWidget != null) _extraWidget!,
                   ],
                 ),
                 actions: [
+                  TextButton(
+                    onPressed: () {
+                      dismiss();
+                    },
+                    child: Text(_cancelButtonText ??
+                        (App.isEnglish ? 'Cancel' : 'إلغاء')),
+                  ),
+                  if (_showSkipButton)
+                    TextButton(
+                      onPressed: () {
+                        dismiss();
+                        _onSkipClick?.call(_inputController.text);
+                      },
+                      child: Text(
+                          _skipButtonText ?? (App.isEnglish ? 'Skip' : 'تخطي')),
+                    ),
                   TextButton(
                     onPressed: () {
                       bool valid = true;
@@ -183,22 +206,10 @@ class InputDialog {
                         _inputHandler?.call(_inputController.text);
                       }
                     },
-                    child: Text(_okButtonText ?? (App.isEnglish ? 'OK' : 'حسنا')),
+                    child:
+                    Text(_okButtonText ?? (App.isEnglish ? 'OK' : 'حسنا')),
                   ),
-                  if (_showSkipButton)
-                    TextButton(
-                      onPressed: () {
-                        dismiss();
-                        _onSkipClick?.call(_inputController.text);
-                      },
-                      child: Text(_skipButtonText ?? (App.isEnglish ? 'Skip' : 'تخطي')),
-                    ),
-                  TextButton(
-                    onPressed: () {
-                      dismiss();
-                    },
-                    child: Text(_cancelButtonText ?? (App.isEnglish ? 'Cancel' : 'إلغاء')),
-                  ),
+
                 ],
                 backgroundColor: AppTheme.appColors?.background ?? Colors.white,
               ),

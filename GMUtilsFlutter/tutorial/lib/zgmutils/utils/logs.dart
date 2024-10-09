@@ -1,19 +1,22 @@
 import 'dart:core' as core;
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
+
 import 'date_op.dart';
 import 'files.dart';
-import 'package:flutter/foundation.dart';
 
 class Logs {
   static int? _logFileDeadline;
+
   static void setLogFileDeadline(core.String? logFileDeadline) {
     try {
       var dt = DateOp().parse(logFileDeadline ?? '', convertToLocalTime: true);
       _logFileDeadline = dt?.millisecondsSinceEpoch;
     } catch (e) {
       if (kDebugMode) {
-        core.print('Logs.setLogFileDeadline(logFileDeadline: $logFileDeadline) ---> Exception: $e');
+        core.print(
+            'Logs.setLogFileDeadline(logFileDeadline: $logFileDeadline) ---> Exception: $e');
       }
     }
   }
@@ -96,7 +99,7 @@ class Logs {
     }
   }
 
-  static void _printToFile(String log) async {
+  static Future<void> _printToFile(String log) async {
     if (_fileWriterBussy) {
       _fileTextCache ??= [];
       _fileTextCache?.add(log);
@@ -115,6 +118,5 @@ class Logs {
       _fileWriterBussy = false;
       _printToFile(log2);
     }
-
   }
 }

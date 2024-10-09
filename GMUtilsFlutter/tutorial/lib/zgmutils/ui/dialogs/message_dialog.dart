@@ -16,7 +16,8 @@ class MessageDialog {
   List<Widget> _actions = [];
   bool _enableOuterDismiss = true;
   bool _dismissed = false;
-  Function? _onDismiss;
+  String? _dismissedBy;
+  Function(String? dismissedBy)? _onDismiss;
   bool _enableLinks = false;
   bool _enableSelect = false;
   bool _allowManualDismiss = true;
@@ -51,22 +52,30 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog addAction(MessageDialogActionButton action) {
-    _actions.insert(
-      0,
-      TextButton(
-        onPressed: () {
-          dismiss();
-          action.action?.call();
-        },
-        child: Text(
-          action.title,
-          style: AppTheme.defaultTextStyle(
-            textColor: action.color,
+  MessageDialog addActions(List<MessageDialogActionButton> actions) {
+    int i = 0;
+    for (var action in actions) {
+      i++;
+
+      _actions.insert(
+        0,
+        TextButton(
+          onPressed: () {
+            _dismiss(action.title);
+            action.action?.call();
+          },
+          child: Text(
+            action.title,
+            style: AppTheme.defaultTextStyle(
+              textColor: action.color,
+              fontWeight: i == 1
+                  ? (action.fontWeight ?? FontWeight.bold)
+                  : action.fontWeight,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     return this;
   }
@@ -76,7 +85,7 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog setOnDismiss(Function? onDismiss) {
+  MessageDialog setOnDismiss(Function(String?)? onDismiss) {
     _onDismiss = onDismiss;
     return this;
   }
@@ -115,7 +124,7 @@ class MessageDialog {
     _context = context;
 
     if (_actions.isEmpty) {
-      addAction(MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا'));
+      addActions([MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا')]);
     }
 
     Widget textWidget;
@@ -187,12 +196,18 @@ class MessageDialog {
       _context = null;
       if (_onDismiss != null) {
         Future.delayed(const Duration(milliseconds: 200), () {
-          _onDismiss?.call();
+          _onDismiss?.call(_dismissedBy);
         });
       }
     });
 
     return this;
+  }
+
+  void _dismiss(String dismissedBy) {
+    if (!_allowManualDismiss) return;
+    _dismissedBy = dismissedBy;
+    dismiss();
   }
 
   void dismiss() {
@@ -207,7 +222,13 @@ class MessageDialog {
 class MessageDialogActionButton {
   final String title;
   final Color? color;
-  final Function? action;
+  final FontWeight? fontWeight;
+  final Function()? action;
 
-  MessageDialogActionButton(this.title, {this.color, this.action});
+  MessageDialogActionButton(
+    this.title, {
+    this.color,
+    this.fontWeight,
+    this.action,
+  });
 }

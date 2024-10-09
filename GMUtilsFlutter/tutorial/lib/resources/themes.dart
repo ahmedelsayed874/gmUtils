@@ -1,4 +1,3 @@
-import 'package:bilingual_learning_schools_ksa/resources/_resources.dart';
 import 'package:bilingual_learning_schools_ksa/resources/fonts.dart';
 import 'package:flutter/material.dart';
 
@@ -42,6 +41,8 @@ class Themes {
     Color? textColor,
     double? textSize,
     FontWeight? fontWeight,
+    TextDecoration? textDecoration,
+    FontStyle? fontStyle,
     String? fontFamily,
     TextOverflow? overflow,
     List<Shadow>? shadows,
@@ -50,6 +51,8 @@ class Themes {
         textColor: textColor,
         textSize: textSize,
         fontWeight: fontWeight,
+        textDecoration: textDecoration,
+        fontStyle: fontStyle,
         fontFamily: fontFamily,
         overflow: overflow,
         shadows: shadows,
@@ -62,10 +65,12 @@ class Themes {
     List<Shadow>? shadows,
   }) =>
       AppTheme.textStyleOfScreenTitle(
-        textColor: textColor,
-        textSize: textSize,
+        textColor: textColor ?? colors.primary,
+        textSize: textSize ?? 20,
         fontFamily: fontFamily,
-        shadows: shadows,
+        shadows: shadows ?? [
+          Shadow(blurRadius: 0.2)
+        ],
       );
 
   TextStyle textStyleOfSectionTitle({
@@ -118,7 +123,7 @@ class _LightColors extends _AppColors {
   @override
   Color card = Colors.white;
   @override
-  Color highlight = Colors.grey[300]!;
+  Color highlight = const Color(0xff777676);
 
   @override
   Color title = const Color(0xff525151);
@@ -130,7 +135,7 @@ class _LightColors extends _AppColors {
   Color hint = const Color(0xffB8B6B6);
 
   @override
-  Color red = const Color(0xfff6540e);
+  Color red = const Color(0xffdc3d4a);//0xfff6540e
   @override
   Color darkRed = const Color(0xff822906);
 }

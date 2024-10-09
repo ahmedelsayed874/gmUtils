@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import '../../utils/pairs.dart';
 import '../dialogs/message_dialog.dart';
 
 abstract class IScreenDriverDependantDelegate {
@@ -17,7 +16,7 @@ abstract class IScreenDriverDependantDelegate {
     required String message,
     List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
-    VoidCallback? onDismiss,
+    Function(String?)? onDismiss,
   });
 
   void showErrorMessage(

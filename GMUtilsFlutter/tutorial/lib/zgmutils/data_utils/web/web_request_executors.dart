@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:bilingual_learning_schools_ksa/zgmutils/utils/mappable.dart';
 import 'package:bilingual_learning_schools_ksa/zgmutils/utils/pairs.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
@@ -13,6 +12,68 @@ import 'response.dart';
 import 'web_url.dart';
 
 class WebRequestExecutor {
+  Future<http.Response?> openUrl(String link) async {
+    try {
+      var response = await http.get(Uri.parse(link.trim()));
+      Logs.print(() => "WebRequestExecutor.openUrl($link) ==> response: {\n"
+          ">>> code: ${response.statusCode},\n"
+          ">>> body: ${response.body},\n"
+          ">>> headers: ${response.headers}\n"
+          "}",
+      );
+      return response;
+    } catch (e) {
+      Logs
+          .print(() => "WebRequestExecutor.checkUrlValidity($link) ==> "
+          "EXCEPTION::: $e",
+      );
+      return null;
+    }
+  }
+
+  Future<Pair<bool, String>> checkUrlValidity(String link) async {
+    try {
+      link = link.toLowerCase().trim();
+
+      if (link.split(' ').length > 1) {
+        Logs.print(() => ""
+            "WebRequestExecutor.checkUrlValidity($link) ==> "
+            "LINK CONTAINS SPACES",
+        );
+        return Pair(value1: false, value2: 'Link contains spaces');
+      }
+
+      if (!link.startsWith('http://') && !link.startsWith('https://')) {
+        Logs.print(() => ""
+            "WebRequestExecutor.checkUrlValidity($link) ==> "
+            "Link not start with 'http://' or 'https://'",
+        );
+        return Pair(value1: false, value2: "Link is not start with 'http://' or 'https://'",);
+      }
+
+      var response = await http.get(Uri.parse(link.trim()));
+      Logs.print(() => ""
+          "WebRequestExecutor.checkUrlValidity($link) ==> response: {\n"
+          ">>> code: ${response.statusCode},\n"
+          ">>> is valid?: ${response.statusCode > 100}\n"
+          "}",
+      );
+
+      return Pair(
+          value1: /*response.statusCode != 404 &&*/ response.statusCode > 100,
+          value2: '',
+      );
+    } catch (e) {
+      Logs.print(() => ""
+          "WebRequestExecutor.checkUrlValidity($link) ==> "
+          "EXCEPTION::: $e",
+      );
+      return Pair(value1: false, value2: '$e'.replaceAll("Invalid argument(s): ", ""),);
+    }
+  }
+
+  //---------------------------------------------------------------------------
+
   Future<Response<DT>> execute<DT>(
     Url<DT> url, {
     int? cacheIntervalInSeconds,
@@ -42,21 +103,19 @@ class WebRequestExecutor {
     PostUrl<DT> url, {
     int? cacheIntervalInSeconds,
   }) async {
-    if (kDebugMode) {
-      Logs.print(() => [
-            '********',
-            'API::Call',
-            '[POST]',
-            'url: ${url.uri}',
-            //'\n',
-            'headers: ${url.headers}',
-            //'\n',
-            'PostParams: ${url.params} ..... asJson: ${url.asJson}',
-            //'\n',
-            'postObject(body): ${url.postObject}',
-            //'\n',
-          ]);
-    }
+    Logs.print(() => [
+          '********',
+          'API::Call',
+          '[POST]',
+          'url: ${url.uri}',
+          //'\n',
+          'headers: ${url.headers}',
+          //'\n',
+          'PostParams: ${url.params} ..... asJson: ${url.asJson}',
+          //'\n',
+          'postObject(body): ${url.postObject}',
+          //'\n',
+        ]);
 
     return _executeWithTries(
       url: url,
@@ -73,25 +132,23 @@ class WebRequestExecutor {
     PostMultiPartFileUrl<DT> url,
     int? cacheIntervalInSeconds,
   ) async {
-    if (kDebugMode) {
-      Logs.print(() => [
-            '********',
-            'API::Call',
-            '[POST / MULTIPART]',
-            'url: ${url.uri}',
-            //'\n',
-            'headers: ${url.headers}',
-            //'\n',
-            'fileMappedKey: ${url.fileMappedKey}',
-            //'\n',
-            'fileBytes-length: ${url.fileBytes.length}',
-            //'\n',
-            'fileName: ${url.fileName}',
-            //'\n',
-            'fileMimeType: ${url.fileMimeType}',
-            //'\n',
-          ]);
-    }
+    Logs.print(() => [
+          '********',
+          'API::Call',
+          '[POST / MULTIPART]',
+          'url: ${url.uri}',
+          //'\n',
+          'headers: ${url.headers}',
+          //'\n',
+          'fileMappedKey: ${url.fileMappedKey}',
+          //'\n',
+          'fileBytes-length: ${url.fileBytes.length}',
+          //'\n',
+          'fileName: ${url.fileName}',
+          //'\n',
+          'fileMimeType: ${url.fileMimeType}',
+          //'\n',
+        ]);
 
     return _executeWithTries(
       url: url,
@@ -156,17 +213,15 @@ class WebRequestExecutor {
       throw 'WebRequestExecutor.executeGet() applied only on GetUrl objects';
     }
 
-    if (kDebugMode) {
-      Logs.print(() => [
-            '********',
-            'API::Call',
-            '[GET]',
-            'url: ${url.uri}',
-            //'\n',
-            'headers: ${url.headers}',
-            //'\n',
-          ]);
-    }
+    Logs.print(() => [
+          '********',
+          'API::Call',
+          '[GET]',
+          'url: ${url.uri}',
+          //'\n',
+          'headers: ${url.headers}',
+          //'\n',
+        ]);
 
     return _executeWithTries(
       url: url,
@@ -190,18 +245,16 @@ class WebRequestExecutor {
       cacheIntervalInSeconds: cacheIntervalInSeconds,
     );
     if (cache != null) {
-      if (kDebugMode) {
-        Logs.print(() => [
-          '********',
-          'API::Response',
-          'url: ${url.uri}',
-          '\n',
-          '<[RESULT WILL RETURN FROM CACHE]>',
-          '\n',
-          'cachedResponse: ${cache.response}',
-          '\n',
-        ]);
-      }
+      Logs.print(() => [
+            '********',
+            'API::Response',
+            'url: ${url.uri}',
+            '\n',
+            '<[RESULT WILL RETURN FROM CACHE]>',
+            '\n',
+            'cachedResponse: ${cache.response}',
+            '\n',
+          ]);
 
       return cache.response;
     }
@@ -252,23 +305,18 @@ class WebRequestExecutor {
       }
     }
 
+    var error = '';
     if (exception != null) {
-      var error = '';
       try {
         error = '$exception';
       } catch (e) {}
-
-      return _resolveResponse(
-        url,
-        http.Response(error, -1),
-        cache: cache,
-        tries: tries,
-      );
+    } else {
+      error = 'Can\'t connect the server';
     }
 
     return _resolveResponse(
       url,
-      http.Response('Can\'t connect the server', 0),
+      http.Response(error, 100),
       cache: cache,
       tries: tries,
     );
@@ -282,24 +330,22 @@ class WebRequestExecutor {
   }) async {
     final code = response.statusCode;
 
-    if (kDebugMode) {
-      Logs.print(() => [
-            '********',
-            'API::Response',
-            'url: ${url.uri}',
-            '\n',
-            'code: $code',
-            '\n',
-            'response: ${response.body}',
-            '\n',
-            'error: ${response.reasonPhrase}',
-            '\n',
-            'headers: ${response.headers}',
-            '\n',
-            'numberOfTries: $tries',
-            '\n',
-          ]);
-    }
+    Logs.print(() => [
+          '********',
+          'API::Response',
+          'url: ${url.uri}',
+          '\n',
+          'code: $code',
+          '\n',
+          'response: ${response.body}',
+          '\n',
+          'error: ${response.reasonPhrase}',
+          '\n',
+          'headers: ${response.headers}',
+          '\n',
+          'numberOfTries: $tries',
+          '\n',
+        ]);
 
     if (code == 200) {
       try {
@@ -310,10 +356,9 @@ class WebRequestExecutor {
         _removeExpiredCaches();
         return responseObj;
       } catch (e) {
-        if (kDebugMode) {
-          Logs.print(() =>
-              'WebRequestExecutor -> Error:: $e ------> Code: $code ------> response: ${response.body}');
-        }
+        Logs.print(() =>
+            'WebRequestExecutor -> Error:: $e ------> Code: $code ------> response: ${response.body}');
+
         _removeExpiredCaches();
         return Response.failed(
           error: '$e',

@@ -28,7 +28,7 @@ class Response<DATA> {
 
   bool get isSuccess => httpCode == 200;
 
-  bool get isConnectionFailed => (httpCode ?? 0) == 0;
+  bool get isConnectionFailed => (httpCode == 0 || httpCode == 100 || httpCode == null);
 
   @override
   String toString() {

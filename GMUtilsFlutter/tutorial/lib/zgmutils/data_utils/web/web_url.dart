@@ -224,8 +224,21 @@ class PostMultiPartFileUrl<RDT> extends GetUrl<RDT> {
     if (i >= 0) {
       return file.path.substring(i + 1);
     } else {
-      return 'file';
+      var d = DateTime.now();
+      return 'file'
+          '${d.year}'
+          '${_compansate(d.month)}'
+          '${_compansate(d.day)}'
+          '${_compansate(d.hour)}'
+          '${_compansate(d.minute)}'
+          '${_compansate(d.second)}'
+          '.${_compansate(d.millisecond)}'
+          '';
     }
+  }
+
+  String _compansate(int n) {
+    return n < 10 ? '0$n' : '$n';
   }
 
   @override

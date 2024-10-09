@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -48,11 +46,14 @@ class MyRootWidget {
     _body = const Text('use \"setBody\" method');
   }
 
-  void configStatusBar({required Color statusBarColor, bool isStatusBarThemeLight = true,}) {
+  void configStatusBar({
+    required Color statusBarColor,
+    bool isStatusBarThemeLight = true,
+  }) {
     _statusBarColor = statusBarColor;
     _isStatusBarThemeLight = isStatusBarThemeLight;
   }
-  
+
   void setupToolbar(Widget? leading, [List<Widget>? action]) {
     _appBar = AppBar(
       centerTitle: true,
@@ -236,7 +237,9 @@ class MyRootWidget {
               top: awareTopSafeArea,
               bottom: Platform.isIOS ? false : true,
               child: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: _isStatusBarThemeLight ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+                value: _isStatusBarThemeLight
+                    ? SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.dark,
                 child: Container(
                   color: _background,
                   width: double.maxFinite,
@@ -292,10 +295,12 @@ class MyRootWidget {
     BuildContext context, {
     required String message,
     SnackBarAction? action,
+    Color? backgroundColor,
   }) {
     final snackBar = SnackBar(
       content: Text(message),
       action: action,
+      backgroundColor: backgroundColor,
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);

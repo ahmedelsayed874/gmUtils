@@ -1,3 +1,5 @@
+import 'package:html/parser.dart';
+import 'package:intl/intl.dart';
 
 class TextUtils {
   String removeExtraSpaces(String text) {
@@ -104,5 +106,16 @@ class TextUtils {
     //     ]);
 
     return isArabicLetter(firstLetter) ?? false;
+  }
+
+  removeHtmlTags(String content) {
+    final document = parse(content);
+    String parsedString = parse(document.body?.text).documentElement?.text ?? '';
+
+    if (parsedString.isEmpty) {
+      parsedString = Bidi.stripHtmlIfNeeded(content);
+    }
+
+    return parsedString ;
   }
 }

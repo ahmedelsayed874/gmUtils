@@ -56,19 +56,18 @@ class AppVersionCheck {
                     ? 'A new version has been released, please update.'
                     : 'تم اصدار تحديث جديد من التطبيق، يرجى التحديث',
               )
-              .addAction(
-                MessageDialogActionButton(
-                  en ? 'Update' : 'تحديث',
-                  action: () {
-                    if (Platform.isIOS) {
-                      openAppleStore();
-                    } else {
-                      openPlayStore();
-                    }
-                  },
-                ),
-              )
-              .show(context);
+              .addActions([
+            MessageDialogActionButton(
+              en ? 'Update' : 'تحديث',
+              action: () {
+                if (Platform.isIOS) {
+                  openAppleStore();
+                } else {
+                  openPlayStore();
+                }
+              },
+            ),
+          ]).show(context);
         },
       );
     }
@@ -108,16 +107,19 @@ class AppVersionCheck {
     String globalVersion2 = '';
 
     for (var i = 0; i < len; i++) {
-      localVersion2 += localVersionSplit[i];
-      globalVersion2 += globalVersionSplit[i];
+      var localPart = localVersionSplit[i];
+      var globalPart = globalVersionSplit[i];
 
-      var ls = max(localVersion2.length, globalVersion2.length);
-      while (ls > localVersion2.length) {
-        localVersion2 += '0';
+      var ls = max(localPart.length, globalPart.length);
+      while (ls > localPart.length) {
+        localPart = '0$localPart';
       }
-      while (ls > globalVersion2.length) {
-        globalVersion2 += '0';
+      while (ls > globalPart.length) {
+        globalPart = '0$globalPart';
       }
+
+      localVersion2 += localPart;
+      globalVersion2 += globalPart;
     }
 
     //localVersion2 100, globalVersion2: 101

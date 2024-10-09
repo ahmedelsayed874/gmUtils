@@ -1,3 +1,4 @@
+import 'package:bilingual_learning_schools_ksa/zgmutils/utils/logs.dart';
 import 'package:flutter/material.dart';
 
 class DateOp {
@@ -6,6 +7,7 @@ class DateOp {
   static const ONE_DAY_MILLISECONDS = 24 * 60 * 60 * 1000;
 
   ///"yyyy-MM-dd HH:mm:ss.SSSXXX" ========> 2012-01-23 01:23:45+02:00
+  ///"yyyy-MM-dd HH:mm:ssZ" ========> 2012-01-23 01:23:45+0200
   String formatForDatabase(
     DateTime dateTime, {
     required bool dateOnly,
@@ -68,6 +70,7 @@ class DateOp {
   }
 
   ///"yyyy-MM-dd HH:mm:ss.SSSXXX" ========> 2012-01-23 01:23:45+02:00
+  ///"yyyy-MM-dd HH:mm:ssZ" ========> 2012-01-23 01:23:45+0200
   String formatForDatabase2({
     required DateOpDayComponent day,
     required DateOpTimeComponent? time,
@@ -199,8 +202,10 @@ class DateOp {
     bool useShortNames = false,
     bool inTwoLines = false,
   }) {
-    var dateTime =
-        parse(date, convertToLocalTime: !dateOnly && convertToLocalTime);
+    var dateTime = parse(
+      date,
+      convertToLocalTime: !dateOnly && convertToLocalTime,
+    );
     if (dateTime == null) {
       return date;
     }
@@ -274,14 +279,19 @@ class DateOp {
     String otherDate,
     bool en, {
     bool convertToLocalTime = true,
+    bool includeSeconds = false,
   }) {
     var date = parse(otherDate, convertToLocalTime: convertToLocalTime);
 
     if (date == null) return otherDate;
-    return sinceNowStatement2(date, en);
+    return sinceNowStatement2(date, en, includeSeconds: includeSeconds);
   }
 
-  String sinceNowStatement2(DateTime otherDate, bool en) {
+  String sinceNowStatement2(
+    DateTime otherDate,
+    bool en, {
+    bool includeSeconds = false,
+  }) {
     var now = DateTime.now();
     var nowMillis = now.millisecondsSinceEpoch;
 
@@ -302,7 +312,7 @@ class DateOp {
         en: en,
         dateOnly: false,
         convertToLocalTime: false,
-        includeSeconds: false,
+        includeSeconds: includeSeconds,
       );
     }
 
@@ -354,7 +364,7 @@ class DateOp {
         );
         statement += time.formattedForUser(
           en: en,
-          includeSeconds: false,
+          includeSeconds: includeSeconds,
         );
 
         return statement;
@@ -379,7 +389,7 @@ class DateOp {
       );
       statement += time.formattedForUser(
         en: en,
-        includeSeconds: false,
+        includeSeconds: includeSeconds,
       );
 
       return statement;
@@ -392,12 +402,12 @@ class DateOp {
         en: en,
         dateOnly: false,
         convertToLocalTime: false,
-        includeSeconds: false,
+        includeSeconds: includeSeconds,
       );
     }
   }
 
-  String nowAsShowNumber() {
+  String nowAsSingleNumber() {
     var now = DateTime.now();
 
     String s = now.year.toString().substring(2);
@@ -414,19 +424,19 @@ class DateOp {
 
   DateTime? parse(
     String date, {
-    required bool convertToLocalTime,
+    bool convertToLocalTime = true,
     DateTime? defaultDate,
   }) {
     var parsedDate = DateTime.tryParse(date);
 
     if (parsedDate != null) {
-      if (convertToLocalTime) {
-        if (parsedDate.isUtc) {
-          parsedDate = parsedDate.toLocal();
-        } else {
-          var now = DateTime.now();
-          parsedDate = parsedDate.add(now.timeZoneOffset);
-        }
+      if (parsedDate.isUtc) {
+        parsedDate = parsedDate.toLocal();
+      }
+      //
+      else if (convertToLocalTime) {
+        var now = DateTime.now();
+        parsedDate = parsedDate.add(now.timeZoneOffset);
       }
 
       return parsedDate;
@@ -463,12 +473,218 @@ class DateOp {
       var second = int.parse(datetimeAtServer.substring(23, 25));
 
       var dt = DateTime(year, month, day, hour, minute, second);
-      
 
       return dt;
     } catch (e) {
       return null;
     }
+  }
+
+  DateOpDuration? remainTo(String date) {
+    var tdt = parse(date);
+    if (tdt == null) {
+      Logs.print(
+        () => 'DateOp.remainTo --> NULL due wrong date format $date',
+      );
+      return null;
+    }
+
+    var remainMillisec =
+        tdt.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch;
+
+    int days = remainMillisec ~/ (DateOp.ONE_DAY_MILLISECONDS);
+    remainMillisec -= (days * DateOp.ONE_DAY_MILLISECONDS);
+
+    int hours = remainMillisec ~/ (DateOp.ONE_HOUR_MILLISECONDS);
+    remainMillisec -= (hours * DateOp.ONE_HOUR_MILLISECONDS);
+
+    int minutes = remainMillisec ~/ (DateOp.ONE_MINUTE_MILLISECONDS);
+    remainMillisec -= (minutes * DateOp.ONE_MINUTE_MILLISECONDS);
+
+    int seconds = remainMillisec ~/ 1000;
+
+    Logs.print(
+      () => 'DateOp.remainTo --> '
+          'days: $days, '
+          'hours: $hours, '
+          'minutes: $minutes, '
+          'seconds: $seconds',
+    );
+
+    return DateOpDuration(
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    );
+  }
+
+  String? remainToAsStatement(
+    String date, {
+    required bool en,
+    bool useShortNames = true,
+    bool reportExactDaysCount = false,
+    bool includeMinutes = true,
+    bool includeSeconds = true,
+    bool acceptNegative = false,
+  }) {
+    var duration = remainTo(date);
+    if (duration == null) return null;
+
+    if (!acceptNegative) {
+      if (duration.inPast) {
+        return null;
+      }
+    }
+
+    int days = duration.days;
+    int hours = duration.hours;
+    int minutes = duration.minutes;
+    int seconds = duration.seconds;
+
+    String statement = '';
+    if (days != 0) {
+      if (en) {
+        statement += '${!reportExactDaysCount && days > 99 ? '99+' : '$days'} ';
+
+        if (useShortNames) {
+          statement += (en ? 'D' : 'ي');
+        } else {
+          statement += 'Day${days > 1 ? 's' : ''}';
+        }
+      } else {
+        if (days == 1) {
+          statement += 'يوم';
+        }
+        //
+        else if (days == 2) {
+          statement += 'يومان';
+        }
+        //
+        else if (days <= 10) {
+          statement +=
+              '${!reportExactDaysCount && days > 99 ? '99+' : '$days'} ';
+          statement += 'أيام';
+        }
+        //
+        else {
+          statement +=
+              '${!reportExactDaysCount && days > 99 ? '99+' : '$days'} ';
+          statement += 'يوم';
+        }
+      }
+    }
+    if (hours != 0) {
+      if (statement.isNotEmpty) {
+        statement += (en ? ', ' : '، ');
+      }
+
+      if (en) {
+        //statement += '${hours > 9 ? '' : (hours < -9 ? '' : ' ')}$hours ';
+        statement += '$hours ';
+        if (useShortNames) {
+          statement += (en ? 'H' : 'س');
+        } else {
+          statement += 'Hour${hours > 1 ? 's' : ''}';
+        }
+      } else {
+        if (hours == 1) {
+          statement += 'ساعه';
+        }
+        //
+        else if (hours == 2) {
+          statement += 'ساعتان';
+        }
+        //
+        else if (hours <= 10) {
+          //statement += '${hours > 9 ? '' : (hours < -9 ? '' : ' ')}$hours ';
+          statement += '$hours ';
+          statement += 'ساعات';
+        }
+        //
+        else {
+          //statement += '${hours > 9 ? '' : (hours < -9 ? '' : ' ')}$hours ';
+          statement += '$hours ';
+          statement += 'ساعه';
+        }
+      }
+    }
+    if (minutes != 0 && includeMinutes) {
+      if (statement.isNotEmpty) {
+        statement += (en ? ', ' : '، ');
+      }
+
+      if (en) {
+        //statement += '${minutes > 9 ? '' : (minutes < -9 ? '' : ' ')}$minutes ';
+        statement += '$minutes ';
+        if (useShortNames) {
+          statement += (en ? 'M' : 'د');
+        } else {
+          statement += 'Minute${minutes > 1 ? 's' : ''}';
+        }
+      } else {
+        if (minutes == 1) {
+          statement += 'دقيقة';
+        }
+        //
+        else if (minutes == 2) {
+          statement += 'دقيقتان';
+        }
+        //
+        else if (minutes <= 10) {
+          //statement += '${minutes > 9 ? '' : (minutes < -9 ? '' : ' ')}$minutes ';
+          statement += '$minutes ';
+          statement += 'دقائق';
+        }
+        //
+        else {
+          //statement += '${minutes > 9 ? '' : (minutes < -9 ? '' : ' ')}$minutes ';
+          statement += '$minutes ';
+          statement += 'دقيقة';
+        }
+      }
+    }
+    if (seconds != 0 && includeSeconds) {
+      if (statement.isNotEmpty) {
+        statement += (en ? ', ' : '، ');
+      }
+
+      if (en) {
+        statement += '${seconds > 9 ? '' : (seconds < -9 ? '' : ' ')}$seconds ';
+        if (useShortNames) {
+          statement += (en ? 'S' : 'ث');
+        } else {
+          statement += 'Second${seconds > 1 ? 's' : ''}';
+        }
+      } else {
+        if (seconds == 1) {
+          statement += 'ثانية';
+        }
+        //
+        else if (seconds == 2) {
+          statement += 'ثانيتان';
+        }
+        //
+        else if (seconds <= 10) {
+          statement +=
+              '${seconds > 9 ? '' : (seconds < -9 ? '' : ' ')}$seconds ';
+          statement += 'ثوان';
+        }
+        //
+        else {
+          statement +=
+              '${seconds > 9 ? '' : (seconds < -9 ? '' : ' ')}$seconds ';
+          statement += 'ثانية';
+        }
+      }
+    }
+
+    if (statement.isEmpty) {
+      statement =
+          useShortNames ? (en ? '0 Second' : '٠ ثانية') : (en ? '0 S' : '٠ ث');
+    }
+
+    return statement;
   }
 }
 
@@ -520,6 +736,7 @@ class DateOpTimeComponent {
   });
 
   ///"HH:mm:ss.SSSXXX" ========> 01:23:45+02:00
+  ///"HH:mm:ssZ" ========> 01:23:45+0200
   String get formattedForDb {
     //if (timezone == null) throw 'timezone is required for formatting function';
 
@@ -597,8 +814,47 @@ class DateOpTimeZoneComponent {
   });
 
   ///"SSSXXX" ========> +02:00
+  ///"Z" ========> +0200
   String get formatted => ''
       '${isPositive ? '+' : '-'}'
-      '${hours < 10 ? '0' : ''}$hours:'
+      '${hours < 10 ? '0' : ''}$hours'
       '${minutes < 10 ? '0' : ''}$minutes';
+}
+
+class DateOpDuration {
+  final int days;
+  final int hours;
+  final int minutes;
+  final int seconds;
+
+  DateOpDuration({
+    required this.days,
+    required this.hours,
+    required this.minutes,
+    required this.seconds,
+  });
+
+  bool get inPast =>
+      (days < 0) || (hours < 0) || (minutes < 0) || (seconds < 0);
+
+  double get inDays => inHours / 24;
+
+  double get inHours {
+    double h = days * 24;
+    h += hours;
+    h += (minutes / 60.0);
+    h += (seconds / 60.0 / 60.0);
+
+    int i = h.toInt();
+    String hs = '${h - i}';
+    int length = 5;
+    if (i < 0) length++;
+    if (hs.length > length) hs = hs.substring(0, length);
+
+    return i.toDouble() + double.parse(hs);
+  }
+
+  double get inMinutes => inHours * 60.0;
+
+  double get inSeconds => inHours * 60.0 * 60.0;
 }

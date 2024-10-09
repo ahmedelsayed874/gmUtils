@@ -6,9 +6,8 @@ import '../gm_main.dart';
 import 'logs.dart';
 
 abstract class INotifications {
-
   Future<void> init(
-    NotificationsConfigurations? notificationsConfigurations,
+    NotificationsConfigurations? _notificationsConfigurations,
   );
 
   ///handle Notifications message
@@ -25,8 +24,7 @@ abstract class INotifications {
     String body, {
     String? payload,
     int? notificationId,
-    LocalNotificationChannelInfo? channelInfo,
-    AndroidNotificationChannel? customChannel,
+    AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
   });
 
@@ -34,6 +32,7 @@ abstract class INotifications {
 }
 
 class Notifications extends INotifications {
+  static String defaultNotificationIconName = 'notif_icon';
   ///this value must set in android manifest
   ///         <meta-data
   ///             android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -42,9 +41,12 @@ class Notifications extends INotifications {
   static String defaultNotificationChannelName = 'Default';
 
   ///sound file name must include extension
-  static RawResourceAndroidNotificationSound? defaultNotificationChannelSound;
+  static SoundFile? defaultNotificationChannelSound;
 
-  NotificationsConfigurations? notificationsConfigurations;
+  /////////////////////////////////////////////////////////////////////////////
+
+  NotificationsConfigurations? _notificationsConfigurations;
+  NotificationsConfigurations? get notificationsConfigurations => _notificationsConfigurations;
 
   //private constructor
   static Notifications? _instance;
@@ -58,11 +60,11 @@ class Notifications extends INotifications {
 
   @override
   Future<void> init(
-    NotificationsConfigurations? notificationsConfigurations,
+    NotificationsConfigurations? _notificationsConfigurations,
   ) async {
     Logs.print(() => 'Notifications.init');
 
-    this.notificationsConfigurations ??= notificationsConfigurations;
+    this._notificationsConfigurations ??= _notificationsConfigurations;
 
     //region Local Notification Config
     await _setupLocalNotification();
@@ -81,7 +83,7 @@ class Notifications extends INotifications {
   void openCorrespondingScreenByNotificationJson(dynamic payload) {
     Logs.print(() => 'Notifications.openCorrespondingScreenByNotificationJson');
     try {
-      notificationsConfigurations?.openCorrespondingScreen(payload);
+      _notificationsConfigurations?.openCorrespondingScreen(payload);
     } catch (e) {}
   }
 
@@ -159,8 +161,8 @@ class Notifications extends INotifications {
     //region initialize
     var initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings(
-        notificationsConfigurations?.androidNotificationIconName ??
-            'notif_icon',
+        _notificationsConfigurations?.androidNotificationIconName ??
+            defaultNotificationIconName,
       ),
 
       //------------------------------------
@@ -179,19 +181,15 @@ class Notifications extends INotifications {
     //endregion
 
     //region create channels
-    if (notificationsConfigurations != null) {
+    if (_notificationsConfigurations != null) {
       var notificationsPlugin = _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
-      await notificationsPlugin?.requestPermission();
+      await notificationsPlugin?.requestNotificationsPermission();
 
       //mandatory (check init() method)
       defaultNotificationChannelSound =
-          notificationsConfigurations?.defaultNotificationSound == null
-              ? null
-              : RawResourceAndroidNotificationSound(
-                  notificationsConfigurations?.defaultNotificationSound,
-                );
+          _notificationsConfigurations?.defaultNotificationSound;
 
       AndroidNotificationChannel defaultNotificationChannel =
           AndroidNotificationChannel(
@@ -200,31 +198,51 @@ class Notifications extends INotifications {
         description: 'Default notification channel',
         importance: Importance.max,
         playSound: true,
-        sound: defaultNotificationChannelSound,
+        sound: defaultNotificationChannelSound == null
+            ? null
+            : RawResourceAndroidNotificationSound(
+                defaultNotificationChannelSound!.name,
+              ),
       );
 
       await notificationsPlugin
           ?.createNotificationChannel(defaultNotificationChannel);
 
-      if (notificationsConfigurations?.androidNotificationChannelsIdsToDelete !=
+      if (_notificationsConfigurations?.androidNotificationChannelsIdsToDelete !=
           null) {
-        for (var channelId in notificationsConfigurations!
-            .androidNotificationChannelsIdsToDelete!()) {
+        var cnfg = _notificationsConfigurations!;
+        var lst = cnfg.androidNotificationChannelsIdsToDelete!();
+        for (var channelId in lst) {
           await notificationsPlugin?.deleteNotificationChannel(channelId);
         }
 
-        notificationsConfigurations?.androidNotificationChannelsIdsToDelete =
+        _notificationsConfigurations?.androidNotificationChannelsIdsToDelete =
             null;
       }
 
-      if (notificationsConfigurations?.androidExtraNotificationChannels !=
+      if (_notificationsConfigurations?.androidExtraNotificationChannels !=
           null) {
-        for (var channel in notificationsConfigurations!
-            .androidExtraNotificationChannels!()) {
-          await notificationsPlugin?.createNotificationChannel(channel);
+        var cnfg = _notificationsConfigurations!;
+        var channel = cnfg.androidExtraNotificationChannels!();
+
+        for (var channel in channel) {
+          await notificationsPlugin?.createNotificationChannel(
+            AndroidNotificationChannel(
+              channel.channelId,
+              channel.channelName,
+              description: channel.channelDescription,
+              importance: channel.importance.importance,
+              playSound: true,
+              sound: channel.soundFile == null
+                  ? null
+                  : RawResourceAndroidNotificationSound(
+                      channel.soundFile!.name,
+                    ),
+            ),
+          );
         }
 
-        notificationsConfigurations?.androidExtraNotificationChannels = null;
+        _notificationsConfigurations?.androidExtraNotificationChannels = null;
       }
     }
     //endregion
@@ -284,19 +302,20 @@ class Notifications extends INotifications {
     String body, {
     String? payload,
     int? notificationId,
-    LocalNotificationChannelInfo? channelInfo,
-    AndroidNotificationChannel? customChannel,
+    AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
   }) {
     Logs.print(() => 'Notifications.showLocalNotification('
         'title: $title, '
         'body: $body, '
         'payload: $payload, '
-        'channelInfo: ${channelInfo?.id}'
-        'customChannel: ${customChannel?.id ?? defaultNotificationChannelId}'
+        'customChannel: ${customChannel?.channelId ?? defaultNotificationChannelId}'
         ')');
 
     final _notificationId = notificationId ?? body.hashCode;
+
+    SoundFile? sound =
+        customChannel?.soundFile ?? defaultNotificationChannelSound;
 
     _flutterLocalNotificationsPlugin.show(
       _notificationId,
@@ -304,17 +323,18 @@ class Notifications extends INotifications {
       body,
       NotificationDetails(
         android: AndroidNotificationDetails(
-          channelInfo?.id ?? customChannel?.id ?? defaultNotificationChannelId,
-          channelInfo?.name ??
-              customChannel?.name ??
-              defaultNotificationChannelName,
+          customChannel?.channelId ?? defaultNotificationChannelId,
+          customChannel?.channelName ?? defaultNotificationChannelName,
           //
-          channelDescription: customChannel?.description,
-          importance: customChannel?.importance ?? Importance.defaultImportance,
-          sound: customChannel?.sound ?? defaultNotificationChannelSound,
+          channelDescription: customChannel?.channelDescription,
+          importance: customChannel?.importance.importance ??
+              Importance.defaultImportance,
+          playSound: true,
+          sound: sound == null
+              ? null
+              : RawResourceAndroidNotificationSound(sound.name),
           //
           priority: Priority.high,
-          playSound: true,
           styleInformation: androidInformationStyle ??
               BigTextStyleInformation(
                 body,
@@ -322,7 +342,7 @@ class Notifications extends INotifications {
         ),
         iOS: DarwinNotificationDetails(
           presentSound: true,
-          sound: customChannel?.sound?.sound,
+          sound: sound?.fileNameWithExtension,
         ),
       ),
       payload: payload,
@@ -350,18 +370,12 @@ void _onDidReceiveNotificationResponse(NotificationResponse details) {
 
 //------------------------------------------------------------------------------
 
-class LocalNotificationChannelInfo {
-  String id;
-  String name;
-
-  LocalNotificationChannelInfo({required this.id, required this.name});
-}
-
 class NotificationsConfigurations {
   final String androidNotificationIconName;
-  final String? defaultNotificationSound;
+  final SoundFile? defaultNotificationSound;
   List<String> Function()? androidNotificationChannelsIdsToDelete;
-  List<AndroidNotificationChannel> Function()? androidExtraNotificationChannels;
+  List<AndroidNotificationChannelProperties> Function()?
+      androidExtraNotificationChannels;
 
   ///payload: may be "Map<String, dynamic>" or "String" or "null"
   final void Function(dynamic payload) openCorrespondingScreen;
@@ -373,4 +387,76 @@ class NotificationsConfigurations {
     required this.androidExtraNotificationChannels,
     required this.openCorrespondingScreen,
   });
+
+  @override
+  String toString() {
+    return 'NotificationsConfigurations{androidNotificationIconName: $androidNotificationIconName, defaultNotificationSound: $defaultNotificationSound, androidNotificationChannelsIdsToDelete: $androidNotificationChannelsIdsToDelete, androidExtraNotificationChannels: $androidExtraNotificationChannels, openCorrespondingScreen: $openCorrespondingScreen}';
+  }
+}
+
+class AndroidNotificationChannelProperties {
+  final String channelId;
+  final String channelName;
+  final String? channelDescription;
+  final Importance2 importance;
+  final SoundFile? soundFile;
+
+  const AndroidNotificationChannelProperties({
+    required this.channelId,
+    required this.channelName,
+    this.channelDescription,
+    required this.importance,
+    required this.soundFile,
+  });
+
+  @override
+  String toString() {
+    return 'AndroidNotificationChannelProperties{'
+        'channelId: $channelId, '
+        'channelName: $channelName, '
+        'channelDescription: $channelDescription, '
+        'importance: $importance, '
+        'soundFile: $soundFile'
+        '}';
+  }
+}
+
+class Importance2 {
+  static const int unspecified = -1000;
+  static const int none = 0;
+  static const int min = 1;
+  static const int low = 2;
+  static const int defaultImportance = 3;
+  static const int high = 4;
+  static const int max = 5;
+
+  final int value;
+
+  const Importance2(this.value);
+
+  Importance get importance {
+    return Importance.values.firstWhere((e) => e.value == value);
+  }
+
+  @override
+  String toString() {
+    return 'Importance2{value: $value}';
+  }
+}
+
+class SoundFile {
+  final String name;
+  final String extension;
+
+  const SoundFile({
+    required this.name,
+    required this.extension,
+  });
+
+  String get fileNameWithExtension => '${name}.${extension}';
+
+  @override
+  String toString() {
+    return 'SoundFile{name: $name, extension: $extension}';
+  }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/pairs.dart';
 import '../dialogs/message_dialog.dart';
 import 'drivers_interfaces.dart';
 import 'screen_utils.dart';
@@ -45,7 +44,7 @@ abstract class BaseStatelessWidget extends StatelessWidget
     required String message,
     List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
-    VoidCallback? onDismiss,
+    Function(String?)? onDismiss,
   }) {
     _screenUtils.showMessage(
       message,

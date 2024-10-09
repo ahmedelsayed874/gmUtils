@@ -4,13 +4,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
-import '../../../zgmutils/data_utils/storages/locale_preference.dart';
-import '../../../zgmutils/utils/notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
-import '../../utils/logs.dart';
 
 import '../../../main.dart' as main;
-
+import '../../../zgmutils/data_utils/storages/locale_preference.dart';
+import '../../../zgmutils/utils/notifications.dart';
+import '../../utils/logs.dart';
 
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/
@@ -40,7 +39,7 @@ abstract class FCMFunctions {
     required String title,
     required String message,
     required String payload,
-    AndroidNotificationChannel? channel,
+    AndroidNotificationChannelProperties? channel,
     bool dataNotification = false,
   });
 
@@ -50,7 +49,7 @@ abstract class FCMFunctions {
     required String title,
     required String message,
     required String payload,
-    AndroidNotificationChannel? channel,
+    AndroidNotificationChannelProperties? channel,
     bool dataNotification = false,
   });
 
@@ -59,8 +58,7 @@ abstract class FCMFunctions {
     String body, {
     String? payload,
     int? notificationId,
-    LocalNotificationChannelInfo? channelInfo,
-    AndroidNotificationChannel? customChannel,
+        AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
   });
 }
@@ -68,7 +66,7 @@ abstract class FCMFunctions {
 //------------------------------------------------------------------------------
 
 class FCM extends FCMFunctions {
-  static String _sentNotificationId = '';
+  // static String _sentNotificationId = '';
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   FCMConfigurations? fcmConfigurations;
@@ -196,7 +194,7 @@ class FCM extends FCMFunctions {
           'FCM._popupNotification2(message: {id=${message.messageId}, payload=${message.data}, en: $en)'
         ]);
 
-    var title = '•${message.notification?.title ?? 'Notification'}';
+    var title = '${message.notification?.title ?? 'Notification'}•';
     var body = message.notification?.body ?? '';
 
     var localNotification = resolveNotification(message, en);
@@ -215,7 +213,6 @@ class FCM extends FCMFunctions {
         localNotification.body ?? body,
         payload: payload,
         notificationId: localNotification.notificationId,
-        channelInfo: localNotification.channelInfo,
         customChannel: localNotification.customChannel,
         androidInformationStyle: localNotification.androidInformationStyle,
       );
@@ -299,7 +296,7 @@ class FCM extends FCMFunctions {
     required String title,
     required String message,
     required String payload,
-    AndroidNotificationChannel? channel,
+    AndroidNotificationChannelProperties? channel,
     bool dataNotification = false,
   }) async {
     return _sendMessageTo(
@@ -318,7 +315,7 @@ class FCM extends FCMFunctions {
     required String title,
     required String message,
     required String payload,
-    AndroidNotificationChannel? channel,
+    AndroidNotificationChannelProperties? channel,
     bool dataNotification = false,
   }) async {
     return _sendMessageTo(
@@ -336,26 +333,24 @@ class FCM extends FCMFunctions {
     required String title,
     required String message,
     required String payload,
-    AndroidNotificationChannel? channel,
+    AndroidNotificationChannelProperties? channel,
     bool dataNotification = false,
   }) async {
-    _sentNotificationId = notificationId;
+    // _sentNotificationId = notificationId;
 
     //https://firebase.google.com/docs/cloud-messaging/http-server-ref
     //https://firebase.google.com/docs/cloud-messaging/send-message?hl=en&authuser=0#send-messages-to-topics-legacy
     //FIVE TOPICS IN ONE REQUEST
 
-    String? androidChannelId =
-        channel?.id ?? Notifications.defaultNotificationChannelId;
-    String? sound = channel?.sound?.sound ??
-        Notifications.defaultNotificationChannelSound?.sound;
+    String? androidChannelId = channel?.channelId ?? Notifications.defaultNotificationChannelId;
+    SoundFile? sound = channel?.soundFile ?? Notifications.defaultNotificationChannelSound;
 
     var android = {
       'title': title,
       'body': message,
     };
     if (sound != null) {
-      android['sound'] = sound.substring(0, sound.lastIndexOf('.'));
+      android['sound'] = sound.name;
     }
     android['android_channel_id'] = androidChannelId;
     android['channel_id'] = androidChannelId;
@@ -369,7 +364,9 @@ class FCM extends FCMFunctions {
       'body': message,
       IOS_PAYLOAD_KEY_NAME: payload,
     };
-    if (sound != null) apns['sound'] = sound;
+    if (sound != null) {
+      apns['sound'] = sound.fileNameWithExtension;
+    }
 
     var notificationBody = {
       'to': to,
@@ -418,8 +415,7 @@ class FCM extends FCMFunctions {
     String body, {
     String? payload,
     int? notificationId,
-    LocalNotificationChannelInfo? channelInfo,
-    AndroidNotificationChannel? customChannel,
+    AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
   }) {
     return localNotifications.showNotification(
@@ -427,7 +423,6 @@ class FCM extends FCMFunctions {
       body,
       payload: payload,
       notificationId: notificationId,
-      channelInfo: channelInfo,
       customChannel: customChannel,
       androidInformationStyle: androidInformationStyle,
     );
@@ -478,8 +473,7 @@ class FcmNotificationProperties {
   String? title;
   String? body;
   String? payload;
-  LocalNotificationChannelInfo? channelInfo;
-  AndroidNotificationChannel? customChannel;
+  AndroidNotificationChannelProperties? customChannel;
   DefaultStyleInformation? androidInformationStyle;
 
   FcmNotificationProperties({
@@ -488,7 +482,6 @@ class FcmNotificationProperties {
     required this.title,
     required this.body,
     this.payload,
-    this.channelInfo,
     this.customChannel,
     this.androidInformationStyle,
   });

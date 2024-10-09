@@ -41,22 +41,19 @@ class CapturingScreenshotWidget extends StatefulWidget {
           .replaceAll(":", '-');
 
       //create file and write data
-      var files = Files.private(
-        fileName, 'png'
-      );
+      var files = Files.private(fileName, 'png');
       var createdFile = await files.writeBytes(imageBytes);
 
       //share file
-      await Share.shareFiles(
-        [createdFile.path],
-        mimeTypes: ['image/*'],
+      await Share.shareXFiles(
+        [XFile(createdFile.path, mimeType: 'image/*')],
         text: text,
       );
     } else {
       MessageDialog.create
           .setTitle(App.isEnglish ? 'Error' : 'خطأ')
           .setMessage(onFailedMessage)
-          .addAction(MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا'))
+          .addActions([MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا')])
           .show(() => context);
     }
   }

@@ -62,7 +62,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     required String message,
     List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
-    VoidCallback? onDismiss,
+    Function(String?)? onDismiss,
   }) {
     if (!_isBuildCalled) {
       return;

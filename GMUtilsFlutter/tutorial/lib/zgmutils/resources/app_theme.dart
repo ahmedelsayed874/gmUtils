@@ -29,6 +29,8 @@ class AppTheme {
     Color? textColor,
     double? textSize,
     FontWeight? fontWeight,
+    TextDecoration? textDecoration,
+    FontStyle? fontStyle,
     String? fontFamily,
     TextOverflow? overflow,
     List<Shadow>? shadows,
@@ -40,6 +42,8 @@ class AppTheme {
       fontFamily: fontFamily ?? defaultFontFamily,
       overflow: overflow,
       shadows: shadows,
+      decoration: textDecoration,
+      fontStyle: fontStyle,
     );
   }
 

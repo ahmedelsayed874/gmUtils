@@ -2,7 +2,6 @@ import 'package:bilingual_learning_schools_ksa/zgmutils/ui/widgets/_root_widget.
 import 'package:flutter/material.dart';
 
 import '../../gm_main.dart';
-import '../../utils/pairs.dart';
 import '../dialogs/message_dialog.dart';
 import '../dialogs/wait_dialog.dart';
 
@@ -24,7 +23,8 @@ class ScreenUtils {
 
     if (_waitDialogShowCount[hashCode] == 1) {
       _waitDialogShowTime[hashCode] = DateTime.now().millisecondsSinceEpoch;
-      _waitDialog[hashCode] = WaitDialog.create.setMessage(message).show(() => App.context);
+      _waitDialog[hashCode] =
+          WaitDialog.create.setMessage(message).show(() => App.context);
     }
   }
 
@@ -62,9 +62,18 @@ class ScreenUtils {
   }
 
   ///root widget must be MyRootWidget to let this method works
-  void showQuickMessage(String message) {
+  void showQuickMessage(
+    String message, {
+    SnackBarAction? action,
+    Color? backgroundColor,
+  }) {
     try {
-      MyRootWidget.showSnackBar(App.context, message: message);
+      MyRootWidget.showSnackBar(
+        App.context,
+        message: message,
+        action: action,
+        backgroundColor: backgroundColor,
+      );
     } catch (e) {}
   }
 
@@ -73,7 +82,7 @@ class ScreenUtils {
     String? title,
     List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
-    VoidCallback? onDismiss,
+    Function(String?)? onDismiss,
   }) {
     title ??= App.isEnglish ? 'Message' : 'رسالة';
 
@@ -84,13 +93,11 @@ class ScreenUtils {
         .setOnDismiss(onDismiss);
 
     if (actions?.isNotEmpty == true) {
-      for (var action in actions!) {
-        md.addAction(action);
-      }
+      md.addActions(actions!);
     } else {
-      md.addAction(
+      md.addActions([
         MessageDialogActionButton(App.isEnglish ? 'Dismiss' : 'إغلاق'),
-      );
+      ]);
     }
 
     md.show(() => App.context);
@@ -109,10 +116,15 @@ class ScreenUtils {
         .setEnableOuterDismiss(false);
 
     if (onRetry != null) {
-      m.addAction(MessageDialogActionButton(App.isEnglish ? 'Retry' : 'إعادة', action: onRetry));
-      m.addAction(MessageDialogActionButton(App.isEnglish ? 'Cancel' : 'إلغاء'));
+      m.addActions([
+        MessageDialogActionButton(App.isEnglish ? 'Retry' : 'إعادة',
+            action: onRetry),
+        MessageDialogActionButton(App.isEnglish ? 'Cancel' : 'إلغاء'),
+      ]);
     } else {
-      m.addAction(MessageDialogActionButton(App.isEnglish ? 'Dismiss' : 'إغلاق'));
+      m.addActions([
+        MessageDialogActionButton(App.isEnglish ? 'Dismiss' : 'إغلاق'),
+      ]);
     }
     m.show(() => App.context);
   }
