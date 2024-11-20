@@ -112,7 +112,9 @@ class DateOp {
 
     var name = names[day]?[en ? 'en' : 'ar'];
     if (en && name != null) {
-      name = name.substring(0, 3);
+      if (short) {
+        name = name.substring(0, 3);
+      }
     }
 
     return name ?? 'Unknown Day($day)';
@@ -136,7 +138,9 @@ class DateOp {
 
     var name = names[month]?[en ? 'en' : 'ar'];
     if (en && name != null) {
-      name = name.substring(0, 3);
+      if (short) {
+        name = name.substring(0, 3);
+      }
     }
 
     return name ?? 'Unknown Month($month)';

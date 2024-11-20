@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 
 import '../../utils/observable_value.dart';
 
-class ObservableWidget extends StatefulWidget {
-  final Widget Function(BuildContext, bool, Object?) child;
-  final ObservableValue observableValue;
+class ObservableWidget<T> extends StatefulWidget {
+  final ObservableValue<T> observableValue;
+  final Widget Function(BuildContext, bool, T?) child;
 
   const ObservableWidget({
-    required this.child,
     required this.observableValue,
+    required this.child,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<ObservableWidget> createState() => _ObservableWidgetState();
+  State<ObservableWidget<T>> createState() => _ObservableWidgetState<T>();
 }
 
-class _ObservableWidgetState extends State<ObservableWidget> {
+class _ObservableWidgetState<T> extends State<ObservableWidget<T>> {
   bool _isValueSet = false;
 
   @override
@@ -38,6 +38,10 @@ class _ObservableWidgetState extends State<ObservableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.child(context, _isValueSet, widget.observableValue.value);
+    return widget.child(
+      context,
+      _isValueSet,
+      widget.observableValue.value,
+    );
   }
 }

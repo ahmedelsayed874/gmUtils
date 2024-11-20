@@ -147,10 +147,19 @@ class FCM extends FCMFunctions {
     //endregion
 
     if (fcmConfigurations?.onDeviceTokenRefresh != null) {
-      this
-          .fcmConfigurations
-          ?.onDeviceTokenRefresh
-          ?.call((await deviceToken) ?? '');
+      String token;
+      try {
+        token = await deviceToken ?? '';
+      } catch (e) {
+        token = '';
+      }
+
+      if (token.isNotEmpty) {
+        this
+            .fcmConfigurations
+            ?.onDeviceTokenRefresh
+            ?.call(token);
+      }
 
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
         this.fcmConfigurations?.onDeviceTokenRefresh?.call(newToken);
@@ -166,7 +175,13 @@ class FCM extends FCMFunctions {
   }
 
   @override
-  Future<String?> get deviceToken => FirebaseMessaging.instance.getToken();
+  Future<String?> get deviceToken async {
+    try {
+      return await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      return null;
+    }
+  }
 
   //region handle FCM message
   void openCorrespondingScreen(RemoteMessage message) {
