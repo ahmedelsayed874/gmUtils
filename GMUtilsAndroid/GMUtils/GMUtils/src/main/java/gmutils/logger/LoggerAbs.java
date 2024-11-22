@@ -211,15 +211,25 @@ public abstract class LoggerAbs {
             write(text, true, true);
         }
 
+        private Long writeTime = null;
+
         public void write(String text, boolean addDate, boolean addSeparation) {
             try {
                 OutputStream os = new FileOutputStream(file, true);
                 OutputStreamWriter sw = new OutputStreamWriter(os);
                 try {
                     if (addDate) {
-                        String date = new Date().toString();
-                        sw.write(date);
-                        sw.write(":\n");
+                        if (writeTime == null) {
+                            writeTime = System.currentTimeMillis();
+                            sw.write("::: ");
+                            sw.write(new Date().toString());
+                            sw.write(" :::\n");
+                        }
+
+                        long diff = System.currentTimeMillis() - writeTime;
+                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(diff);
+                        sw.write("AFTER -> " + timeComponent[1] + ":" +timeComponent[2] + ":" +timeComponent[3] + "." +timeComponent[4]);
+                        sw.write(":-\n");
                     }
 
                     try {
@@ -328,12 +338,12 @@ public abstract class LoggerAbs {
     private LogFileWriter logFileWriter;
 
     public LoggerAbs(@Nullable String logId) {
-        this(logId, null);
-    }
-
-    public LoggerAbs(@Nullable String logId, LogConfigs logConfigs) {
+//        this(logId, null);
+//    }
+//    public LoggerAbs(@Nullable String logId, LogConfigs logConfigs) {
         this.logId = logId;
-        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
+        this.logConfigs = new LogConfigs();
+//        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
 
         numberOnInstances++;
     }
@@ -397,7 +407,6 @@ public abstract class LoggerAbs {
     }
 
     public void setLogConfigs(@NotNull LogConfigs logConfigs) {
-        if (logConfigs == null) throw new IllegalArgumentException();
         this.logConfigs = logConfigs;
     }
 

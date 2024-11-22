@@ -72,7 +72,6 @@ public class CommentsDetector {
         }
     }
 
-
     public static void main(String[] args) {
         runTesting();
     }

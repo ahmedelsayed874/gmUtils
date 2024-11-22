@@ -420,75 +420,75 @@ public class FCM implements FCMFunctions {
         //https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=0
         JsonBuilder notificationBody = JsonBuilder.ofJsonObject();
         if (!TextUtils.isEmpty(fcmToken)) {
-            notificationBody.addString("token", fcmToken);
+            notificationBody.add("token", fcmToken);
         }
         //
         else if (!TextUtils.isEmpty(topic)) {
-            notificationBody.addString("topic", topic);
+            notificationBody.add("topic", topic);
         } else {
             throw new IllegalArgumentException("topic or token must set");
         }
 
         if (!isDataNotification) {
-            notificationBody.addSubObject(
+            notificationBody.add(
                     "notification",
                     JsonBuilder.ofJsonObject()
-                            .addString("title", title)
-                            .addString("body", message)
+                            .add("title", title)
+                            .add("body", message)
             );
         }
 
-        notificationBody.addSubObject(
+        notificationBody.add(
                 "android",
                 JsonBuilder.ofJsonObject()
                         //.addString("collapse_key", "")
                         //.addString("priority", "NORMAL" /*or HIGH*/)
-                        .addSubObject(
+                        .add(
                                 "notification",
                                 JsonBuilder.ofJsonObject()
-                                        .addString("title", title)
-                                        .addString("body", message)
-                                        //.addString("notification_priority", "PRIORITY_DEFAULT") //PRIORITY_HIGH - PRIORITY_MAX - PRIORITY_LOW - PRIORITY_MIN
-                                        .addString("channel_id", channelId)
-                                        .addString("sound", soundFileName)
-                                //.addString("icon", "stock_ticker_update")
-                                //.addString("color", "#7e55c3")
-                                //.addString("tag", "")
-                                //.addString("click_action", "")
-                                //.addString("ticker", "")
+                                        .add("title", title)
+                                        .add("body", message)
+                                        //.add("notification_priority", "PRIORITY_DEFAULT") //PRIORITY_HIGH - PRIORITY_MAX - PRIORITY_LOW - PRIORITY_MIN
+                                        .add("channel_id", channelId)
+                                        .add("sound", soundFileName)
+                                //.add("icon", "stock_ticker_update")
+                                //.add("color", "#7e55c3")
+                                //.add("tag", "")
+                                //.add("click_action", "")
+                                //.add("ticker", "")
                                 //.add("sticky", true)
                                 //.add("default_sound", true)
-                                //.addString("visibility", "PUBLIC") //PRIVATE - SECRET
-                                //.addString("notification_count", 1)
-                                //.addString("image", "http://....")
-                                //.addBoolean("direct_boot_ok", false);
+                                //.add("visibility", "PUBLIC") //PRIVATE - SECRET
+                                //.add("notification_count", 1)
+                                //.add("image", "http://....")
+                                //.add("direct_boot_ok", false);
                         )
         );
 
-        notificationBody.addSubObject(
+        notificationBody.add(
                 "apns",
                 JsonBuilder.ofJsonObject()
                         /*.addSubObject(
                                 "headers",
                                 JsonBuilder.ofJsonObject()
                         )*/
-                        .addSubObject(
+                        .add(
                                 "payload",
                                 JsonBuilder.ofJsonObject()
-                                        .addSubObject(
+                                        .add(
                                                 "aps",
                                                 JsonBuilder.ofJsonObject()
-                                                        .addString("title", title)
-                                                        .addString("body", message)
+                                                        .add("title", title)
+                                                        .add("body", message)
                                         )
                         )
-                        .addString("sound", soundFileName)
+                        .add("sound", soundFileName)
         );
 
-        notificationBody.addSubObject(PAYLOAD_KEY_NAME, dataPayload);
+        notificationBody.add(PAYLOAD_KEY_NAME, dataPayload);
 
         JsonBuilder messageJson = JsonBuilder.ofJsonObject();
-        messageJson.addSubObject("message", notificationBody);
+        messageJson.add("message", notificationBody);
 
         return messageJson;
     }

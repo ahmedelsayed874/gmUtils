@@ -1,4 +1,4 @@
-package gmutils.images;
+package gmutils.utils;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -41,13 +41,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import gmutils.DateOp;
 import gmutils.R;
 import gmutils.listeners.ActionCallback;
-import gmutils.utils.FileUtils;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 
 import static android.os.Environment.DIRECTORY_PICTURES;
 //import okhttp3.RequestBody.Companion.toRequestBody;

@@ -2,6 +2,7 @@ package gmutils.logger;
 
 import android.util.Log;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +50,8 @@ public class Logger extends LoggerAbs {
         if (logId != null && logId.isEmpty()) logId = null;
         if (_instances == null) _instances = new HashMap<>();
         if (!_instances.containsKey(logId)) {
-            Logger logger = new Logger(logId, logsOptions);
+            Logger logger = new Logger(logId);
+            logger.setLogConfigs(logsOptions);
             _instances.put(logId, logger);
         }
         return _instances.get(logId);
@@ -60,15 +62,20 @@ public class Logger extends LoggerAbs {
         return _instances.keySet();
     }
 
+    public static Collection<LoggerAbs> loggers() {
+        if (_instances == null) _instances = new HashMap<>();
+        return _instances.values();
+    }
+
     //----------------------------------------------------------------------------------------------
 
     private Logger(String logId) {
         super(logId);
     }
 
-    private Logger(String logId, LogConfigs logConfigs) {
-        super(logId, logConfigs);
-    }
+//    private Logger(String logId, LogConfigs logConfigs) {
+//        super(logId, logConfigs);
+//    }
 
     @Override
     protected void writeToLog(String tag, String msg) {

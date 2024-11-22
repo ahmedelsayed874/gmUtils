@@ -11,8 +11,26 @@ public interface BackgroundTaskAbs {
         return new BackgroundTask();
     }
 
-    void execute(@NotNull Runnable task, @Nullable Runnable resultCallback);
+    void execute(
+            @NotNull Runnable task,
+            @Nullable Runnable resultCallback
+    );
 
-    <T> void execute(@NotNull ActionCallback0<T> task, @Nullable ResultCallback<T> resultCallback);
+    void execute(
+            @NotNull Runnable task,
+            @Nullable ResultCallback<Throwable> onException,
+            @Nullable Runnable resultCallback
+    );
+
+    <T> void execute(
+            @NotNull ActionCallback0<T> task,
+            @Nullable ResultCallback<T> resultCallback
+    );
+
+    <T> void execute(
+            @NotNull ActionCallback0<T> task,
+            @Nullable ResultCallback<Throwable> onException,
+            @Nullable ResultCallback<T> resultCallback
+    );
 
 }

@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import gmutils.images.ImageUtils;
+import gmutils.utils.ImageUtils;
 import gmutils.utils.UIUtils;
 
 /**

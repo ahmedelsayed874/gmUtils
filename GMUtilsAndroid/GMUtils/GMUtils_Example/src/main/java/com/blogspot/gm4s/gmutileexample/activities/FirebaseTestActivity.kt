@@ -581,7 +581,7 @@ class FirebaseTestActivity : BaseActivity() {
                 false,
                 JsonBuilder
                     .ofJsonObject()
-                    .addString("data", "test").json as JSONObject,
+                    .add("data", "test").json as JSONObject,
                 null, //"default",
                 null,
             ) {

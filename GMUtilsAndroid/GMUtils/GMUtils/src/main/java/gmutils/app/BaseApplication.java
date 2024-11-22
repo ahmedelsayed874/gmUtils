@@ -22,6 +22,7 @@ import gmutils.firebase.fcm.GmFirebaseMessagingService;
 import gmutils.logger.Logger;
 import gmutils.MessagingCenter;
 import gmutils.R;
+import gmutils.logger.LoggerAbs;
 import gmutils.storage.StorageManager;
 import gmutils.ui.dialogs.MessageDialog;
 
@@ -232,8 +233,8 @@ public abstract class BaseApplication extends Application implements Application
             try {
                 boolean isLoggerActive = false;
 
-                for (String loggerName : Logger.loggersNames()) {
-                    if (Logger.instance(loggerName).getLogConfigs().isWriteLogsToFileEnabled()) {
+                for (LoggerAbs logger : Logger.loggers()) {
+                    if (logger.getLogConfigs().isWriteLogsToFileEnabled()) {
                         isLoggerActive = true;
                         break;
                     }
@@ -248,8 +249,8 @@ public abstract class BaseApplication extends Application implements Application
                 Logger.instance("bugs").writeToFile(thisApp(), stack::toString);
             }
 
-            for (String loggerName : Logger.loggersNames()) {
-                Logger.instance(loggerName).print(stack::toString);
+            for (LoggerAbs logger : Logger.loggers()) {
+                logger.print(stack::toString);
             }
 
             try {

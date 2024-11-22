@@ -1340,4 +1340,36 @@ public class DateOp implements Serializable {
         return (isNeg ? "(-) " : "(+) ") + string;
     }
 
+    //--------------------------------------------------------------------------------------------//
+
+    /**
+     *
+     * @param timeMillis
+     * @return [DAYS, HOURS, MINUTES, SECONDS - MILLISECONDS]
+     */
+    public static int[] timeComponentFromTimeMillis(long timeMillis) {
+        final int d = 0;
+        final int H = 1;
+        final int m = 2;
+        final int s = 3;
+        final int ms = 4;
+
+        int[] timeComponent = new int[7];
+
+        timeComponent[d] = (int) (timeMillis / DateOp.ONE_DAY_MILLIS);
+        timeMillis -= (timeComponent[d] * DateOp.ONE_DAY_MILLIS);
+
+        timeComponent[H] = (int) (timeMillis / DateOp.ONE_HOUR_MILLIS);
+        timeMillis -= (timeComponent[H] * DateOp.ONE_HOUR_MILLIS);
+
+        timeComponent[m] = (int) (timeMillis / DateOp.ONE_MINUTE_MILLIS);
+        timeMillis -= (timeComponent[m] * DateOp.ONE_MINUTE_MILLIS);
+
+        timeComponent[s] = (int) (timeMillis / DateOp.ONE_SECOND_MILLIS);
+        timeMillis -= (timeComponent[s] * DateOp.ONE_SECOND_MILLIS);
+
+        timeComponent[ms] = (int) timeMillis;
+
+        return timeComponent;
+    }
 }

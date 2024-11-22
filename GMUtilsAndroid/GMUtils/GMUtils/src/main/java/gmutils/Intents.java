@@ -23,13 +23,12 @@ import androidx.fragment.app.Fragment;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import gmutils.images.ImageUtils;
+import gmutils.utils.ImageUtils;
 import gmutils.storage.SettingsStorage;
 import gmutils.utils.FileUtils;
 import gmutils.utils.Utils;
@@ -532,10 +531,4 @@ public class Intents {
         context.startActivity(Intent.createChooser(sendIntent, "Share"));
     }
 
-public void minimizeApp(Context context) {
-        Intent startMain = new Intent(Intent.ACTION_MAIN);
-        startMain.addCategory(Intent.CATEGORY_HOME);
-        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(startMain);
-    }
 }
