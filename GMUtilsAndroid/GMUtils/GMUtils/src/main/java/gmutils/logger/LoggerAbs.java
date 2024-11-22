@@ -212,12 +212,16 @@ public abstract class LoggerAbs {
         }
 
         private Long writeTime = null;
+        private int logCounter = 0;
 
         public void write(String text, boolean addDate, boolean addSeparation) {
             try {
                 OutputStream os = new FileOutputStream(file, true);
                 OutputStreamWriter sw = new OutputStreamWriter(os);
                 try {
+                    logCounter++;
+                    sw.write("[" + logCounter + "] ");
+
                     if (addDate) {
                         if (writeTime == null) {
                             writeTime = System.currentTimeMillis();
@@ -228,19 +232,20 @@ public abstract class LoggerAbs {
 
                         long diff = System.currentTimeMillis() - writeTime;
                         int[] timeComponent = DateOp.timeComponentFromTimeMillis(diff);
-                        sw.write("AFTER -> " + timeComponent[1] + ":" +timeComponent[2] + ":" +timeComponent[3] + "." +timeComponent[4]);
-                        sw.write(":-\n");
+                        sw.write("AFTER -> " + timeComponent[1] + ":" + timeComponent[2] + ":" + timeComponent[3] + "." + timeComponent[4]);
                     }
 
-                    try {
-                        if (enableEncryption) {
+                    sw.write(":-\n");
+
+                    if (enableEncryption) {
+                        try {
                             int encryptionKey2 = encryptionKey != null ? encryptionKey : LoggerAbs.DEF_ENC_KEY;
                             String encText = Security.getSimpleInstance(encryptionKey2).encrypt(text);
                             sw.write(encText);
-                        } else {
+                        } catch (Exception e) {
                             sw.write(text);
                         }
-                    } catch (Exception e) {
+                    } else {
                         sw.write(text);
                     }
 
