@@ -17,8 +17,16 @@ public class BackgroundTask implements BackgroundTaskAbs {
         new BackgroundTask().execute(task, resultCallback);
     }
 
+    public static void run(Runnable task, @Nullable ResultCallback<Throwable> onException, Runnable resultCallback) {
+        new BackgroundTask().execute(task, onException, resultCallback);
+    }
+
     public static <T> void run(ActionCallback0<T> task, ResultCallback<T> resultCallback) {
         new BackgroundTask().execute(task, resultCallback);
+    }
+
+    public static <T> void run(ActionCallback0<T> task, @Nullable ResultCallback<Throwable> onException, ResultCallback<T> resultCallback) {
+        new BackgroundTask().execute(task, onException, resultCallback);
     }
 
     //----------------------------------------------------------------------------------------------
