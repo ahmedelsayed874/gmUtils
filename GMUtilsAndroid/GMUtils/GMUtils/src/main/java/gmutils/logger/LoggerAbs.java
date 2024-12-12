@@ -343,12 +343,11 @@ public abstract class LoggerAbs {
     private LogFileWriter logFileWriter;
 
     public LoggerAbs(@Nullable String logId) {
-//        this(logId, null);
-//    }
-//    public LoggerAbs(@Nullable String logId, LogConfigs logConfigs) {
+        this(logId, null);
+    }
+    public LoggerAbs(@Nullable String logId, LogConfigs logConfigs) {
         this.logId = logId;
-        this.logConfigs = new LogConfigs();
-//        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
+        setLogConfigs(logConfigs);
 
         numberOnInstances++;
     }
@@ -411,8 +410,8 @@ public abstract class LoggerAbs {
         return logConfigs;
     }
 
-    public void setLogConfigs(@NotNull LogConfigs logConfigs) {
-        this.logConfigs = logConfigs;
+    public void setLogConfigs(LogConfigs logConfigs) {
+        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
     }
 
     //----------------------------------------------------------------------------------------------
