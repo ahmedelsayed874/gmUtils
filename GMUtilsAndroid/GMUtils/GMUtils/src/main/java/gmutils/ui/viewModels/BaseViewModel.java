@@ -43,7 +43,7 @@ public class BaseViewModel extends AndroidViewModel {
 
         MessageDependent appendMessage(StringSet message);
 
-        MessageDependent appendMessage(CharSequence message);
+//        MessageDependent appendMessage(Char Sequence message);
 
         int getMessagesCount();
 
@@ -51,14 +51,14 @@ public class BaseViewModel extends AndroidViewModel {
          * returns the inserted message by "appendMessage"
          *
          * @param idx index
-         * @return String Resource ID, StringSet, CharSequence
+         * @return String Resource ID, StringSet, Char Sequence
          */
         Object getMessage(int idx);
     }
 
     public interface ProgressStatus {
         /**
-         * @param messages int - CharSequence - StringSet
+         * @param messages int - Char Sequence - StringSet
          */
         static ProgressStatus show(List<Object> messages) {
             return new Show(messages);
@@ -84,6 +84,10 @@ public class BaseViewModel extends AndroidViewModel {
                 assert messageId > 0;
             }
 
+//            public Show(Char Sequence message) {
+//                this(new ArrayList<>(List.of(message)));
+//            }
+
             public Show(StringSet message) {
                 this(new ArrayList<>(List.of(message)));
             }
@@ -107,11 +111,11 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
-            @Override
-            public Show appendMessage(CharSequence message) {
-                this.message.add(message);
-                return this;
-            }
+//            @Override
+//            public Show appendMessage(Char Sequence message) {
+//                this.message.add(message);
+//                return this;
+//            }
 
             @Override
             public int getMessagesCount() {
@@ -123,7 +127,7 @@ public class BaseViewModel extends AndroidViewModel {
              * returns the inserted message by "appendMessage"
              *
              * @param idx index
-             * @return String Resource ID, StringSet, CharSequence
+             * @return String Resource ID, StringSet, Char Sequence
              */
             @Override
             public Object getMessage(int idx) {
@@ -134,6 +138,8 @@ public class BaseViewModel extends AndroidViewModel {
         }
 
         class Update extends Show {
+            private Integer progress;
+
             public Update() {
                 super();
             }
@@ -142,6 +148,10 @@ public class BaseViewModel extends AndroidViewModel {
                 super(messageId);
                 assert messageId > 0;
             }
+
+//            public Update(Char Sequence message) {
+//                super(message);
+//            }
 
             public Update(StringSet message) {
                 super(message);
@@ -160,6 +170,16 @@ public class BaseViewModel extends AndroidViewModel {
                 return (Update) super.appendMessage(message);
             }
 
+            //---------------------------------------------------------------------------------
+
+            public Update setProgress(Integer progress) {
+                this.progress = progress;
+                return this;
+            }
+
+            public int getProgress() {
+                return progress;
+            }
         }
 
         class Hide implements ProgressStatus {
@@ -178,35 +198,18 @@ public class BaseViewModel extends AndroidViewModel {
     public static class Message implements MessageDependent {
         private final List<Object> messages; //Integer | StringSet
         public final MessageType type;
-        private boolean enableOuterDismiss = true;
 
         public Message() {
             this(new ArrayList<>(), new MessageType.Hint());
-        }
-
-        public Message(MessageType type) {
-            this(new ArrayList<>(), type);
-        }
-
-        public Message(Integer messageId) {
-            this(messageId, new MessageType.Hint());
         }
 
         public Message(Integer messageId, MessageType type) {
             this(messageId == null || messageId <= 0 ? null : new ArrayList<>(List.of(messageId)), type);
         }
 
-        public Message(CharSequence message) {
-            this(message == null ? null : new ArrayList<>(List.of(message)), new MessageType.Hint());
-        }
-
-        public Message(CharSequence message, MessageType type) {
-            this(message == null ? null : new ArrayList<>(List.of(message)), type);
-        }
-
-        public Message(StringSet message) {
-            this(message == null ? null : new ArrayList<>(List.of(message)), new MessageType.Hint());
-        }
+//        public Message(Char Sequence message, MessageType type) {
+//            this(message == null ? null : new ArrayList<>(List.of(message)), type);
+//        }
 
         public Message(StringSet message, MessageType type) {
             this(message == null ? null : new ArrayList<>(List.of(message)), type);
@@ -232,11 +235,11 @@ public class BaseViewModel extends AndroidViewModel {
             return this;
         }
 
-        @Override
-        public Message appendMessage(CharSequence message) {
-            this.messages.add(message);
-            return this;
-        }
+//        @Override
+//        public Message appendMessage(Char Sequence message) {
+//            this.messages.add(message);
+//            return this;
+//        }
 
         @Override
         public int getMessagesCount() {
@@ -248,7 +251,7 @@ public class BaseViewModel extends AndroidViewModel {
          * returns the inserted message by "appendMessage"
          *
          * @param idx index
-         * @return String Resource ID, StringSet, CharSequence
+         * @return String Resource ID, StringSet, Char Sequence
          */
         @Override
         public Object getMessage(int idx) {
@@ -256,16 +259,6 @@ public class BaseViewModel extends AndroidViewModel {
             return messages.get(idx);
         }
 
-        //----------------------------------------------------------------------
-
-        public Message setEnableOuterDismiss(boolean enableOuterDismiss) {
-            this.enableOuterDismiss = enableOuterDismiss;
-            return this;
-        }
-
-        public boolean isEnableOuterDismiss() {
-            return enableOuterDismiss;
-        }
     }
 
     public interface MessageType {
@@ -275,78 +268,19 @@ public class BaseViewModel extends AndroidViewModel {
 
         class Dialog implements MessageType {
             private int iconRes;
-            private DataGroup3<Integer, StringSet, Runnable> button1;
-            private DataGroup3<Integer, StringSet, Runnable> button2;
-            private DataGroup3<Integer, StringSet, Runnable> button3;
+            private Object title;
+            private DataGroup2<Object, Runnable> button1;
+            private DataGroup2<Object, Runnable> button2;
+            private DataGroup2<Object, Runnable> button3;
             private Runnable onDismiss;
             private final boolean error;
+            private boolean enableOuterDismiss = true;
 
             public Dialog() {
                 this(false);
             }
 
             public Dialog(boolean error) {
-                this(
-                        null,
-                        null,
-                        (Pair<Integer, Runnable>) null,
-                        error
-                );
-            }
-
-            public Dialog(Integer buttonText, Runnable buttonAction) {
-                this(new Pair<>(buttonText, buttonAction), null, null, false);
-            }
-
-            public Dialog(Integer buttonText, Runnable buttonAction, boolean error) {
-                this(new Pair<>(buttonText, buttonAction), null, null, error);
-            }
-
-            public Dialog(StringSet buttonText, Runnable buttonAction) {
-                this(new DataGroup2<>(buttonText, buttonAction), null, null, false);
-            }
-
-            public Dialog(StringSet buttonText, Runnable buttonAction, boolean error) {
-                this(new DataGroup2<>(buttonText, buttonAction), null, null, error);
-            }
-
-            public Dialog(
-                    Pair<Integer, Runnable> button1,
-                    Pair<Integer, Runnable> button2,
-                    Pair<Integer, Runnable> button3
-            ) {
-                this(button1, button2, button3, false);
-            }
-
-            public Dialog(
-                    Pair<Integer, Runnable> button1,
-                    Pair<Integer, Runnable> button2,
-                    Pair<Integer, Runnable> button3,
-                    boolean error
-            ) {
-                this.button1 = button1 == null ? null : new DataGroup3<>(button1.getFirst(), null, button1.getSecond());
-                this.button2 = button2 == null ? null : new DataGroup3<>(button2.getFirst(), null, button2.getSecond());
-                this.button3 = button3 == null ? null : new DataGroup3<>(button3.getFirst(), null, button3.getSecond());
-                this.error = error;
-            }
-
-            public Dialog(
-                    DataGroup2<StringSet, Runnable> button1,
-                    DataGroup2<StringSet, Runnable> button2,
-                    DataGroup2<StringSet, Runnable> button3
-            ) {
-                this(button1, button2, button3, false);
-            }
-
-            public Dialog(
-                    DataGroup2<StringSet, Runnable> button1,
-                    DataGroup2<StringSet, Runnable> button2,
-                    DataGroup2<StringSet, Runnable> button3,
-                    boolean error
-            ) {
-                this.button1 = button1 == null ? null : new DataGroup3<>(null, button1.value1, button1.value2);
-                this.button2 = button2 == null ? null : new DataGroup3<>(null, button2.value1, button2.value2);
-                this.button3 = button3 == null ? null : new DataGroup3<>(null, button3.value1, button3.value2);
                 this.error = error;
             }
 
@@ -357,35 +291,118 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
+            //----------------
+
+            public Dialog setTitle(int title) {
+                this.title = title;
+                return this;
+            }
+
+//            public Dialog setTitle(Char Sequence title) {
+//                this.title = title;
+//                return this;
+//            }
+
+            public Dialog setTitle(StringSet title) {
+                this.title = title;
+                return this;
+            }
+
+            //-----------------
+
+            public Dialog setButton1(int title, Runnable action) {
+                this.button1 = new DataGroup2<>(title, action);
+                return this;
+            }
+
+//            public Dialog setButton1(Char Sequence title, Runnable action) {
+//                this.button1 = new DataGroup2<>(title, action);
+//                return this;
+//            }
+
+            public Dialog setButton1(StringSet title, Runnable action) {
+                this.button1 = new DataGroup2<>(title, action);
+                return this;
+            }
+
+            //------------------
+
+            public Dialog setButton2(int title, Runnable action) {
+                this.button2 = new DataGroup2<>(title, action);
+                return this;
+            }
+
+//            public Dialog setButton2(Char Sequence title, Runnable action) {
+//                this.button2 = new DataGroup2<>(title, action);
+//                return this;
+//            }
+
+            public Dialog setButton2(StringSet title, Runnable action) {
+                this.button2 = new DataGroup2<>(title, action);
+                return this;
+            }
+
+            //-------------------
+
+            public Dialog setButton3(int title, Runnable action) {
+                this.button3 = new DataGroup2<>(title, action);
+                return this;
+            }
+
+//            public Dialog setButton3(Char Sequence title, Runnable action) {
+//                this.button3 = new DataGroup2<>(title, action);
+//                return this;
+//            }
+
+            public Dialog setButton3(StringSet title, Runnable action) {
+                this.button3 = new DataGroup2<>(title, action);
+                return this;
+            }
+
+            //-----------------
+
             public Dialog setOnDismiss(Runnable onDismiss) {
                 this.onDismiss = onDismiss;
                 return this;
             }
 
-            //------------------------------------------------------
-
-            public boolean hasSpecialButtons() {
-                return button1 != null || button2 != null || button3 != null;
+            public Dialog setEnableOuterDismiss(boolean enableOuterDismiss) {
+                this.enableOuterDismiss = enableOuterDismiss;
+                return this;
             }
 
-            public final DataGroup3<Integer, StringSet, Runnable> button1() {
-                return button1;
-            }
-
-            public final DataGroup3<Integer, StringSet, Runnable> button2() {
-                return button2;
-            }
-
-            public final DataGroup3<Integer, StringSet, Runnable> button3() {
-                return button3;
-            }
+            //-------------------------------------------------------------------------------
 
             public int getIconRes() {
                 return iconRes;
             }
 
+            public Object getTitle() {
+                return title;
+            }
+
+            public boolean hasSpecialButtons() {
+                return button1 != null || button2 != null || button3 != null;
+            }
+
+            public final DataGroup2<Object, Runnable> button1() {
+                return button1;
+            }
+
+            public final DataGroup2<Object, Runnable> button2() {
+                return button2;
+            }
+
+            public final DataGroup2<Object, Runnable> button3() {
+                return button3;
+            }
+
             public Runnable getOnDismiss() {
                 return onDismiss;
+            }
+
+            public boolean isEnableOuterDismiss() {
+                return enableOuterDismiss;
             }
 
             @Override
@@ -503,10 +520,10 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postPopMessage(CharSequence message) {
-        Message m = new Message(message, new MessageType.Dialog());
-        postMessage(m);
-    }
+//    public void postPopMessage(Char Sequence message) {
+//        Message m = new Message(message, new MessageType.Dialog());
+//        postMessage(m);
+//    }
 
     public void postPopMessage(StringSet message) {
         Message m = new Message(message, new MessageType.Dialog());
@@ -518,10 +535,10 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postPopMessage(CharSequence message, MessageType.Dialog messageType) {
-        Message m = new Message(message, messageType);
-        postMessage(m);
-    }
+//    public void postPopMessage(Char Sequence message, MessageType.Dialog messageType) {
+//        Message m = new Message(message, messageType);
+//        postMessage(m);
+//    }
 
     public void postPopMessage(StringSet message, MessageType.Dialog messageType) {
         Message m = new Message(message, messageType);
@@ -533,20 +550,20 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postToastMessage(CharSequence message, boolean error) {
-        Message m = new Message(message, new MessageType.Hint(error));
-        postMessage(m);
-    }
+//    public void postToastMessage(Char Sequence message, boolean error) {
+//        Message m = new Message(message, new MessageType.Hint(error));
+//        postMessage(m);
+//    }
 
     public void postToastMessage(StringSet message, boolean error) {
         Message m = new Message(message, new MessageType.Hint(error));
         postMessage(m);
     }
 
-    public void postRetryMessage(CharSequence message, Runnable onRetry) {
-        Message m = new Message(message, new MessageType.Retry(onRetry));
-        postMessage(m);
-    }
+//    public void postRetryMessage(Char Sequence message, Runnable onRetry) {
+//        Message m = new Message(message, new MessageType.Retry(onRetry));
+//        postMessage(m);
+//    }
 
     public void postRetryMessage(StringSet message, Runnable onRetry) {
         Message m = new Message(message, new MessageType.Retry(onRetry));

@@ -2,6 +2,7 @@ package gmutils.ui.utils;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.Spanned;
 import android.text.TextUtils;
 
 import org.jetbrains.annotations.Nullable;
@@ -60,71 +61,59 @@ public class BaseViewModelObserversHandlers {
         CharSequence msg = getText(context, message);
 
         if (message.type instanceof BaseViewModel.MessageType.Dialog mt) {
-                MessageDialog dialog = showMessageDialog.invoke(msg);
-                dialog.setCancelable(message.isEnableOuterDismiss());
-                if (mt.getOnDismiss() != null) {
-                    Runnable onDismiss = mt.getOnDismiss();
-                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            onDismiss.run();
-                        }
-                    });
+            MessageDialog dialog = showMessageDialog.invoke(msg);
+
+            if (mt.getIconRes() > 0) dialog.setIcon(mt.getIconRes());
+
+            CharSequence title = getText(context, mt.getTitle());
+            if (!TextUtils.isEmpty(title)) dialog.setTitle(title);
+
+            dialog.setCancelable(mt.isEnableOuterDismiss());
+
+            if (mt.getOnDismiss() != null) {
+                Runnable onDismiss = mt.getOnDismiss();
+                dialog.setOnDismissListener(dialog1 -> onDismiss.run());
+            }
+
+            if (mt.hasSpecialButtons()) {
+                if (mt.button1() != null) {
+                    Runnable runnable = mt.button1().value2;
+                    MessageDialog.Listener listener = runnable == null ? null : runnable::run;
+
+                    CharSequence txt = getText(context, mt.button1().value1);
+                    if (TextUtils.isEmpty(txt)) txt = context.getString(R.string.action);
+                    dialog.setButton1(txt, listener);
                 }
+                if (mt.button2() != null) {
+                    Runnable runnable = mt.button2().value2;
+                    MessageDialog.Listener listener = runnable == null ? null : runnable::run;
 
-                if (mt.getIconRes() > 0) {
-                    dialog.setIcon(mt.getIconRes());
+                    CharSequence txt = getText(context, mt.button2().value1);
+                    if (TextUtils.isEmpty(txt)) txt = context.getString(R.string.action);
+                    dialog.setButton2(txt, listener);
                 }
+                if (mt.button3() != null) {
+                    Runnable runnable = mt.button3().value2;
+                    MessageDialog.Listener listener = runnable == null ? null : runnable::run;
 
-                if (mt.hasSpecialButtons()) {
-                    if (mt.button1() != null) {
-                        Runnable runnable = mt.button1().value3;
-                        MessageDialog.Listener listener = runnable == null ? null : () -> runnable.run();
-
-                        if (mt.button1().value1 == null) {
-                            dialog.setButton1(getText(mt.button1().value2), listener);
-                        } else {
-                            int i = mt.button1().value1;
-                            if (i == 0) i = R.string.action;
-                            dialog.setButton1(i, listener);
-                        }
-                    }
-                    if (mt.button2() != null) {
-                        Runnable runnable = mt.button2().value3;
-                        MessageDialog.Listener listener = runnable == null ? null : () -> runnable.run();
-
-                        if (mt.button2().value1 == null) {
-                            dialog.setButton2(getText(mt.button2().value2), listener);
-                        } else {
-                            int i = mt.button2().value1;
-                            if (i == 0) i = R.string.action;
-                            dialog.setButton2(i, listener);
-                        }
-                    }
-                    if (mt.button3() != null) {
-                        Runnable runnable = mt.button3().value3;
-                        MessageDialog.Listener listener = runnable == null ? null : () -> runnable.run();
-
-                        if (mt.button3().value1 == null) {
-                            dialog.setButton3(getText(mt.button3().value2), listener);
-                        } else {
-                            int i = mt.button3().value1;
-                            if (i == 0) i = R.string.action;
-                            dialog.setButton3(i, listener);
-                        }
-                    }
+                    CharSequence txt = getText(context, mt.button3().value1);
+                    if (TextUtils.isEmpty(txt)) txt = context.getString(R.string.action);
+                    dialog.setButton3(txt, listener);
                 }
+            }
 
             mt.destroy();
         }
         //
-        else if (message.type instanceof BaseViewModel.MessageType.Hint mt) {
+        else if (message.type instanceof
+                BaseViewModel.MessageType.Hint mt) {
             showToast.invoke(msg, !mt.error);
 
             mt.destroy();
         }
         //
-        else if (message.type instanceof BaseViewModel.MessageType.Retry mt) {
+        else if (message.type instanceof
+                BaseViewModel.MessageType.Retry mt) {
             Runnable onRetry = mt.onRetry();
             mt.destroy();
 
@@ -153,44 +142,39 @@ public class BaseViewModelObserversHandlers {
         }
     }
 
-    private CharSequence getText(Context context, @Nullable BaseViewModel.MessageDependent message) {
-        if (message == null) return "";
-
-        CharSequence msg;
-        if (message.getMessagesCount() == 1) {
-            Object m = message.getMessage(0);
-            if (m instanceof Integer) {
-                msg = context.getString((Integer) m);
-            }
-            //
-            else if (m instanceof StringSet) {
-                msg = getText((StringSet) m);
-            }
-            //
-            else {
-                msg = m == null ? "" : m.toString();
-            }
+    private CharSequence getText(Context context, @Nullable Object m) {
+        CharSequence txt;
+        if (m instanceof Integer) {
+            txt = context.getString((Integer) m);
+        }
+        //
+        else if (m instanceof CharSequence) {
+            txt = (CharSequence) m;
+        }
+        //
+        else if (m instanceof StringSet) {
+            txt = getText((StringSet) m);
         }
         //
         else {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < message.getMessagesCount(); i++) {
-                Object m = message.getMessage(i);
-                if (m instanceof Integer) {
-                    stringBuilder.append(context.getString((Integer) m));
-                }
-                //
-                else if (m instanceof StringSet) {
-                    stringBuilder.append(getText((StringSet) m));
-                }
-                //
-                else {
-                    stringBuilder.append(m == null ? "" : m.toString());
-                }
-            }
-
-            msg = TextHelper.createInstance().parseHtmlText(stringBuilder.toString());
+            txt = (m == null ? "" : m.toString());
         }
+        return txt;
+    }
+
+    private CharSequence getText(Context context, @Nullable BaseViewModel.MessageDependent message) {
+        if (message == null) return "";
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < message.getMessagesCount(); i++) {
+            if (stringBuilder.length() > 0) stringBuilder.append("\n");
+
+            Object m = message.getMessage(i);
+            stringBuilder.append(getText(context, m));
+        }
+
+        CharSequence msg = TextHelper.createInstance().parseHtmlText(stringBuilder.toString());
 
         return msg;
     }
