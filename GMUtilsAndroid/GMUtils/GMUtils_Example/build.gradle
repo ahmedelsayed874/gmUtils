@@ -12,13 +12,14 @@ android {
         }
     }
     namespace 'com.blogspot.gm4s.gmutileexample'
-    compileSdk 34
+    compileSdk 35
     //buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.blogspot.gm4s.gmutileexample"
-        minSdkVersion 19
-        targetSdkVersion 34
+
+        minSdkVersion 21
+        targetSdkVersion 35
 
         versionCode 1
         versionName "1.0"
@@ -40,7 +41,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
+    kotlinOptions {
+        jvmTarget = '17'
+    }
     buildFeatures {
         viewBinding true
     }

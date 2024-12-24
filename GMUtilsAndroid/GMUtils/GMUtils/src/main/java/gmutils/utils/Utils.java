@@ -265,4 +265,10 @@ public class Utils {
         Settings.System.putInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, value);
     }
 
+    public void preventScreenFromRecording(Window window) {
+        window.setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+        );
+    }
 }

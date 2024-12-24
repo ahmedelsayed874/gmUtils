@@ -303,6 +303,17 @@ class MainActivity : BaseActivity() {
             startActivity(Intent(this, FirebaseTestActivity::class.java))
         }
 
+        this.view.btn25.text = "BUG"
+        this.view.btn25.setOnClickListener {
+            val dl = DateOp.getInstance().increaseDays(5)
+            Logger.d().logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
+            Logger.instance("l1").logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
+            Logger.instance("l2").logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
+            Logger.instance("l3").logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
+
+            error("throw bug to test writing to all logs file")
+        }
+
 
         //------------------------------------------------------------------------------------------
 

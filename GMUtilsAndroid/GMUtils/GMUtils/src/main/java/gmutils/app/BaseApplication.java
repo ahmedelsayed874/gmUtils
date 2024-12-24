@@ -245,12 +245,21 @@ public abstract class BaseApplication extends Application implements Application
                     Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
                     fileWriter.write(stack.toString());
                 }
+
+                Application application = thisApp();
+                boolean b = false;
+                for (LoggerAbs logger : Logger.loggers()) {
+                    if (!b) {
+                        if (logger.getLogConfigs().isLogEnabled()) {
+                            b = true;
+                            Log.e("***** EXCEPTION", stack.toString());
+                        }
+                    }
+                    //logger.print(stack::toString);
+                    logger.writeToFile(application, stack::toString);
+                }
             } catch (Exception e) {
                 Logger.instance("bugs").writeToFile(thisApp(), stack::toString);
-            }
-
-            for (LoggerAbs logger : Logger.loggers()) {
-                logger.print(stack::toString);
             }
 
             try {
