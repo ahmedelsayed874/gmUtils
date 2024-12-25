@@ -12,11 +12,16 @@ import android.view.Gravity;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import gmutils.DateOp;
 import gmutils.Intents;
 import gmutils.firebase.fcm.GmFirebaseMessagingService;
 import gmutils.logger.Logger;
@@ -25,6 +30,7 @@ import gmutils.R;
 import gmutils.logger.LoggerAbs;
 import gmutils.storage.StorageManager;
 import gmutils.ui.dialogs.MessageDialog;
+import gmutils.utils.FileUtils;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -231,18 +237,13 @@ public abstract class BaseApplication extends Application implements Application
             }
 
             try {
-                boolean isLoggerActive = false;
-
-                for (LoggerAbs logger : Logger.loggers()) {
-                    if (logger.getLogConfigs().isWriteLogsToFileEnabled()) {
-                        isLoggerActive = true;
-                        break;
-                    }
-                }
-
-                if (isLoggerActive) {
-                    File bugFile = getBugFile();
-                    Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(bugFile, false, null);
+                File[] bugFiles = getBugFiles();
+                for (File bugFile : bugFiles) {
+                    Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(
+                            bugFile,
+                            false,
+                            null
+                    );
                     fileWriter.write(stack.toString());
                 }
 
@@ -258,6 +259,8 @@ public abstract class BaseApplication extends Application implements Application
                     //logger.print(stack::toString);
                     logger.writeToFile(application, stack::toString);
                 }
+
+                Thread.sleep(3000);
             } catch (Exception e) {
                 Logger.instance("bugs").writeToFile(thisApp(), stack::toString);
             }
@@ -279,27 +282,57 @@ public abstract class BaseApplication extends Application implements Application
         return false;
     }
 
-    private File getBugDir() {
-        File bugDir = new File(getExternalFilesDir(null), "bugs");
-        if (!bugDir.exists()) {
-            if (bugDir.mkdirs()) return bugDir;
-            else return null;
-        }
-        return bugDir;
-    }
+    private boolean isLogToFileEnabled() {
+        boolean isLoggerActive = false;
 
-    private File getBugFile() {
-        File bugDir = getBugDir();
-        File bugFile = new File(bugDir, "bugs.bugs");
-        if (!bugFile.exists()) {
-            try {
-                bugFile.createNewFile();
-            } catch (Exception e) {
-                return null;
+        for (LoggerAbs logger : Logger.loggers()) {
+            if (logger.getLogConfigs().isWriteLogsToFileEnabled()) {
+                isLoggerActive = true;
+                break;
             }
         }
 
-        return bugFile;
+        return isLoggerActive;
+    }
+
+    private File[] getBugDirs() {
+        List<File> bugDirs = new ArrayList<>();
+
+        List<File> rootDirs = new ArrayList<>(List.of(getFilesDir()));
+        if (isLogToFileEnabled()) rootDirs.add(getExternalFilesDir(null));
+
+        for (File dir : rootDirs) {
+            File bugDir = new File(dir, "bugs");
+            if (!bugDir.exists()) {
+                if (!bugDir.mkdirs()) {
+                    continue;
+                }
+            }
+
+            bugDirs.add(bugDir);
+        }
+
+        return bugDirs.toArray(new File[0]);
+    }
+
+    private File[] getBugFiles() {
+        List<File> bugFiles = new ArrayList<>();
+
+        File[] bugDirs = getBugDirs();
+        String yyMMddHH = DateOp.getInstance().formatDate("yyMMddHH", true);
+        for (File bugDir : bugDirs) {
+            File bugFile = new File(bugDir, "bugs" + yyMMddHH + ".bugs");
+            if (!bugFile.exists()) {
+                try {
+                    bugFile.createNewFile();
+                } catch (Exception e) {
+                }
+            }
+
+            bugFiles.add(bugFile);
+        }
+
+        return bugFiles.toArray(new File[0]);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -325,7 +358,7 @@ public abstract class BaseApplication extends Application implements Application
                     deleteBugs();
                 })
                 .setButton3("Send", () -> {
-                    onSendBugClick(bugs, getBugFile());
+                    onSendBugClick(bugs, getBugFiles()[0]);
                 })
                 .setOnDismissListener(dialog -> {
                     if (onComplete != null) onComplete.run();
@@ -334,10 +367,12 @@ public abstract class BaseApplication extends Application implements Application
     }
 
     public boolean hasBugs() {
-        File bugDir = getBugDir();
-        if (bugDir != null) {
-            String[] list = bugDir.list();
-            return list != null && list.length > 0;
+        File[] bugDirs = getBugDirs();
+        for (File bugDir : bugDirs) {
+            if (bugDir != null) {
+                String[] list = bugDir.list();
+                return list != null && list.length > 0;
+            }
         }
 
         return false;
@@ -346,9 +381,9 @@ public abstract class BaseApplication extends Application implements Application
     public String getReportedBugs() {
         try {
             return new Logger.LogFileWriter(
-                    getBugFile(),
-                    Logger.d().getLogConfigs().isFileContentEncryptEnabled(),
-                    Logger.d().getLogConfigs().getFileContentEncryptionKey()
+                    getBugFiles()[0],
+                    false,
+                    null
             ).readFileContent();
         } catch (Exception e) {
             return "";
@@ -357,27 +392,38 @@ public abstract class BaseApplication extends Application implements Application
 
     public void deleteBugs() {
         try {
-            boolean b = getBugFile().delete();
-            Log.d(getClass().getSimpleName(), "deleteBugs: isBugFileDeleted: " + b);
+            for (File f : getBugFiles()) {
+                boolean b = f.delete();
+                Log.d(getClass().getSimpleName(), "deleteBugs: isBugFileDeleted: " + b);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
-            boolean b = getBugDir().delete();
-            Log.d(getClass().getSimpleName(), "deleteBugs: isBugDirDeleted: " + b);
+            for (File f : getBugFiles()) {
+                boolean b = f.delete();
+                Log.d(getClass().getSimpleName(), "deleteBugs: isBugDirDeleted: " + b);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public void onSendBugClick(String bugs, File bugFile) {
+        Uri fileUri;
+        try {
+            fileUri = FileUtils.createInstance().createUriForFileUsingFileProvider(this, bugFile);
+        } catch (Exception e) {
+            fileUri = Uri.fromFile(bugFile);
+        }
+
         Intents.getInstance().composeEmail(
                 this,
                 null,
                 "REPORTEDBUG: " + this.getPackageName(),
                 bugs,
-                Uri.fromFile(bugFile)
+                fileUri
         );
     }
 
@@ -481,7 +527,8 @@ public abstract class BaseApplication extends Application implements Application
         StorageManager.registerCallback(null);
         try {
             dispose();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     //----------------------------------------------------------------------------------------------

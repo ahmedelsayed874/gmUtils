@@ -97,7 +97,6 @@ public class SettingsStorage {
 
         //------------------------------------------------------------------------------------------
 
-
         private static Boolean usingEnglish = null;
 
         public static boolean usingEnglish() {

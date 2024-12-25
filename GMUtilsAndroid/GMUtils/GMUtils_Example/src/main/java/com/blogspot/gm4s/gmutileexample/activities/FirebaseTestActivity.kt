@@ -595,7 +595,7 @@ class FirebaseTestActivity : BaseActivity() {
         init {
             val dl = DateOp.getInstance().increaseDays(10)
             logConfigs.setLogDeadline(dl)
-            logConfigs.setWriteLogsToFileDeadline(dl)
+            logConfigs.setWriteLogsToPublicFileDeadline(dl)
         }
 
         override fun writeToLog(tag: String?, msg: String?) {

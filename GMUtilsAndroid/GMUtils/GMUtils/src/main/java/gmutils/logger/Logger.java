@@ -41,7 +41,8 @@ public class Logger extends LoggerAbs {
         if (deadline != null) {
             logsOptions = new LogConfigs()
                     .setLogDeadline(deadline)
-                    .setWriteLogsToFileDeadline(deadline);
+                    .setWriteLogsToPublicFileDeadline(deadline)
+                    .setWriteLogsToPrivateFileDeadline(deadline);
         }
         return instance(logId, logsOptions);
     }
@@ -65,6 +66,12 @@ public class Logger extends LoggerAbs {
     public static Collection<LoggerAbs> loggers() {
         if (_instances == null) _instances = new HashMap<>();
         return _instances.values();
+    }
+
+    public static void printToAll(ContentGetter content) {
+        for(LoggerAbs logger : loggers()) {
+            logger.print(content);
+        }
     }
 
     //----------------------------------------------------------------------------------------------

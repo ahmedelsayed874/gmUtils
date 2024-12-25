@@ -94,7 +94,11 @@ public class Intents {
     public void showMap(Context context, String lat, String lng, String label) {
         if (TextUtils.isEmpty(lat) || TextUtils.isEmpty(lng)) return;
         try {
-            label = URLEncoder.encode(label, StandardCharsets.UTF_8);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                label = URLEncoder.encode(label, StandardCharsets.UTF_8);
+            } else {
+                label = URLEncoder.encode(label);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,8 +137,8 @@ public class Intents {
     }
 
     public boolean showDir(Context context, String dirPath) {
-        Uri uri = FileUtils.createInstance().createUriForFileUsingFileProvider(context, new File(dirPath));
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        //Uri uri = FileUtils.createInstance().createUriForFileUsingFileProvider(context, new File(dirPath));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromFile(new File(dirPath)));
         if (intent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(intent);
             return true;
@@ -455,7 +459,12 @@ public class Intents {
     }
 
     public boolean openMapApp(Context context, double lat, double lon, String title) {
-        title = URLEncoder.encode(title, StandardCharsets.UTF_8);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            title = URLEncoder.encode(title, StandardCharsets.UTF_8);
+        } else {
+            title = URLEncoder.encode(title);
+        }
+
         Uri geoLocation = Uri.parse(String.format("geo:0,0?q=%f,%f(%s)", lat, lon, title));
 
         Intent intent = new Intent(Intent.ACTION_VIEW);

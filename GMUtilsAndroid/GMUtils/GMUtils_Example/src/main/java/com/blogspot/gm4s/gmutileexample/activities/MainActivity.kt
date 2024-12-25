@@ -240,7 +240,7 @@ class MainActivity : BaseActivity() {
             log("get-app-backup", "getting app backup started")
             Logger.d().logConfigs
                 .setLogDeadline(DateOp.getInstance().increaseDays(1))
-                .setWriteLogsToFileDeadline(DateOp.getInstance().increaseDays(1))
+                .setWriteLogsToPublicFileDeadline(DateOp.getInstance().increaseDays(1))
 
             Logger.d().exportAppBackup(thisActivity(), true) {
                 log("get-app-backup", "getting app backup finished: ${it.message}")
@@ -306,10 +306,11 @@ class MainActivity : BaseActivity() {
         this.view.btn25.text = "BUG"
         this.view.btn25.setOnClickListener {
             val dl = DateOp.getInstance().increaseDays(5)
-            Logger.d().logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
-            Logger.instance("l1").logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
-            Logger.instance("l2").logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
-            Logger.instance("l3").logConfigs.setLogDeadline(dl).setWriteLogsToFileDeadline(dl)
+            Logger.d().logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l1").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l2").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l3").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.printToAll() {"test"}
 
             error("throw bug to test writing to all logs file")
         }
@@ -379,7 +380,7 @@ class MainActivity : BaseActivity() {
         logger.logConfigs.apply {
             val dl = DateOp.getInstance().increaseDays(1)
             setLogDeadline(dl)
-            setWriteLogsToFileDeadline(dl)
+            setWriteLogsToPublicFileDeadline(dl)
         }
 
         thread {
@@ -409,7 +410,7 @@ class MainActivity : BaseActivity() {
 
         logger.print { "loggerTest()" }
         logger.print({ logger.logId() }) { "loggerTest()" }
-        Log.d("testLogger", logger.getLogFilesPath(this))
+        Log.d("testLogger", logger.getLogFilesPath(this, null))
 
         logger.printMethod()
         logger.printMethod({ logger.logId() })

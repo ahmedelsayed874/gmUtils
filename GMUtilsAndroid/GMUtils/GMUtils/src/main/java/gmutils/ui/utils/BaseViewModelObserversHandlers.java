@@ -145,7 +145,11 @@ public class BaseViewModelObserversHandlers {
     private CharSequence getText(Context context, @Nullable Object m) {
         CharSequence txt;
         if (m instanceof Integer) {
-            txt = context.getString((Integer) m);
+            if ((Integer) m > 0) {
+                txt = context.getString((Integer) m);
+            } else {
+                txt = "GMUtil: error (send message from the view model is zero)";
+            }
         }
         //
         else if (m instanceof CharSequence) {
@@ -159,24 +163,28 @@ public class BaseViewModelObserversHandlers {
         else {
             txt = (m == null ? "" : m.toString());
         }
+
         return txt;
     }
 
     private CharSequence getText(Context context, @Nullable BaseViewModel.MessageDependent message) {
         if (message == null) return "";
 
-        StringBuilder stringBuilder = new StringBuilder();
+        if (message.getMessagesCount() == 1) {
+            return getText(context, message.getMessage(0));
+        } else {
+            StringBuilder stringBuilder = new StringBuilder();
 
-        for (int i = 0; i < message.getMessagesCount(); i++) {
-            if (stringBuilder.length() > 0) stringBuilder.append("\n");
+            for (int i = 0; i < message.getMessagesCount(); i++) {
+                if (stringBuilder.length() > 0) stringBuilder.append("\n");
 
-            Object m = message.getMessage(i);
-            stringBuilder.append(getText(context, m));
+                Object m = message.getMessage(i);
+                stringBuilder.append(getText(context, m));
+            }
+
+            CharSequence msg = TextHelper.createInstance().parseHtmlText(stringBuilder.toString());
+            return msg;
         }
-
-        CharSequence msg = TextHelper.createInstance().parseHtmlText(stringBuilder.toString());
-
-        return msg;
     }
 
 }

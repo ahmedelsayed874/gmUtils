@@ -32,12 +32,14 @@ import gmutils.firebase.fcm.FCM;
 import gmutils.logger.Logger;
 import gmutils.R;
 import gmutils.listeners.ResultCallback;
+import gmutils.logger.LoggerAbs;
 import gmutils.storage.SettingsStorage;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.dialogs.WaitDialog;
 import gmutils.ui.fragments.BaseFragmentListener;
 import gmutils.ui.utils.ViewSource;
+import gmutils.utils.ZipFileUtils;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -93,7 +95,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         private Runnable onDestroy;
         private boolean preCreateExecuted = false;
         private ViewBinding activityViewBinding;
-        private int showBugsMenuItemId = 0;
+
 
         private Lifecycle(Delegate delegate, Runnable onDestroy) {
             this.delegate = delegate;
@@ -155,7 +157,7 @@ public class ActivityFunctions implements BaseFragmentListener {
             checkIntent(intent);
         }
 
-        private void checkIntent(@NotNull  Intent intent) {
+        private void checkIntent(@NotNull Intent intent) {
             try {
                 Class<?> cls = Class.forName("com.google.firebase.messaging.FirebaseMessaging");
                 FCM.instance().onActivityStarted(intent.getExtras());
@@ -176,6 +178,9 @@ public class ActivityFunctions implements BaseFragmentListener {
 
         //-----------------------------------------------------------------------------------
 
+        private int showBugsMenuItemId;
+//        private int reportBugsMenuItemId;
+
         public void onCreateOptionsMenu(Menu menu) {
             if (Logger.d().getLogConfigs().isWriteLogsToFileEnabled()) {
                 if (showBugsMenuItemId == 0) {
@@ -183,6 +188,12 @@ public class ActivityFunctions implements BaseFragmentListener {
                     if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
                 }
                 menu.add(0, showBugsMenuItemId, 10, "Show Log");
+
+//                if (reportBugsMenuItemId == 0) {
+//                    reportBugsMenuItemId = "Send Error Logs".hashCode();
+//                    if (reportBugsMenuItemId < 0) reportBugsMenuItemId *= -1;
+//                }
+//                menu.add(0, reportBugsMenuItemId, 9, "Send Error Logs");
             }
         }
 
@@ -192,19 +203,20 @@ public class ActivityFunctions implements BaseFragmentListener {
                     activity.onBackPressed();
                 } catch (Exception e) {
                 }
-
                 return true;
             }
-
-            if (item.getItemId() == showBugsMenuItemId) {
+            //
+            else if (item.getItemId() == showBugsMenuItemId) {
                 MessageDialog.create(activity)
-                        .setMessage("Go to this path to find logs:\n" + Logger.d().getLogDirector(activity).getAbsolutePath())
+                        .setMessage("Go to this path to find logs:\n" +
+                                Logger.d().getLogDirector(activity, true).getAbsolutePath()
+                        )
                         .setMessageGravity(Gravity.START)
                         .setButton1(R.string.ok, () -> {
                             try {
                                 Intents.getInstance().showDir(
                                         activity,
-                                        Logger.d().getLogDirector(activity).getAbsolutePath()
+                                        Logger.d().getLogDirector(activity, true).getAbsolutePath()
                                 );
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -214,6 +226,14 @@ public class ActivityFunctions implements BaseFragmentListener {
 
                 return true;
             }
+            //
+//            else if (item.getItemId() == reportBugsMenuItemId) {
+//                ZipFileUtils zipFileUtils = new ZipFileUtils(Logger.d());
+//                if (!delegate.reportBugs()) {
+//
+//                }
+//                return true;
+//            }
 
             return false;
         }

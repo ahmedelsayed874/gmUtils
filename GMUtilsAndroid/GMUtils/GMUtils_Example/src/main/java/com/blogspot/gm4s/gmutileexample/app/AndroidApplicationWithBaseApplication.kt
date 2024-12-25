@@ -2,6 +2,7 @@ package com.blogspot.gm4s.gmutileexample.app
 
 import android.app.Application
 import android.util.Log
+import gmutils.DateOp
 import gmutils.logger.Logger
 import gmutils.app.BaseApplication
 
@@ -14,7 +15,7 @@ class AndroidApplicationAndBaseApplication : Application() {
 
         app = BaseApplication.register(this)
 
-        Logger.d().logConfigs.setWriteLogsToFileDeadline(22, 11, 2021)
+        Logger.d().logConfigs.setWriteLogsToPublicFileDeadline(DateOp.getInstance())
         Log.d("*****", "onCreate()")
 
         Log.d("*****", "reportedBugs: " + app.reportedBugs)

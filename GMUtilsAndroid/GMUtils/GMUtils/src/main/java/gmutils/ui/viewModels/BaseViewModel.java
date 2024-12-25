@@ -9,8 +9,11 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import gmutils.StringSet;
@@ -39,11 +42,11 @@ import kotlin.Pair;
 public class BaseViewModel extends AndroidViewModel {
 
     public interface MessageDependent {
-        MessageDependent appendMessage(Integer messageId);
+        MessageDependent appendMessage(int messageId);
+
+        MessageDependent appendMessage(CharSequence message);
 
         MessageDependent appendMessage(StringSet message);
-
-//        MessageDependent appendMessage(Char Sequence message);
 
         int getMessagesCount();
 
@@ -51,17 +54,17 @@ public class BaseViewModel extends AndroidViewModel {
          * returns the inserted message by "appendMessage"
          *
          * @param idx index
-         * @return String Resource ID, StringSet, Char Sequence
+         * @return String Resource ID, StringSet, CharSequence
          */
         Object getMessage(int idx);
     }
 
     public interface ProgressStatus {
         /**
-         * @param messages int - Char Sequence - StringSet
+         * @param message int - CharSequence - StringSet
          */
-        static ProgressStatus show(List<Object> messages) {
-            return new Show(messages);
+        static ProgressStatus show(@Nullable Object message) {
+            return new Show(Collections.singletonList(message));
         }
 
         static ProgressStatus update(StringSet message) {
@@ -80,13 +83,12 @@ public class BaseViewModel extends AndroidViewModel {
             }
 
             public Show(int messageId) {
-                this(new ArrayList<>(List.of(messageId)));
-                assert messageId > 0;
+                this(messageId <= 0 ?  new ArrayList<>() : new ArrayList<>(List.of(messageId)));
             }
 
-//            public Show(Char Sequence message) {
-//                this(new ArrayList<>(List.of(message)));
-//            }
+            public Show(CharSequence message) {
+                this(new ArrayList<>(List.of(message)));
+            }
 
             public Show(StringSet message) {
                 this(new ArrayList<>(List.of(message)));
@@ -99,8 +101,8 @@ public class BaseViewModel extends AndroidViewModel {
             //------------------------------------------------------------------------------
 
             @Override
-            public Show appendMessage(Integer messageId) {
-                assert messageId > 0;
+            public Show appendMessage(int messageId) {
+                if (messageId <= 0) return this;
                 this.message.add(messageId);
                 return this;
             }
@@ -111,11 +113,11 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
-//            @Override
-//            public Show appendMessage(Char Sequence message) {
-//                this.message.add(message);
-//                return this;
-//            }
+            @Override
+            public Show appendMessage(CharSequence message) {
+                this.message.add(message);
+                return this;
+            }
 
             @Override
             public int getMessagesCount() {
@@ -127,7 +129,7 @@ public class BaseViewModel extends AndroidViewModel {
              * returns the inserted message by "appendMessage"
              *
              * @param idx index
-             * @return String Resource ID, StringSet, Char Sequence
+             * @return String Resource ID, StringSet, CharSequence
              */
             @Override
             public Object getMessage(int idx) {
@@ -146,12 +148,11 @@ public class BaseViewModel extends AndroidViewModel {
 
             public Update(int messageId) {
                 super(messageId);
-                assert messageId > 0;
             }
 
-//            public Update(Char Sequence message) {
-//                super(message);
-//            }
+            public Update(CharSequence message) {
+                super(message);
+            }
 
             public Update(StringSet message) {
                 super(message);
@@ -160,8 +161,7 @@ public class BaseViewModel extends AndroidViewModel {
             //---------------------------------------------------------------------------------
 
             @Override
-            public Update appendMessage(Integer messageId) {
-                assert messageId > 0;
+            public Update appendMessage(int messageId) {
                 return (Update) super.appendMessage(messageId);
             }
 
@@ -203,13 +203,13 @@ public class BaseViewModel extends AndroidViewModel {
             this(new ArrayList<>(), new MessageType.Hint());
         }
 
-        public Message(Integer messageId, MessageType type) {
-            this(messageId == null || messageId <= 0 ? null : new ArrayList<>(List.of(messageId)), type);
+        public Message(int messageId, MessageType type) {
+            this(messageId <= 0 ? null : new ArrayList<>(List.of(messageId)), type);
         }
 
-//        public Message(Char Sequence message, MessageType type) {
-//            this(message == null ? null : new ArrayList<>(List.of(message)), type);
-//        }
+        public Message(CharSequence message, MessageType type) {
+            this(message == null ? null : new ArrayList<>(List.of(message)), type);
+        }
 
         public Message(StringSet message, MessageType type) {
             this(message == null ? null : new ArrayList<>(List.of(message)), type);
@@ -223,8 +223,8 @@ public class BaseViewModel extends AndroidViewModel {
         //------------------------------------------------------------------------------
 
         @Override
-        public Message appendMessage(Integer messageId) {
-            assert messageId > 0;
+        public Message appendMessage(int messageId) {
+            if (messageId <= 0) return this;
             this.messages.add(messageId);
             return this;
         }
@@ -235,11 +235,11 @@ public class BaseViewModel extends AndroidViewModel {
             return this;
         }
 
-//        @Override
-//        public Message appendMessage(Char Sequence message) {
-//            this.messages.add(message);
-//            return this;
-//        }
+        @Override
+        public Message appendMessage(CharSequence message) {
+            this.messages.add(message);
+            return this;
+        }
 
         @Override
         public int getMessagesCount() {
@@ -251,7 +251,7 @@ public class BaseViewModel extends AndroidViewModel {
          * returns the inserted message by "appendMessage"
          *
          * @param idx index
-         * @return String Resource ID, StringSet, Char Sequence
+         * @return String Resource ID, StringSet, CharSequence
          */
         @Override
         public Object getMessage(int idx) {
@@ -298,10 +298,10 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
-//            public Dialog setTitle(Char Sequence title) {
-//                this.title = title;
-//                return this;
-//            }
+            public Dialog setTitle(CharSequence title) {
+                this.title = title;
+                return this;
+            }
 
             public Dialog setTitle(StringSet title) {
                 this.title = title;
@@ -315,10 +315,10 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
-//            public Dialog setButton1(Char Sequence title, Runnable action) {
-//                this.button1 = new DataGroup2<>(title, action);
-//                return this;
-//            }
+            public Dialog setButton1(CharSequence title, Runnable action) {
+                this.button1 = new DataGroup2<>(title, action);
+                return this;
+            }
 
             public Dialog setButton1(StringSet title, Runnable action) {
                 this.button1 = new DataGroup2<>(title, action);
@@ -332,10 +332,10 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
-//            public Dialog setButton2(Char Sequence title, Runnable action) {
-//                this.button2 = new DataGroup2<>(title, action);
-//                return this;
-//            }
+            public Dialog setButton2(CharSequence title, Runnable action) {
+                this.button2 = new DataGroup2<>(title, action);
+                return this;
+            }
 
             public Dialog setButton2(StringSet title, Runnable action) {
                 this.button2 = new DataGroup2<>(title, action);
@@ -349,10 +349,10 @@ public class BaseViewModel extends AndroidViewModel {
                 return this;
             }
 
-//            public Dialog setButton3(Char Sequence title, Runnable action) {
-//                this.button3 = new DataGroup2<>(title, action);
-//                return this;
-//            }
+            public Dialog setButton3(CharSequence title, Runnable action) {
+                this.button3 = new DataGroup2<>(title, action);
+                return this;
+            }
 
             public Dialog setButton3(StringSet title, Runnable action) {
                 this.button3 = new DataGroup2<>(title, action);
@@ -520,10 +520,10 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-//    public void postPopMessage(Char Sequence message) {
-//        Message m = new Message(message, new MessageType.Dialog());
-//        postMessage(m);
-//    }
+    public void postPopMessage(CharSequence message) {
+        Message m = new Message(message, new MessageType.Dialog());
+        postMessage(m);
+    }
 
     public void postPopMessage(StringSet message) {
         Message m = new Message(message, new MessageType.Dialog());
@@ -535,10 +535,10 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-//    public void postPopMessage(Char Sequence message, MessageType.Dialog messageType) {
-//        Message m = new Message(message, messageType);
-//        postMessage(m);
-//    }
+    public void postPopMessage(CharSequence message, MessageType.Dialog messageType) {
+        Message m = new Message(message, messageType);
+        postMessage(m);
+    }
 
     public void postPopMessage(StringSet message, MessageType.Dialog messageType) {
         Message m = new Message(message, messageType);
@@ -550,20 +550,20 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-//    public void postToastMessage(Char Sequence message, boolean error) {
-//        Message m = new Message(message, new MessageType.Hint(error));
-//        postMessage(m);
-//    }
+    public void postToastMessage(CharSequence message, boolean error) {
+        Message m = new Message(message, new MessageType.Hint(error));
+        postMessage(m);
+    }
 
     public void postToastMessage(StringSet message, boolean error) {
         Message m = new Message(message, new MessageType.Hint(error));
         postMessage(m);
     }
 
-//    public void postRetryMessage(Char Sequence message, Runnable onRetry) {
-//        Message m = new Message(message, new MessageType.Retry(onRetry));
-//        postMessage(m);
-//    }
+    public void postRetryMessage(CharSequence message, Runnable onRetry) {
+        Message m = new Message(message, new MessageType.Retry(onRetry));
+        postMessage(m);
+    }
 
     public void postRetryMessage(StringSet message, Runnable onRetry) {
         Message m = new Message(message, new MessageType.Retry(onRetry));
@@ -589,6 +589,10 @@ public class BaseViewModel extends AndroidViewModel {
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish) {
         runOnBackgroundThread(task, onFinish, true, 0, null, null);
+    }
+
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException) {
+        runOnBackgroundThread(task, onFinish, true, 0, onException, null);
     }
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread) {
@@ -650,6 +654,10 @@ public class BaseViewModel extends AndroidViewModel {
 
     public void runOnBackgroundThread(Runnable task) {
         runOnBackgroundThread(task, 0, null);
+    }
+
+    public void runOnBackgroundThread(Runnable task, ResultCallback<Throwable> onException) {
+        runOnBackgroundThread(task, 0, onException);
     }
 
     public void runOnBackgroundThread(Runnable task, long delay) {
