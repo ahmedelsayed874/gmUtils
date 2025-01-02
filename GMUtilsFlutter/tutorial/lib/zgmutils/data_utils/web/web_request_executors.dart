@@ -286,7 +286,7 @@ class WebRequestExecutor {
       }
 
       if (tries < supposedTries) {
-        if (Logs.allowLogs) {
+        if (await Logs.allowLogs) {
           Logs.print(() => [
                 '****',
                 'API::Response(OF_TRY_NUMBER: $tries)',

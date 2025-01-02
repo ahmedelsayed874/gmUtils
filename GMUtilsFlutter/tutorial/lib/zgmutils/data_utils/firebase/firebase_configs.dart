@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../../utils/date_op.dart';
@@ -38,10 +35,22 @@ class FirebaseConfigs extends IFirebaseConfigs {
       ),
     );
 
-    try {
-      await rc.fetchAndActivate();
-    } catch (e) {
-      throw 'you must enable Remote Configuration from Firebase console';
+    int tries = 0;
+    bool b = false;
+    while (tries++ < 9) {
+      try {
+        await rc.fetchAndActivate();
+        b = true;
+      } catch (e) {
+        Logs.print(() => 'FirebaseConfigs.fetch --> EXCEPTION [at try #$tries]: $e');
+        b = false;
+        Future.delayed(const Duration(milliseconds: 300));
+        //throw 'you must enable Remote Configuration from Firebase console .... $e';
+      }
+    }
+
+    if (!b) {
+      return;
     }
 
     _saveLastFetchTime();
@@ -51,7 +60,7 @@ class FirebaseConfigs extends IFirebaseConfigs {
     );
 
     Logs.print(
-          () => 'AppConfigs/FirebaseRemoteConfig -> configsMap: $configsMap',
+          () => 'FirebaseConfigs/FirebaseRemoteConfig -> configsMap: $configsMap',
     );
 
     for (var handler in handlers) {

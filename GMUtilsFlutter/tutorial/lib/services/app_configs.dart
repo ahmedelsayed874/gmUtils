@@ -2,16 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:bilingual_learning_schools_ksa/zgmutils/data_utils/firebase/firebase_configs.dart';
-import 'package:bilingual_learning_schools_ksa/zgmutils/data_utils/storages/general_storage.dart';
-import 'package:bilingual_learning_schools_ksa/zgmutils/utils/app_version_check.dart';
-import 'package:bilingual_learning_schools_ksa/zgmutils/utils/date_op.dart';
-import 'package:bilingual_learning_schools_ksa/zgmutils/utils/logs.dart';
-import 'package:bilingual_learning_schools_ksa/main.dart' as main;
-
+import 'package:xschool/data/models/users/user_account.dart';
+import 'package:xschool/main.dart' as main;
+import 'package:xschool/zgmutils/data_utils/firebase/firebase_configs.dart';
+import 'package:xschool/zgmutils/data_utils/storages/general_storage.dart';
+import 'package:xschool/zgmutils/utils/app_version_check.dart';
+import 'package:xschool/zgmutils/utils/date_op.dart';
+import 'package:xschool/zgmutils/utils/logs.dart';
 
 class AppConfigs {
   String get currentAppVersion => main.appVersion;
+
   String get iosAppStoreId => main.iosAppStoreId;
 
   late final IStorage _storage;
@@ -20,21 +21,63 @@ class AppConfigs {
     _storage = storage ?? GeneralStorage.o('app_configs_cached');
   }
 
+  IFirebaseConfigs get firebaseConfigs {
+    if (main.useProductionData) {
+      return FirebaseConfigs();
+    } else {
+      var a = _AppConfigsDataHandler();
+      a.appConfigsData = AppConfigsData(
+        latestAndroidAppVersion: '0.0.0',
+        latestIosAppVersion: '0.0.0',
+        previousAndroidAppVersionExpiryDate: '',
+        previousIosAppVersionExpiryDate: '',
+        serverUrl: 'https://ahmedelsayed.abdo/',
+        specialServerUrl: '',
+        logFileDeadline: '2025-11-11 11:11:11',
+        appFeatures: """
+          {
+              "allowed": [
+                    "${AppConfigsData.appFeatureMails}",
+                    "${AppConfigsData.appFeatureChats}",
+                    "${AppConfigsData.appFeatureLessons}",
+                    "${AppConfigsData.appFeatureVirtualClasses}",
+                    "${AppConfigsData.appFeatureQuestionBank}",
+                    "${AppConfigsData.appFeatureTeacherStudents}",
+                    "${AppConfigsData.appFeatureHomeworkExams}",
+                    "${AppConfigsData.appFeatureVirtualMeetings}",
+                    "${AppConfigsData.appFeatureChildren}",
+                    "${AppConfigsData.appFeatureSchoolStuff}",
+                    "${AppConfigsData.appFeatureSchoolStudents}",
+                    "${AppConfigsData.appFeatureSchoolParents}",
+                    "${AppConfigsData.appFeatureSubjectRanks}",
+                    "${AppConfigsData.appFeatureTestRanks}"
+              ],
+              "disallowed": [],
+          }
+          """,
+      );
+
+      return FirebaseConfigsMock(a.toMap());
+    }
+  }
+
   //----------------------------------------------------------------------------
 
-  AppConfigsData? _appConfigsData;
+  static AppConfigsData? _appConfigsData;
+
+  static AppConfigsData? get appConfigsDataS => _appConfigsData;
 
   AppConfigsData? get appConfigsData => _appConfigsData;
 
   Future<void> fetch() async {
     _AppConfigsDataHandler handler = _AppConfigsDataHandler();
-    await FirebaseConfigs().fetch(handlers: [handler]);
+    await firebaseConfigs.fetch(handlers: [handler]);
     _appConfigsData = handler.appConfigsData;
 
     _cacheAppConfigsData(handler);
 
     Logs.print(
-          () => 'AppConfigs/_fetch -> appConfigsData: $_appConfigsData',
+      () => 'AppConfigs/_fetch -> appConfigsData: $_appConfigsData',
     );
   }
 
@@ -174,27 +217,49 @@ class _AppConfigsDataHandler extends FirebaseConfigsHandler {
       specialServerUrl: configsMap['specialServerUrl'] ?? '',
       //
       logFileDeadline: configsMap['zLogFileDeadline'] ?? '',
+      //
+      appFeatures: configsMap['appFeatures'] ?? '',
     );
   }
 
   Map<String, String> toMap() {
     return {
       'appVersion_android_latest': appConfigsData.latestAndroidAppVersion,
-      'appVersion_android_previousExpiryDate': appConfigsData.previousAndroidAppVersionExpiryDate,
+      'appVersion_android_previousExpiryDate':
+          appConfigsData.previousAndroidAppVersionExpiryDate,
       //
       'appVersion_ios_latest': appConfigsData.latestIosAppVersion,
-      'appVersion_ios_previousExpiryDate': appConfigsData.previousIosAppVersionExpiryDate,
+      'appVersion_ios_previousExpiryDate':
+          appConfigsData.previousIosAppVersionExpiryDate,
       //
       'serverUrl': appConfigsData._serverUrl,
       //
       'specialServerUrl': appConfigsData._specialServerUrl,
       //
       'zLogFileDeadline': appConfigsData._logFileDeadline,
+      //
+      'appFeatures': appConfigsData._appFeatures,
     };
   }
 }
 
 class AppConfigsData {
+  static const String appFeatureMails = 'mails';
+  static const String appFeatureChats = 'chats';
+  static const String appFeatureLessons = 'lessons';
+  static const String appFeatureVirtualClasses = 'virtual_classes';
+  static const String appFeatureQuestionBank = 'question_bank';
+  static const String appFeatureTeacherStudents = 'teacher_students';
+  static const String appFeatureHomeworkExams = 'homework_exams';
+  static const String appFeatureVirtualMeetings = 'virtual_meetings';
+  static const String appFeatureChildren = 'children';
+  static const String appFeatureSchoolStuff = 'school_stuff';
+  static const String appFeatureSchoolStudents = 'school_students';
+  static const String appFeatureSchoolParents = 'school_parents';
+  static const String appFeatureSubjectRanks = 'subject_ranks';
+  static const String appFeatureTestRanks = 'test_ranks';
+  static const String appFeatureStatistics = 'statistics';
+
   final String latestAndroidAppVersion;
   final String latestIosAppVersion;
   final String previousAndroidAppVersionExpiryDate;
@@ -222,6 +287,21 @@ class AppConfigsData {
    */
   final String _logFileDeadline;
 
+  /*
+  e.g: {
+          "allowed": [
+                    "lessons",
+                    "virtual_classes",
+                    "question_bank",
+                    "students_for_teacher",
+                    "homework_exams",
+                    "virtual_meetings"
+          ],
+          "disallowed": []
+       }
+   */
+  final String _appFeatures;
+
   //---------------------------------------------------------------------------
 
   AppConfigsData({
@@ -235,14 +315,28 @@ class AppConfigsData {
     required String specialServerUrl,
     //
     required String logFileDeadline,
+    //
+    required String appFeatures,
   })  : _serverUrl = serverUrl,
         _specialServerUrl = specialServerUrl,
-        _logFileDeadline = logFileDeadline;
-
+        _logFileDeadline = logFileDeadline,
+        _appFeatures = appFeatures;
 
   @override
   String toString() {
-    return 'AppConfigsData{latestAndroidAppVersion: $latestAndroidAppVersion, latestIosAppVersion: $latestIosAppVersion, previousAndroidAppVersionExpiryDate: $previousAndroidAppVersionExpiryDate, previousIosAppVersionExpiryDate: $previousIosAppVersionExpiryDate, _serverUrl: $_serverUrl, _specialServerUrl: $_specialServerUrl, _logFileDeadline: $_logFileDeadline}';
+    return 'AppConfigsData{'
+        'latestAndroidAppVersion: $latestAndroidAppVersion, '
+        'latestIosAppVersion: $latestIosAppVersion, '
+        'previousAndroidAppVersionExpiryDate: $previousAndroidAppVersionExpiryDate, '
+        'previousIosAppVersionExpiryDate: $previousIosAppVersionExpiryDate, '
+        ''
+        '_serverUrl: $_serverUrl, '
+        '_specialServerUrl: $_specialServerUrl, '
+        ''
+        '_logFileDeadline: $_logFileDeadline, '
+        ''
+        '_appFeatures: $_appFeatures'
+        '}';
   }
 
   //---------------------------------------------------------------------------
@@ -264,6 +358,11 @@ class AppConfigsData {
         var usernameMap = jsonAsMap[username];
         url = usernameMap['url'];
         expire = usernameMap['expireOn'];
+
+        if (_isUrlExpired(expire ?? '')) {
+          url = '';
+          expire = '';
+        }
       } catch (e) {
         Logs.print(() =>
             'AppConfigs.getServerUrlIfExist(username: $username) ---> Exception: $e');
@@ -295,6 +394,89 @@ class AppConfigsData {
 
   //----------------------------------------------------------
 
+  bool hasAppFeature(String featureName, {required String authAccountType,}) {
+    bool? allowed;
+
+    if (_appFeatures.isNotEmpty) {
+      try {
+        /*
+        {
+            "allowed": [],
+            "disallowed": []
+         }
+         */
+        var jsonAsMap = jsonDecode(_appFeatures);
+
+        var allowedFeatures = (jsonAsMap['allowed'] as List?)?.toSet();
+        if (allowedFeatures?.contains(featureName) == true) {
+          allowed = true;
+        }
+
+        var disallowedFeatures = (jsonAsMap['disallowed'] as List?)?.toSet();
+        if (disallowedFeatures?.contains(featureName) == true) {
+          allowed = false;
+        }
+      } catch (e) {
+        Logs.print(() =>
+            'AppConfigs.hasAppFeatures(featureName: $featureName) ---> Exception: $e');
+      }
+    }
+
+    if (allowed == null) {
+      if (featureName == appFeatureMails) {
+        allowed = true;
+      }
+      //
+      else if (featureName == appFeatureChats) {
+        allowed = true;
+      }
+      //
+      else {
+        if (UserAccount.accountTypeManager.toLowerCase() == authAccountType.toLowerCase()) {
+          if (featureName == AppConfigsData.appFeatureSchoolStuff) {
+            allowed = true;
+          }
+          //
+          else if (featureName == AppConfigsData.appFeatureSchoolStudents) {
+            allowed = true;
+          }
+          //
+          else if (featureName == AppConfigsData.appFeatureSchoolParents) {
+            allowed = true;
+          }
+          //
+          else {
+            allowed = false;
+          }
+        }
+        //
+        else {
+          allowed = false;
+        }
+      }
+    }
+
+    if (featureName == appFeatureMails) {
+      var blockedTypes = [
+        '',
+        UserAccount.accountTypeStudent.toLowerCase(),
+        UserAccount.accountTypeParent.toLowerCase(),
+      ];
+      if (blockedTypes.contains(authAccountType.toLowerCase())) {
+        allowed = false;
+      }
+    }
+
+    Logs.print(() => 'AppConfigsData.hasAppFeature('
+        'featureName: $featureName, '
+        'authAccountType: $authAccountType'
+        ') ---> allowed=$allowed');
+
+    return allowed;
+  }
+
+  //----------------------------------------------------------
+
   String? getLogFileDeadline({required String username}) {
     String? expire;
 
@@ -318,4 +500,48 @@ class AppConfigsData {
 
     return expire;
   }
+}
+
+//-------------------------------------------------------------------------
+
+class FirebaseConfigsMock extends IFirebaseConfigs {
+  final Map<String, String> data;
+
+  FirebaseConfigsMock(this.data);
+
+  @override
+  Future<void> fetch({required List<FirebaseConfigsHandler> handlers}) async {
+    await Future.delayed(const Duration(seconds: 10));
+    for (var a in handlers) {
+      a.handle(data);
+    }
+  }
+
+  @override
+  Future<DateTime?> get lastFetchTime async => null;
+
+  @override
+  Future<double> get remainMinuteTillNextFetch async => 0;
+}
+
+//-------------------------------------------------------------------------
+
+class FirebaseConfigsMock extends IFirebaseConfigs {
+  final Map<String, String> data;
+
+  FirebaseConfigsMock(this.data);
+
+  @override
+  Future<void> fetch({required List<FirebaseConfigsHandler> handlers}) async {
+    await Future.delayed(const Duration(seconds: 10));
+    for (var a in handlers) {
+      a.handle(data);
+    }
+  }
+
+  @override
+  Future<DateTime?> get lastFetchTime async => null;
+
+  @override
+  Future<double> get remainMinuteTillNextFetch async => 0;
 }

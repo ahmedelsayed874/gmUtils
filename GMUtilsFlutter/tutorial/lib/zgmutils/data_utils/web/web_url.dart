@@ -9,6 +9,7 @@ abstract class Url<RDT> {
   final String domain;
   final String fragments;
   final String endPoint;
+  final Map<String, String>? queries;
   final Map<String, String> headers = {};
   final Mappable<RDT>? dataMapper;
   final Response<RDT> Function(String response)? responseEncoder;
@@ -17,6 +18,7 @@ abstract class Url<RDT> {
     required this.domain,
     required this.fragments,
     required this.endPoint,
+    required this.queries,
     required Map<String, String>? headers,
     required this.dataMapper,
     required this.responseEncoder,
@@ -35,7 +37,20 @@ abstract class Url<RDT> {
     addHeader(key, value);
   }
 
-  String get uriAsString => '$domain$fragments$endPoint';
+  String get uriAsString {
+    var url = '$domain$fragments$endPoint';
+
+    if (queries?.isNotEmpty == true) {
+      String q = '';
+      queries!.forEach((key, value) {
+        if (q.isNotEmpty) q += '&';
+        q += '$key=$value';
+      });
+      url += '?$q';
+    }
+
+    return url;
+  }
 
   Uri get uri => Uri.parse(Uri.encodeFull(uriAsString));
 
@@ -63,87 +78,50 @@ abstract class Url<RDT> {
     s += domain.hashCode.toString();
     s += fragments.hashCode.toString();
     s += endPoint.hashCode.toString();
+
+    queries?.forEach((key, value) {
+      s += key.hashCode.toString();
+      s += value.hashCode.toString();
+    });
+
     headers.forEach((key, value) {
       s += key.hashCode.toString();
       s += value.hashCode.toString();
     });
+
     return s;
   }
 }
 
 class GetUrl<RDT> extends Url<RDT> {
-  final Map<String, String>? queries;
-
   GetUrl({
-    required String domain,
-    required String fragments,
-    required String endPoint,
-    Map<String, String>? headers,
-    required Mappable<RDT>? dataMapper,
-    required this.queries,
-    Response<RDT> Function(String response)? responseEncoder,
-  }) : super(
-          domain: domain,
-          fragments: fragments,
-          endPoint: endPoint,
-          headers: headers,
-          dataMapper: dataMapper,
-          responseEncoder: responseEncoder,
-        );
-
-  String get uriAsString {
-    var url = super.uriAsString;
-
-    if (queries?.isNotEmpty == true) {
-      String q = '';
-      queries!.forEach((key, value) {
-        if (q.isNotEmpty) q += '&';
-        q += '$key=$value';
-      });
-      url += '?$q';
-    }
-
-    return url;
-  }
-
-  @override
-  String get signature {
-    var s = super.signature;
-    queries?.forEach((key, value) {
-      s += key.hashCode.toString();
-      s += value.hashCode.toString();
-    });
-    return s;
-  }
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    super.queries,
+    super.headers,
+    required super.dataMapper,
+    super.responseEncoder,
+  });
 }
 
-class PostUrl<RDT> extends GetUrl<RDT> {
+class PostUrl<RDT> extends Url<RDT> {
   final Map<String, dynamic>? params;
   final bool asJson;
 
   //final String? body;
 
   PostUrl({
-    required String domain,
-    required String fragments,
-    required String endPoint,
-    Map<String, String>? headers,
-    required Mappable<RDT>? dataMapper,
-    Map<String, String>? queries,
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    super.queries,
+    super.headers,
+    required super.dataMapper,
     this.params,
     this.asJson = true,
-    Response<RDT> Function(String response)? responseEncoder,
-  }) : super(
-          domain: domain,
-          fragments: fragments,
-          endPoint: endPoint,
-          headers: headers,
-          dataMapper: dataMapper,
-          queries: queries,
-          responseEncoder: responseEncoder,
-        ) {
-    //assert((params != null && body == null) || (params == null && body != null));
-
+    super.responseEncoder,
+  }) {
     if (params != null) {
       if (asJson) {
         addHeaderIfNotExist('Content-Type', 'application/json');
@@ -187,33 +165,25 @@ class PostUrl<RDT> extends GetUrl<RDT> {
   }
 }
 
-class PostMultiPartFileUrl<RDT> extends GetUrl<RDT> {
+class PostMultiPartFileUrl<RDT> extends Url<RDT> {
   String fileMappedKey;
   File file;
   String? fileMimeType;
   Map<String, String>? formFields;
 
   PostMultiPartFileUrl({
-    required String domain,
-    required String fragments,
-    required String endPoint,
-    required Map<String, String>? headers,
-    required Mappable<RDT> dataMapper,
-    Map<String, String>? queries,
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    required super.headers,
+    required Mappable<RDT> super.dataMapper,
+    super.queries,
     this.formFields,
     required this.fileMappedKey,
     required this.file,
     this.fileMimeType,
-    Response<RDT> Function(String response)? responseEncoder,
-  }) : super(
-          domain: domain,
-          fragments: fragments,
-          endPoint: endPoint,
-          headers: headers,
-          dataMapper: dataMapper,
-          queries: queries,
-          responseEncoder: responseEncoder,
-        );
+    super.responseEncoder,
+  });
 
   List<int> get fileBytes => file.readAsBytesSync();
 

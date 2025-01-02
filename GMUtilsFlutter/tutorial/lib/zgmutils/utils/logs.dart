@@ -1,18 +1,28 @@
 import 'dart:core' as core;
-import 'dart:core';
-
+//import 'dart:core';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 
+import '../data_utils/storages/general_storage.dart';
 import 'date_op.dart';
 import 'files.dart';
+import 'result.dart';
 
 class Logs {
-  static int? _logFileDeadline;
+  static core.int? _logFileDeadline;
+  static Result<core.DateTime>? _savedDeadline;
 
-  static void setLogFileDeadline(core.String? logFileDeadline) {
+  static void setLogFileDeadline(
+    core.String? logFileDeadline, {
+        core.bool saveDate = false,
+  }) {
     try {
       var dt = DateOp().parse(logFileDeadline ?? '', convertToLocalTime: true);
       _logFileDeadline = dt?.millisecondsSinceEpoch;
+      if (dt != null && saveDate) {
+        GeneralStorage.o('logs').save('deadline', logFileDeadline!);
+        _savedDeadline = Result(dt);
+      }
     } catch (e) {
       if (kDebugMode) {
         core.print(
@@ -21,21 +31,48 @@ class Logs {
     }
   }
 
-  static bool get allowLogs {
-    return (kDebugMode || allowLogToFile);
+  static core.Future<core.DateTime?> get _savedLogsDeadline async {
+    if (_savedDeadline != null) return _savedDeadline!.result;
+
+    try {
+      var d = await GeneralStorage.o('logs').retrieve('deadline');
+      if (d?.isNotEmpty == true) {
+        var dt = DateOp().parse(d ?? '', convertToLocalTime: true);
+        _savedDeadline = Result(dt);
+        return dt;
+      } else {
+        _savedDeadline = Result(null);
+        return null;
+      }
+    } catch (e) {
+      _savedDeadline = Result(null);
+      return null;
+    }
   }
 
-  static bool get allowLogToFile {
+  static core.Future<core.bool> get allowLogs async {
+    return (kDebugMode || (await allowLogToFile));
+  }
+
+  static core.Future<core.bool> get allowLogToFile async {
     var now = core.DateTime.now();
     var printToFile = now.millisecondsSinceEpoch <
         (_logFileDeadline ?? core.DateTime(2024, 5, 15).millisecondsSinceEpoch);
+
+    if (!printToFile) {
+      var dl = await _savedLogsDeadline;
+      if (dl != null) {
+        printToFile = now.millisecondsSinceEpoch < dl.millisecondsSinceEpoch;
+      }
+    }
+
     return printToFile;
   }
 
   //----------------------------------------------------------------------------
 
-  static void print(core.Object? Function() info) {
-    if (allowLogs) {
+  static void print(core.Object? Function() info) async {
+    if (await allowLogs) {
       final infoData = info();
       const logStart = '*****';
       if (infoData == null) {
@@ -67,11 +104,11 @@ class Logs {
   //----------------------------------------------------------------------------
 
   static Files? _files;
-  static List<core.String>? _fileTextCache;
-  static bool _fileWriterBussy = false;
+  static core.List<core.String>? _fileTextCache;
+  static core.bool _fileWriterBussy = false;
 
-  static void _print(String text) {
-    if (allowLogToFile) {
+  static void _print(core.String text) async {
+    if (await allowLogToFile) {
       var now = core.DateTime.now();
 
       if (_files == null) {
@@ -99,7 +136,7 @@ class Logs {
     }
   }
 
-  static Future<void> _printToFile(String log) async {
+  static core.Future<void> _printToFile(core.String log) async {
     if (_fileWriterBussy) {
       _fileTextCache ??= [];
       _fileTextCache?.add(log);
@@ -119,4 +156,10 @@ class Logs {
       _printToFile(log2);
     }
   }
+
+  static core.Future<Directory>? get logsDirPath => _files?.directoryPath;
+
+  static core.Future<File>? get currentLogFile => _files?.localFile;
+
+  static core.Future<core.String>? get currentLogFileContent => _files?.read();
 }

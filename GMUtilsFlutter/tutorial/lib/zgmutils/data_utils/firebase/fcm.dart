@@ -23,7 +23,7 @@ import '../../utils/logs.dart';
 //         <meta-data
 //             android:name="com.google.firebase.messaging.default_notification_icon"
 //             android:resource="@drawable/notif_icon" />
-abstract class FCMFunctions {
+abstract class IFCM {
   Future<String?> get deviceToken;
 
   ///must user on main screen starts
@@ -58,14 +58,14 @@ abstract class FCMFunctions {
     String body, {
     String? payload,
     int? notificationId,
-        AndroidNotificationChannelProperties? customChannel,
+    AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
   });
 }
 
 //------------------------------------------------------------------------------
 
-class FCM extends FCMFunctions {
+class FCM extends IFCM {
   // static String _sentNotificationId = '';
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -155,10 +155,7 @@ class FCM extends FCMFunctions {
       }
 
       if (token.isNotEmpty) {
-        this
-            .fcmConfigurations
-            ?.onDeviceTokenRefresh
-            ?.call(token);
+        this.fcmConfigurations?.onDeviceTokenRefresh?.call(token);
       }
 
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
@@ -205,9 +202,9 @@ class FCM extends FCMFunctions {
   }
 
   void _popupNotification2(RemoteMessage message, bool? en) {
-    Logs.print(() => [
-          'FCM._popupNotification2(message: {id=${message.messageId}, payload=${message.data}, en: $en)'
-        ]);
+    Logs.print(
+      () => ['FCM._popupNotification2(message: ${message.toMap()}, en: $en)'],
+    );
 
     var title = '${message.notification?.title ?? 'Notification'}•';
     var body = message.notification?.body ?? '';
@@ -273,9 +270,9 @@ class FCM extends FCMFunctions {
     for (var topic in topics) {
       try {
         await messaging.subscribeToTopic(topic);
-        Logs.print(() => "FCM: subscribed to \"$topic\"");
+        Logs.print(() => "FCM: subscribed to topic: \"$topic\"");
       } catch (e) {
-        Logs.print(() => "FCM: failed to subscribe to \"$topic\"");
+        Logs.print(() => "FCM: failed to subscribe to topic: \"$topic\"");
       }
     }
 
@@ -289,9 +286,9 @@ class FCM extends FCMFunctions {
       for (var topic in topics ?? []) {
         try {
           await messaging.unsubscribeFromTopic(topic);
-          Logs.print(() => "FCM: unsubscribe from $topic");
+          Logs.print(() => "FCM: unsubscribe from topic: $topic");
         } catch (e) {
-          Logs.print(() => "FCM: failed to unsubscribe from $topic");
+          Logs.print(() => "FCM: failed to unsubscribe from topic: $topic");
         }
       }
     } catch (e) {}
@@ -357,8 +354,10 @@ class FCM extends FCMFunctions {
     //https://firebase.google.com/docs/cloud-messaging/send-message?hl=en&authuser=0#send-messages-to-topics-legacy
     //FIVE TOPICS IN ONE REQUEST
 
-    String? androidChannelId = channel?.channelId ?? Notifications.defaultNotificationChannelId;
-    SoundFile? sound = channel?.soundFile ?? Notifications.defaultNotificationChannelSound;
+    String? androidChannelId =
+        channel?.channelId ?? Notifications.defaultNotificationChannelId;
+    SoundFile? sound =
+        channel?.soundFile ?? Notifications.defaultNotificationChannelSound;
 
     var android = {
       'title': title,
