@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyCuc3xuG7Vh6uJC5u8W2tklMpJ0AY3ge5k</string>
+	<key>GCM_SENDER_ID</key>
+	<string>876227404449</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>sa.edu.bls.mobapp</string>
+	<key>PROJECT_ID</key>
+	<string>gmutils_flutter</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gmutils-flutter.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:876227404449:ios:7b6f7b54e38534c71d06e0</string>
+</dict>
+</plist>

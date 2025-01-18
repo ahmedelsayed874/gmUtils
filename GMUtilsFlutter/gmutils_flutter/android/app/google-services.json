@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "876227404449",
+    "project_id": "bilinguallearningschools-ksa",
+    "storage_bucket": "bilinguallearningschools-ksa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876227404449:android:3b35940dff3073551d06e0",
+        "android_client_info": {
+          "package_name": "sa.edu.bls.mobapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5ws1uu_uNvEp9HMziWW8WP1jTpVBaeS0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

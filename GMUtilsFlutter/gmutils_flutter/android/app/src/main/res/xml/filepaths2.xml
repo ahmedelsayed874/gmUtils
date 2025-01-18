@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Context.getFilesDir() -->
+<!--    <files-path name="files" path="." />-->
+
+    <!-- getCacheDir() -->
+    <cache-path name="files" path="." />
+
+    <!-- ========================================================== -->
+
+    <external-path name="files" path="." />
+
+    <!-- Context#getExternalFilesDir(String) || Context.getExternalFilesDir(null) -->
+<!--    <external-files-path name="files" path="." />-->
+
+    <!-- Context.getExternalCacheDir() -->
+<!--    <external-cache-path name="files" path="." />-->
+</resources>
