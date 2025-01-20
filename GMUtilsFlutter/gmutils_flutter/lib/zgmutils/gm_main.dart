@@ -272,7 +272,8 @@ class _AppState extends State<App> {
         colorScheme: ColorScheme.light(
             primary: colors.primary,
             secondary: colors.primary,
-            background: colors.background),
+            background: colors.background,
+        ),
         brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
         bottomSheetTheme: BottomSheetThemeData(
           backgroundColor: colors.background,
@@ -347,9 +348,8 @@ class _StarterWidgetState extends State<StarterWidget> {
   Widget build(BuildContext context) {
     App._context = context;
 
-    AppMeasurement Function(BuildContext context)? measurements =
-        widget.measurements;
-    AppColors Function(BuildContext context)? appColors = widget.appColors;
+    var measurements = widget.measurements;
+    var appColors = widget.appColors;
 
     AppTheme(
       appColors: appColors!(context),
