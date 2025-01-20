@@ -51,8 +51,8 @@ void main() {
       Res.init(ctx);
       return Res.themes.measurement;
     },
-    appColors: (ctx) {
-      Res.init(ctx);
+    appColors: (ctx, isLight) {
+      Res.init(ctx, useLightTheme: isLight);
       return Res.themes.colors;
     },
     toolbarTitleFontFamily: () => Res.themes.fonts.toolbarTitle,

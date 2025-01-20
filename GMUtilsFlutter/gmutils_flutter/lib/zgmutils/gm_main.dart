@@ -4,10 +4,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../resources/_resources.dart';
 import 'data_utils/firebase/fcm.dart';
-import 'data_utils/storages/locale_preference.dart';
+import 'data_utils/storages/app_preferences_storage.dart';
 import 'resources/app_colors.dart';
 import 'resources/app_measurement.dart';
 import 'resources/app_theme.dart';
+import 'utils/logs.dart';
 import 'utils/notifications.dart';
 
 typedef OnInitialize = void Function(BuildContext);
@@ -19,7 +20,7 @@ class GMMain {
     required bool isEnglishDefaultLocale,
     required String Function(BuildContext context)? appName,
     required AppMeasurement Function(BuildContext context) measurements,
-    required AppColors Function(BuildContext context) appColors,
+    required AppColors Function(BuildContext context, bool isLight) appColors,
     required String? Function()? toolbarTitleFontFamily,
     required String? Function()? defaultFontFamily,
     required Widget startScreen,
@@ -47,9 +48,11 @@ class GMMain {
       fcmRequirements.onFcmInitialized?.call(FCM.instance);
     }
 
-    LocalePreference().isEn().then(
-      (value) {
-        App._isEnglish = value ?? isEnglishDefaultLocale;
+    AppPreferencesStorage()
+        .savedAppPreferences(enIsDefault: isEnglishDefaultLocale)
+        .then(
+          (value) {
+        App._appPreferences = value;
         runApp(App(
           appName: appName,
           measurements: measurements,
@@ -81,7 +84,7 @@ class FcmRequirements {
 class App extends StatefulWidget {
   String Function(BuildContext context)? appName;
   AppMeasurement Function(BuildContext context)? measurements;
-  AppColors Function(BuildContext context)? appColors;
+  AppColors Function(BuildContext context, bool isLight)? appColors;
   String? Function()? toolbarTitleFontFamily;
   String? Function()? defaultFontFamily;
   Widget? startScreen;
@@ -203,19 +206,48 @@ class App extends StatefulWidget {
 
   //============================================================================
 
-  static bool _isEnglish = true;
+  static AppPreferences _appPreferences = AppPreferences(
+    isEn: true,
+    isLightMode: true,
+  );
 
-  static bool get isEnglish => _isEnglish;
+  static bool get isEnglish => _appPreferences.isEn;
+
+  static bool isLightTheme(BuildContext context) {
+    if (_appPreferences.isLightMode == null) {
+      return Theme.of(context).brightness == Brightness.light;
+    } else {
+      return _appPreferences.isLightMode!;
+    }
+  }
 
   static bool changeAppLanguage({
     required BuildContext context,
     required bool toEnglish,
   }) {
-    if (_isEnglish == toEnglish) return false;
+    if (_appPreferences.isEn == toEnglish) return false;
 
-    LocalePreference().setLocale(toEnglish);
+    _appPreferences.isEn = toEnglish;
+    AppPreferencesStorage().setLocale(toEnglish);
+
     var s = context.findAncestorStateOfType<_AppState>();
-    s?.invalidate(toEnglish);
+    s?.invalidate();
+    return s != null;
+  }
+
+  static bool changeAppAppearance({
+    required BuildContext context,
+    required bool? toLight,
+  }) {
+    Logs.print(() =>
+    'App.changeAppAppearance(toLight: $toLight) ... current is light? ${_appPreferences.isLightMode}');
+    if (_appPreferences.isLightMode == toLight) return false;
+
+    _appPreferences.isLightMode = toLight;
+    AppPreferencesStorage().setAppearance(toLight);
+
+    var s = context.findAncestorStateOfType<_AppState>();
+    s?.invalidate();
     return s != null;
   }
 
@@ -226,60 +258,77 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  void invalidate(bool toEnglish) => setState(() {
-        App._isEnglish = toEnglish;
-      });
+  void invalidate() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
-    final colors = widget.appColors!(context);
+    final lightColors = widget.appColors!(context, true);
+    final darkColors = widget.appColors!(context, false);
+    widget.appColors!(context, App.isLightTheme(context));
+
+    theme(AppColors colors) => ThemeData(
+      primarySwatch: colors.primarySwatch,
+      scaffoldBackgroundColor: colors.background,
+      bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
+      cardTheme: CardTheme(
+        color: colors.card,
+        surfaceTintColor: colors.card,
+      ),
+      hintColor: colors.hint,
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: AppTheme.defaultTextStyle(
+          textColor: colors.hint,
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(colors.primary),
+          textStyle: WidgetStatePropertyAll(Res.themes.defaultTextStyle(
+            textColor: colors.textOnPrimary,
+            fontWeight: FontWeight.w600,
+          )),
+          foregroundColor: WidgetStatePropertyAll(colors.textOnPrimary),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+        ),
+      ),
+      colorScheme: ColorScheme.light(
+        primary: colors.primary,
+        secondary: colors.primary,
+        background: colors.background,
+        surface:  colors.background,
+      ),
+      brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colors.background,
+        surfaceTintColor: colors.background,
+      ),
+    );
 
     return MaterialApp(
       title: widget.appName?.call(context) ?? '',
-      theme: ThemeData(
-        primarySwatch: colors.primarySwatch,
-        scaffoldBackgroundColor: colors.background,
-        bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
-        cardTheme: CardTheme(
-          color: colors.card,
-          surfaceTintColor: colors.card,
-        ),
-        hintColor: colors.hint,
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ButtonStyle(
-            backgroundColor: WidgetStatePropertyAll(colors.primary),
-            textStyle: WidgetStatePropertyAll(Res.themes.defaultTextStyle(
-              textColor: colors.textOnPrimary,
-              fontWeight: FontWeight.w600,
-            )),
-            foregroundColor: WidgetStatePropertyAll(colors.textOnPrimary),
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-            ),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: ButtonStyle(
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-            ),
-          ),
-        ),
-        colorScheme: ColorScheme.light(
-            primary: colors.primary,
-            secondary: colors.primary,
-            background: colors.background,
-        ),
-        brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
-        bottomSheetTheme: BottomSheetThemeData(
-          backgroundColor: colors.background,
-          surfaceTintColor: colors.background,
-        ),
-      ),
+      //
+      theme: theme(lightColors),
+      darkTheme: theme(darkColors),
+      themeMode: App._appPreferences.isLightMode == null
+          ? null
+          : (App._appPreferences.isLightMode!
+          ? ThemeMode.light
+          : ThemeMode.dark),
+      //
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -290,6 +339,7 @@ class _AppState extends State<App> {
         Locale('ar', ''), // Arabic, no country code
       ],
       locale: App.isEnglish ? const Locale('en', '') : const Locale('ar', ''),
+      //
       home: StarterWidget(
         startScreen: widget.startScreen!,
         measurements: widget.measurements,
@@ -324,7 +374,7 @@ class _AppState extends State<App> {
 class StarterWidget extends StatefulWidget {
   Widget? startScreen;
   AppMeasurement Function(BuildContext context)? measurements;
-  AppColors Function(BuildContext context)? appColors;
+  AppColors Function(BuildContext context, bool isLight)? appColors;
   String? Function()? toolbarTitleFontFamily;
   String? Function()? defaultFontFamily;
   OnInitialize? onInitialize;
@@ -348,15 +398,18 @@ class _StarterWidgetState extends State<StarterWidget> {
   Widget build(BuildContext context) {
     App._context = context;
 
-    var measurements = widget.measurements;
-    var appColors = widget.appColors;
+    var appMeasurement = widget.measurements!(context);
+    var isLight = App.isLightTheme(context);
+    var appColors = widget.appColors!(context, isLight);
 
+    //init app theme
     AppTheme(
-      appColors: appColors!(context),
-      appMeasurement: measurements!(context),
+      appColors: appColors,
+      appMeasurement: appMeasurement,
       toolbarTitleFontFamily: widget.toolbarTitleFontFamily?.call(),
       defaultFontFamily: widget.defaultFontFamily?.call(),
     );
+
     widget.onInitialize?.call(context);
 
     return widget.startScreen!;

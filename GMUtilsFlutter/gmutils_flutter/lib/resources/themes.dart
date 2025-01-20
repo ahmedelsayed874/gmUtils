@@ -9,16 +9,12 @@ class Themes {
   bool isLightTheme = true;
 
   Themes(BuildContext context, {bool? light}) {
-    isLightTheme = Theme.of(context).brightness == Brightness.light;
-
-    // try {
-    //   var mediaQuery = MediaQuery.of(context);
-    //   textScaleFactor = mediaQuery.textScaleFactor;
-    // } catch (e) {}
-    // density = 1; //to do set it's value based on devicePixelRatio
-
     if (light != null) {
       isLightTheme = light;
+    }
+    //
+    else { //if (context != null) {
+      isLightTheme = Theme.of(context).brightness == Brightness.light;
     }
 
     AppTheme(

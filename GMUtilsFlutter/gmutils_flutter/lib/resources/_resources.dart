@@ -8,10 +8,10 @@ import 'themes.dart';
 class Res {
   static Res? _instance; //must init on app start
 
-  static void init(BuildContext context) {
+  static void init(BuildContext context, {bool? useLightTheme}) {
     _instance = Res._(
       Strings(context),
-      Themes(context),
+      Themes(context, light: useLightTheme),
       Images(context),
       Audio(),
     );
