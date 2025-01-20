@@ -11,6 +11,7 @@ import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
+import gmutils.net.retrofit.responseHolders.IResponse;
 import okhttp3.Request;
 import retrofit2.Call;
 
@@ -26,7 +27,7 @@ import retrofit2.Call;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public final class CallbackOperations<R extends BaseResponse> {
+public final class CallbackOperations<R extends IResponse> {
     interface Listener<R> {
         void onResponseReady(R response);
     }
@@ -200,10 +201,10 @@ public final class CallbackOperations<R extends BaseResponse> {
             R body = response.body();
             if (body != null) {
                 if (extras != null) {
-                    body._extras = extras;
+                    body.setExtras(extras);
                 }
 
-                body._code = response.code();
+                body.setStatusCode(response.code());
 
                 setResult(body, headers);
 
@@ -241,39 +242,39 @@ public final class CallbackOperations<R extends BaseResponse> {
             response.setCallbackStatus(errorListener.getInternalStatus(code, error));
         } else {
             if (code == 0)
-                response.setCallbackStatus(BaseObjectResponse.Statuses.ConnectionFailed);
+                response.setCallbackStatus(IResponse.Status.ConnectionFailed);
             else
-                response.setCallbackStatus(BaseObjectResponse.Statuses.Error);
+                response.setCallbackStatus(IResponse.Status.Error);
         }
 
         if (errorListener != null) {
-            response._error = errorListener.getErrorMessage(code, error);
+            response.setError(errorListener.getErrorMessage(code, error));
 
         } else {
             if (TextUtils.isEmpty(error)) {
                 if (code == 0) {
-                    response._error = "Connection Timeout, Please check your connection";
+                    response.setError("Connection Timeout, Please check your connection");
                 } else if (code == 401) {
-                    response._error = "Your session has been expired, Please close application and open again";
+                    response.setError("Your session has been expired, Please close application and open again");
                 } else {
-                    response._error = "Error (" + code + ")";
+                    response.setError("Error (" + code + ")");
                 }
             } else {
-                response._error = error;
+                response.setError(error);
             }
         }
 
         if (extras != null) {
-            response._extras = extras;
+            response.setExtras(extras);
         }
 
-        response._isErrorDueException = exception;
+        response.setIsErrorDueException(exception);
         if (error.contains("Trust anchor for certification path not found")) {
-            response._isSSLCertificateRequired = true;
+            response.setIsSSLCertificateRequired(true);
         }
 
-        response._code = code;
-        response._headers = headers;
+        response.setStatusCode(code);
+        response.setHeaders(headers);
 
         setResult(response, headers);
     }
@@ -287,9 +288,9 @@ public final class CallbackOperations<R extends BaseResponse> {
             );
         }
 
-        result._headers = headers;
-        result._requestTime = requestTime;
-        result._responseTime = System.currentTimeMillis();
+        result.setHeaders(headers);
+        result.setRequestTime(requestTime);
+        result.setResponseTime(System.currentTimeMillis());
         if (listener != null) listener.onResponseReady(result);
 
         destroyReferences();

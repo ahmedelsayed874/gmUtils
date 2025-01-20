@@ -25,15 +25,15 @@ public class FakeImageAPI implements ImageAPIs {
             ImageResponse r = new ImageResponse();
 
             if (s == null) {
-                r.setCallbackStatus(BaseResponse.Statuses.ConnectionFailed);
+                r.setCallbackStatus(BaseResponse.Status.ConnectionFailed);
                 r._code = 0;
             } else {
                 if (s) {
                     r.setData(new Object());
-                    r.setCallbackStatus(BaseResponse.Statuses.Succeeded);
+                    r.setCallbackStatus(BaseResponse.Status.Succeeded);
                     r._code = 200;
                 } else {
-                    r.setCallbackStatus(BaseResponse.Statuses.Error);
+                    r.setCallbackStatus(BaseResponse.Status.Error);
                     r._code = 400;
                 }
             }

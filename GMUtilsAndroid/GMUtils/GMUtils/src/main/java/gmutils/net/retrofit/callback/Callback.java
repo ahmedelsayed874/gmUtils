@@ -9,6 +9,7 @@ import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
+import gmutils.net.retrofit.responseHolders.IResponse;
 import okhttp3.Request;
 import retrofit2.Call;
 
@@ -24,7 +25,7 @@ import retrofit2.Call;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class Callback<R extends BaseResponse> implements retrofit2.Callback<R> {
+public class Callback<R extends IResponse> implements retrofit2.Callback<R> {
 
     private CallbackOperations<R> callbackOperations;
     private OnResponseReady<R> onResponseReady;

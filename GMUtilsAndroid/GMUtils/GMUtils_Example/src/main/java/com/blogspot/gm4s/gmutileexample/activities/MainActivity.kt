@@ -225,8 +225,30 @@ class MainActivity : BaseActivity() {
             log("pick image began", "")
         }
 
-        this.view.btn14.text = "Restore App Backup"
+        this.view.btn14.text = "Test Logger Functions"
         this.view.btn14.setOnClickListener {
+            log("test logger", "")
+            testLogger()
+        }
+
+        this.view.btn15.text = "Get App Backup"
+        this.view.btn15.setOnClickListener {
+            /*val r = this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            val f = File(r, System.currentTimeMillis().toString() + ".txt");
+            val b = f.createNewFile();*/
+
+            log("get-app-backup", "getting app backup started")
+            Logger.d().logConfigs
+                .setLogDeadline(DateOp.getInstance().increaseDays(1))
+                .setWriteLogsToPublicFileDeadline(DateOp.getInstance().increaseDays(1))
+
+            Logger.d().exportAppBackup(thisActivity(), true) {
+                log("get-app-backup", "getting app backup finished: ${it.message}")
+            }
+        }
+
+        this.view.btn16.text = "Restore App Backup"
+        this.view.btn16.setOnClickListener {
             log("restore-app-backup", "restoring app backup started")
             val b = FileUtils.createInstance().showFileExplorer(
                 this,
@@ -237,13 +259,13 @@ class MainActivity : BaseActivity() {
             log("restore-app-backup", "restoring app backup started: $b")
         }
 
-        this.view.btn15.text = "Test Untrusted Connection"
-        this.view.btn15.setOnClickListener {
+        this.view.btn17.text = "Test Untrusted Connection"
+        this.view.btn17.setOnClickListener {
             testUntrustedConnection()
         }
 
-        this.view.btn16.text = "Input Dialog with 3 inputs"
-        this.view.btn16.setOnClickListener {
+        this.view.btn18.text = "Input Dialog with 3 inputs"
+        this.view.btn18.setOnClickListener {
             InputDialog.create(this)
                 .setTitle("title")
                 .setMessage("message")
@@ -266,8 +288,8 @@ class MainActivity : BaseActivity() {
                 .show()
         }
 
-        this.view.btn17.text = "List Dialog"
-        this.view.btn17.setOnClickListener {
+        this.view.btn19.text = "List Dialog"
+        this.view.btn19.setOnClickListener {
             ListDialog<String>(this) { inp, idx ->
                 log("List Dialog", inp)
             }.setTitle("Title")
@@ -276,77 +298,23 @@ class MainActivity : BaseActivity() {
                 .show()
         }
 
-        this.view.btn18.text = "Firebase"
-        this.view.btn18.setOnClickListener {
+        this.view.btn20.text = "Firebase"
+        this.view.btn20.setOnClickListener {
             startActivity(Intent(this, FirebaseTestActivity::class.java))
         }
 
-        this.view.btn19.text = "Test Logger Functions"
-        this.view.btn19.setOnClickListener {
-            log("test logger", "")
-            val logger = Logger.instance("testLogger")
-            logger.logConfigs.apply {
-                val dl = DateOp.getInstance().increaseDays(1)
-                setLogDeadline(dl)
-                //setWriteLogsToPublicFileDeadline(dl)
-                setWriteLogsToPrivateFileDeadline(dl)
-            }
-
-            thread {
-                for (i in 0..200) {
-                    //_testLogger(logger)
-                    logger.print { "A$i," }
-//                Thread.sleep(Random.nextLong(1, 5))
-                }
-            }
-        }
-
-        this.view.btn20.text = "Export App Backup"
-        this.view.btn20.setOnClickListener {
-            /*val r = this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            val f = File(r, System.currentTimeMillis().toString() + ".txt");
-            val b = f.createNewFile();*/
-
-            log("get-app-backup", "getting app backup started")
-            val dl = DateOp.getInstance().increaseDays(1)
-            Logger.d().logConfigs
-                .setLogDeadline(dl)
-                //.setWriteLogsToPublicFileDeadline(dl)
-                .setWriteLogsToPrivateFileDeadline(dl)
-
-            Logger.d().exportAppBackup(thisActivity(), true) {
-                log("get-app-backup", "getting app backup finished: ${it.message}")
-            }
-        }
-
-        this.view.btn21.text = "BUG"
-        this.view.btn21.setOnClickListener {
-            //val dl = DateOp.getInstance().increaseDays(1)
-            val dl = DateOp.getInstance().decreaseDays(1)
-            Logger.d().logConfigs
-                .setLogDeadline(dl)
-                //.setWriteLogsToPublicFileDeadline(dl)
-                .setWriteLogsToPrivateFileDeadline(dl)
-
-            Logger.instance("l1").logConfigs
-                .setLogDeadline(dl)
-                //.setWriteLogsToPublicFileDeadline(dl)
-                .setWriteLogsToPrivateFileDeadline(dl)
-
-            Logger.instance("l2").logConfigs
-                .setLogDeadline(dl)
-                //.setWriteLogsToPublicFileDeadline(dl)
-                .setWriteLogsToPrivateFileDeadline(dl)
-
-            Logger.instance("l3").logConfigs
-                .setLogDeadline(dl)
-                //.setWriteLogsToPublicFileDeadline(dl)
-                .setWriteLogsToPrivateFileDeadline(dl)
-
+        this.view.btn25.text = "BUG"
+        this.view.btn25.setOnClickListener {
+            val dl = DateOp.getInstance().increaseDays(5)
+            Logger.d().logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l1").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l2").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l3").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
             Logger.printToAll() {"test"}
 
             error("throw bug to test writing to all logs file")
         }
+
 
         //------------------------------------------------------------------------------------------
 
@@ -358,6 +326,7 @@ class MainActivity : BaseActivity() {
         (application as BaseApplication).checkBugsExist(this) {
             Log.d(this::class.java.name, "onCreate: ")
         }
+
 
     }
 
@@ -405,6 +374,56 @@ class MainActivity : BaseActivity() {
             }
         }
     }
+
+    fun testLogger() {
+        val logger = Logger.instance("testLogger")
+        logger.logConfigs.apply {
+            val dl = DateOp.getInstance().increaseDays(1)
+            setLogDeadline(dl)
+            setWriteLogsToPublicFileDeadline(dl)
+        }
+
+        thread {
+            for (i in 0..200) {
+                //_testLogger(logger)
+                logger.print { "A$i," }
+//                Thread.sleep(Random.nextLong(1, 5))
+            }
+        }
+
+//        thread {
+//            for (i in 0..100) {
+//                //_testLogger(logger)
+//                logger.print { "B$i," }
+//                Thread.sleep(Random.nextLong(1, 5))
+//            }
+//        }
+    }
+
+    fun _testLogger(logger: LoggerAbs) {
+        try {
+            val x = 1 / 0
+        } catch (e: Exception) {
+            logger.print(e)
+            logger.print({ logger.logId() }, e)
+        }
+
+        logger.print { "loggerTest()" }
+        logger.print({ logger.logId() }) { "loggerTest()" }
+        Log.d("testLogger", logger.getLogFilesPath(this, null))
+
+        logger.printMethod()
+        logger.printMethod({ logger.logId() })
+        logger.printMethod({ logger.logId() }) { "this is more info" }
+        val r = Runnable {
+            logger.printMethod()
+            logger.printMethod { logger.logId() }
+            logger.printMethod({ logger.logId() }, { "this is more info" })
+        }
+        r.run()
+        logger.writeToFile(this) { "writing to file" }
+    }
+
 
     private fun testUntrustedConnection() {
         Logger.d().logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))

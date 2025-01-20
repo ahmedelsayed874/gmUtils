@@ -7,9 +7,12 @@ import com.google.gson.annotations.Expose;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import gmutils.DateOp;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -68,8 +71,7 @@ import java.util.Map;
     }
  */
 
-public abstract class BaseResponse {
-    public enum Statuses {Succeeded, Error, ConnectionFailed}
+public abstract class BaseResponse implements IResponse {
 
     @Expose(serialize = false, deserialize = false)
     @Ignore
@@ -107,29 +109,136 @@ public abstract class BaseResponse {
     @Ignore
     public Long _responseTime;
 
-    //----------------------------------------------------------------------------------------------
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setCallbackStatus(@Nullable Statuses status) {
+    @Override
+    public int getStatusCode() {
+        return _code;
+    }
+
+    @Override
+    public void setStatusCode(int code) {
+        _code = code;
+    }
+
+    //-------------------------------------
+
+    @Override
+    public Map<String, List<String>> getHeaders() {
+        return _headers;
+    }
+
+    @Override
+    public void setHeaders(Map<String, List<String>> headers) {
+        _headers = headers;
+    }
+
+    //-------------------------------------
+
+    @Override
+    public void setRequestTime(long time) {
+        _requestTime = time;
+    }
+
+    @Override
+    public long getRequestTime() {
+        return _requestTime;
+    }
+
+    //-------------------------------------
+
+    @Override
+    public void setResponseTime(long time) {
+        _responseTime = time;
+    }
+
+    @Override
+    public long getResponseTime() {
+        return _responseTime;
+    }
+
+    public String requestInterval() {
+        try {
+            int[] DHMSMs = DateOp.timeComponentFromTimeMillis(_responseTime - _requestTime);
+            return DHMSMs[2] + "M, " + DHMSMs[3] + "S, " + DHMSMs[4] + "Ms";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    //-------------------------------------
+
+    @Override
+    public void setExtras(Map<String, Object> extras) {
+        _extras = extras;
+    }
+
+    @Override
+    public Map<String, Object> getExtras() {
+        return _extras;
+    }
+
+    //-------------------------------------
+
+    @Override
+    public void setCallbackStatus(@Nullable Status status) {
         this._callbackStatus = status.name();
     }
 
+    @Override
     @Nullable
-    public final Statuses getCallbackStatus() {
+    public final Status getCallbackStatus() {
         if (_callbackStatus == null) return null;
-        else return Statuses.valueOf(_callbackStatus);
+        else return Status.valueOf(_callbackStatus);
     }
 
-    public abstract Statuses getResponseStatus();
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public boolean isSuccess() {
-        return getResponseStatus() == Statuses.Succeeded;
+        return getResponseStatus() == Status.Succeeded;
     }
 
     public boolean isConnectionFailed() {
-        return getResponseStatus() == Statuses.ConnectionFailed;
+        return getResponseStatus() == Status.ConnectionFailed;
     }
 
-    //----------------------------------------------------------------------------------------------
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void setError(String error) {
+        _error = error;
+    }
+
+    @Override
+    public String getError() {
+        return _error;
+    }
+
+    //-----------------------------
+
+    @Override
+    public void setIsErrorDueException(boolean dueException) {
+        _isErrorDueException = dueException;
+    }
+
+    @Override
+    public boolean isErrorDueException() {
+        return _isErrorDueException;
+    }
+
+    //-----------------------------
+
+    @Override
+    public void setIsSSLCertificateRequired(boolean required) {
+        _isSSLCertificateRequired = required;
+    }
+
+    @Override
+    public boolean isSSLCertificateRequired() {
+        return _isSSLCertificateRequired;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void copyFrom(@NotNull BaseResponse otherResponse) {
         _callbackStatus = otherResponse._callbackStatus;
@@ -174,6 +283,7 @@ public abstract class BaseResponse {
                 "extras=" + _extras + ",\n" +
                 "requestTime=" + _requestTime + ",\n" +
                 "responseTime=" + _responseTime + ",\n" +
+                "requestInterval=" + requestInterval() + ",\n" +
                 "header=" + header + "\n" +
                 '}';
     }

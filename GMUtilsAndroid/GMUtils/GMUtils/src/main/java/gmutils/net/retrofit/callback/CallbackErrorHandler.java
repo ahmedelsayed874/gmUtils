@@ -1,6 +1,7 @@
 package gmutils.net.retrofit.callback;
 
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
+import gmutils.net.retrofit.responseHolders.IResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -15,6 +16,6 @@ import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
  * +201022663988
  */
 public interface CallbackErrorHandler {
-    BaseObjectResponse.Statuses getInternalStatus(int code, String error);
+    IResponse.Status getInternalStatus(int code, String error);
     String getErrorMessage(int code, String error);
 }

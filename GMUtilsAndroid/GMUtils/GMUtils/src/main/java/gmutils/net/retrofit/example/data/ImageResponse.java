@@ -30,7 +30,7 @@ public class ImageResponse extends BaseObjectResponse<Object> {
     }
 
     @Override
-    public Statuses getResponseStatus() {
+    public Status getResponseStatus() {
         return null;
     }
 }

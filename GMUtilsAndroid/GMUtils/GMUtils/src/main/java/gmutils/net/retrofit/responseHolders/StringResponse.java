@@ -23,12 +23,14 @@ public final class StringResponse extends BaseResponse {
     }
 
     @Override
-    public Statuses getResponseStatus() {
-        Statuses callbackStatus = getCallbackStatus();
+    public Status getResponseStatus() {
+        Status callbackStatus = getCallbackStatus();
         if (callbackStatus == null) {
-            return null != text ? Statuses.Succeeded : Statuses.Error;
+            return null != text ? Status.Succeeded : Status.Error;
 
-        } else return callbackStatus;
+        } else {
+            return callbackStatus;
+        }
     }
 
     @Override

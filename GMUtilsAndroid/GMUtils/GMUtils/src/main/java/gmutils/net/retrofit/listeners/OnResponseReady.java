@@ -1,6 +1,7 @@
 package gmutils.net.retrofit.listeners;
 
 import gmutils.net.retrofit.responseHolders.BaseResponse;
+import gmutils.net.retrofit.responseHolders.IResponse;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -13,6 +14,6 @@ import gmutils.net.retrofit.responseHolders.BaseResponse;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public interface OnResponseReady<BR extends BaseResponse> {
+public interface OnResponseReady<BR extends IResponse> {
     void invoke(BR response);
 }

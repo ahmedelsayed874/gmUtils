@@ -55,6 +55,7 @@ import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.callback.LogsOptions;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.BaseResponse;
+import gmutils.net.retrofit.responseHolders.IResponse;
 import gmutils.storage.GeneralStorage;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -664,7 +665,7 @@ public class RetrofitService {
     //----------------------------------------------------------------------------------------------
 
     @Nullable
-    public static <R extends BaseResponse> R executeWebService(
+    public static <R extends IResponse> R executeWebService(
             boolean async,
             Class<R> responseClass,
             Call<R> call,
@@ -681,7 +682,7 @@ public class RetrofitService {
     }
 
     @Nullable
-    public static <R extends BaseResponse> R executeWebService(
+    public static <R extends IResponse> R executeWebService(
             boolean async,
             Class<R> responseClass,
             Call<R> call,
@@ -699,7 +700,7 @@ public class RetrofitService {
     }
 
     @Nullable
-    public static <R extends BaseResponse> R executeWebService(
+    public static <R extends IResponse> R executeWebService(
             boolean async,
             Class<R> responseClass,
             Call<R> call,
@@ -717,7 +718,7 @@ public class RetrofitService {
     }
 
     @Nullable
-    public static <R extends BaseResponse> R executeWebService(
+    public static <R extends IResponse> R executeWebService(
             boolean async,
             Class<R> responseClass,
             Call<R> call,
