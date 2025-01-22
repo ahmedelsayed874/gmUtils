@@ -10,7 +10,7 @@ import "package:googleapis_auth/auth_io.dart";
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 
 import '../../../main.dart' as main;
-import '../../../zgmutils/data_utils/storages/locale_preference.dart';
+import '../../../zgmutils/data_utils/storages/app_preferences_storage.dart';
 import '../../../zgmutils/utils/notifications.dart';
 import '../../utils/logs.dart';
 import '../../utils/result.dart';
@@ -210,7 +210,7 @@ class FCM extends IFCM {
 
   void _popupNotification(RemoteMessage message) {
     try {
-      LocalePreference().isEn().then((en) {
+      AppPreferencesStorage().isEn().then((en) {
         _popupNotification2(message, en);
       });
     } catch (e) {
