@@ -36,6 +36,10 @@ public class SettingsStorage {
         mPreference = context.getSharedPreferences(prefName, Context.MODE_PRIVATE);
     }
 
+    public SettingsStorage(SharedPreferences preference) {
+        this.mPreference = preference;
+    }
+
     public Language languagePref() {
         if (language == null) language = new Language(mPreference);
         return language;
@@ -47,8 +51,8 @@ public class SettingsStorage {
         SharedPreferences mPreference;
         String PREF_KEY;
 
-        BasePref(SharedPreferences mPreference, String PREF_KEY) {
-            this.mPreference = mPreference;
+        BasePref(SharedPreferences preference, String PREF_KEY) {
+            this.mPreference = preference;
             this.PREF_KEY = PREF_KEY;
         }
 

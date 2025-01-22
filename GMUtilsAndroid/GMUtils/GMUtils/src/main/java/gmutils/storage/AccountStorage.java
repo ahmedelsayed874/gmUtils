@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +44,10 @@ public class AccountStorage {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        public EncryptionUtil(@NotNull Security.EncryptDecryptInterface encryptDecrypt) {
+            this.encryptDecryptInterface = encryptDecrypt;
         }
 
         public String encrypt(String data) {
@@ -137,6 +143,11 @@ public class AccountStorage {
         String prefName = context.getPackageName() + "_" + getClass().getSimpleName().toUpperCase();
         sharedPreferences = context.getSharedPreferences(prefName, Context.MODE_PRIVATE);
         encryptionUtil = new EncryptionUtil(context.getApplicationContext());
+    }
+
+    public AccountStorage(SharedPreferences sharedPreferences, Security.EncryptDecryptInterface encryptDecrypt) {
+        this.sharedPreferences = sharedPreferences;
+        this.encryptionUtil = new EncryptionUtil(encryptDecrypt);
     }
 
     private String tryEncrypt(String data) {

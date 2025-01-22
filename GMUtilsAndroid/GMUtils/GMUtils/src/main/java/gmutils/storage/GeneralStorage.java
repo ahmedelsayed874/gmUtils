@@ -28,16 +28,12 @@ import java.util.Set;
 public class GeneralStorage {
 
     public static GeneralStorage getInstance() {
-        return new GeneralStorage(null);
+        return new GeneralStorage((String) null);
     }
 
     public static GeneralStorage getInstance(String name) {
         return new GeneralStorage(name);
     }
-
-    /*private static String getPrefName() {
-        return GeneralStorage.class.getName() + "GENERAL";
-    }*/
 
     //----------------------------------------------------------------------------------------------
 
@@ -54,6 +50,10 @@ public class GeneralStorage {
 
         mPreference = appContext.getSharedPreferences(name, Context.MODE_PRIVATE);
 
+    }
+
+    public GeneralStorage(SharedPreferences preference) {
+        this.mPreference = preference;
     }
 
     public void save(String key, String value) {
