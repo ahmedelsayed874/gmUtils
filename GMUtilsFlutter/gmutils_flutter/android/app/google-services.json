@@ -1,15 +1,15 @@
 {
   "project_info": {
-    "project_number": "876227404449",
-    "project_id": "bilinguallearningschools-ksa",
+    "project_number": "1111111",
+    "project_id": "xxxxx",
     "storage_bucket": "bilinguallearningschools-ksa.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:876227404449:android:3b35940dff3073551d06e0",
+        "mobilesdk_app_id": "1:2345:android:3b35940dff3073551d06e0",
         "android_client_info": {
-          "package_name": "sa.edu.bls.mobapp"
+          "package_name": "com.example"
         }
       },
       "oauth_client": [],

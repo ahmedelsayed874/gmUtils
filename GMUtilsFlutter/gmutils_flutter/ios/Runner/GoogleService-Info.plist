@@ -5,11 +5,11 @@
 	<key>API_KEY</key>
 	<string>AIzaSyCuc3xuG7Vh6uJC5u8W2tklMpJ0AY3ge5k</string>
 	<key>GCM_SENDER_ID</key>
-	<string>876227404449</string>
+	<string>1111111</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>sa.edu.bls.mobapp</string>
+	<string>com.example</string>
 	<key>PROJECT_ID</key>
 	<string>gmutils_flutter</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:876227404449:ios:7b6f7b54e38534c71d06e0</string>
+	<string>1:23456:ios:7b6f7b54e38534c71d06e0</string>
 </dict>
 </plist>
