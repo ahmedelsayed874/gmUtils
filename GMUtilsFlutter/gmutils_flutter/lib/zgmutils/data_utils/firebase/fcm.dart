@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:http/http.dart' as http;
-import 'package:googleapis_auth/googleapis_auth.dart' as googleAuth;
 import "package:googleapis_auth/auth_io.dart";
+import 'package:googleapis_auth/googleapis_auth.dart' as googleAuth;
+import 'package:http/http.dart' as http;
+import 'package:mowasalatna/resources/_resources.dart';
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 
 import '../../../main.dart' as main;
@@ -34,9 +35,13 @@ abstract class IFCM {
   ///must user on main screen starts
   void redirectToPendingScreen();
 
-  Future<void> subscribeToTopics(List<String> topics);
+  Future<Result<bool>> subscribeToTopics(List<String> topics);
 
-  Future<void> unsubscribeFromTopics({List<String>? topics});
+  Future<Result<bool>> unsubscribeFromSubscribedTopics();
+
+  Future<Result<bool>> unsubscribeFromTopics(List<String> topics);
+
+  Future<List<String>> subscribedTopics();
 
   Future<bool> sendMessageToSpecificDevice({
     required String deviceToken,
@@ -281,8 +286,10 @@ class FCM extends IFCM {
   }
 
   @override
-  Future<void> subscribeToTopics(List<String> topics) async {
-    await unsubscribeFromTopics();
+  Future<Result<bool>> subscribeToTopics(List<String> topics) async {
+    await unsubscribeFromSubscribedTopics();
+
+    String errors = '';
 
     for (var topic in topics) {
       try {
@@ -290,25 +297,67 @@ class FCM extends IFCM {
         Logs.print(() => "FCM: subscribed to topic: \"$topic\"");
       } catch (e) {
         Logs.print(() => "FCM: failed to subscribe to topic: \"$topic\"");
+
+        if (errors.isNotEmpty) errors += '\n';
+        errors += '- $topic: $e';
       }
     }
 
-    (await _prefs).setStringList('FCM_Topics', topics);
+    if (errors.isEmpty) {
+      (await _prefs).setStringList('FCM_Topics', topics);
+      return Result(true);
+    } else {
+      return Result(false, message: StringSet(errors));
+    }
   }
 
   @override
-  Future<void> unsubscribeFromTopics({List<String>? topics}) async {
-    try {
-      var topics2 = topics ?? (await _prefs).getStringList('FCM_Topics') ?? [];
-      for (var topic in topics2) {
-        try {
-          await messaging.unsubscribeFromTopic(topic);
-          Logs.print(() => "FCM: unsubscribe from topic: $topic");
-        } catch (e) {
-          Logs.print(() => "FCM: failed to unsubscribe from topic: $topic");
-        }
+  Future<Result<bool>> unsubscribeFromSubscribedTopics() async {
+    var savedTopics = await subscribedTopics();
+    return _unsubscribeFromTopics(
+      savedTopics: savedTopics,
+      targetTopics: savedTopics,
+    );
+  }
+
+  @override
+  Future<Result<bool>> unsubscribeFromTopics(List<String> topics) async {
+    var savedTopics = await subscribedTopics();
+    return _unsubscribeFromTopics(
+      savedTopics: savedTopics,
+      targetTopics: topics,
+    );
+  }
+
+  Future<Result<bool>> _unsubscribeFromTopics({
+    required List<String> savedTopics,
+    required List<String> targetTopics,
+  }) async {
+    String errors = '';
+
+    for (var topic in targetTopics) {
+      try {
+        await messaging.unsubscribeFromTopic(topic);
+        savedTopics.remove(topic);
+        Logs.print(() => "FCM: unsubscribe from topic: $topic");
+      } catch (e) {
+        Logs.print(() => "FCM: failed to unsubscribe from topic: $topic");
+
+        if (errors.isNotEmpty) errors += '\n';
+        errors += '- $topic: $e';
       }
-    } catch (e) {}
+    }
+
+    if (errors.isEmpty) {
+      (await _prefs).setStringList('FCM_Topics', savedTopics);
+      return Result(true);
+    } else {
+      return Result(false, message: StringSet(errors));
+    }
+  }
+
+  Future<List<String>> subscribedTopics() async {
+    return (await _prefs).getStringList('FCM_Topics') ?? [];
   }
 
   //endregion
