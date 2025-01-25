@@ -357,14 +357,14 @@ class _HomeScreenState extends BaseState<HomeScreen>
 
     lst.addAll([
       TitledIconButton(
-        icon: Res.images.logoColoredSmallWithoutText,
-        title: Res.strings.bls_website,
+        icon: Res.images.appLogoToolbar,
+        title: 'Link 1',
         notificationCount: 0,
         onClick: openBlsWebsiteScreen,
       ),
       TitledIconButton(
-        icon: Res.images.logoColoredSmallWithoutText,
-        title: Res.strings.banan_website,
+        icon: Res.images.appLogoToolbar,
+        title: 'Link 2',
         notificationCount: 0,
         onClick: openBananWebsiteScreen,
       ),

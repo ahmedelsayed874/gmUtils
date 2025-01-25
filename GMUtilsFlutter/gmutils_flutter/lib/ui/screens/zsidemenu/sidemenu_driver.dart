@@ -77,9 +77,9 @@ abstract class SidemenuDriverAbs extends IScreenDriver {
           submenu: [
             //bls website
             SidemenuItem(
-              iconRes: Res.images.logoColoredSmallWithoutText,
+              iconRes: Res.images.appLogoToolbar,
               iconData: null,
-              text: Res.strings.bls_website,
+              text: 'Link 1',
               action: delegate.openBlsWebsiteScreen,
               submenu: null,
             ),
@@ -87,9 +87,9 @@ abstract class SidemenuDriverAbs extends IScreenDriver {
             //banan website
 
             SidemenuItem(
-              iconRes: Res.images.logoColoredSmallWithoutText,
+              iconRes: Res.images.appLogoToolbar,
               iconData: null,
-              text: Res.strings.banan_website,
+              text: 'Link 2',
               action: delegate.openBananWebsiteScreen,
               submenu: null,
             ),

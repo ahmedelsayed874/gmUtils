@@ -83,7 +83,7 @@ class _RPSetNewPasswordScreenState extends BaseState<RPSetNewPasswordScreen>
 
         Center(
           child: Image.asset(
-            Res.images.logoColored,
+            Res.images.appLogoTop,
             width: 170,
           ),
         ),

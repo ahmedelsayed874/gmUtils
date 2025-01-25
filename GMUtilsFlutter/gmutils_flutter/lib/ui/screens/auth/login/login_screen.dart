@@ -93,7 +93,7 @@ class _LoginScreenState extends BaseState<LoginScreen>
     //logo
     children.add(Center(
       child: Image.asset(
-        Res.images.logoColored,
+        Res.images.appLogoTop,
         width: 170,
       ),
     ));

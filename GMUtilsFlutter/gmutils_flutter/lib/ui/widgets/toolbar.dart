@@ -312,7 +312,7 @@ class _ToolbarState extends State<Toolbar> {
         HomeScreen.show(); //navigate to home on logo long clicked
       },
       child: Image.asset(
-        Res.images.logoColoredSmallWithoutText,
+        Res.images.appLogoToolbar,
         height: 45,
       ),
     ));
@@ -320,52 +320,13 @@ class _ToolbarState extends State<Toolbar> {
 
     children.add(const SizedBox(width: 4));
 
-    /*return Container(
+    return Container(
       height: Toolbar.toolbarHeight,
       decoration: BoxDecoration(
         color: Res.themes.colors.primary,
         boxShadow: [const BoxShadow()],
       ),
       child: Row(children: children),
-    );*/
-
-    return SizedBox(
-      height: Toolbar.toolbarHeight + 10,
-      child: Stack(
-        children: [
-          //Container(color: Colors.green,),
-          SizedBox(
-            height: Toolbar.toolbarHeight + 10,
-            width: double.maxFinite,
-            child: Transform.flip(
-              flipX: App.isEnglish,
-              child: Image.asset(
-                Res.images.toolbar,
-                fit: BoxFit.fill,
-              ),
-            ),
-          ),
-          //
-          Padding(
-            padding: const EdgeInsets.only(top: 35),
-            child: Opacity(
-              opacity: 0.5,
-              child: SizedBox(
-                height: Toolbar.toolbarHeight + 10,
-                width: double.maxFinite,
-                child: Transform.flip(
-                  flipX: App.isEnglish,
-                  child: Image.asset(
-                    Res.images.toolbar,
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Row(children: children),
-        ],
-      ),
     );
   }
 }

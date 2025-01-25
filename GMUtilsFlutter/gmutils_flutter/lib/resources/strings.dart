@@ -7,7 +7,7 @@ class Strings {
 
   Strings(BuildContext? context);
 
-  String get appName => 'مدارس التعليم ثنائي اللغة';
+  String get appName => 'gmutils';
 
   String get please_wait => en ? 'Please wait...' : 'يرجى الإنتظار...';
 
@@ -104,6 +104,7 @@ class Strings {
   String get send => en ? 'Send' : 'إرسال';
 
   String get previous => en ? 'Previous' : 'السابق';
+
   String get next => en ? 'Next' : 'التالي';
 
   String get pounds => en ? 'pounds' : 'جنيه';
@@ -438,9 +439,6 @@ class Strings {
 
   String get your_account_has_been_blocked =>
       en ? 'Your account has been blocked.' : 'تم حظر حسابك';
-
-  String get your_account_has_been_closed =>
-      en ? 'Your account has been closed.' : 'تم غلق حسابك';
 
   String get until_ => en ? 'until:' : 'حتى:';
 
@@ -1084,6 +1082,7 @@ class Strings {
   String get parent_info => en ? 'Parent Info' : 'معلومات ولي الأمر';
 
   get schoolDepartment => en ? 'Department' : 'القسم';
+
   get schoolBuilding => en ? 'Building' : 'المبنى';
 
   get learningStage => en ? 'Learning Stage' : 'المرحلة التعليمية';
@@ -1137,12 +1136,6 @@ class Strings {
 
   get cant_open_the_file => en ? 'Can\'t open the file' : 'تعذر فتح الملف';
 
-  String get the_lesson_add_successfully =>
-      en ? 'The lesson add successfully' : 'تم اضافة الدرس بنجاح';
-
-  String get the_lesson_updated_successfully =>
-      en ? 'The lesson updated successfully' : 'تم تعديل الدرس بنجاح';
-
   get resources => en ? 'Resources' : 'المصادر';
 
   String get no_resources =>
@@ -1165,15 +1158,6 @@ class Strings {
   String get wait_for_review2 => en ? 'wait for review' : 'في انتظار المراجعة';
 
   String get review => en ? 'Review' : 'مراجعه';
-
-  String get create_virtual_classroom =>
-      en ? 'Create Virtual Classroom' : 'انشاء غرفة دراسة افتراضية';
-
-  String get start_virtual_classroom =>
-      en ? 'Start Virtual Classroom' : 'بدأ غرفة دراسة افتراضية';
-
-  String get join_virtual_classroom =>
-      en ? 'Join Virtual Classroom' : 'انضم لغرفة الدراسة الافتراضية';
 
   get scheduled_at => en ? 'Scheduled at' : 'جُدوِلَ في';
 
@@ -1208,38 +1192,13 @@ class Strings {
       en ? 'Long press to paste' : 'ضغطة مطولة للصق من الحافظة';
 
   String get long_press_paste => en ? 'Long press/paste' : 'ضغطة مطولة\\لصق';
-  String get paste_the_link_here => en ? 'Paste the link here' : 'إلصق الرابط هنا';
 
-  String get select_text_to_change_its_format =>
-      en ? 'Select text to change its format' : 'حدد النص لتقوم بتغيير تنسيقة';
-
-  String get any_change_to_content_will_lose_the_text_format => en
-      ? 'Any change to content will discard the text format'
-      : 'أي تغيير في المحتوى سوف يلغي تنسيق النص';
+  String get paste_the_link_here =>
+      en ? 'Paste the link here' : 'إلصق الرابط هنا';
 
   String get proceed => en ? 'Proceed' : 'واصل';
 
   get details => en ? 'Details' : 'التفاصيل';
-
-  get questionBank => en ? 'Question Bank' : 'بنك الأسئلة';
-
-  String get questions_added_successfully =>
-      en ? 'Questions added successfully' : 'تم اضافة الأسئلة بنجاح';
-
-  get share_question => en ? 'Share Question' : 'شارك بسؤال';
-
-  String get add_new_questions =>
-      en ? 'Add New Questions' : 'إضافة أسألة جديدة';
-
-  String get add_new_homework => en ? 'Add New Homework' : 'إضافة واجب جديد';
-
-  String get add_new_exam => en ? 'Add New Exam' : 'إضافة إختبار جديد';
-
-  String get edit_the_questions => en ? 'Edit The Question' : 'تعديل سؤال';
-
-  String get edit_the_homework => en ? 'Edit Homework' : 'تعديل واجب';
-
-  String get edit_the_exam => en ? 'Edit Exam' : 'تعديل الاختبار';
 
   get suggestedAnswer => en ? 'Suggested Answer' : 'الإجابة المقترحة';
 
@@ -1269,29 +1228,10 @@ class Strings {
 
   get correct => en ? 'Correct' : 'صحيحة';
 
-  get default_is_1 => en ? 'default is 1' : 'الإفتراضي هو ١';
-
-  get you_have_to_add_2_choices_at_least_one_of_them_is_correct_at_least => en
-      ? 'You have to add 2 different choices at least, and one of them at least is correct'
-      : 'يجب إضافة خيارين مختلفين على الأقل، أحدهم على الأقل يكون صحيحا';
-
-  get one_of_the_choices_must_be_correct_at_least => en
-      ? 'One of the choices at least must be marked as correct'
-      : 'يجب أن يكون أحد الخيارات على الأقل معلّم كصحيح';
-
-  get only_one_of_the_choices_must_be_correct => en
-      ? 'Only one of the choices must be marked as correct'
-      : 'يجب أن يكون أحد الخيارات فقط معلّم كصحيح';
-
-  String get please_review_mentioned_errors => en
-      ? 'Please review the mentioned errors'
-      : 'يرجى مراجعة الأخطاء المذكورة';
 
   get must_be => en ? 'must be' : 'يجب أن يكون';
 
   get integer_number => en ? 'integer number' : 'عدد صحيح';
-
-  get find_question => en ? 'Find a question...' : 'أتبحث عن سؤال...';
 
   get onlyMe => en ? 'Only Me' : 'أنا فقط';
 
@@ -1299,97 +1239,17 @@ class Strings {
 
   get add => en ? 'Add' : 'إضافة';
 
-  get number_of_answers => en ? 'No. Of Answers' : 'عدد الإجابات';
-
-  String get lesson_content_formatting =>
-      en ? 'Lesson Content Formatting' : 'تنسيق محتوى الدرس';
-
-  String get create_homework_for_lesson =>
-      en ? 'Create Homework For The Lesson' : 'إنشاء واجب للدرس';
-
-  String get add_new_homework_for_lesson =>
-      en ? 'Add New Homework For The Lesson' : 'إضافة واجب للدرس';
-
-  String get you_didnt_create_homework_for_this_lesson_yet => en
-      ? 'You didn\'t create a homework for this lesson yet'
-      : 'لم تنشيء واجب لهذا الدرس حتى الآن';
 
   get supposedTime => en ? 'Supposed Time' : 'زمن الإجابة';
-
-  get where_the_test_will_end_automatically => en
-      ? 'where the test will end automatically'
-      : 'حيث سيغلق الإختبار تلقائيا بعد انقضاء هذه المده';
 
   get startAt => en ? 'Start At' : 'تاريخ البدأ';
 
   get closeAt => en ? 'Close At' : 'تاريخ الإنتهاء';
 
-  get where_no_one_can_answer_any_more => en
-      ? 'where no one can answer any more'
-      : 'حيث لن يستطيع أحد أن يقدم إجابات بعد ذلك';
-
-  get minimum_time => en ? 'Minimum Time' : 'أقل قيمة للوقت';
-
   get choose_one => en ? 'Choose one' : 'اختار أحدهم';
-
-  get number_of_questions => en ? 'Number Of Questions' : 'عدد الأسألة';
 
   String get step => en ? 'Step' : 'خطوة';
 
-  get lesson => en ? 'Lesson' : 'الدرس';
-
-  String get import_from_questionBank =>
-      en ? 'Import from Question Bank' : 'استيراد من بنك الأسئلة';
-
-  get selected_questions => en ? 'Selected Questions' : 'الأسئلة المختارة';
-
-  String get there_is_X_question_which_is_already_exist => en
-      ? 'There is X question(s) which is already exist and not added.'
-      : '.يوجد X سؤال/أسئلة مكررين لم يتم اضافتهم';
-
-  get select_lesson => en ? 'Select Lesson' : 'اختار الدرس';
-
-  get select_learningStageLevel =>
-      en ? 'Select Learning Stage Level' : 'اختار اسم المرحلة التعليمية';
-
-  get leave_empty_to_target_all =>
-      en ? 'Leave empty to target all' : 'اتركها فارغة لإختيار الجميع';
-
-  String get you_have_to_select_subject_first =>
-      en ? 'You have to select subject first' : 'يجب اختيار اسم المادة أولا';
-
-  String get retrieving_data_failed =>
-      en ? 'Retrieving data failed' : 'تعذر تحميل الداتا';
-
-  String get subject_and_lesson_is_required =>
-      en ? 'Subject and lesson are required' : 'اسم المادة والدرس مطلوبين';
-
-  String get subject_is_required =>
-      en ? 'Subject name is required' : 'اسم المادة مطلوب';
-
-  String get supposedTime_must_be_greaterThan_X_minutes => en
-      ? 'Supposed time must be greater than X minutes'
-      : 'زمن الإجابة يجب ألا يقل عن X دقيقة';
-
-  String get please_put_description_for_the_X =>
-      en ? 'Please put a description for the ' : 'برجاء وضع وصف لل';
-
-  String get start_time_is_required =>
-      en ? 'Start time is required' : 'يجب تحديد وقت البداية';
-
-  get you_didnt_set_test_time_thats_mean_it_has_open_time => en
-      ? 'You didn\'t set the Test Time, that\'s mean it has an open time.'
-      : 'لم تحدد وقت البداية للإختبار مما يعني أن مدة الإمتحان مفتوحة.';
-
-  String get close_time_must_be_in_the_future_and_cover_answering_time => en
-      ? 'Close time must be in the future and cover answering time to make sure of get enough time for answering the questions'
-      : 'تاريخ ووقت الإنتهاء ينبغى أن يكون في المستقبل وأن يغطى زمن الإجابة لضمان الوقت الكافي للإجابة على الأسئلة.';
-
-  String get start_time_must_be_in_the_future_by_at_least_X_minutes => en
-      ? 'Start time must be in the future by at least X minutes'
-      : 'وقت البدأ ينبغى أن يكون في المستقبل بما لا يقل عن X دقائق';
-
-  get semester => en ? 'Semester' : 'الفصل الدراسي';
 
   get openTime => en ? 'Open Time' : 'وقت مفتوح';
 
@@ -1399,10 +1259,6 @@ class Strings {
 
   get hidden => en ? 'Hidden' : 'مختفي';
 
-  get homework_answers => en ? 'Homework Answers' : 'إحابات الواجبات';
-
-  get exam_answers => en ? 'Exam Answers' : 'إحابات الإختبارات';
-
   get closeTime => en ? 'Close Time' : 'تاريخ الإنتهاء';
 
   get leaveReview => en ? 'Leave review' : 'مغادرة المراجعه';
@@ -1411,76 +1267,12 @@ class Strings {
 
   String get set => en ? 'Set' : 'حفظ';
 
-  String get set_score => en ? 'Set Score' : 'حفظ التقييم';
-
-  get type_answer_score_here =>
-      en ? 'Type answer score here' : 'اكتب تقييم الإجابة هنا';
-
   get type_valid_number => en ? 'Type valid number' : 'اكتب رقما صحيحا';
 
   get max => en ? 'Max.' : 'بحد أقصى';
 
-  String get you_entered_score_greater_than_the_didicated_for_this_question_which_is_X => en
-      ? 'You entered score greater than the dedicated for this question which is X'
-      : 'لقد أدخلت قيمة أكبر من المخصصة لهذا السؤال والتي هي X';
-
-  get set_the_answer_score => en ? 'Set the answer score' : 'حدد تقييم للإجابة';
-
-  get automatedScore => en ? 'Automated Score' : 'التقييم التلقائي';
-
-  get teacher_score => en ? 'Teacher Score' : 'تقييم المدرس';
-
-  get not_set => '<NOT-SET>';
-  get not_set_yet => 'Not set yet';
-
   String get do_you_have_any_comment =>
       en ? 'Do you have any comment?' : 'هل لديك أي تعليق؟';
-
-  get the_following_answer_need_to_set_score => en
-      ? 'The following answer need to set the score'
-      : 'الإجابة التالية تحتاج لوضع التقييم له';
-
-  get the_following_answers_need_to_set_score => en
-      ? 'The following answers need to set the score'
-      : 'الإجابات التالية تحتاج لوضع التقييم لها';
-
-  String get answer_show_result =>
-      en ? 'Answer/Show Result' : 'إجابة/عرض النتيجة';
-
-  get answered => en ? 'Answered' : 'الإجابات';
-
-  get questionsCount => en ? 'Questions Count' : 'عدد الأسئلة';
-
-  get startAnsweringTime => en ? 'Start Answering Time' : 'عدد الأسئلة';
-
-  get lastUpdateTime => en ? 'Last Update Time' : 'وقت آخر تحديث';
-
-  get reviewedBy => en ? 'Reviewed By' : 'قام بالمراجعة';
-
-  String get testInterval => en ? 'Test Interval' : 'وقت الإختبار';
-
-  String get this_test_created_by =>
-      en ? 'This test created by' : 'تم إنشاء هذا الإختبار من قِبَل';
-
-  String get start => en ? 'Start' : 'ابدأ';
-
-  String get test_has_been_finished =>
-      en ? 'Test has been finished' : 'تم انتهاء الإختبار';
-
-  String get answeredQuestions => en ? 'Answered Questions' : 'الأسئلة المجابة';
-
-  get answers => en ? 'answers' : 'إجابة';
-
-  String get show_test_result_on_system =>
-      en ? 'Show test result on system' : 'شاهد نتيجة الإختبار على النظام';
-
-  String get there_are_X_answers_are_waiting_for_review => en
-      ? 'There are X answers are waiting for review'
-      : 'لديك X سؤال في انتظار المراجعة';
-
-  String get there_is_one_answer_is_waiting_for_review => en
-      ? 'There is one answer is waiting for review'
-      : 'لديك سؤال في انتظار المراجعة';
 
   String? get the_first => en ? 'First' : 'الأول';
 
@@ -1490,97 +1282,10 @@ class Strings {
 
   String? get the_fourth => en ? 'Fourth' : 'الرابع';
 
-  get delete_test => en ? 'Delete Test' : 'حذف الإختبار';
-
-  String get finish_review => en ? 'Finish Review' : 'انهاء المراجعة';
-
   String get statistics => en ? 'Statistics' : 'الإحصائيات';
-
-  get virtualRoomsAttendance => en ? 'V.Room Atten.' : 'حضور الغرف';
 
   get hours => en ? 'Hours' : 'ساعات';
 
-  String get homeworks_statistics =>
-      en ? 'Homeworks Statistics' : 'إحصائيات الواجيات';
-
-  String get exams_statistics =>
-      en ? 'Exams Statistics' : 'إحصائيات الإختبارات';
-
-  String get virtualRooms_statistics =>
-      en ? 'Virtual Rooms Statistics' : 'إحصائيات غرف لبدراسة';
-
-  get reviewerNote => en ? 'Reviewer Note' : 'ملاحظات المراجع';
-
-  get no_end => en ? 'NO-END' : 'غير منتهي';
-
-  get stuff => en ? 'Stuff' : 'الهيئة التعليمية';
-
-  get top_in_subject => en ? 'Top In Subjects' : 'المتفوق بالمواد';
-
-  get top_in_test => en ? 'Top In Test' : 'المتفوق بالإمتحانات';
-
-  get parents => en ? 'Parents' : 'أولياء الأمور';
-
-  get show_mails => en ? 'Show Mails' : 'الإطلاع على البريد';
-
-  get show_chats => en ? 'Show Chats' : 'الإطلاع على المحادثات';
-
-  String get top_students => en ? 'Top Students' : 'الطلبة المتفوقون';
-
-  String get show_more => en ? 'Show More' : 'أظهر المزيد';
-
-  String get testInfo => en ? 'Test Info' : 'معلومات عن الإختبار';
-
-  get select_one_the_following_tests =>
-      en ? 'Select one of the following tests' : 'اختار أحد الأختبارات التالية';
-
-  get generalTest => en ? 'General test' : 'اختبار عام';
-
-  get addedHomeworks => en ? 'Added Homeworks' : 'الواجبات المضافة';
-
-  get addedExams => en ? 'Added Exams' : 'الإختبارات المضافة';
-
-  String get if_yes_the_exam_will_reach_all_students_who_study_same_subject => en
-      ? 'If yes, the exam will reach all students who study selected subject'
-      : 'في حالت نعم، سيصل الاختبار لكل الطلبة الذين يدرسون نفس المادة';
-
-  get reviewedHomeworks => en ? 'Reviewed Homeworks' : 'الواجبات المراجعة';
-
-  get reviewedExams => en ? 'Reviewed Exams' : 'الإختبارات المراجعة';
-
-  get interaction_with_mails =>
-      en ? 'Interaction With Mails' : 'التفاعل مع رسائل البريد';
-
-  get virtualRooms => en ? 'Virtual Rooms' : 'الغرف الإفتراضية';
-
-  String get you_are_seeing_as_manager =>
-      en ? 'You are seeing as manager' : 'أنت ترى هذا كمدير';
-
-  get show_lessons => en ? 'Show Lessons' : 'عرض الدروس';
-
-  get show_homework_exams =>
-      en ? 'Show Homework/Exams' : 'عرض الواجبات/الإختبارات';
-
-  get show_virtual_rooms => en ? 'Show Virtual Room' : 'عرض الغرف الإفتراضية';
-
-  get show_added_questions =>
-      en ? 'Show Added Questions' : 'عرض الأسئلة المضافة';
-
-  String get mails_count => en ? 'Mails Count' : 'عدد البريد الإلكتروني';
-
-  String get chat_rooms_count => en ? 'Chat Rooms Count' : 'عدد غرف المحادثة';
-
-  String get chat_messages_count =>
-      en ? 'Chat Messages Count' : 'عدد رسائل المحادثات';
-
-  String get lessonsCount => en ? 'Lessons Count' : 'عدد الدروس';
-
-  String get homeworksCount => en ? 'Homeworks Count' : 'عدد الواجبات';
-
-  String get examsCount => en ? 'Exams Count' : 'عدد الإختبارات';
-
-  String get virtualRoomsCount =>
-      en ? 'Virtual Rooms Count' : 'عدد الغرف الإفتراضية';
 
   get type => en ? 'Type' : 'النوع';
 
@@ -1601,150 +1306,36 @@ class Strings {
 
   String get ended => en ? 'Ended' : 'انتهى';
 
-  String get starting_virtual_allowed_before_start_time_by_X_minutes_only => en
-      ? 'Starting virtual room allowed before start time by X minutes only.'
-      : 'يسمح ببدأ الغرف الإفتراضية قبل وقت البدأ بـ X دقائق فقط.';
-
-  get roomLink => en ? 'Room Link' : 'رابط الغرفة';
-
   get updatedAt => en ? 'Updated At' : 'وقت التحديث';
 
-  String get select_user => en ? 'Select a User' : 'اختار أحد الحسابات';
-
-  String get try_to_generate_google_meet_from_the_next_button => en
-      ? 'Try to generate Google Meet link from the next button'
-      : 'حاول إنشاء رابط لجوجل ميت من الزر التالي';
-
-  String get generate_google_meet_link =>
-      en ? 'Generate Google Meet Link' : 'أنشيء رابط جوجل Meet';
-
-  String get or_you_can_create_one_and_paste_the_link_to_the_next_input => en
-      ? 'or you can create one in your favorite platform and paste the link to the next input'
-      : 'أو يمكنك انشاء غرفه على المنصة التي ترغب بها ولصق رابط الغرفه في المُدْخَل التالي';
-
-  String get create_link_and_paste_the_link_to_the_next_input => en
-      ? 'Create a link on your favorite platform and paste the link to the next input'
-      : 'أنشيء غرفه على المنصة التي ترغب بها وألصق الرابط الخاص بها في المُدْخَل التالي';
-
-  String get link_must_start_with_https => en
-      ? 'link must start with \'https://\''
-      : 'يجب أن يبدأ الرابط ب \'https://\'';
-
-  String get suggestedPlatforms => en ? 'Suggested Platforms' : 'المنصات المقترحة';
-
-  get the_link_of_the_vertual_room_is_missing => en ?
-  'The link of the virtual room is missing' :
-  'الرابط الخاص بالغرفه الافتراضية غير موجود';
 
   String get end => en ? 'End' : 'إنهاء';
 
-  String get endMeeting => en ? 'End Meeting' : 'انهاء الإجتماع';
-
   String get go_back => en ? 'Go Back' : 'للخلف';
-
-  get going_back_with_ending_meeting_will_not_record_end_time_which_important_for_your_evaluation => en ?
-  'Going back without end meeting will not record end time which important for your evaluation.' :
-  'الرجوع للخلف بدون انهاء الإجتماع لن يقوم بتسجيل وقت الإنتهاء الضروري لتقييم الآداء الخاص بك.';
 
   get now => en ? 'now' : 'الآن';
 
-  String get byUser => en ? 'By User' : 'بإختيار المستخدم';
-
-  get open_external => en ? 'Open External' : 'عرض خارجيا';
-
-  String get cancelVirtualRoom => en ? 'Cancel Virtual Room' : 'إلغاء الغرفة الإفتراضية';
-
-  get you_cant_cancel_now_while_meeting_should_be_started => en ?
-  'You can\'t cancel now while meeting should be started' :
-  'لا يمكنك الإلغاء الآن حيث من المفترض أنه قد تم البدأ';
-
-  String get insert_below_the_reason_of_cancelling => en ? 'Insert below the reason of cancelling' : 'أدخل بالأسفل سبب الإلغاء';
-
-  get select_date_time => en ? 'Select Date/Time' : 'حدد التاريخ/الوقت';
-
-  get subjects_based => en ? 'Subjects Based' : 'طُلّاب مادة دراسية';
-
-  String get all_students_who_study_subject_X => en ? 'All students who study subject \"Xxx\"' : 'كل الصلاب الذين يدرسون مادة \"Xxx\"';
-
-  String get your_students => en ? 'Your Students' : 'طلابك';
-
-  String get select_target_classrooms => en ? 'Select target classroom/s' : 'حدد الفصول الدراسية المستهدفة:';
-
-  String get you_have_X_deleted_messages_click_to_show => en ?
-  'You have Xxx deleted messages, click here to show' :
-  'لديك Xxx رسائل محذوفه، اضغ هنا لعرضها';
-
-  get click_to_specify_room_link => en ? 'Click to specify the room link' : 'اضغط لتحديد رابط الغرفة';
-
-  String get you_can_set_later => en ? 'You can set it later' : 'يمكن تحديد لا حقا';
-
-  get you_have_to_select_one_classroom_at_least => en ?
-  'You have to select one classroom at least' :
-  'يجب إختيار فصل دراسي واحد على الأقل';
-
-  String get you_cant_start_before_Xxx_minutes_of_start_time => en ?
-  'You can\'t start before Xxx minutes of start time' :
-  'لا يمكن البدأ قبل Xxx دقيقة من وقت بداية الإختبار';
+  String get you_can_set_later =>
+      en ? 'You can set it later' : 'يمكن تحديد لا حقا';
 
   get members => en ? 'Members' : 'الأعضاء';
 
-  get studentsRank => en ? 'Students Rank' : 'ترتيب الطلاب';
-
-  get external_links => en ? 'External Links' : 'روابط خارجية';
-  get bls_website => 'BLS Website';
-  get banan_website => 'BLS Platform';
-
-  String get who_see_the_message => en ? 'Who see the message' : 'من شاهد الرسالة';
-
-  get every_teacher_should_specify_his_classrooms_and_subjects => en ?
-  'Every teacher should specify his classrooms and subjects.' :
-  'ينبغي على كل مدرس أن يحدد الفصول والمواد الخاصة به.';
-
-  get set_it_anytime_from_your_profile => en ?
-      'Set it anytime from your profile.' :
-      'حددها في اي وقت من ملفك الشخصي.';
-
   get later => en ? 'Later' : 'لاحقا';
-
-  String get update_subjects => en ? 'Update Subjects' : 'تعديل المواد';
-  String get update_classrooms => en ? 'Update Classrooms' : 'تعديل الفصول';
-
-  get classSchedule => en ? 'Class Schedule' : 'جدول الحصص';
-
-  get teaching_configurations => en ? 'Teaching Configurations' : 'خيارات التدريس';
 
   get select => en ? 'Select' : 'حدد';
 
-  String get you_are_not_assigned_to_any_classroom => en ?
-  'You are not assigned to any classroom' :
-  'لم يتم تخصيص فصول دراسية لك';
-
-  String get assign_classroom => en ? 'Assign Classroom' : 'تخصيص فصل دراسي';
-
-  String get contact_it_team_to_fix_this_issue => en ? 'Contact IT supervisors to fix this issue' : 'تواصل مع مسئولي تكنولوجيا المعلومات لحل هذه المشكلة';
-
-  get editedBy => en ? 'Edited By' : 'عٌدّلت بواسطة';
-
-  get your_gender_is_not_specified_contact_admin_solve_this_problem => en ?
-  'Your gender is not specified, please contact the admin to solve this issue.' :
-  'نوع الجنس الخاص بك غير محدد، يرجى التواصل مع مدير النظام لحل هذه المشكلة.';
-
   get reportIssue => en ? 'Report An Issue' : 'الإبلاغ عن مشكلة';
-
-  String get only_teachers_can_send_messages => en ? 'Only teachers can send messages' : 'يمكن للمدرسين فقط ارسال الرسائل';
 
   get poll => en ? 'Poll' : 'استفتاء';
 
   get createPoll => en ? 'Create Poll' : 'إنشاء استفتاء';
 
-  String get enter_poll_subject => en ? 'Enter poll subject' : 'ادخل موضوع الإستفتاء';
-
-  String get you_have_to_add_2_choices => en ? 'You have to add 2 choices at least' : 'يجب اضافة اختيارين على الأقل';
-
   String get showResult => en ? 'Show Result' : 'عرض النتائج';
 
   String get reactors => en ? 'Reactors' : 'المتفاعلين';
-  String get pollSelectors => en ? 'Contributors' : 'المشاركين';
 
-  String get find_message => en ? 'Find a message' : 'ابحث عن رسالة';
+  get external_links => en ? 'External Links' : 'روابط خارجية';
+
+  get not_set_yet => en ? 'NOT SET YET' : 'لم يتم اضافته بعد';
+
 }

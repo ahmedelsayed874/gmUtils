@@ -305,12 +305,19 @@ class _AppState extends State<App> {
           ),
         ),
       ),
-      colorScheme: ColorScheme.light(
-        primary: colors.primary,
-        secondary: colors.primary,
-        background: colors.background,
-        surface:  colors.background,
-      ),
+      colorScheme: colors.isLightMode
+              ? ColorScheme.light(
+                  primary: colors.primary,
+                  secondary: colors.primary,
+                  background: colors.background,
+                  surface: colors.background,
+                )
+              : ColorScheme.dark(
+                  primary: colors.primary,
+                  secondary: colors.primary,
+                  background: colors.background,
+                  surface: colors.background,
+                ),
       brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colors.background,

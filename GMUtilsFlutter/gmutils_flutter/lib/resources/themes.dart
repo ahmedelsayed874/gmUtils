@@ -1,9 +1,9 @@
-import 'package:gmutils_flutter/resources/fonts.dart';
 import 'package:flutter/material.dart';
 
 import '../zgmutils/resources/app_colors.dart';
 import '../zgmutils/resources/app_measurement.dart';
 import '../zgmutils/resources/app_theme.dart';
+import 'fonts.dart';
 
 class Themes {
   bool isLightTheme = true;
@@ -11,9 +11,7 @@ class Themes {
   Themes(BuildContext context, {bool? light}) {
     if (light != null) {
       isLightTheme = light;
-    }
-    //
-    else { //if (context != null) {
+    } else {
       isLightTheme = Theme.of(context).brightness == Brightness.light;
     }
 
@@ -53,7 +51,7 @@ class Themes {
         fontFamily: fontFamily,
         overflow: overflow,
         shadows: shadows,
-          letterSpacing: letterSpacing,
+        letterSpacing: letterSpacing,
       );
 
   TextStyle textStyleOfScreenTitle({
@@ -66,9 +64,7 @@ class Themes {
         textColor: textColor ?? colors.primary,
         textSize: textSize ?? 20,
         fontFamily: fontFamily,
-        shadows: shadows ?? [
-          Shadow(blurRadius: 0.2)
-        ],
+        shadows: shadows ?? [Shadow(blurRadius: 0.2)],
       );
 
   TextStyle textStyleOfSectionTitle({
@@ -103,7 +99,7 @@ class _LightColors extends _AppColors {
   _LightColors() : super(isLightMode: true);
 
   @override
-  Color get primary => const Color(0xff31263A);
+  Color get primary => const Color(0xff3bbc04);
 
   @override
   Color get secondary => const Color(0xffD94A19);
@@ -134,16 +130,18 @@ class _LightColors extends _AppColors {
   Color hint = const Color(0xffB8B6B6);
 
   @override
-  Color red = const Color(0xffdc3d4a);//0xfff6540e
+  Color red = const Color(0xffdc3d4a); //0xfff6540e
   @override
   Color darkRed = const Color(0xff822906);
 
   @override
   Color get chatCardLeft => Color(0xFFEFEFEF);
+
   //Color get chatCardLeft => Colors.yellow.withOpacity(0.7);
 
   @override
   Color get chatCardRight => secondary;
+
   //Color get chatCardRight => const Color(0xfff68a66);
 
   @override
@@ -160,7 +158,7 @@ class _DarkColors extends _AppColors {
   _DarkColors() : super(isLightMode: false);
 
   @override
-  Color primary = const Color(0xff31263A);
+  Color primary = const Color(0xff144201);
 
   @override
   Color get secondary => const Color(0xff5e1f0a);
@@ -197,6 +195,7 @@ class _DarkColors extends _AppColors {
 
   @override
   Color get chatCardLeft => Colors.yellow.withOpacity(0.7);
+
   @override
   Color get chatCardRight => secondary.withAlpha(80);
 

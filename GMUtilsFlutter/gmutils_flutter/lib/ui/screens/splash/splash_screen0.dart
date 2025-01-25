@@ -63,7 +63,7 @@ class _SplashScreenState extends BaseState<SplashScreen>
               children: [
                 Padding(
                   padding: const EdgeInsets.all(80.0),
-                  child: Image.asset(Res.images.logoWhite),
+                  child: Image.asset(Res.images.appLogoSplash),
                 ),
                 ...schoolValuesWidgets(from: 0, to: _animation.value),
               ],

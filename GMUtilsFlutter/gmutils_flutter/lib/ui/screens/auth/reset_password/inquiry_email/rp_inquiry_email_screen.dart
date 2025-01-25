@@ -66,7 +66,7 @@ class _RPInquiryEmailScreenState extends BaseState<RPInquiryEmailScreen>
 
         Center(
           child: Image.asset(
-            Res.images.logoColored,
+            Res.images.appLogoTop,
             width: 170,
           ),
         ),

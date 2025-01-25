@@ -107,7 +107,7 @@ abstract class SplashScreenDriverAbs extends IScreenDriver {
       else {
         delegate.showMessage(
           title: Res.strings.message,
-          message: Res.strings.your_account_has_been_closed,
+          message: Res.strings.your_account_has_been_blocked,
           actions: [
             MessageDialogActionButton(
               Res.strings.ok,

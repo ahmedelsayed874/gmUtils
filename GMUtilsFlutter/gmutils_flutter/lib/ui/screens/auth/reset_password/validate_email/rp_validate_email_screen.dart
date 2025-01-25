@@ -69,7 +69,7 @@ class _RPValidateEmailScreenState extends BaseState<RPValidateEmailScreen>
         ),
         Center(
           child: Image.asset(
-            Res.images.logoColored,
+            Res.images.appLogoTop,
             width: 170,
           ),
         ),

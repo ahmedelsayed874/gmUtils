@@ -22,27 +22,22 @@ class Images {
 
   String rootDir = 'assets/images/';
 
-  String get splash => '${rootDir}splash.jpeg';
+  //todo add image
+  String get splash =>  '${rootDir}app_splash.png';
 
-  String get logoWhite =>
-      '${rootDir}logo_white@${_density < 4 ? _density : 3}x.png';
+  //todo add image
+  String get appLogoSplash =>  '${rootDir}app_logo_splash.png';
 
-  String get logoColored =>
-      '${rootDir}logo_colored@${_density < 4 ? _density : 3}x.png';
+  //todo add image
+  String get appLogoTop =>  '${rootDir}app_logo_top.png';
 
-  String get logoColoredSmall => '${rootDir}logo_colored_small.png';
+  //todo add image
+  String get appLogoToolbar =>  '${rootDir}app_logo_toolbar.png';
 
-  String get logoColoredSmallWithoutText =>
-      '${rootDir}logo_colored_small_without_txt.png';
+  //todo add image
+  String progress(int n) => '${rootDir}progress_$n.png';
 
-  String get iconCommunications =>
-      '${rootDir}icon_communication@${_density < 3 ? _density : 2}x.png';
-
-  String get iconDigitalLearning =>
-      '${rootDir}icon_digital_learning@${_density < 3 ? _density : 2}x.png';
-
-  String get iconExam =>
-      '${rootDir}icon_exam@${_density < 3 ? _density : 2}x.png';
+  String get children => '${rootDir}children.png';
 
   String get iconMail =>
       '${rootDir}icon_mail@${_density < 3 ? _density : 2}x.png';
@@ -50,8 +45,19 @@ class Images {
   String get iconChat =>
       '${rootDir}icon_chat@${_density < 3 ? _density : 2}x.png';
 
-  String get classroom =>
-      '${rootDir}classroom@${_density < 3 ? _density : 2}x.png';
+  String get parentCare => '${rootDir}parent_care.png';
+
+  String get podiumRank => '${rootDir}podium_rank@${_density < 4 ? _density : 3}x.png';
+  String get podiumWinner => '${rootDir}podium_winner.png';
+
+  String get question => '${rootDir}question.png';
+
+  String get questionColored => '${rootDir}question_colored.png';
+
+  String get questionBank => '${rootDir}question_bank.png';
+
+  String get students =>
+      '${rootDir}students@${_density < 3 ? _density : 2}x.png';
 
   String get studentsAll =>
       '${rootDir}students_all@${_density < 4 ? _density : 3}x.png';
@@ -61,37 +67,6 @@ class Images {
 
   String get stuff => '${rootDir}stuff@${_density < 3 ? _density : 2}x.png';
 
-  String get squarePrimary => '${rootDir}square_primary.png';
-
   String get trianglePrimary => '${rootDir}triangle_primary.png';
-
-  String get lessons => '${rootDir}lessons@${_density < 3 ? _density : 2}x.png';
-
-  String get students =>
-      '${rootDir}students@${_density < 3 ? _density : 2}x.png';
-
-  String get questionBank => '${rootDir}question_bank.png';
-
-  String get question => '${rootDir}question.png';
-
-  String get questionColored => '${rootDir}question_colored.png';
-
-  String get podiumRank => '${rootDir}podium_rank@${_density < 4 ? _density : 3}x.png';
-  String get podiumWinner => '${rootDir}podium_winner.png';
-
-  String get parentCare => '${rootDir}parent_care.png';
-
-  String get virtualRoomStudents => '${rootDir}virtual_room_students@${_density < 4 ? _density : 3}x.png';
-  String get virtualRoomStuff => '${rootDir}virtual_room_stuff@${_density < 4 ? _density : 3}x.png';
-
-  String get vrLogoGoogleMeet => '${rootDir}vr_logo_google_meet.png';
-  String get vrLogoTeams => '${rootDir}vr_logo_teams.png';
-  String get vrLogoZoom => '${rootDir}vr_logo_zoom.png';
-
-  String get children => '${rootDir}children.png';
-
-  String get toolbar => '${rootDir}toolbar.png';
-
-  String progress(int n) => '${rootDir}progress_bls$n.png';
 
 }

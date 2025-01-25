@@ -67,7 +67,7 @@ class _SplashScreenState extends BaseState<SplashScreen>
               margin: EdgeInsets.only(bottom: 2),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 80),
-                child: Image.asset(Res.images.logoColored, color: Colors.white,),
+                child: Image.asset(Res.images.appLogoSplash, color: Colors.white,),
               ),
             ),
           ),
@@ -75,7 +75,7 @@ class _SplashScreenState extends BaseState<SplashScreen>
             alignment: Alignment.center,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 80),
-              child: Image.asset(Res.images.logoColored),
+              child: Image.asset(Res.images.appLogoSplash),
             ),
           ),
           Align(
