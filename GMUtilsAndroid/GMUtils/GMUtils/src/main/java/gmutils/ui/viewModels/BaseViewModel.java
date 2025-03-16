@@ -588,26 +588,26 @@ public class BaseViewModel extends AndroidViewModel {
     //----------------------------------------------------------
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish) {
-        runOnBackgroundThread(task, onFinish, true, 0, null, null);
+        runOnBackgroundThread(task, onFinish, null, true, 0, null);
     }
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException) {
-        runOnBackgroundThread(task, onFinish, true, 0, onException, null);
+        runOnBackgroundThread(task, onFinish, onException, true, 0, null);
     }
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread) {
-        runOnBackgroundThread(task, onFinish, dispatchResultOnUIThread, 0, null, null);
+        runOnBackgroundThread(task, onFinish, null, dispatchResultOnUIThread, 0, null);
     }
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay) {
-        runOnBackgroundThread(task, onFinish, dispatchResultOnUIThread, delay, null, null);
+        runOnBackgroundThread(task, onFinish, null, dispatchResultOnUIThread, delay, null);
     }
 
-    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay, ResultCallback<Throwable> onException) {
-        runOnBackgroundThread(task, onFinish, dispatchResultOnUIThread, delay, onException, null);
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException, boolean dispatchResultOnUIThread, long delay) {
+        runOnBackgroundThread(task, onFinish, onException, dispatchResultOnUIThread, delay, null);
     }
 
-    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay, ResultCallback<Throwable> onException, String threadName) {
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException, boolean dispatchResultOnUIThread, long delay, String threadName) {
         if (task == null) return;
 
         Runnable target = () -> {
@@ -677,14 +677,14 @@ public class BaseViewModel extends AndroidViewModel {
                 //onFinish
                 null,
 
+                //onException
+                onException,
+
                 //dispatchToUi
                 true,
 
                 //delay
                 delay,
-
-                //onException
-                onException,
 
                 //threadName
                 null

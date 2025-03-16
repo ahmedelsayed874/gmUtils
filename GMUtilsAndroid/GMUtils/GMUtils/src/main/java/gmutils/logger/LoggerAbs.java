@@ -4,11 +4,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +64,8 @@ public abstract class LoggerAbs {
         private int maxFileSizeInKiloBytes = 2 /*MB*/ * 1024 /*KB*/;
         public int maxLogsFilesCount = 20;
 
+        private boolean writeLogsOnUiThread = false;
+
         //region set printing logs deadline
         public LogConfigs setLogDeadline(DateOp dateOp) {
             this.logDeadline = dateOp;
@@ -117,6 +117,11 @@ public abstract class LoggerAbs {
 
         //endregion
 
+        public void setWriteLogsOnUiThread(boolean writeLogsOnUiThread) {
+            this.writeLogsOnUiThread = writeLogsOnUiThread;
+        }
+
+
         //--------------------------------------------------------
 
         //region getters: check enable status, fileContentEncryptionKey, maxFileSizeInKiloBytes,maxLogsFilesCount
@@ -153,6 +158,10 @@ public abstract class LoggerAbs {
             return maxLogsFilesCount;
         }
         //endregion
+
+        public boolean isWriteLogsOnUiThread() {
+            return writeLogsOnUiThread;
+        }
 
         @Override
         public String toString() {
@@ -284,7 +293,7 @@ public abstract class LoggerAbs {
                                 "\n" +
                                 stackTrace.getMethodName() +
                                 " -> line: " + stackTrace.getLineNumber() +
-                                (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo))
+                                (("" + moreInfo).isEmpty() ? "" : ("\n-> " + moreInfo))
                 );
             } catch (Exception e) {
                 write(moreInfo);
@@ -378,6 +387,11 @@ public abstract class LoggerAbs {
     private static LooperThread _looperThread;
 
     protected void runOnLoggerThread(Runnable task) {
+        if (logConfigs.writeLogsOnUiThread) {
+            task.run();
+            return;
+        }
+
         if (_looperThread == null) {
             _looperThread = new LooperThread(
                     "logger-thread",
@@ -553,7 +567,7 @@ public abstract class LoggerAbs {
                             "\n" +
                             stackTrace.getMethodName() +
                             "() -> line: " + stackTrace.getLineNumber() +
-                            (TextUtils.isEmpty(moreInfo) ? "" : ("\n-> " + moreInfo));
+                            (moreInfo.isEmpty() ? "" : ("\n-> " + moreInfo));
 
                     printSync(title, () -> msg);
                 } catch (Exception e) {

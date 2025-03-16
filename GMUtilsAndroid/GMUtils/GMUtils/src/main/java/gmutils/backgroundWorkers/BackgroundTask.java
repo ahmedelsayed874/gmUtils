@@ -101,6 +101,8 @@ public class BackgroundTask implements BackgroundTaskAbs {
                     runOnUiThread(() -> {
                         onException.invoke(e);
                     });
+                } else {
+                    throw e;
                 }
             }
         };
