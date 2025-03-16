@@ -41,8 +41,8 @@ public class FcmNotificationProperties {
     private String customTitle;
     private String customBody;
     private String payload;
-    private String channelId = Notifier.DEFAULT_NOTIFICATION_CHANNEL_ID;
-    private String channelName = Notifier.DEFAULT_NOTIFICATION_CHANNEL_Name;
+    private String channelId = Notifier.DEFAULT_NOTIFICATION_CHANNEL_ID();
+    private String channelName = Notifier.DEFAULT_NOTIFICATION_CHANNEL_Name();
     private NotificationCompat.Style notificationStyle;
     private List<Pair<String, PendingIntent>> actions;
     private OnClick onClick;

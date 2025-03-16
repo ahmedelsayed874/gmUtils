@@ -21,7 +21,7 @@ import gmutils.net.volley.ApiURL;
  */
 
 public class CountriesURLs {
-    public static final String baseURL = "https://restcountries.eu/rest/v2/";
+    private static final String baseURL = "https://restcountries.eu/rest/v2/";
 
     public static class CountriesListURL extends ApiURL.getURL {
         private String regionName;

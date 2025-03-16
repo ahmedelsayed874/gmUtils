@@ -25,7 +25,7 @@ import retrofit2.Call;
  */
 
 public class TimeAPIs implements gmutils.net.retrofit.example.callers._interfaces.TimeAPIs {
-    public static final String baseURL = "http://worldtimeapi.org/api/";
+    private static final String baseURL = "http://worldtimeapi.org/api/";
 
     @Override
     public void geTimeZoneList(String ofSpecificArea, OnResponseReady<TimeZones> callback) {

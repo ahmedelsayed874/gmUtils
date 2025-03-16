@@ -28,28 +28,6 @@ public class FirebaseAuthManager implements IFirebaseAuthManager {
 
     //----------------------------------------------------------------------------
 
-    /*public static String DEFAULT_EMAIL_HOST_NAME = "myusers.org";
-    private String hostNameForNonEmailLogin;
-    @Override
-    public void setHostNameForNonEmailLogin(String hostName) {
-        hostNameForNonEmailLogin = hostName;
-    }*/
-    /*@Override
-    public String getHostNameForNonEmailLogin() {
-        return !TextUtils.isEmpty(hostNameForNonEmailLogin) ?
-                hostNameForNonEmailLogin :
-                DEFAULT_EMAIL_HOST_NAME;
-    }*/
-
-    /*@Override
-    public void registerByNonEmail(String text, String password, ResultCallback<Response<Boolean>> callback) {
-        registerByEmail(formatNonEmailToEmail(text), password, callback);
-    }*/
-    /*@Override
-    public void loginByNonEmail(String text, String password, ResultCallback<Response<FBUser>> callback) {
-        loginByEmail(formatNonEmailToEmail(text), password, callback);
-    }*/
-
     @Override
     public void registerByEmail(String email, String password, ResultCallback<Response<Boolean>> callback) {
         fbAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {

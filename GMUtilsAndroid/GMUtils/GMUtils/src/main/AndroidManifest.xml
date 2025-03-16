@@ -7,7 +7,7 @@
 
     <uses-sdk tools:overrideLibrary="androidx.security.ktx" />
 
-    <queries>
+    <!--<queries>
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>
@@ -44,13 +44,12 @@
             <action android:name="android.intent.action.SEND_MULTIPLE" />
             <data android:scheme="mailto" />
         </intent>
-    </queries>
+    </queries>-->
 
     <application
         android:allowBackup="true"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="false">
         <!-- android:supportsRtl="true" -->
-
 
         <!--<provider
             android:name="androidx.core.content.FileProvider"
@@ -61,7 +60,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>-->
-
 
     </application>
 

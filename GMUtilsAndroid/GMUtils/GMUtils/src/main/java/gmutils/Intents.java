@@ -44,6 +44,50 @@ import gmutils.utils.Utils;
  * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
+ * <p>
+ * <p>
+ * <p>
+ * the following queries must declared in manifest file
+ * only declare required function
+ * <queries>
+ * <intent>
+ * <action android:name="android.media.action.IMAGE_CAPTURE" />
+ * </intent>
+ * <intent>
+ * <action android:name="android.intent.action.GET_CONTENT" />
+ * </intent>
+ * <intent>
+ * <action android:name="android.intent.action.INSERT" />
+ * </intent>
+ * <intent>
+ * <action android:name="android.intent.action.VIEW" />
+ * </intent>
+ * <intent>
+ * <action android:name="android.intent.action.DIAL" />
+ * <data android:scheme="tel" />
+ * </intent>
+ * <intent>
+ * <action android:name="android.intent.action.CALL" />
+ * <data android:scheme="tel" />
+ * </intent>
+ * <intent>
+ * <action android:name="android.intent.action.SENDTO" />
+ * <data android:scheme="smsto" />
+ * </intent>
+ * <intent>
+ * <action android:name="android.intent.action.SEND" />
+ * <data android:mimeType="
+ *//*" /> fix mime type, remove one /
+ *         </intent>
+ *         <intent>
+ *             <action android:name="android.intent.action.SENDTO"/>
+ *             <data android:scheme="mailto"/>
+ *         </intent>
+ *         <intent>
+ *             <action android:name="android.intent.action.SEND_MULTIPLE"/>
+ *             <data android:scheme="mailto"/>
+ *         </intent>
+ *     </queries>
  */
 public class Intents {
 

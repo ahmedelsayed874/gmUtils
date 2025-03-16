@@ -80,7 +80,7 @@ public class FCM implements FCMFunctions {
         );
         printLog(() -> "[Fcm.init()] -> " +
                 "don\"t forget to define this " +
-                Notifier.DEFAULT_NOTIFICATION_CHANNEL_ID +
+                Notifier.DEFAULT_NOTIFICATION_CHANNEL_ID() +
                 " as " +
                 "default notification channel (com.google.firebase.messaging.default_notification_channel_id)"
         );
@@ -107,7 +107,7 @@ public class FCM implements FCMFunctions {
                 "    android:resource=\"@color/colorAccent\" />\n" +
                 "<meta-data\n" +
                 "    android:name=\"com.google.firebase.messaging.default_notification_channel_id\"\n" +
-                "    android:value=\"" + Notifier.DEFAULT_NOTIFICATION_CHANNEL_ID + "\" />\n" +
+                "    android:value=\"" + Notifier.DEFAULT_NOTIFICATION_CHANNEL_ID() + "\" />\n" +
                 "\n" +
                 "\n------------------------------------------------------------\n" +
                 "\n" +

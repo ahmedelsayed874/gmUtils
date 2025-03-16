@@ -18,7 +18,7 @@ import gmutils.net.volley.ApiURL;
  */
 
 public class TimeURLs {
-    public static final String baseURL = "http://worldtimeapi.org/api/";
+    private static final String baseURL = "http://worldtimeapi.org/api/";
 
     public static class TimeZoneListURL extends ApiURL.getURL {
         private String ofSpecificArea = ""; //ex: Africa

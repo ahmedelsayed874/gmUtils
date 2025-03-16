@@ -36,8 +36,13 @@ import gmutils.utils.Utils;
  * +201022663988
  */
 public class Notifier {
-    public static final String DEFAULT_NOTIFICATION_CHANNEL_ID = "default";
-    public static final String DEFAULT_NOTIFICATION_CHANNEL_Name = "Default";
+    public static String DEFAULT_NOTIFICATION_CHANNEL_ID() {
+        return "default";
+    }
+
+    public static String DEFAULT_NOTIFICATION_CHANNEL_Name() {
+        return "Default";
+    }
 
     private NotificationCompat.Builder notificationBuilder;
     private final int notificationIconRes;
@@ -46,7 +51,7 @@ public class Notifier {
 
     private Uri notificationSoundUri;
     private boolean vibrate = false;
-    
+
     public static Notifier getInstance(int notificationIconRes, int iconBackgroundColor) {
         return new Notifier(notificationIconRes, iconBackgroundColor);
     }
@@ -55,16 +60,16 @@ public class Notifier {
         this.notificationIconRes = notificationIconRes;
         this.iconBackgroundColor = iconBackgroundColor;
     }
-    
+
     //---------------------------------
-    
+
     private Uri getNotificationSound(Context context) {
         if (this.notificationSoundUri == null) {
             this.notificationSoundUri = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_NOTIFICATION);
         }
         return this.notificationSoundUri;
     }
-    
+
     //---------------------------------
 
     //region setNotificationChannel
@@ -93,7 +98,7 @@ public class Notifier {
     public Notifier setNotificationChannel(Context context, String channelId, String channelName, String channelDescription, int importance) {
         return setNotificationChannel(
                 context,
-                channelId, 
+                channelId,
                 channelName,
                 channelDescription,
                 importance,
@@ -152,8 +157,8 @@ public class Notifier {
             if (notificationBuilder != null)
                 throw new IllegalStateException("Can't create channel after create notification");
 
-            channelId = TextUtils.isEmpty(channelId) ? DEFAULT_NOTIFICATION_CHANNEL_ID : channelId;
-            channelName = TextUtils.isEmpty(channelName) ? DEFAULT_NOTIFICATION_CHANNEL_Name : channelName;
+            channelId = TextUtils.isEmpty(channelId) ? DEFAULT_NOTIFICATION_CHANNEL_ID() : channelId;
+            channelName = TextUtils.isEmpty(channelName) ? DEFAULT_NOTIFICATION_CHANNEL_Name() : channelName;
 
             this.createdChannelId = channelId;
 
@@ -239,7 +244,7 @@ public class Notifier {
                 requestCode = intent.getComponent().getClassName().hashCode();
             } catch (Exception e1) {
                 try {
-                    requestCode = intent .getAction().hashCode();
+                    requestCode = intent.getAction().hashCode();
                 } catch (Exception e2) {
                     requestCode = ("" + title + body + "").hashCode();
                 }
@@ -254,10 +259,10 @@ public class Notifier {
             );
 
         }
-        
+
         return createNotification(context, title, body, pendingIntent);
     }
-    
+
     public Notifier createNotification(Context context, CharSequence title, CharSequence body, PendingIntent pendingIntent) {
         title = TextUtils.isEmpty(title) ? context.getString(R.string.app_name) : title;
 
