@@ -13,13 +13,13 @@ public interface BackgroundTaskAbs {
 
     void execute(
             @NotNull Runnable task,
-            @Nullable Runnable resultCallback
+            @Nullable Runnable onComplete
     );
 
     void execute(
             @NotNull Runnable task,
             @Nullable ResultCallback<Throwable> onException,
-            @Nullable Runnable resultCallback
+            @Nullable Runnable onComplete
     );
 
     <T> void execute(

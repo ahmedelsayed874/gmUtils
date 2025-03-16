@@ -53,16 +53,16 @@ public class BackgroundTask implements BackgroundTaskAbs {
     @Override
     public void execute(
             @NotNull Runnable task,
-            Runnable resultCallback
+            Runnable onComplete
     ) {
-        execute(task, null, resultCallback);
+        execute(task, null, onComplete);
     }
 
     @Override
     public void execute(
             @NotNull Runnable task,
             @Nullable ResultCallback<Throwable> onException,
-            @Nullable Runnable resultCallback
+            @Nullable Runnable onComplete
     ) {
         execute(
                 () -> {
@@ -70,7 +70,7 @@ public class BackgroundTask implements BackgroundTaskAbs {
                     return null;
                 },
                 onException,
-                resultCallback == null ? null : result -> resultCallback.run()
+                onComplete == null ? null : result -> onComplete.run()
         );
     }
 
