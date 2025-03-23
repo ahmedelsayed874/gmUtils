@@ -104,13 +104,56 @@ public class JsonBuilder {
      *      infinities}
      * @return
      */
-    public JsonBuilder addMap(Set<?> keys, @NotNull ActionCallback<Object, Object> value) {
+    public JsonBuilder addMapElements(Set<?> keys, @NotNull ActionCallback<Object, Object> value) {
         if (keys == null) return this;
         if (keys.isEmpty()) return this;
 
         if (rootJson instanceof JSONObject) {
             for (Object key : keys) {
                 add(value.invoke(key));
+            }
+        }
+        //
+        else {
+            throw new IllegalStateException("rootJson is not JSONObject");
+        }
+
+        return this;
+    }
+
+    //-----------------------------------------------
+
+    /**
+     *
+     * @param jsonObjectKey jsonObjectKey
+     * @param mapKeys map keys
+     * @param value take the key and returns a value from one of these types {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
+     *      Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
+     *      {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
+     *      infinities}
+     * @return
+     */
+    public JsonBuilder addMap(String jsonObjectKey, Set<?> mapKeys, @NotNull ActionCallback<Object, Object> value) {
+        if (rootJson instanceof JSONObject) {
+            if (mapKeys == null) {
+                add(
+                        jsonObjectKey,
+                        JSONObject.NULL
+                );
+            }
+            //
+            else if (mapKeys.isEmpty()) {
+                add(
+                        jsonObjectKey,
+                        new JSONObject()
+                );
+            }
+            //
+            else {
+                add(
+                        jsonObjectKey,
+                        new JsonBuilder(new JSONObject()).addMapElements(mapKeys, value)
+                );
             }
         }
         //
@@ -135,7 +178,9 @@ public class JsonBuilder {
             try {
                 if (value instanceof JsonBuilder) {
                     ((JSONObject) rootJson).put(key, ((JsonBuilder) value).rootJson);
-                } else {
+                }
+                //
+                else {
                     ((JSONObject) rootJson).put(key, value);
                 }
             } catch (JSONException e) {
