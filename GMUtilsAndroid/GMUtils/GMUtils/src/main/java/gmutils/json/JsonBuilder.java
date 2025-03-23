@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Set;
+
 import gmutils.listeners.ActionCallback;
 
 public class JsonBuilder {
@@ -86,6 +88,34 @@ public class JsonBuilder {
         //
         else {
             throw new IllegalStateException("rootJson is not JSONArray");
+        }
+
+        return this;
+    }
+
+    //-----------------------------------------------
+
+    /**
+     *
+     * @param keys map keys
+     * @param value take the key and returns a value from one of these types {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
+     *      Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
+     *      {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
+     *      infinities}
+     * @return
+     */
+    public JsonBuilder addMap(Set<?> keys, @NotNull ActionCallback<Object, Object> value) {
+        if (keys == null) return this;
+        if (keys.isEmpty()) return this;
+
+        if (rootJson instanceof JSONObject) {
+            for (Object key : keys) {
+                add(value.invoke(key));
+            }
+        }
+        //
+        else {
+            throw new IllegalStateException("rootJson is not JSONObject");
         }
 
         return this;

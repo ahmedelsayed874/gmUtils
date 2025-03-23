@@ -321,7 +321,7 @@ class _CachedImage {
 
 _CachedImage? _getCachedImage(String name) {
   var i = _cachedImagesIndexes[name] ?? -1;
-  if (i >= 0) {
+  if (i >= 0 && i < _cachedImagesList.length) {
     return _cachedImagesList[i];
   } else {
     return null;
@@ -329,14 +329,19 @@ _CachedImage? _getCachedImage(String name) {
 }
 
 void _appendCachedImage(_CachedImage image) {
-  const maxBytes = 100 /*MB*/ * 1024 /*KB*/ * 1024 /*B*/;
+  const maxBytes = 30 /*MB*/ * 1024 /*KB*/ * 1024 /*B*/;
   var totalBytes = 0;
   _cachedImagesList.forEach((e) {
     totalBytes += e.imageBytes.length;
   });
   if (totalBytes > maxBytes) {
-    var c = _cachedImagesList.removeAt(0);
-    _cachedImagesIndexes.remove(c.name);
+    _cachedImagesList.removeAt(0);
+    //_cachedImagesIndexes.remove(c.name);
+    _cachedImagesIndex.clear();
+    for (var i = 0; i < _cachedImages.length; i++) {
+      var img = _cachedImages[i];
+      _cachedImagesIndex[img.name] = i;
+    }
   }
 
   _cachedImagesList.add(image);
