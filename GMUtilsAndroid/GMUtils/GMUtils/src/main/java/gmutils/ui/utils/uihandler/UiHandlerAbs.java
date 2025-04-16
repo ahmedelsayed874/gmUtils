@@ -1,9 +1,6 @@
-package gmutils.ui.utils;
+package gmutils.ui.utils.uihandler;
 
 import org.jetbrains.annotations.NotNull;
-
-import gmutils.backgroundWorkers.BackgroundTask;
-import gmutils.backgroundWorkers.BackgroundTaskAbs;
 
 public interface UiHandlerAbs {
     static UiHandlerAbs getInstance() {

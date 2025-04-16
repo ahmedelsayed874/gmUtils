@@ -1,6 +1,5 @@
 package gmutils.net.retrofit.listeners;
 
-import gmutils.net.retrofit.responseHolders.BaseResponse;
 import gmutils.net.retrofit.responseHolders.IResponse;
 
 /**

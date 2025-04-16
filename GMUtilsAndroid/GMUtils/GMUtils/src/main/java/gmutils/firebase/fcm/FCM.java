@@ -26,8 +26,6 @@ import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.json.JsonBuilder;
 import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ResultCallback;
-import gmutils.listeners.ResultCallback2;
-import gmutils.listeners.ResultCallback3;
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.SimpleHTTPRequest;

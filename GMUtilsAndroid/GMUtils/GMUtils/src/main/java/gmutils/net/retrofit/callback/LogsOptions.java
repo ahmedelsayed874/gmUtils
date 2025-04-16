@@ -8,7 +8,6 @@ import java.util.List;
 
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ActionCallback0;
-import gmutils.listeners.ActionCallback2;
 
 
 public class LogsOptions {

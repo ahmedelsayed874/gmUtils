@@ -1,10 +1,6 @@
 package gmutils.net.retrofit.responseHolders;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
-
-import gmutils.net.retrofit.RetrofitService;
 
 public final class StringResponse extends BaseResponse {
 

@@ -24,7 +24,6 @@ import android.view.WindowManager;
 
 import androidx.annotation.RequiresPermission;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

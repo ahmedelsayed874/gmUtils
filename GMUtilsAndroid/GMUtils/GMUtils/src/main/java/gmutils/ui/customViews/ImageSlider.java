@@ -24,8 +24,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import gmutils.Intents;
-import gmutils.logger.Logger;
 import gmutils.listeners.SimpleWindowAttachListener;
+import gmutils.logger.Logger;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

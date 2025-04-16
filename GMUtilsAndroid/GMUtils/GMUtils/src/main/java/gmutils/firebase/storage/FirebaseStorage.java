@@ -1,17 +1,17 @@
 package gmutils.firebase.storage;
 
 import android.net.Uri;
-import androidx.annotation.NonNull;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
 import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.io.IOException;
+
 import gmutils.DateOp;
 import gmutils.StringSet;
-import gmutils.firebase.FirebaseUtils;
 import gmutils.firebase.Response;
 import gmutils.listeners.ResultCallback;
 

@@ -10,9 +10,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-import gmutils.logger.Logger;
 import gmutils.listeners.ResultCallback2;
 import gmutils.listeners.ResultCallback3;
+import gmutils.logger.Logger;
 import gmutils.net.retrofit.RetrofitService;
 import gmutils.net.retrofit.example.apiServices.FileDownloadRequest;
 import okhttp3.ResponseBody;

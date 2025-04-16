@@ -11,7 +11,6 @@ import gmutils.StringSet;
 import gmutils.firebase.Response;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
-import gmutils.listeners.ResultCallback2;
 
 public abstract class IFirebaseDatabaseOp {
 

@@ -28,9 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import gmutils.utils.ImageUtils;
 import gmutils.storage.SettingsStorage;
-import gmutils.utils.FileUtils;
+import gmutils.utils.ImageUtils;
 import gmutils.utils.Utils;
 
 /**

@@ -7,23 +7,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
-import androidx.annotation.RequiresApi;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-
-import gmutils.collections.dataGroup.DataGroup3;
-import gmutils.listeners.ActionCallback;
-import gmutils.listeners.RecyclerViewPaginationListener;
 import gmutils.listeners.SimpleWindowAttachListener;
 import gmutils.ui.utils.DumbViewBinding;
 

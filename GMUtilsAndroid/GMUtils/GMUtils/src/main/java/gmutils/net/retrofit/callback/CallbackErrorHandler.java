@@ -1,6 +1,5 @@
 package gmutils.net.retrofit.callback;
 
-import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import gmutils.net.retrofit.responseHolders.IResponse;
 
 /**

@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,6 @@ import android.widget.FrameLayout
 import android.widget.SeekBar
 import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import gmutils.R
 import gmutils.inputFilters.IntegerRangeFilter
@@ -26,7 +24,6 @@ import gmutils.ui.adapters.BaseRecyclerAdapter
 import gmutils.ui.adapters.BaseRecyclerAdapterViewHolder
 import gmutils.utils.TextHelper
 import org.json.JSONArray
-import kotlin.math.max
 
 class ColorPicker @JvmOverloads constructor(
     context: Context,

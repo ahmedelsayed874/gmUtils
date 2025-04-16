@@ -11,7 +11,6 @@ import androidx.security.crypto.MasterKeys
 import gmutils.app.BaseApplication
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.security.KeyStore
 import java.security.SecureRandom

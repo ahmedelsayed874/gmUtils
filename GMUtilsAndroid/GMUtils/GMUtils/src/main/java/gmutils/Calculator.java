@@ -4,9 +4,7 @@ import android.util.Pair;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class Calculator {
     private BigDecimal result = BigDecimal.valueOf(0);

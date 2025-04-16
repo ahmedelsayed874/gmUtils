@@ -1,23 +1,10 @@
 package gmutils.ui.dialogs;
 
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-
-import org.json.JSONArray;
-
-import gmutils.R;
 import gmutils.listeners.ResultCallback;
-import gmutils.listeners.ResultCallback2;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

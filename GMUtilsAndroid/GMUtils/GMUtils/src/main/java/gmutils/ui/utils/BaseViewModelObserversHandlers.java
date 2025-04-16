@@ -1,8 +1,6 @@
 package gmutils.ui.utils;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.text.Spanned;
 import android.text.TextUtils;
 
 import org.jetbrains.annotations.Nullable;

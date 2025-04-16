@@ -1,4 +1,4 @@
-package gmutils.ui.utils;
+package gmutils.ui.utils.uihandler;
 
 import android.os.Handler;
 import android.os.Looper;

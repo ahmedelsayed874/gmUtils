@@ -34,8 +34,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import gmutils.logger.Logger;
 import gmutils.app.BaseApplication;
+import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.utils.ImageUtils;
 

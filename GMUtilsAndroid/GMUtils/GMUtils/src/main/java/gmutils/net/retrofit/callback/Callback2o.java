@@ -1,14 +1,11 @@
 package gmutils.net.retrofit.callback;
 
-import android.util.Log;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
-import gmutils.net.retrofit.listeners.OnResponseReady2;
 import gmutils.net.retrofit.listeners.OnResponseReady2o;
 import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
 import okhttp3.Request;

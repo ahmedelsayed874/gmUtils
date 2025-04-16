@@ -1,5 +1,9 @@
 package gmutils.geography;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.content.Context.LOCATION_SERVICE;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -22,10 +26,6 @@ import java.util.List;
 
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.utils.UIUtils;
-
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.content.Context.LOCATION_SERVICE;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

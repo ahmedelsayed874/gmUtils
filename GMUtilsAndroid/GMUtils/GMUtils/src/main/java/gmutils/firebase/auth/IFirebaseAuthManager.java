@@ -6,7 +6,6 @@ import com.google.firebase.auth.FirebaseAuthException;
 
 import java.util.Map;
 
-import gmutils.firebase.FirebaseUtils;
 import gmutils.firebase.Response;
 import gmutils.listeners.ResultCallback;
 

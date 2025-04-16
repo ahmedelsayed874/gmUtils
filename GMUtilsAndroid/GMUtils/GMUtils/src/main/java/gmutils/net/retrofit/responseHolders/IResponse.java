@@ -1,13 +1,5 @@
 package gmutils.net.retrofit.responseHolders;
 
-import androidx.room.Ignore;
-
-import com.google.gson.annotations.Expose;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

@@ -2,7 +2,6 @@ package gmutils.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,10 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 
 import gmutils.R;
-import gmutils.storage.SettingsStorage;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.toast.MyToast;

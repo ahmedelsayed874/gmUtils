@@ -17,13 +17,15 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
+import gmutils.R;
 import gmutils.listeners.ResultCallback;
 import gmutils.logger.Logger;
-import gmutils.R;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.fragments.BaseLegacyFragment;

@@ -15,9 +15,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +22,6 @@ import gmutils.KeypadOp;
 import gmutils.R;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
-import gmutils.listeners.ResultCallback2;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

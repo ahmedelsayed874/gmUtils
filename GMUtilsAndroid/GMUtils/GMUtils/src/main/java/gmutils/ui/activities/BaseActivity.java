@@ -27,9 +27,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 
+import gmutils.R;
 import gmutils.listeners.ResultCallback;
 import gmutils.logger.Logger;
-import gmutils.R;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.fragments.BaseFragment;

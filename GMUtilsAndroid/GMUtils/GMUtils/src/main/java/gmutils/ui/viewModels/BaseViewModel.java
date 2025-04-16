@@ -1,9 +1,6 @@
 package gmutils.ui.viewModels;
 
 import android.app.Application;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.TextUtils;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -12,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,11 +16,9 @@ import gmutils.StringSet;
 import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.backgroundWorkers.BackgroundTaskAbs;
 import gmutils.collections.dataGroup.DataGroup2;
-import gmutils.collections.dataGroup.DataGroup3;
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
-import gmutils.ui.utils.UiHandlerAbs;
-import kotlin.Pair;
+import gmutils.ui.utils.uihandler.UiHandlerAbs;
 
 
 /**

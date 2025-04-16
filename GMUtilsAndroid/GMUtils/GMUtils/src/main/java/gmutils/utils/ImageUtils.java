@@ -1,5 +1,7 @@
 package gmutils.utils;
 
+import static android.os.Environment.DIRECTORY_PICTURES;
+
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -43,8 +45,6 @@ import java.util.Locale;
 
 import gmutils.R;
 import gmutils.listeners.ActionCallback;
-
-import static android.os.Environment.DIRECTORY_PICTURES;
 //import okhttp3.RequestBody.Companion.toRequestBody;
 
 /**

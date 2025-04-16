@@ -26,17 +26,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import gmutils.backgroundWorkers.BackgroundTask;
-import gmutils.DateOp;
-import gmutils.backgroundWorkers.LooperThread;
-import gmutils.app.BaseApplication;
-import gmutils.listeners.ResultCallback;
-
-import java.lang.Runnable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import gmutils.DateOp;
+import gmutils.app.BaseApplication;
+import gmutils.backgroundWorkers.BackgroundTask;
+import gmutils.backgroundWorkers.LooperThread;
+import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.security.Security;
 import gmutils.utils.ZipFileUtils;
@@ -460,21 +457,25 @@ public abstract class LoggerAbs {
 
     //----------------
 
-    public void print(@NotNull ContentGetter callback) {
-        print(null, callback);
+    public void print(@NotNull ContentGetter content) {
+        print(null, content);
     }
 
-    public void print(TitleGetter title, @NotNull ContentGetter callback) {
-        if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
+    public void print(TitleGetter title, @NotNull ContentGetter content) {
+        print(title, content, false, false);
+    }
+
+    public void print(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
+        if ((forceLog || logConfigs.isLogEnabled()) || (forceWriteToFile || logConfigs.isWriteLogsToFileEnabled())) {
             runOnLoggerThread(() -> {
-                printSync(title, callback);
+                printSync(title, content);
             });
         }
     }
 
-    private void printSync(TitleGetter title, @NotNull ContentGetter callback) {
+    private void printSync(TitleGetter title, @NotNull ContentGetter content) {
         if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
-            String content = ("" + callback.getContent());
+            String contentStr = ("" + content.getContent());
 
             if (logConfigs.isLogEnabled()) {
                 String title2 = "**** ";
@@ -482,7 +483,7 @@ public abstract class LoggerAbs {
                 if (title != null) title2 += title.getTitle();
 
                 String[] t = refineTitle(title2);
-                String[] m = divideLogMsg(content, t.length > 1 ? t[1].length() : 0);
+                String[] m = divideLogMsg(contentStr, t.length > 1 ? t[1].length() : 0);
 
                 if (m.length == 1) {
                     if (t.length == 1)

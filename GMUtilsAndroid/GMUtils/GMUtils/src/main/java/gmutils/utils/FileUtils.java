@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import gmutils.logger.Logger;
 import gmutils.R;
+import gmutils.logger.Logger;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)

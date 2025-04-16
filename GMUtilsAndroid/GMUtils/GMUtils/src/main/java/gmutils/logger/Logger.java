@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import gmutils.DateOp;
-import gmutils.net.retrofit.callback.LogsOptions;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -79,10 +78,6 @@ public class Logger extends LoggerAbs {
     private Logger(String logId) {
         super(logId);
     }
-
-//    private Logger(String logId, LogConfigs logConfigs) {
-//        super(logId, logConfigs);
-//    }
 
     @Override
     protected void writeToLog(String tag, String msg) {

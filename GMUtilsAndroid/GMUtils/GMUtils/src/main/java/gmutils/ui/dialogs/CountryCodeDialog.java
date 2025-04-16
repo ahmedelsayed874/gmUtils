@@ -17,8 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-import gmutils.geography.CountryPhoneCodes;
 import gmutils.R;
+import gmutils.geography.CountryPhoneCodes;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.SearchTextChangeListener;
 import gmutils.ui.adapters.BaseRecyclerAdapter;

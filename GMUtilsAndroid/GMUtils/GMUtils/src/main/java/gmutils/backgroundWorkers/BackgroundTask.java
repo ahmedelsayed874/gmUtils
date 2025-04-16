@@ -1,7 +1,5 @@
 package gmutils.backgroundWorkers;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
 
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
-import gmutils.ui.utils.UiHandlerAbs;
+import gmutils.ui.utils.uihandler.UiHandlerAbs;
 
 public class BackgroundTask implements BackgroundTaskAbs {
 
@@ -33,20 +31,26 @@ public class BackgroundTask implements BackgroundTaskAbs {
 
     @Nullable
     private final String threadName;
-    private UiHandlerAbs handler;
+    private final UiHandlerAbs handler;
 
     public BackgroundTask() {
-        this(null);
+        this(null, UiHandlerAbs.getInstance());
+    }
+
+    public BackgroundTask(UiHandlerAbs handler) {
+        this(null, handler);
     }
 
     public BackgroundTask(@Nullable String threadName) {
+        this(threadName, UiHandlerAbs.getInstance());
+    }
+
+    public BackgroundTask(@Nullable String threadName, UiHandlerAbs handler) {
         if (TextUtils.isEmpty(threadName))
             this.threadName = null;
         else
             this.threadName = threadName.trim();
-    }
 
-    public void setHandler(UiHandlerAbs handler) {
         this.handler = handler;
     }
 

@@ -3,10 +3,8 @@ package gmutils.ui.fragments;
 import android.app.Activity;
 import android.content.Context;
 
-import gmutils.ui.activities.ActivityFunctions;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
-import gmutils.ui.viewModels.BaseViewModel;
 
 
 public interface BaseFragmentListener {

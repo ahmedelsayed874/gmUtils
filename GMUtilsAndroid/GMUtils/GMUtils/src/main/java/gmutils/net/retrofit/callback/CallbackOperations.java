@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
-import gmutils.net.retrofit.responseHolders.BaseObjectResponse;
-import gmutils.net.retrofit.responseHolders.BaseResponse;
 import gmutils.net.retrofit.responseHolders.IResponse;
 import okhttp3.Request;
 import retrofit2.Call;
