@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.CalendarContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -581,6 +582,14 @@ public class Intents {
         sendIntent.setType("text/plain");
         sendIntent.putExtra(Intent.EXTRA_TEXT, text);
         context.startActivity(Intent.createChooser(sendIntent, "Share"));
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public void openFilesAccessManagementPermission(Context context, String packageName) {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+        intent.setData(Uri.parse("package:" + packageName));
+        context.startActivity(intent);
     }
 
 }
