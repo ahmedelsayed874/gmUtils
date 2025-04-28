@@ -18,8 +18,8 @@ public interface BackgroundTaskAbs {
 
     void execute(
             @NotNull Runnable task,
-            @Nullable ResultCallback<Throwable> onException,
-            @Nullable Runnable onComplete
+            @Nullable Runnable onComplete,
+            @Nullable ResultCallback<Throwable> onException
     );
 
     <T> void execute(
@@ -29,8 +29,8 @@ public interface BackgroundTaskAbs {
 
     <T> void execute(
             @NotNull ActionCallback0<T> task,
-            @Nullable ResultCallback<Throwable> onException,
-            @Nullable ResultCallback<T> resultCallback
+            @Nullable ResultCallback<T> resultCallback,
+            @Nullable ResultCallback<Throwable> onException
     );
 
 }

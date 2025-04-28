@@ -2,6 +2,7 @@ package gmutils.ui.viewModels;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
@@ -485,6 +486,18 @@ public class BaseViewModel extends AndroidViewModel {
 
     }
 
+    public BaseViewModel(@NonNull Application application, MutableLiveData<ProgressStatus> progressStatusLiveData, MutableLiveData<Message> alertMessageLiveData, MutableLiveData<String> updateUiLiveData) {
+        super(application);
+        
+        assert progressStatusLiveData != null;
+        assert alertMessageLiveData != null;
+        assert updateUiLiveData != null;
+
+        this.progressStatusLiveData = progressStatusLiveData;
+        this.alertMessageLiveData = alertMessageLiveData;
+        this.updateUiLiveData = updateUiLiveData;
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public MutableLiveData<ProgressStatus> progressStatusLiveData() {
@@ -582,18 +595,18 @@ public class BaseViewModel extends AndroidViewModel {
     //----------------------------------------------------------
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish) {
-        runOnBackgroundThread(task, null, onFinish, true, 0, null);
+        runOnBackgroundThread(task, onFinish, null, true, 0, null);
     }
 
-    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<Throwable> onException, ResultCallback<T> onFinish) {
-        runOnBackgroundThread(task, onException, onFinish, true, 0, null);
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException) {
+        runOnBackgroundThread(task, onFinish, onException, true, 0, null);
     }
 
-    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<Throwable> onException, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay) {
-        runOnBackgroundThread(task, onException, onFinish, dispatchResultOnUIThread, delay, null);
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException, boolean dispatchResultOnUIThread, long delay) {
+        runOnBackgroundThread(task, onFinish, onException, dispatchResultOnUIThread, delay, null);
     }
 
-    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<Throwable> onException, ResultCallback<T> onFinish, boolean dispatchResultOnUIThread, long delay, String threadName) {
+    public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException, boolean dispatchResultOnUIThread, long delay, String threadName) {
         if (task == null) return;
 
         Runnable target = () -> {

@@ -15,16 +15,16 @@ public class BackgroundTask implements BackgroundTaskAbs {
         new BackgroundTask().execute(task, resultCallback);
     }
 
-    public static void run(Runnable task, @Nullable ResultCallback<Throwable> onException, Runnable resultCallback) {
-        new BackgroundTask().execute(task, onException, resultCallback);
+    public static void run(Runnable task, Runnable resultCallback, @Nullable ResultCallback<Throwable> onException) {
+        new BackgroundTask().execute(task, resultCallback, onException);
     }
 
     public static <T> void run(ActionCallback0<T> task, ResultCallback<T> resultCallback) {
         new BackgroundTask().execute(task, resultCallback);
     }
 
-    public static <T> void run(ActionCallback0<T> task, @Nullable ResultCallback<Throwable> onException, ResultCallback<T> resultCallback) {
-        new BackgroundTask().execute(task, onException, resultCallback);
+    public static <T> void run(ActionCallback0<T> task, ResultCallback<T> resultCallback, @Nullable ResultCallback<Throwable> onException) {
+        new BackgroundTask().execute(task, resultCallback, onException);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -59,14 +59,14 @@ public class BackgroundTask implements BackgroundTaskAbs {
             @NotNull Runnable task,
             Runnable onComplete
     ) {
-        execute(task, null, onComplete);
+        execute(task, onComplete, null);
     }
 
     @Override
     public void execute(
             @NotNull Runnable task,
-            @Nullable ResultCallback<Throwable> onException,
-            @Nullable Runnable onComplete
+            @Nullable Runnable onComplete,
+            @Nullable ResultCallback<Throwable> onException
     ) {
         execute(
                 () -> {
@@ -83,14 +83,14 @@ public class BackgroundTask implements BackgroundTaskAbs {
             @NotNull ActionCallback0<T> task,
             @Nullable ResultCallback<T> resultCallback
     ) {
-        execute(task, null, resultCallback);
+        execute(task, resultCallback, null);
     }
 
     @Override
     public <T> void execute(
             @NotNull ActionCallback0<T> task,
-            @Nullable ResultCallback<Throwable> onException,
-            @Nullable ResultCallback<T> resultCallback
+            @Nullable ResultCallback<T> resultCallback,
+            @Nullable ResultCallback<Throwable> onException
     ) {
         Runnable runnable = () -> {
             try {
