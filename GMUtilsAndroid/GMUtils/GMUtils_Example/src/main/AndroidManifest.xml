@@ -42,6 +42,7 @@
         <activity android:name=".activities.ColorPicker2Activity" />
         <activity android:name=".customViewExamples.TextBoxWithTitle_ImplActivity" />
         <activity android:name="com.blogspot.gm4s.gmutileexample.activities.FirebaseTestActivity" />
+        <activity android:name="com.blogspot.gm4s.gmutileexample.activities.ActivityWithViewModelExampleActivity" />
     </application>
 
 </manifest>

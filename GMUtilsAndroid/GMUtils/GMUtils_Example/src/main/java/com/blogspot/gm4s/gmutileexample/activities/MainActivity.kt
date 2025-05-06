@@ -52,10 +52,12 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_main)
 
-        this.view.btn1.text = "calc size"
+        //this.view.btn1.text = "calc size"
+        this.view.btn1.text = "test viewmodel"
         this.view.btn1.setOnClickListener {
-            val x = Utils.createInstance().calculatePixelInCm(this, 1.0)
-            log("", "x = $x")
+            //val x = Utils.createInstance().calculatePixelInCm(this, 1.0)
+            //log("", "x = $x")
+            Activities.start(ActivityWithViewModelExampleActivity::class.java, this)
         }
 
         this.view.btn2.text = "read log file"
