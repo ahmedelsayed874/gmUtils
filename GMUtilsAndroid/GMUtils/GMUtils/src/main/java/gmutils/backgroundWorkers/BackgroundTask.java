@@ -31,27 +31,27 @@ public class BackgroundTask implements BackgroundTaskAbs {
 
     @Nullable
     private final String threadName;
-    private final UiHandlerAbs handler;
+    private final UiHandlerAbs uiHandler;
 
     public BackgroundTask() {
         this(null, UiHandlerAbs.getInstance());
     }
 
-    public BackgroundTask(UiHandlerAbs handler) {
-        this(null, handler);
+    public BackgroundTask(UiHandlerAbs uiHandler) {
+        this(null, uiHandler);
     }
 
     public BackgroundTask(@Nullable String threadName) {
         this(threadName, UiHandlerAbs.getInstance());
     }
 
-    public BackgroundTask(@Nullable String threadName, UiHandlerAbs handler) {
+    public BackgroundTask(@Nullable String threadName, @NotNull UiHandlerAbs uiHandler) {
         if (TextUtils.isEmpty(threadName))
             this.threadName = null;
         else
             this.threadName = threadName.trim();
 
-        this.handler = handler;
+        this.uiHandler = uiHandler;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class BackgroundTask implements BackgroundTaskAbs {
             @NotNull Runnable task,
             Runnable onComplete
     ) {
-        execute(task, onComplete, null);
+        execute(task, onComplete, null, true);
     }
 
     @Override
@@ -68,22 +68,37 @@ public class BackgroundTask implements BackgroundTaskAbs {
             @Nullable Runnable onComplete,
             @Nullable ResultCallback<Throwable> onException
     ) {
+        execute(task, onComplete, onException, true);
+    }
+
+    @Override
+    public void execute(
+            @NotNull Runnable task,
+            @Nullable Runnable onComplete,
+            @Nullable ResultCallback<Throwable> onException,
+            boolean dispatchResultOnUIThread
+    ) {
         execute(
                 () -> {
                     task.run();
                     return null;
                 },
+                onComplete == null ?
+                        null :
+                        result -> onComplete.run(),
                 onException,
-                onComplete == null ? null : result -> onComplete.run()
+                dispatchResultOnUIThread
         );
     }
+
+    //-------------------------------------------------------------------------------------------
 
     @Override
     public <T> void execute(
             @NotNull ActionCallback0<T> task,
             @Nullable ResultCallback<T> resultCallback
     ) {
-        execute(task, resultCallback, null);
+        execute(task, resultCallback, null, true);
     }
 
     @Override
@@ -92,20 +107,46 @@ public class BackgroundTask implements BackgroundTaskAbs {
             @Nullable ResultCallback<T> resultCallback,
             @Nullable ResultCallback<Throwable> onException
     ) {
+        execute(task, resultCallback, onException, true);
+    }
+
+    @Override
+    public <T> void execute(
+            @NotNull ActionCallback0<T> task,
+            @Nullable ResultCallback<T> resultCallback,
+            @Nullable ResultCallback<Throwable> onException,
+            boolean dispatchResultOnUIThread
+    ) {
         Runnable runnable = () -> {
             try {
                 T result = task.invoke();
                 if (resultCallback != null) {
-                    runOnUiThread(() -> {
+                    if (dispatchResultOnUIThread) {
+                        runOnUiThread(() -> {
+                            resultCallback.invoke(result);
+                        });
+                    }
+                    //
+                    else {
                         resultCallback.invoke(result);
-                    });
+                    }
                 }
-            } catch (Throwable e) {
+            }
+            //
+            catch (Throwable e) {
                 if (onException != null) {
-                    runOnUiThread(() -> {
+                    if (dispatchResultOnUIThread) {
+                        runOnUiThread(() -> {
+                            onException.invoke(e);
+                        });
+                    }
+                    //
+                    else {
                         onException.invoke(e);
-                    });
-                } else {
+                    }
+                }
+                //
+                else {
                     throw e;
                 }
             }
@@ -119,9 +160,9 @@ public class BackgroundTask implements BackgroundTaskAbs {
     }
 
     private void runOnUiThread(Runnable task) {
-        UiHandlerAbs uiHandler = handler;
-        if (uiHandler == null) uiHandler = UiHandlerAbs.getInstance();
-        uiHandler.post(0, task);
+        UiHandlerAbs handler = uiHandler;
+        if (handler == null) handler = UiHandlerAbs.getInstance(); //unnecessary, but for precaution
+        handler.post(0, task);
     }
 
 }

@@ -473,42 +473,28 @@ public class BaseViewModel extends AndroidViewModel {
 
     //----------------------------------------------------------------------------------------------
 
-    private final MutableLiveData<ProgressStatus> progressStatusLiveData;
-    private final MutableLiveData<Message> alertMessageLiveData;
-    private final MutableLiveData<String> updateUiLiveData;
-
     public BaseViewModel(@NotNull Application application) {
         super(application);
-
-        progressStatusLiveData = new MutableLiveData<>();
-        alertMessageLiveData = new MutableLiveData<>();
-        updateUiLiveData = new MutableLiveData<>();
-
-    }
-
-    public BaseViewModel(@NonNull Application application, MutableLiveData<ProgressStatus> progressStatusLiveData, MutableLiveData<Message> alertMessageLiveData, MutableLiveData<String> updateUiLiveData) {
-        super(application);
-        
-        assert progressStatusLiveData != null;
-        assert alertMessageLiveData != null;
-        assert updateUiLiveData != null;
-
-        this.progressStatusLiveData = progressStatusLiveData;
-        this.alertMessageLiveData = alertMessageLiveData;
-        this.updateUiLiveData = updateUiLiveData;
     }
 
     //----------------------------------------------------------------------------------------------
 
+    private MutableLiveData<ProgressStatus> progressStatusLiveData;
+    private MutableLiveData<Message> alertMessageLiveData;
+    private MutableLiveData<String> updateUiLiveData;
+
     public MutableLiveData<ProgressStatus> progressStatusLiveData() {
+        if (progressStatusLiveData == null) progressStatusLiveData = new MutableLiveData<>();
         return progressStatusLiveData;
     }
 
     public MutableLiveData<Message> alertMessageLiveData() {
+        if (alertMessageLiveData == null) alertMessageLiveData = new MutableLiveData<>();
         return alertMessageLiveData;
     }
 
     public MutableLiveData<String> updateUiLiveData() {
+        if (updateUiLiveData == null) updateUiLiveData = new MutableLiveData<>();
         return updateUiLiveData;
     }
 
@@ -579,9 +565,15 @@ public class BaseViewModel extends AndroidViewModel {
 
     //----------------------------------------------------------------------------------------------
 
+    private UiHandlerAbs uiHandler;
+
     @NotNull
     public UiHandlerAbs getHandler() {
-        return UiHandlerAbs.getInstance();
+        if (uiHandler == null) {
+            uiHandler = UiHandlerAbs.getInstance();
+        }
+
+        return uiHandler;
     }
 
     public void runOnUiThread(Runnable runnable) {
@@ -593,6 +585,17 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     //----------------------------------------------------------
+
+    private BackgroundTaskAbs backgroundTask;
+
+    @NotNull
+    public BackgroundTaskAbs getBackgroundTaskInstance(String threadName) {
+        if (backgroundTask == null) {
+            backgroundTask = new BackgroundTask(threadName);
+        }
+
+        return backgroundTask;
+    }
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish) {
         runOnBackgroundThread(task, onFinish, null, true, 0, null);
@@ -607,46 +610,19 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     public <T> void runOnBackgroundThread(ActionCallback0<T> task, ResultCallback<T> onFinish, ResultCallback<Throwable> onException, boolean dispatchResultOnUIThread, long delay, String threadName) {
-        if (task == null) return;
+        if (task == null) throw new IllegalArgumentException("task can't be null");
 
-        Runnable target = () -> {
-            T result;
-            if (onException == null) {
-                result = task.invoke();
-            } else {
-                try {
-                    result = task.invoke();
-                } catch (Throwable e) {
-                    if (dispatchResultOnUIThread)
-                        runOnUiThread(() -> onException.invoke(e));
-                    else
-                        onException.invoke(e);
-
-                    return;
-                }
-            }
-
-            if (onFinish != null) {
-                if (dispatchResultOnUIThread)
-                    runOnUiThread(() -> onFinish.invoke(result));
-                else
-                    onFinish.invoke(result);
-            }
-        };
-
-        Runnable startThread = () -> {
-            getBackgroundTaskInstance(threadName).execute(target, null);
+        Runnable job = () -> {
+            getBackgroundTaskInstance(threadName).execute(task, onFinish, onException, dispatchResultOnUIThread);
         };
 
         if (delay > 0) {
-            runOnUiThread(startThread, delay);
-        } else {
-            startThread.run();
+            runOnUiThread(job, delay);
         }
-    }
-
-    protected BackgroundTaskAbs getBackgroundTaskInstance(String threadName) {
-        return new BackgroundTask(threadName);
+        //
+        else {
+            job.run();
+        }
     }
 
     //---------------------------------------------------------

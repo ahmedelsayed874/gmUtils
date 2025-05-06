@@ -3,7 +3,7 @@ package gmutils.ui.utils.uihandler;
 import org.jetbrains.annotations.NotNull;
 
 public interface UiHandlerAbs {
-    static UiHandlerAbs getInstance() {
+    public static UiHandlerAbs getInstance() {
         return new UiHandler();
     }
 
