@@ -72,13 +72,13 @@ public abstract class BaseFragment extends Fragment {
 
     //----------------------------------------------------------------------------------------------
 
-    private ViewBinding fragmentViewBinding;
+    private ViewBinding viewBinding;
 
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater, ViewGroup container);
 
-    public ViewBinding getFragmentViewBinding() {
-        return fragmentViewBinding;
+    public ViewBinding getViewBinding() {
+        return viewBinding;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -128,8 +128,8 @@ public abstract class BaseFragment extends Fragment {
         }
         //
         else if (viewSource instanceof ViewSource.ViewBinding) {
-            fragmentViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
-            view = fragmentViewBinding.getRoot();
+            viewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
+            view = viewBinding.getRoot();
         }
 
         //------------------------------------------------------------------------------------------
@@ -317,7 +317,7 @@ public abstract class BaseFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         hideWaitView();
-        fragmentViewBinding = null;
+        viewBinding = null;
     }
 
     @Override
