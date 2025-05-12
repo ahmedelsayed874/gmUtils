@@ -80,7 +80,7 @@ public class Logger extends LoggerAbs {
     }
 
     @Override
-    protected void writeToLog(String tag, String msg) {
+    public void writeToLog(String tag, String msg) {
         Log.e(tag, msg);
     }
 

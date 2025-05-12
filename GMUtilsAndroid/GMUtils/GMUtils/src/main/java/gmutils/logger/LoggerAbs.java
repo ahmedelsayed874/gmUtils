@@ -468,54 +468,52 @@ public abstract class LoggerAbs {
     public void print(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
         if ((forceLog || logConfigs.isLogEnabled()) || (forceWriteToFile || logConfigs.isWriteLogsToFileEnabled())) {
             runOnLoggerThread(() -> {
-                printSync(title, content);
+                printSync(title, content, forceLog, forceWriteToFile);
             });
         }
     }
 
-    private void printSync(TitleGetter title, @NotNull ContentGetter content) {
-        if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
-            String contentStr = ("" + content.getContent());
+    private void printSync(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
+        String contentStr = ("" + content.getContent());
 
-            if (logConfigs.isLogEnabled()) {
-                String title2 = "**** ";
-                if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
-                if (title != null) title2 += title.getTitle();
+        if (logConfigs.isLogEnabled() || forceLog) {
+            String title2 = "**** ";
+            if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
+            if (title != null) title2 += title.getTitle();
 
-                String[] t = refineTitle(title2);
-                String[] m = divideLogMsg(contentStr, t.length > 1 ? t[1].length() : 0);
+            String[] t = refineTitle(title2);
+            String[] m = divideLogMsg(contentStr, t.length > 1 ? t[1].length() : 0);
 
-                if (m.length == 1) {
-                    if (t.length == 1)
-                        writeToLog(t[0], m[0]);
-                    else
-                        writeToLog(t[0], t[1] + ": " + m[0]);
-                } else {
-                    for (int i = 0; i < m.length; i++) {
-                        if (t.length == 1) {
-                            writeToLog(t[0], "LOG[" + i + "]-> " + m[i]);
-                        } else {
-                            writeToLog(t[0], t[1] + ": " + "LOG[" + i + "]-> " + m[i]);
-                        }
+            if (m.length == 1) {
+                if (t.length == 1)
+                    writeToLog(t[0], m[0]);
+                else
+                    writeToLog(t[0], t[1] + ": " + m[0]);
+            } else {
+                for (int i = 0; i < m.length; i++) {
+                    if (t.length == 1) {
+                        writeToLog(t[0], "LOG[" + i + "]-> " + m[i]);
+                    } else {
+                        writeToLog(t[0], t[1] + ": " + "LOG[" + i + "]-> " + m[i]);
                     }
                 }
             }
+        }
 
-            if (logConfigs.isWriteLogsToFileEnabled()) {
-                if (BaseApplication.current() != null) {
-                    try {
-                        String[] title2 = new String[]{""};
-                        if (title != null) title2[0] = "<<|(" + title.getTitle() + ")|>>\n";
+        if (logConfigs.isWriteLogsToFileEnabled() || forceWriteToFile) {
+            if (BaseApplication.current() != null) {
+                try {
+                    String[] title2 = new String[]{""};
+                    if (title != null) title2[0] = "<<|(" + title.getTitle() + ")|>>\n";
 
-                        writeToFileSync(BaseApplication.current(), () -> title2[0] + content);
-                    } catch (Exception e) {
-                    }
+                    writeToFileSync(BaseApplication.current(), () -> title2[0] + contentStr);
+                } catch (Exception e) {
                 }
             }
         }
     }
 
-    protected abstract void writeToLog(String tag, String msg);
+    public abstract void writeToLog(String tag, String msg);
 
     //----------------
 
@@ -570,12 +568,19 @@ public abstract class LoggerAbs {
                             "() -> line: " + stackTrace.getLineNumber() +
                             (moreInfo.isEmpty() ? "" : ("\n-> " + moreInfo));
 
-                    printSync(title, () -> msg);
+                    printSync(
+                            title,
+                            () -> msg,
+                            false,
+                            false
+                    );
                 } catch (Exception e) {
                     printSync(
                             title,
                             () -> "printMethod failed with exception: " + e.getMessage() +
-                                    (moreInfoCallback == null ? "" : "\nMORE-INFO: " + moreInfoCallback.getContent())
+                                    (moreInfoCallback == null ? "" : "\nMORE-INFO: " + moreInfoCallback.getContent()),
+                            false,
+                            false
                     );
                 }
             });
