@@ -628,15 +628,15 @@ public class FirebaseDatabaseOp extends IFirebaseDatabaseOp {
 
         if (filterOption.type == FBFilterTypes.Equal) {
             if (filterOption.args instanceof String) {
-                query = ref.equalTo((String) filterOption.args);
+                query = query.equalTo((String) filterOption.args);
             }
             //
             else if (filterOption.args instanceof Double) {
-                query = ref.equalTo((Double) filterOption.args);
+                query = query.equalTo((Double) filterOption.args);
             }
             //
             else if (filterOption.args instanceof Boolean) {
-                query = ref.equalTo((Boolean) filterOption.args);
+                query = query.equalTo((Boolean) filterOption.args);
             }
         }
         //
