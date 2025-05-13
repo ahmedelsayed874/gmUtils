@@ -49,7 +49,7 @@ abstract class IFCM {
     required String message,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = false,
+    bool dataNotification = true,
   });
 
   Future<bool> sendMessageToTopic({
@@ -58,7 +58,7 @@ abstract class IFCM {
     required String message,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = false,
+    bool dataNotification = true,
   });
 
   int showNotification(
