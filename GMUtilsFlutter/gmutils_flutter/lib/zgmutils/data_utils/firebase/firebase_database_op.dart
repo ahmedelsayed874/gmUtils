@@ -238,28 +238,46 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     DataSnapshot? snapshot;
 
     try {
+      Query? query;
       if (filterOption != null) {
-        ref.orderByChild(filterOption.key);
+        query = ref.orderByChild(filterOption.key);
 
         if (filterOption.type == FBFilterTypes.equal) {
-          ref.equalTo(filterOption.args);
-        } else if (filterOption.type == FBFilterTypes.greaterThan) {
-          ref.startAfter(filterOption.args);
-        } else if (filterOption.type == FBFilterTypes.greaterThanOrEqual) {
-          ref.startAt(filterOption.args);
-        } else if (filterOption.type == FBFilterTypes.lessThan) {
-          ref.endBefore(filterOption.args);
-        } else if (filterOption.type == FBFilterTypes.lessThanOrEqual) {
-          ref.endAt(filterOption.args);
+          query = query.equalTo(filterOption.args);
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.greaterThan) {
+          query = query.startAfter(filterOption.args);
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.greaterThanOrEqual) {
+          query = query.startAt(filterOption.args);
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.lessThan) {
+          query = query.endBefore(filterOption.args);
+        }
+        //
+        else if (filterOption.type == FBFilterTypes.lessThanOrEqual) {
+          query = query.endAt(filterOption.args);
         }
 
         if (filterOption.limit != null) {
-          ref.limitToFirst(filterOption.limit!);
+          query = query.limitToFirst(filterOption.limit!);
         }
       }
 
-      var result = await ref.once();
-      snapshot = result.snapshot;
+      if (query == null) {
+        var result = await ref.once();
+        snapshot = result.snapshot;
+      }
+      //
+      else {
+        //snapshot = await query.get();
+        var result = await query.once();
+        snapshot = result.snapshot;
+      }
+
 
       if (snapshot.exists) {
         List<T> list = await _mapData(
@@ -269,7 +287,6 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
         return Response.success(data: list);
       }
-
       //
       else {
         return Response.failed(
@@ -388,7 +405,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     }
   }
 
-//----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
 
   @override
   void listenToChanges({

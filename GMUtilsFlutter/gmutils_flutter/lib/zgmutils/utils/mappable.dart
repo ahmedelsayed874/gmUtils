@@ -64,13 +64,13 @@ class IntMapper extends Mappable<int?> {
 
   IntMapper({required this.key});
 
-  @override
+   @override
   int? fromMap(Map<String, dynamic> values) {
+    var n = int.tryParse('${values[key]}');
+
     return values[key] == null
         ? null
-        : (values[key] is int
-            ? values[key]
-            : throw 'IntMapper.fromMap(Map<String, dynamic>) can\'t handle the data under the key = $key;\nthe data: $values');
+        : (n ?? (throw 'IntMapper.fromMap(Map<String, dynamic>) can\'t handle the data under the key = $key;\nthe data: $values'));
   }
 
   @override
@@ -86,11 +86,11 @@ class DoubleMapper extends Mappable<double?> {
 
   @override
   double? fromMap(Map<String, dynamic> values) {
+    var n = double.tryParse('${values[key]}');
+    
     return values[key] == null
         ? null
-        : (values[key] is int
-            ? values[key]
-            : throw 'DoubleMapper.fromMap(Map<String, dynamic>) can\'t handle the data under the key = $key;\nthe data: $values');
+        : (n ?? (throw 'DoubleMapper.fromMap(Map<String, dynamic>) can\'t handle the data under the key = $key;\nthe data: $values'));
   }
 
   @override
