@@ -50,10 +50,10 @@ class FirebaseStorage implements IFirebaseStorage {
     try {
       await reference.putFile(file);
       var link = await reference.getDownloadURL();
-      Logs.print(() => 'uploadTo(reference: ${reference.fullPath}, file: ${file.path}) ----> $link');
+      Logs.print(() => 'FirebaseStorage.uploadTo(reference: ${reference.fullPath}, file: ${file.path}) ----> $link');
       return Response.success(data: link);
     } on FirebaseException catch (e) {
-      Logs.print(() => 'uploadTo() ----> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage.uploadTo() ----> EXCEPTION:: $e');
       return Response.failed(error: StringSet(e.code, e.code));
     }
   }
@@ -65,10 +65,10 @@ class FirebaseStorage implements IFirebaseStorage {
       firebasePath = _refinePath(firebasePath);
       var reference = storage.ref(firebasePath);
       var url = await reference.getDownloadURL();
-      Logs.print(() => 'getDownloadURL(firebasePath: $firebasePath) ---> $url');
+      Logs.print(() => 'FirebaseStorage.getDownloadURL(firebasePath: $firebasePath) ---> $url');
       return Response.success(data: url);
     } catch (e) {
-      Logs.print(() => 'getDownloadURL ---> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage.getDownloadURL ---> EXCEPTION:: $e');
       if (e is FirebaseException) {
         return Response.failed(error: StringSet(e.code, e.code));
       } else {
@@ -113,11 +113,11 @@ class FirebaseStorage implements IFirebaseStorage {
     try {
       fromPath = _refinePath(fromPath);
       await storage.ref(fromPath).writeToFile(outFile);
-      Logs.print(() => 'download(fromPath: $fromPath) ---> file downloaded to: ${outFile.path}');
+      Logs.print(() => 'FirebaseStorage.download(fromPath: $fromPath) ---> file downloaded to: ${outFile.path}');
       return Response.success(data: outFile);
     } on FirebaseException catch (e) {
       // e.g, e.code == 'canceled'
-      Logs.print(() => 'download() ---> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage.download() ---> EXCEPTION:: $e');
       return Response.failed(error: StringSet(e.code, e.code));
     }
   }
@@ -129,10 +129,10 @@ class FirebaseStorage implements IFirebaseStorage {
       atPath = _refinePath(atPath);
       var reference = storage.ref(atPath);
       await reference.delete();
-      Logs.print(() => 'delete(atPath: $atPath) -----> true');
+      Logs.print(() => 'FirebaseStorage.delete(atPath: $atPath) -----> true');
       return Response.success(data: true);
     } catch (e) {
-      Logs.print(() => 'delete() -----> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage.delete() -----> EXCEPTION:: $e');
       if (e is FirebaseException) {
         return Response.failed(error: StringSet(e.code, e.code));
       } else {
