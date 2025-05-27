@@ -183,7 +183,7 @@ class InputDialog {
                       ),
                       keyboardType: _keyboardType,
                       minLines: _obscureText ? null : _minInputLines,
-                      maxLines: _obscureText ? null : _minInputLines == null ? null : (_maxInputLines ?? (_minInputLines! + 3)),
+                      maxLines: _obscureText ? 1 : (_minInputLines == null ? null : (_maxInputLines ?? (_minInputLines! + 3))),
                       obscureText: _obscureText,
                     ),
                     if (_extraWidget != null) _extraWidget!,
