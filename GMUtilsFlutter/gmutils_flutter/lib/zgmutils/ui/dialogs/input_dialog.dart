@@ -13,7 +13,7 @@ class InputDialog {
   String _inputHint = '';
   int? _minInputLines;
   int? _maxInputLines;
-  bool Function(String input)? _validationInputHandler;
+  String? Function(String input)? _validationInputHandler;
   void Function(String input)? _inputHandler;
   void Function()? _onDismiss;
   final TextEditingController _inputController = TextEditingController();
@@ -77,7 +77,7 @@ class InputDialog {
   }
 
   InputDialog setValidationInputHandler(
-    bool Function(String input)? validationInputHandler,
+    String? Function(String input)? validationInputHandler,
   ) {
     _validationInputHandler = validationInputHandler;
     return this;
@@ -156,8 +156,9 @@ class InputDialog {
         context: context(),
         barrierDismissible: _enableOuterDismiss,
         builder: (context) {
-          return Column(
-            children: [
+          return _AlertDialogBody(inputDialog: this);
+          /*return Column(
+           children: [
               const Expanded(child: Text('')),
               AlertDialog(
                 title: Text(
@@ -174,16 +175,20 @@ class InputDialog {
                     DirectionAwareTextField(
                       controller: _inputController,
                       decoration: InputDecoration(
-                          hintText: _inputHint,
-                          hintStyle: AppTheme.defaultTextStyle(
-                            fontWeight: FontWeight.normal,
-                            textColor: AppTheme.appColors?.hint,
-                          ),
-                          border: const OutlineInputBorder(),
+                        hintText: _inputHint,
+                        hintStyle: AppTheme.defaultTextStyle(
+                          fontWeight: FontWeight.normal,
+                          textColor: AppTheme.appColors?.hint,
+                        ),
+                        border: const OutlineInputBorder(),
                       ),
                       keyboardType: _keyboardType,
                       minLines: _obscureText ? null : _minInputLines,
-                      maxLines: _obscureText ? 1 : (_minInputLines == null ? null : (_maxInputLines ?? (_minInputLines! + 3))),
+                      maxLines: _obscureText
+                          ? 1
+                          : (_minInputLines == null
+                              ? null
+                              : (_maxInputLines ?? (_minInputLines! + 3))),
                       obscureText: _obscureText,
                     ),
                     if (_extraWidget != null) _extraWidget!,
@@ -225,7 +230,7 @@ class InputDialog {
               ),
               const Expanded(child: Text('')),
             ],
-          );
+          );*/
         }).then((value) {
       _context = null;
       _inputHandler = null;
@@ -240,5 +245,109 @@ class InputDialog {
   void dismiss() {
     _dismissed = true;
     if (_context != null) Navigator.pop(_context!());
+  }
+}
+
+class _AlertDialogBody extends StatefulWidget {
+  InputDialog? inputDialog;
+
+  _AlertDialogBody({required this.inputDialog, super.key});
+
+  @override
+  State<_AlertDialogBody> createState() => _AlertDialogBodyState();
+}
+
+class _AlertDialogBodyState extends State<_AlertDialogBody> {
+  String? error;
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.inputDialog = null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var inputDialog = widget.inputDialog!;
+
+    return Column(
+      children: [
+        const Expanded(child: Text('')),
+        AlertDialog(
+          title: Text(
+            inputDialog._title,
+            style: AppTheme.textStyleOfScreenTitle(),
+          ),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                inputDialog._message,
+                style: AppTheme.defaultTextStyle(),
+              ),
+              DirectionAwareTextField(
+                controller: inputDialog._inputController,
+                decoration: InputDecoration(
+                  hintText: inputDialog._inputHint,
+                  hintStyle: AppTheme.defaultTextStyle(
+                    fontWeight: FontWeight.normal,
+                    textColor: AppTheme.appColors?.hint,
+                  ),
+                  border: const OutlineInputBorder(),
+                  errorText: error,
+                ),
+                keyboardType: inputDialog._keyboardType,
+                minLines: inputDialog._obscureText ? null : inputDialog._minInputLines,
+                maxLines: inputDialog._obscureText
+                    ? 1
+                    : (inputDialog._minInputLines == null
+                        ? null
+                        : (inputDialog._maxInputLines ?? (inputDialog._minInputLines! + 3))),
+                obscureText: inputDialog._obscureText,
+              ),
+              if (inputDialog._extraWidget != null) inputDialog._extraWidget!,
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                error = null;
+
+                if (inputDialog._validationInputHandler != null) {
+                  error = inputDialog._validationInputHandler!(inputDialog._inputController.text);
+                  if (error != null) {
+                    setState(() {});
+                  }
+                }
+
+                if (error == null) {
+                  inputDialog.dismiss();
+                  inputDialog._inputHandler?.call(inputDialog._inputController.text);
+                }
+              },
+              child: Text(inputDialog._okButtonText ?? (App.isEnglish ? 'OK' : 'حسنا')),
+            ),
+            if (inputDialog._showSkipButton)
+              TextButton(
+                onPressed: () {
+                  inputDialog.dismiss();
+                  inputDialog._onSkipClick?.call(inputDialog._inputController.text);
+                },
+                child:
+                    Text(inputDialog._skipButtonText ?? (App.isEnglish ? 'Skip' : 'تخطي')),
+              ),
+            TextButton(
+              onPressed: () {
+                inputDialog.dismiss();
+              },
+              child: Text(
+                  inputDialog._cancelButtonText ?? (App.isEnglish ? 'Cancel' : 'إلغاء')),
+            ),
+          ],
+          backgroundColor: AppTheme.appColors?.background ?? Colors.white,
+        ),
+        const Expanded(child: Text('')),
+      ],
+    );
   }
 }
