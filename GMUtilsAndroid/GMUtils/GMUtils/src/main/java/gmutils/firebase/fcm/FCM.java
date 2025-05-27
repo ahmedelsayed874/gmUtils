@@ -483,7 +483,11 @@ public class FCM implements FCMFunctions {
                         .add("sound", soundFileName)
         );
 
-        notificationBody.add(PAYLOAD_KEY_NAME, dataPayload);
+if (dataPayload != null) {
+    JSONObject data = new JSONObject();
+    data.put(PAYLOAD_KEY_NAME, dataPayload); check this line
+        notificationBody.add("data", data);
+}
 
         JsonBuilder messageJson = JsonBuilder.ofJsonObject();
         messageJson.add("message", notificationBody);

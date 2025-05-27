@@ -18,6 +18,7 @@ class InputDialog {
   void Function()? _onDismiss;
   final TextEditingController _inputController = TextEditingController();
   TextInputType? _keyboardType;
+  bool _obscureText = false;
   String? _okButtonText;
   String? _skipButtonText;
   String? _cancelButtonText;
@@ -62,6 +63,11 @@ class InputDialog {
 
   InputDialog setInputKeyboardType(TextInputType keyboardType) {
     _keyboardType = keyboardType;
+    return this;
+  }
+
+  InputDialog setInputObscureText(bool obscureText) {
+    _obscureText = obscureText;
     return this;
   }
 
@@ -176,8 +182,9 @@ class InputDialog {
                           border: const OutlineInputBorder(),
                       ),
                       keyboardType: _keyboardType,
-                      minLines: _minInputLines,
-                      maxLines: _minInputLines == null ? null : (_maxInputLines ?? (_minInputLines! + 3)),
+                      minLines: _obscureText ? null : _minInputLines,
+                      maxLines: _obscureText ? null : _minInputLines == null ? null : (_maxInputLines ?? (_minInputLines! + 3)),
+                      obscureText: _obscureText,
                     ),
                     if (_extraWidget != null) _extraWidget!,
                   ],
