@@ -7,7 +7,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import "package:googleapis_auth/auth_io.dart";
 import 'package:googleapis_auth/googleapis_auth.dart' as googleAuth;
 import 'package:http/http.dart' as http;
-import 'package:mowasalatna/resources/_resources.dart';
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 
 import '../../../main.dart' as main;
@@ -49,7 +48,7 @@ abstract class IFCM {
     required String message,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = true,
+    bool dataNotification = false,
   });
 
   Future<bool> sendMessageToTopic({
@@ -171,7 +170,7 @@ class FCM extends IFCM {
 
     Logs.print(() => '[Fcm.init()] -> '
         'don\'t forget to use FCM.instance.redirectToPendingScreen(); '
-        'in your home screen');
+        'in your list screen');
     Logs.print(() => '[Fcm.init()] -> '
         'don\'t forget to define this "${Notifications.defaultNotificationChannelId}" as '
         'default notification channel (com.google.firebase.messaging.default_notification_channel_id)');
@@ -314,9 +313,11 @@ class FCM extends IFCM {
   @override
   Future<Result<bool>> unsubscribeFromSubscribedTopics() async {
     var savedTopics = await subscribedTopics();
+    if (savedTopics.isEmpty) return Result(true);
+
     return _unsubscribeFromTopics(
-      savedTopics: savedTopics,
-      targetTopics: savedTopics,
+      savedTopics: savedTopics.toList(),
+      targetTopics: savedTopics.toList(),
     );
   }
 
@@ -324,8 +325,8 @@ class FCM extends IFCM {
   Future<Result<bool>> unsubscribeFromTopics(List<String> topics) async {
     var savedTopics = await subscribedTopics();
     return _unsubscribeFromTopics(
-      savedTopics: savedTopics,
-      targetTopics: topics,
+      savedTopics: savedTopics.toList(),
+      targetTopics: topics.toList(),
     );
   }
 
@@ -581,20 +582,28 @@ class FCM extends IFCM {
         //"image": "http://....",
         //"direct_boot_ok": false,
       },
+      //"data": {},
     };
 
     notificationBody["apns"] = {
       "payload": {
         "aps": {
-          "title": title,
-          "body": message,
+          "alert": {
+            "title": title,
+            "body": message,
+          },
+          //"sound": soundFileName,
+          // "badge": 1,
         },
+        //if (dataPayload != null) IOS_PAYLOAD_KEY_NAME: dataPayload, //"data" This was your original iOS custom payload placement
       },
-      //"sound": soundFileName,
+      // "headers": {
+      //   "apns-priority": "10", // "5" for low priority
+      // }
     };
 
     if (dataPayload != null) {
-      notificationBody[IOS_PAYLOAD_KEY_NAME] = dataPayload;
+      notificationBody["data"] = {IOS_PAYLOAD_KEY_NAME : dataPayload};
     }
 
     Map<String, dynamic> messageJson = {};
