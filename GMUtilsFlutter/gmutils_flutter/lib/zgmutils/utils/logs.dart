@@ -1,4 +1,5 @@
 import 'dart:core' as core;
+
 //import 'dart:core';
 import 'dart:io';
 
@@ -15,7 +16,7 @@ class Logs {
 
   static void setLogFileDeadline(
     core.String? logFileDeadline, {
-        core.bool saveDate = false,
+    core.bool saveDate = false,
   }) {
     try {
       var dt = DateOp().parse(logFileDeadline ?? '', convertToLocalTime: true);
@@ -51,8 +52,8 @@ class Logs {
     }
   }
 
-  static core.Future<core.bool> get allowLogs async {
-    return (kDebugMode || (await allowLogToFile));
+  static core.bool get allowLogsToConsole {
+    return kDebugMode;
   }
 
   static core.Future<core.bool> get allowLogToFile async {
@@ -73,7 +74,7 @@ class Logs {
   //----------------------------------------------------------------------------
 
   static void print(core.Object? Function() info) async {
-    if (await allowLogs) {
+    if (allowLogsToConsole || await allowLogToFile) {
       final infoData = info();
       const logStart = '*****';
       if (infoData == null) {
@@ -133,7 +134,7 @@ class Logs {
       _printToFile('>>>> $now ----\n$text \r\n\r\n');
     }
 
-    if (kDebugMode) {
+    if (allowLogsToConsole) {
       core.print(text);
     }
   }
@@ -147,7 +148,7 @@ class Logs {
     }
 
     _fileWriterBussy = true;
-    var order = '000000${_x++}'.substring('$_x'.length);//0000 001234
+    var order = '000000${_x++}'.substring('$_x'.length); //0000 001234
     _files?.append('[$order]:: $log').then((v) {
       if (_fileTextCache?.isNotEmpty == true) {
         _fileWriterBussy = true;
