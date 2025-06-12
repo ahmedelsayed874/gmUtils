@@ -52,11 +52,11 @@ class Logs {
     }
   }
 
-  static core.bool get allowLogsToConsole {
+  static core.bool get inDebugMode {
     return kDebugMode;
   }
 
-  static core.Future<core.bool> get allowLogToFile async {
+  static core.Future<core.bool> get writingToLogFileEnabled async {
     var now = core.DateTime.now();
     var printToFile = now.millisecondsSinceEpoch <
         (_logFileDeadline ?? core.DateTime(2024, 5, 15).millisecondsSinceEpoch);
@@ -74,7 +74,7 @@ class Logs {
   //----------------------------------------------------------------------------
 
   static void print(core.Object? Function() info) async {
-    if (allowLogsToConsole || await allowLogToFile) {
+    if (inDebugMode || await writingToLogFileEnabled) {
       final infoData = info();
       const logStart = '*****';
       if (infoData == null) {
@@ -111,7 +111,7 @@ class Logs {
   static core.int _x = 0;
 
   static void _print(core.String text) async {
-    if (await allowLogToFile) {
+    if (await writingToLogFileEnabled) {
       var now = core.DateTime.now();
 
       if (_files == null) {
@@ -134,7 +134,7 @@ class Logs {
       _printToFile('>>>> $now ----\n$text \r\n\r\n');
     }
 
-    if (allowLogsToConsole) {
+    if (kDebugMode) {
       core.print(text);
     }
   }

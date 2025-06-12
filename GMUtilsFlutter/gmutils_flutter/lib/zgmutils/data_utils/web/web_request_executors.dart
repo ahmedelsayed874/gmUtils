@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:gmutils_flutter/zgmutils/utils/mappable.dart';
-import 'package:gmutils_flutter/zgmutils/utils/pairs.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 import '../../utils/logs.dart';
+import '../../utils/mappable.dart';
+import '../../utils/pairs.dart';
 import '../../utils/result.dart';
 import 'response.dart';
 import 'web_url.dart';
@@ -286,7 +286,7 @@ class WebRequestExecutor {
       }
 
       if (tries < supposedTries) {
-        if (await Logs.allowLogs) {
+        if (Logs.inDebugMode || await Logs.writingToLogFileEnabled) {
           Logs.print(() => [
                 '****',
                 'API::Response(OF_TRY_NUMBER: $tries)',
