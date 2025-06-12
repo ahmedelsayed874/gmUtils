@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:ogtech_app_store/zgmutils/utils/text_utils.dart';
 
 import '../../utils/logs.dart';
 import '../../utils/mappable.dart';
@@ -96,6 +97,11 @@ class FBFilterOption {
     required this.args,
     required this.limit,
   });
+
+  @override
+  String toString() {
+    return 'FBFilterOption{type: $type, key: $key, args: $args, limit: $limit}';
+  }
 }
 
 enum FBFilterTypes {
@@ -128,7 +134,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       try {
         init();
       } catch (e) {
-        Logs.print(() => e);
+        Logs.print(() => 'FirebaseDatabaseOp.databaseReference ---> Exception:: $e');
         await Firebase.initializeApp();
         init();
       }
@@ -167,15 +173,15 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           .whenComplete(() async => added = true)
           .onError((error, stackTrace) async => added = false);
 
+      Logs.print(() => 'FirebaseDatabaseOp.saveDataTo'
+          '(ref: ${ref.path}, data: ${TextUtils().trimEnd('$data')}) '
+          '---> added: $added');
+
       return Response.success(data: added);
     } catch (e) {
-      Logs.print(
-            () => '***** FirebaseDatabaseOp.saveData() **** '
-            'args(ref: ${ref.path}) \n'
-            '$e',
-      );
+      Logs.print(() => 'FirebaseDatabaseOp.saveDataTo(ref: ${ref.path}) ---> Exception:: $e');
       return Response.failed(
-        error: StringSet(e.toString(), e.toString()),
+        error: StringSet(e.toString()),
         connectionFailed: true,
       );
     }
@@ -206,15 +212,15 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           .whenComplete(() async => added = true)
           .onError((error, stackTrace) async => added = false);
 
+      Logs.print(() => 'FirebaseDatabaseOp.saveMultipleDataTo'
+          '(ref: ${ref.path}, data-length: ${nodesAndData.length}, data: ${TextUtils().trimEnd('$nodesAndData')}) '
+          '---> added: $added');
+
       return Response.success(data: added);
     } catch (e) {
-      Logs.print(
-            () => '***** FirebaseDatabaseOp.addMultipleData() **** '
-            'args(ref: ${ref.path}) \n'
-            '$e',
-      );
+      Logs.print(() => 'FirebaseDatabaseOp.saveMultipleDataTo(ref: ${ref.path}) ---> Exception:: $e');
       return Response.failed(
-        error: StringSet(e.toString(), e.toString()),
+        error: StringSet(e.toString()),
         connectionFailed: true,
       );
     }
@@ -279,29 +285,35 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       }
 
 
+      Response<List<T>> response;
+      
       if (snapshot.exists) {
         List<T> list = await _mapData(
           snapshot,
           collectionSource,
         );
 
-        return Response.success(data: list);
+        response = Response.success(data: list);
       }
       //
       else {
-        return Response.failed(
+        response = Response.failed(
           error: StringSet('No data', "لا توجد بيانات"),
         );
       }
+
+      Logs.print(() => 'FirebaseDatabaseOp.retrieveAll'
+          '(ref: ${ref.path}, filterOption: $filterOption) '
+          '---> '
+          'response.data-length: ${response.data?.length}, '
+          'response.data: ${TextUtils().trimEnd('${response.data}')}, '
+          'response.message: ${response.error}');
+      
+      return response;
     } catch (e) {
-      Logs.print(
-            () => '***** FirebaseDatabaseOp.retrieveAll() **** '
-            'args(from: ${ref.path}) \n'
-            'snapshot: ${snapshot?.value} \n'
-            '$e',
-      );
+      Logs.print(() => 'FirebaseDatabaseOp.retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> Exception:: $e');
       return Response.failed(
-        error: StringSet(e.toString(), e.toString()),
+        error: StringSet(e.toString()),
         connectionFailed: true,
       );
     }
@@ -367,6 +379,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       var event = await ref.once();
       var snapshot = event.snapshot;
 
+      Response<T> response;
+      
       if (snapshot.exists) {
         if (snapshot.value is List) {
           var data = snapshot.value as List;
@@ -383,23 +397,27 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           }
         }
 
-        return Response.success(data: mappable.fromMap(map));
+        response = Response.success(data: mappable.fromMap(map));
       }
       //
       else {
-        return Response.failed(
+        response = Response.failed(
           error: StringSet('No data', "لا توجد بيانات"),
         );
       }
-    } catch (e) {
-      Logs.print(
-            () => '***** FirebaseDatabaseOp.retrieveNodeFrom() **** '
-            'args(from: ${ref.path}) \n'
-            'result: $map \n'
-            '$e',
+
+      Logs.print(() => 'FirebaseDatabaseOp.retrieveOnlyFrom(ref: ${ref.path}) '
+          '---> '
+          'response.data: ${TextUtils().trimEnd('${response.data}')}, '
+          'response.message: ${response.error}',
       );
+
+      return response;
+    } catch (e) {
+      Logs.print(() => 'FirebaseDatabaseOp.retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> Exception:: $e');
+      
       return Response.failed(
-        error: StringSet(e.toString(), e.toString()),
+        error: StringSet(e.toString()),
         connectionFailed: true,
       );
     }
@@ -515,14 +533,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       bool suc = true;
       var ref = await databaseReference;
       await ref.remove().onError((error, stackTrace) => suc = false);
+      Logs.print(() => 'FirebaseDatabaseOp.clear() ---> success:: $suc');
       return Response.success(data: suc);
     } catch (e) {
-      Logs.print(
-            () => '***** FirebaseDatabaseOp.clear() **** '
-            '$e',
-      );
+      Logs.print(() => 'FirebaseDatabaseOp.clear() ---> Exception:: $e');
       return Response.failed(
-        error: StringSet(e.toString(), e.toString()),
+        error: StringSet(e.toString()),
         connectionFailed: true,
       );
     }
@@ -534,15 +550,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     try {
       bool deleted = true;
       await ref.remove().onError((error, stackTrace) => deleted = false);
+      Logs.print(() => 'FirebaseDatabaseOp.removeNode(ref: ${ref.path}) ---> deleted:: $deleted');
       return Response.success(data: deleted);
     } catch (e) {
-      Logs.print(
-            () => '***** FirebaseDatabaseOp.removeNodeByReference() **** '
-            'args(nodeRef: ${ref.path}) \n'
-            '$e',
-      );
+      Logs.print(() => 'FirebaseDatabaseOp.removeNode(ref: ${ref.path}) ---> Exception:: $e');
       return Response.failed(
-        error: StringSet(e.toString(), e.toString()),
+        error: StringSet(e.toString()),
         connectionFailed: true,
       );
     }
@@ -550,11 +563,11 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
   @override
   void listenToAddingSpecific<N>({required String? subNodePath, required Function(N p1) onAdd, void Function()? onDone, void Function(Object p1, StackTrace p2)? onError}) {
-    // TODO: implement listenToAddingSpecific
+    throw 'implement listenToAddingSpecific';
   }
 
   @override
   void listenToChangesSpecific<N>({required String? subNodePath, required Function(N p1) onChange, void Function()? onDone, void Function(Object p1, StackTrace p2)? onError}) {
-    // TODO: implement listenToChangesSpecific
+    throw 'implement listenToChangesSpecific';
   }
 }

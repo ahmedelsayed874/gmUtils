@@ -16,6 +16,7 @@ class WebViewScreen extends StatefulWidget {
     required String toolbarTitle,
     required String url,
     int? height,
+    VoidCallback? onLoadCompleted,
     VoidCallback? onLoadFailed,
   }) {
     App.navTo(
@@ -24,6 +25,7 @@ class WebViewScreen extends StatefulWidget {
         toolbarTitle: toolbarTitle,
         url: url,
         height: height,
+        onLoadCompleted: onLoadCompleted,
         onLoadFailed: onLoadFailed,
       ),
     );
@@ -32,6 +34,7 @@ class WebViewScreen extends StatefulWidget {
   static WebViewScreen asWidget({
     required String url,
     int? height,
+    VoidCallback? onLoadCompleted,
     VoidCallback? onLoadFailed,
   }) {
     return WebViewScreen(
@@ -39,6 +42,7 @@ class WebViewScreen extends StatefulWidget {
       toolbarTitle: '',
       url: url,
       height: height,
+      onLoadCompleted: onLoadCompleted,
       onLoadFailed: onLoadFailed,
     );
   }
@@ -49,6 +53,7 @@ class WebViewScreen extends StatefulWidget {
   final String toolbarTitle;
   final String url;
   final int? height;
+  final VoidCallback? onLoadCompleted;
   final VoidCallback? onLoadFailed;
 
   const WebViewScreen({
@@ -56,6 +61,7 @@ class WebViewScreen extends StatefulWidget {
     required this.toolbarTitle,
     required this.url,
     required this.height,
+    required this.onLoadCompleted,
     required this.onLoadFailed,
     super.key,
   });
@@ -102,7 +108,9 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
           },
           onPageFinished: (String url) {
             Logs.print(
-                () => 'WebViewScreen->WebViewController->onPageFinished');
+              () => 'WebViewScreen->WebViewController->onPageFinished',
+            );
+            widget.onLoadCompleted?.call();
           },
           onWebResourceError: (WebResourceError error) {
             Logs.print(() =>

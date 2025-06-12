@@ -1,5 +1,5 @@
-import 'package:html/parser.dart';
-import 'package:intl/intl.dart';
+// import 'package:html/parser.dart';
+// import 'package:intl/intl.dart';
 
 class TextUtils {
   String removeExtraSpaces(String text) {
@@ -108,17 +108,17 @@ class TextUtils {
     return isArabicLetter(firstLetter) ?? false;
   }
 
-  String removeHtmlTags(String content) {
-    final document = parse(content);
-    String parsedString =
-        parse(document.body?.text).documentElement?.text ?? '';
-
-    if (parsedString.isEmpty) {
-      parsedString = Bidi.stripHtmlIfNeeded(content);
-    }
-
-    return parsedString;
-  }
+  // String removeHtmlTags(String content) {
+  //   final document = parse(content);
+  //   String parsedString =
+  //       parse(document.body?.text).documentElement?.text ?? '';
+  //
+  //   if (parsedString.isEmpty) {
+  //     parsedString = Bidi.stripHtmlIfNeeded(content);
+  //   }
+  //
+  //   return parsedString;
+  // }
 
   //----------------------------------------------------------------------------
 
@@ -134,5 +134,19 @@ class TextUtils {
         .replaceAll('7', '٧')
         .replaceAll('8', '٨')
         .replaceAll('9', '٩');
+  }
+
+  //----------------------------------------------------------------------------
+
+  String trimEnd(String text, {int endIndex = 100, String suffix = "..."}) {
+    if (endIndex < 1) return '';
+
+    if (text.length > endIndex) {
+      return text.substring(0, endIndex) + suffix;
+    }
+    //
+    else {
+      return text;
+    }
   }
 }

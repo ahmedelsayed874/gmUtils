@@ -72,7 +72,7 @@ class Notifications extends INotifications {
 
     Logs.print(() => '[Notifications.init()] -> '
         'don\'t forget to use Notifications.instance.redirectToPendingScreen(); '
-        'in your home screen');
+        'in your list screen');
     Logs.print(() => '[Notifications.init()] -> '
         'don\'t forget to define this "$defaultNotificationChannelId" as '
         'default notification channel (com.google.firebase.messaging.default_notification_channel_id)');
@@ -305,14 +305,21 @@ class Notifications extends INotifications {
     AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
   }) {
+    var _notificationId = notificationId ?? body.hashCode;
+    while (_notificationId > 0x7FFFFFFF || _notificationId < -0x80000000) {
+      var v = '$_notificationId';
+      var v2 = '$_notificationId'.substring(0, v.length - 1);
+      _notificationId = int.parse(v2);
+    }
+
     Logs.print(() => 'Notifications.showLocalNotification('
         'title: $title, '
         'body: $body, '
         'payload: $payload, '
-        'customChannel: ${customChannel?.channelId ?? defaultNotificationChannelId}'
+        '_notificationId: $_notificationId (was: $notificationId), '
+        'customChannel: ${customChannel?.channelId ?? defaultNotificationChannelId}, '
+        'androidInformationStyle: ${androidInformationStyle?.runtimeType}'
         ')');
-
-    final _notificationId = notificationId ?? body.hashCode;
 
     SoundFile? sound =
         customChannel?.soundFile ?? defaultNotificationChannelSound;
