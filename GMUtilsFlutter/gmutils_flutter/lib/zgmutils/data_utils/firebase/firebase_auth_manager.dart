@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:ogtech_app_store/zgmutils/utils/result.dart';
 import 'package:ogtech_app_store/zgmutils/utils/text_utils.dart';
 
 import '../../utils/logs.dart';
@@ -86,6 +89,34 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
   //----------------------------------------------------------------------------
 
+  Future<Result<UserCredential>> _userCredential({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      UserCredential userCredential;
+      
+      userCredential = await Future.sync(() async {
+        return await (await fbAuth).signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }).timeout(Duration(seconds: 10));
+      
+      return Result(userCredential);
+
+    } on TimeoutException catch (e) {
+      Logs.print(() => 'FirebaseAuthManager.loginByEmail ---> Exception: $e');
+      return Result(null, message: StringSet(
+          'Request timeout. please check your connection.',
+          'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'
+      ));
+    } catch (e) {
+      Logs.print(() => 'FirebaseAuthManager._userCredential ---> Exception: $e');
+      return Result(null, message: StringSet(e.toString()));
+    }
+  }
+  
   @override
   Future<Response<bool>> registerByNonEmail({
     required String text,
@@ -108,11 +139,17 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     required String password,
   }) async {
     try {
-      UserCredential userCredential;
-      userCredential = await (await fbAuth).createUserWithEmailAndPassword(
+      var res = await _userCredential(email: email, password: password);
+      if (res.result == null) {
+        return Response.failed(error: res.message);
+      }
+
+      UserCredential userCredential = res.result!;
+
+      /*userCredential = await (await fbAuth).createUserWithEmailAndPassword(
         email: email,
         password: password,
-      );
+      );*/
 
       var registered = userCredential.additionalUserInfo?.isNewUser == true;
 
@@ -129,7 +166,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     } catch (e) {
       Logs.print(
           () => 'FirebaseAuthManager.registerByEmail ---> Exception: $e');
-      return Response.failed(error: StringSet(e.toString(), e.toString()));
+      return Response.failed(error: StringSet(e.toString()));
     }
   }
 
@@ -144,12 +181,27 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
   @override
   Future<Response<User>> loginByEmail(String email, String password) async {
+    
     try {
-      UserCredential userCredential;
-      userCredential = await (await fbAuth).signInWithEmailAndPassword(
+      var res = await _userCredential(email: email, password: password);
+      if (res.result == null) {
+        return Response.failed(error: res.message);
+      }
+
+      UserCredential userCredential = res.result!;
+
+      /*UserCredential userCredential;
+      userCredential = await Future.sync(() async {
+        return await (await fbAuth).signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }).timeout(Duration(seconds: 10));*/
+
+      /*userCredential = await (await fbAuth).signInWithEmailAndPassword(
         email: email,
         password: password,
-      );
+      );*/
 
       Response<User> response;
 
@@ -173,13 +225,19 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
           'response.message: ${response.error}');
 
       return response;
+    } on TimeoutException catch (e) {
+      Logs.print(() => 'FirebaseAuthManager.loginByEmail ---> Exception: $e');
+      return Response.failed(error: StringSet(
+          'Request timeout. please check your connection.',
+        'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'
+      ));
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager.loginByEmail ---> FirebaseAuthException:: $e');
       return firebaseAuthExceptionMessage(e);
     } catch (e) {
       Logs.print(() => 'FirebaseAuthManager.loginByEmail ---> Exception: $e');
-      return Response.failed(error: StringSet(e.toString(), e.toString()));
+      return Response.failed(error: StringSet(e.toString()));
     }
   }
 
@@ -218,7 +276,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     } catch (e) {
       Logs.print(
           () => 'FirebaseAuthManager.startPasswordReset ---> Exception:: $e');
-      return Response.failed(error: StringSet(e.toString(), e.toString()));
+      return Response.failed(error: StringSet(e.toString()));
     }
   }
 
@@ -266,7 +324,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     } catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager.verifyResetPasswordCode ---> Exception:: $e');
-      return Response.failed(error: StringSet(e.toString(), e.toString()));
+      return Response.failed(error: StringSet(e.toString()));
     }
   }
 
@@ -292,7 +350,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     } catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager.changePasswordAfterResetting ---> Exception:: $e');
-      return Response.failed(error: StringSet(e.toString(), e.toString()));
+      return Response.failed(error: StringSet(e.toString()));
     }
   }
 
@@ -353,7 +411,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     } catch (e) {
       Logs.print(
           () => 'FirebaseAuthManager.changePassword ----> Exception:: $e');
-      return Response.failed(error: StringSet(e.toString(), e.toString()));
+      return Response.failed(error: StringSet(e.toString()));
     }
   }
 

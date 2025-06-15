@@ -1,4 +1,4 @@
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 
 import '../../utils/logs.dart';
 
@@ -52,7 +52,7 @@ class FirebaseUtils {
   //endregion
 
   //region isConnectionAvailable
-  static int _lastConnectionCheckTime = 0;
+  /*static int _lastConnectionCheckTime = 0;
   static bool _lastConnectionCheckResult = false;
 
   static Future<bool> isConnectionAvailable() async {
@@ -64,12 +64,12 @@ class FirebaseUtils {
 
       var response = await http.get(Uri.parse('https://www.google.com'));
       _lastConnectionCheckResult = true;
-      Logs.print(() => ['response of: google.com', ':', response.statusCode]);
+      Logs.print(() => 'FirebaseUtils.isConnectionAvailable ---> response of: google.com: ${response.statusCode}');
       return true;
     } catch (e) {
       _lastConnectionCheckResult = false;
       return false;
     }
-  }
+  }*/
 //endregion
 }

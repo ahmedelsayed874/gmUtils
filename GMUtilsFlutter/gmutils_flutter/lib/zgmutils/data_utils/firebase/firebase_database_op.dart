@@ -21,9 +21,9 @@ abstract class IFirebaseDatabaseOp<T> {
 
   //----------------------------------------------------------------------------
 
-  Future<bool> isConnectionAvailable() {
-    return FirebaseUtils.isConnectionAvailable();
-  }
+  /*Future<bool> is ConnectionAvailable() {
+    return FirebaseUtils.is ConnectionAvailable();
+  }*/
 
   //----------------------------------------------------------------------------
 
@@ -119,6 +119,11 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     required super.mappable,
     required super.rootNodeName,
   });
+
+  final _timeoutErrorMessage = StringSet(
+    'Request timeout. please check your connection.',
+    'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.',
+  );
 
   //----------------------------------------------------------------------------
 
@@ -233,12 +238,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     FBFilterOption? filterOption,
     List<Map> Function(Object value)? collectionSource,
   }) async {
-    if (await isConnectionAvailable() == false) {
+    /*if (await is ConnectionAvailable() == false) {
       return Response.failed(
         error: StringSet('No Connection', 'لا يوجد اتصال'),
         connectionFailed: true,
       );
-    }
+    }*/
 
     var ref = await databaseReference;
     DataSnapshot? snapshot;
@@ -273,17 +278,27 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         }
       }
 
-      if (query == null) {
+      /*if (query == null) {
         var result = await ref.once();
         snapshot = result.snapshot;
       }
       //
       else {
-        //snapshot = await query.get();
         var result = await query.once();
         snapshot = result.snapshot;
-      }
+      }*/
 
+      snapshot = await Future.sync(() async {
+        if (query == null) {
+          var result = await ref.once();
+          return result.snapshot;
+        }
+        //
+        else {
+          var result = await query.once();
+          return result.snapshot;
+        }
+      }).timeout(Duration(seconds: 10));
 
       Response<List<T>> response;
       
@@ -310,11 +325,17 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           'response.message: ${response.error}');
       
       return response;
+    } on TimeoutException catch (e) {
+      Logs.print(() => 'FirebaseDatabaseOp.retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> Exception:: $e');
+      return Response.failed(
+        error: _timeoutErrorMessage,
+        connectionFailed: true,
+      );
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp.retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> Exception:: $e');
       return Response.failed(
         error: StringSet(e.toString()),
-        connectionFailed: true,
+        connectionFailed: false,
       );
     }
   }
@@ -366,18 +387,23 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   Future<Response<T>> retrieveOnlyFrom({
     required DatabaseReference ref,
   }) async {
-    if (await isConnectionAvailable() == false) {
+    /*if (await is ConnectionAvailable() == false) {
       return Response.failed(
         error: StringSet('No Connection', 'لا يوجد اتصال'),
         connectionFailed: true,
       );
-    }
+    }*/
 
     var map;
 
     try {
-      var event = await ref.once();
-      var snapshot = event.snapshot;
+      /*var event = await ref.once();
+      var snapshot = event.snapshot;*/
+
+      var snapshot = await Future.sync(() async {
+        var event = await ref.once();
+        return event.snapshot;
+      }).timeout(Duration(seconds: 10));
 
       Response<T> response;
       
@@ -413,12 +439,19 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       );
 
       return response;
+    } on TimeoutException catch (e) {
+      Logs.print(() => 'FirebaseDatabaseOp.retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> Exception:: $e');
+
+      return Response.failed(
+        error: _timeoutErrorMessage,
+        connectionFailed: true,
+      );
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp.retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> Exception:: $e');
       
       return Response.failed(
         error: StringSet(e.toString()),
-        connectionFailed: true,
+        connectionFailed: false,
       );
     }
   }
