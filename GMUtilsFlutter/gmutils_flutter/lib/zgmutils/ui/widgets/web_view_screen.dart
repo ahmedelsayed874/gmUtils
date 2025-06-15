@@ -114,7 +114,12 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
           },
           onWebResourceError: (WebResourceError error) {
             Logs.print(() =>
-                'WebViewScreen->WebViewController->onWebResourceError: [errorCode: ${error.errorCode}, errorDesc: ${error.description}]');
+                'WebViewScreen->WebViewController->'
+                    'onWebResourceError: [errorCode: ${error.errorCode}, '
+                    'errorDesc: ${error.description}]',
+            );
+
+            _dispatchLoadingFailed();
           },
           onNavigationRequest: (NavigationRequest request) {
             _tries++;
@@ -126,18 +131,7 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
               return NavigationDecision.navigate;
             } else {
               if (_tries == 2) {
-                widget.onLoadFailed?.call();
-
-                MyRootWidget.showSnackBar(
-                  context,
-                  message: App.isEnglish
-                      ? "Unable to view the webpage .. will open external"
-                      : "تعذر عرض صفحة الويب .. سيتم العرض خارجيا",
-                );
-
-                Future.delayed(const Duration(milliseconds: 700), () {
-                  Launcher().openUrl(widget.url);
-                });
+                _dispatchLoadingFailed();
               }
 
               return NavigationDecision.prevent;
@@ -162,5 +156,20 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
         child: WebViewWidget(controller: controller!),
       );
     }
+  }
+
+  void _dispatchLoadingFailed() {
+    widget.onLoadFailed?.call();
+
+    MyRootWidget.showSnackBar(
+      context,
+      message: App.isEnglish
+          ? "Unable to view the webpage .. will open external"
+          : "تعذر عرض صفحة الويب .. سيتم العرض خارجيا",
+    );
+
+    Future.delayed(const Duration(milliseconds: 700), () {
+      Launcher().openUrl(widget.url);
+    });
   }
 }

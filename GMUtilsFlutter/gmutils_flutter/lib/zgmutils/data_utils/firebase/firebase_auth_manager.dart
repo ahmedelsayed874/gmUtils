@@ -90,33 +90,36 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
   //----------------------------------------------------------------------------
 
   Future<Result<UserCredential>> _userCredential({
-    required String email,
-    required String password,
+    required Future<UserCredential> Function() fbMethod,
   }) async {
     try {
       UserCredential userCredential;
-      
-      userCredential = await Future.sync(() async {
-        return await (await fbAuth).signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      }).timeout(Duration(seconds: 10));
-      
-      return Result(userCredential);
 
+      userCredential = await Future.sync(() async {
+        return fbMethod();
+      }).timeout(Duration(seconds: 10));
+
+      return Result(userCredential);
     } on TimeoutException catch (e) {
-      Logs.print(() => 'FirebaseAuthManager.loginByEmail ---> Exception: $e');
-      return Result(null, message: StringSet(
-          'Request timeout. please check your connection.',
-          'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'
-      ));
+      Logs.print(
+          () => 'FirebaseAuthManager._userCredential ---> Exception: $e');
+      return Result(null,
+          message: StringSet(
+            'Request timeout. please check your connection.',
+            'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.',
+          ));
+    } on FirebaseAuthException catch (e) {
+      Logs.print(() =>
+          'FirebaseAuthManager._userCredential ---> FirebaseAuthException:: $e');
+      var r = firebaseAuthExceptionMessage(e);
+      return Result(null, message: r.error);
     } catch (e) {
-      Logs.print(() => 'FirebaseAuthManager._userCredential ---> Exception: $e');
+      Logs.print(
+          () => 'FirebaseAuthManager._userCredential ---> Exception: $e');
       return Result(null, message: StringSet(e.toString()));
     }
   }
-  
+
   @override
   Future<Response<bool>> registerByNonEmail({
     required String text,
@@ -139,7 +142,13 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     required String password,
   }) async {
     try {
-      var res = await _userCredential(email: email, password: password);
+      var res = await _userCredential(fbMethod: () async {
+        return await (await fbAuth).createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      });
+
       if (res.result == null) {
         return Response.failed(error: res.message);
       }
@@ -181,22 +190,19 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
   @override
   Future<Response<User>> loginByEmail(String email, String password) async {
-    
     try {
-      var res = await _userCredential(email: email, password: password);
+      var res = await _userCredential(fbMethod: () async {
+        return await (await fbAuth).signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      });
+
       if (res.result == null) {
         return Response.failed(error: res.message);
       }
 
       UserCredential userCredential = res.result!;
-
-      /*UserCredential userCredential;
-      userCredential = await Future.sync(() async {
-        return await (await fbAuth).signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      }).timeout(Duration(seconds: 10));*/
 
       /*userCredential = await (await fbAuth).signInWithEmailAndPassword(
         email: email,
@@ -227,10 +233,9 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       return response;
     } on TimeoutException catch (e) {
       Logs.print(() => 'FirebaseAuthManager.loginByEmail ---> Exception: $e');
-      return Response.failed(error: StringSet(
-          'Request timeout. please check your connection.',
-        'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'
-      ));
+      return Response.failed(
+          error: StringSet('Request timeout. please check your connection.',
+              'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'));
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager.loginByEmail ---> FirebaseAuthException:: $e');
