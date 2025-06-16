@@ -18,121 +18,19 @@ class AppVersionCheck {
 
   final String runningAndroidVersion;
   final String runningIosVersion;
-  final String? publishedAndroidVersion;
-  final String? publishedIosVersion;
   final String iosAppId;
 
   AppVersionCheck({
     required this.runningAndroidVersion,
     required this.runningIosVersion,
-    required this.publishedAndroidVersion,
-    required this.publishedIosVersion,
     required this.iosAppId,
   }) {
     Logs.print(() => [
           'AppVersionCheck.constructor()',
           'runningAndroidVersion: $runningAndroidVersion',
           'runningIosVersion: $runningIosVersion',
-          'publishedAndroidVersion: $publishedAndroidVersion',
-          'publishedIosVersion: $publishedIosVersion',
           'iosAppId: $iosAppId',
         ]);
-  }
-
-  void check(BuildContext Function() context, bool en) async {
-    var b = hasNewVersion(
-      globalAndroidVersion: await getPlayStoreVersion(),
-      globalIosVersion: await getAppStoreVersion(),
-    );
-
-    if (b == true) {
-      Future.delayed(
-        const Duration(milliseconds: 900),
-        () {
-          MessageDialog.create
-              .setTitle(en ? 'Alert' : 'تنبيه')
-              .setMessage(
-                en
-                    ? 'A new version has been released, please update.'
-                    : 'تم اصدار تحديث جديد من التطبيق، يرجى التحديث',
-              )
-              .addActions([
-            MessageDialogActionButton(
-              en ? 'Update' : 'تحديث',
-              action: () {
-                if (Platform.isIOS) {
-                  openAppleStore();
-                } else {
-                  openPlayStore();
-                }
-              },
-            ),
-          ]).show(context);
-        },
-      );
-    }
-  }
-
-  bool? hasNewVersion({
-    String? globalAndroidVersion,
-    String? globalIosVersion,
-  }) {
-    String? localVersion;
-    String? globalVersion;
-
-    if (Platform.isAndroid) {
-      localVersion = runningAndroidVersion;
-      globalVersion = publishedAndroidVersion ?? globalAndroidVersion;
-    }
-    //
-    else if (Platform.isIOS) {
-      localVersion = runningIosVersion;
-      globalVersion = publishedIosVersion ?? globalIosVersion;
-    }
-
-    if (localVersion == null || globalVersion == null) return null;
-
-    var localVersionSplit = localVersion.split('.'); //1.0.0
-    var globalVersionSplit = globalVersion.split('.'); //1.0.1
-
-    var len = max(localVersionSplit.length, globalVersionSplit.length); //3
-    while (len > localVersionSplit.length) {
-      localVersionSplit.add('');
-    }
-    while (len > globalVersionSplit.length) {
-      globalVersionSplit.add('');
-    }
-
-    String localVersion2 = '';
-    String globalVersion2 = '';
-
-    for (var i = 0; i < len; i++) {
-      var localPart = localVersionSplit[i];
-      var globalPart = globalVersionSplit[i];
-
-      var ls = max(localPart.length, globalPart.length);
-      while (ls > localPart.length) {
-        localPart = '0$localPart';
-      }
-      while (ls > globalPart.length) {
-        globalPart = '0$globalPart';
-      }
-
-      localVersion2 += localPart;
-      globalVersion2 += globalPart;
-    }
-
-    //localVersion2 100, globalVersion2: 101
-    var compare = globalVersion2.compareTo(localVersion2); //160<>100
-
-    Logs.print(() => [
-          'AppVersionCheck',
-          'hasNewVersion(localVersion: $localVersion, globalVersion: $globalVersion)',
-          'after converting (localVersion2: $localVersion2, globalVersion2: $globalVersion2)',
-          'compare result: $compare'
-        ]);
-
-    return compare > 0;
   }
 
   Future<String?> getPlayStoreVersion() async {
@@ -219,6 +117,146 @@ class AppVersionCheck {
       }
     }
     return null;
+  }
+
+  //----------------------------------------------------------------------------
+
+  ///
+  /// if publishedAndroidVersion is null, getPlayStoreVersion will run to try find the version
+  /// if publishedIosVersion is null, getAppStoreVersion will run to try find the version
+  ///
+  void checkAndAware(
+    BuildContext Function() context, {
+    required String? publishedAndroidVersion,
+    required String? publishedIosVersion,
+    required bool en,
+    bool forceSelectAction = false,
+  }) async {
+    Logs.print(() => [
+          'AppVersionCheck.check ---> ',
+          'publishedAndroidVersion: $publishedAndroidVersion',
+          'publishedIosVersion: $publishedIosVersion',
+          if (publishedAndroidVersion == null)
+            'android version is going to check on playstore',
+          if (publishedIosVersion == null)
+            'ios version is going to check on appstore',
+        ]);
+
+    publishedAndroidVersion ??= await getPlayStoreVersion();
+    publishedIosVersion ??= await getAppStoreVersion();
+
+    var b = hasNewVersion(
+      publishedAndroidVersion: publishedAndroidVersion,
+      publishedIosVersion: publishedIosVersion,
+    );
+
+    if (b == true) {
+      Future.delayed(
+        const Duration(milliseconds: 900),
+        () {
+          MessageDialog? md;
+
+          md = MessageDialog.create
+              .setTitle(en ? 'Alert' : 'تنبيه')
+              .setMessage(
+                en
+                    ? 'A new version has been released, please update.'
+                    : 'تم اصدار تحديث جديد من التطبيق، يرجى التحديث',
+              )
+              .addActions([
+                MessageDialogActionButton(
+                  en ? 'Update' : 'تحديث',
+                  action: () {
+                    md?.allowManualDismiss(true);
+                    md?.dismiss();
+
+                    if (Platform.isIOS) {
+                      openAppleStore();
+                    } else {
+                      openPlayStore();
+                    }
+                  },
+                ),
+                if (!forceSelectAction)
+                  MessageDialogActionButton(
+                    en ? 'Later' : 'لاحقا',
+                    action: null,
+                  ),
+              ])
+              .setEnableOuterDismiss(!forceSelectAction)
+              .allowManualDismiss(!forceSelectAction)
+              .show(context);
+        },
+      );
+    }
+  }
+
+  bool? hasNewVersion({
+    required String? publishedAndroidVersion,
+    required String? publishedIosVersion,
+  }) {
+    String? localVersion;
+    String? globalVersion;
+
+    if (Platform.isAndroid) {
+      localVersion = runningAndroidVersion;
+      globalVersion = publishedAndroidVersion;
+    }
+    //
+    else if (Platform.isIOS) {
+      localVersion = runningIosVersion;
+      globalVersion = publishedIosVersion;
+    }
+
+    Logs.print(() => [
+      'AppVersionCheck.hasNewVersion ---> ',
+      'platform: ${Platform.operatingSystem}',
+      'localVersion: $localVersion',
+      'globalVersion: $globalVersion',
+    ]);
+
+    if (localVersion == null || globalVersion == null) return null;
+
+    var localVersionSplit = localVersion.split('.'); //1.0.0
+    var globalVersionSplit = globalVersion.split('.'); //1.0.1
+
+    var len = max(localVersionSplit.length, globalVersionSplit.length); //3
+    while (len > localVersionSplit.length) {
+      localVersionSplit.add('');
+    }
+    while (len > globalVersionSplit.length) {
+      globalVersionSplit.add('');
+    }
+
+    String localVersion2 = '';
+    String globalVersion2 = '';
+
+    for (var i = 0; i < len; i++) {
+      var localPart = localVersionSplit[i];
+      var globalPart = globalVersionSplit[i];
+
+      var ls = max(localPart.length, globalPart.length);
+      while (ls > localPart.length) {
+        localPart = '0$localPart';
+      }
+      while (ls > globalPart.length) {
+        globalPart = '0$globalPart';
+      }
+
+      localVersion2 += localPart;
+      globalVersion2 += globalPart;
+    }
+
+    //localVersion2 100, globalVersion2: 101
+    var compare = globalVersion2.compareTo(localVersion2); //160<>100
+
+    Logs.print(() => [
+          'AppVersionCheck.hasNewVersion --->',
+          'after converting (localVersion2: $localVersion2, globalVersion2: $globalVersion2)',
+          'compare result: $compare'
+        ]);
+
+    return compare > 0;
   }
 
   void openPlayStore() async {
