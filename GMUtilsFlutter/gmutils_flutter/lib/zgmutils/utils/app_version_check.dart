@@ -136,7 +136,7 @@ class AppVersionCheck {
     required String? publishedAndroidVersion,
     required String? publishedIosVersion,
     required bool en,
-    bool forceSelectAction = false,
+    required bool forceSelectAction,
   }) async {
     Logs.print(() => [
           'AppVersionCheck.check ---> ',
