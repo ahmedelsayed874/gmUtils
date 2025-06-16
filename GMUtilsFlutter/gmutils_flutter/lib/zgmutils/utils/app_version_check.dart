@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:ogtech_app_store/zgmutils/utils/string_set.dart';
 
 import '../ui/dialogs/message_dialog.dart';
 import 'launcher.dart';
@@ -121,11 +122,16 @@ class AppVersionCheck {
 
   //----------------------------------------------------------------------------
 
+  StringSet defaultWarnMessage = StringSet(
+    'A new version has been released.',
+    'تم اصدار تحديث جديد من التطبيق.',
+  );
+
   ///
   /// if publishedAndroidVersion is null, getPlayStoreVersion will run to try find the version
   /// if publishedIosVersion is null, getAppStoreVersion will run to try find the version
   ///
-  void checkAndAware(
+  void checkAndWarn(
     BuildContext Function() context, {
     required String? publishedAndroidVersion,
     required String? publishedIosVersion,
@@ -151,43 +157,34 @@ class AppVersionCheck {
     );
 
     if (b == true) {
-      Future.delayed(
-        const Duration(milliseconds: 900),
-        () {
-          MessageDialog? md;
+      MessageDialog? md;
 
-          md = MessageDialog.create
-              .setTitle(en ? 'Alert' : 'تنبيه')
-              .setMessage(
-                en
-                    ? 'A new version has been released, please update.'
-                    : 'تم اصدار تحديث جديد من التطبيق، يرجى التحديث',
-              )
-              .addActions([
-                MessageDialogActionButton(
-                  en ? 'Update' : 'تحديث',
-                  action: () {
-                    md?.allowManualDismiss(true);
-                    md?.dismiss();
+      md = MessageDialog.create
+          .setTitle(en ? 'Alert' : 'تنبيه')
+          .setMessage(defaultWarnMessage.get(en))
+          .addActions([
+            MessageDialogActionButton(
+              en ? 'Update' : 'تحديث',
+              action: () {
+                md?.allowManualDismiss(true);
+                md?.dismiss();
 
-                    if (Platform.isIOS) {
-                      openAppleStore();
-                    } else {
-                      openPlayStore();
-                    }
-                  },
-                ),
-                if (!forceSelectAction)
-                  MessageDialogActionButton(
-                    en ? 'Later' : 'لاحقا',
-                    action: null,
-                  ),
-              ])
-              .setEnableOuterDismiss(!forceSelectAction)
-              .allowManualDismiss(!forceSelectAction)
-              .show(context);
-        },
-      );
+                if (Platform.isIOS) {
+                  openAppleStore();
+                } else {
+                  openPlayStore();
+                }
+              },
+            ),
+            if (!forceSelectAction)
+              MessageDialogActionButton(
+                en ? 'Later' : 'لاحقا',
+                action: null,
+              ),
+          ])
+          .setEnableOuterDismiss(!forceSelectAction)
+          .allowManualDismiss(!forceSelectAction)
+          .show(context);
     }
   }
 
@@ -209,11 +206,11 @@ class AppVersionCheck {
     }
 
     Logs.print(() => [
-      'AppVersionCheck.hasNewVersion ---> ',
-      'platform: ${Platform.operatingSystem}',
-      'localVersion: $localVersion',
-      'globalVersion: $globalVersion',
-    ]);
+          'AppVersionCheck.hasNewVersion ---> ',
+          'platform: ${Platform.operatingSystem}',
+          'localVersion: $localVersion',
+          'globalVersion: $globalVersion',
+        ]);
 
     if (localVersion == null || globalVersion == null) return null;
 
