@@ -130,7 +130,7 @@ abstract class UsersDataSource {
       if (credential?.value1.toLowerCase().startsWith('test') == true) {
         topics.add(credential!.value1.toLowerCase());
       }
-      fcm.unsubscribeFromTopics(topics : topics);
+      fcm.unsubscribeFromTopics(topics);
     }
 
     return response;
@@ -315,7 +315,7 @@ abstract class UsersDataSource {
     required int pageNumber,
     required int pageSize,
     required String language, //→ [en - ar]
-    required String? sortBy,  //→ [Name - LastLoginTime]
+    required String? sortBy, //→ [Name - LastLoginTime]
     required String? sortDirection, //→ [ASC - DESC]
   }) {
     return doGetAccountsList(
@@ -339,10 +339,9 @@ abstract class UsersDataSource {
     required int pageNumber,
     required int pageSize,
     required String language, //→ [en - ar]
-    required String? sortBy,// → [Name - LastLoginTime]
+    required String? sortBy, // → [Name - LastLoginTime]
     required String? sortDirection, //→ [ASC - DESC]
   });
 
-  //endregion
-
+//endregion
 }

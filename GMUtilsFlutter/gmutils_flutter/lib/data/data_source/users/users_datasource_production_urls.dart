@@ -17,7 +17,7 @@ class LoginUrl extends PostUrl<Response<AuthUserAccount>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'Login',
-          dataMapper: ResponseMapper(dataMapper: AuthUserAccountMapper()),
+          responseMapper: ResponseMapper(dataMapper: AuthUserAccountMapper()),
           queries: null,
           params: {
             'userName': username,
@@ -38,7 +38,7 @@ class SendAccountPasswordResetCodeUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'SendAccountPasswordResetCode',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'emailAddress': emailAddress,
@@ -56,7 +56,7 @@ class VerifyAccountPasswordResetCodeUrl
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'VerifyAccountPasswordResetCode',
-          dataMapper: ResponseMapper(dataMapper: UserAccountIdentifierMapper()),
+          responseMapper: ResponseMapper(dataMapper: UserAccountIdentifierMapper()),
           queries: null,
           params: {
             'emailAddress': emailAddress,
@@ -74,7 +74,7 @@ class ResetAccountPasswordUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'ResetAccountPassword',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -96,7 +96,7 @@ class VerifyEmailAddressUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'VerifyEmailAddress',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -115,7 +115,7 @@ class ConfirmEmailAddressUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'ConfirmEmailAddress',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -137,7 +137,7 @@ class ChangeAccountPhotoUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'ChangeAccountPhoto',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -157,7 +157,7 @@ class ChangePhoneNumberUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'ChangePhoneNumber',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -177,7 +177,7 @@ class ChangeAccountPasswordUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'ChangeAccountPassword',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -196,7 +196,7 @@ class GetAccountInfoUrl extends GetUrl<Response<UserAccount>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'GetAccountInfo',
-          dataMapper: ResponseMapper(dataMapper: UserAccountMapper()),
+          responseMapper: ResponseMapper(dataMapper: UserAccountMapper()),
           queries: {
             'accountId': '$accountId',
           },
@@ -228,7 +228,7 @@ class GetAccountsListUrl extends PostUrl<Response<List<UserAccountHeader>>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'GetAccountsList',
-          dataMapper: ResponseMapper(dataMapper: UserAccountHeaderMapper()),
+          responseMapper: ResponseMapper(dataMapper: UserAccountHeaderMapper()),
           queries: null,
           params: {
             'requesterAccountId': requesterAccountId,

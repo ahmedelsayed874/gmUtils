@@ -17,7 +17,7 @@ class UploadFileUrl extends PostMultiPartFileUrl<Response<Attachment>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'UploadFile',
-          dataMapper: ResponseMapper(dataMapper: AttachmentMapper()),
+          responseMapper: ResponseMapper(dataMapper: AttachmentMapper()),
           queries: null,
           formFields: {
             'fileName': fileName,
@@ -37,7 +37,7 @@ class DeleteFileUrl extends PostUrl<Response<Void>> {
     fragments: RequestsHelper.instance.apisPath,
     headers: RequestsHelper.instance.headers,
     endPoint: 'DeleteFile',
-    dataMapper: ResponseMapper(dataMapper: null),
+    responseMapper: ResponseMapper(dataMapper: null),
     queries: null,
     params: {
       'FilePath': filePath,

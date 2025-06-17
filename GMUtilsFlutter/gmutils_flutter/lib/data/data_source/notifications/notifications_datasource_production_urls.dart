@@ -14,7 +14,7 @@ class UpdateFcmTokenUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'UpdateFcmToken',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -32,7 +32,7 @@ class DeleteFcmTokenUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'DeleteFcmToken',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: null,
           params: {
             'accountId': accountId,
@@ -53,7 +53,7 @@ class GetNotificationsUrl extends GetUrl<Response<List<Notification>>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'GetNotifications',
-          dataMapper: ResponseMapper(dataMapper: NotificationMapper()),
+          responseMapper: ResponseMapper(dataMapper: NotificationMapper()),
           queries: {
             'accountId': accountId.toString(),
             'pageNumber': pageNumber.toString(),
@@ -72,7 +72,7 @@ class MarkNotificationAsReadUrl extends PostUrl<Response<void>> {
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'MarkNotificationAsRead',
-          dataMapper: ResponseMapper(dataMapper: null),
+          responseMapper: ResponseMapper(dataMapper: null),
           queries: {
             'accountId': accountId.toString(),
             'notificationId': notificationId.toString(),
@@ -96,7 +96,7 @@ class GetNotificationsCountUrl
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'GetNotificationsCount',
-          dataMapper: ResponseMapper(dataMapper: NotificationsCountMapper()),
+          responseMapper: ResponseMapper(dataMapper: NotificationsCountMapper()),
           queries: {
             'accountId': accountId.toString(),
           },

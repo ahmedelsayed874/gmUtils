@@ -336,11 +336,11 @@ void _appendCachedImage(_CachedImage image) {
   });
   if (totalBytes > maxBytes) {
     _cachedImagesList.removeAt(0);
-    //_cachedImagesIndexes.remove(c.name);
-    _cachedImagesIndex.clear();
-    for (var i = 0; i < _cachedImages.length; i++) {
-      var img = _cachedImages[i];
-      _cachedImagesIndex[img.name] = i;
+    _cachedImagesIndexes.clear();
+
+    for (var i = 0; i < _cachedImagesIndexes.length; i++) {
+      var img = _cachedImagesList[i];
+      _cachedImagesIndexes[img.name] = i;
     }
   }
 

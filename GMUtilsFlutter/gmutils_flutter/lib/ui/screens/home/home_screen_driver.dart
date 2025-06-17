@@ -84,7 +84,7 @@ abstract class HomeScreenDriverAbs extends IScreenDriver {
           domain: 'https://api.aladhan.com/v1/gToH/$d-$m-${dt.year}',
           fragments: '',
           endPoint: '',
-          dataMapper: null,
+          responseMapper: null,
           queries: null,
           responseEncoder: (response) {
             try {

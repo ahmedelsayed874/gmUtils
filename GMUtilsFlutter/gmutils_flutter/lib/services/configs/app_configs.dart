@@ -159,7 +159,10 @@ class AppConfigs {
     }*/
 
     var checker = _getAppVersionCheckInstance();
-    var b = checker.hasNewVersion();
+    var b = checker.hasNewVersion(
+      publishedAndroidVersion: appConfigsData.latestAndroidAppVersion,
+      publishedIosVersion: appConfigsData.latestIosAppVersion,
+    );
     Logs.print(() => 'AppConfigs -> needUpdate() -> $b');
     return b == true;
   }
@@ -225,8 +228,6 @@ class AppConfigs {
     return AppVersionCheck(
       runningAndroidVersion: currentAppVersion,
       runningIosVersion: currentAppVersion,
-      publishedAndroidVersion: appConfigsData.latestAndroidAppVersion,
-      publishedIosVersion: appConfigsData.latestIosAppVersion,
       iosAppId: iosAppStoreId,
     );
   }

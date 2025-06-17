@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:ogtech_app_store/zgmutils/utils/string_set.dart';
+import 'string_set.dart';
 
 import '../ui/dialogs/message_dialog.dart';
 import 'launcher.dart';
