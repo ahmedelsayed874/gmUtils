@@ -11,7 +11,7 @@ abstract class Url<RDT> {
   final String endPoint;
   final Map<String, String>? queries;
   final Map<String, String> headers = {};
-  final Mappable<RDT>? dataMapper;
+  final Mappable<RDT>? responseMapper;
   final Response<RDT> Function(String response)? responseEncoder;
 
   Url({
@@ -20,7 +20,7 @@ abstract class Url<RDT> {
     required this.endPoint,
     required this.queries,
     required Map<String, String>? headers,
-    required this.dataMapper,
+    required this.responseMapper,
     required this.responseEncoder,
   }) {
     if (headers != null) {
@@ -59,15 +59,19 @@ abstract class Url<RDT> {
       var response2 = responseEncoder!(response);
       // response2.rawResponse = response;
       return response2;
-    } else if (dataMapper == null) {
+    }
+    //
+    else if (responseMapper == null) {
       return Response.failed(
         error: 'Internal error: either "Url.responseEncoder" or '
-            '"Url.dataMapper" should has value',
+            '"Url.responseMapper" should has value',
         httpCode: 0,
       );
-    } else {
+    }
+    //
+    else {
       var dataMap = jsonDecode(response);
-      final responseObj = ResponseMapper(dataMapper!).fromMap(dataMap);
+      final responseObj = ResponseMapper(responseMapper!).fromMap(dataMap);
       // responseObj.rawResponse = response;
       return responseObj;
     }
@@ -100,7 +104,7 @@ class GetUrl<RDT> extends Url<RDT> {
     required super.endPoint,
     super.queries,
     super.headers,
-    required super.dataMapper,
+    required super.responseMapper,
     super.responseEncoder,
   });
 }
@@ -117,7 +121,7 @@ class PostUrl<RDT> extends Url<RDT> {
     required super.endPoint,
     super.queries,
     super.headers,
-    required super.dataMapper,
+    required super.responseMapper,
     this.params,
     this.asJson = true,
     super.responseEncoder,
@@ -176,7 +180,7 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     required super.fragments,
     required super.endPoint,
     required super.headers,
-    required Mappable<RDT> super.dataMapper,
+    required Mappable<RDT> super.responseMapper,
     super.queries,
     this.formFields,
     required this.fileMappedKey,

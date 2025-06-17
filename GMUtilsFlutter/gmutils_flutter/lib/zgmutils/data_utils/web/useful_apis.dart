@@ -19,7 +19,7 @@ class _TimeOfAreaUrl extends GetUrl<_TimeOfAreaModel> {
           fragments: 'api/timezone/Africa/Cairo/',
           endPoint: '',
           headers: {},
-          dataMapper: _TimeOfAreaModelMapper(),
+          responseMapper: _TimeOfAreaModelMapper(),
           queries: null,
         );
 }
