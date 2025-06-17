@@ -1,4 +1,4 @@
-import 'package:gmutils_flutter/zgmutils/gm_main.dart';
+import '../../../zgmutils/gm_main.dart';
 import 'package:flutter/material.dart';
 
 import '../dialogs/message_dialog.dart';

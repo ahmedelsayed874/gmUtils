@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 //path_provider: ^2.0.3
-import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
+import '../../../zgmutils/utils/logs.dart';
 import 'package:path_provider/path_provider.dart' as filesProvider;
 
 ///Directory tempDir = await getTemporaryDirectory();

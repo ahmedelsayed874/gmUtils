@@ -1,9 +1,9 @@
-import 'package:gmutils_flutter/ui/dialogs/wait_dialog.dart';
-import 'package:gmutils_flutter/zgmutils/ui/widgets/_root_widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../gm_main.dart';
 import '../dialogs/message_dialog.dart';
+import '../dialogs/wait_dialog.dart';
+import '../widgets/_root_widget.dart';
 
 Map<int, WaitDialog> _waitDialog = {};
 Map<int, int> _waitDialogShowCount = {};
