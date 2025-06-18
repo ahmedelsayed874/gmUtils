@@ -160,6 +160,10 @@ class AccountStorage extends IAccountStorage {
     App.callObservers(category: 'AccountCache', args: account);
   }
 
+  static void removeObserver(String name) {
+    App.removeObserver(category: 'AccountCache', name: name);
+  }
+
   //----------------------------------------------------------------------------
 
   DataSecurity? _dataSecurity;
