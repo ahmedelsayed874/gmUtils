@@ -1,5 +1,7 @@
 abstract class Mappable<T> {
-  Map<String, dynamic> toMap(T object);
+  Map<String, dynamic> toMap(T object) {
+    throw UnimplementedError('implement this method to handle this object --> $object');
+  }
 
   T fromMap(Map<String, dynamic> values);
 

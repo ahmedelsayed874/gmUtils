@@ -9,8 +9,8 @@ abstract class Url<RDT> {
   final String domain;
   final String fragments;
   final String endPoint;
-  final Map<String, String>? queries;
   final Map<String, String> headers = {};
+  final Map<String, String>? queries;
   final Mappable<RDT>? responseMapper;
   final Response<RDT> Function(String response)? responseEncoder;
 
@@ -18,8 +18,9 @@ abstract class Url<RDT> {
     required this.domain,
     required this.fragments,
     required this.endPoint,
-    required this.queries,
     required Map<String, String>? headers,
+    required this.queries,
+    //
     required this.responseMapper,
     required this.responseEncoder,
   }) {
@@ -102,8 +103,9 @@ class GetUrl<RDT> extends Url<RDT> {
     required super.domain,
     required super.fragments,
     required super.endPoint,
-    super.queries,
     super.headers,
+    super.queries,
+    //
     required super.responseMapper,
     super.responseEncoder,
   });
@@ -119,11 +121,13 @@ class PostUrl<RDT> extends Url<RDT> {
     required super.domain,
     required super.fragments,
     required super.endPoint,
-    super.queries,
     super.headers,
-    required super.responseMapper,
+    super.queries,
+    //
     this.params,
     this.asJson = true,
+    //
+    required super.responseMapper,
     super.responseEncoder,
   }) {
     if (params != null) {
@@ -180,12 +184,14 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     required super.fragments,
     required super.endPoint,
     required super.headers,
-    required Mappable<RDT> super.responseMapper,
     super.queries,
+    //
     this.formFields,
     required this.fileMappedKey,
     required this.file,
     this.fileMimeType,
+    //
+    required Mappable<RDT> super.responseMapper,
     super.responseEncoder,
   });
 
