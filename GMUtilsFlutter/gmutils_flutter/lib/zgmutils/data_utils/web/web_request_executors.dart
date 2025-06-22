@@ -380,7 +380,7 @@ class WebRequestExecutor {
 
   Future<Response<Result<DT>>> createDummyResponse<DT>({
     required String apiName,
-    required Pair<Result<DT>, Mappable?> Function() onSuccessResponse,
+    required Pair<Result<DT>, Mappable?> Function() responseData,
     int delayInSeconds = 1,
   }) async {
     Logs.print(() => 'API-Dummy-Request:: http://$apiName');
@@ -408,10 +408,11 @@ class WebRequestExecutor {
       DT? data;
       String? error;
 
-      var resultAndMapper = onSuccessResponse();
+      var resultAndMapper = responseData();
       if (resultAndMapper.value1.result != null) {
         if (resultAndMapper.value2 == null)
           throw 'set mapper class if data is exist';
+
         if (resultAndMapper.value1.result is List) {
           List<Map<String, dynamic>>? map;
           try {
@@ -432,7 +433,9 @@ class WebRequestExecutor {
                   'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
             }
           }
-        } else {
+        }
+        //
+        else {
           Map<String, dynamic>? map;
           try {
             map = resultAndMapper.value2!.toMap(resultAndMapper.value1.result);
@@ -451,6 +454,10 @@ class WebRequestExecutor {
             }
           }
         }
+      }
+      //
+      else {
+        error = resultAndMapper.value1.message?.en;
       }
 
       if (data != null) {
