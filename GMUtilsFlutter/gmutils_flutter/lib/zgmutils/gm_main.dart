@@ -270,7 +270,7 @@ class _AppState extends State<App> {
       primarySwatch: colors.primarySwatch,
       scaffoldBackgroundColor: colors.background,
       bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
-      cardTheme: CardTheme(
+      cardTheme: CardTheme.of(context).copyWith(
         color: colors.card,
         surfaceTintColor: colors.card,
       ),
