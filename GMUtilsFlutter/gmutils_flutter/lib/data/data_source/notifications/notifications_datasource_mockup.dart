@@ -49,7 +49,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
   }) async {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'updateFcmToken(accountId: $accountId, fcmToken: $fcmToken)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -77,7 +77,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
   }) async {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'deleteFcmToken(accountId: $accountId, fcmToken: $fcmToken)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -109,7 +109,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'getNotifications(accountId: $accountId, pageNumber: $pageNumber, pageSize: $pageSize)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -142,7 +142,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
           'notificationId: $notificationId, '
           'relatedObjectName: $relatedObjectName'
           ')',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -171,7 +171,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
   }) async {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'getTeacherNotificationsCount(accountId: $accountId)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(

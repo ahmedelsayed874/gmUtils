@@ -24,6 +24,7 @@ String get appVersion => '1.0.0';
 //region serverUrl --------------------------------------------------
 String _serverUrl = 'https://gm4s1.blogspot.com/'; //'http://0/';
 set serverUrl(String url) => _serverUrl = url;
+
 String get serverUrl => _serverUrl;
 //String get serverUrl => 'https://test.example.com/';
 
@@ -85,7 +86,8 @@ void main() {
         ),
         sendFcmMessageParameters: SendFcmMessageParameters(
           firebaseProjectId: 'gmutils_flutter',
-          firebaseServiceAccountFilePathInAssets: 'assets/keys/gmutils_flutter-firebase-adminsdk-twoid-599c494587.json',
+          firebaseServiceAccountFilePathInAssets:
+              'assets/keys/gmutils_flutter-firebase-adminsdk-twoid-599c494587.json',
         ),
         onDeviceTokenRefresh: (newToken) {
           Logs.print(() => 'main.init.onDeviceTokenRefresh:: $newToken');

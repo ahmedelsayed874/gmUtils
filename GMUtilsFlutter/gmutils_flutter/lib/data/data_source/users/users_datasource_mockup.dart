@@ -114,7 +114,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           "authenticateUser(username: $username, password: $password, fcmToken: $fcmToken)",
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -150,7 +150,7 @@ class UsersDataSourceMockup extends UsersDataSource {
   }) async {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'sendAccountPasswordResetCode(emailAddress: $emailAddress)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -179,7 +179,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'verifyAccountPasswordResetCode(emailAddress: $emailAddress, code: $code)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -208,7 +208,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'resetAccountPassword(accountId: $accountId, password: $password)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -242,7 +242,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'verifyEmailAddress(accountId: $accountId, emailAddress: $emailAddress)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -272,7 +272,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'confirmEmailAddress(accountId: $accountId, emailAddress: $emailAddress, otp: $otp)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -305,7 +305,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'changeAccountPhoto(accountId: $accountId, photoPath: $photoPath)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -336,7 +336,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'doChangePhoneNumber(accountId: $accountId, phoneNumber: $phoneNumber)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -367,7 +367,7 @@ class UsersDataSourceMockup extends UsersDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'changeAccountPassword(accountId: $accountId, newPassword: $newPassword)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -396,7 +396,7 @@ class UsersDataSourceMockup extends UsersDataSource {
   }) async {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'getAccountInfo(accountId: $accountId)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -445,7 +445,7 @@ class UsersDataSourceMockup extends UsersDataSource {
           'sortBy: $sortBy, '
           'sortDirection: $sortDirection'
           ')',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(

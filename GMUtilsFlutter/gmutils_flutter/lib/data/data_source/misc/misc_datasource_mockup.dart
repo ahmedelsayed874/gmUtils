@@ -21,7 +21,7 @@ class MiscDataSourceMockup extends MiscDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'uploadFile(file: ${file.path}, fileName: $fileName, attachmentType: $attachmentType)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
@@ -53,7 +53,7 @@ class MiscDataSourceMockup extends MiscDataSource {
     var response = await WebRequestExecutor().createDummyResponse(
       apiName:
       'deleteFile(filePath: $filePath)',
-      onSuccessResponse: () {
+      responseData: () {
         if (Random().nextInt(100) > 97) {
           return Pair(
               value1: Result(
