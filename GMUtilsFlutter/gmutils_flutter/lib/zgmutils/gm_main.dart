@@ -51,7 +51,7 @@ class GMMain {
     AppPreferencesStorage()
         .savedAppPreferences(enIsDefault: isEnglishDefaultLocale)
         .then(
-          (value) {
+      (value) {
         App._appPreferences = value;
         runApp(App(
           appName: appName,
@@ -153,7 +153,10 @@ class App extends StatefulWidget {
     return _observers?.containsKey(category) == true;
   }
 
-  static bool isObserverNameExist({required String category, required String observerName,}) {
+  static bool isObserverNameExist({
+    required String category,
+    required String observerName,
+  }) {
     if (_observers?.containsKey(category) == true) {
       return _observers?[category]?.containsKey(observerName) == true;
     }
@@ -214,11 +217,19 @@ class App extends StatefulWidget {
   static bool get isEnglish => _appPreferences.isEn;
 
   static bool isLightTheme(BuildContext context) {
+    bool b;
+
     if (_appPreferences.isLightMode == null) {
-      return Theme.of(context).brightness == Brightness.light;
+      //b = Theme.of(context).brightness == Brightness.light;
+      b = MediaQuery.platformBrightnessOf(context) == Brightness.light;
     } else {
-      return _appPreferences.isLightMode!;
+      b = _appPreferences.isLightMode!;
     }
+
+    Logs.print(() =>
+    'App.isLightTheme() ----> $b (_appPreferences.isLightMode ? ${_appPreferences.isLightMode})');
+
+    return b;
   }
 
   static bool changeAppLanguage({
@@ -240,7 +251,7 @@ class App extends StatefulWidget {
     required bool? toLight,
   }) {
     Logs.print(() =>
-    'App.changeAppAppearance(toLight: $toLight) ... current is light? ${_appPreferences.isLightMode}');
+        'App.changeAppAppearance(toLight: $toLight) ... current is light? ${_appPreferences.isLightMode}');
     if (_appPreferences.isLightMode == toLight) return false;
 
     _appPreferences.isLightMode = toLight;
@@ -262,50 +273,52 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    Logs.print(() => '_AppState.build()');
+
     final lightColors = widget.appColors!(context, true);
     final darkColors = widget.appColors!(context, false);
     widget.appColors!(context, App.isLightTheme(context));
 
     theme(AppColors colors) => ThemeData(
-      primarySwatch: colors.primarySwatch,
-      scaffoldBackgroundColor: colors.background,
-      bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
-      cardTheme: CardTheme.of(context).copyWith(
-        color: colors.card,
-        surfaceTintColor: colors.card,
-      ),
-      hintColor: colors.hint,
-      inputDecorationTheme: InputDecorationTheme(
-        hintStyle: AppTheme.defaultTextStyle(
-          textColor: colors.hint,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll(colors.primary),
-          textStyle: WidgetStatePropertyAll(Res.themes.defaultTextStyle(
-            textColor: colors.textOnPrimary,
-            fontWeight: FontWeight.w600,
-          )),
-          foregroundColor: WidgetStatePropertyAll(colors.textOnPrimary),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
+          primarySwatch: colors.primarySwatch,
+          scaffoldBackgroundColor: colors.background,
+          bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
+          cardTheme: CardTheme.of(context).copyWith(
+            color: colors.card,
+            surfaceTintColor: colors.card,
+          ),
+          hintColor: colors.hint,
+          inputDecorationTheme: InputDecorationTheme(
+            hintStyle: AppTheme.defaultTextStyle(
+              textColor: colors.hint,
+              fontWeight: FontWeight.normal,
             ),
           ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(colors.primary),
+              textStyle: WidgetStatePropertyAll(Res.themes.defaultTextStyle(
+                textColor: colors.primaryVariant,
+                fontWeight: FontWeight.w600,
+              )),
+              foregroundColor: WidgetStatePropertyAll(colors.primaryVariant),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-      colorScheme: colors.isLightMode
+          textButtonTheme: TextButtonThemeData(
+            style: ButtonStyle(
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+            ),
+          ),
+          colorScheme: colors.isLightMode
               ? ColorScheme.light(
                   primary: colors.primary,
                   secondary: colors.primary,
@@ -318,12 +331,12 @@ class _AppState extends State<App> {
                   background: colors.background,
                   surface: colors.background,
                 ),
-      brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: colors.background,
-        surfaceTintColor: colors.background,
-      ),
-    );
+          brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
+          bottomSheetTheme: BottomSheetThemeData(
+            backgroundColor: colors.background,
+            surfaceTintColor: colors.background,
+          ),
+        );
 
     return MaterialApp(
       title: widget.appName?.call(context) ?? '',
@@ -331,10 +344,10 @@ class _AppState extends State<App> {
       theme: theme(lightColors),
       darkTheme: theme(darkColors),
       themeMode: App._appPreferences.isLightMode == null
-          ? null
+          ? ThemeMode.system
           : (App._appPreferences.isLightMode!
-          ? ThemeMode.light
-          : ThemeMode.dark),
+              ? ThemeMode.light
+              : ThemeMode.dark),
       //
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -403,6 +416,8 @@ class StarterWidget extends StatefulWidget {
 class _StarterWidgetState extends State<StarterWidget> {
   @override
   Widget build(BuildContext context) {
+    Logs.print(() => '_StarterWidgetState.build()');
+
     App._context = context;
 
     var appMeasurement = widget.measurements!(context);

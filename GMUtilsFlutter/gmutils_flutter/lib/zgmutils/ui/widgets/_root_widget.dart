@@ -59,12 +59,12 @@ class MyRootWidget {
       centerTitle: true,
       leading: leading,
       actions: action,
-      foregroundColor: AppTheme.appColors?.toolbarTextColor,
+      foregroundColor: AppTheme.appColors?.toolbarVariant,
       backgroundColor: AppTheme.appColors?.toolbar,
       title: Text(
         toolbarTitle,
         style: AppTheme.textStyleOfScreenTitle(
-          textColor: AppTheme.appColors?.toolbarTextColor,
+          textColor: AppTheme.appColors?.toolbarVariant,
           textSize: AppTheme.appMeasurement?.toolbarTitleSize,
           fontFamily: AppTheme.toolbarTitleFontFamily,
         ),

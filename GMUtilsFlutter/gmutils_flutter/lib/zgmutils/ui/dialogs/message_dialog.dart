@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 
-import '../../gm_main.dart';
 import '../../resources/app_theme.dart';
 import '../../utils/launcher.dart';
 import '../../utils/logs.dart';

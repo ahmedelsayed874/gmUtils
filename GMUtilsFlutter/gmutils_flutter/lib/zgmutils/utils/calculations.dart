@@ -117,4 +117,17 @@ class Calculations {
             (1 - cos((lon2 - lon1) * p))/2;
     return 12742 * asin(sqrt(a));
   }
+
+  //----------------------------------------------------------------------------
+
+  int pixelsInCM(double cm) {
+    //An iOS point is equivalent to 1/163 of an inch.
+
+    var oneInchPoints = 163.0; //pt
+    var oneCMPoints = oneInchPoints / 2.54; //pt
+    var pointCount = oneCMPoints * cm;
+    var pixels = pointCount; //* onePointPexils
+    return pixels.toInt();
+  }
+
 }

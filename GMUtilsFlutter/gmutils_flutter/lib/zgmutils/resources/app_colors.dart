@@ -6,37 +6,58 @@ abstract class AppColors {
   AppColors({required this.isLightMode});
 
   Color get primary;
+
+  Color get primaryVariant;
+
+  //
   Color get secondary;
 
+  Color get secondaryVariant;
+
+  //
+  Color get toolbar;
+
+  Color get toolbarVariant;
+
+  //
   Color get background;
 
+  //
+  Color get bottomNavBar;
+
+  Color get bottomNavBarVariant;
+
+  //
   Color get sideMenu;
 
-  Color get toolbar;
-  Color get toolbarTextColor;
+  Color get sideMenuVariant;
 
-  Color get card;
-
-  Color get highlight;
-
+  //
   Color get title;
 
   Color get text;
 
-  Color get textOnPrimary;
-
   Color get hint;
 
-  Color get red;
-
-  Color get darkRed;
-
-  Color get chatCardLeft;
-  Color get chatCardRight;
   Color get links;
+
+  //
+  Color get card;
+
+  //
   Color get white;
+
+  //
   Color get black;
 
+  //
+  Color get red;
+
+  //
+  Color get blue;
+
+  //
+  Color get green;
 
   MaterialColor get primarySwatch => MaterialColor(
         primary.value,
