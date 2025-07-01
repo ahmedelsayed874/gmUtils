@@ -115,7 +115,6 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
   }) async {
     Logs.print(() => [
-          '********',
           'API::Call',
           '[POST]',
           'url: ${url.uri}',
@@ -151,7 +150,6 @@ class WebRequestExecutor {
     }
 
     Logs.print(() => [
-          '********',
           'API::Call',
           '[POST / MULTIPART]',
           'url: ${url.uri}',
@@ -167,6 +165,30 @@ class WebRequestExecutor {
           'fileMimeType: ${url.fileMimeType}',
           //'\n',
         ]);
+
+    if (fileBytesLength is int) {
+      if (fileBytesLength == 0) {
+        Logs.print(() => [
+          'API::Response',
+          'url: ${url.uri}',
+          '\n',
+          '<[File size is zero]>',
+        ]);
+        return Response.failed(url: url, error: 'File size is zero', httpCode: -1,);
+      }
+    }
+    //
+    else {
+      Logs.print(() => [
+        'API::Response',
+        'url: ${url.uri}',
+        '\n',
+        '<[File size is unknown]>',
+        '\n',
+        '<[ERROR: $fileBytesLength]>',
+      ]);
+      return Response.failed(url: url, error: 'File size is unknown', httpCode: -1,);
+    }
 
     return _executeWithTries(
       url: url,
@@ -232,7 +254,6 @@ class WebRequestExecutor {
     }
 
     Logs.print(() => [
-          '********',
           'API::Call',
           '[GET]',
           'url: ${url.uri}',
