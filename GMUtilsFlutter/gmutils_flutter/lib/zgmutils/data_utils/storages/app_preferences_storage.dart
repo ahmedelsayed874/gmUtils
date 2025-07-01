@@ -9,7 +9,7 @@ class AppPreferencesStorage {
     return locale == null ? null : locale == 'en';
   }
 
-  Future<bool> setLocale(bool toEn) async {
+  Future<bool> setLanguage(bool toEn) async {
     return _storage.save('locale', toEn ? 'en' : 'ar');
   }
 
@@ -26,18 +26,17 @@ class AppPreferencesStorage {
   }
 
   Future<AppPreferences> savedAppPreferences({
-    bool enIsDefault = true,
-    bool? lightIsDefault,
+    AppPreferences? defaultAppPreferences,
   }) async {
     return AppPreferences(
-      isEn: (await isEn()) ?? enIsDefault,
-      isLightMode: await isLightMode(),
+      isEn: (await isEn()) ?? defaultAppPreferences?.isEn,
+      isLightMode: (await isLightMode()) ?? defaultAppPreferences?.isLightMode,
     );
   }
 }
 
 class AppPreferences {
-  bool isEn;
+  bool? isEn;
   bool? isLightMode;
 
   AppPreferences({

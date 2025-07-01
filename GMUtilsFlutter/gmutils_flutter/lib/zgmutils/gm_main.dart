@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,7 +19,7 @@ typedef OnInitialize = void Function(BuildContext);
 
 class GMMain {
   static void init({
-    required bool isEnglishDefaultLocale,
+    required AppPreferences? defaultAppPreferences,
     required String Function(BuildContext context)? appName,
     required AppMeasurement Function(BuildContext context) measurements,
     required AppColors Function(BuildContext context, bool isLight) appColors,
@@ -49,7 +51,7 @@ class GMMain {
     }
 
     AppPreferencesStorage()
-        .savedAppPreferences(enIsDefault: isEnglishDefaultLocale)
+        .savedAppPreferences(defaultAppPreferences: defaultAppPreferences)
         .then(
       (value) {
         App._appPreferences = value;
@@ -238,36 +240,24 @@ class App extends StatefulWidget {
   //============================================================================
 
   static AppPreferences _appPreferences = AppPreferences(
-    isEn: true,
-    isLightMode: true,
+    isEn: null,
+    isLightMode: null,
   );
 
-  static bool get isEnglish => _appPreferences.isEn;
+  static bool get isEnglish => _appPreferences.isEn ?? true;
 
-  static bool isLightTheme(BuildContext context) {
-    bool b;
-
-    if (_appPreferences.isLightMode == null) {
-      //b = Theme.of(context).brightness == Brightness.light;
-      b = MediaQuery.platformBrightnessOf(context) == Brightness.light;
-    } else {
-      b = _appPreferences.isLightMode!;
-    }
-
-    Logs.print(() =>
-        'App.isLightTheme() ----> $b (_appPreferences.isLightMode ? ${_appPreferences.isLightMode})');
-
-    return b;
-  }
+  static bool get isLightTheme => _appPreferences.isLightMode ?? true;
 
   static bool changeAppLanguage({
     required BuildContext context,
     required bool toEnglish,
   }) {
-    if (_appPreferences.isEn == toEnglish) return false;
+    if (_appPreferences.isEn != null && _appPreferences.isEn == toEnglish) {
+      return false;
+    }
 
     _appPreferences.isEn = toEnglish;
-    AppPreferencesStorage().setLocale(toEnglish);
+    AppPreferencesStorage().setLanguage(toEnglish);
 
     var s = context.findAncestorStateOfType<_AppState>();
     s?.invalidate();
@@ -280,7 +270,11 @@ class App extends StatefulWidget {
   }) {
     Logs.print(() =>
         'App.changeAppAppearance(toLight: $toLight) ... current is light? ${_appPreferences.isLightMode}');
-    if (_appPreferences.isLightMode == toLight) return false;
+
+    if (_appPreferences.isLightMode != null &&
+        _appPreferences.isLightMode == toLight) {
+      return false;
+    }
 
     _appPreferences.isLightMode = toLight;
     AppPreferencesStorage().setAppearance(toLight);
@@ -301,13 +295,21 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    Logs.print(() => '_AppState.build()');
+    Logs.print(() => '_AppState.build() ----> locale: ${Platform.localeName}');
+
+    App._appPreferences.isEn ??=
+        (!Platform.localeName.toLowerCase().startsWith('ar'));
+
+    App._appPreferences.isLightMode ??=
+        MediaQuery.platformBrightnessOf(context) == Brightness.light;
+
+    //------------------------------------------------------------------------
 
     final lightColors = widget.appColors?.call(context, true) ??
         AppColors.def(isLightMode: true);
     final darkColors = widget.appColors?.call(context, false) ??
         AppColors.def(isLightMode: false);
-    widget.appColors?.call(context, App.isLightTheme(context));
+    widget.appColors?.call(context, App.isLightTheme);
 
     theme(AppColors colors) => ThemeData(
           primarySwatch: colors.primarySwatch,
@@ -388,7 +390,11 @@ class _AppState extends State<App> {
         Locale('en', ''), // English, no country code
         Locale('ar', ''), // Arabic, no country code
       ],
-      locale: App.isEnglish ? const Locale('en', '') : const Locale('ar', ''),
+      locale: App._appPreferences.isEn == null
+          ? null
+          : (App._appPreferences.isEn!
+              ? const Locale('en', '')
+              : const Locale('ar', '')),
       //
       home: StarterWidget(
         startScreen: widget.startScreen!,
@@ -453,9 +459,8 @@ class _StarterWidgetState extends State<StarterWidget> {
     var appMeasurement =
         widget.measurements?.call(context) ?? AppMeasurement.def();
 
-    var isLight = App.isLightTheme(context);
-    var appColors = widget.appColors?.call(context, isLight) ??
-        AppColors.def(isLightMode: isLight);
+    var isLight = App.isLightTheme;
+    var appColors = widget.appColors?.call(context, isLight) ?? AppColors.def(isLightMode: isLight);
 
     //init app theme
     AppTheme(
