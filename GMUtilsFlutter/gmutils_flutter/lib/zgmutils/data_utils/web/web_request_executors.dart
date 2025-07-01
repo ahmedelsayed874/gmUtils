@@ -15,17 +15,18 @@ class WebRequestExecutor {
   Future<http.Response?> openUrl(String link) async {
     try {
       var response = await http.get(Uri.parse(link.trim()));
-      Logs.print(() => "WebRequestExecutor.openUrl($link) ==> response: {\n"
-          ">>> code: ${response.statusCode},\n"
-          ">>> body: ${response.body},\n"
-          ">>> headers: ${response.headers}\n"
-          "}",
+      Logs.print(
+        () => "WebRequestExecutor.openUrl($link) ==> response: {\n"
+            ">>> code: ${response.statusCode},\n"
+            ">>> body: ${response.body},\n"
+            ">>> headers: ${response.headers}\n"
+            "}",
       );
       return response;
     } catch (e) {
-      Logs
-          .print(() => "WebRequestExecutor.checkUrlValidity($link) ==> "
-          "EXCEPTION::: $e",
+      Logs.print(
+        () => "WebRequestExecutor.checkUrlValidity($link) ==> "
+            "EXCEPTION::: $e",
       );
       return null;
     }
@@ -36,39 +37,49 @@ class WebRequestExecutor {
       link = link.toLowerCase().trim();
 
       if (link.split(' ').length > 1) {
-        Logs.print(() => ""
-            "WebRequestExecutor.checkUrlValidity($link) ==> "
-            "LINK CONTAINS SPACES",
+        Logs.print(
+          () => ""
+              "WebRequestExecutor.checkUrlValidity($link) ==> "
+              "LINK CONTAINS SPACES",
         );
         return Pair(value1: false, value2: 'Link contains spaces');
       }
 
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        Logs.print(() => ""
-            "WebRequestExecutor.checkUrlValidity($link) ==> "
-            "Link not start with 'http://' or 'https://'",
+        Logs.print(
+          () => ""
+              "WebRequestExecutor.checkUrlValidity($link) ==> "
+              "Link not start with 'http://' or 'https://'",
         );
-        return Pair(value1: false, value2: "Link is not start with 'http://' or 'https://'",);
+        return Pair(
+          value1: false,
+          value2: "Link is not start with 'http://' or 'https://'",
+        );
       }
 
       var response = await http.get(Uri.parse(link.trim()));
-      Logs.print(() => ""
-          "WebRequestExecutor.checkUrlValidity($link) ==> response: {\n"
-          ">>> code: ${response.statusCode},\n"
-          ">>> is valid?: ${response.statusCode > 100}\n"
-          "}",
+      Logs.print(
+        () => ""
+            "WebRequestExecutor.checkUrlValidity($link) ==> response: {\n"
+            ">>> code: ${response.statusCode},\n"
+            ">>> is valid?: ${response.statusCode > 100}\n"
+            "}",
       );
 
       return Pair(
-          value1: /*response.statusCode != 404 &&*/ response.statusCode > 100,
-          value2: '',
+        value1: /*response.statusCode != 404 &&*/ response.statusCode > 100,
+        value2: '',
       );
     } catch (e) {
-      Logs.print(() => ""
-          "WebRequestExecutor.checkUrlValidity($link) ==> "
-          "EXCEPTION::: $e",
+      Logs.print(
+        () => ""
+            "WebRequestExecutor.checkUrlValidity($link) ==> "
+            "EXCEPTION::: $e",
       );
-      return Pair(value1: false, value2: '$e'.replaceAll("Invalid argument(s): ", ""),);
+      return Pair(
+        value1: false,
+        value2: '$e'.replaceAll("Invalid argument(s): ", ""),
+      );
     }
   }
 
@@ -365,6 +376,7 @@ class WebRequestExecutor {
 
         _removeExpiredCaches();
         return Response.failed(
+          url: url,
           error: '$e',
           httpCode: code,
           responseHeader: response.headers,
@@ -375,6 +387,7 @@ class WebRequestExecutor {
     else {
       _removeExpiredCaches();
       return Response.failed(
+        url: url,
         error: response.reasonPhrase ?? response.body,
         httpCode: code,
         responseHeader: response.headers,
@@ -398,6 +411,7 @@ class WebRequestExecutor {
     final r = Random().nextInt(100);
     if (r > 0 && r < 5) {
       response = Response.failed(
+        url: null,
         error: "no connection",
         httpCode: 0,
       );
@@ -405,6 +419,7 @@ class WebRequestExecutor {
     //
     else if (r < 10) {
       response = Response.failed(
+        url: null,
         error: "Supposed error on server side",
         httpCode: 400,
       );
@@ -467,9 +482,18 @@ class WebRequestExecutor {
       }
 
       if (data != null) {
-        response = Response.success(data: Result(data));
-      } else {
-        response = Response.failed(error: error, httpCode: 200);
+        response = Response.success(
+          url: null,
+          data: Result(data),
+        );
+      }
+      //
+      else {
+        response = Response.failed(
+          url: null,
+          error: error,
+          httpCode: 200,
+        );
       }
     }
 

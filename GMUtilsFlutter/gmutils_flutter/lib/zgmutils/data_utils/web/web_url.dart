@@ -64,6 +64,7 @@ abstract class Url<RDT> {
     //
     else if (responseMapper == null) {
       return Response.failed(
+        url: this,
         error: 'Internal error: either "Url.responseEncoder" or '
             '"Url.responseMapper" should has value',
         httpCode: 0,
@@ -73,6 +74,7 @@ abstract class Url<RDT> {
     else {
       var dataMap = jsonDecode(response);
       final responseObj = ResponseMapper(responseMapper!).fromMap(dataMap);
+      responseObj.url = this;
       // responseObj.rawResponse = response;
       return responseObj;
     }

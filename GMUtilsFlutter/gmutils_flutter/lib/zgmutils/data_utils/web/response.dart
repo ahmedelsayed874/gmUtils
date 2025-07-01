@@ -1,6 +1,8 @@
 import '../../utils/mappable.dart';
+import 'web_url.dart';
 
 class Response<DATA> {
+  Url? url;
   DATA? data;
   String? error;
   int? httpCode;
@@ -9,6 +11,7 @@ class Response<DATA> {
   // String? rawResponse;
 
   Response._({
+    required this.url,
     this.data,
     this.error,
     this.httpCode,
@@ -16,11 +19,13 @@ class Response<DATA> {
   });
 
   Response.success({
+    required this.url,
     required this.data,
     this.responseHeader,
   }) : httpCode = 200;
 
   Response.failed({
+    required this.url,
     required this.error,
     required this.httpCode,
     this.responseHeader,
@@ -32,7 +37,7 @@ class Response<DATA> {
 
   @override
   String toString() {
-    return 'Response{data: $data, error: $error, httpCode: $httpCode, responseHeader: $responseHeader}';
+    return 'Response{endPoint: ${url?.endPoint}, data: $data, error: $error, httpCode: $httpCode, responseHeader: $responseHeader}';
   }
 }
 
@@ -46,6 +51,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
     final data = dataMapper.fromMap(values);
 
     return Response._(
+      url: null,
       data: data,
       error: null,
       httpCode: values['httpCode'],
