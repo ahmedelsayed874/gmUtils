@@ -175,20 +175,50 @@ class App extends StatefulWidget {
     Widget screen, {
     Object? args,
     bool singleTop = false,
+    bool animate = false,
   }) async {
-    final route = MaterialPageRoute<RT>(
-      builder: (context) => screen,
-      settings: RouteSettings(
-        name: null,
-        arguments: args,
-      ),
-    );
+    RouteSettings? settings = RouteSettings(name: null, arguments: args);
+
+    /*final route = MaterialPageRoute<RT>(builder: (context) => screen, settings: settings);*/
+
+    pageBuilder(context, animation, secondaryAnimation) => screen;
+
+    final route = animate
+        ? PageRouteBuilder<RT>(
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              final tween = Tween(begin: begin, end: end)
+                  .chain(CurveTween(curve: Curves.ease));
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+
+            //
+            pageBuilder: pageBuilder,
+            settings: settings,
+          )
+        : PageRouteBuilder<RT>(
+            pageBuilder: pageBuilder,
+            settings: settings,
+          );
 
     final nav = Navigator.of(context);
+
     RT? result;
     if (singleTop) {
       result = await nav.pushAndRemoveUntil(route, (route) => false);
-    } else {
+    }
+    //
+    else {
       result = await nav.push(route);
     }
 
@@ -273,8 +303,10 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     Logs.print(() => '_AppState.build()');
 
-    final lightColors = widget.appColors?.call(context, true) ?? AppColors.def(isLightMode: true);
-    final darkColors = widget.appColors?.call(context, false) ?? AppColors.def(isLightMode: false);
+    final lightColors = widget.appColors?.call(context, true) ??
+        AppColors.def(isLightMode: true);
+    final darkColors = widget.appColors?.call(context, false) ??
+        AppColors.def(isLightMode: false);
     widget.appColors?.call(context, App.isLightTheme(context));
 
     theme(AppColors colors) => ThemeData(
