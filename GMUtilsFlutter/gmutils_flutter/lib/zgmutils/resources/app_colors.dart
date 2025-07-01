@@ -5,6 +5,10 @@ abstract class AppColors {
 
   AppColors({required this.isLightMode});
 
+  factory AppColors.def({required bool isLightMode}) => _AppColorsDefault(
+        isLightMode: isLightMode,
+      );
+
   Color get primary;
 
   Color get primaryVariant;
@@ -74,4 +78,71 @@ abstract class AppColors {
           900: primary,
         },
       );
+}
+
+class _AppColorsDefault extends AppColors {
+  _AppColorsDefault({required super.isLightMode});
+
+  @override
+  Color get background => Colors.white;
+
+  @override
+  Color get black => Colors.black;
+
+  @override
+  Color get blue => Colors.blueAccent;
+
+  @override
+  Color get bottomNavBar => Colors.black;
+
+  @override
+  Color get bottomNavBarVariant => Colors.white;
+
+  @override
+  Color get card => Colors.grey[100] ?? Colors.grey;
+
+  @override
+  Color get green => Colors.green;
+
+  @override
+  Color get hint => Colors.grey[400] ?? Colors.grey;
+
+  @override
+  Color get links => Colors.blueAccent;
+
+  @override
+  Color get primary => Colors.blueAccent;
+
+  @override
+  Color get primaryVariant => Colors.white;
+
+  @override
+  Color get red => Colors.red;
+
+  @override
+  Color get secondary => Colors.red;
+
+  @override
+  Color get secondaryVariant => Colors.white;
+
+  @override
+  Color get sideMenu => primary;
+
+  @override
+  Color get sideMenuVariant => primaryVariant;
+
+  @override
+  Color get text => Colors.black;
+
+  @override
+  Color get title => Colors.grey;
+
+  @override
+  Color get toolbar => primary;
+
+  @override
+  Color get toolbarVariant => primaryVariant;
+
+  @override
+  Color get white => Colors.white;
 }

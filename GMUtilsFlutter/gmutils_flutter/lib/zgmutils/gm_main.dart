@@ -96,12 +96,10 @@ class App extends StatefulWidget {
     required this.appColors,
     required this.toolbarTitleFontFamily,
     required this.defaultFontFamily,
-    required Widget startScreen,
+    required Widget this.startScreen,
     required this.onInitialize,
     Key? key,
-  }) : super(key: key) {
-    this.startScreen = startScreen;
-  }
+  });
 
   //============================================================================
 
@@ -227,7 +225,7 @@ class App extends StatefulWidget {
     }
 
     Logs.print(() =>
-    'App.isLightTheme() ----> $b (_appPreferences.isLightMode ? ${_appPreferences.isLightMode})');
+        'App.isLightTheme() ----> $b (_appPreferences.isLightMode ? ${_appPreferences.isLightMode})');
 
     return b;
   }
@@ -275,9 +273,9 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     Logs.print(() => '_AppState.build()');
 
-    final lightColors = widget.appColors!(context, true);
-    final darkColors = widget.appColors!(context, false);
-    widget.appColors!(context, App.isLightTheme(context));
+    final lightColors = widget.appColors?.call(context, true) ?? AppColors.def(isLightMode: true);
+    final darkColors = widget.appColors?.call(context, false) ?? AppColors.def(isLightMode: false);
+    widget.appColors?.call(context, App.isLightTheme(context));
 
     theme(AppColors colors) => ThemeData(
           primarySwatch: colors.primarySwatch,
@@ -297,7 +295,7 @@ class _AppState extends State<App> {
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
               backgroundColor: WidgetStatePropertyAll(colors.primary),
-              textStyle: WidgetStatePropertyAll(Res.themes.defaultTextStyle(
+              textStyle: WidgetStatePropertyAll(AppTheme.defaultTextStyle(
                 textColor: colors.primaryVariant,
                 fontWeight: FontWeight.w600,
               )),
@@ -400,7 +398,7 @@ class StarterWidget extends StatefulWidget {
   OnInitialize? onInitialize;
 
   StarterWidget({
-    required this.startScreen,
+    required Widget this.startScreen,
     required this.measurements,
     required this.appColors,
     required this.toolbarTitleFontFamily,
@@ -420,9 +418,12 @@ class _StarterWidgetState extends State<StarterWidget> {
 
     App._context = context;
 
-    var appMeasurement = widget.measurements!(context);
+    var appMeasurement =
+        widget.measurements?.call(context) ?? AppMeasurement.def();
+
     var isLight = App.isLightTheme(context);
-    var appColors = widget.appColors!(context, isLight);
+    var appColors = widget.appColors?.call(context, isLight) ??
+        AppColors.def(isLightMode: isLight);
 
     //init app theme
     AppTheme(

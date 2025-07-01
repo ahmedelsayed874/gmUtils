@@ -226,8 +226,15 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     var s = super.signature;
     s += fileMappedKey.hashCode.toString();
     s += file.path.hashCode.toString();
-    s += file.lengthSync().toString();
-    s += file.lastModifiedSync().millisecondsSinceEpoch.toString();
+    try {
+      s += file.lengthSync().toString();
+      s += file
+          .lastModifiedSync()
+          .millisecondsSinceEpoch
+          .toString();
+    } catch (e) {
+      s += e.toString();
+    }
     if (fileMimeType != null) {
       s += fileMimeType.hashCode.toString();
     }

@@ -132,6 +132,13 @@ class WebRequestExecutor {
     PostMultiPartFileUrl<DT> url,
     int? cacheIntervalInSeconds,
   ) async {
+    dynamic fileBytesLength;
+    try {
+      fileBytesLength = url.fileBytes.length;
+    } catch (e) {
+      fileBytesLength = e;
+    }
+
     Logs.print(() => [
           '********',
           'API::Call',
@@ -142,7 +149,7 @@ class WebRequestExecutor {
           //'\n',
           'fileMappedKey: ${url.fileMappedKey}',
           //'\n',
-          'fileBytes-length: ${url.fileBytes.length}',
+          'fileBytes-length: $fileBytesLength',
           //'\n',
           'fileName: ${url.fileName}',
           //'\n',
@@ -246,7 +253,6 @@ class WebRequestExecutor {
     );
     if (cache != null) {
       Logs.print(() => [
-            '********',
             'API::Response',
             'url: ${url.uri}',
             '\n',
@@ -288,7 +294,6 @@ class WebRequestExecutor {
       if (tries < supposedTries) {
         if (Logs.inDebugMode || await Logs.writingToLogFileEnabled) {
           Logs.print(() => [
-                '****',
                 'API::Response(OF_TRY_NUMBER: $tries)',
                 'url: ${url.uri}',
                 '\n',
@@ -331,7 +336,6 @@ class WebRequestExecutor {
     final code = response.statusCode;
 
     Logs.print(() => [
-          '********',
           'API::Response',
           'url: ${url.uri}',
           '\n',
@@ -366,10 +370,12 @@ class WebRequestExecutor {
           responseHeader: response.headers,
         );
       }
-    } else {
+    }
+    //
+    else {
       _removeExpiredCaches();
       return Response.failed(
-        error: response.reasonPhrase,
+        error: response.reasonPhrase ?? response.body,
         httpCode: code,
         responseHeader: response.headers,
       );
