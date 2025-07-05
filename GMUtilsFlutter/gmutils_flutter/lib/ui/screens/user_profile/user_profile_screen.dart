@@ -385,7 +385,7 @@ class _UserProfileScreenState extends BaseState<UserProfileScreen>
               style: Res.themes.defaultTextStyle(
                 textSize: 10,
                 fontWeight: FontWeight.w600,
-                textColor: Res.themes.colors.highlight,
+                textColor: Res.themes.colors.hint,
               ),
             ),
           ));

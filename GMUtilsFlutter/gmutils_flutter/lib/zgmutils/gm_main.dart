@@ -252,6 +252,9 @@ class App extends StatefulWidget {
     required BuildContext context,
     required bool toEnglish,
   }) {
+    Logs.print(() =>
+    'App.changeAppLanguage(toEnglish: $toEnglish) ... current is en? ${_appPreferences.isEn}');
+
     if (_appPreferences.isEn != null && _appPreferences.isEn == toEnglish) {
       return false;
     }
@@ -295,7 +298,7 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    Logs.print(() => '_AppState.build() ----> locale: ${Platform.localeName}');
+    Logs.print(() => '_AppState.build()');
 
     App._appPreferences.isEn ??=
         (!Platform.localeName.toLowerCase().startsWith('ar'));

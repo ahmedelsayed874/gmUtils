@@ -44,7 +44,7 @@ bool isDeviceHasHardwareKeys = true;
 
 void main() {
   GMMain.init(
-    isEnglishDefaultLocale: false,
+    defaultAppPreferences: null,
     appName: (ctx) {
       return Strings(ctx).appName;
     },

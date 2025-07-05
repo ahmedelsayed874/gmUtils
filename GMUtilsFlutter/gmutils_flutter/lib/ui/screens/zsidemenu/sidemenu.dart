@@ -92,7 +92,7 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
                   screenDriver.authUserAccount.fullname,
                   textAlign: TextAlign.center,
                   style: Res.themes.defaultTextStyle(
-                    textColor: Res.themes.colors.textOnPrimary,
+                    textColor: Res.themes.colors.primaryVariant,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

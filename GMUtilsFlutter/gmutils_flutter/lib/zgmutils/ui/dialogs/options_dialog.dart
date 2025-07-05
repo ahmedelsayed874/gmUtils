@@ -5,44 +5,51 @@ import 'package:flutter/material.dart';
 import '../../gm_main.dart';
 import '../../resources/app_theme.dart';
 
-typedef OptionSelectHandler = void Function(OptionElement choice);
+typedef OptionSelectHandler<T> = void Function(OptionElement<T> choice);
 
-class OptionsDialog {
+class OptionsDialog<T> {
   static double optionElementHeight = 55.0;
 
-  static OptionsDialog create(
+  static OptionsDialog<T> create<T>(
     String title,
-    List<OptionElement> options, {
-    OptionElement? selectedOption,
-    required OptionSelectHandler optionSelectHandler,
+    List<OptionElement<T>> options, {
+    OptionElement<T>? selectedOption,
+    required OptionSelectHandler<T> optionSelectHandler,
     int? maxNumberOfDisplayedItems,
+    void Function(bool? ok)? onDismiss,
   }) =>
-      OptionsDialog(
+      OptionsDialog<T>(
         title,
         options,
         selectedOption: selectedOption,
         optionSelectHandler: optionSelectHandler,
         maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
+        onDismiss: onDismiss,
       );
 
   final String title;
-  final List<OptionElement> options;
-  final OptionElement? selectedOption;
-  OptionSelectHandler? _optionSelectHandler;
+  final List<OptionElement<T>> options;
+  final OptionElement<T>? selectedOption;
+  OptionSelectHandler<T>? _optionSelectHandler;
   BuildContext Function()? _context;
   int? maxNumberOfDisplayedItems;
+  void Function(bool? ok)? _onDismiss;
 
   OptionsDialog(
     this.title,
     this.options, {
     this.selectedOption,
-    required OptionSelectHandler optionSelectHandler,
+    required OptionSelectHandler<T> optionSelectHandler,
     this.maxNumberOfDisplayedItems,
+    void Function(bool? ok)? onDismiss,
   }) {
     _optionSelectHandler = optionSelectHandler;
+    _onDismiss = onDismiss;
   }
 
-  OptionsDialog show(BuildContext Function() context) {
+  bool? _dismissedByOk;
+
+  OptionsDialog<T> show(BuildContext Function() context) {
     _context = context;
 
     RouteSettings routeSettings = const RouteSettings(name: 'options_dialog');
@@ -66,19 +73,27 @@ class OptionsDialog {
     ).then((value) {
       _context = null;
       _optionSelectHandler = null;
+
+      _onDismiss?.call(_dismissedByOk);
+      _onDismiss = null;
     });
 
     return this;
   }
 
   Widget _dialogBody(BuildContext context) {
-    return _OptionDialogBody(
+    return _OptionDialogBody<T>(
       options: options,
       selectedOption: selectedOption,
       optionSelectHandler: _optionSelectHandler,
-      dismiss: dismiss,
+      dismiss: _dismiss,
       maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
     );
+  }
+
+  void _dismiss(bool ok) {
+    _dismissedByOk = ok;
+    dismiss();
   }
 
   void dismiss() {
@@ -86,11 +101,11 @@ class OptionsDialog {
   }
 }
 
-class _OptionDialogBody extends StatefulWidget {
-  List<OptionElement>? options;
-  OptionElement? selectedOption;
-  OptionSelectHandler? optionSelectHandler;
-  void Function()? dismiss;
+class _OptionDialogBody<T> extends StatefulWidget {
+  List<OptionElement<T>>? options;
+  OptionElement<T>? selectedOption;
+  OptionSelectHandler<T>? optionSelectHandler;
+  void Function(bool ok)? dismiss;
   int? maxNumberOfDisplayedItems;
 
   _OptionDialogBody({
@@ -103,7 +118,7 @@ class _OptionDialogBody extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _OptionDialogBodyState createState() => _OptionDialogBodyState();
+  _OptionDialogBodyState<T> createState() => _OptionDialogBodyState<T>();
 
   dispose() {
     options = null;
@@ -112,7 +127,7 @@ class _OptionDialogBody extends StatefulWidget {
   }
 }
 
-class _OptionDialogBodyState extends State<_OptionDialogBody> {
+class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
   @override
   void dispose() {
     widget.dispose();
@@ -137,7 +152,7 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
               groupValue: widget.selectedOption,
               onChanged: (option) {
                 setState(() {
-                  widget.selectedOption = option as OptionElement?;
+                  widget.selectedOption = option as OptionElement<T>?;
                 });
               },
             ),
@@ -150,7 +165,7 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
           );
         });
 
-    var body = Container(
+    var body = SizedBox(
       width: double.maxFinite,
       child: Column(
         children: [
@@ -164,7 +179,7 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
             children: [
               TextButton(
                 onPressed: () {
-                  widget.dismiss?.call();
+                  widget.dismiss?.call(true);
 
                   if (widget.optionSelectHandler != null) {
                     if (widget.selectedOption != null) {
@@ -182,7 +197,7 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
               ),
               TextButton(
                 onPressed: () {
-                  widget.dismiss?.call();
+                  widget.dismiss?.call(false);
                 },
                 child: Text(
                   App.isEnglish ? 'Cancel' : 'إلغاء',
@@ -214,20 +229,20 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
       style: AppTheme.defaultTextStyle(),
       child: dialogHeight == null
           ? body
-          : Container(child: body, height: dialogHeight),
+          : SizedBox(child: body, height: dialogHeight),
     );
   }
 }
 
-class OptionElement {
+class OptionElement<T> {
   final String text;
-  final Object value;
+  final T value;
 
   OptionElement(this.text, this.value);
 
   @override
   bool operator ==(Object other) {
-    if (other is OptionElement) {
+    if (other is OptionElement<T>) {
       return other.text == text && other.value == value;
     }
 

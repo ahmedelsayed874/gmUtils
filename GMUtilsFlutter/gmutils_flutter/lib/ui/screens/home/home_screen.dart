@@ -119,7 +119,7 @@ class _HomeScreenState extends BaseState<HomeScreen>
     if (appConfigs.needUpdateApp()) {
       var forceUpdateNow = appConfigs.mustUpdateApp();
 
-      Future.delayed(Duration(seconds: isBuildCalled ? 1 : 5), () {
+      Future.delayed(Duration(seconds: mounted ? 1 : 5), () {
         var md = MessageDialog.create;
         md
             .setTitle(Res.strings.alert)
@@ -284,7 +284,7 @@ class _HomeScreenState extends BaseState<HomeScreen>
             child: Text(
               title,
               style: Res.themes.defaultTextStyle(
-                textColor: Res.themes.colors.textOnPrimary,
+                textColor: Res.themes.colors.primaryVariant,
                 fontWeight: FontWeight.bold,
                 textSize: 13,
               ),

@@ -26,6 +26,15 @@ abstract class IScreenDriverDependantDelegate {
     Function()? onDismiss,
   });
 
+  void showOptionsDialog<T>({
+    required String title,
+    required List<T> options,
+    required T? selectedOption,
+    required void Function(T) onOptionSelected,
+    required void Function(bool? dissmissedByOk) onDismiss,
+    int? maxNumberOfDisplayedItems,
+  });
+
   void updateView();
 
   void goBack([result]);

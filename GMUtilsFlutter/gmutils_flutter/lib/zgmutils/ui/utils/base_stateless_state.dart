@@ -76,6 +76,28 @@ abstract class BaseStatelessWidget extends StatelessWidget
     );
   }
 
+  //-----------------------------------------------------------------
+
+  @override
+  void showOptionsDialog<T>({
+    required String title,
+    required List<T> options,
+    required T? selectedOption,
+    required void Function(T p1) onOptionSelected,
+    required void Function(bool? dissmissedByOk) onDismiss,
+    int? maxNumberOfDisplayedItems,
+  }) {
+    _screenUtils.showOptionsDialog(
+      title: title,
+      options: options,
+      selectedOption: selectedOption,
+      onOptionSelected: onOptionSelected,
+      onDismiss: onDismiss,
+    );
+  }
+
+  //-----------------------------------------------------------------
+
   @override
   void updateView() {}
 

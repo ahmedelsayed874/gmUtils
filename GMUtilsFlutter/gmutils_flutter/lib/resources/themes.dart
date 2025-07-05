@@ -152,6 +152,34 @@ class _LightColors extends _AppColors {
 
   @override
   Color get black => Colors.black;
+
+  @override
+  // TODO: implement blue
+  Color get blue => throw UnimplementedError();
+
+  @override
+  // TODO: implement bottomNavBar
+  Color get bottomNavBar => throw UnimplementedError();
+
+  @override
+  // TODO: implement bottomNavBarVariant
+  Color get bottomNavBarVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement primaryVariant
+  Color get primaryVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement secondaryVariant
+  Color get secondaryVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement sideMenuVariant
+  Color get sideMenuVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement toolbarVariant
+  Color get toolbarVariant => throw UnimplementedError();
 }
 
 class _DarkColors extends _AppColors {
@@ -207,6 +235,34 @@ class _DarkColors extends _AppColors {
 
   @override
   Color get black => Colors.white70;
+
+  @override
+  // TODO: implement blue
+  Color get blue => throw UnimplementedError();
+
+  @override
+  // TODO: implement bottomNavBar
+  Color get bottomNavBar => throw UnimplementedError();
+
+  @override
+  // TODO: implement bottomNavBarVariant
+  Color get bottomNavBarVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement primaryVariant
+  Color get primaryVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement secondaryVariant
+  Color get secondaryVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement sideMenuVariant
+  Color get sideMenuVariant => throw UnimplementedError();
+
+  @override
+  // TODO: implement toolbarVariant
+  Color get toolbarVariant => throw UnimplementedError();
 }
 
 //==============================================================================

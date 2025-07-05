@@ -58,8 +58,7 @@ class Logs {
 
   static core.Future<core.bool> get writingToLogFileEnabled async {
     var now = core.DateTime.now();
-    var printToFile = now.millisecondsSinceEpoch <
-        (_logFileDeadline ?? core.DateTime(2024, 5, 15).millisecondsSinceEpoch);
+    var printToFile = now.millisecondsSinceEpoch < (_logFileDeadline ?? 0);
 
     if (!printToFile) {
       var dl = await _savedLogsDeadline;

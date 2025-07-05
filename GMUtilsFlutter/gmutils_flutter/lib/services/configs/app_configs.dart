@@ -11,6 +11,8 @@ import 'package:gmutils_flutter/zgmutils/utils/date_op.dart';
 import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
 import 'package:gmutils_flutter/zgmutils/utils/mappable.dart';
 
+import '../../zgmutils/utils/pairs.dart';
+
 class AppConfigs {
   String get currentAppVersion => main.appVersion;
 
@@ -677,12 +679,12 @@ class FirebaseConfigsMock extends IFirebaseConfigs {
   FirebaseConfigsMock(this.data);
 
   @override
-  Future<bool> fetch({required List<FirebaseConfigsHandler> handlers}) async {
+  Future<Pair<bool, String?>> fetch({required List<FirebaseConfigsHandler> handlers,}) async {
     await Future.delayed(const Duration(seconds: 10));
     for (var a in handlers) {
       a.handle(data);
     }
-    return true;
+    return Pair(value1: true, value2: null);
   }
 
   @override

@@ -110,7 +110,7 @@ class _ToolbarState extends State<Toolbar> {
           },
           icon: Icon(
             Icons.menu_sharp,
-            color: Res.themes.colors.textOnPrimary,
+            color: Res.themes.colors.primaryVariant,
           ),
         ),
       );
@@ -133,7 +133,7 @@ class _ToolbarState extends State<Toolbar> {
           icon: Icon(
             //App.isEnglish ? Icons.arrow_back_ios : Icons.arrow_forward_ios,
             Icons.arrow_back_ios,
-            color: Res.themes.colors.textOnPrimary,
+            color: Res.themes.colors.primaryVariant,
           ),
         ),
       );
@@ -201,7 +201,7 @@ class _ToolbarState extends State<Toolbar> {
                 line1,
                 maxLines: 1,
                 style: Res.themes.defaultTextStyle(
-                  textColor: Res.themes.colors.textOnPrimary,
+                  textColor: Res.themes.colors.primaryVariant,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -214,7 +214,7 @@ class _ToolbarState extends State<Toolbar> {
                 line2,
                 maxLines: 1,
                 style: Res.themes.defaultTextStyle(
-                  textColor: Res.themes.colors.textOnPrimary,
+                  textColor: Res.themes.colors.primaryVariant,
                   textSize: 12,
                 ),
               ),
@@ -275,7 +275,7 @@ class _ToolbarState extends State<Toolbar> {
     if (widget.toolbarConfiguration.moreActions?.isNotEmpty == true) {
       children.add(PopupMenuButton<DropdownActionProperties>(
         color: Res.themes.colors.background,
-        iconColor: Res.themes.colors.textOnPrimary,
+        iconColor: Res.themes.colors.primaryVariant,
         onSelected: (action) {
           widget.toolbarConfiguration.onActionSelected!(action);
         },

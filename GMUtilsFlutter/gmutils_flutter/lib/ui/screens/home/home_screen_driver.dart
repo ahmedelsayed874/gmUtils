@@ -94,9 +94,9 @@ abstract class HomeScreenDriverAbs extends IScreenDriver {
               var month = dateMap['month']['ar'];
               var year = dateMap['year'];
 
-              return Response.success(data: ["$day", "$month", "$year"]);
+              return Response.success(url: null, data: ["$day", "$month", "$year"]);
             } catch (e) {
-              return Response.failed(error: e.toString(), httpCode: 400);
+              return Response.failed(url: null, error: e.toString(), httpCode: 400);
             }
           }),
     );

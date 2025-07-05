@@ -9,29 +9,29 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     implements IScreenDriverDependantDelegate {
   final ScreenUtils _screenUtils = const ScreenUtils();
 
-  bool _isBuildCalled = false;
-
-  bool get isBuildCalled => _isBuildCalled;
-
   String? get defaultWaitViewMessage => null;
 
   @override
-  void initState() {
-    super.initState();
-    // Future.delayed(const Duration(seconds: 1), () => _isBuildCalled = true);
-  }
-
-  @override
   void didChangeDependencies() {
-    _isBuildCalled = true;
     super.didChangeDependencies();
   }
 
-  @override
-  void showWaitView([String? message]) {
-    if (!_isBuildCalled) {
-      return;
+  //-----------------------------------------------------------------
+
+  Future _waitForMount() async {
+    int x = 0;
+    while (!mounted) {
+      await Future.delayed(Duration(milliseconds: 500));
+      x++;
+      if (x > 6) break;
     }
+  }
+
+  //-----------------------------------------------------------------
+
+  @override
+  void showWaitView([String? message]) async {
+    await _waitForMount();
 
     _screenUtils.showWaitView(message ?? defaultWaitViewMessage);
   }
@@ -67,10 +67,8 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     List<MessageDialogActionButton>? actions,
     bool allowOuterDismiss = true,
     Function(String?)? onDismiss,
-  }) {
-    if (!_isBuildCalled) {
-      return;
-    }
+  }) async {
+    await _waitForMount();
 
     _screenUtils.showMessage(
       message,
@@ -89,10 +87,8 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     String? title,
     Function()? onRetry,
     Function()? onDismiss,
-  }) {
-    if (!_isBuildCalled) {
-      return;
-    }
+  }) async {
+    await _waitForMount();
 
     _screenUtils.showErrorMessage(
       message,
@@ -101,6 +97,30 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
       onDismiss: onDismiss,
     );
   }
+
+  //-----------------------------------------------------------------
+
+  @override
+  void showOptionsDialog<T>({
+    required String title,
+    required List<T> options,
+    required T? selectedOption,
+    required void Function(T p1) onOptionSelected,
+    required void Function(bool? dissmissedByOk) onDismiss,
+    int? maxNumberOfDisplayedItems,
+  }) async {
+    await _waitForMount();
+
+    _screenUtils.showOptionsDialog(
+      title: title,
+      options: options,
+      selectedOption: selectedOption,
+      onOptionSelected: onOptionSelected,
+      onDismiss: onDismiss,
+    );
+  }
+
+  //-----------------------------------------------------------------
 
   @override
   void updateView() {

@@ -28,7 +28,7 @@ class MyWidgets {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(size/2),
-            color: strokeColor ?? Res.themes.colors.textOnPrimary.withAlpha(180),
+            color: strokeColor ?? Res.themes.colors.primaryVariant.withAlpha(180),
           ),
           clipBehavior: Clip.hardEdge,
           width: size,
@@ -38,7 +38,7 @@ class MyWidgets {
           margin: EdgeInsets.all(1),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(size/2),
-            color: Res.themes.colors.textOnPrimary,
+            color: Res.themes.colors.primaryVariant,
             //color: Res.themes.colors.red,
           ),
           clipBehavior: Clip.hardEdge,
@@ -60,7 +60,7 @@ class MyWidgets {
               color: Res.themes.colors.primary,
               size: size - 10,
             ),
-            errorPlaceHolderBackgroundColor: Res.themes.colors.textOnPrimary,
+            errorPlaceHolderBackgroundColor: Res.themes.colors.primaryVariant,
           ),
         ),
       ],

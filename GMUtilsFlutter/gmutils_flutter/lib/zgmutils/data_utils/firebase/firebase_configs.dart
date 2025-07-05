@@ -2,11 +2,11 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../../utils/date_op.dart';
 import '../../utils/logs.dart';
+import '../../utils/pairs.dart';
 import '../storages/general_storage.dart';
 
 abstract class IFirebaseConfigs {
-
-  Future<bool> fetch({required List<FirebaseConfigsHandler> handlers});
+  Future<Pair<bool, String?>> fetch({required List<FirebaseConfigsHandler> handlers});
 
   Future<DateTime?> get lastFetchTime;
 
@@ -17,62 +17,76 @@ class FirebaseConfigs extends IFirebaseConfigs {
   late final int minimumFetchIntervalInMinute;
   late final IStorage _storage;
 
-  FirebaseConfigs({int? minimumFetchIntervalInMinute, IStorage? customStorage,}) {
+  FirebaseConfigs({
+    int? minimumFetchIntervalInMinute,
+    IStorage? customStorage,
+  }) {
     this.minimumFetchIntervalInMinute = minimumFetchIntervalInMinute ?? 10;
     _storage = customStorage ?? GeneralStorage.o('firebase_configs');
   }
 
   @override
-  Future<bool> fetch({required List<FirebaseConfigsHandler> handlers}) async {
+  Future<Pair<bool, String?>> fetch({required List<FirebaseConfigsHandler> handlers}) async {
     assert(handlers.isNotEmpty);
 
     final rc = FirebaseRemoteConfig.instance;
 
-    rc.setConfigSettings(
-      RemoteConfigSettings(
-        fetchTimeout: const Duration(seconds: 30),
-        minimumFetchInterval: Duration(minutes: this.minimumFetchIntervalInMinute,),
+    rc.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: const Duration(seconds: 30),
+      minimumFetchInterval: Duration(
+        minutes: this.minimumFetchIntervalInMinute,
       ),
-    );
+    ));
 
     int tries = 0;
-    bool b = false;
+    bool success = false;
+    String? error;
 
     while (tries++ < 9) {
       try {
+        error = null;
         await rc.fetchAndActivate();
-        b = true;
+        success = true;
       } catch (e) {
-        Logs.print(() => 'FirebaseConfigs.fetch --> EXCEPTION [at try #$tries]: $e');
-        b = false;
+        success = false;
+        error = e.toString();
+
+        Logs.print(
+          () => 'FirebaseConfigs.fetch --> EXCEPTION [at try #$tries]: $e',
+        );
+
         await Future.delayed(const Duration(milliseconds: 300));
         //throw 'you must enable Remote Configuration from Firebase console .... $e';
       }
     }
 
-    if (!b) {
-      return false;
+    if (success) {
+      _saveLastFetchTime();
+
+      var configsMap = rc.getAll().map(
+            (key, value) => MapEntry(key, value.asString()),
+      );
+
+      Logs.print(
+            () => 'FirebaseConfigs/FirebaseRemoteConfig -> configsMap: $configsMap',
+      );
+
+      for (var handler in handlers) {
+        handler.handle(configsMap);
+      }
     }
 
-    _saveLastFetchTime();
-
-    var configsMap = rc.getAll().map(
-          (key, value) => MapEntry(key, value.asString()),
-    );
-
-    Logs.print(
-          () => 'FirebaseConfigs/FirebaseRemoteConfig -> configsMap: $configsMap',
-    );
-
-    for (var handler in handlers) {
-      handler.handle(configsMap);
-    }
-
-    return true;
+    return Pair(value1: success, value2: error);
   }
 
   void _saveLastFetchTime() {
-    _storage.save('last_fetch_time', DateOp().formatForDatabase(DateTime.now(), dateOnly: false,),);
+    _storage.save(
+      'last_fetch_time',
+      DateOp().formatForDatabase(
+        DateTime.now(),
+        dateOnly: false,
+      ),
+    );
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../gm_main.dart';
 import '../dialogs/message_dialog.dart';
+import '../dialogs/options_dialog.dart';
 import '../dialogs/wait_dialog.dart';
 import '../widgets/_root_widget.dart';
 
@@ -62,6 +63,8 @@ class ScreenUtils {
       }
     }
   }
+
+  //-----------------------------------------------------------------
 
   ///root widget must be MyRootWidget to let this method works
   void showQuickMessage(
@@ -132,5 +135,35 @@ class ScreenUtils {
 
     m.setOnDismiss(onDismiss == null ? null : (r) => onDismiss());
     m.show(() => App.context);
+  }
+
+  //-----------------------------------------------------------------
+
+  void showOptionsDialog<T>({
+    required String title,
+    required List<T> options,
+    required T? selectedOption,
+    required void Function(T p1) onOptionSelected,
+    required void Function(bool? dissmissedByOk) onDismiss,
+    int? maxNumberOfDisplayedItems,
+  }) {
+    OptionElement<T>? selectedOptionElement;
+
+    var optionsElements = options.map((o) {
+      var e = OptionElement<T>(o.toString(), o);
+      if (e.toString() == selectedOption.toString()) {
+        selectedOptionElement = e;
+      }
+      return e;
+    }).toList();
+
+    OptionsDialog(
+      title,
+      optionsElements,
+      selectedOption: selectedOptionElement,
+      optionSelectHandler: (choice) => onOptionSelected(choice.value),
+      maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
+      onDismiss: onDismiss,
+    ).show(() => App.context);
   }
 }
