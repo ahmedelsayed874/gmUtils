@@ -10,6 +10,7 @@ import 'data_utils/storages/app_preferences_storage.dart';
 import 'resources/app_colors.dart';
 import 'resources/app_measurement.dart';
 import 'resources/app_theme.dart';
+import 'ui/utils/screen_utils.dart';
 import 'utils/logs.dart';
 import 'utils/notifications.dart';
 
@@ -25,10 +26,11 @@ class GMMain {
     required AppColors Function(BuildContext context, bool isLight) appColors,
     required String? Function()? toolbarTitleFontFamily,
     required String? Function()? defaultFontFamily,
-    required Widget startScreen,
     required FcmRequirements? fcmRequirements,
     required NotificationsConfigurations? localNotificationsConfigurations,
     required OnInitialize? onInitialize,
+    required Widget startScreen,
+    CustomWaitViewController? customWaitViewController,
   }) async {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -48,6 +50,10 @@ class GMMain {
         fcmRequirements.fcmConfigurations,
       );
       fcmRequirements.onFcmInitialized?.call(FCM.instance);
+    }
+
+    if (customWaitViewController != null) {
+      ScreenUtils.waitViewController = customWaitViewController;
     }
 
     AppPreferencesStorage()

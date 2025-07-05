@@ -6,11 +6,25 @@ import '../dialogs/options_dialog.dart';
 import '../dialogs/wait_dialog.dart';
 import '../widgets/_root_widget.dart';
 
-Map<int, WaitDialog> _waitDialog = {};
+Map<int, Object> _waitDialog = {};
 Map<int, int> _waitDialogShowCount = {};
 Map<int, int> _waitDialogShowTime = {};
 
+class CustomWaitViewController {
+  Object Function(String message) onShow;
+  void Function(String message) onUpdate;
+  void Function() onDismiss;
+
+  CustomWaitViewController({
+    required this.onShow,
+    required this.onUpdate,
+    required this.onDismiss,
+  });
+}
+
 class ScreenUtils {
+  static CustomWaitViewController? waitViewController;
+
   const ScreenUtils();
 
   void showWaitView(String? message) {
@@ -24,15 +38,32 @@ class ScreenUtils {
 
     if (_waitDialogShowCount[hashCode] == 1) {
       _waitDialogShowTime[hashCode] = DateTime.now().millisecondsSinceEpoch;
-      _waitDialog[hashCode] =
-          WaitDialog.create.setMessage(message).show(() => App.context);
+
+      if (waitViewController == null) {
+        _waitDialog[hashCode] =
+            WaitDialog.create.setMessage(message).show(() => App.context);
+      }
+      //
+      else {
+        _waitDialog[hashCode] = waitViewController!.onShow.call(message);
+      }
+    }
+    //
+    else {
+      updateWaitViewMessage(message);
     }
   }
 
   bool get isWaitDialogShown => (_waitDialogShowCount[hashCode] ?? 0) > 0;
 
   void updateWaitViewMessage(String msg) {
-    _waitDialog[hashCode]?.setMessage(msg);
+    if (waitViewController == null) {
+      (_waitDialog[hashCode] as WaitDialog?)?.setMessage(msg);
+    }
+    //
+    else {
+      waitViewController!.onUpdate(msg);
+    }
   }
 
   Future<void> hideWaitView({bool forceHide = true}) async {
@@ -48,7 +79,17 @@ class ScreenUtils {
       dismiss() {
         _waitDialogShowCount.remove(hashCode);
         _waitDialogShowTime.remove(hashCode);
-        _waitDialog[hashCode]?.dismiss();
+
+        //
+        if (waitViewController == null) {
+          (_waitDialog[hashCode] as WaitDialog?)?.dismiss();
+        }
+        //
+        else {
+          waitViewController!.onDismiss();
+        }
+
+        //
         _waitDialog.remove(hashCode);
       }
 

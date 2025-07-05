@@ -8,14 +8,24 @@ class WaitDialog {
   static WaitDialog get create => WaitDialog();
 
   BuildContext Function()? _context;
+  _WaitDialogBody? _waitDialogBody;
   String _message = '';
   bool _shown = false;
   bool _dismissed = false;
 
+  //------------------------------------------------
+
+  String get message => _message;
+
+  bool get isShown => _shown;
+
   WaitDialog setMessage(String message) {
     _message = message;
+    _waitDialogBody?.updateMessage(message);
     return this;
   }
+
+  //------------------------------------------------
 
   int _tries = 3;
 
@@ -25,22 +35,24 @@ class WaitDialog {
     _context = context;
 
     retryShow() => Future.delayed(
-      Duration(
-        milliseconds: _tries > 2 ? 500 : (_tries > 1 ? 800 : 1300),
-      ),
+          Duration(
+            milliseconds: _tries > 2 ? 500 : (_tries > 1 ? 800 : 1300),
+          ),
           () {
-        if (_tries-- == 0) {
-          _context = null;
-          return;
-        }
+            if (_tries-- == 0) {
+              _dispose();
+              return;
+            }
 
-        if (!_dismissed && _context != null) {
-          show(_context!, delayMs: delayMs);
-        } else {
-          _context = null;
-        }
-      },
-    );
+            if (!_dismissed && _context != null) {
+              show(_context!, delayMs: delayMs);
+            }
+            //
+            else {
+              _dispose();
+            }
+          },
+        );
 
     if (delayMs == null) {
       try {
@@ -49,7 +61,9 @@ class WaitDialog {
         Logs.print(() => "WaitDialog.show>> EXCEPTION: $e");
         retryShow();
       }
-    } else {
+    }
+    //
+    else {
       Future.delayed(Duration(milliseconds: delayMs), () {
         if (!_dismissed && _context != null) {
           try {
@@ -58,8 +72,10 @@ class WaitDialog {
             Logs.print(() => "WaitDialog.show>> EXCEPTION: $e");
             retryShow();
           }
-        } else {
-          _context = null;
+        }
+        //
+        else {
+          _dispose();
         }
       });
     }
@@ -79,38 +95,13 @@ class WaitDialog {
     showDialog(
       context: context(),
       builder: (context) {
-        return Material(
-          type: MaterialType.transparency,
-          child: Center(
-            child: Row(
-              children: [
-                const Expanded(child: SizedBox()),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  color: AppTheme.appColors?.background ?? Colors.white,
-                  child: Row(
-                    children: [
-                      const SizedBox(
-                        child: CircularProgressIndicator(),
-                        width: 25,
-                        height: 25,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        _message,
-                        style: AppTheme.defaultTextStyle(),
-                      ),
-                    ],
-                  ),
-                ),
-                const Expanded(child: const SizedBox()),
-              ],
-            ),
-          ),
-        );
+        _waitDialogBody ??= _WaitDialogBody(message: message);
+        return _waitDialogBody!;
       },
       routeSettings: routeSettings,
-    ).then((value) => _context = null);
+    ).then((value) {
+      _dispose();
+    });
 
     _shown = true;
 
@@ -119,10 +110,97 @@ class WaitDialog {
 
   void dismiss() {
     _dismissed = true;
+
     if (_context != null) {
       if (_shown) {
         Navigator.pop(_context!());
       }
+      //
+      else {
+        _dispose();
+      }
     }
+    //
+    else {
+      _dispose();
+    }
+  }
+
+  void _dispose() {
+    _context = null;
+    _waitDialogBody = null;
+  }
+}
+
+class _WaitDialogBody extends StatefulWidget {
+  final String message;
+
+  const _WaitDialogBody({
+    required this.message,
+    super.key,
+  });
+
+  @override
+  State<_WaitDialogBody> createState() => _WaitDialogBodyState();
+
+  void updateMessage(String message) {
+    _WaitDialogBodyState.updateMessage(message);
+  }
+}
+
+class _WaitDialogBodyState extends State<_WaitDialogBody> {
+  static _WaitDialogBodyState? _state;
+
+  static void updateMessage(String message) {
+    _state?.message = message;
+    _state?.setState(() {});
+  }
+
+  late String message;
+
+  @override
+  void initState() {
+    _state = this;
+    super.initState();
+    message = widget.message;
+  }
+
+  @override
+  void dispose() {
+    _state = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Center(
+        child: Row(
+          children: [
+            const Expanded(child: SizedBox()),
+            Container(
+              padding: const EdgeInsets.all(10),
+              color: AppTheme.appColors?.background ?? Colors.white,
+              child: Row(
+                children: [
+                  const SizedBox(
+                    child: CircularProgressIndicator(),
+                    width: 25,
+                    height: 25,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    message,
+                    style: AppTheme.defaultTextStyle(),
+                  ),
+                ],
+              ),
+            ),
+            const Expanded(child: const SizedBox()),
+          ],
+        ),
+      ),
+    );
   }
 }
