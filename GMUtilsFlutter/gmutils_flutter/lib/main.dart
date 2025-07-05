@@ -58,7 +58,6 @@ void main() {
     },
     toolbarTitleFontFamily: () => Res.themes.fonts.toolbarTitle,
     defaultFontFamily: () => Res.themes.fonts.cairo,
-    startScreen: const SplashScreen(),
     localNotificationsConfigurations: null,
     fcmRequirements: FcmRequirements(
       fcmConfigurations: FCMConfigurations(
@@ -129,6 +128,8 @@ void main() {
       //AppInfoStorage().saveFirstAppLaunchDateTimeIfMissed();
       Logs.print(() => "main.initializing completed");
     },
+    startScreen: const SplashScreen(),
+    customWaitViewController: null,
   );
 }
 

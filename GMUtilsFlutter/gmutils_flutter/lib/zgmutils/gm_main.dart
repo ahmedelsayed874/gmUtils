@@ -30,7 +30,7 @@ class GMMain {
     required NotificationsConfigurations? localNotificationsConfigurations,
     required OnInitialize? onInitialize,
     required Widget startScreen,
-    CustomWaitViewController? customWaitViewController,
+    required CustomWaitViewController? customWaitViewController,
   }) async {
     WidgetsFlutterBinding.ensureInitialized();
 
