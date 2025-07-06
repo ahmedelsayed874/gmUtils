@@ -12,8 +12,8 @@ Map<int, int> _waitDialogShowTime = {};
 
 class CustomWaitViewController {
   Object Function(String message) onShow;
-  void Function(String message) onUpdate;
-  void Function() onDismiss;
+  void Function(Object waitView, String message) onUpdate;
+  void Function(Object waitView) onDismiss;
 
   CustomWaitViewController({
     required this.onShow,
@@ -62,7 +62,7 @@ class ScreenUtils {
     }
     //
     else {
-      waitViewController!.onUpdate(msg);
+      waitViewController!.onUpdate(_waitDialog[hashCode]!, msg);
     }
   }
 
@@ -86,7 +86,7 @@ class ScreenUtils {
         }
         //
         else {
-          waitViewController!.onDismiss();
+          waitViewController!.onDismiss(_waitDialog[hashCode]!);
         }
 
         //
