@@ -2,10 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import "package:googleapis_auth/auth_io.dart";
-import 'package:googleapis_auth/googleapis_auth.dart' as googleAuth;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 
@@ -15,6 +12,7 @@ import '../../../zgmutils/utils/notifications.dart';
 import '../../utils/logs.dart';
 import '../../utils/result.dart';
 import '../../utils/string_set.dart';
+import 'fcm_extension.dart';
 
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/
@@ -484,48 +482,8 @@ class FCM extends IFCM {
 
   ///https://pub.dev/packages/googleapis_auth
   ///googleapis_auth: ^1.6.0
-  Future<Result<String>> _getAccessToken() async {
-    const MESSAGING_SCOPE =
-        "https://www.googleapis.com/auth/firebase.messaging";
-    final List<String> scopes = [MESSAGING_SCOPE];
-
-    var path = fcmConfigurations
-        ?.sendFcmMessageParameters?.firebaseServiceAccountFilePathInAssets;
-    if (path?.isNotEmpty != true) {
-      return Result(
-        null,
-        message: StringSet('Path to Service Account File is missing'),
-      );
-    }
-
-    var bytes = await rootBundle.load(path!);
-    var json = String.fromCharCodes(bytes.buffer.asInt8List());
-
-    ServiceAccountCredentials accountCredentials;
-    try {
-      accountCredentials = googleAuth.ServiceAccountCredentials.fromJson(json);
-    } catch (e) {
-      //return Result(null, message: StringSet('Creating ServiceAccountCredentials from json failed$e'),);
-      rethrow;
-    }
-
-    AccessCredentials? credentials;
-    StringSet? exception;
-
-    var client = http.Client();
-    try {
-      credentials = await obtainAccessCredentialsViaServiceAccount(
-        accountCredentials,
-        scopes,
-        client,
-      );
-    } catch (e) {
-      exception = StringSet('$e');
-    }
-
-    client.close();
-
-    return Result(credentials?.accessToken.data, message: exception);
+  Future<Result<String>> _getAccessToken() {
+    return FCM_Extension().getAccessToken(fcmConfigurations: fcmConfigurations);
   }
 
   Map<String, dynamic> _buildRequestData({
