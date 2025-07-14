@@ -1,4 +1,3 @@
-
 import 'dart:math';
 
 import '../../resources/_resources.dart';
@@ -59,14 +58,20 @@ class Calculations {
     required String birthday,
     bool short = false,
   }) {
-    return _calculateAgeAsString(age: calculateAge(birthday: birthday), short: short,);
+    return _calculateAgeAsString(
+      age: calculateAge(birthday: birthday),
+      short: short,
+    );
   }
 
   String calculateAgeAsString2({
     required DateTime birthday,
     bool short = false,
   }) {
-    return _calculateAgeAsString(age: calculateAge2(birthday: birthday), short: short,);
+    return _calculateAgeAsString(
+      age: calculateAge2(birthday: birthday),
+      short: short,
+    );
   }
 
   String _calculateAgeAsString({required double age, bool short = false}) {
@@ -110,11 +115,16 @@ class Calculations {
 
   //----------------------------------------------------------------------------
 
-  double calculateDistanceBetweenPoints(double lat1, double  lon1, double  lat2, double lon2,){
+  double calculateDistanceBetweenPoints({
+    required double lat1,
+    required double lng1,
+    required double lat2,
+    required double lng2,
+  }) {
     var p = 0.017453292519943295;
-    var a = 0.5 - cos((lat2 - lat1) * p)/2 +
-        cos(lat1 * p) * cos(lat2 * p) *
-            (1 - cos((lon2 - lon1) * p))/2;
+    var a = 0.5 -
+        cos((lat2 - lat1) * p) / 2 +
+        cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lng2 - lng1) * p)) / 2;
     return 12742 * asin(sqrt(a));
   }
 
@@ -129,5 +139,4 @@ class Calculations {
     var pixels = pointCount; //* onePointPexils
     return pixels.toInt();
   }
-
 }
