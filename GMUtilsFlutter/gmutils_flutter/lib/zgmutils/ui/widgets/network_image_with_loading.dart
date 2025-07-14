@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../gm_main.dart';
+import '../../utils/logs.dart';
 import 'image_viewer_screen.dart';
 
 class NetworkImageWithLoading extends StatelessWidget {
@@ -21,16 +22,10 @@ class NetworkImageWithLoading extends StatelessWidget {
   final Color? errorPlaceHolderBackgroundColor;
   final int? errorPlaceHolderSize;
   final BoxFit? fit;
-  final void Function(NetworkImageWithLoading)? onLoadComplete;
+  final void Function(bool success, ImageMetaData?)? onLoadComplete;
   final bool enableCaching;
 
   //---------------------
-
-  int? imageWidth;
-  int? imageHeight;
-  bool isLoadingCompleted = false;
-
-  File? cachedFile;
 
   NetworkImageWithLoading({
     required this.imgUrl,
@@ -47,10 +42,13 @@ class NetworkImageWithLoading extends StatelessWidget {
     this.fit,
     this.onLoadComplete,
     this.enableCaching = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
+  int? _imageWidth;
+  File? _cachedFile;
   static String? _cacheDirPath;
+  bool _onLoadInvoked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -63,56 +61,63 @@ class NetworkImageWithLoading extends StatelessWidget {
               width: desiredImageWidth,
               height: desiredImageHeight,
             );
-          } else {
+          }
+          //
+          else {
             _cacheDirPath = s.data!.path;
-            return build2(context, _cacheDirPath!);
+            return _build2(context, _cacheDirPath!);
           }
         },
       );
-    } else {
-      return build2(context, _cacheDirPath);
+    }
+    //
+    else {
+      return _build2(context, _cacheDirPath);
     }
   }
 
-  Widget build2(BuildContext context, String? cacheDirPath) {
+  Widget _build2(BuildContext context, String? cacheDirPath) {
     if (enableCaching && imgUrl != null) {
-      if (cachedFile == null && cacheDirPath != null) {
+      if (_cachedFile == null && cacheDirPath != null) {
         var fileName = imgUrl!
             .replaceAll('://', '')
             .replaceAll('.', '-')
             .replaceAll('/', '-');
 
-        cachedFile = File('$cacheDirPath/$fileName');
+        _cachedFile = File('$cacheDirPath/$fileName');
       }
 
       var cache = _getCachedImage(imgUrl!);
 
       if (cache != null) {
-        return loadImageFromCachedMemory(cache);
+        return _loadImageFromCachedMemory(cache);
       }
       //
-      else if (cachedFile?.existsSync() == true) {
-        return loadImageFromCachedFile();
+      else if (_cachedFile?.existsSync() == true) {
+        return _loadImageFromCachedFile();
       }
       //
       else {
-        return loadImageFromWeb();
+        return _loadImageFromWeb();
       }
     }
     //
     else {
-      return loadImageFromWeb();
+      return _loadImageFromWeb();
     }
   }
 
-  Widget loadImageFromCachedMemory(_CachedImage cache) {
-    //Logs.print(() => 'NetworkImageWithLoading.loadImageFromCachedMemory --> url: $imgUrl}');
+  Widget _loadImageFromCachedMemory(_CachedImage cache) {
+    Logs.print(() =>
+        'NetworkImageWithLoading._loadImageFromCachedMemory(cache: ${cache.name})');
+
+    _onLoadInvoked = false;
+
     return GestureDetector(
       onTap: imgUrl == null
           ? null
           : () {
               if (allowEnlargeOnClick) {
-                //Logs.print(() => imgUrl);
                 ImageViewerScreen.showFromUrl(
                   toolbarTitle: toolbarTitle,
                   photoUrl: imgUrl!,
@@ -127,11 +132,21 @@ class NetworkImageWithLoading extends StatelessWidget {
         cache.imageBytes,
         width: desiredImageWidth,
         height: desiredImageHeight,
+        frameBuilder: (context, child, int? frame, wasSynchronouslyLoaded) {
+          /*Log s.print(() =>
+              'NetworkImageWithLoading._loadImageFromCachedMemory.ON_SUCCESS');*/
+
+          _invokeOnLoadComplete(true, null);
+
+          return child;
+        },
         errorBuilder: (context, error, stackTrace) {
-          if (cachedFile?.existsSync() == true) {
-            return loadImageFromCachedFile();
-          } else {
-            return loadImageFromWeb();
+          if (_cachedFile?.existsSync() == true) {
+            return _loadImageFromCachedFile();
+          }
+          //
+          else {
+            return _loadImageFromWeb();
           }
         },
         fit: fit,
@@ -139,10 +154,13 @@ class NetworkImageWithLoading extends StatelessWidget {
     );
   }
 
-  Widget loadImageFromCachedFile() {
-    //Logs.print(() => 'NetworkImageWithLoading.loadImageFromCachedFile --> url: $imgUrl}');
+  Widget _loadImageFromCachedFile() {
+    Logs.print(() =>
+        'NetworkImageWithLoading._loadImageFromCachedFile(_cachedFile: ${_cachedFile?.path}');
 
-    Uint8List imgBytes = cachedFile!.readAsBytesSync();
+    _onLoadInvoked = false;
+
+    Uint8List imgBytes = _cachedFile!.readAsBytesSync();
     if (imgUrl != null) {
       _appendCachedImage(_CachedImage(name: imgUrl!, imageBytes: imgBytes));
     }
@@ -152,7 +170,6 @@ class NetworkImageWithLoading extends StatelessWidget {
           ? null
           : () {
               if (allowEnlargeOnClick) {
-                //Logs.print(() => 'NetworkImageWithLoading.loadImageFromCachedFile.enlarge --> $imgUrl');
                 ImageViewerScreen.showFromUrl(
                   toolbarTitle: toolbarTitle,
                   photoUrl: imgUrl!,
@@ -167,16 +184,27 @@ class NetworkImageWithLoading extends StatelessWidget {
         imgBytes,
         width: desiredImageWidth,
         height: desiredImageHeight,
+        frameBuilder: (context, child, int? frame, wasSynchronouslyLoaded) {
+          /*Log s.print(() =>
+              'NetworkImageWithLoading._loadImageFromCachedFile.ON_SUCCESS');*/
+
+          _invokeOnLoadComplete(true, null);
+
+          return child;
+        },
         errorBuilder: (context, error, stackTrace) {
-          return loadImageFromWeb();
+          return _loadImageFromWeb();
         },
         fit: fit,
       ),
     );
   }
 
-  Widget loadImageFromWeb() {
-    //Logs.print(() => 'NetworkImageWithLoading.loadImageFromWeb --> url: $imgUrl}');
+  Widget _loadImageFromWeb() {
+    Logs.print(
+        () => 'NetworkImageWithLoading._loadImageFromWeb(imgUrl: $imgUrl)');
+
+    _onLoadInvoked = false;
 
     var errorWidget = Center(
       child: Container(
@@ -186,9 +214,9 @@ class NetworkImageWithLoading extends StatelessWidget {
         child: onClick == null
             ? errorPlaceHolder
             : GestureDetector(
-          onTap: () => onClick?.call(imgUrl ?? ''),
-          child: errorPlaceHolder,
-        ),
+                onTap: () => onClick?.call(imgUrl ?? ''),
+                child: errorPlaceHolder,
+              ),
       ),
     );
     var lnk = imgUrl ?? '';
@@ -199,7 +227,7 @@ class NetworkImageWithLoading extends StatelessWidget {
       width: desiredImageWidth,
       height: desiredImageHeight,
       loadingBuilder: (ctx, child, loadingProgress) {
-        /*//Logs.print(() => 'NetworkImageWithLoading -> Image -> loadingBuilder[ '
+        /*Log s.print(() => 'NetworkImageWithLoading -> Image -> loadingBuilder[ '
             'imgUrl: $imgUrl, '
             'child: $child, '
             'progress: ['
@@ -212,7 +240,6 @@ class NetworkImageWithLoading extends StatelessWidget {
         if (allowEnlargeOnClick) {
           widget = GestureDetector(
             onTap: () {
-              //Logs.print(() => imgUrl);
               ImageViewerScreen.showFromUrl(
                 toolbarTitle: toolbarTitle,
                 photoUrl: imgUrl ?? '',
@@ -266,6 +293,10 @@ class NetworkImageWithLoading extends StatelessWidget {
         }
       },
       errorBuilder: (context, error, stackTrace) {
+        /*Log s.print(() => 'NetworkImageWithLoading._loadImageFromWeb -> ERROR ->'
+            'loading image failed for: $imgUrl');*/
+
+        _invokeOnLoadComplete(false, null);
         return errorWidget;
       },
       fit: fit,
@@ -273,17 +304,23 @@ class NetworkImageWithLoading extends StatelessWidget {
 
     image.image.resolve(const ImageConfiguration()).addListener(
       ImageStreamListener((image, synchronousCall) async {
-        var update = imageWidth == null;
+        //var imgW = _imageWidth;
+        var update = _imageWidth == null;
 
-        imageWidth = image.image.width;
-        imageHeight = image.image.height;
+        /*Log s.print(() => 'NetworkImageWithLoading._loadImageFromWeb -> '
+            'ImageStreamListener -> '
+            'imageWidth: ${imgW} ---> '
+            'update: $update');*/
 
         if (update) {
-          isLoadingCompleted = true;
           if (onLoadComplete != null) {
-            Future.delayed(const Duration(milliseconds: 200), () {
-              onLoadComplete?.call(this);
-            });
+            var imageMetaData = ImageMetaData(
+              imgUrl: imgUrl ?? '',
+              imageWidth: image.image.width,
+              imageHeight: image.image.height,
+              cachedFile: _cachedFile,
+            );
+            _invokeOnLoadComplete(true, imageMetaData);
           }
         }
 
@@ -291,11 +328,11 @@ class NetworkImageWithLoading extends StatelessWidget {
           var b = await image.image.toByteData(format: ImageByteFormat.png);
           if (b != null) {
             var imgBytes = b.buffer.asUint8List();
-            if (cachedFile?.existsSync() == true) {
-              cachedFile?.deleteSync();
+            if (_cachedFile?.existsSync() == true) {
+              _cachedFile?.deleteSync();
             }
-            cachedFile?.createSync();
-            cachedFile?.writeAsBytesSync(imgBytes);
+            _cachedFile?.createSync();
+            _cachedFile?.writeAsBytesSync(imgBytes);
 
             _appendCachedImage(
               _CachedImage(name: imgUrl!, imageBytes: imgBytes),
@@ -308,6 +345,26 @@ class NetworkImageWithLoading extends StatelessWidget {
     return image;
   }
 
+  void _invokeOnLoadComplete(bool success, ImageMetaData? meta) {
+    Logs.print(
+      () => 'NetworkImageWithLoading'
+          '._invokeOnLoadComplete(success: $success) .... '
+          'was invoked? $_onLoadInvoked}',
+    );
+
+    if (_onLoadInvoked) return;
+    _onLoadInvoked = true;
+
+    if (onLoadComplete == null) return;
+
+    Future.delayed(Duration(milliseconds: 300), () {
+      try {
+        onLoadComplete?.call(success, meta);
+      } catch (e1) {
+        _invokeOnLoadComplete(success, meta);
+      }
+    });
+  }
 }
 
 //==============================================================================
@@ -364,4 +421,27 @@ Map<String, int> get _cachedImagesIndexes {
     App.globalVariables['NetworkImageWithLoading.cachedImages.indexes'] = map;
   }
   return map;
+}
+
+//==============================================================================
+
+class ImageMetaData {
+  final String imgUrl;
+
+  final int imageWidth;
+  final int imageHeight;
+
+  final File? cachedFile;
+
+  ImageMetaData({
+    required this.imgUrl,
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.cachedFile,
+  });
+
+  @override
+  String toString() {
+    return 'ImageMetaData{imgUrl: $imgUrl, imageWidth: $imageWidth, imageHeight: $imageHeight, _cachedFile: $cachedFile}';
+  }
 }
