@@ -160,6 +160,7 @@ class ScreenUtils {
     var m = MessageDialog.create
         .setTitle(title)
         .setMessage(message)
+        .setEnableSelect(true)
         .setEnableOuterDismiss(false);
 
     if (onRetry != null) {
