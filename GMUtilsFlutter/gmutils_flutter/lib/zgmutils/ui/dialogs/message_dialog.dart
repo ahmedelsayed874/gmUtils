@@ -4,6 +4,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import '../../resources/app_theme.dart';
 import '../../utils/launcher.dart';
 import '../../utils/logs.dart';
+import '../widgets/my_linkify.dart';
 
 class MessageDialog {
   static MessageDialog get create => MessageDialog();
@@ -128,33 +129,11 @@ class MessageDialog {
 
     Widget textWidget;
     if (_enableLinks) {
-      if (_enableSelect) {
-        textWidget = SelectableLinkify(
-          onOpen: (link) {
-            if (link is EmailLinkifier) {
-              Launcher().sendEmail(link.url, '', '');
-            } else {
-              Launcher().openUrl(link.url);
-            }
-          },
+      textWidget = MyLinkify(
           text: _message,
-          options: const LinkifyOptions(humanize: false),
-          style: AppTheme.defaultTextStyle(),
-        );
-      } else {
-        textWidget = Linkify(
-          onOpen: (link) {
-            if (link is EmailLinkifier) {
-              Launcher().sendEmail(link.url, '', '');
-            } else {
-              Launcher().openUrl(link.url);
-            }
-          },
-          text: _message,
-          options: const LinkifyOptions(humanize: false),
-          style: AppTheme.defaultTextStyle(),
-        );
-      }
+        enableSelect: _enableSelect,
+        options: _enableSelect ? null : const LinkifyOptions(humanize: false),
+      );
     } else {
       if (_enableSelect) {
         textWidget = SelectableText(
