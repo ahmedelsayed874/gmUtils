@@ -46,6 +46,49 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
 
   ResponseMapper(this.dataMapper);
 
+  Response<DT> from(value) {
+    if (value is Map) {
+      return fromMap(value as Map<String, dynamic>);
+    }
+    //
+    else if (value is List) {
+      List? data;
+
+      if (value.isNotEmpty) {
+        data = [];
+
+        for (var i in value) {
+          if (i is Map<String, dynamic>) {
+            var x = dataMapper.fromMap(i);
+            data.add(x);
+          }
+          //
+          else {
+            data.add(i);
+          }
+        }
+      }
+
+      return Response._(
+        url: null,
+        data: data as DT?,
+        error: null,
+        httpCode: null,
+        responseHeader: null,
+      );
+    }
+    //
+    else {
+      return Response._(
+        url: null,
+        data: value,
+        error: null,
+        httpCode: null,
+        responseHeader: null,
+      );
+    }
+  }
+
   @override
   Response<DT> fromMap(Map<String, dynamic> values) {
     final data = dataMapper.fromMap(values);

@@ -47,7 +47,9 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
     required int accountId,
     required String fcmToken,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'updateFcmToken(accountId: $accountId, fcmToken: $fcmToken)',
       responseData: () {
         if (Random().nextInt(100) > 97) {
@@ -67,7 +69,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   @override
@@ -75,7 +77,9 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
     required int accountId,
     required String fcmToken,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'deleteFcmToken(accountId: $accountId, fcmToken: $fcmToken)',
       responseData: () {
         if (Random().nextInt(100) > 97) {
@@ -95,7 +99,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
 //------------------------------------------------------------------------------
@@ -106,7 +110,9 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
     required int pageNumber,
     required int pageSize,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'getNotifications(accountId: $accountId, pageNumber: $pageNumber, pageSize: $pageSize)',
       responseData: () {
@@ -127,7 +133,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   @override
@@ -136,7 +142,8 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
     required int notificationId,
     required String relatedObjectName,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'markNotificationAsRead('
           'accountId: $accountId, '
           'notificationId: $notificationId, '
@@ -160,7 +167,7 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
 //------------------------------------------------------------------------------
@@ -169,42 +176,43 @@ class NotificationsDataSourceMockup extends NotificationsDataSource {
   Future<Response<NotificationsCount>> doGetNotificationsCount({
     required int accountId,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
-      apiName: 'getTeacherNotificationsCount(accountId: $accountId)',
-      responseData: () {
-        if (Random().nextInt(100) > 97) {
-          return Pair(
-              value1: Result(
-                null,
-                message: StringSet('Any Error', 'أي خطأ'),
-              ),
-              value2: null);
-        } else {
-          var notifications = _notifications;
-
-          return Pair(
-              value1: Result(
-                NotificationsCount(
-                  allNotificationsCount: notifications.length,
-                  unreadMailsCount: notifications
-                      .where((element) =>
-                          !element.isRead &&
-                          element.relatedObjectName == Notification.relatedObjectName_Mail)
-                      .length,
-                  unreadChatMessagesCount: notifications
-                      .where((element) =>
-                          !element.isRead &&
-                          element.relatedObjectName ==
-                              Notification.relatedObjectName_Chat)
-                      .length,
-                ),
-              ),
-              value2: NotificationsCountMapper());
-        }
-      },
-    );
-
-    return Response.fromDummyResponse(response);
+    return Response.failed();
+    // var response = await WebRequestExecutor().createDummyResponse(
+    //   apiName: 'getTeacherNotificationsCount(accountId: $accountId)',
+    //   responseData: () {
+    //     if (Random().nextInt(100) > 97) {
+    //       return Pair(
+    //           value1: Result(
+    //             null,
+    //             message: StringSet('Any Error', 'أي خطأ'),
+    //           ),
+    //           value2: null);
+    //     } else {
+    //       var notifications = _notifications;
+    //
+    //       return Pair(
+    //           value1: Result(
+    //             NotificationsCount(
+    //               allNotificationsCount: notifications.length,
+    //               unreadMailsCount: notifications
+    //                   .where((element) =>
+    //                       !element.isRead &&
+    //                       element.relatedObjectName == Notification.relatedObjectName_Mail)
+    //                   .length,
+    //               unreadChatMessagesCount: notifications
+    //                   .where((element) =>
+    //                       !element.isRead &&
+    //                       element.relatedObjectName ==
+    //                           Notification.relatedObjectName_Chat)
+    //                   .length,
+    //             ),
+    //           ),
+    //           value2: NotificationsCountMapper());
+    //     }
+    //   },
+    // );
+    //
+    // return Response.fromDummyResponse(response);
   }
 
 }

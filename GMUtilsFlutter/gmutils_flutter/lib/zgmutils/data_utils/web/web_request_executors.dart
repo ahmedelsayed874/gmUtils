@@ -8,6 +8,7 @@ import '../../utils/logs.dart';
 import '../../utils/mappable.dart';
 import '../../utils/pairs.dart';
 import '../../utils/result.dart';
+import '../../utils/string_set.dart';
 import 'response.dart';
 import 'web_url.dart';
 
@@ -169,25 +170,33 @@ class WebRequestExecutor {
     if (fileBytesLength is int) {
       if (fileBytesLength == 0) {
         Logs.print(() => [
-          'API::Response',
-          'url: ${url.uri}',
-          '\n',
-          '<[File size is zero]>',
-        ]);
-        return Response.failed(url: url, error: 'File size is zero', httpCode: -1,);
+              'API::Response',
+              'url: ${url.uri}',
+              '\n',
+              '<[File size is zero]>',
+            ]);
+        return Response.failed(
+          url: url,
+          error: 'File size is zero',
+          httpCode: -1,
+        );
       }
     }
     //
     else {
       Logs.print(() => [
-        'API::Response',
-        'url: ${url.uri}',
-        '\n',
-        '<[File size is unknown]>',
-        '\n',
-        '<[ERROR: $fileBytesLength]>',
-      ]);
-      return Response.failed(url: url, error: 'File size is unknown', httpCode: -1,);
+            'API::Response',
+            'url: ${url.uri}',
+            '\n',
+            '<[File size is unknown]>',
+            '\n',
+            '<[ERROR: $fileBytesLength]>',
+          ]);
+      return Response.failed(
+        url: url,
+        error: 'File size is unknown',
+        httpCode: -1,
+      );
     }
 
     return _executeWithTries(
@@ -420,7 +429,7 @@ class WebRequestExecutor {
 
   Future<Response<Result<DT>>> createDummyResponse<DT>({
     required String apiName,
-    required Pair<Result<DT>, Mappable?> Function() responseData,
+    required DummyResponseBuilder<DT> Function() responseBuilder,
     int delayInSeconds = 1,
   }) async {
     Logs.print(() => 'API-Dummy-Request:: http://$apiName');
@@ -447,65 +456,82 @@ class WebRequestExecutor {
     }
     //
     else {
-      DT? data;
+      Result<DT>? data;
       String? error;
 
-      var resultAndMapper = responseData();
-      if (resultAndMapper.value1.result != null) {
-        if (resultAndMapper.value2 == null)
-          throw 'set mapper class if data is exist';
+      var resBldr = responseBuilder();
+      if (resBldr.result == null && resBldr.message == null) {
+        data = Result(null);
+      }
+      //
+      else if (resBldr.result != null) {
+        if (resBldr.result is List) {
+          assert(
+            resBldr.dataMappable != null,
+            'set mapper class if data is exist',
+          );
 
-        if (resultAndMapper.value1.result is List) {
           List<Map<String, dynamic>>? map;
+
           try {
-            map = resultAndMapper.value2!.toMapList(
-              resultAndMapper.value1.result as List,
+            map = resBldr.dataMappable!.toMapList(
+              resBldr.result as List,
             );
           } catch (e) {
             error = 'Error in toMapList() in '
-                '${resultAndMapper.value2!.runtimeType} class for '
-                'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
+                '${resBldr.dataMappable!.runtimeType} class for '
+                'data class ${resBldr.result.runtimeType}.... details: $e';
+          }
+
+          if (error == null) {
+            try {
+              data = Result(resBldr.dataMappable!.fromMapList(map) as DT?);
+            } catch (e) {
+              error = 'Error in fromMapList() in '
+                  '${resBldr.dataMappable!.runtimeType} class for '
+                  'data class ${resBldr.result.runtimeType}.... details: $e';
+            }
+          }
+        }
+        //
+        else if (resBldr.result is Map) {
+          assert(
+            resBldr.dataMappable != null,
+            'set mapper class if data is exist',
+          );
+
+          Map<String, dynamic>? map;
+          try {
+            map = resBldr.dataMappable!.toMap(resBldr.result);
+          } catch (e) {
+            error = 'Error in toMap() in '
+                '${resBldr.dataMappable!.runtimeType} class for '
+                'data class ${resBldr.result.runtimeType}.... details: $e';
           }
           if (error == null) {
             try {
-              data = resultAndMapper.value2!.fromMapList(map) as DT?;
+              data = resBldr.dataMappable!.fromMap(map!);
             } catch (e) {
-              error = 'Error in fromMapList() in '
-                  '${resultAndMapper.value2!.runtimeType} class for '
-                  'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
+              error = 'Error in fromMap() in '
+                  '${resBldr.dataMappable!.runtimeType} class for '
+                  'data class ${resBldr.result.runtimeType}.... details: $e';
             }
           }
         }
         //
         else {
-          Map<String, dynamic>? map;
-          try {
-            map = resultAndMapper.value2!.toMap(resultAndMapper.value1.result);
-          } catch (e) {
-            error = 'Error in toMap() in '
-                '${resultAndMapper.value2!.runtimeType} class for '
-                'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
-          }
-          if (error == null) {
-            try {
-              data = resultAndMapper.value2!.fromMap(map!);
-            } catch (e) {
-              error = 'Error in fromMap() in '
-                  '${resultAndMapper.value2!.runtimeType} class for '
-                  'data class ${resultAndMapper.value1.result.runtimeType}.... details: $e';
-            }
-          }
+          data = Result(resBldr.result);
         }
       }
       //
       else {
-        error = resultAndMapper.value1.message?.en;
+        error = resBldr.message?.en;
       }
 
       if (data != null) {
         response = Response.success(
           url: null,
-          data: Result(data),
+          data: data,
         );
       }
       //
@@ -513,7 +539,7 @@ class WebRequestExecutor {
         response = Response.failed(
           url: null,
           error: error,
-          httpCode: 200,
+          httpCode: 400,
         );
       }
     }
@@ -595,4 +621,17 @@ void _removeExpiredCaches() async {
   for (var k in keys) {
     _cacheStorage.remove(k);
   }
+}
+
+//==============================================================================
+
+class DummyResponseBuilder<D> extends Result<D> {
+  final Mappable? dataMappable;
+
+  DummyResponseBuilder({
+    required this.dataMappable,
+    required D? data,
+    required StringSet? error,
+    super.extra,
+  }) : super(data, message: error);
 }

@@ -199,7 +199,7 @@ class _NotificationsScreenState extends BaseState<NotificationsScreen>
                               notification.createdAt,
                               en: App.isEnglish,
                               dateOnly: false,
-                            ),
+                            )!,
                             style: Res.themes.defaultTextStyle(
                               textSize: 13,
                               textColor: Res.themes.colors.hint,

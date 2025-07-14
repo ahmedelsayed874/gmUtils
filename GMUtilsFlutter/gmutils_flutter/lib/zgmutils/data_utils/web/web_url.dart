@@ -58,7 +58,6 @@ abstract class Url<RDT> {
   Response<RDT> encodeResponse(String response) {
     if (responseEncoder != null) {
       var response2 = responseEncoder!(response);
-      // response2.rawResponse = response;
       return response2;
     }
     //
@@ -72,11 +71,21 @@ abstract class Url<RDT> {
     }
     //
     else {
-      var dataMap = jsonDecode(response);
-      final responseObj = ResponseMapper(responseMapper!).fromMap(dataMap);
-      responseObj.url = this;
-      // responseObj.rawResponse = response;
-      return responseObj;
+      try {
+        var dataMap = jsonDecode(response);
+        //final responseObj = ResponseMapper(responseMapper!).fromMap(dataMap);
+        final responseObj = ResponseMapper(responseMapper!).from(dataMap);
+        responseObj.url = this;
+        return responseObj;
+      } catch (e) {
+        final Response<RDT> res = Response.failed(
+          url: this,
+          error: 'Url.encodeResponse --> Exception at Parsing the response of ($endPoint): $e ------> response=$response',
+          httpCode: 0,
+        );
+        res.url = this;
+        return res;
+      }
     }
   }
 

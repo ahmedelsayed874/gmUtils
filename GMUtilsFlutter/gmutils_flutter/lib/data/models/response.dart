@@ -25,6 +25,17 @@ class Response<T> {
   })  : this._message1 = message is ResponseMessage? ? message : null,
         this._message2 = message is String? ? message : null;
 
+  Response.failed({
+    String status = statusFailed,
+    String? message,
+    int? httpCode,
+  }) : this(
+          status: status,
+          message: message,
+          data: null,
+          httpCode: httpCode,
+        );
+
   bool get isSuccess => status == statusSuccess;
 
   bool get isConnectionFailed => status == statusConnectionError;
@@ -36,7 +47,10 @@ class Response<T> {
     msg ??= _message1?.text(en: App.isEnglish);
     msg ??= (defaultErrorMessage ?? 'Unknown Error');
 
-    if (httpCode != null && httpCode != 200 && httpCode != 100 && httpCode != 0) {
+    if (httpCode != null &&
+        httpCode != 200 &&
+        httpCode != 100 &&
+        httpCode != 0) {
       msg += ' [code: $httpCode]';
     }
     return msg;

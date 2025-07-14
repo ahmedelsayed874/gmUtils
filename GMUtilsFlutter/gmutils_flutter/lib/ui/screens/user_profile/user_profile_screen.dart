@@ -396,7 +396,7 @@ class _UserProfileScreenState extends BaseState<UserProfileScreen>
                 userAccount.lastLoginTime!,
                 en: App.isEnglish,
                 dateOnly: false,
-              ),
+              )!,
               style: Res.themes.defaultTextStyle(
                 textSize: 10,
                 textColor: Res.themes.colors.hint,

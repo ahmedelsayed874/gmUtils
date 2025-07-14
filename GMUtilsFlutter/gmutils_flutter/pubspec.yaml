@@ -67,6 +67,9 @@ dependencies:
 
   #async_zip: ^0.1.0
 
+  totp: ^0.1.0
+  geolocator: ^14.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

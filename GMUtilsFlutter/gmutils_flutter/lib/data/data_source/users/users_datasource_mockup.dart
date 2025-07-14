@@ -96,7 +96,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required String password,
     required String fcmToken,
   }) async {
-    String accountType;
+    return Response.failed();
+
+    /*String accountType;
     if (username.substring(0, 1).toLowerCase() == 'm') {
       accountType = UserAccount.accountTypeManager;
     } else if (username.substring(0, 1).toLowerCase() == 's') {
@@ -138,7 +140,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   //------------------------------------------------------------------------------
@@ -148,7 +150,9 @@ class UsersDataSourceMockup extends UsersDataSource {
   Future<Response<void>> sendAccountPasswordResetCode({
     required String emailAddress,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'sendAccountPasswordResetCode(emailAddress: $emailAddress)',
       responseData: () {
         if (Random().nextInt(100) > 97) {
@@ -168,7 +172,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   @override
@@ -176,7 +180,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required String emailAddress,
     required String code,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'verifyAccountPasswordResetCode(emailAddress: $emailAddress, code: $code)',
       responseData: () {
@@ -197,7 +203,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   @override
@@ -205,7 +211,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required int accountId,
     required String password,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'resetAccountPassword(accountId: $accountId, password: $password)',
       responseData: () {
@@ -226,7 +234,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   //endregion
@@ -239,7 +247,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required int accountId,
     required String emailAddress,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'verifyEmailAddress(accountId: $accountId, emailAddress: $emailAddress)',
       responseData: () {
@@ -260,7 +270,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   @override
@@ -269,7 +279,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required String emailAddress,
     required String otp,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'confirmEmailAddress(accountId: $accountId, emailAddress: $emailAddress, otp: $otp)',
       responseData: () {
@@ -290,7 +302,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   //endregion
@@ -302,7 +314,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required int accountId,
     required String photoPath,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'changeAccountPhoto(accountId: $accountId, photoPath: $photoPath)',
       responseData: () {
@@ -323,7 +337,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   //------------------------------------------------------------------------------
@@ -333,7 +347,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required int accountId,
     required String phoneNumber,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'doChangePhoneNumber(accountId: $accountId, phoneNumber: $phoneNumber)',
       responseData: () {
@@ -354,7 +370,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   //------------------------------------------------------------------------------
@@ -364,7 +380,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required int accountId,
     required String newPassword,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName:
           'changeAccountPassword(accountId: $accountId, newPassword: $newPassword)',
       responseData: () {
@@ -385,7 +403,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   //------------------------------------------------------------------------------
@@ -394,7 +412,9 @@ class UsersDataSourceMockup extends UsersDataSource {
   Future<Response<UserAccount>> doGetAccountInfo({
     required int accountId,
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'getAccountInfo(accountId: $accountId)',
       responseData: () {
         if (Random().nextInt(100) > 97) {
@@ -418,7 +438,7 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 
   //------------------------------------------------------------------------------
@@ -435,7 +455,9 @@ class UsersDataSourceMockup extends UsersDataSource {
     required String? sortBy, // → [Name - LastLoginTime]
     required String? sortDirection, //→ [ASC - DESC]
   }) async {
-    var response = await WebRequestExecutor().createDummyResponse(
+    return Response.failed();
+
+    /*var response = await WebRequestExecutor().createDummyResponse(
       apiName: 'getAccountsList(requesterAccountId: $requesterAccountId, '
           'requesterAccountType: $requesterAccountType, '
           'targetAccountTypes: $targetAccountTypes, '
@@ -463,6 +485,6 @@ class UsersDataSourceMockup extends UsersDataSource {
       },
     );
 
-    return Response.fromDummyResponse(response);
+    return Response.fromDummyResponse(response);*/
   }
 }
