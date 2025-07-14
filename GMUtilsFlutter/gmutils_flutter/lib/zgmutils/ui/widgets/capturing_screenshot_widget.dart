@@ -12,70 +12,61 @@ import '../../utils/files.dart';
 import '../dialogs/message_dialog.dart';
 
 class CapturingScreenshotWidget extends StatefulWidget {
-  CapturingScreenshotWidget({this.builder, Key? key}) : super(key: key);
-
-  Widget Function(GlobalKey key)? builder;
-  final GlobalKey _globalKey = GlobalKey();
+  late final GlobalKey globalKey;// = GlobalKey();
+  final Widget Function() builder;
+  
+  CapturingScreenshotWidget({
+    GlobalKey? globalKey,
+    required this.builder, 
+    super.key,
+  }) {
+    this.globalKey = globalKey ?? GlobalKey();
+  }
 
   @override
   State<CapturingScreenshotWidget> createState() => _ToBeCapturedWidgetState();
 
-  void shareAsImage({
+  WidgetCapture get captureTool => WidgetCapture(globalKey);
+
+  void shareExternal({
     required BuildContext context,
     String text = '',
     String onFailedMessage = ''
         'Failed to capture a scene, '
         'please a take screenshot instead.',
   }) async {
-    var key = _globalKey;
-    var imageBytes = await WidgetCapture().captureAsBytes(key);
-    if (imageBytes != null) {
-      //file name
-      var fileName = DateOp()
-          .formatForDatabase(
-            DateTime.now(),
-            dateOnly: false,
-          )
-          .replaceAll(" ", '-')
-          .replaceAll("+", '-')
-          .replaceAll(":", '-');
-
-      //create file and write data
-      var files = Files.private(fileName, 'png');
-      var createdFile = await files.writeBytes(imageBytes);
-
+    var key = globalKey;
+    var file = await WidgetCapture(key).captureAsFile();
+    if (file != null) {
       //share file
       await Share.shareXFiles(
-        [XFile(createdFile.path, mimeType: 'image/*')],
+        [XFile(file.path, mimeType: 'image/*')],
         text: text,
       );
-    } else {
+    }
+    //
+    else {
       MessageDialog.create
           .setTitle(App.isEnglish ? 'Error' : 'خطأ')
           .setMessage(onFailedMessage)
-          .addActions([MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا')])
-          .show(() => context);
+          .addActions([
+        MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا')
+      ]).show(() => context);
     }
   }
 
   Future<Image?> takeSceneImage() async {
-    var image = await WidgetCapture().captureAsImage(_globalKey);
+    var image = await WidgetCapture(globalKey).captureAsImage();
     return image;
   }
 }
 
 class _ToBeCapturedWidgetState extends State<CapturingScreenshotWidget> {
   @override
-  void dispose() {
-    widget.builder = null;
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      key: widget._globalKey,
-      child: widget.builder?.call(widget._globalKey),
+      key: widget.globalKey,
+      child: widget.builder.call(),
     );
   }
 }
@@ -83,7 +74,11 @@ class _ToBeCapturedWidgetState extends State<CapturingScreenshotWidget> {
 //------------------------------------------------------------------------------
 
 class WidgetCapture {
-  Future<Uint8List?> captureAsBytes(GlobalKey widgetKey) async {
+  final GlobalKey widgetKey;
+
+  WidgetCapture(this.widgetKey);
+
+  Future<Uint8List?> captureAsBytes() async {
     RenderRepaintBoundary? boundary =
         widgetKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
     final image = await boundary?.toImage(pixelRatio: 3);
@@ -92,13 +87,13 @@ class WidgetCapture {
     return pngBytes;
   }
 
-  Future<Image?> captureAsImage(GlobalKey widgetKey) async {
-    var bytes = await captureAsBytes(widgetKey);
+  Future<Image?> captureAsImage() async {
+    var bytes = await captureAsBytes();
     return bytes == null ? null : Image.memory(bytes);
   }
 
-  Future<File?> captureAsFile(GlobalKey widgetKey, [String? fileName]) async {
-    var imageBytes = await captureAsBytes(widgetKey);
+  Future<File?> captureAsFile([String? fileName]) async {
+    var imageBytes = await captureAsBytes();
     if (imageBytes != null) {
       //file name
       var fileName2 = fileName ??
