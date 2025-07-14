@@ -18,7 +18,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
 
   //-----------------------------------------------------------------
 
-  Future _waitForMount() async {
+  Future waitForMount() async {
     int x = 0;
     while (!mounted) {
       await Future.delayed(Duration(milliseconds: 500));
@@ -31,7 +31,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
 
   @override
   void showWaitView([String? message]) async {
-    await _waitForMount();
+    await waitForMount();
 
     _screenUtils.showWaitView(message ?? defaultWaitViewMessage);
   }
@@ -68,7 +68,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     bool allowOuterDismiss = true,
     Function(String?)? onDismiss,
   }) async {
-    await _waitForMount();
+    await waitForMount();
 
     _screenUtils.showMessage(
       message,
@@ -88,7 +88,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     Function()? onRetry,
     Function()? onDismiss,
   }) async {
-    await _waitForMount();
+    await waitForMount();
 
     _screenUtils.showErrorMessage(
       message,
@@ -109,7 +109,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     required void Function(bool? dissmissedByOk) onDismiss,
     int? maxNumberOfDisplayedItems,
   }) async {
-    await _waitForMount();
+    await waitForMount();
 
     _screenUtils.showOptionsDialog(
       title: title,
@@ -117,6 +117,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
       selectedOption: selectedOption,
       onOptionSelected: onOptionSelected,
       onDismiss: onDismiss,
+      maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
     );
   }
 

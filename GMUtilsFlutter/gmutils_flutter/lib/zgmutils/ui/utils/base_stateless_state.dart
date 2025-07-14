@@ -93,6 +93,7 @@ abstract class BaseStatelessWidget extends StatelessWidget
       selectedOption: selectedOption,
       onOptionSelected: onOptionSelected,
       onDismiss: onDismiss,
+      maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
     );
   }
 
