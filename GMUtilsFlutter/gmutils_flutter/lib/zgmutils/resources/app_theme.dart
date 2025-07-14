@@ -35,6 +35,7 @@ class AppTheme {
     TextOverflow? overflow,
     List<Shadow>? shadows,
     double? letterSpacing,
+    double? height,
   }) {
     return TextStyle(
       color: textColor ?? appColors?.text,
@@ -46,6 +47,7 @@ class AppTheme {
       decoration: textDecoration,
       fontStyle: fontStyle,
       letterSpacing: letterSpacing,
+      height: height,
     );
   }
 
@@ -54,6 +56,7 @@ class AppTheme {
     double? textSize,
     String? fontFamily,
     List<Shadow>? shadows,
+    double? height,
   }) =>
       defaultTextStyle(
         textColor: textColor ?? appColors?.primary,
@@ -61,6 +64,7 @@ class AppTheme {
         fontWeight: FontWeight.w800,
         fontFamily: fontFamily ?? defaultFontFamily,
         shadows: shadows,
+          height: height,
       );
 
   static TextStyle textStyleOfSectionTitle({
@@ -68,6 +72,7 @@ class AppTheme {
     double? textSize,
     String? fontFamily,
     List<Shadow>? shadows,
+    double? height,
   }) =>
       defaultTextStyle(
         textColor: textColor,
@@ -75,5 +80,6 @@ class AppTheme {
         fontWeight: FontWeight.w800,
         fontFamily: fontFamily ?? defaultFontFamily,
         shadows: shadows,
+          height: height,
       );
 }
