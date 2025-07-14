@@ -197,8 +197,8 @@ class DateOp {
     return formattedDate;
   }
 
-  String formatForUser2(
-    String date, {
+  String? formatForUser2(
+    String? date, {
     required bool en,
     required bool dateOnly,
     bool convertToLocalTime = true,
@@ -207,7 +207,7 @@ class DateOp {
     bool inTwoLines = false,
   }) {
     var dateTime = parse(
-      date,
+      date ?? '',
       convertToLocalTime: !dateOnly && convertToLocalTime,
     );
     if (dateTime == null) {
@@ -427,10 +427,12 @@ class DateOp {
   }
 
   DateTime? parse(
-    String date, {
+    String? date, {
     bool convertToLocalTime = true,
     DateTime? defaultDate,
   }) {
+    if (date == null) return null;
+
     var parsedDate = DateTime.tryParse(date);
 
     if (parsedDate != null) {
