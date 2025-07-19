@@ -1,6 +1,8 @@
 // import 'package:html/parser.dart';
 // import 'package:intl/intl.dart';
 
+import 'package:flutter/material.dart';
+
 class TextUtils {
   String removeExtraSpaces(String text) {
     text = text.trim();
@@ -148,6 +150,39 @@ class TextUtils {
         .replaceAll('٧', '7')
         .replaceAll('٨', '8')
         .replaceAll('٩', '9');
+  }
+
+  //----------------------------------------------------------------------------
+
+  bool hasNonEnglishLetter(String sentence) {
+    for (var c in sentence.characters) {
+      bool notValid = true;
+
+      if (c.codeUnits[0] >= 'a'.codeUnits[0] && c.codeUnits[0] <= 'z'.codeUnits[0]) {
+        notValid = false;
+      }
+      else if (c.codeUnits[0] >= 'A'.codeUnits[0] && c.codeUnits[0] <= 'Z'.codeUnits[0]) {
+        notValid = false;
+      }
+
+      if (notValid) return true;
+    }
+
+    return false;
+  }
+
+  bool hasNonEnglishNumbers(String sentence) {
+    for (var c in sentence.characters) {
+      bool notValid = true;
+
+      if (c.codeUnits[0] >= '0'.codeUnits[0] && c.codeUnits[0] <= '9'.codeUnits[0]) {
+        notValid = false;
+      }
+
+      if (notValid) return true;
+    }
+
+    return false;
   }
 
   //----------------------------------------------------------------------------

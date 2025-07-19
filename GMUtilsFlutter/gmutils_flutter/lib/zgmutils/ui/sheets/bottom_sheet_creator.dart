@@ -4,49 +4,44 @@ class BottomSheetCreator {
   void show({
     required BuildContext context,
     required List<Widget> children,
+    Widget? title,
     VoidCallback? onClosing,
-    VoidCallback? onClosed,
+    void Function(dynamic)? onClosed,
     bool isExpanded = false,
-    bool enableDrag = false,
+    bool disableDrag = false,
     double contentPadding = 15,
     Color? backgroundColor,
   }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: isExpanded,
-
-      // shape: RoundedRectangleBorder(
-      //   borderRadius: BorderRadius.only(
-      //     topLeft: Radius.circular(30),
-      //     topRight: Radius.circular(30),
-      //   ),
-      //   side: BorderSide(),
-      // ),
-
       builder: (context) => _BottomSheetBody(
         onClosing: onClosing,
-        enableDrag: enableDrag,
+        disableDrag: disableDrag,
         contentPadding: contentPadding,
         backgroundColor: backgroundColor,
+        title: title,
         children: children,
       ),
-    ).then((value) => onClosed?.call());
+    ).then((value) => onClosed?.call(value));
   }
 }
 
 //------------------------------------------------------------------------------
 
 class _BottomSheetBody extends StatefulWidget {
+  final Widget? title;
   final List<Widget> children;
   final VoidCallback? onClosing;
-  final bool enableDrag;
+  final bool disableDrag;
   final double contentPadding;
   final Color? backgroundColor;
 
   const _BottomSheetBody({
+    required this.title,
     required this.children,
     required this.onClosing,
-    required this.enableDrag, // = false,
+    required this.disableDrag, // = false,
     required this.contentPadding, // = 15,
     required this.backgroundColor,
     Key? key,
@@ -84,9 +79,10 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
 
   @override
   Widget build(BuildContext context) {
+    final Widget? title = widget.title;
     final List<Widget> children = widget.children;
     final VoidCallback? onClosing = widget.onClosing;
-    final bool enableDrag = widget.enableDrag;
+    final bool disableDrag = widget.disableDrag;
     final double contentPadding = widget.contentPadding;
     final Color? backgroundColor = widget.backgroundColor;
 
@@ -103,10 +99,23 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
             contentPadding,
           );*/
 
+    var body = Padding(
+      padding: EdgeInsets.all(contentPadding),
+      child: children.length > 1
+          ? SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              ),
+            )
+          : children[0],
+    );
+
     return BottomSheet(
-      enableDrag: enableDrag,
+      enableDrag: disableDrag,
       animationController:
-          enableDrag ? BottomSheet.createAnimationController(this) : null,
+      !disableDrag ? BottomSheet.createAnimationController(this) : null,
       backgroundColor: backgroundColor,
 
       // shape: RoundedRectangleBorder(
@@ -116,17 +125,13 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
 
       builder: (context) => Padding(
         padding: MediaQuery.of(context).viewInsets,
-        child: Padding(
-          padding: EdgeInsets.all(contentPadding),
-          child: children.length > 1
-              ? SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: children,
-                  ),
-                )
-              : children[0],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (title != null) title,
+            Expanded(child: body),
+          ],
         ),
       ),
       onClosing: () => onClosing?.call(),
