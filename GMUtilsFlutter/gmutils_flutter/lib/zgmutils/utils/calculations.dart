@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../../resources/_resources.dart';
+import '../gm_main.dart';
 import 'date_op.dart';
 
 class Calculations {
@@ -92,21 +92,32 @@ class Calculations {
     //(0.0328542096 - 0) * 31 = 1.0184804976
 
     if (short) {
-      String txt = '$years ${Res.strings.Y}';
+      var y = App.isEnglish ? 'Y' : 'ع';
+      var m = App.isEnglish ? 'M' : 'ش';
+      var d = App.isEnglish ? 'D' : 'ي';
+
+      String txt = '$years $y';
       if (months > 0) {
-        txt += ', $months ${Res.strings.M}';
+        txt += ', $months $m';
       }
       if (days > 0) {
-        txt += ', $days ${Res.strings.D}';
+        txt += ', $days $d';
       }
       return txt;
-    } else {
-      String txt = '$years ${Res.strings.years}';
+    }
+    //
+    else {
+      var yearsStr = App.isEnglish ? 'years' : 'عام';
+      var and = App.isEnglish ? 'and' : 'و';
+      var monthsStr = App.isEnglish ? 'months' : 'شهور';
+      var daysStr = App.isEnglish ? 'days' : 'يوم';
+
+      String txt = '$years $yearsStr';
       if (months > 0) {
-        txt += ' ${Res.strings.and} $months ${Res.strings.months}';
+        txt += ' $and $months $monthsStr';
       }
       if (days > 0) {
-        txt += ' ${Res.strings.and} $days ${Res.strings.days}';
+        txt += ' $and $days $daysStr';
       }
 
       return txt;
@@ -142,16 +153,16 @@ class Calculations {
 
   //----------------------------------------------------------------------------
 
-  String percent(double p, {String separate = ' '}) {
+  String percent(double p, {String suffix = ' %'}) {
     //0.4234234
     var per100 = p * 100; //42.34234
     var pi = per100.toInt(); //42
     var d = ((per100 - pi) * 100).toInt() / 100; //0.34
 
     if (d > 0) {
-      return '${pi + d}$separate%';
+      return '${pi + d}$suffix';
     } else {
-      return '$pi$separate%';
+      return '$pi$suffix';
     }
   }
 }
