@@ -44,6 +44,7 @@ class AccountStorage extends IAccountStorage {
 
   sharedPrefLib.SharedPreferences? __prefs;
   static IAccount? cached_account;
+  static String? cached_username;
 
   AccountStorage(super.accountMapper);
 
@@ -62,6 +63,7 @@ class AccountStorage extends IAccountStorage {
     var pref = await _prefs;
 
     cached_account = account;
+    cached_username = username;
 
     var accountJson = jsonEncode(IAccountStorage.accountMapper!.toMap(account));
 
@@ -79,6 +81,8 @@ class AccountStorage extends IAccountStorage {
     String username,
     String password,
   ) async {
+    cached_username = username;
+
     var pref = await _prefs;
 
     var userNameEnc = await _enc(username);
@@ -128,8 +132,13 @@ class AccountStorage extends IAccountStorage {
     if (un != null && un.isNotEmpty && pw != null && pw.isNotEmpty) {
       un = await _dec(un);
       pw = await _dec(pw);
+
+      cached_username = un;
+
       return Pair(value1: un, value2: pw);
-    } else {
+    }
+    //
+    else {
       return null;
     }
   }
@@ -140,6 +149,7 @@ class AccountStorage extends IAccountStorage {
     var pref = await _prefs;
 
     cached_account = null;
+    cached_username = null;
 
     var b1 = await pref.setString(KEY_ACCOUNT, '');
     var b2 = await pref.setString(KEY_USER_NAME, '');
