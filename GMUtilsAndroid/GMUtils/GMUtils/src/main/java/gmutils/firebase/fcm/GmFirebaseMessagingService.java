@@ -22,9 +22,10 @@ import gmutils.storage.GeneralStorage;
 import gmutils.storage.SettingsStorage;
 
 public class GmFirebaseMessagingService extends FirebaseMessagingService {
-//    public interface FcmMessageHandler {
-//        void onMessageReceived(Context context, RemoteMessage message);
-//    }
+    public static final String EXTRA_FCM_TIMESTAMP = FCM.EXTRA_FCM_TIMESTAMP;
+    public static final String EXTRA_GOOGLE_MESSAGE_ID = FCM.EXTRA_GOOGLE_MESSAGE_ID;
+    public  static  final  String PAYLOAD_KEY_NAME = "payload";
+
 
     public interface FcmTokenChangeHandler {
         void onNewToken(Context context, String token);
@@ -194,7 +195,7 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
 
         if (onClick != null) {
             intent = onClick.intent;
-            intent.putExtra(FCM.PAYLOAD_KEY_NAME, notificationProperties.getPayload());
+            intent.putExtra(PAYLOAD_KEY_NAME, notificationProperties.getPayload());
             intent.putExtra(FCM.EXTRA_FCM_TIMESTAMP, System.currentTimeMillis());
 
             if (onClick.intentTarget != FcmNotificationProperties.OnClick.IntentTarget.Activity) {
@@ -234,12 +235,14 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
                     }
                 }
             }
-        } else {
+        }
+        //
+        else {
             intent = context.getPackageManager().getLaunchIntentForPackage(
                     context.getPackageName()
             );
             if (intent != null) {
-                intent.putExtra(FCM.PAYLOAD_KEY_NAME, notificationProperties.getPayload());
+                intent.putExtra(PAYLOAD_KEY_NAME, notificationProperties.getPayload());
                 intent.putExtra(FCM.EXTRA_FCM_TIMESTAMP, System.currentTimeMillis());
             }
         }

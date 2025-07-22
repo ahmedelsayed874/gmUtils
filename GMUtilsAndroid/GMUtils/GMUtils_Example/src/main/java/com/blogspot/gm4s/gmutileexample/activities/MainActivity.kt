@@ -243,6 +243,7 @@ class MainActivity : BaseActivity() {
             Logger.d().logConfigs
                 .setLogDeadline(DateOp.getInstance().increaseDays(1))
                 .setWriteLogsToPublicFileDeadline(DateOp.getInstance().increaseDays(1))
+                .setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
 
             Logger.d().exportAppBackup(thisActivity(), true) {
                 log("get-app-backup", "getting app backup finished: ${it.message}")

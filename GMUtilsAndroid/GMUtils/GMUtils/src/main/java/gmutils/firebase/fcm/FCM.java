@@ -35,7 +35,6 @@ import gmutils.storage.GeneralStorage;
 public class FCM implements FCMFunctions {
     public static final String EXTRA_FCM_TIMESTAMP = "fcm.timestamp";
     public static final String EXTRA_GOOGLE_MESSAGE_ID = "google.message_id";
-    public static final String EXTRA_FROM = "from";
 
     static FCM _instance;
 
@@ -332,7 +331,6 @@ public class FCM implements FCMFunctions {
         );
     }
 
-    public static final String PAYLOAD_KEY_NAME = "data";
 
     /**
      * https://firebase.google.com/docs/cloud-messaging/migrate-v1?hl=en&authuser=0#java
@@ -483,11 +481,9 @@ public class FCM implements FCMFunctions {
                         .add("sound", soundFileName)
         );
 
-if (dataPayload != null) {
-    JSONObject data = new JSONObject();
-    data.put(PAYLOAD_KEY_NAME, dataPayload); check this line
-        notificationBody.add("data", data);
-}
+        if (dataPayload != null) {
+            notificationBody.add("data", dataPayload);
+        }
 
         JsonBuilder messageJson = JsonBuilder.ofJsonObject();
         messageJson.add("message", notificationBody);

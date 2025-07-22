@@ -93,4 +93,5 @@
             <data android:mimeType="*/*" />
         </intent>
     </queries>
+    
 </manifest>
