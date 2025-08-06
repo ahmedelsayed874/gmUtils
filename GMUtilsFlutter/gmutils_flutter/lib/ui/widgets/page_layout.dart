@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/data/data_source/users/users_datasource.dart';
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/services/configs/app_configs.dart';
@@ -6,7 +7,6 @@ import 'package:gmutils_flutter/ui/screens/user_profile/user_profile_screen.dart
 import 'package:gmutils_flutter/ui/widgets/toolbar.dart';
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/_root_widget.dart';
-import 'package:flutter/material.dart';
 
 import '../screens/zsidemenu/sidemenu.dart';
 import 'small_notifications_list.dart';

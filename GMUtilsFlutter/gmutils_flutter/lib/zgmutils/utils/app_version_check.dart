@@ -3,12 +3,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'string_set.dart';
 
 import '../ui/dialogs/message_dialog.dart';
 import 'launcher.dart';
 import 'logs.dart';
 import 'package_info.dart';
+import 'string_set.dart';
 
 class AppVersionCheck {
   static Future<String> get playStoreLink async {

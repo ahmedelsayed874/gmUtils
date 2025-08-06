@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
-import 'package:flutter/material.dart';
 
 class AudioPlayer extends StatefulWidget {
   /// Path from where to play recorded audio

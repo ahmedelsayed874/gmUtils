@@ -8,7 +8,7 @@ class WaitDialog {
   static WaitDialog get create => WaitDialog();
 
   BuildContext Function()? _context;
-  _WaitDialogBody? _waitDialogBody;
+  _WaitDialogBodyHorizontal? _waitDialogBody;
   String _message = '';
   bool _shown = false;
   bool _dismissed = false;
@@ -95,7 +95,7 @@ class WaitDialog {
     showDialog(
       context: context(),
       builder: (context) {
-        _waitDialogBody ??= _WaitDialogBody(message: message);
+        _waitDialogBody ??= _WaitDialogBodyHorizontal(message: message);
         return _waitDialogBody!;
       },
       routeSettings: routeSettings,
@@ -132,24 +132,26 @@ class WaitDialog {
   }
 }
 
-class _WaitDialogBody extends StatefulWidget {
+//////////////////////////////////////////////////////////////////////////////
+
+class _WaitDialogBodyHorizontal extends StatefulWidget {
   final String message;
 
-  const _WaitDialogBody({
+  const _WaitDialogBodyHorizontal({
     required this.message,
     super.key,
   });
 
   @override
-  State<_WaitDialogBody> createState() => _WaitDialogBodyState();
+  State<_WaitDialogBodyHorizontal> createState() => _WaitDialogBodyHorizontalState();
 
   void updateMessage(String message) {
-    _WaitDialogBodyState.updateMessage(message);
+    _WaitDialogBodyHorizontalState.updateMessage(message);
   }
 }
 
-class _WaitDialogBodyState extends State<_WaitDialogBody> {
-  static _WaitDialogBodyState? _state;
+class _WaitDialogBodyHorizontalState extends State<_WaitDialogBodyHorizontal> {
+  static _WaitDialogBodyHorizontalState? _state;
 
   static void updateMessage(String message) {
     _state?.message = message;
@@ -198,6 +200,84 @@ class _WaitDialogBodyState extends State<_WaitDialogBody> {
               ),
             ),
             const Expanded(child: const SizedBox()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+class _WaitDialogBodyVertical extends StatefulWidget {
+  final String message;
+
+  const _WaitDialogBodyVertical({
+    required this.message,
+    super.key,
+  });
+
+  @override
+  State<_WaitDialogBodyVertical> createState() => _WaitDialogBodyVerticalState();
+
+  void updateMessage(String message) {
+    _WaitDialogBodyVerticalState.updateMessage(message);
+  }
+}
+
+class _WaitDialogBodyVerticalState extends State<_WaitDialogBodyVertical> {
+  static _WaitDialogBodyVerticalState? _state;
+
+  static void updateMessage(String message) {
+    _state?.message = message;
+    _state?.setState(() {});
+  }
+
+  late String message;
+
+  @override
+  void initState() {
+    _state = this;
+    super.initState();
+    message = widget.message;
+  }
+
+  @override
+  void dispose() {
+    _state = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Center(
+        child: Column(
+          children: [
+            const Expanded(child: SizedBox()),
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: AppTheme.appColors?.background ?? Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    width: 25,
+                    height: 25,
+                    child: CircularProgressIndicator(),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    message,
+                    style: AppTheme.defaultTextStyle(fontWeight: FontWeight.bold,),
+                  ),
+                ],
+              ),
+            ),
+            const Expanded(child: SizedBox()),
           ],
         ),
       ),

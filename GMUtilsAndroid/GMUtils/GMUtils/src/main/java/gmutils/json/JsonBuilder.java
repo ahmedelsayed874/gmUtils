@@ -34,12 +34,11 @@ public class JsonBuilder {
     //----------------------------------------------------------------------------------------------
 
     /**
-     *
      * @param value a {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
-     *      Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May
-     *      not be {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
-     *      infinities}. Unsupported values are not permitted and will cause the
-     *      array to be in an inconsistent state.
+     *              Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May
+     *              not be {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
+     *              infinities}. Unsupported values are not permitted and will cause the
+     *              array to be in an inconsistent state.
      * @return {@link JsonBuilder}
      */
     public JsonBuilder add(Object value) {
@@ -69,14 +68,13 @@ public class JsonBuilder {
     }
 
     //-----------------------------------------------
-    
+
     /**
-     *
      * @param count number of item which will add
      * @param value take the index of array item and returns a value from one of these types {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
-     *      Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
-     *      {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
-     *      infinities}
+     *              Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
+     *              {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
+     *              infinities}
      * @return
      */
     public JsonBuilder addList(int count, @NotNull ActionCallback<Integer, Object> value) {
@@ -96,12 +94,11 @@ public class JsonBuilder {
     //-----------------------------------------------
 
     /**
-     *
-     * @param keys map keys
+     * @param keys  map keys
      * @param value take the key and returns a value from one of these types {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
-     *      Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
-     *      {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
-     *      infinities}
+     *              Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
+     *              {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
+     *              infinities}
      * @return
      */
     public JsonBuilder addMapElements(Set<?> keys, @NotNull ActionCallback<Object, Object> value) {
@@ -110,7 +107,7 @@ public class JsonBuilder {
 
         if (rootJson instanceof JSONObject) {
             for (Object key : keys) {
-                add(value.invoke(key));
+                add("" + key, value.invoke(key));
             }
         }
         //
@@ -124,13 +121,12 @@ public class JsonBuilder {
     //-----------------------------------------------
 
     /**
-     *
      * @param jsonObjectKey jsonObjectKey
-     * @param mapKeys map keys
-     * @param value take the key and returns a value from one of these types {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
-     *      Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
-     *      {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
-     *      infinities}
+     * @param mapKeys       map keys
+     * @param value         take the key and returns a value from one of these types {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
+     *                      Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
+     *                      {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
+     *                      infinities}
      * @return
      */
     public JsonBuilder addMap(String jsonObjectKey, Set<?> mapKeys, @NotNull ActionCallback<Object, Object> value) {
@@ -167,11 +163,11 @@ public class JsonBuilder {
     //-----------------------------------------------
 
     /**
-     * @param key {@link String}
+     * @param key   {@link String}
      * @param value a {@link JsonBuilder}, {@link JSONObject}, {@link JSONArray}, String, Boolean,
-     *     Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
-     *     {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
-     *     infinities}.
+     *              Integer, Long, Double, {@link JSONObject#NULL}, or {@code null}. May not be
+     *              {@link Double#isNaN() NaNs} or {@link Double#isInfinite()
+     *              infinities}.
      */
     public JsonBuilder add(@NotNull String key, Object value) {
         if (rootJson instanceof JSONObject) {

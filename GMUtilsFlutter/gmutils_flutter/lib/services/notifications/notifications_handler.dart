@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:gmutils_flutter/data/data_source/notifications/notifications_datasource.dart';
 import 'package:gmutils_flutter/data/data_source/users/users_datasource.dart';
 import 'package:gmutils_flutter/data/models/notifications/notification.dart';
 import 'package:gmutils_flutter/ui/widgets/small_notifications_list.dart';
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
 import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import '../../zgmutils/data_utils/firebase/fcm.dart';
 
 class NotificationsHandler {

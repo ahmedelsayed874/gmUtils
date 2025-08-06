@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/ui/screens/auth/reset_password/inquiry_email/rp_inquiry_email_screen.dart';
 import 'package:gmutils_flutter/ui/screens/home/home_screen.dart';
@@ -5,7 +6,6 @@ import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/ui/utils/base_stateful_state.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/_root_widget.dart';
 import 'package:gmutils_flutter/zgmutils/utils/keyboard_manager.dart';
-import 'package:flutter/material.dart';
 
 import 'login_screen_driver.dart';
 

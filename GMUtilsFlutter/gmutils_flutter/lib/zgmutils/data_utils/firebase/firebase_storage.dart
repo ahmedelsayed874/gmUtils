@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:path_provider/path_provider.dart';
 
-import '../../gm_main.dart';
 import '../../utils/date_op.dart';
 import '../../utils/logs.dart';
 import '../../utils/string_set.dart';

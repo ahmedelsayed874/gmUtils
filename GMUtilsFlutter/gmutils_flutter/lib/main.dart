@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:gmutils_flutter/data/data_source/notifications/notifications_datasource.dart';
 import 'package:gmutils_flutter/data/models/notifications/notification.dart'
     as nm;
@@ -5,7 +6,6 @@ import 'package:gmutils_flutter/services/notifications/firebase_options.dart';
 import 'package:gmutils_flutter/ui/screens/notifications/notifications_screen.dart';
 import 'package:gmutils_flutter/ui/screens/splash/splash_screen.dart';
 import 'package:gmutils_flutter/zgmutils/utils/device_info.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'resources/_resources.dart';
 import 'resources/strings.dart';

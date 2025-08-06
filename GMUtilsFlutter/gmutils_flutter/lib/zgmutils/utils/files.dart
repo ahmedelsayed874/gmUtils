@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path_provider/path_provider.dart' as filesProvider;
+
 //path_provider: ^2.0.3
 import '../../../zgmutils/utils/logs.dart';
-import 'package:path_provider/path_provider.dart' as filesProvider;
 
 ///Directory tempDir = await getTemporaryDirectory();
 /// String tempPath = tempDir.path;

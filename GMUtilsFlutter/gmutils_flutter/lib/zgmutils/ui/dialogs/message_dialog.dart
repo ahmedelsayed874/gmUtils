@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 
 import '../../resources/app_theme.dart';
-import '../../utils/launcher.dart';
 import '../../utils/logs.dart';
 import '../widgets/my_linkify.dart';
 

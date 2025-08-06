@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 import '../../../zgmutils/utils/result.dart';
 import '../../../zgmutils/utils/text_utils.dart';
-
 import '../../utils/logs.dart';
 import '../../utils/string_set.dart';
 import 'firebase_utils.dart';

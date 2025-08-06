@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import '../../../zgmutils/utils/text_utils.dart';
 
+import '../../../zgmutils/utils/text_utils.dart';
 import '../../utils/logs.dart';
 import '../../utils/mappable.dart';
 import '../../utils/string_set.dart';

@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/data/models/users/user_account.dart';
-import 'package:gmutils_flutter/data/models/users/user_account_header.dart';
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/services/app_privilege_checker.dart';
 import 'package:gmutils_flutter/ui/screens/auth/login/login_screen.dart';
@@ -23,7 +23,6 @@ import 'package:gmutils_flutter/zgmutils/utils/date_op.dart';
 import 'package:gmutils_flutter/zgmutils/utils/image_cropper.dart';
 import 'package:gmutils_flutter/zgmutils/utils/image_picker.dart';
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
-import 'package:flutter/material.dart';
 
 import '../../../zgmutils/ui/utils/base_stateful_state.dart';
 import 'user_profile_screen_driver.dart';

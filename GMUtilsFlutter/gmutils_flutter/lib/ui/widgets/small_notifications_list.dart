@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../data/data_source/notifications/notifications_datasource.dart';
 import '../../data/data_source/users/users_datasource.dart';
 import '../../data/models/notifications/notification.dart' as n;
-import '../../data/data_source/notifications/notifications_datasource.dart';
 import '../../resources/_resources.dart';
 import '../../services/notifications/notifications_handler.dart';
 import '../../zgmutils/gm_main.dart';

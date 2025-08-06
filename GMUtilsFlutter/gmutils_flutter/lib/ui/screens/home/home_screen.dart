@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/data/models/users/auth_user_account.dart';
-import 'package:gmutils_flutter/main.dart' as main;
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/services/configs/app_configs.dart';
 import 'package:gmutils_flutter/ui/screens/user_profile/change_password/change_password_screen.dart';
@@ -10,10 +10,7 @@ import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/ui/dialogs/message_dialog.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/observable_widget.dart';
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
-import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
-import 'package:gmutils_flutter/zgmutils/utils/notifications.dart';
 import 'package:gmutils_flutter/zgmutils/utils/pairs.dart';
-import 'package:flutter/material.dart';
 
 import '../../../zgmutils/ui/utils/base_stateful_state.dart';
 import '../../widgets/titled_icon_button.dart';

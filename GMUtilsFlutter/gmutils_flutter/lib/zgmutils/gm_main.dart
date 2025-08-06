@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import '../resources/_resources.dart';
 import 'data_utils/firebase/fcm.dart';
 import 'data_utils/storages/app_preferences_storage.dart';
 import 'resources/app_colors.dart';

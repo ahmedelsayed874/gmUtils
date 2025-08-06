@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/zgmutils/utils/files.dart';
 import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
-import 'package:flutter/material.dart';
 import 'package:record/record.dart' as recoder;
 
 class AudioRecorder extends StatefulWidget {

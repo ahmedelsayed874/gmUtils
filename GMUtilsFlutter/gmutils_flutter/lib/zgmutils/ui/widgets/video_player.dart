@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart' as vp;
 
 import '../../gm_main.dart';
-import '../../resources/app_theme.dart';
 import '../../utils/logs.dart';
 import 'web_view_screen.dart';
 

@@ -1,8 +1,9 @@
+import 'package:gmutils_flutter/main.dart' as main;
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/ui/utils/iscreen_driver.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/firebase/fcm.dart';
-import 'package:gmutils_flutter/main.dart' as main;
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
+
 import '../../../data/data_source/users/users_datasource.dart';
 import '../../../data/models/response.dart';
 import '../../../data/models/users/auth_user_account.dart';

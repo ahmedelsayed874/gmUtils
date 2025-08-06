@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/data/models/users/user_account_identifier.dart';
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/ui/screens/auth/login/login_screen.dart';
@@ -5,7 +6,6 @@ import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/ui/utils/base_stateful_state.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/_root_widget.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/widgtes.dart';
-import 'package:flutter/material.dart';
 
 import 'rp_set_new_password_screen_driver.dart';
 

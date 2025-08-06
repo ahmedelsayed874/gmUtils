@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/main.dart';
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/ui/screens/auth/login/login_screen.dart';
 import 'package:gmutils_flutter/ui/screens/home/home_screen.dart';
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/_root_widget.dart';
-import 'package:flutter/material.dart';
 
 import '../../../zgmutils/ui/utils/base_stateful_state.dart';
 import 'splash_screen_driver.dart';

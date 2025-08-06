@@ -1,7 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/main.dart' as main;
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/network_image_with_loading.dart';
-import 'package:flutter/material.dart';
 
 class MyWidgets {
   Widget userPhotoAvatar({

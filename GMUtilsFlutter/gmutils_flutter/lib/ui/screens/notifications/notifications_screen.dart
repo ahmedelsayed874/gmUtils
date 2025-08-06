@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/data/models/notifications/notification.dart'
     as model;
 import 'package:gmutils_flutter/data/models/notifications/notification.dart'
@@ -7,7 +8,6 @@ import 'package:gmutils_flutter/services/notifications/notifications_handler.dar
 import 'package:gmutils_flutter/ui/widgets/page_layout.dart';
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/utils/date_op.dart';
-import 'package:flutter/material.dart';
 
 import '../../../zgmutils/ui/utils/base_stateful_state.dart';
 import '../../widgets/toolbar.dart';
