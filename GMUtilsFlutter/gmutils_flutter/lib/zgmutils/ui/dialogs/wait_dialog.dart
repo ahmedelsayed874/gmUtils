@@ -8,9 +8,12 @@ class WaitDialog {
   static WaitDialog get create => WaitDialog();
 
   BuildContext Function()? _context;
-  _WaitDialogBodyHorizontal? _waitDialogBody;
+  _WaitDialogBodyHorizontal? _waitDialogBodyHor;
+  _WaitDialogBodyVertical? _waitDialogBodyVer;
+
   String _message = '';
   bool _shown = false;
+  WaitDialogStyle _style = WaitDialogStyle.vertical;
   bool _dismissed = false;
 
   //------------------------------------------------
@@ -21,7 +24,15 @@ class WaitDialog {
 
   WaitDialog setMessage(String message) {
     _message = message;
-    _waitDialogBody?.updateMessage(message);
+
+    _waitDialogBodyHor?.updateMessage(message);
+    _waitDialogBodyVer?.updateMessage(message);
+
+    return this;
+  }
+
+  WaitDialog setStyle(WaitDialogStyle style) {
+    _style = style;
     return this;
   }
 
@@ -95,8 +106,16 @@ class WaitDialog {
     showDialog(
       context: context(),
       builder: (context) {
-        _waitDialogBody ??= _WaitDialogBodyHorizontal(message: message);
-        return _waitDialogBody!;
+        if (_style == WaitDialogStyle.horizontal) {
+          _waitDialogBodyHor ??= _WaitDialogBodyHorizontal(message: message);
+          return _waitDialogBodyHor!;
+        }
+
+        //
+        else {
+          _waitDialogBodyVer ??= _WaitDialogBodyVertical(message: message);
+          return _waitDialogBodyVer!;
+        }
       },
       routeSettings: routeSettings,
     ).then((value) {
@@ -128,9 +147,12 @@ class WaitDialog {
 
   void _dispose() {
     _context = null;
-    _waitDialogBody = null;
+    _waitDialogBodyHor = null;
+    _waitDialogBodyVer = null;
   }
 }
+
+enum WaitDialogStyle { horizontal, vertical }
 
 //////////////////////////////////////////////////////////////////////////////
 
