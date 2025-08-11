@@ -21,13 +21,19 @@ class AppTheme {
     AppTheme.defaultFontFamily = defaultFontFamily;
   }
 
-  AppColors get app_colors => AppTheme.appColors!;
-
-  AppMeasurement get app_measurement => AppTheme.appMeasurement!;
+  static double? scaledFontSize(double? baseFontSize) {
+    var fontSize = baseFontSize ?? appMeasurement?.textSize;
+    if (fontSize != null && appMeasurement != null) {
+      fontSize /= appMeasurement!.textScaleFactor;
+    }
+    //print('>>>>>>>> AppTheme.scaledFontSize($baseFontSize, textScaleFactor: ${appMeasurement!.textScaleFactor}) ---> $fontSize');
+    return fontSize;
+  }
 
   static TextStyle defaultTextStyle({
     Color? textColor,
     double? textSize,
+    bool autoScaleTextSize = true,
     FontWeight? fontWeight,
     TextDecoration? textDecoration,
     FontStyle? fontStyle,
@@ -39,7 +45,7 @@ class AppTheme {
   }) {
     return TextStyle(
       color: textColor ?? appColors?.text,
-      fontSize: textSize ?? appMeasurement?.textSize,
+      fontSize: autoScaleTextSize ? scaledFontSize(textSize) : textSize,
       fontWeight: fontWeight,
       fontFamily: fontFamily ?? defaultFontFamily,
       overflow: overflow,
@@ -54,6 +60,7 @@ class AppTheme {
   static TextStyle textStyleOfScreenTitle({
     Color? textColor,
     double? textSize,
+    bool autoScaleTextSize = true,
     String? fontFamily,
     List<Shadow>? shadows,
     double? height,
@@ -61,15 +68,17 @@ class AppTheme {
       defaultTextStyle(
         textColor: textColor ?? appColors?.primary,
         textSize: textSize ?? appMeasurement?.screenTitleSize,
+        autoScaleTextSize: autoScaleTextSize,
         fontWeight: FontWeight.w800,
         fontFamily: fontFamily ?? defaultFontFamily,
         shadows: shadows,
-          height: height,
+        height: height,
       );
 
   static TextStyle textStyleOfSectionTitle({
     Color? textColor,
     double? textSize,
+    bool autoScaleTextSize = true,
     String? fontFamily,
     List<Shadow>? shadows,
     double? height,
@@ -77,9 +86,10 @@ class AppTheme {
       defaultTextStyle(
         textColor: textColor,
         textSize: textSize,
+        autoScaleTextSize: autoScaleTextSize,
         fontWeight: FontWeight.w800,
         fontFamily: fontFamily ?? defaultFontFamily,
         shadows: shadows,
-          height: height,
+        height: height,
       );
 }

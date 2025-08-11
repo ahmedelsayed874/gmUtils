@@ -5,7 +5,6 @@ import '../../resources/app_theme.dart';
 import '../../utils/launcher.dart';
 import '../../utils/text_utils.dart';
 
-//todo copy to gm4s
 class MyLinkify extends StatelessWidget {
   final String text;
   final TextStyle? textStyle;
@@ -30,10 +29,11 @@ class MyLinkify extends StatelessWidget {
     text2 = text2.replaceAll(' https://https://', ' https://');
     text2 = text2.replaceAll(' http://https://', ' https://');
 
-    final defaultStyle = textStyle ?? AppTheme.defaultTextStyle();
+    final defaultStyle = textStyle ?? AppTheme.defaultTextStyle(autoScaleTextSize: false,);
     final linkifyLinkStyle = linkTextStyle ??
         AppTheme.defaultTextStyle(
           textColor: Colors.blueAccent,
+          autoScaleTextSize: false,
         );
     final textDirection =
         TextUtils().isStartWithArabic(text2) == true ? TextDirection.rtl : null;

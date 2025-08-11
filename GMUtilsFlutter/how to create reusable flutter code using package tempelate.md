@@ -9,7 +9,8 @@ Here's a comprehensive guide to creating and utilizing your own Flutter packages
 The first step is to create a new Flutter project with a package template. This will generate the necessary structure for a reusable package.
 
 **1. Create the Package:**
-Open your terminal and run the following command, replacing `my_reusable_package` with your desired package name:```bash
+Open your terminal and run the following command, replacing `my_reusable_package` with your desired package name:
+```bash
 flutter create --template=package my_reusable_package
 ```
 This command will create a directory named `my_reusable_package` containing the basic structure of a Flutter package.

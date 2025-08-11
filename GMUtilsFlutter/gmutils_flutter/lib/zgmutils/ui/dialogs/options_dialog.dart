@@ -8,8 +8,6 @@ import '../../resources/app_theme.dart';
 typedef OptionSelectHandler<T> = void Function(OptionElement<T> choice);
 
 class OptionsDialog<T> {
-  static double optionElementHeight = 55.0;
-
   static OptionsDialog<T> create<T>(
     String title,
     List<OptionElement<T>> options, {
@@ -33,6 +31,7 @@ class OptionsDialog<T> {
   OptionSelectHandler<T>? _optionSelectHandler;
   BuildContext Function()? _context;
   int? maxNumberOfDisplayedItems;
+  late final double estimatedOptionHeight;
   void Function(bool? ok)? _onDismiss;
 
   OptionsDialog(
@@ -41,11 +40,11 @@ class OptionsDialog<T> {
     this.selectedOption,
     required OptionSelectHandler<T> optionSelectHandler,
     this.maxNumberOfDisplayedItems,
+    double? estimatedOptionHeight,
     void Function(bool? ok)? onDismiss,
-  }) {
-    _optionSelectHandler = optionSelectHandler;
-    _onDismiss = onDismiss;
-  }
+  })  : estimatedOptionHeight = estimatedOptionHeight ?? 55,
+        _optionSelectHandler = optionSelectHandler,
+        _onDismiss = onDismiss;
 
   bool? _dismissedByOk;
 
@@ -88,6 +87,7 @@ class OptionsDialog<T> {
       optionSelectHandler: _optionSelectHandler,
       dismiss: _dismiss,
       maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
+      estimatedOptionHeight: estimatedOptionHeight,
     );
   }
 
@@ -107,6 +107,7 @@ class _OptionDialogBody<T> extends StatefulWidget {
   OptionSelectHandler<T>? optionSelectHandler;
   void Function(bool ok)? dismiss;
   int? maxNumberOfDisplayedItems;
+  double estimatedOptionHeight;
 
   _OptionDialogBody({
     Key? key,
@@ -115,6 +116,7 @@ class _OptionDialogBody<T> extends StatefulWidget {
     this.optionSelectHandler,
     this.dismiss,
     this.maxNumberOfDisplayedItems,
+    required this.estimatedOptionHeight,
   }) : super(key: key);
 
   @override
@@ -156,7 +158,10 @@ class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
                 });
               },
             ),
-            title: Text(element.text),
+            title: Text(
+              element.text,
+              style: AppTheme.defaultTextStyle(),
+            ),
             onTap: () {
               setState(() {
                 widget.selectedOption = element;
@@ -215,7 +220,7 @@ class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
 
     double? dialogHeight;
     if (widget.maxNumberOfDisplayedItems != null) {
-      final h = OptionsDialog.optionElementHeight;
+      final h = widget.estimatedOptionHeight;
 
       dialogHeight = h + (widget.options?.length ?? 0) * h;
       var maxNumberOfDisplayedItems = h + widget.maxNumberOfDisplayedItems! * h;
@@ -229,7 +234,7 @@ class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
       style: AppTheme.defaultTextStyle(),
       child: dialogHeight == null
           ? body
-          : SizedBox(child: body, height: dialogHeight),
+          : SizedBox(height: dialogHeight, child: body),
     );
   }
 }

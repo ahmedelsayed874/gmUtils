@@ -235,12 +235,12 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
     msg += '---------- DESCRIBE THE ISSUE BELOW ----------';
     msg += '\n\n\n\n\n';
 
-    var logFileContent = await Logs.currentLogFileContent;
+    var logFileContent = await Logs.getLastLogsContent(upTo: 5);
     if (logFileContent?.isNotEmpty == true) {
       msg += '---------- DON\'T CHANGE ANY OF THE FOLLOWING ----------';
       msg += '\n\n';
 
-      var encoded = const Base64Encoder().convert(logFileContent!.codeUnits);
+      var encoded = logFileContent!;
       if (encoded.length > 100) {
         var end = Random().nextInt(100);
         if (end < 1) end = 1;

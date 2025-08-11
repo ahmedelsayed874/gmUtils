@@ -108,6 +108,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
     required void Function(T p1) onOptionSelected,
     required void Function(bool? dissmissedByOk) onDismiss,
     int? maxNumberOfDisplayedItems,
+    double? estimatedOptionHeight,
   }) async {
     await waitForMount();
 
@@ -118,6 +119,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
       onOptionSelected: onOptionSelected,
       onDismiss: onDismiss,
       maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
+        estimatedOptionHeight: estimatedOptionHeight,
     );
   }
 

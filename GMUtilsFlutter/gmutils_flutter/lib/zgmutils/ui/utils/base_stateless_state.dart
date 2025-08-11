@@ -1,6 +1,6 @@
+import '../../../zgmutils/gm_main.dart';
 import 'package:flutter/material.dart';
 
-import '../../../zgmutils/gm_main.dart';
 import '../dialogs/message_dialog.dart';
 import 'drivers_interfaces.dart';
 import 'screen_utils.dart';
@@ -86,6 +86,7 @@ abstract class BaseStatelessWidget extends StatelessWidget
     required void Function(T p1) onOptionSelected,
     required void Function(bool? dissmissedByOk) onDismiss,
     int? maxNumberOfDisplayedItems,
+    double? estimatedOptionHeight,
   }) {
     _screenUtils.showOptionsDialog(
       title: title,
@@ -94,6 +95,7 @@ abstract class BaseStatelessWidget extends StatelessWidget
       onOptionSelected: onOptionSelected,
       onDismiss: onDismiss,
       maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
+        estimatedOptionHeight: estimatedOptionHeight,
     );
   }
 

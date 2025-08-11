@@ -19,6 +19,7 @@ class Themes {
       appColors: isLightTheme ? _LightColors() : _DarkColors(),
       appMeasurement: _AppMeasurement(
         screenSize: MediaQuery.of(context).size,
+        textScaleFactor: MediaQuery.textScalerOf(context).textScaleFactor,
       ),
       toolbarTitleFontFamily: fonts.toolbarTitle,
       defaultFontFamily: fonts.cairo,
@@ -268,7 +269,7 @@ class _DarkColors extends _AppColors {
 //==============================================================================
 
 class _AppMeasurement extends AppMeasurement {
-  _AppMeasurement({required super.screenSize});
+  _AppMeasurement({required super.screenSize, required super.textScaleFactor});
 
   @override
   double toolbarTitleSize = 17;

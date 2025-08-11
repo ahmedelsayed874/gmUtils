@@ -188,6 +188,7 @@ class ScreenUtils {
     required void Function(T p1) onOptionSelected,
     required void Function(bool? dissmissedByOk) onDismiss,
     int? maxNumberOfDisplayedItems,
+    double? estimatedOptionHeight,
   }) {
     OptionElement<T>? selectedOptionElement;
 
@@ -205,6 +206,7 @@ class ScreenUtils {
       selectedOption: selectedOptionElement,
       optionSelectHandler: (choice) => onOptionSelected(choice.value),
       maxNumberOfDisplayedItems: maxNumberOfDisplayedItems,
+      estimatedOptionHeight: estimatedOptionHeight,
       onDismiss: onDismiss,
     ).show(() => App.context);
   }

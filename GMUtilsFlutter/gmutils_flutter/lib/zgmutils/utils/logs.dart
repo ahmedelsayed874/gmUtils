@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:core' as core;
+
 //import 'dart:core';
 import 'dart:io';
 
@@ -113,7 +115,7 @@ class Logs {
       var now = core.DateTime.now();
 
       if (_files == null) {
-        _files = Files.public(
+        _files = Files.private(
           'log_${DateOp().formatForDatabase2(day: DateOpDayComponent(year: now.year, month: now.month, day: now.day), time: DateOpTimeComponent(
                 hour: now.hour,
                 minute: now.minute,
@@ -162,9 +164,83 @@ class Logs {
     });
   }
 
-  static core.Future<Directory>? get logsDirPath => _files?.directoryPath;
+  //----------------------------------------------------------------------------
 
-  static core.Future<File>? get currentLogFile => _files?.localFile;
+  static core.Future<Directory?> get logsDirPath async {
+    return _files?.directoryPath;
+  }
 
-  static core.Future<core.String>? get currentLogFileContent => _files?.read();
+  static core.Future<File?> get currentLogFile async {
+    return _files?.localFile;
+  }
+
+  static core.Future<core.String?> getLastLogsContent({
+    core.int upTo = 1,
+    core.bool encrypted = true,
+  }) async {
+    if (upTo < 1) {
+      return null;
+    }
+    //
+    else if (upTo == 1) {
+      if (encrypted) {
+        var file = await currentLogFile;
+        if (file == null) return null;
+        return _encodeFileContent(file);
+      }
+      //
+      else {
+        return _files?.read();
+      }
+    }
+
+    final dir = await logsDirPath;
+    if (dir == null) return null;
+
+    final files = dir
+        .listSync(followLinks: false)
+        .where((e) => e.path.endsWith('txt'))
+        .toList()
+        .reversed;
+
+    var content = '';
+    var i = 0;
+    while (i < upTo && i < files.length) {
+      if (content.isNotEmpty) {
+        content += '\n*******************\n';
+      }
+
+      var file = File(files.elementAt(i).path);
+
+      if (encrypted) {
+        content += await _encodeFileContent(file);
+      }
+      //
+      else {
+        try {
+          content += await file.readAsString();
+        } catch (e) {
+          //content += 'READING-LOGS-FAILED::EXCEPTION=$e';
+        }
+      }
+
+      i++;
+    }
+
+    return content;
+  }
+
+  static core.Future<core.String> _encodeFileContent(File file) async {
+    core.String content;
+
+    try {
+      content = await file.readAsString();
+    } catch (e) {
+      return '';
+    }
+
+    core.List<core.int> bytes = utf8.encode(content);
+    core.String contentBase64 = base64.encode(bytes);
+    return contentBase64;
+  }
 }

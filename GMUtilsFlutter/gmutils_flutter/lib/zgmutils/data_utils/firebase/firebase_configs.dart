@@ -6,7 +6,8 @@ import '../../utils/pairs.dart';
 import '../storages/general_storage.dart';
 
 abstract class IFirebaseConfigs {
-  Future<Pair<bool, String?>> fetch({required List<FirebaseConfigsHandler> handlers});
+  Future<Pair<bool, String?>> fetch(
+      {required List<FirebaseConfigsHandler> handlers});
 
   Future<DateTime?> get lastFetchTime;
 
@@ -14,25 +15,28 @@ abstract class IFirebaseConfigs {
 }
 
 class FirebaseConfigs extends IFirebaseConfigs {
+  late final int fetchTimeoutSeconds;
   late final int minimumFetchIntervalInMinute;
   late final IStorage _storage;
 
   FirebaseConfigs({
-    int? minimumFetchIntervalInMinute,
+    this.fetchTimeoutSeconds = 10,
+    this.minimumFetchIntervalInMinute = 10,
     IStorage? customStorage,
   }) {
-    this.minimumFetchIntervalInMinute = minimumFetchIntervalInMinute ?? 10;
     _storage = customStorage ?? GeneralStorage.o('firebase_configs');
   }
 
   @override
-  Future<Pair<bool, String?>> fetch({required List<FirebaseConfigsHandler> handlers}) async {
+  Future<Pair<bool, String?>> fetch({
+    required List<FirebaseConfigsHandler> handlers,
+  }) async {
     assert(handlers.isNotEmpty);
 
     final rc = FirebaseRemoteConfig.instance;
 
     rc.setConfigSettings(RemoteConfigSettings(
-      fetchTimeout: const Duration(seconds: 30),
+      fetchTimeout: Duration(seconds: fetchTimeoutSeconds),
       minimumFetchInterval: Duration(
         minutes: this.minimumFetchIntervalInMinute,
       ),
@@ -43,9 +47,13 @@ class FirebaseConfigs extends IFirebaseConfigs {
     String? error;
 
     while (tries++ < 9) {
+      Logs.print(() => 'FirebaseConfigs.fetch --> try #$tries');
+
       try {
         error = null;
-        await rc.fetchAndActivate();
+        await rc
+            .fetchAndActivate()
+            .timeout(Duration(seconds: fetchTimeoutSeconds + 1));
         success = true;
       } catch (e) {
         success = false;
@@ -65,14 +73,38 @@ class FirebaseConfigs extends IFirebaseConfigs {
 
       var configsMap = rc.getAll().map(
             (key, value) => MapEntry(key, value.asString()),
-      );
+          );
 
       Logs.print(
-            () => 'FirebaseConfigs/FirebaseRemoteConfig -> configsMap: $configsMap',
+        () => 'FirebaseConfigs/FirebaseRemoteConfig -> configsMap: $configsMap',
       );
 
       for (var handler in handlers) {
         handler.handle(configsMap);
+      }
+    }
+
+    if (error?.isNotEmpty == true) {
+      if (error!.contains('TimeoutException')) {
+        error = 'Connection timeout, check device connection and try again';
+      }
+
+      //
+      else if (error.contains('[firebase_remote_config/internal]')) {
+        error = error.replaceAll('[firebase_remote_config/internal]', '');
+      }
+
+      //
+      else if (error.contains('"Underlying error:')) {
+        var s = error.indexOf('"Underlying error:');
+        if (s >= 0) {
+          var e = error.indexOf('"', s);
+          if (e > s) {
+            try {
+              error = error.substring(s + 11, e);
+            } catch (e) {}
+          }
+        }
       }
     }
 

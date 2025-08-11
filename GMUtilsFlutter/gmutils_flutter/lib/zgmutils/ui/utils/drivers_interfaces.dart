@@ -33,6 +33,7 @@ abstract class IScreenDriverDependantDelegate {
     required void Function(T) onOptionSelected,
     required void Function(bool? dissmissedByOk) onDismiss,
     int? maxNumberOfDisplayedItems,
+    double? estimatedOptionHeight,
   });
 
   void updateView();

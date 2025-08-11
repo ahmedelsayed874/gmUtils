@@ -1,10 +1,12 @@
-
 import 'dart:ui';
+
+import 'package:flutter/painting.dart';
 
 abstract class AppMeasurement {
   final Size screenSize;
+  final double textScaleFactor;
 
-  AppMeasurement({required this.screenSize});
+  AppMeasurement({required this.screenSize, required this.textScaleFactor});
 
   factory AppMeasurement.def() => _AppMeasurementDefault();
 
@@ -20,7 +22,11 @@ abstract class AppMeasurement {
 }
 
 class _AppMeasurementDefault extends AppMeasurement {
-  _AppMeasurementDefault() : super(screenSize: Size(1000, 3000));
+  _AppMeasurementDefault()
+      : super(
+          screenSize: Size(1000, 3000),
+          textScaleFactor: 1,
+        );
 
   @override
   double paragraphTextSize = 15;
@@ -45,5 +51,4 @@ class _AppMeasurementDefault extends AppMeasurement {
 
   @override
   double toolbarTitleSize = 14;
-
 }

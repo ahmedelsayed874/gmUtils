@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 
 import '../../resources/app_theme.dart';
+import '../../utils/launcher.dart';
 import '../../utils/logs.dart';
 import '../widgets/my_linkify.dart';
 
@@ -129,17 +130,21 @@ class MessageDialog {
     Widget textWidget;
     if (_enableLinks) {
       textWidget = MyLinkify(
-          text: _message,
+        text: _message,
         enableSelect: _enableSelect,
         options: _enableSelect ? null : const LinkifyOptions(humanize: false),
       );
-    } else {
+    }
+    //
+    else {
       if (_enableSelect) {
         textWidget = SelectableText(
           _message,
           style: AppTheme.defaultTextStyle(),
         );
-      } else {
+      }
+      //
+      else {
         textWidget = Text(
           _message,
           style: AppTheme.defaultTextStyle(),
@@ -152,20 +157,27 @@ class MessageDialog {
         barrierDismissible: _enableOuterDismiss,
         builder: (context) {
           return AlertDialog(
-            title: Text(
-              _title,
-              style: AppTheme.textStyleOfScreenTitle(),
+            title: Padding(
+              padding: EdgeInsets.only(left: 7, right: 7, top: 5),
+              child: Text(
+                _title,
+                style: AppTheme.textStyleOfScreenTitle(),
+              ),
             ),
-            content: _extraWidget == null
-                ? textWidget
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      textWidget,
-                      _extraWidget!,
-                    ],
-                  ),
+
+            content: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 7),
+              child: _extraWidget == null
+                  ? textWidget
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        textWidget,
+                        _extraWidget!,
+                      ],
+                    ),
+            ),
             actions: _actions,
             backgroundColor: AppTheme.appColors?.background ?? Colors.white,
           );
