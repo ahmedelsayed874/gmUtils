@@ -3,12 +3,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'string_set.dart';
 
 import '../ui/dialogs/message_dialog.dart';
 import 'launcher.dart';
 import 'logs.dart';
 import 'package_info.dart';
-import 'string_set.dart';
 
 class AppVersionCheck {
   static Future<String> get playStoreLink async {
@@ -137,6 +137,8 @@ class AppVersionCheck {
     required String? publishedIosVersion,
     required bool en,
     required bool forceSelectAction,
+    required String? message,
+    String? title,
   }) async {
     Logs.print(() => [
           'AppVersionCheck.check ---> ',
@@ -160,8 +162,9 @@ class AppVersionCheck {
       MessageDialog? md;
 
       md = MessageDialog.create
-          .setTitle(en ? 'Alert' : 'تنبيه')
-          .setMessage(defaultWarnMessage.get(en))
+          .setTitle(title ?? (en ? 'Alert' : 'تنبيه'))
+          .setMessage(message ?? defaultWarnMessage.get(en))
+          .setEnableLinks(true)
           .addActions([
             MessageDialogActionButton(
               en ? 'Update' : 'تحديث',
