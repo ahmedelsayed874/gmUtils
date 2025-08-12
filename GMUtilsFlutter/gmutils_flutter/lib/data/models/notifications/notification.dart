@@ -1,5 +1,5 @@
 import 'package:gmutils_flutter/zgmutils/utils/mappable.dart';
-import 'package:gmutils_flutter/zgmutils/utils/notifications.dart';
+import 'package:gmutils_flutter/zgmutils/utils/notifications_manager.dart';
 
 class Notification {
   static const String relatedObjectName_Mail = 'Mail';

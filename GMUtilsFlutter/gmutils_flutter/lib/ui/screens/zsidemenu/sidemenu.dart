@@ -3,7 +3,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:gmutils_flutter/data/models/notifications/notification.dart' as notifModel;
+import 'package:gmutils_flutter/data/models/notifications/notification.dart'
+    as notifModel;
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/ui/screens/home/home_screen.dart';
 import 'package:gmutils_flutter/ui/screens/notifications/notifications_screen.dart';
@@ -18,7 +19,7 @@ import 'package:gmutils_flutter/zgmutils/utils/date_op.dart';
 import 'package:gmutils_flutter/zgmutils/utils/files.dart';
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
 import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
-import 'package:gmutils_flutter/zgmutils/utils/notifications.dart';
+import 'package:gmutils_flutter/zgmutils/utils/notifications_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../user_profile/user_profile_screen.dart';
@@ -195,7 +196,7 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
 
   @override
   void onReportIssue() async {
-    if ((await Logs.currentLogFile) == null) {
+    if ((await Logs.hasLogs) == true) {
       showMessage(
         message: App.isEnglish
             ? 'Please repeat the steps that lead to the issue, to help collect data, then finally report the issue'
@@ -287,11 +288,13 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
 
   @override
   void testNewChatNotification() {
-    Notifications.instance.showNotification(
-        'TestNewChatNotification', 'Test New Chat Notification',
-        customChannel: notifModel.Notification.channelInfoOf(
-          notifModel.Notification.relatedObjectName_Chat,
-        ));
+    NotificationsManager.instance.showNotification(
+      'TestNewChatNotification',
+      'Test New Chat Notification',
+      customChannel: notifModel.Notification.channelInfoOf(
+        notifModel.Notification.relatedObjectName_Chat,
+      ),
+    );
   }
 
   @override
@@ -302,9 +305,11 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
       notifModel.Notification.relatedObjectName_ChatMessagePollResultUpdated
     ][Random().nextInt(3)];
 
-    Notifications.instance.showNotification('TestNewChatMessageNotification',
-        'Test New Chat Message Notification ($channel)',
-        customChannel: notifModel.Notification.channelInfoOf(channel));
+    NotificationsManager.instance.showNotification(
+      'TestNewChatMessageNotification',
+      'Test New Chat Message Notification ($channel)',
+      customChannel: notifModel.Notification.channelInfoOf(channel),
+    );
   }
 
   String? lastNotificationTitle;

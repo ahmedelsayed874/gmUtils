@@ -7,11 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 
 import '../../../main.dart' as main;
-import '../../../zgmutils/data_utils/storages/app_preferences_storage.dart';
-import '../../../zgmutils/utils/notifications.dart';
 import '../../utils/logs.dart';
+import '../../utils/notifications_manager.dart';
 import '../../utils/result.dart';
 import '../../utils/string_set.dart';
+import '../storages/app_preferences_storage.dart';
 import 'fcm_extension.dart';
 
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
@@ -74,7 +74,7 @@ class FCM extends IFCM {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   FCMConfigurations? fcmConfigurations;
 
-  INotifications localNotifications = Notifications.instance;
+  INotificationsManager localNotifications = NotificationsManager.instance;
 
   //private constructor
   static FCM? _instance;
@@ -170,7 +170,7 @@ class FCM extends IFCM {
         'don\'t forget to use FCM.instance.redirectToPendingScreen(); '
         'in your list screen');
     Logs.print(() => '[Fcm.init()] -> '
-        'don\'t forget to define this "${Notifications.defaultNotificationChannelId}" as '
+        'don\'t forget to define this "${NotificationsManager.defaultNotificationChannelId}" as '
         'default notification channel (com.google.firebase.messaging.default_notification_channel_id)');
   }
 
@@ -585,9 +585,9 @@ class FCM extends IFCM {
     //FIVE TOPICS IN ONE REQUEST
 
     String? androidChannelId =
-        channel?.channelId ?? Notifications.defaultNotificationChannelId;
+        channel?.channelId ?? NotificationsManager.defaultNotificationChannelId;
     SoundFile? sound =
-        channel?.soundFile ?? Notifications.defaultNotificationChannelSound;
+        channel?.soundFile ?? NotificationsManager.defaultNotificationChannelSound;
 
     var android = {
       'title': title,

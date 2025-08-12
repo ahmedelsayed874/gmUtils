@@ -1,6 +1,6 @@
-import '../../../zgmutils/gm_main.dart';
 import 'package:flutter/material.dart';
 
+import '../../gm_main.dart';
 import '../dialogs/message_dialog.dart';
 import 'drivers_interfaces.dart';
 import 'screen_utils.dart';

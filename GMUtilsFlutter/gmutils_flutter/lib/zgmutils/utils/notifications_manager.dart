@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../gm_main.dart';
 import 'logs.dart';
 
-abstract class INotifications {
+abstract class INotificationsManager {
   Future<void> init(
     NotificationsConfigurations? _notificationsConfigurations,
   );
@@ -31,7 +31,7 @@ abstract class INotifications {
   Future<List<ActiveNotification>> getActiveNotifications();
 }
 
-class Notifications extends INotifications {
+class NotificationsManager extends INotificationsManager {
   static String defaultNotificationIconName = 'notif_icon';
   ///this value must set in android manifest
   ///         <meta-data
@@ -49,14 +49,14 @@ class Notifications extends INotifications {
   NotificationsConfigurations? get notificationsConfigurations => _notificationsConfigurations;
 
   //private constructor
-  static Notifications? _instance;
+  static NotificationsManager? _instance;
 
-  static Notifications get instance {
-    _instance ??= Notifications._();
+  static NotificationsManager get instance {
+    _instance ??= NotificationsManager._();
     return _instance!;
   }
 
-  Notifications._();
+  NotificationsManager._();
 
   @override
   Future<void> init(
@@ -372,7 +372,7 @@ void _onDidReceiveNotificationResponse(NotificationResponse details) {
       ')');
 
   var payload = details.payload;
-  Notifications.instance.openCorrespondingScreenByNotificationJson(payload);
+  NotificationsManager.instance.openCorrespondingScreenByNotificationJson(payload);
 }
 
 //------------------------------------------------------------------------------

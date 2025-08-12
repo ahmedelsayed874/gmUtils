@@ -11,7 +11,7 @@ import 'resources/app_measurement.dart';
 import 'resources/app_theme.dart';
 import 'ui/utils/screen_utils.dart';
 import 'utils/logs.dart';
-import 'utils/notifications.dart';
+import 'utils/notifications_manager.dart';
 
 typedef OnInitialize = void Function(BuildContext);
 
@@ -34,7 +34,7 @@ class GMMain {
     WidgetsFlutterBinding.ensureInitialized();
 
     if (localNotificationsConfigurations != null) {
-      await Notifications.instance.init(localNotificationsConfigurations);
+      await NotificationsManager.instance.init(localNotificationsConfigurations);
     }
 
     if (fcmRequirements != null && localNotificationsConfigurations != null) {

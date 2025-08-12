@@ -1,7 +1,8 @@
-import '../../../zgmutils/data_utils/web/response.dart';
-import '../../../zgmutils/data_utils/web/web_request_executors.dart';
-import '../../../zgmutils/data_utils/web/web_url.dart';
-import '../../../zgmutils/utils/mappable.dart';
+
+import '../../utils/mappable.dart';
+import 'response.dart';
+import 'web_request_executors.dart';
+import 'web_url.dart';
 
 class UsefulApis {
   Future<Response<_TimeOfAreaModel>> currentTimeInCairo() async {

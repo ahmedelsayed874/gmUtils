@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../zgmutils/ui/widgets/network_image_with_loading.dart';
+import 'network_image_with_loading.dart';
+
 
 class ImagesSliderWidget extends StatefulWidget {
   final List<String> urls;

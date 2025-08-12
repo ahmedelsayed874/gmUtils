@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:gmutils_flutter/resources/_resources.dart';
-import 'package:gmutils_flutter/zgmutils/gm_main.dart';
+
+import '../../gm_main.dart';
+import '../../resources/app_theme.dart';
+
 
 class AudioPlayer extends StatefulWidget {
   /// Path from where to play recorded audio
@@ -96,7 +98,7 @@ class AudioPlayerState extends State<AudioPlayer> {
 
   Widget _buildControl() {
     Widget icon;
-    Color controlColor = widget.controlColor ?? Res.themes.colors.secondary;
+    Color controlColor = widget.controlColor ?? AppTheme.appColors?.secondary ?? Colors.blueAccent;
     Color controlColorBg = controlColor.withOpacity(0.3);
 
     if (_audioPlayer.state == ap.PlayerState.playing) {
@@ -140,7 +142,7 @@ class AudioPlayerState extends State<AudioPlayer> {
 
     double width = widgetWidth - _controlSize;
 
-    var color = widget.sliderColor ?? Res.themes.colors.secondary;
+    var color = widget.sliderColor ?? AppTheme.appColors?.secondary ?? Colors.blueAccent;
 
     return SizedBox(
       width: width,
