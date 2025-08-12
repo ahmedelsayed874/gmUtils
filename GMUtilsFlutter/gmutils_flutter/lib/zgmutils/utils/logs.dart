@@ -12,9 +12,9 @@ import 'files.dart';
 import 'result.dart';
 
 class Logs {
-  static core.Map<core.String?, LogsManager>? _logs;
+  static core.Map<core.String?, _LogsManager>? _logs;
 
-  static LogsManager get(
+  static _LogsManager get(
     core.String? name, {
     core.int maxLogsFiles = 10,
     core.bool forceCreateNewInstance = false,
@@ -22,19 +22,19 @@ class Logs {
     _logs ??= {};
 
     if (forceCreateNewInstance) {
-      _logs![name] = LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
+      _logs![name] = _LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
     }
     //
     else {
-      _logs![name] ??= LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
+      _logs![name] ??= _LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
     }
 
     return _logs![name]!;
   }
 
-  static LogsManager get _defLogs => get(null);
+  static _LogsManager get _defLogs => get(null);
 
-  static core.List<LogsManager> get allLogs {
+  static core.List<_LogsManager> get allLogs {
     var all = _logs?.values.toList() ?? [];
     if (all.isEmpty) all.add(_defLogs);
     return all;
@@ -73,7 +73,7 @@ class Logs {
 
     for (var logs in allLogs) {
       if (content.isNotEmpty) content += '\n';
-      content += '=>${logs.logsSet}::${await logs.getLastLogsContent(
+      content += '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(
         upTo: upTo,
         encrypted: encrypted,
       )}';
@@ -81,13 +81,28 @@ class Logs {
 
     return content;
   }
+
+  //----------------------------------------------------------------------------
+
+  static core.Future<core.bool> get hasLogs async {
+    for (var value in allLogs) {
+      final dir = await value.logsDirPath;
+      final files = dir?.listSync(followLinks: false);
+
+      if (files?.isNotEmpty == true) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }
 
-class LogsManager {
+class _LogsManager {
   final core.String? logsSet;
   final core.int maxLogsFiles;
 
-  LogsManager._({required this.logsSet, required this.maxLogsFiles});
+  _LogsManager._({required this.logsSet, required this.maxLogsFiles});
 
   //----------------------------------------------------------------------------
 
@@ -313,7 +328,7 @@ class LogsManager {
       }
       //
       else {
-        return file.readAsString();
+        return _getFileContent(file);
       }
     }
 
@@ -329,10 +344,8 @@ class LogsManager {
     var content = '';
     var i = 0;
     while (i < upTo && i < files.length) {
-      if (content.isNotEmpty) {
-        content += '\n*******************\n';
-      }
-
+      if (content.isNotEmpty) content += '\n\n';
+      
       var file = File(files.elementAt(i).path);
 
       if (encrypted) {
@@ -340,11 +353,7 @@ class LogsManager {
       }
       //
       else {
-        try {
-          content += await file.readAsString();
-        } catch (e) {
-          //content += 'READING-LOGS-FAILED::EXCEPTION=$e';
-        }
+        content += await _getFileContent(file);
       }
 
       i++;
@@ -353,15 +362,23 @@ class LogsManager {
     return content;
   }
 
-  core.Future<core.String> _encodeFileContent(File file) async {
+  core.Future<core.String> _getFileContent(File file) async {
     core.String content;
-
+    
     try {
-      content = await file.readAsString();
+      content = await file.readAsString(); 
     } catch (e) {
       return '';
     }
-
+    
+    return '${Files.extractFileName(file)}'
+        ':-------------------------\n'
+        '$content';
+  }
+  
+  core.Future<core.String> _encodeFileContent(File file) async {
+    core.String content = await _getFileContent(file);
+    
     core.List<core.int> bytes = utf8.encode(content);
     core.String contentBase64 = base64.encode(bytes);
     return contentBase64;
