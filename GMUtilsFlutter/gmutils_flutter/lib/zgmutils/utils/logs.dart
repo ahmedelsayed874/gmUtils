@@ -65,18 +65,22 @@ class Logs {
 
   //----------------------------------------------------------------------------
 
-  static core.Future<Directory?> get logsDirPath => _defLogs.logsDirPath;
-
-  static core.Future<File?> get currentLogFile => _defLogs.currentLogFile;
-
   static core.Future<core.String?> getLastLogsContent({
     core.int upTo = 1,
     core.bool encrypted = true,
-  }) =>
-      _defLogs.getLastLogsContent(
+  }) async {
+    core.String content = '';
+
+    for (var logs in allLogs) {
+      if (content.isNotEmpty) content += '\n';
+      content += '=>${logs.logsSet}::${await logs.getLastLogsContent(
         upTo: upTo,
         encrypted: encrypted,
-      );
+      )}';
+    }
+
+    return content;
+  }
 }
 
 class LogsManager {
