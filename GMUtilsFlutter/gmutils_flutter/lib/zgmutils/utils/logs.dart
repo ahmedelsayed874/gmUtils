@@ -12,10 +12,90 @@ import 'files.dart';
 import 'result.dart';
 
 class Logs {
-  static core.int? _logFileDeadline;
-  static Result<core.DateTime>? _savedDeadline;
+  static core.Map<core.String?, LogsManager>? _logs;
+
+  static LogsManager get(
+    core.String? name, {
+    core.int maxLogsFiles = 10,
+    core.bool forceCreateNewInstance = false,
+  }) {
+    _logs ??= {};
+
+    if (forceCreateNewInstance) {
+      _logs![name] = LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
+    }
+    //
+    else {
+      _logs![name] ??= LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
+    }
+
+    return _logs![name]!;
+  }
+
+  static LogsManager get _defLogs => get(null);
+
+  static core.List<LogsManager> get allLogs {
+    var all = _logs?.values.toList() ?? [];
+    if (all.isEmpty) all.add(_defLogs);
+    return all;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
 
   static void setLogFileDeadline(
+    core.String? logFileDeadline, {
+    core.bool saveDate = false,
+  }) =>
+      _defLogs.setLogFileDeadline(
+        logFileDeadline,
+        saveDate: saveDate,
+      );
+
+  static core.Future<core.DateTime?> get savedLogsDeadline =>
+      _defLogs.savedLogsDeadline;
+
+  static core.bool get inDebugMode => _defLogs.inDebugMode;
+
+  static core.Future<core.bool> get writingToLogFileEnabled =>
+      _defLogs.writingToLogFileEnabled;
+
+  //----------------------------------------------------------------------------
+
+  static void print(core.Object? Function() info) => _defLogs.print(info);
+
+  //----------------------------------------------------------------------------
+
+  static core.Future<Directory?> get logsDirPath => _defLogs.logsDirPath;
+
+  static core.Future<File?> get currentLogFile => _defLogs.currentLogFile;
+
+  static core.Future<core.String?> getLastLogsContent({
+    core.int upTo = 1,
+    core.bool encrypted = true,
+  }) =>
+      _defLogs.getLastLogsContent(
+        upTo: upTo,
+        encrypted: encrypted,
+      );
+}
+
+class LogsManager {
+  final core.String? logsSet;
+  final core.int maxLogsFiles;
+
+  LogsManager._({required this.logsSet, required this.maxLogsFiles});
+
+  //----------------------------------------------------------------------------
+
+  core.String _getLogsSetStr({core.String prefix = '_'}) =>
+      logsSet?.isNotEmpty == true ? '$prefix$logsSet' : '';
+
+  //----------------------------------------------------------------------------
+
+  core.int? _logFileDeadline;
+  Result<core.DateTime>? _savedDeadline;
+
+  void setLogFileDeadline(
     core.String? logFileDeadline, {
     core.bool saveDate = false,
   }) {
@@ -23,7 +103,10 @@ class Logs {
       var dt = DateOp().parse(logFileDeadline ?? '', convertToLocalTime: true);
       _logFileDeadline = dt?.millisecondsSinceEpoch;
       if (dt != null && saveDate) {
-        GeneralStorage.o('logs').save('deadline', logFileDeadline!);
+        GeneralStorage.o('logs').save(
+          'deadline${_getLogsSetStr()}}',
+          logFileDeadline!,
+        );
         _savedDeadline = Result(dt);
       }
     } catch (e) {
@@ -34,11 +117,13 @@ class Logs {
     }
   }
 
-  static core.Future<core.DateTime?> get _savedLogsDeadline async {
+  core.Future<core.DateTime?> get savedLogsDeadline async {
     if (_savedDeadline != null) return _savedDeadline!.result;
 
     try {
-      var d = await GeneralStorage.o('logs').retrieve('deadline');
+      var d = await GeneralStorage.o('logs').retrieve(
+        'deadline${_getLogsSetStr()}',
+      );
       if (d?.isNotEmpty == true) {
         var dt = DateOp().parse(d ?? '', convertToLocalTime: true);
         _savedDeadline = Result(dt);
@@ -53,16 +138,16 @@ class Logs {
     }
   }
 
-  static core.bool get inDebugMode {
+  core.bool get inDebugMode {
     return kDebugMode;
   }
 
-  static core.Future<core.bool> get writingToLogFileEnabled async {
+  core.Future<core.bool> get writingToLogFileEnabled async {
     var now = core.DateTime.now();
     var printToFile = now.millisecondsSinceEpoch < (_logFileDeadline ?? 0);
 
     if (!printToFile) {
-      var dl = await _savedLogsDeadline;
+      var dl = await savedLogsDeadline;
       if (dl != null) {
         printToFile = now.millisecondsSinceEpoch < dl.millisecondsSinceEpoch;
       }
@@ -73,12 +158,16 @@ class Logs {
 
   //----------------------------------------------------------------------------
 
-  static void print(core.Object? Function() info) async {
+  Files? _files;
+  core.List<core.String>? _fileTextCache;
+  core.bool _fileWriterBusy = false;
+  core.int _x = 0;
+
+  void print(core.Object? Function() info) async {
     if (inDebugMode || await writingToLogFileEnabled) {
       final infoData = info();
-      const logStart = '*****';
       if (infoData == null) {
-        _print('$logStart null');
+        _print('null');
       } else {
         final string = infoData.toString();
         var len = string.length;
@@ -89,7 +178,7 @@ class Logs {
         if (end > string.length) end = string.length;
 
         while (len > maxLen) {
-          _print('$logStart ${string.substring(start, end)}');
+          _print(string.substring(start, end));
           start += maxLen;
           end += maxLen;
           if (end > string.length) end = string.length;
@@ -97,84 +186,113 @@ class Logs {
         }
 
         if (len > 0) {
-          _print('$logStart ${string.substring(start)}');
+          _print(string.substring(start));
         }
       }
     }
   }
 
-  //----------------------------------------------------------------------------
-
-  static Files? _files;
-  static core.List<core.String>? _fileTextCache;
-  static core.bool _fileWriterBussy = false;
-  static core.int _x = 0;
-
-  static void _print(core.String text) async {
+  void _print(core.String text) async {
     if (await writingToLogFileEnabled) {
-      var now = core.DateTime.now();
-
-      if (_files == null) {
-        _files = Files.private(
-          'log_${DateOp().formatForDatabase2(day: DateOpDayComponent(year: now.year, month: now.month, day: now.day), time: DateOpTimeComponent(
-                hour: now.hour,
-                minute: now.minute,
-                second: 0,
-                timezone: null,
-              ))}',
-          'txt',
-        );
-        if (kDebugMode) {
-          _files?.localFile.then((file) {
-            core.print('****** LOG-FILE-PATH: ${file.path}');
-          });
-        }
-      }
-
-      _printToFile('>>>> $now ----\n$text \r\n\r\n');
+      _createLogFileIfNotExist();
+      _printToFile(text);
     }
 
     if (kDebugMode) {
-      core.print(text);
+      core.print('***** $text');
     }
   }
 
-  static core.Future<void> _printToFile(core.String log) async {
-    if (_fileWriterBussy) {
+  void _createLogFileIfNotExist() async {
+    if (_files != null) return;
+
+    var now = core.DateTime.now();
+
+    _files = Files.private(
+      'log_${DateOp().formatForDatabase2(
+        day: DateOpDayComponent(
+          year: now.year,
+          month: now.month,
+          day: now.day,
+        ),
+        time: DateOpTimeComponent(
+          hour: now.hour,
+          minute: now.minute,
+          second: 0,
+          timezone: null,
+        ),
+      )}',
+      'txt',
+      subDirName: 'logs${_getLogsSetStr(prefix: '/')}',
+    );
+
+    final dir = await logsDirPath;
+    if (dir != null) {
+      final files = dir
+          .listSync(followLinks: false)
+          .where((e) => e.path.endsWith('txt'))
+          .toList();
+
+      while (files.length > maxLogsFiles) {
+        try {
+          files.removeAt(0).deleteSync();
+        } catch (e) {
+          if (kDebugMode) {
+            core.print(e);
+          }
+        }
+      }
+    }
+
+    if (kDebugMode) {
+      _files?.localFile.then((file) {
+        if (kDebugMode) {
+          core.print('****** LOG-FILE-PATH: ${file.path}');
+        }
+      });
+    }
+  }
+
+  core.Future<void> _printToFile(core.String text) async {
+    if (_fileWriterBusy) {
       _fileTextCache ??= [];
-      _fileTextCache?.add(log);
+      _fileTextCache?.add(text);
 
       return;
     }
 
-    _fileWriterBussy = true;
+    _fileWriterBusy = true;
+
+    var now = core.DateTime.now();
     var order = '000000${_x++}'.substring('$_x'.length); //0000 001234
-    _files?.append('[$order]:: $log').then((v) {
-      if (_fileTextCache?.isNotEmpty == true) {
-        _fileWriterBussy = true;
+    final log = '[$order]:: $now::\n$text \r\n\r\n';
 
-        var log2 = _fileTextCache!.removeAt(0);
-        if (_fileTextCache!.isEmpty) _fileTextCache = null;
+    await _files?.append(log);
 
-        _fileWriterBussy = false;
-        _printToFile(log2);
-      } else {
-        _fileWriterBussy = false;
-      }
-    });
+    if (_fileTextCache?.isNotEmpty == true) {
+      _fileWriterBusy = true;
+
+      var log2 = _fileTextCache!.removeAt(0);
+      if (_fileTextCache!.isEmpty) _fileTextCache = null;
+
+      _fileWriterBusy = false;
+      _printToFile(log2);
+    } else {
+      _fileWriterBusy = false;
+    }
   }
 
   //----------------------------------------------------------------------------
 
-  static core.Future<Directory?> get logsDirPath async {
+  core.Future<Directory?> get logsDirPath async {
     return _files?.directoryPath;
   }
 
-  static core.Future<File?> get currentLogFile async {
+  core.Future<File?> get currentLogFile async {
     return _files?.localFile;
   }
 
-  static core.Future<core.String?> getLastLogsContent({
+  core.Future<core.String?> getLastLogsContent({
     core.int upTo = 1,
     core.bool encrypted = true,
   }) async {
@@ -183,14 +301,15 @@ class Logs {
     }
     //
     else if (upTo == 1) {
+      var file = await currentLogFile;
+      if (file == null) return null;
+
       if (encrypted) {
-        var file = await currentLogFile;
-        if (file == null) return null;
         return _encodeFileContent(file);
       }
       //
       else {
-        return _files?.read();
+        return file.readAsString();
       }
     }
 
@@ -230,7 +349,7 @@ class Logs {
     return content;
   }
 
-  static core.Future<core.String> _encodeFileContent(File file) async {
+  core.Future<core.String> _encodeFileContent(File file) async {
     core.String content;
 
     try {

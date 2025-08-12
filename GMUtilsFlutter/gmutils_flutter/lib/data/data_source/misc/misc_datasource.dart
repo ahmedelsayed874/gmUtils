@@ -19,8 +19,8 @@ abstract class MiscDataSource {
     required File file,
     required String? fileType,
   }) {
-    var fileName = Files.fileName(file);
-    var fileExtension = Files.fileExtension(file);
+    var fileName = Files.extractFileName(file);
+    var fileExtension = Files.extractFileExtension(file);
     String? attachmentType =
         fileType ?? Attachment.fileTypeForFileExtension(fileExtension);
 

@@ -11,48 +11,48 @@ import '../../../zgmutils/utils/logs.dart';
 ///Directory appDocDir = await getApplicationDocumentsDirectory();
 ///String appDocPath = appDocDir.path;
 class Files {
-  String _fileName;
-  String _fileExtension;
-  bool _saveToCacheDir;
-  bool _downloadDir;
-  bool _privateDir = true;
+  final String fileName;
+  final String fileExtension;
+  final bool saveToCacheDir;
+  final bool downloadDir;
+  final bool privateDir;
+  final String? subDirName;
 
   Files.private(
-    this._fileName,
-    this._fileExtension, {
-    bool saveToCacheDir = false,
-  })  : _saveToCacheDir = saveToCacheDir,
-        _privateDir = true,
-        _downloadDir = false;
+    this.fileName,
+    this.fileExtension, {
+    this.saveToCacheDir = false,
+    this.subDirName,
+  })  : privateDir = true,
+        downloadDir = false;
 
   Files.public(
-    this._fileName,
-    this._fileExtension, {
-    bool downloadDir = false,
-    bool saveToCacheDir = false,
-  })  : _downloadDir = downloadDir,
-        _saveToCacheDir = saveToCacheDir,
-        _privateDir = false;
+    this.fileName,
+    this.fileExtension, {
+    this.downloadDir = false,
+    this.saveToCacheDir = false,
+    this.subDirName,
+  }) : privateDir = false;
 
   //----------------------------------------------------------------------------
 
   Future<Directory> get directoryPath async {
     Directory? directory;
     if (Platform.isAndroid) {
-      if (_privateDir) {
-        directory = _saveToCacheDir
+      if (privateDir) {
+        directory = saveToCacheDir
             ? await filesProvider.getApplicationCacheDirectory()
             : await filesProvider.getApplicationDocumentsDirectory();
       }
       //
       else {
-        if (_saveToCacheDir) {
+        if (saveToCacheDir) {
           directory =
               (await filesProvider.getExternalCacheDirectories())?.first;
         }
         //
         else {
-          if (_downloadDir) {
+          if (downloadDir) {
             try {
               directory = await filesProvider.getDownloadsDirectory();
             } catch (e) {
@@ -68,12 +68,12 @@ class Files {
     }
     //
     else {
-      if (_privateDir) {
+      if (privateDir) {
         directory = await filesProvider.getApplicationSupportDirectory();
       }
       //
       else {
-        if (_downloadDir) {
+        if (downloadDir) {
           try {
             directory = await filesProvider.getDownloadsDirectory();
           } catch (e) {
@@ -87,7 +87,16 @@ class Files {
       }
     }
 
-    return directory ?? (await filesProvider.getTemporaryDirectory());
+    directory ??= (await filesProvider.getTemporaryDirectory());
+
+    if (subDirName?.isNotEmpty == true) {
+      directory = Directory('${directory.path}/$subDirName');
+      if (!directory.existsSync()) {
+        directory = await directory.create(recursive: true);
+      }
+    }
+
+    return directory;
   }
 
   //----------------------------------------------------------------------------
@@ -97,7 +106,7 @@ class Files {
   Future<File> get localFile async {
     if (__localFile == null) {
       final path = (await directoryPath).path;
-      __localFile = File('$path/$_fileName.$_fileExtension');
+      __localFile = File('$path/$fileName.$fileExtension');
       if (!__localFile!.existsSync()) {
         __localFile!.createSync(recursive: true);
       }
@@ -191,7 +200,7 @@ class Files {
     }
   }
 
-  static String fileName(File file) {
+  static String extractFileName(File file) {
     var txt = '';
 
     var idx = file.path.lastIndexOf('/');
@@ -204,7 +213,7 @@ class Files {
     return txt;
   }
 
-  static String fileExtension(File file) {
+  static String extractFileExtension(File file) {
     var txt = '';
 
     var idx = file.path.lastIndexOf('.');
