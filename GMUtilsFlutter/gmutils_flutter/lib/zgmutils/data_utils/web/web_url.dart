@@ -185,10 +185,11 @@ class PostUrl<RDT> extends Url<RDT> {
 }
 
 class PostMultiPartFileUrl<RDT> extends Url<RDT> {
-  String fileMappedKey;
-  File file;
-  String? fileMimeType;
-  Map<String, String>? formFields;
+  final String fileMappedKey;
+  final File file;
+  final String? customFileName;
+  final String? fileMimeType;
+  final Map<String, String>? formFields;
 
   PostMultiPartFileUrl({
     required super.domain,
@@ -200,6 +201,7 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     this.formFields,
     required this.fileMappedKey,
     required this.file,
+    this.customFileName,
     this.fileMimeType,
     //
     required Mappable<RDT> super.responseMapper,
@@ -209,6 +211,10 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
   List<int> get fileBytes => file.readAsBytesSync();
 
   String get fileName {
+    if (customFileName?.isNotEmpty == true) {
+      return customFileName!;
+    }
+
     int i = file.path.lastIndexOf('/');
     if (i < 0) i = file.path.lastIndexOf('\\');
 
@@ -218,17 +224,17 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
       var d = DateTime.now();
       return 'file'
           '${d.year}'
-          '${_compansate(d.month)}'
-          '${_compansate(d.day)}'
-          '${_compansate(d.hour)}'
-          '${_compansate(d.minute)}'
-          '${_compansate(d.second)}'
-          '.${_compansate(d.millisecond)}'
+          '${_compensate(d.month)}'
+          '${_compensate(d.day)}'
+          '${_compensate(d.hour)}'
+          '${_compensate(d.minute)}'
+          '${_compensate(d.second)}'
+          '.${_compensate(d.millisecond)}'
           '';
     }
   }
 
-  String _compansate(int n) {
+  String _compensate(int n) {
     return n < 10 ? '0$n' : '$n';
   }
 
@@ -251,7 +257,7 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     }
     formFields?.forEach((key, value) {
       s += key.hashCode.toString();
-      s += '$value'.hashCode.toString();
+      s += value.hashCode.toString();
     });
     return s;
   }
