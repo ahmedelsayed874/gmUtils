@@ -22,8 +22,18 @@ class LoginUrl extends PostUrl<Response<AuthUserAccount>> {
           params: {
             'userName': username,
             'password': password,
-            'fcmToken': fcmToken,
+            // 'fcmToken': fcmToken,
+            'fcmToken':
+                '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
           },
+          obscureLogOptions: [
+            // ObscureLogOption.allValueOf('fcmToken'),
+            // ObscureLogOption.firstHalfOfValueOf('password'),
+            ObscureLogOption.secondHalfOfValueOf('password'),
+            //ObscureLogOption.firstOfValueOf('password', withPercent: 0.7),
+            ObscureLogOption.firstOfValueOf('userName', withPercent: 0.7),
+            ObscureLogOption.encryptValueOf('fcmToken', secretKey: 'aAbB'),
+          ],
         );
 }
 
@@ -56,7 +66,8 @@ class VerifyAccountPasswordResetCodeUrl
           fragments: RequestsHelper.instance.apisPath,
           headers: RequestsHelper.instance.headers,
           endPoint: 'VerifyAccountPasswordResetCode',
-          responseMapper: ResponseMapper(dataMapper: UserAccountIdentifierMapper()),
+          responseMapper:
+              ResponseMapper(dataMapper: UserAccountIdentifierMapper()),
           queries: null,
           params: {
             'emailAddress': emailAddress,
@@ -221,7 +232,7 @@ class GetAccountsListUrl extends PostUrl<Response<List<UserAccountHeader>>> {
     required int pageNumber,
     required int pageSize,
     required String language, //→ [en - ar]
-    required String? sortBy,// → [Name - LastLoginTime]
+    required String? sortBy, // → [Name - LastLoginTime]
     required String? sortDirection, //→ [ASC - DESC]
   }) : super(
           domain: RequestsHelper.instance.serverUrl,
@@ -238,12 +249,12 @@ class GetAccountsListUrl extends PostUrl<Response<List<UserAccountHeader>>> {
             'pageNumber': pageNumber,
             'pageSize': pageSize,
             'language': language,
-            if (sortBy != null) 'sortBy' : sortBy,
-            if (sortDirection != null) 'sortDirection' : sortDirection,
+            if (sortBy != null) 'sortBy': sortBy,
+            if (sortDirection != null) 'sortDirection': sortDirection,
           },
         );
 
-  /*static Map<String, String>? collectQueries({
+/*static Map<String, String>? collectQueries({
     required int requesterAccountId,
     required String requesterAccountType,
     required List<String>? targetAccountTypes,

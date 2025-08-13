@@ -155,32 +155,25 @@ class _LightColors extends _AppColors {
   Color get black => Colors.black;
 
   @override
-  // TODO: implement blue
-  Color get blue => throw UnimplementedError();
+  Color get blue => Colors.blueAccent;
 
   @override
-  // TODO: implement bottomNavBar
-  Color get bottomNavBar => throw UnimplementedError();
+  Color get bottomNavBar => Colors.white70;
 
   @override
-  // TODO: implement bottomNavBarVariant
-  Color get bottomNavBarVariant => throw UnimplementedError();
+  Color get bottomNavBarVariant => Colors.black;
 
   @override
-  // TODO: implement primaryVariant
-  Color get primaryVariant => throw UnimplementedError();
+  Color get primaryVariant => Colors.white;
 
   @override
-  // TODO: implement secondaryVariant
-  Color get secondaryVariant => throw UnimplementedError();
+  Color get secondaryVariant => Colors.white;
 
   @override
-  // TODO: implement sideMenuVariant
-  Color get sideMenuVariant => throw UnimplementedError();
+  Color get sideMenuVariant => primaryVariant;
 
   @override
-  // TODO: implement toolbarVariant
-  Color get toolbarVariant => throw UnimplementedError();
+  Color get toolbarVariant => primaryVariant;
 }
 
 class _DarkColors extends _AppColors {
@@ -238,32 +231,25 @@ class _DarkColors extends _AppColors {
   Color get black => Colors.white70;
 
   @override
-  // TODO: implement blue
-  Color get blue => throw UnimplementedError();
+  Color get blue => Colors.blue[900]!;
 
   @override
-  // TODO: implement bottomNavBar
-  Color get bottomNavBar => throw UnimplementedError();
+  Color get bottomNavBar => Colors.black;
 
   @override
-  // TODO: implement bottomNavBarVariant
-  Color get bottomNavBarVariant => throw UnimplementedError();
+  Color get bottomNavBarVariant => Colors.white;
 
   @override
-  // TODO: implement primaryVariant
-  Color get primaryVariant => throw UnimplementedError();
+  Color get primaryVariant => Colors.white;
 
   @override
-  // TODO: implement secondaryVariant
-  Color get secondaryVariant => throw UnimplementedError();
+  Color get secondaryVariant => primaryVariant;
 
   @override
-  // TODO: implement sideMenuVariant
-  Color get sideMenuVariant => throw UnimplementedError();
+  Color get sideMenuVariant => primaryVariant;
 
   @override
-  // TODO: implement toolbarVariant
-  Color get toolbarVariant => throw UnimplementedError();
+  Color get toolbarVariant => primaryVariant;
 }
 
 //==============================================================================

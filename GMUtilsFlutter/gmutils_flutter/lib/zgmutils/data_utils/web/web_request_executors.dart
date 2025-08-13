@@ -118,13 +118,13 @@ class WebRequestExecutor {
     Logs.print(() => [
           'API::Call',
           '[POST]',
-          'url: ${url.uri}',
+          'url: ${url.obscuredUri}',
           //'\n',
-          'headers: ${url.headers}',
+          'headers: ${url.obscuredHeaders}',
           //'\n',
-          'PostParams: ${url.params} ..... asJson: ${url.asJson}',
+          'PostParams: ${url.obscuredParams} ..... asJson: ${url.asJson}',
           //'\n',
-          'postObject(body): ${url.postObject}',
+          'postObject(body): ${url.obscuredPostObject}',
           //'\n',
         ]);
 
@@ -153,9 +153,9 @@ class WebRequestExecutor {
     Logs.print(() => [
           'API::Call',
           '[POST / MULTIPART]',
-          'url: ${url.uri}',
+          'url: ${url.obscuredUri}',
           //'\n',
-          'headers: ${url.headers}',
+          'headers: ${url.obscuredHeaders}',
           //'\n',
           'fileMappedKey: ${url.fileMappedKey}',
           //'\n',
@@ -164,6 +164,8 @@ class WebRequestExecutor {
           'fileName: ${url.fileName}',
           //'\n',
           'fileMimeType: ${url.fileMimeType}',
+          //'\n',
+          'formFields: ${url.obscuredFormFields}',
           //'\n',
         ]);
 
@@ -265,9 +267,9 @@ class WebRequestExecutor {
     Logs.print(() => [
           'API::Call',
           '[GET]',
-          'url: ${url.uri}',
+          'url: ${url.obscuredUri}',
           //'\n',
-          'headers: ${url.headers}',
+          'headers: ${url.obscuredHeaders}',
           //'\n',
         ]);
 
@@ -378,7 +380,7 @@ class WebRequestExecutor {
 
     Logs.print(() => [
           'API::Response',
-          'url: ${url.uri}',
+          'url: ${url.obscuredUri}',
           '\n',
           'code: $code',
           '\n',

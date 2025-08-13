@@ -32,9 +32,9 @@ abstract class UsersDataSource {
   Future<Response<AuthUserAccount>> login({
     required String username,
     required String password,
-    required IFCM fcm,
+    IFCM? fcm,
   }) async {
-    var fcmToken = await fcm.deviceToken;
+    var fcmToken = '';//await fcm.deviceToken;
 
     var response = await doLogin(
       username: username,
@@ -61,7 +61,7 @@ abstract class UsersDataSource {
         if (username.toLowerCase().startsWith('test') == true) {
           topics.add(username.toLowerCase());
         }
-        fcm.subscribeToTopics(topics);
+        //fcm.subscribeToTopics(topics);
 
         accountStorage.saveAccount(
           response.data!,

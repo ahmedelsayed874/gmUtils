@@ -13,6 +13,7 @@ abstract class Url<RDT> {
   final Map<String, String>? queries;
   final Mappable<RDT>? responseMapper;
   final Response<RDT> Function(String response)? responseEncoder;
+  final List<ObscureLogOption>? obscureLogOptions;
 
   Url({
     required this.domain,
@@ -23,6 +24,8 @@ abstract class Url<RDT> {
     //
     required this.responseMapper,
     required this.responseEncoder,
+    //
+    required this.obscureLogOptions,
   }) {
     if (headers != null) {
       this.headers.addAll(headers);
@@ -80,7 +83,8 @@ abstract class Url<RDT> {
       } catch (e) {
         final Response<RDT> res = Response.failed(
           url: this,
-          error: 'Url.encodeResponse --> Exception at Parsing the response of ($endPoint): $e ------> response=$response',
+          error:
+              'Url.encodeResponse --> Exception at Parsing the response of ($endPoint): $e ------> response=$response',
           httpCode: 0,
         );
         res.url = this;
@@ -107,6 +111,87 @@ abstract class Url<RDT> {
 
     return s;
   }
+
+  //-----------------------------------------------
+
+  Map<String, ObscureLogOption>? get _obscureLogOptionsMap {
+    if (obscureLogOptions == null) return null;
+
+    Map<String, ObscureLogOption> m = {};
+
+    for (var value in obscureLogOptions!) {
+      m[value.keyName] = value;
+    }
+
+    return m;
+  }
+
+  Map? _obscureMap(Map? m) {
+    if (obscureLogOptions == null || m == null) return m;
+    final obscureLogOptionsMap = _obscureLogOptionsMap!;
+
+    Map<String, String> h = {};
+
+    for (var key in m.keys) {
+      final v = obscureLogOptionsMap[key]?.obscure(m[key] ?? '');
+      h[key] = v ?? m[key] ?? '';
+    }
+
+    return h;
+  }
+
+  /*Map<String, String> get obscuredHeaders0 {
+    if (obscureLogOptions == null) return headers;
+    final obscureLogOptionsMap = _obscureLogOptionsMap!;
+
+    Map<String, String> h = {};
+
+    for (var key in headers.keys) {
+      final v = obscureLogOptionsMap[key]?.obscure(headers[key] ?? '');
+      h[key] = v ?? headers[key] ?? '';
+    }
+
+    return h;
+  }*/
+  Map? get obscuredHeaders => _obscureMap(headers);
+
+  /*Map<String, String>? get obscuredQueries {
+    if (obscureLogOptions == null || queries == null) return queries;
+    final obscureLogOptionsMap = _obscureLogOptionsMap!;
+
+    Map<String, String> h = {};
+
+    for (var key in queries!.keys) {
+      final v = obscureLogOptionsMap[key]?.obscure(queries![key] ?? '');
+      h[key] = v ?? queries![key] ?? '';
+    }
+
+    return h;
+  }*/
+  Map? get obscuredQueries => _obscureMap(queries);
+
+  String get obscuredUriAsString {
+    if (obscureLogOptions == null) return uriAsString;
+
+    var url = '$domain$fragments$endPoint';
+
+    final _obscuredQueries = obscuredQueries;
+    if (_obscuredQueries?.isNotEmpty == true) {
+      String q = '';
+      _obscuredQueries!.forEach((key, value) {
+        if (q.isNotEmpty) q += '&';
+        q += '$key=$value';
+      });
+      url += '?$q';
+    }
+
+    return url;
+  }
+
+  Uri get obscuredUri => Uri.parse(
+        Uri.encodeFull(
+            obscureLogOptions == null ? uriAsString : obscuredUriAsString),
+      );
 }
 
 class GetUrl<RDT> extends Url<RDT> {
@@ -119,6 +204,8 @@ class GetUrl<RDT> extends Url<RDT> {
     //
     required super.responseMapper,
     super.responseEncoder,
+    //
+    super.obscureLogOptions,
   });
 }
 
@@ -140,6 +227,8 @@ class PostUrl<RDT> extends Url<RDT> {
     //
     required super.responseMapper,
     super.responseEncoder,
+    //
+    super.obscureLogOptions,
   }) {
     if (params != null) {
       if (asJson) {
@@ -158,7 +247,9 @@ class PostUrl<RDT> extends Url<RDT> {
         final json = jsonEncode(params);
         //Logs.print(() => 'PostUrl -> json: $json');
         return json;
-      } else {
+      }
+      //
+      else {
         String q = '';
         params!.forEach((key, value) {
           if (q.isNotEmpty) q += '&';
@@ -167,7 +258,9 @@ class PostUrl<RDT> extends Url<RDT> {
         //Logs.print(() => 'PostUrl -> parameters: $q');
         return q;
       }
-    } else {
+    }
+    //
+    else {
       return '';
     }
   }
@@ -181,6 +274,43 @@ class PostUrl<RDT> extends Url<RDT> {
     });
     s += '$asJson'.hashCode.toString();
     return s;
+  }
+
+  //-----------------------------------------
+
+  /*Map<String, dynamic>? get obscuredParams {
+    if (obscureLogOptions == null || params == null) return params;
+    final obscureLogOptionsMap = _obscureLogOptionsMap!;
+
+    Map<String, String> h = {};
+
+    for (var key in params!.keys) {
+      final v = obscureLogOptionsMap[key]?.obscure(params![key] ?? '');
+      h[key] = v ?? params![key] ?? '';
+    }
+
+    return h;
+  }*/
+  Map? get obscuredParams => _obscureMap(params);
+
+  Object get obscuredPostObject {
+    if (obscuredParams?.isNotEmpty == true) {
+      if (asJson) {
+        final json = jsonEncode(obscuredParams);
+        //Logs.print(() => 'PostUrl -> json: $json');
+        return json;
+      } else {
+        String q = '';
+        obscuredParams!.forEach((key, value) {
+          if (q.isNotEmpty) q += '&';
+          q += '$key=$value';
+        });
+        //Logs.print(() => 'PostUrl -> parameters: $q');
+        return q;
+      }
+    } else {
+      return '';
+    }
   }
 }
 
@@ -206,6 +336,8 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     //
     required Mappable<RDT> super.responseMapper,
     super.responseEncoder,
+    //
+    super.obscureLogOptions,
   });
 
   List<int> get fileBytes => file.readAsBytesSync();
@@ -245,10 +377,7 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     s += file.path.hashCode.toString();
     try {
       s += file.lengthSync().toString();
-      s += file
-          .lastModifiedSync()
-          .millisecondsSinceEpoch
-          .toString();
+      s += file.lastModifiedSync().millisecondsSinceEpoch.toString();
     } catch (e) {
       s += e.toString();
     }
@@ -260,5 +389,108 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
       s += value.hashCode.toString();
     });
     return s;
+  }
+
+  //--------------------------------------------
+
+  /*Map<String, String>? get obscuredFormFields {
+    if (obscureLogOptions == null || formFields == null) return formFields;
+    final obscureLogOptionsMap = _obscureLogOptionsMap!;
+
+    Map<String, String> h = {};
+
+    for (var key in formFields!.keys) {
+      final v = obscureLogOptionsMap[key]?.obscure(formFields![key] ?? '');
+      h[key] = v ?? formFields![key] ?? '';
+    }
+
+    return h;
+  }*/
+  Map? get obscuredFormFields => _obscureMap(formFields);
+}
+
+//-----------------------------------------------------------------------------
+
+class ObscureLogOption {
+  final String keyName;
+  final bool? fromLeading;
+  final double withPercent;
+  final String? secretKey;
+
+  ObscureLogOption.allValueOf(this.keyName)
+      : fromLeading = true,
+        withPercent = 1,
+        secretKey = null;
+
+  ObscureLogOption.firstHalfOfValueOf(this.keyName)
+      : fromLeading = true,
+        withPercent = 0.5,
+        secretKey = null;
+
+  ObscureLogOption.secondHalfOfValueOf(this.keyName)
+      : fromLeading = false,
+        withPercent = 0.5,
+        secretKey = null;
+
+  ObscureLogOption.firstOfValueOf(this.keyName, {required this.withPercent})
+      : fromLeading = true,
+        secretKey = null;
+
+  ObscureLogOption.lastOfValueOf(this.keyName, {required this.withPercent})
+      : fromLeading = false,
+        secretKey = null;
+
+  ObscureLogOption.encryptValueOf(this.keyName, {required this.secretKey})
+      : fromLeading = null,
+        withPercent = 1;
+
+  String obscure(value) {
+    value = '$value';
+
+    if (fromLeading == true) {
+      //password ---> ****word
+      int end = (value.length * withPercent).ceil();
+
+      String t = '';
+
+      for (var i = 0; i < end; i++) {
+        t += '*';
+      }
+
+      if (end < value.length) {
+        t += value.substring(end);
+      }
+
+      return t;
+    }
+
+    //
+    else if (fromLeading == false) {
+      //password ---> pass****
+      int end = (value.length * (1.0 - withPercent)).floor();
+
+      String t = '';
+
+      if (end > 0 && end < value.length) {
+        t = value.substring(0, end);
+      }
+
+      for (var i = end; i < value.length; i++) {
+        t += '*';
+      }
+
+      return t;
+    }
+
+    //
+    else if (secretKey?.isNotEmpty == true) {
+      final v = utf8.encode(value);
+      return base64Encode(v);
+    }
+
+    //
+    else {
+      throw 'obscuring type is unknown';
+    }
   }
 }

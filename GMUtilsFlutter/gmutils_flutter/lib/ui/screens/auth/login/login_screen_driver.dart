@@ -31,12 +31,12 @@ abstract class LoginScreenDriverAbs extends IScreenDriver {
 
     delegate.showWaitView();
 
-    await checkServerUrl(username: username);
+    // await checkServerUrl(username: username);
 
     var response = await usersDataSource.login(
       username: username,
       password: password,
-      fcm: FCM.instance,
+      //fcm: FCM.instance,
     );
 
     await delegate.hideWaitView();

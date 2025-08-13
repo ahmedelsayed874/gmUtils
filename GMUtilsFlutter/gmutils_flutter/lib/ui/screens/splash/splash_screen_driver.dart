@@ -34,9 +34,9 @@ abstract class SplashScreenDriverAbs extends IScreenDriver {
       _startNextScreen();
     });
 
-    _loadAppConfigs().then((r) {
+    //_loadAppConfigs().then((r) {
       _login();
-    });
+    //});
   }
 
   Future<void> _loadAppConfigs() async {
