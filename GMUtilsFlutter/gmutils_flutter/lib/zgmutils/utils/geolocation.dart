@@ -47,6 +47,7 @@ abstract class Geolocation {
     required double lng1,
     required double lat2,
     required double lng2,
+    required bool inKilometers,
   });
 }
 
@@ -142,18 +143,21 @@ class GeolocationReal extends Geolocation {
     }
   }
 
+  /// distance in KM
   @override
   double calculateDistance({
     required double lat1,
     required double lng1,
     required double lat2,
     required double lng2,
+    required bool inKilometers,
   }) {
     var distance = Calculations().calculateDistanceBetweenPoints(
       lat1: lat1,
       lng1: lng1,
       lat2: lat2,
       lng2: lng2,
+      inKilometers: inKilometers,
     );
     return distance;
   }
@@ -186,12 +190,14 @@ class GeolocationMock extends Geolocation {
     required double lng1,
     required double lat2,
     required double lng2,
+    required bool inKilometers,
   }) {
     var distance = Calculations().calculateDistanceBetweenPoints(
       lat1: lat1,
       lng1: lng1,
       lat2: lat2,
       lng2: lng2,
+      inKilometers: inKilometers,
     );
     return distance;
   }

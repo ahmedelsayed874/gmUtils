@@ -130,11 +130,16 @@ abstract class Url<RDT> {
     if (obscureLogOptions == null || m == null) return m;
     final obscureLogOptionsMap = _obscureLogOptionsMap!;
 
-    Map<String, String> h = {};
+    Map h = {};
 
     for (var key in m.keys) {
-      final v = obscureLogOptionsMap[key]?.obscure(m[key] ?? '');
-      h[key] = v ?? m[key] ?? '';
+      final v = obscureLogOptionsMap[key]?.obscure('${m[key]}');
+      if (v != null) {
+        h[key] = v;
+      }
+      else {
+        h[key] = '${m[key]}';
+      }
     }
 
     return h;
@@ -416,32 +421,44 @@ class ObscureLogOption {
   final bool? fromLeading;
   final double withPercent;
   final String? secretKey;
+  final String? replacement;
 
   ObscureLogOption.allValueOf(this.keyName)
       : fromLeading = true,
         withPercent = 1,
-        secretKey = null;
+        secretKey = null,
+        replacement = null;
 
   ObscureLogOption.firstHalfOfValueOf(this.keyName)
       : fromLeading = true,
         withPercent = 0.5,
-        secretKey = null;
+        secretKey = null,
+        replacement = null;
 
   ObscureLogOption.secondHalfOfValueOf(this.keyName)
       : fromLeading = false,
         withPercent = 0.5,
-        secretKey = null;
+        secretKey = null,
+        replacement = null;
 
   ObscureLogOption.firstOfValueOf(this.keyName, {required this.withPercent})
       : fromLeading = true,
-        secretKey = null;
+        secretKey = null,
+        replacement = null;
 
   ObscureLogOption.lastOfValueOf(this.keyName, {required this.withPercent})
       : fromLeading = false,
-        secretKey = null;
+        secretKey = null,
+        replacement = null;
 
   ObscureLogOption.encryptValueOf(this.keyName, {required this.secretKey})
       : fromLeading = null,
+        withPercent = 1,
+        replacement = null;
+
+  ObscureLogOption.replaceValueOf(this.keyName, {required this.replacement})
+      : fromLeading = null,
+        secretKey = null,
         withPercent = 1;
 
   String obscure(value) {
@@ -486,6 +503,11 @@ class ObscureLogOption {
     else if (secretKey?.isNotEmpty == true) {
       final v = utf8.encode(value);
       return base64Encode(v);
+    }
+
+    //
+    else if (replacement?.isNotEmpty == true) {
+      return replacement!;
     }
 
     //
