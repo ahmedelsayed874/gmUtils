@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 
+import '../../utils/text_utils.dart';
 import '../../utils/logs.dart';
 import '../../utils/mappable.dart';
 import '../../utils/string_set.dart';
-import '../../utils/text_utils.dart';
 import 'firebase_utils.dart';
 import 'response.dart';
 
@@ -38,6 +38,7 @@ abstract class IFirebaseDatabaseOp<T> {
   Future<Response<List<T>>> retrieveAll({
     FBFilterOption? filterOption,
     List<Map> Function(Object value)? collectionSource,
+    String? subNodePath,
   });
 
   //----------------------------------------------------------------------------
@@ -237,6 +238,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   Future<Response<List<T>>> retrieveAll({
     FBFilterOption? filterOption,
     List<Map> Function(Object value)? collectionSource,
+    String? subNodePath,
   }) async {
     /*if (await is ConnectionAvailable() == false) {
       return Response.failed(
@@ -245,7 +247,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       );
     }*/
 
-    var ref = await databaseReference;
+    DatabaseReference ref = await _getReferenceOfNode(subNodePath);
     DataSnapshot? snapshot;
 
     try {
