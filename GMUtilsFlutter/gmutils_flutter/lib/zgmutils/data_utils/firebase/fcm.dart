@@ -86,14 +86,14 @@ class FCM extends IFCM {
 
   FCM._();
 
-  Future<void> init(FCMConfigurations? fcmConfigurations) async {
+  Future<void> init(FCMConfigurations? fcmConfigs) async {
     Logs.print(() => 'Fcm.init');
 
-    this.fcmConfigurations ??= fcmConfigurations;
+    fcmConfigurations ??= fcmConfigs;
 
     //region Local Notification Config
     await localNotifications.init(
-      this.fcmConfigurations?.notificationsConfigurations,
+      fcmConfigurations?.notificationsConfigurations,
     );
 
     await messaging.setForegroundNotificationPresentationOptions(
@@ -158,11 +158,11 @@ class FCM extends IFCM {
       }
 
       if (token.isNotEmpty) {
-        this.fcmConfigurations?.onDeviceTokenRefresh?.call(token);
+        fcmConfigurations?.onDeviceTokenRefresh?.call(token);
       }
 
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-        this.fcmConfigurations?.onDeviceTokenRefresh?.call(newToken);
+        fcmConfigurations?.onDeviceTokenRefresh?.call(newToken);
       });
     }
 
