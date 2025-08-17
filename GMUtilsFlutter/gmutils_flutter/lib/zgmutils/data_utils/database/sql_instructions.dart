@@ -5,6 +5,13 @@ abstract class SQLInstruction {
 
   String getSQLInstruction();
 
+  List<SQLInstruction>? onExecuteSqlError(SQLInstruction failedSql, error) {
+    throw UnimplementedError(
+      'implement this to handle the following error: $error '
+      'which occurred due to executing ${failedSql.getSQLInstruction()}',
+    );
+  }
+
   @override
   String toString() {
     return 'SQLInstruction = ${getSQLInstruction()}';
@@ -13,7 +20,7 @@ abstract class SQLInstruction {
 
 //------------------------------------------------------------------------------
 
-/*abstract class SQLCreateTable extends SQLInstruction {
+abstract class SQLCreateTable extends SQLInstruction {
   SQLCreateTable({
     required String tableName,
   }) : super(tableName);
@@ -25,34 +32,36 @@ abstract class SQLInstruction {
   @override
   String getSQLInstruction() {
     String columnsStr = '';
-    columns.forEach((element) {
+    for (var element in columns) {
       if (columnsStr.isNotEmpty) columnsStr += ", ";
       columnsStr += element.getSQLInstruction();
-    });
+    }
 
     String primaryColumnsStr = '';
     if (primaryColumns != null && primaryColumns?.isNotEmpty == true) {
       if (columnsStr.contains(SQLTableColumn.CONSTRAINTS_PRIMARY_KEY)) {
         throw Exception(
-            'this table "$tableName" defines PRIMARY KEY in two places');
+          'this table "$tableName" defines PRIMARY KEY in two places',
+        );
       }
 
       primaryColumnsStr = ', ${SQLTableColumn.CONSTRAINTS_PRIMARY_KEY} (';
       final length = primaryColumnsStr.length;
-      primaryColumns!.forEach((element) {
+      for (var element in primaryColumns!) {
         if (primaryColumnsStr.length > length) primaryColumnsStr += ", ";
         primaryColumnsStr += element;
-      });
+      }
       primaryColumnsStr += ')';
     }
 
     return 'CREATE TABLE $tableName ($columnsStr$primaryColumnsStr)';
   }
 
-  static SQLCreateTable obj(
-      {required String tableName,
-      required List<SQLTableColumn> columns,
-      required List<String>? primaryColumns}) {
+  static SQLCreateTable obj({
+    required String tableName,
+    required List<SQLTableColumn> columns,
+    required List<String>? primaryColumns,
+  }) {
     return SQLCreateTableImpl(
       tableName,
       columns_: columns,
@@ -61,26 +70,9 @@ abstract class SQLInstruction {
   }
 }
 
-class SQLCreateTableImpl extends SQLCreateTable {
-  final List<SQLTableColumn> columns_;
-  final List<String>? primaryColumns_;
+typedef FieldType = String;
 
-  SQLCreateTableImpl(
-    String tableName, {
-    required this.columns_,
-    required this.primaryColumns_,
-  }) : super(tableName: tableName);
-
-  @override
-  List<SQLTableColumn> get columns => columns_;
-
-  @override
-  List<String>? get primaryColumns => primaryColumns_;
-}*/
-
-//------------------------------------------------------------------------------
-
-/*class SQLTableColumn extends SQLInstruction {
+class SQLTableColumn extends SQLInstruction {
   static const TYPE_INTEGER_NUMBER = 'INTEGER';
   static const TYPE_REAL_NUMBER = 'REAL';
   static const TYPE_TEXT = 'TEXT';
@@ -107,38 +99,53 @@ class SQLCreateTableImpl extends SQLCreateTable {
   String getSQLInstruction() {
     String constraintsStr = '';
     if (constraints != null && constraints!.isNotEmpty) {
-      constraintsStr = ' ' + constraints!.join(' ');
+      constraintsStr = ' ${constraints!.join(' ')}';
     }
     return '$name $type$constraintsStr';
   }
 
   static List<SQLTableColumn> createFromMap(
     Map map, {
-    required String? Function(String fieldName) onFieldTypeError,
+    required FieldType? Function(String fieldName, Type? valueType)?
+        onFieldTypeError,
     required List<String>? Function(String fieldName) constraints,
   }) {
     List<SQLTableColumn> cols = [];
 
-    map.entries.forEach((element) {
+    for (var element in map.entries) {
       var fieldName = element.key;
       String fieldType = '';
 
       if (element.value is String) {
         fieldType = SQLTableColumn.TYPE_TEXT;
-      } else if (element.value is int) {
+      }
+      //
+      else if (element.value is int) {
         fieldType = SQLTableColumn.TYPE_INTEGER_NUMBER;
-      } else if (element.value is num) {
+      }
+      //
+      else if (element.value is num) {
         fieldType = SQLTableColumn.TYPE_REAL_NUMBER;
-      } else if (element.value is double) {
+      }
+      //
+      else if (element.value is double) {
         fieldType = SQLTableColumn.TYPE_REAL_NUMBER;
-      } else if (element.value is bool) {
+      }
+      //
+      else if (element.value is bool) {
         fieldType = SQLTableColumn.TYPE_INTEGER_NUMBER;
-      } else {
-        var t = (onFieldTypeError.call(fieldName) ?? '').trim();
+      }
+      //
+      else {
+        var r = onFieldTypeError?.call(fieldName, element.value?.runtimeType);
+        var t = (r ?? '').trim();
         if (t.isEmpty) {
           throw Exception(
-              '"$fieldName" with type of "${element.value.runtimeType}" is not define');
-        } else {
+            '"$fieldName" with type of "${element.value?.runtimeType}" is not define',
+          );
+        }
+        //
+        else {
           fieldType = t;
         }
       }
@@ -148,11 +155,28 @@ class SQLCreateTableImpl extends SQLCreateTable {
         type: fieldType,
         constraints: constraints.call(fieldName),
       ));
-    });
+    }
 
     return cols;
   }
-}*/
+}
+
+class SQLCreateTableImpl extends SQLCreateTable {
+  final List<SQLTableColumn> columns_;
+  final List<String>? primaryColumns_;
+
+  SQLCreateTableImpl(
+    String tableName, {
+    required this.columns_,
+    required this.primaryColumns_,
+  }) : super(tableName: tableName);
+
+  @override
+  List<SQLTableColumn> get columns => columns_;
+
+  @override
+  List<String>? get primaryColumns => primaryColumns_;
+}
 
 //------------------------------------------------------------------------------
 
