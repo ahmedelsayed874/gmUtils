@@ -6,6 +6,8 @@
         android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:name=".app.BaseApplicationExample"
         android:allowBackup="true"
@@ -44,5 +46,22 @@
         <activity android:name="com.blogspot.gm4s.gmutileexample.activities.FirebaseTestActivity" />
         <activity android:name="com.blogspot.gm4s.gmutileexample.activities.ActivityWithViewModelExampleActivity" />
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+        </intent>
+
+        <intent>
+            <action android:name="android.intent.action.OPEN_DOCUMENT" />
+<!--            <category android:name="android.intent.category.OPENABLE" />-->
+        </intent>
+
+        <intent>
+            <action android:name="android.intent.action.GET_CONTENT" />
+        </intent>
+
+    </queries>
 
 </manifest>

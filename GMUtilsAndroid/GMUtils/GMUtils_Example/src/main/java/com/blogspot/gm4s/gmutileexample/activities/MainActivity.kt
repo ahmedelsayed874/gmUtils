@@ -1,5 +1,6 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -256,6 +257,7 @@ class MainActivity : BaseActivity() {
             val b = FileUtils.createInstance().showFileExplorer(
                 this,
                 "application/*",
+                false,
                 null,
                 12321
             )
@@ -316,6 +318,41 @@ class MainActivity : BaseActivity() {
             Logger.printToAll() {"test"}
 
             error("throw bug to test writing to all logs file")
+        }
+
+        this.view.btn26.text = "Open File"
+        this.view.btn26.setOnClickListener {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    9
+                )
+                return@setOnClickListener
+            }
+
+            InputDialog.create(this)
+                .setTitle("Open File Explore")
+                .setMessage("Type mimetype of the file")
+                .setInputHint("Mimetype (separate by ,)")
+                .setInputText("application/*")
+                .setPositiveButtonCallback {
+                    val split = it[0].split(',').toTypedArray()
+
+                    val b = FileUtils.createInstance().showFileExplorer(
+                        this,
+                        split,
+                        false,
+                        null,
+                        12321
+                    )
+                    log("opening-file", "opening-file of mimetype = ${it[0]} ---> got $b")
+
+                    null
+                }
+                .show()
+
+
         }
 
 
@@ -435,6 +472,7 @@ class MainActivity : BaseActivity() {
         FileUtils.createInstance().showFileExplorer(
             this,
             "*/*",
+            false,
             null,
             12313
         )

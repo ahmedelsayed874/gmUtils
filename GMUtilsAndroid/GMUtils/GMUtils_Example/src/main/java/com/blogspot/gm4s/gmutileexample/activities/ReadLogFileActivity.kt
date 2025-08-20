@@ -46,6 +46,7 @@ class ReadLogFileActivity : BaseActivity() {
         FileUtils.createInstance().showFileExplorer(
             this,
             "*/*",
+            false,
             null,
             1
         )

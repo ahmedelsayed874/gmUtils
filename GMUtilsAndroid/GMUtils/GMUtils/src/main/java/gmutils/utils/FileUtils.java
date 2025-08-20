@@ -6,7 +6,9 @@ import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -29,6 +31,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -330,19 +334,35 @@ public class FileUtils {
 
     //----------------------------------------------------------------------------------------------
 
-    public boolean showFileExplorer(Fragment fragment, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
-        Intent intent = canShowFileExplorer(fragment.getActivity(), mimeType, pickerInitialUri, requestId);
-
-        if (intent != null) {
-            fragment.startActivityForResult(intent, requestId);
-            return true;
-        }
-
-        return false;
+    public boolean showFileExplorer(
+            Activity activity,
+            String mimeType,
+            boolean selectMultiple,
+            @Nullable Uri pickerInitialUri,
+            int requestId
+    ) {
+        return showFileExplorer(
+                activity,
+                TextUtils.isEmpty(mimeType) ? null : new String[]{mimeType},
+                selectMultiple,
+                pickerInitialUri,
+                requestId
+        );
     }
 
-    public boolean showFileExplorer(Activity activity, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
-        Intent intent = canShowFileExplorer(activity, mimeType, pickerInitialUri, requestId);
+    public boolean showFileExplorer(
+            Activity activity,
+            String[] mimeTypes,
+            boolean selectMultiple,
+            @Nullable Uri pickerInitialUri,
+            int requestId
+    ) {
+        Intent intent = canShowFileExplorer(
+                activity,
+                mimeTypes,
+                selectMultiple,
+                pickerInitialUri
+        );
 
         if (intent != null) {
             activity.startActivityForResult(intent, requestId);
@@ -352,44 +372,148 @@ public class FileUtils {
         return false;
     }
 
-    private Intent canShowFileExplorer(Activity activity, String mimeType, @Nullable Uri pickerInitialUri, int requestId) {
+    public boolean showFileExplorer(
+            Fragment fragment,
+            String mimeType,
+            boolean selectMultiple,
+            @Nullable Uri pickerInitialUri,
+            int requestId
+    ) {
+        return showFileExplorer(
+                fragment,
+                TextUtils.isEmpty(mimeType) ? null : new String[]{mimeType},
+                selectMultiple,
+                pickerInitialUri,
+                requestId
+        );
+    }
 
+    public boolean showFileExplorer(
+            Fragment fragment,
+            String[] mimeTypes,
+            boolean selectMultiple,
+            @Nullable Uri pickerInitialUri,
+            int requestId
+    ) {
+        Intent intent = canShowFileExplorer(fragment.getActivity(), mimeTypes, selectMultiple, pickerInitialUri);
+
+        if (intent != null) {
+            fragment.startActivityForResult(intent, requestId);
+            return true;
+        }
+
+        return false;
+    }
+
+    public Intent canShowFileExplorer(
+            Activity activity,
+            String[] mimeTypes,
+            boolean selectMultiple,
+            @Nullable Uri pickerInitialUri
+    ) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            Intent intent = createShowingFileExplorerIntent19(mimeType, pickerInitialUri);
+            Intent intent = createShowingFileExplorerIntent19(mimeTypes, selectMultiple, pickerInitialUri);
 
             if (intent.resolveActivity(activity.getPackageManager()) != null) {
                 return intent;
-            } else {
-                intent = createShowingFileExplorerIntent(mimeType);
-                if (intent.resolveActivity(activity.getPackageManager()) != null)
-                    return intent;
             }
-
-        } else {
-            Intent intent = createShowingFileExplorerIntent(mimeType);
-            if (intent.resolveActivity(activity.getPackageManager()) != null)
-                return intent;
         }
+
+        //OR
+        String mimeType = null;
+        if (mimeTypes != null && mimeTypes.length > 0) {
+            mimeType = mimeTypes[0];
+        }
+
+        Intent intent = createShowingFileExplorerIntent(mimeType, selectMultiple);
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            return intent;
+        }
+
 
         return null;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private Intent createShowingFileExplorerIntent19(String mimeType, @Nullable Uri pickerInitialUri) {
-        return createShowingFileExplorerIntent(Intent.ACTION_OPEN_DOCUMENT, mimeType, pickerInitialUri);
+    public Intent createShowingFileExplorerIntent19(
+            String[] mimeTypes,
+            boolean selectMultiple,
+            @Nullable Uri pickerInitialUri
+    ) {
+        return createShowingFileExplorerIntent(
+                Intent.ACTION_OPEN_DOCUMENT,
+                mimeTypes,
+                selectMultiple,
+                pickerInitialUri
+        );
     }
 
-    private Intent createShowingFileExplorerIntent(String mimeType) {
-        return createShowingFileExplorerIntent(Intent.ACTION_GET_CONTENT, mimeType, null);
+    public Intent createShowingFileExplorerIntent(
+            String mimeType,
+            boolean selectMultiple
+    ) {
+        return createShowingFileExplorerIntent(
+                Intent.ACTION_GET_CONTENT,
+                TextUtils.isEmpty(mimeType) ? null : new String[]{mimeType},
+                selectMultiple,
+                null
+        );
     }
 
-    private Intent createShowingFileExplorerIntent(String action, String mimeType, @Nullable Uri pickerInitialUri) {
-        if (TextUtils.isEmpty(mimeType)) mimeType = "*/*";
-
+    /**
+     * https://developer.android.com/guide/components/intents-common#Storage
+     * https://developer.android.com/guide/components/intents-common#OpenFile
+     */
+    private Intent createShowingFileExplorerIntent(
+            String action,
+            String[] mimeTypes,
+            boolean selectMultiple,
+            @Nullable Uri pickerInitialUri
+    ) {
         Intent intent = new Intent(action);
 
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType(mimeType);
+
+        if (mimeTypes != null) {
+            if (mimeTypes.length == 0) {
+                intent.setType("*/*");
+            }
+            //
+            else if (mimeTypes.length == 1) {
+                String mimeType = TextUtils.isEmpty(mimeTypes[0]) ? "*/*" : mimeTypes[0];
+                intent.setType(mimeType);
+            }
+            //
+            else {
+                List<String> mimetypes2 = new ArrayList<>();
+                for (String mimeType : mimeTypes) {
+                    if (!"*/*".equals(mimeType)) {
+                        mimetypes2.add(mimeType);
+                    }
+                }
+
+                if (mimetypes2.isEmpty()) {
+                    intent.setType("*/*");
+                }
+                //
+                else if (mimetypes2.size() == 1) {
+                    intent.setType(mimetypes2.get(0));
+                }
+                //
+                else {
+                    intent.setType("*/*");
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes2.toArray(new String[0]));
+                }
+            }
+        }
+        //
+        else {
+            intent.setType("*/*");
+        }
+
+        if (selectMultiple) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
 
         if (pickerInitialUri != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
