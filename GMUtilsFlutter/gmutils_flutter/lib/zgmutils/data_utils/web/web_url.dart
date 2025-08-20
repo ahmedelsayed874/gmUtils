@@ -69,6 +69,7 @@ abstract class Url<RDT> {
         url: this,
         error: 'Internal error: either "Url.responseEncoder" or '
             '"Url.responseMapper" should has value',
+        rawResponse: response,
         httpCode: 0,
       );
     }
@@ -76,16 +77,17 @@ abstract class Url<RDT> {
     else {
       try {
         var dataMap = jsonDecode(response);
-        //final responseObj = ResponseMapper(responseMapper!).fromMap(dataMap);
         final responseObj = ResponseMapper(responseMapper!).from(dataMap);
         responseObj.url = this;
         return responseObj;
       } catch (e) {
         final Response<RDT> res = Response.failed(
           url: this,
-          error:
-              'Url.encodeResponse --> Exception at Parsing the response of ($endPoint): $e ------> response=$response',
+          error: 'Url.encodeResponse --> Exception at Parsing the response of '
+              '($endPoint): $e ------> response=$response',
+          rawResponse: response,
           httpCode: 0,
+
         );
         res.url = this;
         return res;

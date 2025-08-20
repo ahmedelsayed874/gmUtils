@@ -180,6 +180,7 @@ class WebRequestExecutor {
         return Response.failed(
           url: url,
           error: 'File size is zero',
+          rawResponse: '"error":"File size is zero"',
           httpCode: -1,
         );
       }
@@ -197,6 +198,7 @@ class WebRequestExecutor {
       return Response.failed(
         url: url,
         error: 'File size is unknown',
+        rawResponse: '"error":"File size is unknown"',
         httpCode: -1,
       );
     }
@@ -394,7 +396,8 @@ class WebRequestExecutor {
           '\n',
         ]);
 
-    if (code == 200) {
+    /*//if (code == 200) {
+    if ((code ~/ 100) == 2) {
       try {
         final responseObj = url.encodeResponse(response.body);
         responseObj.httpCode = code;
@@ -410,6 +413,7 @@ class WebRequestExecutor {
         return Response.failed(
           url: url,
           error: '$e',
+          rawResponse: response.body,
           httpCode: code,
           responseHeader: response.headers,
         );
@@ -421,10 +425,50 @@ class WebRequestExecutor {
       return Response.failed(
         url: url,
         error: response.reasonPhrase ?? response.body,
+        rawResponse: response.reasonPhrase ?? response.body,
+        httpCode: code,
+        responseHeader: response.headers,
+      );
+    }*/
+
+    Response<DT>? responseObj;
+    try {
+      responseObj = url.encodeResponse(response.body);
+    } catch (e) {
+      Logs.print(() => 'WebRequestExecutor -> Error:: parsing-body: "${response.body}" ---> got "$e"');
+    }
+
+    if (responseObj == null) {
+      try {
+        responseObj = url.encodeResponse(response.reasonPhrase!);
+      } catch (e) {
+        Logs.print(() => 'WebRequestExecutor -> Error:: parsing-reasonPhrase: ${response.reasonPhrase} ---> got "$e"');
+      }
+    }
+
+    if (responseObj != null) {
+      responseObj.httpCode = code;
+      responseObj.responseHeader = response.headers;
+
+      cache?.set(responseObj);
+      _removeExpiredCaches();
+    }
+    //
+    else {
+      Logs.print(() =>
+      'WebRequestExecutor -> Fatal error while handling the response');
+
+      _removeExpiredCaches();
+      responseObj = Response.failed(
+        url: url,
+        error: 'FATAL ERROR: parsing response failed'.toUpperCase(),
+        rawResponse: '{"status":"Fatal error", "body":${response.body}, "error":${response.reasonPhrase}}',
         httpCode: code,
         responseHeader: response.headers,
       );
     }
+
+    return responseObj;
   }
 
   //============================================================================
@@ -445,6 +489,7 @@ class WebRequestExecutor {
       response = Response.failed(
         url: null,
         error: "no connection",
+        rawResponse: null,
         httpCode: 0,
       );
     }
@@ -453,6 +498,7 @@ class WebRequestExecutor {
       response = Response.failed(
         url: null,
         error: "Supposed error on server side",
+        rawResponse: '{"error":"Supposed error on server side"}',
         httpCode: 400,
       );
     }
@@ -541,6 +587,7 @@ class WebRequestExecutor {
         response = Response.failed(
           url: null,
           error: error,
+          rawResponse: '"error":"$error"',
           httpCode: 400,
         );
       }

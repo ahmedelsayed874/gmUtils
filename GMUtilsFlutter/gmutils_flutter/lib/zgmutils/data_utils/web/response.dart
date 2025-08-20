@@ -5,15 +5,15 @@ class Response<DATA> {
   Url? url;
   DATA? data;
   String? error;
+  String? rawResponse;
   int? httpCode;
   Map<String, String>? responseHeader;
-
-  // String? rawResponse;
 
   Response._({
     required this.url,
     this.data,
     this.error,
+    this.rawResponse,
     this.httpCode,
     this.responseHeader,
   });
@@ -27,17 +27,26 @@ class Response<DATA> {
   Response.failed({
     required this.url,
     required this.error,
+    required this.rawResponse,
     required this.httpCode,
     this.responseHeader,
   });
 
-  bool get isSuccess => httpCode == 200;
+  //bool get isSuccess => httpCode == 200;
+  bool get isSuccess => ((httpCode ?? 0) ~/ 100) == 2;
 
   bool get isConnectionFailed => (httpCode == 0 || httpCode == 100 || httpCode == null);
 
   @override
   String toString() {
-    return 'Response{endPoint: ${url?.endPoint}, data: $data, error: $error, httpCode: $httpCode, responseHeader: $responseHeader}';
+    return 'Response{'
+        'endPoint: ${url?.endPoint}, '
+        'data: $data, '
+        'error: $error, '
+        'rawResponse: $rawResponse, '
+        'httpCode: $httpCode, '
+        'responseHeader: $responseHeader'
+        '}';
   }
 }
 
@@ -73,6 +82,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
         url: null,
         data: data as DT?,
         error: null,
+        rawResponse: null,
         httpCode: null,
         responseHeader: null,
       );
@@ -83,6 +93,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
         url: null,
         data: value,
         error: null,
+        rawResponse: null,
         httpCode: null,
         responseHeader: null,
       );
@@ -97,6 +108,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
       url: null,
       data: data,
       error: null,
+      rawResponse: null,
       httpCode: values['httpCode'],
       responseHeader: null,
     );
