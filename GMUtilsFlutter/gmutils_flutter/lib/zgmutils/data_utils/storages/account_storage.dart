@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fox_transportation/zgmutils/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 
 import '../../gm_main.dart';
@@ -9,35 +10,38 @@ import '../../utils/data_security.dart';
 import '../../utils/mappable.dart';
 import '../../utils/pairs.dart';
 
-
 abstract class IAccount {
   get account_id;
+
   get token_;
 }
 
-abstract class IAccountStorage {
-  static Mappable<IAccount>? accountMapper;
+abstract class IAccountStorage<Account extends IAccount> {
+  Mappable<Account> accountMapper;
 
-  IAccountStorage(Mappable<IAccount> accountMapper) {
-    IAccountStorage.accountMapper = accountMapper;
-  }
+  IAccountStorage(this.accountMapper);
 
-  Future<bool> saveAccount(IAccount account, String username, String password,);
+  Future<bool> saveAccount(
+    Account account,
+    String username,
+    String password,
+  );
 
   Future<bool> saveUserNameAndPassword(String username, String newPassword);
 
-  Future<bool> updateAccount(IAccount account);
+  Future<bool> updateAccount(Account account);
 
-  Future<IAccount?> get account;
+  Future<Account?> get account;
 
-  IAccount? get cachedAccount;
+  Account? get cachedAccount;
 
   Future<Pair<String, String>?> getUserNameAndPassword();
 
   Future<bool> clear();
 }
 
-class AccountStorage extends IAccountStorage {
+class AccountStorage<Account extends IAccount>
+    extends IAccountStorage<Account> {
   static const KEY_ACCOUNT = "AccountStorage.ACCOUNT";
   static const KEY_USER_NAME = "AccountStorage.USER_NAME";
   static const KEY_PASSWORD = "AccountStorage.PASSWORD";
@@ -55,8 +59,9 @@ class AccountStorage extends IAccountStorage {
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<bool> saveAccount(
-    IAccount account,
+    Account account,
     String username,
     String password,
   ) async {
@@ -65,7 +70,7 @@ class AccountStorage extends IAccountStorage {
     cached_account = account;
     cached_username = username;
 
-    var accountJson = jsonEncode(IAccountStorage.accountMapper!.toMap(account));
+    var accountJson = jsonEncode(accountMapper.toMap(account));
 
     var accountJsonEnc = await _enc(accountJson);
 
@@ -77,6 +82,7 @@ class AccountStorage extends IAccountStorage {
     return b1 && b2;
   }
 
+  @override
   Future<bool> saveUserNameAndPassword(
     String username,
     String password,
@@ -94,9 +100,8 @@ class AccountStorage extends IAccountStorage {
     return b2 && b3;
   }
 
-  Future<bool> updateAccount(
-    IAccount account,
-  ) async {
+  @override
+  Future<bool> updateAccount(Account account) async {
     Pair? credentials = await getUserNameAndPassword();
     if (credentials != null) {
       return await saveAccount(account, credentials.value1, credentials.value2);
@@ -106,23 +111,30 @@ class AccountStorage extends IAccountStorage {
 
   //----------------------------------------------------------------------------
 
-  Future<IAccount?> get account async {
+  @override
+  Future<Account?> get account async {
     if (cached_account == null) {
       var pref = await _prefs;
       var accountJsonEnc = pref.getString(KEY_ACCOUNT);
       if (accountJsonEnc != null && accountJsonEnc.isNotEmpty) {
         var accountJson = await _dec(accountJsonEnc);
         var map = jsonDecode(accountJson);
-        cached_account = IAccountStorage.accountMapper!.fromMap(map);
+        try {
+          cached_account = accountMapper.fromMap(map);
+        } catch (e) {
+          Logs.print(() => 'AccountStorage.get account ---> Exception $e ----> at parsing account data ($map)');
+        }
       }
     }
-    return cached_account;
+    return cached_account as Account?;
   }
 
-  IAccount? get cachedAccount => AccountStorage.cached_account;
+  @override
+  Account? get cachedAccount => AccountStorage.cached_account as Account?;
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<Pair<String, String>?> getUserNameAndPassword() async {
     var pref = await _prefs;
 
@@ -145,6 +157,7 @@ class AccountStorage extends IAccountStorage {
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<bool> clear() async {
     var pref = await _prefs;
 
@@ -163,7 +176,8 @@ class AccountStorage extends IAccountStorage {
   //----------------------------------------------------------------------------
 
   static void addObserver(String name, ObserverDelegate observer) {
-    App.addObserver(category: 'AccountCache', observerName: name, observer: observer);
+    App.addObserver(
+        category: 'AccountCache', observerName: name, observer: observer);
   }
 
   static void callObservers(IAccount? account) {
