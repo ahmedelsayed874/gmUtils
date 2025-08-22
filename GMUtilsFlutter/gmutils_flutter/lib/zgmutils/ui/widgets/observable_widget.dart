@@ -9,8 +9,8 @@ class ObservableWidget<T> extends StatefulWidget {
   const ObservableWidget({
     required this.observableValue,
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   @override
   State<ObservableWidget<T>> createState() => _ObservableWidgetState<T>();
@@ -26,7 +26,7 @@ class _ObservableWidgetState<T> extends State<ObservableWidget<T>> {
       try {
         _isValueSet = true;
         setState(() {});
-      } catch (e) {}
+      } catch (_) {}
     };
   }
 

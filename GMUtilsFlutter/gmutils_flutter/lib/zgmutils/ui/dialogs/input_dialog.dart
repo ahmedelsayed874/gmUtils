@@ -251,7 +251,7 @@ class InputDialog {
 class _AlertDialogBody extends StatefulWidget {
   InputDialog? inputDialog;
 
-  _AlertDialogBody({required this.inputDialog, super.key});
+  _AlertDialogBody({required this.inputDialog});
 
   @override
   State<_AlertDialogBody> createState() => _AlertDialogBodyState();

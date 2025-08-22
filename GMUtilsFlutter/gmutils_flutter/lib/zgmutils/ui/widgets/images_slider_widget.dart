@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'network_image_with_loading.dart';
-
 
 class ImagesSliderWidget extends StatefulWidget {
   final List<String> urls;
@@ -36,7 +34,7 @@ class _PageViewExampleState extends State<ImagesSliderWidget>
     super.initState();
     _pageViewController = PageController();
 
-    _maxTabControllerLength =  widget.urls.length < 10 ? widget.urls.length : 10;
+    _maxTabControllerLength = widget.urls.length < 10 ? widget.urls.length : 10;
     _tabController = TabController(
       length: _maxTabControllerLength,
       vsync: this,
@@ -53,7 +51,7 @@ class _PageViewExampleState extends State<ImagesSliderWidget>
   @override
   Widget build(BuildContext context) {
     var errorPlaceHolder =
-        widget.errorPlaceHolder ?? Icon(Icons.image_not_supported_outlined);
+        widget.errorPlaceHolder ?? const Icon(Icons.image_not_supported_outlined);
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -89,7 +87,7 @@ class _PageViewExampleState extends State<ImagesSliderWidget>
   }
 
   void _handlePageViewChanged(int currentPageIndex) {
-    print('_PageViewExampleState._handlePageViewChanged(currentPageIndex = $currentPageIndex)');
+    //print('_PageViewExampleState._handlePageViewChanged(currentPageIndex = $currentPageIndex)');
     if (!_isOnDesktopAndWeb) {
       return;
     }
@@ -111,7 +109,7 @@ class _PageViewExampleState extends State<ImagesSliderWidget>
   }
 
   void _updateCurrentPageIndex(int index) {
-    print('_PageViewExampleState._updateCurrentPageIndex(index = $index)');
+    //print('_PageViewExampleState._updateCurrentPageIndex(index = $index)');
 
     _tabController.index = index;
     _pageViewController.animateToPage(
@@ -121,8 +119,8 @@ class _PageViewExampleState extends State<ImagesSliderWidget>
     );
   }
 
-  bool get _isOnDesktopAndWeb =>
-      true ||
+  bool get _isOnDesktopAndWeb => true;
+/*||
       kIsWeb ||
       switch (defaultTargetPlatform) {
         TargetPlatform.macOS ||
@@ -133,12 +131,11 @@ class _PageViewExampleState extends State<ImagesSliderWidget>
         TargetPlatform.iOS ||
         TargetPlatform.fuchsia =>
           false,
-      };
+      };*/
 }
 
 class _PageIndicator extends StatelessWidget {
   const _PageIndicator({
-    super.key,
     required this.tabController,
     required this.currentPageIndex,
     required this.onUpdateCurrentPageIndex,

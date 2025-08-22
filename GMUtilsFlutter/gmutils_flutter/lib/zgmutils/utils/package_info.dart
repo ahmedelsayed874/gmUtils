@@ -1,5 +1,5 @@
 
-import 'package:package_info_plus/package_info_plus.dart' as flutterPackageInfo;
+import 'package:package_info_plus/package_info_plus.dart' as flutter_package_info;
 
 /// package_info_plus: ^3.0.2
 /// Be sure to add this line if `PackageInfo.fromPlatform()` is called before runApp()
@@ -7,7 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart' as flutterPackageInfo;
 
 class PackageInfo {
 
-  Future<flutterPackageInfo.PackageInfo> get packageInfo async => await flutterPackageInfo.PackageInfo.fromPlatform();
+  Future<flutter_package_info.PackageInfo> get packageInfo async => await flutter_package_info.PackageInfo.fromPlatform();
 
   Future<String> get appName async => (await packageInfo).appName;
 

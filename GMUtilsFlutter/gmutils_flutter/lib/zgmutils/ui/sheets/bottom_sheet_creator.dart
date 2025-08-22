@@ -44,8 +44,8 @@ class _BottomSheetBody extends StatefulWidget {
     required this.disableDrag, // = false,
     required this.contentPadding, // = 15,
     required this.backgroundColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   @override
   State<_BottomSheetBody> createState() => _BottomSheetBodyState();
@@ -141,7 +141,7 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
     );
   }
 
-  Widget _bottomOfSingleContent(
+  /*Widget _bottomOfSingleContent(
     children,
     contentPadding,
     enableDrag,
@@ -188,5 +188,5 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
         );
       },
     );
-  }
+  }*/
 }

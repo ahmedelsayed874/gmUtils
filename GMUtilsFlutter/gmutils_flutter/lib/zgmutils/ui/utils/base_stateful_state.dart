@@ -21,7 +21,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
   Future waitForMount() async {
     int x = 0;
     while (!mounted) {
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       x++;
       if (x > 6) break;
     }
@@ -129,7 +129,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
   void updateView() {
     try {
       setState(() {});
-    } catch (e) {}
+    } catch (_) {}
   }
 
   void updateViewLater(int delay) {

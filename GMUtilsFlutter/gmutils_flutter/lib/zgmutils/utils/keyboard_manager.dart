@@ -50,7 +50,7 @@ class KeyboardManage {
     Future.delayed(const Duration(milliseconds: 500), () {
       try {
         focusScopeNode?.dispose();
-      } catch (e) {}
+      } catch (_) {}
 
       focusScopeNode = null;
     });

@@ -17,8 +17,8 @@ class SearchBoxWidget extends StatelessWidget {
     this.autoConvertToLowerCase = true,
     this.delay = 1000,
     this.autofocus = false,
-    Key? key,
-  }) : super(key: key) {
+    super.key,
+  }) : super() {
     if (hint != null && inputDecoration != null) throw Exception();
   }
 

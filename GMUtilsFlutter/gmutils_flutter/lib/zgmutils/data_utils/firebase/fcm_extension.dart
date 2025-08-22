@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart' show rootBundle;
 import "package:googleapis_auth/auth_io.dart";
-import 'package:googleapis_auth/googleapis_auth.dart' as googleAuth;
+import 'package:googleapis_auth/googleapis_auth.dart' as google_auth;
 import 'package:http/http.dart' as http;
 
 import '../../utils/result.dart';
@@ -38,7 +38,7 @@ class FCM_Extension {
 
     ServiceAccountCredentials accountCredentials;
     try {
-      accountCredentials = googleAuth.ServiceAccountCredentials.fromJson(json);
+      accountCredentials = google_auth.ServiceAccountCredentials.fromJson(json);
     } catch (e) {
       //return Result(null, message: StringSet('Creating ServiceAccountCredentials from json failed$e'),);
       rethrow;

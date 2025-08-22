@@ -99,7 +99,7 @@ class AudioPlayerState extends State<AudioPlayer> {
   Widget _buildControl() {
     Widget icon;
     Color controlColor = widget.controlColor ?? AppTheme.appColors?.secondary ?? Colors.blueAccent;
-    Color controlColorBg = controlColor.withOpacity(0.3);
+    Color controlColorBg = controlColor.withAlpha(80);
 
     if (_audioPlayer.state == ap.PlayerState.playing) {
       icon = Icon(Icons.pause, color: controlColor, size: 30);
@@ -148,7 +148,7 @@ class AudioPlayerState extends State<AudioPlayer> {
       width: width,
       child: Slider(
         activeColor: color,
-        inactiveColor: color.withOpacity(0.6),
+        inactiveColor: color.withAlpha(155),
         onChanged: (v) {
           if (duration != null) {
             final position = v * duration.inMilliseconds;

@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:image_picker/image_picker.dart' as imgPicker;
+import 'package:image_picker/image_picker.dart' as img_picker;
 
 ///https://pub.dev/packages/image_picker
 class ImagePicker {
   Future<File?> pickPhoto({double? maxWidth, double? maxHeight}) async {
-    final imgPicker.ImagePicker _picker = imgPicker.ImagePicker();
-    final imgPicker.XFile? image = await _picker.pickImage(
-      source: imgPicker.ImageSource.gallery,
+    final img_picker.ImagePicker _picker = img_picker.ImagePicker();
+    final img_picker.XFile? image = await _picker.pickImage(
+      source: img_picker.ImageSource.gallery,
       maxWidth: maxWidth,
       maxHeight: maxHeight,
     );
@@ -23,9 +23,9 @@ class ImagePicker {
 
   Future<List<File>> pickMultiplePhoto(
       {double? maxWidth, double? maxHeight}) async {
-    final imgPicker.ImagePicker _picker = imgPicker.ImagePicker();
+    final img_picker.ImagePicker _picker = img_picker.ImagePicker();
 
-    final List<imgPicker.XFile> images = await _picker.pickMultiImage(
+    final List<img_picker.XFile> images = await _picker.pickMultiImage(
       maxWidth: maxWidth,
       maxHeight: maxHeight,
       imageQuality: (maxWidth == null && maxHeight == null) ? null : 100,
@@ -36,9 +36,9 @@ class ImagePicker {
   }
 
   Future<File?> takePhoto({double? maxWidth, double? maxHeight}) async {
-    final imgPicker.ImagePicker _picker = imgPicker.ImagePicker();
-    final imgPicker.XFile? image = await _picker.pickImage(
-      source: imgPicker.ImageSource.camera,
+    final img_picker.ImagePicker _picker = img_picker.ImagePicker();
+    final img_picker.XFile? image = await _picker.pickImage(
+      source: img_picker.ImageSource.camera,
       maxWidth: maxWidth,
       maxHeight: maxHeight,
     );
@@ -53,11 +53,11 @@ class ImagePicker {
   }
 
   Future<File?> pickVideo() async {
-    final imgPicker.ImagePicker _picker = imgPicker.ImagePicker();
+    final img_picker.ImagePicker _picker = img_picker.ImagePicker();
 
     // Pick a video
-    final imgPicker.XFile? image = await _picker.pickVideo(
-      source: imgPicker.ImageSource.gallery,
+    final img_picker.XFile? image = await _picker.pickVideo(
+      source: img_picker.ImageSource.gallery,
     );
 
     File? returningImg;
@@ -69,13 +69,13 @@ class ImagePicker {
     return returningImg;
   }
 
-  void _otherHelpers() async {
-    //final imgPicker.ImagePicker _picker = imgPicker.ImagePicker();
+  /*void _otherHelpers() async {
+    //final img_picker.ImagePicker _picker = img_picker.ImagePicker();
 
     // Capture a video
-    //final imgPicker.XFile? video =  await _picker.pickVideo(source: imgPicker.ImageSource.camera);
+    //final img_picker.XFile? video =  await _picker.pickVideo(source: img_picker.ImageSource.camera);
 
     // Pick multiple images
-    //final List<imgPicker.XFile>? images = await _picker.pickMultiImage();
-  }
+    //final List<img_picker.XFile>? images = await _picker.pickMultiImage();
+  }*/
 }

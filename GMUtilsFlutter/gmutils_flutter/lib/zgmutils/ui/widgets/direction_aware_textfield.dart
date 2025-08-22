@@ -67,8 +67,8 @@ class DirectionAwareTextField extends StatefulWidget {
     this.scrollController,
     this.enabled,
     this.onDirectionChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   @override
   State<DirectionAwareTextField> createState() =>

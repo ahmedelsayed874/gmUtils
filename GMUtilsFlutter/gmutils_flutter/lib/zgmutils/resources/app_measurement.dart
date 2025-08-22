@@ -24,7 +24,7 @@ abstract class AppMeasurement {
 class _AppMeasurementDefault extends AppMeasurement {
   _AppMeasurementDefault()
       : super(
-          screenSize: Size(1000, 3000),
+          screenSize: const Size(1000, 3000),
           textScaleFactor: 1,
         );
 

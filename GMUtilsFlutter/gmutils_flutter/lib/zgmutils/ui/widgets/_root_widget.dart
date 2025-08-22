@@ -29,7 +29,7 @@ class MyRootWidget {
     _showBackButton = false;
 
     _background = AppTheme.appColors?.background ?? Colors.white;
-    _body = const Text('use \"setBody\" method');
+    _body = const Text('use "setBody" method');
   }
 
   MyRootWidget.withoutToolbar({
@@ -43,7 +43,7 @@ class MyRootWidget {
     _backButtonColor = backButtonColor;
 
     _background = AppTheme.appColors?.background ?? Colors.white;
-    _body = const Text('use \"setBody\" method');
+    _body = const Text('use "setBody" method');
   }
 
   void configStatusBar({

@@ -120,7 +120,7 @@ class ScreenUtils {
         action: action,
         backgroundColor: backgroundColor,
       );
-    } catch (e) {}
+    } catch (_) {}
   }
 
   void showMessage(

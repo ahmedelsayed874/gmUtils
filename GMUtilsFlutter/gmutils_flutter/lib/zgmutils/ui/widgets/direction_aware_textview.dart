@@ -26,10 +26,10 @@ class DirectionAwareTextView extends StatelessWidget {
     this.maxLines,
     this.selectionColor,
     this.selectable = false,
-    Key? key,
+    super.key,
   })  : rich = false,
         textSpan = null,
-        super(key: key) {
+        super() {
     _initState(textDirection);
   }
 
@@ -44,14 +44,15 @@ class DirectionAwareTextView extends StatelessWidget {
     this.maxLines,
     this.selectionColor,
     this.selectable = false,
-    Key? key,
+    super.key,
   })  : rich = true,
         text = '',
-        super(key: key) {
+        super() {
     _initState(textDirection);
     if (selectable) {
-      if (textSpan! is TextSpan)
+      if (textSpan! is TextSpan) {
         throw 'selectable rich text must depend on TextSpan';
+      }
     }
   }
 

@@ -97,7 +97,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
       userCredential = await Future.sync(() async {
         return fbMethod();
-      }).timeout(Duration(seconds: 10));
+      }).timeout(const Duration(seconds: 10));
 
       return Result(userCredential);
     } on TimeoutException catch (e) {

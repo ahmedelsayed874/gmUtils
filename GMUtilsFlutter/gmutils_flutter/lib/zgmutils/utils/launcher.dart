@@ -61,7 +61,7 @@ class Launcher {
     bool r = false;
     try {
       r = await url_launcher.launchUrl(Uri.parse(url));
-    } catch (e) {}
+    } catch (_) {}
     if (!r) printInstructions();
     return r;
   }
@@ -91,7 +91,7 @@ class Launcher {
     bool r = false;
     try {
       r = await url_launcher.launchUrl(uri);
-    } catch (e) {}
+    } catch (_) {}
     if (!r) printInstructions();
     return r;
   }

@@ -1,13 +1,9 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-import '../gm_main.dart';
 import 'logs.dart';
 
 abstract class INotificationsManager {
   Future<void> init(
-    NotificationsConfigurations? _notificationsConfigurations,
+    NotificationsConfigurations? notificationsConfigurations,
   );
 
   ///handle Notifications message
@@ -60,11 +56,11 @@ class NotificationsManager extends INotificationsManager {
 
   @override
   Future<void> init(
-    NotificationsConfigurations? _notificationsConfigurations,
+    NotificationsConfigurations? notificationsConfigurations,
   ) async {
     Logs.print(() => 'Notifications.init ... follow setup instruction here: https://pub.dev/packages/flutter_local_notifications');
 
-    this._notificationsConfigurations ??= _notificationsConfigurations;
+    _notificationsConfigurations ??= notificationsConfigurations;
 
     //region Local Notification Config
     await _setupLocalNotification();
@@ -84,7 +80,7 @@ class NotificationsManager extends INotificationsManager {
     Logs.print(() => 'Notifications.openCorrespondingScreenByNotificationJson');
     try {
       _notificationsConfigurations?.openCorrespondingScreen(payload);
-    } catch (e) {}
+    } catch (_) {}
   }
 
   //endregion
@@ -248,7 +244,7 @@ class NotificationsManager extends INotificationsManager {
     //endregion
   }
 
-  void _onDidReceiveLocalNotificationOfIos(
+  /*void _onDidReceiveLocalNotificationOfIos(
     int id,
     String? title,
     String? body,
@@ -294,7 +290,7 @@ class NotificationsManager extends INotificationsManager {
         ],
       ),
     );
-  }
+  }*/
 
   @override
   int showNotification(
@@ -305,18 +301,18 @@ class NotificationsManager extends INotificationsManager {
     AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
   }) {
-    var _notificationId = notificationId ?? body.hashCode;
-    while (_notificationId > 0x7FFFFFFF || _notificationId < -0x80000000) {
-      var v = '$_notificationId';
-      var v2 = '$_notificationId'.substring(0, v.length - 1);
-      _notificationId = int.parse(v2);
+    var notifId = notificationId ?? body.hashCode;
+    while (notifId > 0x7FFFFFFF || notifId < -0x80000000) {
+      var v = '$notifId';
+      var v2 = '$notifId'.substring(0, v.length - 1);
+      notifId = int.parse(v2);
     }
 
     Logs.print(() => 'Notifications.showLocalNotification('
         'title: $title, '
         'body: $body, '
         'payload: $payload, '
-        '_notificationId: $_notificationId (was: $notificationId), '
+        'notifId: $notifId (was: $notificationId), '
         'customChannel: ${customChannel?.channelId ?? defaultNotificationChannelId}, '
         'androidInformationStyle: ${androidInformationStyle?.runtimeType}'
         ')');
@@ -325,7 +321,7 @@ class NotificationsManager extends INotificationsManager {
         customChannel?.soundFile ?? defaultNotificationChannelSound;
 
     _flutterLocalNotificationsPlugin.show(
-      _notificationId,
+      notifId,
       title,
       body,
       NotificationDetails(
@@ -355,7 +351,7 @@ class NotificationsManager extends INotificationsManager {
       payload: payload,
     );
 
-    return _notificationId;
+    return notifId;
   }
 
   @override
@@ -460,7 +456,7 @@ class SoundFile {
     required this.extension,
   });
 
-  String get fileNameWithExtension => '${name}.${extension}';
+  String get fileNameWithExtension => '$name.$extension';
 
   @override
   String toString() {

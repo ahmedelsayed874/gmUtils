@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../../utils/logs.dart';
-import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
+import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../gm_main.dart';
 import '../../utils/data_security.dart';
@@ -46,14 +46,14 @@ class AccountStorage<Account extends IAccount>
   static const KEY_USER_NAME = "AccountStorage.USER_NAME";
   static const KEY_PASSWORD = "AccountStorage.PASSWORD";
 
-  sharedPrefLib.SharedPreferences? __prefs;
+  shared_pref.SharedPreferences? __prefs;
   static IAccount? cached_account;
   static String? cached_username;
 
   AccountStorage(super.accountMapper);
 
-  Future<sharedPrefLib.SharedPreferences> get _prefs async {
-    __prefs ??= await sharedPrefLib.SharedPreferences.getInstance();
+  Future<shared_pref.SharedPreferences> get _prefs async {
+    __prefs ??= await shared_pref.SharedPreferences.getInstance();
     return __prefs!;
   }
 

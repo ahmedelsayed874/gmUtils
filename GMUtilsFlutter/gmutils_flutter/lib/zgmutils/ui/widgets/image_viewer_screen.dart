@@ -49,8 +49,8 @@ class _ImageViewerOnWebViewScreen extends StatefulWidget {
 
   const _ImageViewerOnWebViewScreen({
     required this.toolbarTitle,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   @override
   State<_ImageViewerOnWebViewScreen> createState() =>
@@ -124,8 +124,8 @@ class _ImageViewerOnImageViewScreen extends StatefulWidget {
 
   const _ImageViewerOnImageViewScreen({
     required this.toolbarTitle,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   @override
   State<_ImageViewerOnImageViewScreen> createState() =>

@@ -434,7 +434,7 @@ class WebRequestExecutor {
     if (exception != null) {
       try {
         error = '$exception';
-      } catch (e) {}
+      } catch (_) {}
     } else {
       error = 'Can\'t connect the server';
     }

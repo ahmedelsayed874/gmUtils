@@ -29,10 +29,12 @@ class TextUtils {
     var letterCode = letter[0].codeUnits[0];
 
     if ('اآإأء'.contains(letter) || 'يىئ'.contains(letter)) return true;
-    if (letterCode >= '٠'.codeUnits[0] && letterCode <= '٩'.codeUnits[0])
+    if (letterCode >= '٠'.codeUnits[0] && letterCode <= '٩'.codeUnits[0]) {
       return true;
-    if (letterCode >= 'ء'.codeUnits[0] && letterCode <= 'ي'.codeUnits[0])
+    }
+    if (letterCode >= 'ء'.codeUnits[0] && letterCode <= 'ي'.codeUnits[0]) {
       return true;
+    }
 
     return false;
   }
@@ -40,8 +42,9 @@ class TextUtils {
   bool? isArabicSymbol(String letter) {
     if (letter.trim().isEmpty) return null;
 
-    if ('!@#\$٪^&*)(ـ-+=ًٌٍَُِّْ][}{»«:\"\؛|\\ـ>،.</؟'.contains(letter))
+    if ('!@#\$٪^&*)(ـ-+=ًٌٍَُِّْ][}{»«:"؛|\\ـ>،.</؟'.contains(letter)) {
       return true;
+    }
     if ('°ٱ∞دذطظ‘’“”ڤەچ…گںٹٰٓپیےڈڑژ,گںٹٰٓپیےڈڑژ'.contains(letter)) return true;
 
     return false;
@@ -51,12 +54,15 @@ class TextUtils {
     if (letter.trim().isEmpty) return null;
     var letterCode = letter[0].codeUnits[0];
 
-    if (letterCode >= 'a'.codeUnits[0] && letterCode <= 'z'.codeUnits[0])
+    if (letterCode >= 'a'.codeUnits[0] && letterCode <= 'z'.codeUnits[0]) {
       return true;
-    if (letterCode >= 'A'.codeUnits[0] && letterCode <= 'Z'.codeUnits[0])
+    }
+    if (letterCode >= 'A'.codeUnits[0] && letterCode <= 'Z'.codeUnits[0]) {
       return true;
-    if (letterCode >= '0'.codeUnits[0] && letterCode <= '9'.codeUnits[0])
+    }
+    if (letterCode >= '0'.codeUnits[0] && letterCode <= '9'.codeUnits[0]) {
       return true;
+    }
 
     return false;
   }
@@ -64,9 +70,10 @@ class TextUtils {
   bool? isEnglishSymbol(String letter) {
     if (letter.trim().isEmpty) return null;
 
-    if ('§±!@#\$%^&*()_-+=[{]}\\|\'\";:`~,<.>/?'.contains(letter)) return true;
-    if ('§¡™£¢∞§¶•ªº–≠œ∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æ«`Ω≈ç√∫˜µ≤≥µ'.contains(letter))
+    if ('§±!@#\$%^&*()_-+=[{]}\\|\'";:`~,<.>/?'.contains(letter)) return true;
+    if ('§¡™£¢∞§¶•ªº–≠œ∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æ«`Ω≈ç√∫˜µ≤≥µ'.contains(letter)) {
       return true;
+    }
 
     return false;
   }

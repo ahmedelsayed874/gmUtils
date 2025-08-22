@@ -1,7 +1,7 @@
 //shared_preferences: ^2.0.7
 import 'dart:async';
 
-import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
+import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 abstract class IStorage {
 
@@ -25,15 +25,16 @@ class GeneralStorage extends IStorage {
 
   GeneralStorage.o(this.prefName);
 
-  sharedPrefLib.SharedPreferences? __prefs;
+  shared_pref.SharedPreferences? __prefs;
 
-  Future<sharedPrefLib.SharedPreferences> get _prefs async {
-    __prefs ??= await sharedPrefLib.SharedPreferences.getInstance();
+  Future<shared_pref.SharedPreferences> get _prefs async {
+    __prefs ??= await shared_pref.SharedPreferences.getInstance();
     return __prefs!;
   }
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<bool> save(
     String key,
     String data,
@@ -45,6 +46,7 @@ class GeneralStorage extends IStorage {
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<String?> retrieve(String key) async {
     var pref = await _prefs;
     var data = pref.getString('${prefName}_$key');
@@ -53,6 +55,7 @@ class GeneralStorage extends IStorage {
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<bool> remove(String key) async {
     var pref = await _prefs;
     var b1 = await pref.remove('${prefName}_$key');

@@ -300,7 +300,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           var result = await query.once();
           return result.snapshot;
         }
-      }).timeout(Duration(seconds: 10));
+      }).timeout(const Duration(seconds: 10));
 
       Response<List<T>> response;
       
@@ -396,7 +396,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       );
     }*/
 
-    var map;
+    Map<String, dynamic> map = {};
 
     try {
       /*var event = await ref.once();
@@ -405,7 +405,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       var snapshot = await Future.sync(() async {
         var event = await ref.once();
         return event.snapshot;
-      }).timeout(Duration(seconds: 10));
+      }).timeout(const Duration(seconds: 10));
 
       Response<T> response;
       

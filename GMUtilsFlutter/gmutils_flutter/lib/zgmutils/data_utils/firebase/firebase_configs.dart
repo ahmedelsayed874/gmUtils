@@ -38,7 +38,7 @@ class FirebaseConfigs extends IFirebaseConfigs {
     rc.setConfigSettings(RemoteConfigSettings(
       fetchTimeout: Duration(seconds: fetchTimeoutSeconds),
       minimumFetchInterval: Duration(
-        minutes: this.minimumFetchIntervalInMinute,
+        minutes: minimumFetchIntervalInMinute,
       ),
     ));
 
@@ -102,7 +102,7 @@ class FirebaseConfigs extends IFirebaseConfigs {
           if (e > s) {
             try {
               error = error.substring(s + 11, e);
-            } catch (e) {}
+            } catch (_) {}
           }
         }
       }

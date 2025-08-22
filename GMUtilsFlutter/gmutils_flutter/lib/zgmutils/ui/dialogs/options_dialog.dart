@@ -110,14 +110,14 @@ class _OptionDialogBody<T> extends StatefulWidget {
   double estimatedOptionHeight;
 
   _OptionDialogBody({
-    Key? key,
+    super.key,
     required this.options,
     required this.selectedOption,
     this.optionSelectHandler,
     this.dismiss,
     this.maxNumberOfDisplayedItems,
     required this.estimatedOptionHeight,
-  }) : super(key: key);
+  }) : super();
 
   @override
   _OptionDialogBodyState<T> createState() => _OptionDialogBodyState<T>();
@@ -154,7 +154,7 @@ class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
               groupValue: widget.selectedOption,
               onChanged: (option) {
                 setState(() {
-                  widget.selectedOption = option as OptionElement<T>?;
+                  widget.selectedOption = option;
                 });
               },
             ),

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart' as filesProvider;
+import 'package:path_provider/path_provider.dart' as files_provider;
 
 //path_provider: ^2.0.3
 import 'logs.dart';
@@ -41,27 +41,27 @@ class Files {
     if (Platform.isAndroid) {
       if (privateDir) {
         directory = saveToCacheDir
-            ? await filesProvider.getApplicationCacheDirectory()
-            : await filesProvider.getApplicationDocumentsDirectory();
+            ? await files_provider.getApplicationCacheDirectory()
+            : await files_provider.getApplicationDocumentsDirectory();
       }
       //
       else {
         if (saveToCacheDir) {
           directory =
-              (await filesProvider.getExternalCacheDirectories())?.first;
+              (await files_provider.getExternalCacheDirectories())?.first;
         }
         //
         else {
           if (downloadDir) {
             try {
-              directory = await filesProvider.getDownloadsDirectory();
+              directory = await files_provider.getDownloadsDirectory();
             } catch (e) {
-              directory = await filesProvider.getExternalStorageDirectory();
+              directory = await files_provider.getExternalStorageDirectory();
             }
           }
           //
           else {
-            directory = await filesProvider.getExternalStorageDirectory();
+            directory = await files_provider.getExternalStorageDirectory();
           }
         }
       }
@@ -69,25 +69,25 @@ class Files {
     //
     else {
       if (privateDir) {
-        directory = await filesProvider.getApplicationSupportDirectory();
+        directory = await files_provider.getApplicationSupportDirectory();
       }
       //
       else {
         if (downloadDir) {
           try {
-            directory = await filesProvider.getDownloadsDirectory();
+            directory = await files_provider.getDownloadsDirectory();
           } catch (e) {
-            directory = await filesProvider.getApplicationDocumentsDirectory();
+            directory = await files_provider.getApplicationDocumentsDirectory();
           }
         }
         //
         else {
-          directory = await filesProvider.getApplicationDocumentsDirectory();
+          directory = await files_provider.getApplicationDocumentsDirectory();
         }
       }
     }
 
-    directory ??= (await filesProvider.getTemporaryDirectory());
+    directory ??= (await files_provider.getTemporaryDirectory());
 
     if (subDirName?.isNotEmpty == true) {
       directory = Directory('${directory.path}/$subDirName');

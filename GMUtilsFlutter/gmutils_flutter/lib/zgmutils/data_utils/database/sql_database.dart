@@ -41,7 +41,7 @@ abstract class SQLDatabase {
   }
 
   FutureOr<void> _onCreateDb(Database db, int version) async {
-    var tablesLst = this.tables;
+    var tablesLst = tables;
     assert(tablesLst.isNotEmpty);
 
     for (var table in tablesLst) {

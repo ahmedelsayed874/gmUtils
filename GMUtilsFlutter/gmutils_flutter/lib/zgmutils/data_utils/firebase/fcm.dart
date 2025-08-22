@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
+import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../../main.dart' as main;
 import '../../utils/logs.dart';
@@ -127,7 +127,7 @@ class FCM extends IFCM {
         default:
         ////print('FCM: User declined or has not accepted permission');
       }
-    } catch (e) {}
+    } catch (_) {}
     //endregion
 
     //--------------------------------------------------------------------------
@@ -275,10 +275,10 @@ class FCM extends IFCM {
   //----------------------------------------------------------------------------
 
   //region subscribe/unsubscribe TOPICs
-  sharedPrefLib.SharedPreferences? __prefs;
+  shared_pref.SharedPreferences? __prefs;
 
-  Future<sharedPrefLib.SharedPreferences> get _prefs async {
-    __prefs ??= await sharedPrefLib.SharedPreferences.getInstance();
+  Future<shared_pref.SharedPreferences> get _prefs async {
+    __prefs ??= await shared_pref.SharedPreferences.getInstance();
     return __prefs!;
   }
 
@@ -355,6 +355,7 @@ class FCM extends IFCM {
     }
   }
 
+  @override
   Future<List<String>> subscribedTopics() async {
     return (await _prefs).getStringList('FCM_Topics') ?? [];
   }

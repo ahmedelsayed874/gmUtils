@@ -89,14 +89,14 @@ class _VideoPlayerState extends State<VideoPlayer> {
           //run autoplay
           if (!_controller.value.hasError && widget.autoPlay) {
             if (!_controller.value.isPlaying) {
-              Future.delayed(Duration(milliseconds: 300), _playOrPause);
+              Future.delayed(const Duration(milliseconds: 300), _playOrPause);
             }
           }
 
           //on error
           if (_controller.value.hasError && widget.onVideoLoadError != null) {
             timer?.cancel();
-            Future.delayed(Duration(milliseconds: 300), () {
+            Future.delayed(const Duration(milliseconds: 300), () {
               widget.onVideoLoadError?.call();
             });
           }
@@ -206,7 +206,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   void enlargeVideo() {
     try {
       _controller.pause();
-    } catch (e) {}
+    } catch (_) {}
 
     WebViewScreen.show(
       toolbarTitle: widget.videoTitle ?? '',
@@ -216,13 +216,13 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   void _observeVideoComplete() {
     timer = Timer.periodic(
-      Duration(seconds: 1),
+      const Duration(seconds: 1),
       (timer) {
         if (!_controller.value.hasError) {
           if (_controller.value.duration.inSeconds ==
               _controller.value.position.inSeconds) {
             Logs.print(() =>
-                '${this.runtimeType}._observeVideoComplete ----> video completed');
+                '$runtimeType._observeVideoComplete ----> video completed');
             timer.cancel();
             onVideoCompleted?.call();
             onVideoCompleted = null;

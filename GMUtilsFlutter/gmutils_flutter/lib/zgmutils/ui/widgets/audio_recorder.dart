@@ -154,7 +154,7 @@ class _AudioRecorderState extends State<AudioRecorder> {
     if (_recordState == recoder.RecordState.stop) {
       children.add(clipOval(
         const Icon(Icons.mic, color: Colors.white, size: 30),
-        Colors.white.withOpacity(0.1),
+        Colors.white.withAlpha(30),
         onClick: () => _start(),
       ));
 
@@ -169,7 +169,7 @@ class _AudioRecorderState extends State<AudioRecorder> {
     else {
       children.add(clipOval(
         const Icon(Icons.stop, color: Colors.red, size: 30),
-        Colors.red.withOpacity(0.1),
+        Colors.red.withAlpha(30),
         onClick: () => _stop(),
       ));
 
@@ -182,13 +182,13 @@ class _AudioRecorderState extends State<AudioRecorder> {
 
       if (_recordState == recoder.RecordState.record) {
         icon = const Icon(Icons.pause, color: Colors.red, size: 30);
-        color = Colors.red.withOpacity(0.1);
+        color = Colors.red.withAlpha(30);
       }
       //
       else {
         final theme = Theme.of(context);
         icon = const Icon(Icons.play_arrow, color: Colors.red, size: 30);
-        color = theme.primaryColor.withOpacity(0.1);
+        color = theme.primaryColor.withAlpha(30);
       }
 
       clipOval(

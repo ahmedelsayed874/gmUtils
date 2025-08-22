@@ -206,7 +206,7 @@ class SQLInsert extends SQLInstruction {
     String columns = '';
     String values = '';
 
-    this.values.forEach((element) {
+    for (var element in this.values) {
       if (columns.isNotEmpty) {
         columns += ', ';
         values += ', ';
@@ -214,7 +214,7 @@ class SQLInsert extends SQLInstruction {
 
       columns += element.columnName;
       values += element.value;
-    });
+    }
 
     return 'INSERT INTO $tableName($columns) VALUES($values)';
   }
@@ -225,7 +225,7 @@ class SQLCellValue {
   dynamic _value;
 
   SQLCellValue({required this.columnName, dynamic value}) {
-    this._value = value;
+    _value = value;
   }
 
   String get value {
@@ -252,10 +252,10 @@ class SQLUpdate extends SQLInstruction {
   @override
   String getSQLInstruction() {
     String setStatement = '';
-    values.forEach((element) {
+    for (var element in values) {
       if (setStatement.isNotEmpty) setStatement += ', ';
       setStatement += '${element.columnName} = ${element.value}';
-    });
+    }
 
     String whereClause = '';
     if (conditions != null) whereClause += ' WHERE ${conditions!.statement}';
@@ -275,14 +275,14 @@ class SQLConditions {
     if (_setMethodIsLastUse) throw Exception(_exceptionMessage);
     _setMethodIsLastUse = true;
 
-    dynamic _value;
+    dynamic value_;
     if (value is String) {
-      _value = "'$value'";
+      value_ = "'$value'";
     } else {
-      _value = value;
+      value_ = value;
     }
 
-    _statement += '$columnName $compareOperator $_value ';
+    _statement += '$columnName $compareOperator $value_ ';
 
     return this;
   }

@@ -1,13 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 // import 'package:flutter_webview_pro/webview_flutter.dart';
-
-import '../../../zgmutils/utils/launcher.dart';
-import '../../../zgmutils/utils/logs.dart';
 import '../../gm_main.dart';
-import '_root_widget.dart';
 
 class WebView2Screen extends StatefulWidget {
   static void show({
@@ -36,8 +31,8 @@ class WebView2Screen extends StatefulWidget {
     this.hasToolbar = true,
     this.toolbarTitle,
     this.margin,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   @override
   State<WebView2Screen> createState() => _ImageViewerScreenState();

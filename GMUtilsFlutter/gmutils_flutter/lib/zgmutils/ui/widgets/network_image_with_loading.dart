@@ -357,7 +357,7 @@ class NetworkImageWithLoading extends StatelessWidget {
 
     if (onLoadComplete == null) return;
 
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       try {
         onLoadComplete?.call(success, meta);
       } catch (e1) {
@@ -388,9 +388,9 @@ _CachedImage? _getCachedImage(String name) {
 void _appendCachedImage(_CachedImage image) {
   const maxBytes = 30 /*MB*/ * 1024 /*KB*/ * 1024 /*B*/;
   var totalBytes = 0;
-  _cachedImagesList.forEach((e) {
+  for (var e in _cachedImagesList) {
     totalBytes += e.imageBytes.length;
-  });
+  }
   if (totalBytes > maxBytes) {
     _cachedImagesList.removeAt(0);
     _cachedImagesIndexes.clear();

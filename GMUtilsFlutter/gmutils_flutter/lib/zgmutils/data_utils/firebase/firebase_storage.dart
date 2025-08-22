@@ -59,6 +59,7 @@ class FirebaseStorage implements IFirebaseStorage {
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<Response<String>> getDownloadURL(String firebasePath) async {
     try {
       firebasePath = _refinePath(firebasePath);
@@ -78,6 +79,7 @@ class FirebaseStorage implements IFirebaseStorage {
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<Response<File>> download(
     String fromPath, {
     File? suggestedOutFile,
@@ -123,6 +125,7 @@ class FirebaseStorage implements IFirebaseStorage {
 
   //----------------------------------------------------------------------------
 
+  @override
   Future<Response<bool>> delete(String atPath) async {
     try {
       atPath = _refinePath(atPath);

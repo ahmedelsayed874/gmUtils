@@ -36,7 +36,7 @@ class Widgets {
       decoration: InputDecoration(
         hintText: hint,
         contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-        border: useUnderlineStyle ? UnderlineInputBorder() : OutlineInputBorder(
+        border: useUnderlineStyle ? const UnderlineInputBorder() : OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
           gapPadding: 1,
         ),
@@ -66,13 +66,13 @@ class Widgets {
   }) {
     return [
       Widgets.title(title),
-      SizedBox(height: 10),
+      const SizedBox(height: 10),
       TextField(
         controller: controller,
         textInputAction: textInputAction,
         keyboardType: inputType,
         decoration: InputDecoration(
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
           hintText: hint,
         ),
         obscureText: obscureText,

@@ -47,14 +47,14 @@ class CheckboxesDialog {
       required ChecksHandler checksHandler,
       CheckRules? checkRules,
       this.maxNumberOfDisplayedItems,}) {
-    this._checksHandler = checksHandler;
-    this._checkRules = checkRules;
+    _checksHandler = checksHandler;
+    _checkRules = checkRules;
   }
 
   CheckboxesDialog show(BuildContext context) {
-    this._context = context;
+    _context = context;
 
-    RouteSettings routeSettings = RouteSettings(name: 'options_dialog');
+    RouteSettings routeSettings = const RouteSettings(name: 'options_dialog');
 
     showDialog(
       context: context,
@@ -63,7 +63,7 @@ class CheckboxesDialog {
           title: Text(title),
           titleTextStyle: AppTheme.defaultTextStyle(),
           content: _dialogBody(context),
-          contentPadding: EdgeInsets.all(0),
+          contentPadding: const EdgeInsets.all(0),
         );
       },
       routeSettings: routeSettings,
@@ -100,14 +100,14 @@ class _OptionDialogBody extends StatefulWidget {
   int? maxNumberOfDisplayedItems;
 
   _OptionDialogBody({
-    Key? key,
+    super.key,
     required this.options,
     this.selectedOptions,
     this.checksHandler,
     this.checkRules,
     this.dismiss,
     this.maxNumberOfDisplayedItems,
-  }) : super(key: key);
+  }) : super();
 
   @override
   _OptionDialogBodyState createState() => _OptionDialogBodyState();
@@ -127,8 +127,9 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
   void initState() {
     super.initState();
 
-    if (widget.selectedOptions != null)
-      this.selectedOptions = widget.selectedOptions!.toSet();
+    if (widget.selectedOptions != null) {
+      selectedOptions = widget.selectedOptions!.toSet();
+    }
   }
 
   @override
@@ -171,7 +172,7 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
           ),
         ),
         //actions
-        Divider(
+        const Divider(
           height: 2,
         ),
         Row(
@@ -214,9 +215,9 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
       style: AppTheme.defaultTextStyle(),
       child: dialogHeight == null
           ? body
-          : Container(
-              child: body,
+          : SizedBox(
               height: dialogHeight,
+              child: body,
             ),
     );
   }
@@ -224,10 +225,11 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
   void onElementCheckChanged(CheckingElement element, bool checked) async {
     if (widget.checkRules == null) {
       setState(() {
-        if (checked)
+        if (checked) {
           selectedOptions.add(element);
-        else
+        } else {
           selectedOptions.remove(element);
+        }
       });
     } else {
       var r = await widget.checkRules
@@ -237,10 +239,11 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
         if (r != null) {
           selectedOptions = r;
         } else {
-          if (checked)
+          if (checked) {
             selectedOptions.add(element);
-          else
+          } else {
             selectedOptions.remove(element);
+          }
         }
       });
     }
@@ -256,7 +259,7 @@ class CheckingElement {
   @override
   bool operator ==(Object other) {
     if (other is CheckingElement) {
-      return other.text == this.text && other.value == this.value;
+      return other.text == text && other.value == value;
     }
 
     return false;

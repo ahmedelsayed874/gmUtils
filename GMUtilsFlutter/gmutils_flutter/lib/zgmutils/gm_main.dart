@@ -105,7 +105,7 @@ class App extends StatefulWidget {
     required this.defaultFontFamily,
     required Widget this.startScreen,
     required this.onInitialize,
-    Key? key,
+    super.key,
   });
 
   //============================================================================
@@ -450,8 +450,8 @@ class StarterWidget extends StatefulWidget {
     required this.toolbarTitleFontFamily,
     required this.defaultFontFamily,
     required this.onInitialize,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   @override
   State<StarterWidget> createState() => _StarterWidgetState();

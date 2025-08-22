@@ -161,7 +161,6 @@ class _WaitDialogBodyHorizontal extends StatefulWidget {
 
   const _WaitDialogBodyHorizontal({
     required this.message,
-    super.key,
   });
 
   @override
@@ -209,9 +208,9 @@ class _WaitDialogBodyHorizontalState extends State<_WaitDialogBodyHorizontal> {
               child: Row(
                 children: [
                   const SizedBox(
-                    child: CircularProgressIndicator(),
                     width: 25,
                     height: 25,
+                    child: CircularProgressIndicator(),
                   ),
                   const SizedBox(width: 10),
                   Text(
@@ -221,7 +220,7 @@ class _WaitDialogBodyHorizontalState extends State<_WaitDialogBodyHorizontal> {
                 ],
               ),
             ),
-            const Expanded(child: const SizedBox()),
+            const Expanded(child: SizedBox()),
           ],
         ),
       ),
@@ -236,7 +235,6 @@ class _WaitDialogBodyVertical extends StatefulWidget {
 
   const _WaitDialogBodyVertical({
     required this.message,
-    super.key,
   });
 
   @override

@@ -106,8 +106,8 @@ class _SearchDialogWidget extends StatefulWidget {
   _SearchDialogWidget({
     required this.searchDialogArguments,
     required this.dismiss,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  }) : super();
 
   List<dynamic>? _result;
 
@@ -218,13 +218,13 @@ class _SearchDialogWidgetState extends State<_SearchDialogWidget> {
           dialogHeight = maxNumberOfDisplayedItems;
         }
 
-        children.add(SizedBox(height: 10));
+        children.add(const SizedBox(height: 10));
         children.add(SizedBox(
           height: dialogHeight,
           child: listView,
         ));
       } else {
-        children.add(SizedBox(height: 10));
+        children.add(const SizedBox(height: 10));
         children.add(Center(
           child: Text(App.isEnglish ? 'No data' : 'لا توجد بيانات'),
         ));

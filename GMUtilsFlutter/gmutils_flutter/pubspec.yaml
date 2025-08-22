@@ -68,6 +68,7 @@ dependencies:
   record: ^5.1.2
   audioplayers: ^6.0.0
   video_player: ^2.10.0
+  flutter_rating_bar: ^4.0.1
 
 #  open_file_plus: ^3.4.1+1
 #  flutter_widget_from_html: ^0.15.1

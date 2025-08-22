@@ -38,7 +38,7 @@ class ValidationChecker {
 }
 
 abstract class Validator {
-  String _text;
+  final String _text;
 
   Validator(this._text);
 
@@ -120,14 +120,14 @@ class NameValidator extends Validator {
       final spaceCode = ' '.codeUnitAt(0);
 
       var valid = true;
-      targetName.characters.forEach((char) {
+      for (var char in targetName.characters) {
         var charCode = char.codeUnitAt(0);
         valid = (charCode >= charset1min && charCode <= charset1max) ||
             (charCode >= charset2min && charCode <= charset2max) ||
             (charCode >= charset3min && charCode <= charset3max) ||
             charCode == spaceCode;
-        if (!valid) return;
-      });
+        if (!valid) continue;
+      }
 
       if (!valid) {
         errEn += 'Enter a valid name.';

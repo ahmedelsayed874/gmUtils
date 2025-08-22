@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 
 import '../../resources/app_theme.dart';
-import '../../utils/launcher.dart';
 import '../../utils/logs.dart';
 import '../widgets/my_linkify.dart';
 
@@ -13,7 +12,7 @@ class MessageDialog {
   String _title = '';
   String _message = '';
   Widget? _extraWidget;
-  List<Widget> _actions = [];
+  final List<Widget> _actions = [];
   bool _enableOuterDismiss = true;
   bool _dismissed = false;
   String? _dismissedBy;
@@ -33,12 +32,12 @@ class MessageDialog {
   }
 
   MessageDialog setEnableLinks(bool enableLinks) {
-    this._enableLinks = enableLinks;
+    _enableLinks = enableLinks;
     return this;
   }
 
   MessageDialog setEnableSelect(bool enableSelect) {
-    this._enableSelect = enableSelect;
+    _enableSelect = enableSelect;
     return this;
   }
 
@@ -158,7 +157,7 @@ class MessageDialog {
         builder: (context) {
           return AlertDialog(
             title: Padding(
-              padding: EdgeInsets.only(left: 7, right: 7, top: 5),
+              padding: const EdgeInsets.only(left: 7, right: 7, top: 5),
               child: Text(
                 _title,
                 style: AppTheme.textStyleOfScreenTitle(),
@@ -166,7 +165,7 @@ class MessageDialog {
             ),
 
             content: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 7),
               child: _extraWidget == null
                   ? textWidget
                   : Column(
