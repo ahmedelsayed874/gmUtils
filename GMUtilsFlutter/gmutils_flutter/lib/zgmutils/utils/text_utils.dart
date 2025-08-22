@@ -199,5 +199,47 @@ class TextUtils {
     }
   }
 
+  //----------------------------------------------------------------------------
 
+  String convertVariableNameToFriendlyText(String key) {
+    //abcDef_JH
+    key = key.replaceAll('_', ' ');
+    //abcDef JH
+
+    int space = ' '.codeUnits[0]; //32
+    int zero = '0'.codeUnits[0]; //48
+    int nine = '9'.codeUnits[0]; //57
+    int A = 'A'.codeUnits[0]; //65
+    int Z = 'Z'.codeUnits[0]; //90
+    int a = 'a'.codeUnits[0]; //97
+    int z = 'z'.codeUnits[0]; //122
+
+    String txt = '';
+    int prevChat = 0;
+
+    for (var c in key.codeUnits) {
+      if (c >= A && c <= Z) {
+        if (prevChat != 0) txt += ' ';
+        txt += String.fromCharCode(c);
+      } else if (c >= a && c <= z) {
+        var c2 = c;
+        if (!(prevChat >= a && prevChat <= z)) {
+          //if (prevChat != 0) txt += ' ';
+          //c2 = c - 32;
+          if (prevChat == 0 || prevChat == space) c2 = c - 32;
+        }
+        txt += String.fromCharCode(c2);
+      } else if (c >= zero && c <= nine) {
+        if (!(prevChat >= zero && prevChat <= nine)) txt += ' ';
+        txt += String.fromCharCode(c);
+      } else {
+        if (prevChat != space) txt += ' ';
+        txt += String.fromCharCode(c);
+      }
+
+      prevChat = c;
+    }
+
+    return txt;
+  }
 }
