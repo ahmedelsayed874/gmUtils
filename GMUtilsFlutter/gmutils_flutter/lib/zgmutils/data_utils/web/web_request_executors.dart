@@ -111,6 +111,29 @@ class WebRequestExecutor {
 
   //---------------------------------------------------------------------------
 
+  Future<Response<DT>> executeGet<DT>(
+    GetUrl<DT> url, {
+    int? cacheIntervalInSeconds,
+  }) async {
+    Logs.print(() => [
+          'API::Call',
+          '[GET]',
+          'url: ${url.obscuredUri}',
+          //'\n',
+          'headers: ${url.obscuredHeaders}',
+          //'\n',
+        ]);
+
+    return _executeWithTries(
+      url: url,
+      cacheIntervalInSeconds: cacheIntervalInSeconds,
+      run: () async => await http.get(
+        url.uri,
+        headers: url.headers,
+      ),
+    );
+  }
+
   Future<Response<DT>> executePost<DT>(
     PostUrl<DT> url, {
     int? cacheIntervalInSeconds,
@@ -258,17 +281,69 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> executeGet<DT>(
-    GetUrl<DT> url, {
+  Future<Response<DT>> executePatch<DT>(
+    PatchUrl<DT> url, {
     int? cacheIntervalInSeconds,
   }) async {
-    if (url is PostUrl) {
-      throw 'WebRequestExecutor.executeGet() applied only on GetUrl objects';
-    }
-
     Logs.print(() => [
           'API::Call',
-          '[GET]',
+          '[PATCH]',
+          'url: ${url.obscuredUri}',
+          //'\n',
+          'headers: ${url.obscuredHeaders}',
+          //'\n',
+          'PatchParams: ${url.obscuredParams} ..... asJson: ${url.asJson}',
+          //'\n',
+          'patchObject(body): ${url.obscuredPostObject}',
+          //'\n',
+        ]);
+
+    return _executeWithTries(
+      url: url,
+      cacheIntervalInSeconds: cacheIntervalInSeconds,
+      run: () async => await http.patch(
+        url.uri,
+        headers: url.headers,
+        body: url.postObject,
+      ),
+    );
+  }
+
+  Future<Response<DT>> executePut<DT>(
+    PutUrl<DT> url, {
+    int? cacheIntervalInSeconds,
+  }) async {
+    Logs.print(() => [
+          'API::Call',
+          '[PUT]',
+          'url: ${url.obscuredUri}',
+          //'\n',
+          'headers: ${url.obscuredHeaders}',
+          //'\n',
+          'PutParams: ${url.obscuredParams} ..... asJson: ${url.asJson}',
+          //'\n',
+          'putObject(body): ${url.obscuredPostObject}',
+          //'\n',
+        ]);
+
+    return _executeWithTries(
+      url: url,
+      cacheIntervalInSeconds: cacheIntervalInSeconds,
+      run: () async => await http.put(
+        url.uri,
+        headers: url.headers,
+        body: url.postObject,
+      ),
+    );
+  }
+
+  Future<Response<DT>> executeDelete<DT>(
+    DeleteUrl<DT> url, {
+    int? cacheIntervalInSeconds,
+  }) async {
+    Logs.print(() => [
+          'API::Call',
+          '[DELETE]',
           'url: ${url.obscuredUri}',
           //'\n',
           'headers: ${url.obscuredHeaders}',
@@ -278,7 +353,7 @@ class WebRequestExecutor {
     return _executeWithTries(
       url: url,
       cacheIntervalInSeconds: cacheIntervalInSeconds,
-      run: () async => await http.get(
+      run: () async => await http.delete(
         url.uri,
         headers: url.headers,
       ),
@@ -435,14 +510,16 @@ class WebRequestExecutor {
     try {
       responseObj = url.encodeResponse(response.body);
     } catch (e) {
-      Logs.print(() => 'WebRequestExecutor -> Error:: parsing-body: "${response.body}" ---> got "$e"');
+      Logs.print(() =>
+          'WebRequestExecutor -> Error:: parsing-body: "${response.body}" ---> got "$e"');
     }
 
     if (responseObj == null) {
       try {
         responseObj = url.encodeResponse(response.reasonPhrase!);
       } catch (e) {
-        Logs.print(() => 'WebRequestExecutor -> Error:: parsing-reasonPhrase: ${response.reasonPhrase} ---> got "$e"');
+        Logs.print(() =>
+            'WebRequestExecutor -> Error:: parsing-reasonPhrase: ${response.reasonPhrase} ---> got "$e"');
       }
     }
 
@@ -456,13 +533,14 @@ class WebRequestExecutor {
     //
     else {
       Logs.print(() =>
-      'WebRequestExecutor -> Fatal error while handling the response');
+          'WebRequestExecutor -> Fatal error while handling the response');
 
       _removeExpiredCaches();
       responseObj = Response.failed(
         url: url,
         error: 'FATAL ERROR: parsing response failed'.toUpperCase(),
-        rawResponse: '{"status":"Fatal error", "body":${response.body}, "error":${response.reasonPhrase}}',
+        rawResponse:
+            '{"status":"Fatal error", "body":${response.body}, "error":${response.reasonPhrase}}',
         httpCode: code,
         responseHeader: response.headers,
       );

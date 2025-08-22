@@ -41,6 +41,10 @@ abstract class Url<RDT> {
     addHeader(key, value);
   }
 
+  void removeHeader(String key) {
+    headers.remove(key);
+  }
+
   String get uriAsString {
     var url = '$domain$fragments$endPoint';
 
@@ -87,7 +91,6 @@ abstract class Url<RDT> {
               '($endPoint): $e ------> response=$response',
           rawResponse: response,
           httpCode: 0,
-
         );
         res.url = this;
         return res;
@@ -138,8 +141,7 @@ abstract class Url<RDT> {
       final v = obscureLogOptionsMap[key]?.obscure('${m[key]}');
       if (v != null) {
         h[key] = v;
-      }
-      else {
+      } else {
         h[key] = '${m[key]}';
       }
     }
@@ -199,6 +201,17 @@ abstract class Url<RDT> {
         Uri.encodeFull(
             obscureLogOptions == null ? uriAsString : obscuredUriAsString),
       );
+
+  @override
+  String toString() {
+    return 'Url{\n'
+        'domain: $domain,\n'
+        'fragments: $fragments,\n'
+        'endPoint: $endPoint,\n'
+        'headers: $headers,\n'
+        'queries: $queries'
+        '}';
+  }
 }
 
 class GetUrl<RDT> extends Url<RDT> {
@@ -216,13 +229,13 @@ class GetUrl<RDT> extends Url<RDT> {
   });
 }
 
-class PostUrl<RDT> extends Url<RDT> {
+class _PostUrl<RDT> extends Url<RDT> {
   final Map<String, dynamic>? params;
   final bool asJson;
 
   //final String? body;
 
-  PostUrl({
+  _PostUrl({
     required super.domain,
     required super.fragments,
     required super.endPoint,
@@ -321,6 +334,24 @@ class PostUrl<RDT> extends Url<RDT> {
   }
 }
 
+class PostUrl<RDT> extends _PostUrl<RDT> {
+  PostUrl({
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    super.headers,
+    super.queries,
+    //
+    super.params,
+    super.asJson,
+    //
+    required super.responseMapper,
+    super.responseEncoder,
+    //
+    super.obscureLogOptions,
+  });
+}
+
 class PostMultiPartFileUrl<RDT> extends Url<RDT> {
   final String fileMappedKey;
   final File file;
@@ -414,6 +445,59 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     return h;
   }*/
   Map? get obscuredFormFields => _obscureMap(formFields);
+}
+
+//-----------------------------------------------------
+
+class PatchUrl<RDT> extends _PostUrl<RDT> {
+  PatchUrl({
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    super.headers,
+    super.queries,
+    //
+    super.params,
+    super.asJson,
+    //
+    required super.responseMapper,
+    super.responseEncoder,
+    //
+    super.obscureLogOptions,
+  });
+}
+
+class PutUrl<RDT> extends _PostUrl<RDT> {
+  PutUrl({
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    super.headers,
+    super.queries,
+    //
+    super.params,
+    super.asJson,
+    //
+    required super.responseMapper,
+    super.responseEncoder,
+    //
+    super.obscureLogOptions,
+  });
+}
+
+class DeleteUrl<RDT> extends Url<RDT> {
+  DeleteUrl({
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    super.headers,
+    super.queries,
+    //
+    required super.responseMapper,
+    super.responseEncoder,
+    //
+    super.obscureLogOptions,
+  });
 }
 
 //-----------------------------------------------------------------------------

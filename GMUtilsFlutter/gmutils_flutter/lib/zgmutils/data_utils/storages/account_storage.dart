@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fox_transportation/zgmutils/utils/logs.dart';
+import '../../utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart' as sharedPrefLib;
 
 import '../../gm_main.dart';

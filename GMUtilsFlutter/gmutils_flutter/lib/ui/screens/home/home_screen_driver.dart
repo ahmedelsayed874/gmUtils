@@ -96,7 +96,7 @@ abstract class HomeScreenDriverAbs extends IScreenDriver {
 
               return Response.success(url: null, data: ["$day", "$month", "$year"]);
             } catch (e) {
-              return Response.failed(url: null, error: e.toString(), httpCode: 400);
+              return Response.failed(url: null, rawResponse: response, error: e.toString(), httpCode: 400);
             }
           }),
     );
