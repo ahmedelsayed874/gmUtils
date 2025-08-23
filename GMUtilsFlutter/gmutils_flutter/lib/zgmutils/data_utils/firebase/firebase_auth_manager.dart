@@ -32,10 +32,10 @@ abstract class IFirebaseAuthManager {
   String formatNonEmailToEmail(String text) {
     text = FirebaseUtils.refinePhoneNumber(text);
     text = FirebaseUtils.refineKeyName(text);
-    return 'un_$text$DEFAULT_EMAIL_HOST_NAME';
+    return 'un_$text$nonEmailHostName';
   }
 
-  static String get DEFAULT_EMAIL_HOST_NAME => 'myusers.org';
+  String get nonEmailHostName;
 
   //----------------------------------------------------------------------------
 
@@ -72,6 +72,10 @@ abstract class IFirebaseAuthManager {
 }
 
 class FirebaseAuthManager extends IFirebaseAuthManager {
+  final String _nonEmailHostName;
+
+  FirebaseAuthManager({String nonEmailHostName = 'myusers.org'}) : _nonEmailHostName = nonEmailHostName;
+
   FirebaseAuth? _auth;
 
   Future<FirebaseAuth> get fbAuth async {
@@ -88,6 +92,9 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
   }
 
   //----------------------------------------------------------------------------
+
+  @override
+  String get nonEmailHostName => _nonEmailHostName;
 
   Future<Result<UserCredential>> _userCredential({
     required Future<UserCredential> Function() fbMethod,
