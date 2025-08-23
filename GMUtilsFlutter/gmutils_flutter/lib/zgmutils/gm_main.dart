@@ -322,7 +322,8 @@ class _AppState extends State<App> {
     theme(AppColors colors) => ThemeData(
           primarySwatch: colors.primarySwatch,
           scaffoldBackgroundColor: colors.background,
-          bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
+          //bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
+          bottomAppBarTheme: BottomAppBarThemeData(color: colors.toolbar),
           cardTheme: CardTheme.of(context).copyWith(
             color: colors.card,
             surfaceTintColor: colors.card,
