@@ -31,12 +31,14 @@ abstract class SQLDatabase {
   //----------------------------------------------------------------------------
 
   Future<Database> get database async {
-    _database ??= await openDatabase(
-      join(await getDatabasesPath(), '$databaseName.db'),
-      onCreate: _onCreateDb,
-      onUpgrade: _onUpgradeDb,
-      version: version,
-    );
+    if (_database == null || _database?.isOpen != true) {
+      _database = await openDatabase(
+        join(await getDatabasesPath(), '$databaseName.db'),
+        onCreate: _onCreateDb,
+        onUpgrade: _onUpgradeDb,
+        version: version,
+      );
+    }
     return _database!;
   }
 
@@ -119,9 +121,9 @@ abstract class SQLDatabase {
   Future<SQLDatabaseTable> newTableInstance({required String tableName}) async {
     Database _database;
     try {
-      _database = await database.timeout(const Duration(seconds: 1));
+      _database = await database.timeout(const Duration(seconds: 3));
     } catch (e) {
-      throw 'database may not created yet';
+      throw 'database may not created yet ---> exception $e';
     }
 
     try {
