@@ -228,19 +228,7 @@ class _LogsManager {
     var now = core.DateTime.now();
 
     _files = Files.private(
-      'log_${DateOp().formatForDatabase2(
-        day: DateOpDayComponent(
-          year: now.year,
-          month: now.month,
-          day: now.day,
-        ),
-        time: DateOpTimeComponent(
-          hour: now.hour,
-          minute: now.minute,
-          second: 0,
-          timezone: null,
-        ),
-      )}',
+      'log_${DateOp().format(now, pattern: 'yyyy-MM-dd-HH-mm-ss')}',
       'txt',
       subDirName: 'logs${_getLogsSetStr(prefix: '/')}',
     );
