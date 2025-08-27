@@ -75,66 +75,6 @@ class DateOp {
     }
     //endregion
 
-    //region month XXXXXXXXXXXX
-    /*int i = 0;
-    do {
-      int idx = pattern.indexOf('M', i);
-      if (idx == -1) break;
-
-      if (idx + 4 < pattern.length && pattern.substring(idx, idx + 4) == 'MMMM') {
-        var m = getMonthName(dateTime.month, en: en);
-        i += m.length;
-
-        print('xxxxxxx MMMM:: $pattern .... idx=$idx');
-        pattern = pattern.replaceFirst(
-          'MMMM',
-          m,
-          idx,
-        );
-        print('xxxxxxx MMMM:: $pattern .... i=$i');
-      }
-      //
-      else if (idx + 3 < pattern.length && pattern.substring(idx, idx + 3) == 'MMM') {
-        var m = getMonthName(dateTime.month, en: en, short: true);
-        i += m.length;
-
-        print('xxxxxxx MMM:: $pattern .... idx=$idx');
-        pattern = pattern.replaceFirst(
-          'MMM',
-          m,
-          idx,
-        );
-        print('xxxxxxx MMM:: $pattern .... i=$i');
-      }
-      //
-      else if (idx + 2 < pattern.length && pattern.substring(idx, idx + 2) == 'MM') {
-        var m = '00${dateTime.month}'.substring('${dateTime.month}'.length);
-        i += m.length;
-
-        print('xxxxxxx MM:: $pattern .... idx=$idx');
-        pattern = pattern.replaceFirst(
-          'MM',
-          m,
-          idx,
-        );
-        print('xxxxxxx MM:: $pattern .... i=$i');
-      }
-      //
-      else if (idx + 1 < pattern.length && pattern.substring(idx, idx + 1) == 'M') {
-        var m = dateTime.month.toString();
-        i += m.length;
-
-        print('xxxxxxx M:: $pattern .... idx=$idx');
-        pattern = pattern.replaceFirst(
-          'M',
-          m,
-          idx,
-        );
-        print('xxxxxxx M:: $pattern .... i=$i');
-      }
-    } while(i >= 0 && i < pattern.length);*/
-    //endregion
-
     //region day
     if (pattern.contains('dd')) {
       pattern = pattern.replaceAll(
