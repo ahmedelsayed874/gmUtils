@@ -54,6 +54,11 @@ class DateOp {
   /// yyyy-MM-dd HH:mm:ss: 2025-08-26 14:57:00
   /// EEE, d MMM yyyy HH:mm:ss Z: Tue, 26 Aug 2025 14:57:00 +0200
   String format(DateTime dateTime, {required String pattern, bool? en}) {
+    pattern = pattern
+        .replaceAll('M', '`M`')
+        .replaceAll('E', '`E`')
+        .replaceAll('a', '`a`');
+
     //region year
     if (pattern.contains('yyyy')) {
       pattern = pattern.replaceAll(
@@ -75,7 +80,7 @@ class DateOp {
     }
     //endregion
 
-    //region day
+    //region day-numbers
     if (pattern.contains('dd')) {
       pattern = pattern.replaceAll(
         'dd',
@@ -173,9 +178,9 @@ class DateOp {
     //endregion
 
     //region am/pm
-    if (pattern.contains('a')) {
+    if (pattern.contains('`a`')) {
       pattern = pattern.replaceAll(
-        'a',
+        '`a`',
         dateTime.hour >= 12 ? 'PM' : 'AM',
       );
     }
@@ -210,59 +215,50 @@ class DateOp {
     }
     //endregion
 
-    //
-
-    //region month
-    int mi = pattern.indexOf('M');
-
-    while (mi >= 0 && mi < pattern.length) {
-      String from = '';
-      String to = '';
-
-      if (mi + 4 < pattern.length && pattern.substring(mi, mi + 4) == 'MMMM') {
-        from = 'MMMM';
-        to = getMonthName(dateTime.month, en: en);
-      }
-      //
-      else if (mi + 3 < pattern.length && pattern.substring(mi, mi + 3) == 'MMM') {
-        from = 'MMM';
-        to = getMonthName(dateTime.month, en: en, short: true);
-      }
-      //
-      else if (mi + 2 < pattern.length && pattern.substring(mi, mi + 2) == 'MM') {
-        from = 'MM';
-        to = '00${dateTime.month}'.substring('${dateTime.month}'.length);
-      }
-      //
-      else if (mi + 1 < pattern.length && pattern.substring(mi, mi + 1) == 'M') {
-        from = 'M';
-        to = dateTime.month.toString();
-      }
-
-      if (to.isNotEmpty) {
-        pattern = pattern.replaceFirst(from, to, mi);
-
-        mi += to.length + 1;
-        mi = pattern.indexOf('M', mi);
-      } else {
-        break;
-      }
+    //region month-(names&numbers)
+    if (pattern.contains('`M``M``M``M`')) {
+      pattern = pattern.replaceAll(
+        '`M``M``M``M`',
+        getMonthName(dateTime.month, en: en),
+      );
+    }
+    if (pattern.contains('`M``M``M`')) {
+      pattern = pattern.replaceAll(
+        '`M``M``M`',
+        getMonthName(dateTime.month, en: en, short: true),
+      );
+    }
+    if (pattern.contains('`M``M`')) {
+      pattern = pattern.replaceAll(
+        '`M``M`',
+        '00${dateTime.month}'.substring('${dateTime.month}'.length),
+      );
+    }
+    if (pattern.contains('`M`')) {
+      pattern = pattern.replaceAll(
+        '`M`',
+        dateTime.month.toString(),
+      );
     }
     //endregion
 
-    //
-
-    //region day-name
-    if (pattern.contains('EEEE')) {
+    //region day-names
+    if (pattern.contains('`E``E``E``E`')) {
       pattern = pattern.replaceAll(
-        'EEEE',
-        getDayName(dateTime.day, en: en),
+        '`E``E``E``E`',
+        getWeekDayName(dateTime.weekday, en: en),
       );
     }
-    if (pattern.contains('EEE')) {
+    if (pattern.contains('`E``E``E`')) {
       pattern = pattern.replaceAll(
-        'EEE',
-        getDayName(dateTime.day, en: en, short: true),
+        '`E``E``E`',
+        getWeekDayName(dateTime.weekday, en: en, short: true),
+      );
+    }
+    if (pattern.contains('`E`')) {
+      pattern = pattern.replaceAll(
+        '`E`',
+        getWeekDayName(dateTime.weekday, en: en),
       );
     }
     //endregion
@@ -302,89 +298,9 @@ class DateOp {
     return format(dateTime, pattern: pattern, en: true);
   }
 
-  /*///"yyyy-MM-dd HH:mm:ss" ========> 2012-01-23 01:23:45
-  String formatForDatabase(
-    DateTime dateTime, {
-    required bool dateOnly,
-    bool convertToUtc = true,
-    bool includeZoneTime = false,
-  }) {
-    if (convertToUtc) {
-      if (!(dateTime.isUtc) && !(dateOnly)) {
-        dateTime = dateTime.toUtc();
-      }
-    }
-
-    if (dateOnly) {
-      return DateOpDayComponent(
-        year: dateTime.year,
-        month: dateTime.month,
-        day: dateTime.day,
-      ).formattedForDb;
-    }
-    //
-    else {
-      DateOpTimeZoneComponent? timezone;
-
-      if (includeZoneTime) {
-        if (convertToUtc) {
-          timezone = DateOpTimeZoneComponent(
-            isPositive: true,
-            hours: 0,
-            minutes: 0,
-          );
-        }
-        //
-        else {
-          var totalMinutes = dateTime.timeZoneOffset.inMinutes;
-          var isPositive = totalMinutes >= 0;
-          int timeZoneHours = totalMinutes ~/ 60;
-          int timeZoneMinutes = totalMinutes - (timeZoneHours * 60);
-
-          timezone = DateOpTimeZoneComponent(
-            isPositive: isPositive,
-            hours: timeZoneHours,
-            minutes: timeZoneMinutes,
-          );
-        }
-      }
-
-      var day = DateOpDayComponent(
-        year: dateTime.year,
-        month: dateTime.month,
-        day: dateTime.day,
-      );
-      var time = DateOpTimeComponent(
-        hour: dateTime.hour,
-        minute: dateTime.minute,
-        second: dateTime.second,
-        timezone: timezone,
-      );
-
-      String formattedDate = '';
-
-      //day -----------------------------------
-      formattedDate += day.formattedForDb;
-
-      //time -----------------------------------
-      formattedDate += ' ${time.formattedForDb}';
-
-      return formattedDate;
-    }
-  }
-
-  String formatTimeForDatabase(TimeOfDay time) {
-    return DateOpTimeComponent(
-      hour: time.hour,
-      minute: time.minute,
-      second: 0,
-      timezone: null,
-    ).formattedForDb;
-  }*/
-
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-  String getDayName(int day, {bool? en, bool short = false}) {
+  String getWeekDayName(int day, {bool? en, bool short = false}) {
     var names = {
       DateTime.saturday: {'en': 'Saturday', 'ar': 'السبت'},
       DateTime.sunday: {'en': 'Sunday', 'ar': 'الأحد'},
@@ -439,7 +355,7 @@ class DateOp {
   String formatForUser(
     DateTime dateTime, {
     bool? en,
-    required bool dateOnly,
+    bool dateOnly = false,
     bool convertToLocalTime = true,
     bool includeSeconds = false,
     bool useShortNames = false,
@@ -448,7 +364,7 @@ class DateOp {
     en ??= App.isEnglish;
 
     DateTime dateTime2;
-    if (!dateOnly && convertToLocalTime) {
+    if (/*!dateOnly &&*/ convertToLocalTime) {
       if (dateTime.isUtc) {
         dateTime2 = dateTime.toLocal();
       }
@@ -478,7 +394,7 @@ class DateOp {
   String? formatForUser2(
     String? date, {
     bool? en,
-    required bool dateOnly,
+    bool dateOnly = false,
     bool convertToLocalTime = true,
     bool includeSeconds = false,
     bool useShortNames = false,
@@ -486,7 +402,7 @@ class DateOp {
   }) {
     var dateTime = parse(
       date ?? '',
-      convertToLocalTime: !dateOnly && convertToLocalTime,
+      convertToLocalTime: /*!dateOnly &&*/ convertToLocalTime,
     );
     if (dateTime == null) {
       return date;
@@ -497,123 +413,11 @@ class DateOp {
       en: en,
       dateOnly: dateOnly,
       convertToLocalTime: false,
-      //convertToLocalTime,
       includeSeconds: includeSeconds,
       useShortNames: useShortNames,
       inTwoLines: inTwoLines,
     );
   }
-
-  /*
-  //region formatForUser
-  String formatForUser(
-    DateTime dateTime, {
-    bool? en,
-    required bool dateOnly,
-    bool convertToLocalTime = true,
-    bool includeSeconds = false,
-    bool useShortNames = false,
-    bool inTwoLines = false,
-  }) {
-    en ??= App.isEnglish;
-
-    DateTime date_time;
-    if (!dateOnly && convertToLocalTime) {
-      if (dateTime.isUtc) {
-        date_time = dateTime.toLocal();
-      } else {
-        var now = DateTime.now();
-        date_time = dateTime.add(now.timeZoneOffset);
-      }
-    } else {
-      date_time = dateTime;
-    }
-
-    String formattedDate = '';
-
-    formattedDate +=
-        getDayName(date_time.weekday, en: en, short: useShortNames);
-    formattedDate += ' ${date_time.day}, ';
-
-    formattedDate +=
-        getMonthName(date_time.month, en: en, short: useShortNames);
-    formattedDate += ' ${date_time.year}';
-
-    if (!dateOnly) {
-      if (inTwoLines) formattedDate += '\n';
-      formattedDate += ' ';
-
-      var time = DateOpTimeComponent(
-        hour: date_time.hour,
-        minute: date_time.minute,
-        second: date_time.second,
-        timezone: null,
-      );
-      formattedDate += time.formattedForUser(
-        en: en,
-        includeSeconds: includeSeconds,
-      );
-    }
-
-    return formattedDate;
-  }
-  //endregion
-
-
-  String formatTimeForUser(
-    TimeOfDay time, {
-    bool? en,
-  }) {
-    en ??= App.isEnglish;
-
-    var time2 = DateOpTimeComponent(
-      hour: time.hour,
-      minute: time.minute,
-      second: 0,
-      timezone: null,
-    );
-
-    return time2.formattedForUser(
-      en: en,
-      includeSeconds: false,
-    );
-  }
-
-  String formatTimeForUser2(
-    String time, {
-    bool? en,
-    bool includeSeconds = false,
-  }) {
-    en ??= App.isEnglish;
-
-    var t = time.split(' ');
-    if (t.length > 1) return time;
-
-    var p = time.split(':');
-    if (p.length >= 2) {
-      var h = int.parse(p[0]);
-      var m = int.parse(p[1]);
-      int s = 0;
-      if (p.length > 2) {
-        s = int.parse(p[2]);
-      }
-
-      var time = DateOpTimeComponent(
-        hour: h,
-        minute: m,
-        second: s,
-        timezone: null,
-      );
-      String formattedTime = time.formattedForUser(
-        en: en,
-        includeSeconds: includeSeconds,
-      );
-
-      return formattedTime;
-    }
-
-    return time;
-  }*/
 
   //============================================================================
 
@@ -1037,38 +841,6 @@ class DateOp {
 }
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-/*class DateOpDayComponent {
-  int year;
-  int month;
-  int day;
-
-  DateOpDayComponent({
-    required this.year,
-    required this.month,
-    required this.day,
-  });
-
-  ///"yyyy-MM-dd" ========> 2012-01-23
-  String get formattedForDb {
-    String formattedDate = '';
-
-    //year --------------------------------
-    formattedDate += '$year';
-
-    //month --------------------------------
-    formattedDate += '-';
-    if (month < 10) formattedDate += '0';
-    formattedDate += '$month';
-
-    //day ---------------------------------
-    formattedDate += '-';
-    if (day < 10) formattedDate += '0';
-    formattedDate += '$day';
-
-    return formattedDate;
-  }
-}*/
 
 class DateOpTimeComponent {
   final int hour;
