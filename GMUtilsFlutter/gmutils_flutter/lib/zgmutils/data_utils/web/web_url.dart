@@ -13,6 +13,7 @@ abstract class Url<RDT> {
   final Map<String, String>? queries;
   final Mappable<RDT>? responseMapper;
   final Response<RDT> Function(String response)? responseEncoder;
+  final String? logsName;
   final List<ObscureLogOption>? obscureLogOptions;
 
   Url({
@@ -25,6 +26,7 @@ abstract class Url<RDT> {
     required this.responseMapper,
     required this.responseEncoder,
     //
+    required this.logsName,
     required this.obscureLogOptions,
   }) {
     if (headers != null) {
@@ -204,7 +206,7 @@ abstract class Url<RDT> {
 
   @override
   String toString() {
-    return 'Url{\n'
+    return '$runtimeType{\n'
         'domain: $domain,\n'
         'fragments: $fragments,\n'
         'endPoint: $endPoint,\n'
@@ -225,6 +227,7 @@ class GetUrl<RDT> extends Url<RDT> {
     required super.responseMapper,
     super.responseEncoder,
     //
+    super.logsName,
     super.obscureLogOptions,
   });
 }
@@ -248,6 +251,7 @@ class _PostUrl<RDT> extends Url<RDT> {
     required super.responseMapper,
     super.responseEncoder,
     //
+    super.logsName,
     super.obscureLogOptions,
   }) {
     if (params != null) {
@@ -332,6 +336,17 @@ class _PostUrl<RDT> extends Url<RDT> {
       return '';
     }
   }
+
+  @override
+  String toString() {
+    var t = super.toString();
+    t = t.substring(0, t.length - 1);
+    t += ',\n'
+        'params: $params,\n'
+        'asJson: $asJson'
+        '}';
+    return t;
+  }
 }
 
 class PostUrl<RDT> extends _PostUrl<RDT> {
@@ -375,6 +390,7 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     required Mappable<RDT> super.responseMapper,
     super.responseEncoder,
     //
+    super.logsName,
     super.obscureLogOptions,
   });
 
@@ -445,6 +461,20 @@ class PostMultiPartFileUrl<RDT> extends Url<RDT> {
     return h;
   }*/
   Map? get obscuredFormFields => _obscureMap(formFields);
+
+  @override
+  String toString() {
+    var t = super.toString();
+    t = t.substring(0, t.length - 1);
+    t += ',\n'
+        'fileMappedKey: $fileMappedKey,\n'
+        'file: $file,\n'
+        'customFileName: $customFileName,\n'
+        'fileMimeType: $fileMimeType,\n'
+        'formFields: $formFields'
+        '}';
+    return t;
+  }
 }
 
 //-----------------------------------------------------
@@ -496,6 +526,7 @@ class DeleteUrl<RDT> extends Url<RDT> {
     required super.responseMapper,
     super.responseEncoder,
     //
+    super.logsName,
     super.obscureLogOptions,
   });
 }

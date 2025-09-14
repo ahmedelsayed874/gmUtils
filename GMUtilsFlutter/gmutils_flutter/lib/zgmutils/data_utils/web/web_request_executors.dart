@@ -13,10 +13,10 @@ import 'response.dart';
 import 'web_url.dart';
 
 class WebRequestExecutor {
-  Future<http.Response?> openUrl(String link) async {
+  Future<http.Response?> openUrl(String link, {String? logsName}) async {
     try {
       var response = await http.get(Uri.parse(link.trim()));
-      Logs.print(
+      Logs.get(logsName).print(
         () => "WebRequestExecutor.openUrl($link) ==> response: {\n"
             ">>> code: ${response.statusCode},\n"
             ">>> body: ${response.body},\n"
@@ -25,7 +25,7 @@ class WebRequestExecutor {
       );
       return response;
     } catch (e) {
-      Logs.print(
+      Logs.get(logsName).print(
         () => "WebRequestExecutor.checkUrlValidity($link) ==> "
             "EXCEPTION::: $e",
       );
@@ -33,12 +33,12 @@ class WebRequestExecutor {
     }
   }
 
-  Future<Pair<bool, String>> checkUrlValidity(String link) async {
+  Future<Pair<bool, String>> checkUrlValidity(String link, {String? logsName,}) async {
     try {
       link = link.toLowerCase().trim();
 
       if (link.split(' ').length > 1) {
-        Logs.print(
+        Logs.get(logsName).print(
           () => ""
               "WebRequestExecutor.checkUrlValidity($link) ==> "
               "LINK CONTAINS SPACES",
@@ -47,7 +47,7 @@ class WebRequestExecutor {
       }
 
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        Logs.print(
+        Logs.get(logsName).print(
           () => ""
               "WebRequestExecutor.checkUrlValidity($link) ==> "
               "Link not start with 'http://' or 'https://'",
@@ -59,7 +59,7 @@ class WebRequestExecutor {
       }
 
       var response = await http.get(Uri.parse(link.trim()));
-      Logs.print(
+      Logs.get(logsName).print(
         () => ""
             "WebRequestExecutor.checkUrlValidity($link) ==> response: {\n"
             ">>> code: ${response.statusCode},\n"
@@ -72,7 +72,7 @@ class WebRequestExecutor {
         value2: '',
       );
     } catch (e) {
-      Logs.print(
+      Logs.get(logsName).print(
         () => ""
             "WebRequestExecutor.checkUrlValidity($link) ==> "
             "EXCEPTION::: $e",
@@ -115,7 +115,7 @@ class WebRequestExecutor {
     GetUrl<DT> url, {
     int? cacheIntervalInSeconds,
   }) async {
-    Logs.print(() => [
+    Logs.get(url.logsName).print(() => [
           'API::Call',
           '[GET]',
           'url: ${url.obscuredUri}',
@@ -138,7 +138,7 @@ class WebRequestExecutor {
     PostUrl<DT> url, {
     int? cacheIntervalInSeconds,
   }) async {
-    Logs.print(() => [
+    Logs.get(url.logsName).print(() => [
           'API::Call',
           '[POST]',
           'url: ${url.obscuredUri}',
@@ -173,7 +173,7 @@ class WebRequestExecutor {
       fileBytesLength = e;
     }
 
-    Logs.print(() => [
+    Logs.get(url.logsName).print(() => [
           'API::Call',
           '[POST / MULTIPART]',
           'url: ${url.obscuredUri}',
@@ -194,7 +194,7 @@ class WebRequestExecutor {
 
     if (fileBytesLength is int) {
       if (fileBytesLength == 0) {
-        Logs.print(() => [
+        Logs.get(url.logsName).print(() => [
               'API::Response',
               'url: ${url.uri}',
               '\n',
@@ -210,7 +210,7 @@ class WebRequestExecutor {
     }
     //
     else {
-      Logs.print(() => [
+      Logs.get(url.logsName).print(() => [
             'API::Response',
             'url: ${url.uri}',
             '\n',
@@ -285,7 +285,7 @@ class WebRequestExecutor {
     PatchUrl<DT> url, {
     int? cacheIntervalInSeconds,
   }) async {
-    Logs.print(() => [
+    Logs.get(url.logsName).print(() => [
           'API::Call',
           '[PATCH]',
           'url: ${url.obscuredUri}',
@@ -313,7 +313,7 @@ class WebRequestExecutor {
     PutUrl<DT> url, {
     int? cacheIntervalInSeconds,
   }) async {
-    Logs.print(() => [
+    Logs.get(url.logsName).print(() => [
           'API::Call',
           '[PUT]',
           'url: ${url.obscuredUri}',
@@ -341,7 +341,7 @@ class WebRequestExecutor {
     DeleteUrl<DT> url, {
     int? cacheIntervalInSeconds,
   }) async {
-    Logs.print(() => [
+    Logs.get(url.logsName).print(() => [
           'API::Call',
           '[DELETE]',
           'url: ${url.obscuredUri}',
@@ -372,7 +372,7 @@ class WebRequestExecutor {
       cacheIntervalInSeconds: cacheIntervalInSeconds,
     );
     if (cache != null) {
-      Logs.print(() => [
+      Logs.get(url.logsName).print(() => [
             'API::Response',
             'url: ${url.uri}',
             '\n',
@@ -413,7 +413,7 @@ class WebRequestExecutor {
 
       if (tries < supposedTries) {
         if (Logs.inDebugMode || await Logs.writingToLogFileEnabled) {
-          Logs.print(() => [
+          Logs.get(url.logsName).print(() => [
                 'API::Response(OF_TRY_NUMBER: $tries)',
                 'url: ${url.uri}',
                 '\n',
@@ -455,7 +455,7 @@ class WebRequestExecutor {
   }) async {
     final code = response.statusCode;
 
-    Logs.print(() => [
+    Logs.get(url.logsName).print(() => [
           'API::Response',
           'url: ${url.obscuredUri}',
           '\n',
@@ -481,7 +481,7 @@ class WebRequestExecutor {
         _removeExpiredCaches();
         return responseObj;
       } catch (e) {
-        Logs.print(() =>
+        Logs.get(logsName).print(() =>
             'WebRequestExecutor -> Error:: $e ------> Code: $code ------> response: ${response.body}');
 
         _removeExpiredCaches();
@@ -510,7 +510,7 @@ class WebRequestExecutor {
     try {
       responseObj = url.encodeResponse(response.body);
     } catch (e) {
-      Logs.print(() =>
+      Logs.get(url.logsName).print(() =>
           'WebRequestExecutor -> Error:: parsing-body: "${response.body}" ---> got "$e"');
     }
 
@@ -518,7 +518,7 @@ class WebRequestExecutor {
       try {
         responseObj = url.encodeResponse(response.reasonPhrase!);
       } catch (e) {
-        Logs.print(() =>
+        Logs.get(url.logsName).print(() =>
             'WebRequestExecutor -> Error:: parsing-reasonPhrase: ${response.reasonPhrase} ---> got "$e"');
       }
     }
@@ -532,7 +532,7 @@ class WebRequestExecutor {
     }
     //
     else {
-      Logs.print(() =>
+      Logs.get(url.logsName).print(() =>
           'WebRequestExecutor -> Fatal error while handling the response');
 
       _removeExpiredCaches();
@@ -555,8 +555,9 @@ class WebRequestExecutor {
     required String apiName,
     required DummyResponseBuilder<DT> Function() responseBuilder,
     int delayInSeconds = 1,
+    String? logsName,
   }) async {
-    Logs.print(() => 'API-Dummy-Request:: http://$apiName');
+    Logs.get(logsName).print(() => 'API-Dummy-Request:: http://$apiName');
 
     await Future.delayed(Duration(seconds: delayInSeconds));
 
@@ -671,7 +672,7 @@ class WebRequestExecutor {
       }
     }
 
-    Logs.print(() => 'API-Dummy-Response:: http://$apiName -> $response');
+    Logs.get(logsName).print(() => 'API-Dummy-Response:: http://$apiName -> $response');
 
     return response;
   }
