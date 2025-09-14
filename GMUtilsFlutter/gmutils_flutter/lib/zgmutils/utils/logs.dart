@@ -26,7 +26,8 @@ class Logs {
     }
     //
     else {
-      _logs![name] ??= _LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
+      _logs![name] ??=
+          _LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
     }
 
     return _logs![name]!;
@@ -42,17 +43,22 @@ class Logs {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  static void setLogFileDeadline(
-    core.String? logFileDeadline, {
+  static void setLogFileDeadline({
+    core.String? publicLogFileDeadline,
+    core.String? privateLogFileDeadline,
     core.bool saveDate = false,
   }) =>
       _defLogs.setLogFileDeadline(
-        logFileDeadline,
+        publicLogFileDeadline: publicLogFileDeadline,
+        privateLogFileDeadline: privateLogFileDeadline,
         saveDate: saveDate,
       );
 
-  static core.Future<core.DateTime?> get savedLogsDeadline =>
-      _defLogs.savedLogsDeadline;
+  static core.Future<core.DateTime?> get savedPublicLogsDeadline =>
+      _defLogs.savedPublicLogsDeadline;
+
+  static core.Future<core.DateTime?> get savedPrivateLogsDeadline =>
+      _defLogs.savedPrivateLogsDeadline;
 
   static core.bool get inDebugMode => _defLogs.inDebugMode;
 
@@ -65,9 +71,11 @@ class Logs {
 
   //----------------------------------------------------------------------------
 
+  ///fromPublicLogs: null mean read from current logs dir
   static core.Future<core.String?> getLastLogsContent({
     core.int upTo = 1,
     core.bool encrypted = true,
+    core.bool? fromPublicLogs,
   }) async {
     core.String content = '';
 
@@ -76,6 +84,7 @@ class Logs {
       content += '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(
         upTo: upTo,
         encrypted: encrypted,
+        fromPublicLogs: fromPublicLogs,
       )}';
     }
 
@@ -84,9 +93,19 @@ class Logs {
 
   //----------------------------------------------------------------------------
 
-  static core.Future<core.bool> get hasLogs async {
+  static core.Future<core.bool> get hasPublicLogs => _hasLogs(false);
+
+  static core.Future<core.bool> get hasPrivateLogs => _hasLogs(true);
+
+  static core.Future<core.bool> get hasLogs => _hasLogs(null);
+
+  static core.Future<core.bool> _hasLogs(core.bool? fromPublicLogs) async {
     for (var value in allLogs) {
-      final dir = await value.logsDirPath;
+      final dir = fromPublicLogs == null
+          ? (await value.currentLogsDir)
+          : (fromPublicLogs
+              ? (await value.publicLogsDir)
+              : (await value.privateLogsDir));
       final files = dir?.listSync(followLinks: false);
 
       if (files?.isNotEmpty == true) {
@@ -111,48 +130,75 @@ class _LogsManager {
 
   //----------------------------------------------------------------------------
 
-  core.int? _logFileDeadline;
-  Result<core.DateTime>? _savedDeadline;
+  core.int? _publicLogFileDeadline;
+  core.int? _privateLogFileDeadline;
 
-  void setLogFileDeadline(
-    core.String? logFileDeadline, {
+  void setLogFileDeadline({
+    core.String? publicLogFileDeadline,
+    core.String? privateLogFileDeadline,
     core.bool saveDate = false,
   }) {
-    try {
-      var dt = DateOp().parse(logFileDeadline ?? '', convertToLocalTime: true);
-      _logFileDeadline = dt?.millisecondsSinceEpoch;
-      if (dt != null && saveDate) {
-        GeneralStorage.o('logs').save(
-          'deadline${_getLogsSetStr()}}',
-          logFileDeadline!,
-        );
-        _savedDeadline = Result(dt);
+    if (publicLogFileDeadline == null && privateLogFileDeadline == null) {
+      core.print(
+        'setLogsFileDeadline '
+        'CALLED BUT WITHOUT PROVIDING DATES '
+        '(LOGS NAME: ${_getLogsSetStr()})',
+      );
+    }
+
+    if (publicLogFileDeadline != null) {
+      final dt = DateOp().parse(
+        publicLogFileDeadline,
+        convertToLocalTime: true,
+      );
+      if (dt != null) {
+        _publicLogFileDeadline = dt.microsecondsSinceEpoch;
+        if (saveDate) {
+          GeneralStorage.o('logs').save(
+            'deadline${_getLogsSetStr()}_pub',
+            publicLogFileDeadline,
+          );
+        }
       }
-    } catch (e) {
-      if (kDebugMode) {
-        core.print(
-            'Logs.setLogFileDeadline(logFileDeadline: $logFileDeadline) ---> Exception: $e');
+    }
+
+    if (privateLogFileDeadline != null) {
+      final dt = DateOp().parse(
+        privateLogFileDeadline,
+        convertToLocalTime: true,
+      );
+      if (dt != null) {
+        _privateLogFileDeadline = dt.microsecondsSinceEpoch;
+        if (saveDate) {
+          GeneralStorage.o('logs').save(
+            'deadline${_getLogsSetStr()}_prv',
+            privateLogFileDeadline,
+          );
+        }
       }
     }
   }
 
-  core.Future<core.DateTime?> get savedLogsDeadline async {
-    if (_savedDeadline != null) return _savedDeadline!.result;
-
+  core.Future<core.DateTime?> get savedPublicLogsDeadline async {
     try {
       var d = await GeneralStorage.o('logs').retrieve(
-        'deadline${_getLogsSetStr()}',
+        'deadline${_getLogsSetStr()}_pub',
       );
-      if (d?.isNotEmpty == true) {
-        var dt = DateOp().parse(d ?? '', convertToLocalTime: true);
-        _savedDeadline = Result(dt);
-        return dt;
-      } else {
-        _savedDeadline = Result(null);
-        return null;
-      }
+      var dt = DateOp().parse(d, convertToLocalTime: true);
+      return dt;
     } catch (e) {
-      _savedDeadline = Result(null);
+      return null;
+    }
+  }
+
+  core.Future<core.DateTime?> get savedPrivateLogsDeadline async {
+    try {
+      var d = await GeneralStorage.o('logs').retrieve(
+        'deadline${_getLogsSetStr()}_prv',
+      );
+      var dt = DateOp().parse(d, convertToLocalTime: true);
+      return dt;
+    } catch (e) {
       return null;
     }
   }
@@ -162,17 +208,38 @@ class _LogsManager {
   }
 
   core.Future<core.bool> get writingToLogFileEnabled async {
-    var now = core.DateTime.now();
-    var printToFile = now.millisecondsSinceEpoch < (_logFileDeadline ?? 0);
+    return (await writingToPrivateLogFileEnabled) ||
+        (await writingToPublicLogFileEnabled);
+  }
 
-    if (!printToFile) {
-      var dl = await savedLogsDeadline;
-      if (dl != null) {
-        printToFile = now.millisecondsSinceEpoch < dl.millisecondsSinceEpoch;
-      }
+  core.Future<core.bool> get writingToPublicLogFileEnabled async {
+    var now = core.DateTime.now();
+
+    if (_publicLogFileDeadline == null) {
+      var dl = await savedPublicLogsDeadline;
+      _publicLogFileDeadline = dl?.millisecondsSinceEpoch;
     }
 
-    return printToFile;
+    if (_publicLogFileDeadline != null) {
+      return now.millisecondsSinceEpoch < _publicLogFileDeadline!;
+    }
+
+    return false;
+  }
+
+  core.Future<core.bool> get writingToPrivateLogFileEnabled async {
+    var now = core.DateTime.now();
+
+    if (_privateLogFileDeadline == null) {
+      var dl = await savedPrivateLogsDeadline;
+      _privateLogFileDeadline = dl?.millisecondsSinceEpoch;
+    }
+
+    if (_privateLogFileDeadline != null) {
+      return now.millisecondsSinceEpoch < _privateLogFileDeadline!;
+    }
+
+    return false;
   }
 
   //----------------------------------------------------------------------------
@@ -222,18 +289,33 @@ class _LogsManager {
     }
   }
 
+  core.String get _subDirName => 'logs${_getLogsSetStr(prefix: '/')}';
+
   void _createLogFileIfNotExist() async {
     if (_files != null) return;
 
-    var now = core.DateTime.now();
+    final now = core.DateTime.now();
+    final fileName =
+        'log_${DateOp().format(now, pattern: 'yyyy-MM-dd-HH-mm-ss')}';
+    const fileExtension = 'txt';
 
-    _files = Files.private(
-      'log_${DateOp().format(now, pattern: 'yyyy-MM-dd-HH-mm-ss')}',
-      'txt',
-      subDirName: 'logs${_getLogsSetStr(prefix: '/')}',
-    );
+    if (await writingToPublicLogFileEnabled) {
+      _files = Files.public(
+        fileName,
+        fileExtension,
+        subDirName: _subDirName,
+      );
+    }
+    //
+    else {
+      _files = Files.private(
+        fileName,
+        fileExtension,
+        subDirName: _subDirName,
+      );
+    }
 
-    final dir = await logsDirPath;
+    final dir = await currentLogsDir;
     if (dir != null) {
       final files = dir
           .listSync(followLinks: false)
@@ -291,17 +373,29 @@ class _LogsManager {
 
   //----------------------------------------------------------------------------
 
-  core.Future<Directory?> get logsDirPath async {
-    return _files?.directoryPath;
+  core.Future<Directory?> get publicLogsDir async {
+    var file = Files.public('_', '', subDirName: _subDirName);
+    return file.directory;
+  }
+
+  core.Future<Directory?> get privateLogsDir async {
+    var file = Files.private('_', '', subDirName: _subDirName);
+    return file.directory;
+  }
+
+  core.Future<Directory?> get currentLogsDir async {
+    return _files?.directory;
   }
 
   core.Future<File?> get currentLogFile async {
     return _files?.localFile;
   }
 
+  ///fromPublicLogs: null will get from current logs dir
   core.Future<core.String?> getLastLogsContent({
     core.int upTo = 1,
     core.bool encrypted = true,
+    core.bool? fromPublicLogs,
   }) async {
     if (upTo < 1) {
       return null;
@@ -320,7 +414,9 @@ class _LogsManager {
       }
     }
 
-    final dir = await logsDirPath;
+    final dir = fromPublicLogs == null
+        ? (await currentLogsDir)
+        : (fromPublicLogs ? (await publicLogsDir) : (await privateLogsDir));
     if (dir == null) return null;
 
     final files = dir
@@ -333,7 +429,7 @@ class _LogsManager {
     var i = 0;
     while (i < upTo && i < files.length) {
       if (content.isNotEmpty) content += '\n\n';
-      
+
       var file = File(files.elementAt(i).path);
 
       if (encrypted) {
@@ -352,23 +448,24 @@ class _LogsManager {
 
   core.Future<core.String> _getFileContent(File file) async {
     core.String content;
-    
+
     try {
-      content = await file.readAsString(); 
+      content = await file.readAsString();
     } catch (e) {
       return '';
     }
-    
+
     return '${Files.extractFileName(file)}'
         ':-------------------------\n'
         '$content';
   }
-  
+
   core.Future<core.String> _encodeFileContent(File file) async {
     core.String content = await _getFileContent(file);
-    
+
     core.List<core.int> bytes = utf8.encode(content);
     core.String contentBase64 = base64.encode(bytes);
     return contentBase64;
   }
 }
+

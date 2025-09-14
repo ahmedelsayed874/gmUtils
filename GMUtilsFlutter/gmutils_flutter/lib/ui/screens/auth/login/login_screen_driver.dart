@@ -65,9 +65,11 @@ abstract class LoginScreenDriverAbs extends IScreenDriver {
       username: username,
     );
 
-    Logs.setLogFileDeadline(appConfigs.appConfigs.getLogFileDeadline(
-      username: username,
-    ));
+    Logs.setLogFileDeadline(
+      privateLogFileDeadline: appConfigs.appConfigs.getLogFileDeadline(
+        username: username,
+      ),
+    );
   }
 }
 

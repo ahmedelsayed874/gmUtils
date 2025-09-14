@@ -59,7 +59,8 @@ abstract class SplashScreenDriverAbs extends IScreenDriver {
     );
 
     if (credentials != null) {
-      Logs.setLogFileDeadline(appConfigs.appConfigs.getLogFileDeadline(
+      Logs.setLogFileDeadline(
+          privateLogFileDeadline: appConfigs.appConfigs.getLogFileDeadline(
         username: credentials.value1,
       ));
     }

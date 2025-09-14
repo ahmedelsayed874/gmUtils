@@ -36,7 +36,7 @@ class Files {
 
   //----------------------------------------------------------------------------
 
-  Future<Directory> get directoryPath async {
+  Future<Directory> get directory async {
     Directory? directory;
     if (Platform.isAndroid) {
       if (privateDir) {
@@ -105,7 +105,7 @@ class Files {
 
   Future<File> get localFile async {
     if (__localFile == null) {
-      final path = (await directoryPath).path;
+      final path = (await directory).path;
       __localFile = File('$path/$fileName.$fileExtension');
       if (!__localFile!.existsSync()) {
         __localFile!.createSync(recursive: true);

@@ -207,7 +207,10 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
             action: () {
               var dateTime = DateTime.now().add(Duration(minutes: 15));
               var dl = DateOp().formatForDatabase(dateTime, dateOnly: false);
-              Logs.setLogFileDeadline(dl, saveDate: true);
+              Logs.setLogFileDeadline(
+                privateLogFileDeadline: dl,
+                saveDate: true,
+              );
             },
           ),
           MessageDialogActionButton(App.isEnglish ? 'Back' : 'رجوع'),
