@@ -12,9 +12,9 @@ import 'files.dart';
 import 'result.dart';
 
 class Logs {
-  static core.Map<core.String?, _LogsManager>? _logs;
+  static core.Map<core.String?, LogsManager>? _logs;
 
-  static _LogsManager get(
+  static LogsManager get(
     core.String? name, {
     core.int maxLogsFiles = 10,
     core.bool forceCreateNewInstance = false,
@@ -22,20 +22,25 @@ class Logs {
     _logs ??= {};
 
     if (forceCreateNewInstance) {
-      _logs![name] = _LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
+      _logs![name] = _LogsManagerImpl(
+        logsSet: name,
+        maxLogsFiles: maxLogsFiles,
+      );
     }
     //
     else {
-      _logs![name] ??=
-          _LogsManager._(logsSet: name, maxLogsFiles: maxLogsFiles);
+      _logs![name] ??= _LogsManagerImpl(
+        logsSet: name,
+        maxLogsFiles: maxLogsFiles,
+      );
     }
 
     return _logs![name]!;
   }
 
-  static _LogsManager get _defLogs => get(null);
+  static LogsManager get _defLogs => get(null);
 
-  static core.List<_LogsManager> get allLogs {
+  static core.List<LogsManager> get allLogs {
     var all = _logs?.values.toList() ?? [];
     if (all.isEmpty) all.add(_defLogs);
     return all;
@@ -64,6 +69,12 @@ class Logs {
 
   static core.Future<core.bool> get writingToLogFileEnabled =>
       _defLogs.writingToLogFileEnabled;
+
+  static core.Future<core.bool> get writingToPublicLogFileEnabled =>
+      _defLogs.writingToPublicLogFileEnabled;
+
+  static core.Future<core.bool> get writingToPrivateLogFileEnabled =>
+      _defLogs.writingToPrivateLogFileEnabled;
 
   //----------------------------------------------------------------------------
 
@@ -117,11 +128,11 @@ class Logs {
   }
 }
 
-class _LogsManager {
+abstract class LogsManager {
   final core.String? logsSet;
   final core.int maxLogsFiles;
 
-  _LogsManager._({required this.logsSet, required this.maxLogsFiles});
+  LogsManager({required this.logsSet, required this.maxLogsFiles});
 
   //----------------------------------------------------------------------------
 
@@ -224,6 +235,8 @@ class _LogsManager {
       return now.millisecondsSinceEpoch < _publicLogFileDeadline!;
     }
 
+    _publicLogFileDeadline ??= 0;
+
     return false;
   }
 
@@ -239,12 +252,15 @@ class _LogsManager {
       return now.millisecondsSinceEpoch < _privateLogFileDeadline!;
     }
 
+    _privateLogFileDeadline ??= 0;
+
     return false;
   }
 
   //----------------------------------------------------------------------------
 
   Files? _files;
+  core.bool? _intoPublic;
   core.List<core.String>? _fileTextCache;
   core.bool _fileWriterBusy = false;
   core.int _x = 0;
@@ -279,8 +295,13 @@ class _LogsManager {
   }
 
   void _print(core.String text) async {
-    if (await writingToLogFileEnabled) {
-      _createLogFileIfNotExist();
+    if (await writingToPublicLogFileEnabled) {
+      _createLogFileIfNotExist(true);
+      _printToFile(text);
+    }
+    //
+    else if (await writingToPrivateLogFileEnabled) {
+      _createLogFileIfNotExist(false);
       _printToFile(text);
     }
 
@@ -291,15 +312,16 @@ class _LogsManager {
 
   core.String get _subDirName => 'logs${_getLogsSetStr(prefix: '/')}';
 
-  void _createLogFileIfNotExist() async {
-    if (_files != null) return;
+  void _createLogFileIfNotExist(core.bool intoPublic) async {
+    if (_files != null && _intoPublic == intoPublic) return;
+    _intoPublic = intoPublic;
 
     final now = core.DateTime.now();
     final fileName =
         'log_${DateOp().format(now, pattern: 'yyyy-MM-dd-HH-mm-ss')}';
     const fileExtension = 'txt';
 
-    if (await writingToPublicLogFileEnabled) {
+    if (intoPublic) {
       _files = Files.public(
         fileName,
         fileExtension,
@@ -469,3 +491,6 @@ class _LogsManager {
   }
 }
 
+class _LogsManagerImpl extends LogsManager {
+  _LogsManagerImpl({required super.logsSet, required super.maxLogsFiles});
+}
