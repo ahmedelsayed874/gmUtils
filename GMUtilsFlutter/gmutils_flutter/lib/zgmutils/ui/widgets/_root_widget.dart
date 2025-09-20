@@ -269,7 +269,7 @@ class MyRootWidget {
 
   Widget _defaultWidget() {
     return Container(
-      // color: Colors.black,
+      color: _background,
       width: double.maxFinite,
       padding: _screenPadding ??
           EdgeInsets.only(
