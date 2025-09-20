@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_webview_pro/webview_flutter.dart';
 import '../../gm_main.dart';
 
+///this class depend on flutter_webview_pro
 class WebView2Screen extends StatefulWidget {
-  static void show({
+  static Future<void> show({
     required String url,
     required bool hasToolbar,
     required String? toolbarTitle,
     EdgeInsets? margin,
   }) {
-    App.navTo(
+    throw 'must import flutter_webview_pro';
+    return App.navTo(
       WebView2Screen(
         url: url,
         hasToolbar: hasToolbar,

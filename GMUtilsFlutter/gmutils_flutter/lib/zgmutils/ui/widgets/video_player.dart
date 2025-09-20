@@ -208,7 +208,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       _controller.pause();
     } catch (_) {}
 
-    WebViewScreen.show(
+    WebViewScreen.showWithToolbar(
       toolbarTitle: widget.videoTitle ?? '',
       url: widget.videoUrl!,
     );
