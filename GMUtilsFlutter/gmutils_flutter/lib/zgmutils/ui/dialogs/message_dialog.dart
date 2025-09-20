@@ -9,25 +9,48 @@ class MessageDialog {
   static MessageDialog get create => MessageDialog();
 
   BuildContext Function()? _context;
+  double? _borderRadius;
+  Color? _backgroundColor;
+  BoxConstraints? _constraints;
+  Widget? _topIcon;
   String _title = '';
+  TextStyle? _titleStyle;
   String _message = '';
+  TextStyle? _messageStyle;
+  bool _enableLinks = false;
+  bool _enableTextSelect = false;
   Widget? _extraWidget;
   final List<Widget> _actions = [];
   bool _enableOuterDismiss = true;
   bool _dismissed = false;
   String? _dismissedBy;
   Function(String? dismissedBy)? _onDismiss;
-  bool _enableLinks = false;
-  bool _enableSelect = false;
   bool _allowManualDismiss = true;
 
-  MessageDialog setTitle(String title) {
-    _title = title;
+  MessageDialog setBoxStyle(
+      {Color? backgroundColor,
+      double? borderRadius,
+      BoxConstraints? constraints}) {
+    _backgroundColor = backgroundColor;
+    _borderRadius = borderRadius;
+    _constraints = constraints;
     return this;
   }
 
-  MessageDialog setMessage(String message) {
+  MessageDialog setTopIcon(Widget topIcon) {
+    _topIcon = topIcon;
+    return this;
+  }
+
+  MessageDialog setTitle(String title, {TextStyle? style}) {
+    _title = title;
+    _titleStyle = style;
+    return this;
+  }
+
+  MessageDialog setMessage(String message, {TextStyle? style}) {
     _message = message;
+    _messageStyle = style;
     return this;
   }
 
@@ -36,8 +59,8 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog setEnableSelect(bool enableSelect) {
-    _enableSelect = enableSelect;
+  MessageDialog setEnableTextSelect(bool enableSelect) {
+    _enableTextSelect = enableSelect;
     return this;
   }
 
@@ -53,26 +76,28 @@ class MessageDialog {
 
   MessageDialog addActions(List<MessageDialogActionButton> actions) {
     int i = 0;
+
     for (var action in actions) {
       i++;
 
+      void onPressed() {
+        _dismiss(action.title);
+        action.action?.call();
+      }
+
       _actions.insert(
         0,
-        TextButton(
-          onPressed: () {
-            _dismiss(action.title);
-            action.action?.call();
-          },
-          child: Text(
-            action.title,
-            style: AppTheme.defaultTextStyle(
-              textColor: action.color ?? AppTheme.appColors?.secondary,
-              fontWeight: i == 1
-                  ? (action.fontWeight ?? FontWeight.bold)
-                  : action.fontWeight,
-            ),
-          ),
-        ),
+        action.useTextButton
+            ? TextButton(
+                onPressed: onPressed,
+                style: action.buttonStyle,
+                child: Text(action.title, style: action.textStyle(i)),
+              )
+            : ElevatedButton(
+                onPressed: onPressed,
+                style: action.buttonStyle,
+                child: Text(action.title, style: action.textStyle(i)),
+              ),
       );
     }
 
@@ -122,31 +147,29 @@ class MessageDialog {
   MessageDialog _show(BuildContext Function() context) {
     _context = context;
 
-    /*if (_actions.isEmpty) {
-      addActions([MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا')]);
-    }*/
-
     Widget textWidget;
     if (_enableLinks) {
       textWidget = MyLinkify(
         text: _message,
-        enableSelect: _enableSelect,
-        options: _enableSelect ? null : const LinkifyOptions(humanize: false),
+        enableSelect: _enableTextSelect,
+        options:
+            _enableTextSelect ? null : const LinkifyOptions(humanize: false),
+        textStyle: _messageStyle,
       );
     }
     //
     else {
-      if (_enableSelect) {
+      if (_enableTextSelect) {
         textWidget = SelectableText(
           _message,
-          style: AppTheme.defaultTextStyle(),
+          style: _messageStyle ?? AppTheme.defaultTextStyle(),
         );
       }
       //
       else {
         textWidget = Text(
           _message,
-          style: AppTheme.defaultTextStyle(),
+          style: _messageStyle ?? AppTheme.defaultTextStyle(),
         );
       }
     }
@@ -156,14 +179,16 @@ class MessageDialog {
         barrierDismissible: _enableOuterDismiss,
         builder: (context) {
           return AlertDialog(
+            icon: _topIcon,
+            //
             title: Padding(
               padding: const EdgeInsets.only(left: 7, right: 7, top: 5),
               child: Text(
                 _title,
-                style: AppTheme.textStyleOfScreenTitle(),
+                style: _titleStyle ?? AppTheme.textStyleOfScreenTitle(),
               ),
             ),
-
+            //
             content: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 7),
               child: _extraWidget == null
@@ -177,8 +202,19 @@ class MessageDialog {
                       ],
                     ),
             ),
+            //
             actions: _actions,
-            backgroundColor: AppTheme.appColors?.background ?? Colors.white,
+            //
+            backgroundColor: _backgroundColor ??
+                AppTheme.appColors?.background ??
+                Colors.white,
+            //
+            shape: _borderRadius == null
+                ? null
+                : RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(_borderRadius!),
+                  ),
+            constraints: _constraints,
           );
         }).then((value) {
       _context = null;
@@ -209,14 +245,36 @@ class MessageDialog {
 
 class MessageDialogActionButton {
   final String title;
-  final Color? color;
-  final FontWeight? fontWeight;
+  final bool useTextButton;
+  final ButtonStyle? buttonStyle;
+  TextStyle? _textStyle;
+  Color? _textColor;
+  FontWeight? _textFontWeight;
   final Function()? action;
 
   MessageDialogActionButton(
     this.title, {
-    this.color,
-    this.fontWeight,
+    this.useTextButton = true,
+    Color? color,
+    FontWeight? fontWeight,
     this.action,
-  });
+  }) : buttonStyle = null;
+
+  MessageDialogActionButton.customStyle(
+    this.title, {
+    this.useTextButton = true,
+    this.buttonStyle,
+    TextStyle? textStyle,
+    this.action,
+  }) : _textStyle = textStyle;
+
+  TextStyle? textStyle(int idx) {
+    _textStyle ??= AppTheme.defaultTextStyle(
+      textColor: _textColor ?? AppTheme.appColors?.secondary,
+      fontWeight:
+          idx == 1 ? (_textFontWeight ?? FontWeight.bold) : _textFontWeight,
+    );
+
+    return _textStyle;
+  }
 }
