@@ -29,6 +29,8 @@ abstract class IAccountStorage<Account extends IAccount> {
 
   Future<bool> saveUserNameAndPassword(String username, String newPassword);
 
+  Future<bool> updatePassword(String newPassword);
+
   Future<bool> updateAccount(Account account);
 
   Future<Account?> get account;
@@ -92,12 +94,19 @@ class AccountStorage<Account extends IAccount>
     var pref = await _prefs;
 
     var userNameEnc = await _enc(username);
-    var passwordEnc = await _enc(password);
 
     var b2 = await pref.setString(KEY_USER_NAME, userNameEnc);
-    var b3 = await pref.setString(KEY_PASSWORD, passwordEnc);
+    var b3 = await updatePassword(password);
 
     return b2 && b3;
+  }
+
+  @override
+  Future<bool> updatePassword(String newPassword) async {
+    var pref = await _prefs;
+    var passwordEnc = await _enc(newPassword);
+    var b3 = await pref.setString(KEY_PASSWORD, passwordEnc);
+    return b3;
   }
 
   @override
@@ -122,7 +131,8 @@ class AccountStorage<Account extends IAccount>
         try {
           cached_account = accountMapper.fromMap(map);
         } catch (e) {
-          Logs.print(() => 'AccountStorage.get account ---> Exception $e ----> at parsing account data ($map)');
+          Logs.print(() =>
+              'AccountStorage.get account ---> Exception $e ----> at parsing account data ($map)');
         }
       }
     }
