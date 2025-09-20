@@ -55,6 +55,7 @@ class FirebaseConfigs extends IFirebaseConfigs {
             .fetchAndActivate()
             .timeout(Duration(seconds: fetchTimeoutSeconds + 1));
         success = true;
+        tries = 10;
       } catch (e) {
         success = false;
         error = e.toString();
