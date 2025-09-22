@@ -81,22 +81,10 @@ abstract class Url<RDT> {
     }
     //
     else {
-      try {
-        var dataMap = jsonDecode(response);
-        final responseObj = ResponseMapper(responseMapper!).from(dataMap);
-        responseObj.url = this;
-        return responseObj;
-      } catch (e) {
-        final Response<RDT> res = Response.failed(
-          url: this,
-          error: 'Url.encodeResponse --> Exception at Parsing the response of '
-              '($endPoint): $e ------> response=$response',
-          rawResponse: response,
-          httpCode: 0,
-        );
-        res.url = this;
-        return res;
-      }
+      var dataMap = jsonDecode(response);
+      final responseObj = ResponseMapper(responseMapper!).from(dataMap);
+      responseObj.url = this;
+      return responseObj;
     }
   }
 
@@ -140,45 +128,57 @@ abstract class Url<RDT> {
     Map h = {};
 
     for (var key in m.keys) {
-      final v = obscureLogOptionsMap[key]?.obscure('${m[key]}');
-      if (v != null) {
-        h[key] = v;
-      } else {
-        h[key] = '${m[key]}';
+      var value = m[key];
+
+      if (obscureLogOptionsMap.containsKey(key)) {
+        final v = obscureLogOptionsMap[key]?.obscure('$value');
+        if (v != null) {
+          h[key] = v;
+        }
+        //
+        else {
+          h[key] = '$value';
+        }
+      }
+      //
+      else if (value is Map) {
+        h[key] = _obscureMap(value);
+      }
+      //
+      else if (value is List) {
+        h[key] = _obscureList(value);
+      }
+      //
+      else {
+        h[key] = value;
       }
     }
 
     return h;
   }
 
-  /*Map<String, String> get obscuredHeaders0 {
-    if (obscureLogOptions == null) return headers;
-    final obscureLogOptionsMap = _obscureLogOptionsMap!;
+  List _obscureList(List value) {
+    List newList = [];
 
-    Map<String, String> h = {};
-
-    for (var key in headers.keys) {
-      final v = obscureLogOptionsMap[key]?.obscure(headers[key] ?? '');
-      h[key] = v ?? headers[key] ?? '';
+    for (var lstItem in value) {
+      if (lstItem is Map) {
+        newList.add(_obscureMap(lstItem));
+      }
+      //
+      /*else if (lstItem is List) {
+        newList.add(_obscureList(lstItem));
+      }*/
+      //
+      else {
+        newList.add(lstItem);
+      }
     }
 
-    return h;
-  }*/
+    return newList;
+  }
+
   Map? get obscuredHeaders => _obscureMap(headers);
 
-  /*Map<String, String>? get obscuredQueries {
-    if (obscureLogOptions == null || queries == null) return queries;
-    final obscureLogOptionsMap = _obscureLogOptionsMap!;
-
-    Map<String, String> h = {};
-
-    for (var key in queries!.keys) {
-      final v = obscureLogOptionsMap[key]?.obscure(queries![key] ?? '');
-      h[key] = v ?? queries![key] ?? '';
-    }
-
-    return h;
-  }*/
   Map? get obscuredQueries => _obscureMap(queries);
 
   String get obscuredUriAsString {
@@ -258,7 +258,9 @@ class _PostUrl<RDT> extends Url<RDT> {
       if (asJson) {
         addHeaderIfNotExist('Content-Type', 'application/json');
         addHeaderIfNotExist('Accept', 'application/json');
-      } else {
+      }
+      //
+      else {
         addHeaderIfNotExist(
             'Content-Type', 'application/x-www-form-urlencoded');
       }
@@ -302,19 +304,6 @@ class _PostUrl<RDT> extends Url<RDT> {
 
   //-----------------------------------------
 
-  /*Map<String, dynamic>? get obscuredParams {
-    if (obscureLogOptions == null || params == null) return params;
-    final obscureLogOptionsMap = _obscureLogOptionsMap!;
-
-    Map<String, String> h = {};
-
-    for (var key in params!.keys) {
-      final v = obscureLogOptionsMap[key]?.obscure(params![key] ?? '');
-      h[key] = v ?? params![key] ?? '';
-    }
-
-    return h;
-  }*/
   Map? get obscuredParams => _obscureMap(params);
 
   Object get obscuredPostObject {
@@ -323,7 +312,9 @@ class _PostUrl<RDT> extends Url<RDT> {
         final json = jsonEncode(obscuredParams);
         //Logs.print(() => 'PostUrl -> json: $json');
         return json;
-      } else {
+      }
+      //
+      else {
         String q = '';
         obscuredParams!.forEach((key, value) {
           if (q.isNotEmpty) q += '&';
@@ -332,7 +323,9 @@ class _PostUrl<RDT> extends Url<RDT> {
         //Logs.print(() => 'PostUrl -> parameters: $q');
         return q;
       }
-    } else {
+    }
+    //
+    else {
       return '';
     }
   }
@@ -363,118 +356,9 @@ class PostUrl<RDT> extends _PostUrl<RDT> {
     required super.responseMapper,
     super.responseEncoder,
     //
-    super.obscureLogOptions,
-  });
-}
-
-class PostMultiPartFileUrl<RDT> extends Url<RDT> {
-  final String fileMappedKey;
-  final File file;
-  final String? customFileName;
-  final String? fileMimeType;
-  final Map<String, String>? formFields;
-
-  PostMultiPartFileUrl({
-    required super.domain,
-    required super.fragments,
-    required super.endPoint,
-    required super.headers,
-    super.queries,
-    //
-    this.formFields,
-    required this.fileMappedKey,
-    required this.file,
-    this.customFileName,
-    this.fileMimeType,
-    //
-    required Mappable<RDT> super.responseMapper,
-    super.responseEncoder,
-    //
     super.logsName,
     super.obscureLogOptions,
   });
-
-  List<int> get fileBytes => file.readAsBytesSync();
-
-  String get fileName {
-    if (customFileName?.isNotEmpty == true) {
-      return customFileName!;
-    }
-
-    int i = file.path.lastIndexOf('/');
-    if (i < 0) i = file.path.lastIndexOf('\\');
-
-    if (i >= 0) {
-      return file.path.substring(i + 1);
-    } else {
-      var d = DateTime.now();
-      return 'file'
-          '${d.year}'
-          '${_compensate(d.month)}'
-          '${_compensate(d.day)}'
-          '${_compensate(d.hour)}'
-          '${_compensate(d.minute)}'
-          '${_compensate(d.second)}'
-          '.${_compensate(d.millisecond)}'
-          '';
-    }
-  }
-
-  String _compensate(int n) {
-    return n < 10 ? '0$n' : '$n';
-  }
-
-  @override
-  String get signature {
-    var s = super.signature;
-    s += fileMappedKey.hashCode.toString();
-    s += file.path.hashCode.toString();
-    try {
-      s += file.lengthSync().toString();
-      s += file.lastModifiedSync().millisecondsSinceEpoch.toString();
-    } catch (e) {
-      s += e.toString();
-    }
-    if (fileMimeType != null) {
-      s += fileMimeType.hashCode.toString();
-    }
-    formFields?.forEach((key, value) {
-      s += key.hashCode.toString();
-      s += value.hashCode.toString();
-    });
-    return s;
-  }
-
-  //--------------------------------------------
-
-  /*Map<String, String>? get obscuredFormFields {
-    if (obscureLogOptions == null || formFields == null) return formFields;
-    final obscureLogOptionsMap = _obscureLogOptionsMap!;
-
-    Map<String, String> h = {};
-
-    for (var key in formFields!.keys) {
-      final v = obscureLogOptionsMap[key]?.obscure(formFields![key] ?? '');
-      h[key] = v ?? formFields![key] ?? '';
-    }
-
-    return h;
-  }*/
-  Map? get obscuredFormFields => _obscureMap(formFields);
-
-  @override
-  String toString() {
-    var t = super.toString();
-    t = t.substring(0, t.length - 1);
-    t += ',\n'
-        'fileMappedKey: $fileMappedKey,\n'
-        'file: $file,\n'
-        'customFileName: $customFileName,\n'
-        'fileMimeType: $fileMimeType,\n'
-        'formFields: $formFields'
-        '}';
-    return t;
-  }
 }
 
 //-----------------------------------------------------
@@ -493,6 +377,7 @@ class PatchUrl<RDT> extends _PostUrl<RDT> {
     required super.responseMapper,
     super.responseEncoder,
     //
+    super.logsName,
     super.obscureLogOptions,
   });
 }
@@ -511,9 +396,146 @@ class PutUrl<RDT> extends _PostUrl<RDT> {
     required super.responseMapper,
     super.responseEncoder,
     //
+    super.logsName,
     super.obscureLogOptions,
   });
 }
+
+//-----------------------------------------------------
+
+enum MultiPartMethod { POST, PATCH, PUT }
+
+class MultiPartFile {
+  final String mappedKey;
+  final File file;
+  final String? customFileName;
+  final String? mimeType;
+
+  MultiPartFile({
+    required this.mappedKey,
+    required this.file,
+    this.customFileName,
+    this.mimeType,
+  });
+
+  List<int>? _fileBytes;
+  List<int> get fileBytes => _fileBytes ??= file.readAsBytesSync();
+
+  dynamic get fileBytesLength {
+    try {
+      return fileBytes.length;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  String get fileName {
+    if (customFileName?.isNotEmpty == true) {
+      return customFileName!;
+    }
+
+    int i = file.path.lastIndexOf('/');
+    if (i < 0) i = file.path.lastIndexOf('\\');
+
+    if (i >= 0) {
+      return file.path.substring(i + 1);
+    }
+    //
+    else {
+      var d = DateTime.now();
+      return 'file'
+          '${d.year}'
+          '${_compensate(d.month)}'
+          '${_compensate(d.day)}'
+          '${_compensate(d.hour)}'
+          '${_compensate(d.minute)}'
+          '${_compensate(d.second)}'
+          '.${_compensate(d.millisecond)}'
+          '';
+    }
+  }
+
+  String _compensate(int n) {
+    return n < 10 ? '0$n' : '$n';
+  }
+
+  String get signature {
+    var s = '';
+    s += mappedKey.hashCode.toString();
+    s += file.path.hashCode.toString();
+    try {
+      s += file.lengthSync().toString();
+      s += file.lastModifiedSync().millisecondsSinceEpoch.toString();
+    } catch (e) {
+      s += e.toString();
+    }
+    if (mimeType != null) {
+      s += mimeType.hashCode.toString();
+    }
+    return s;
+  }
+}
+
+class MultiPartRequestUrl<RDT> extends Url<RDT> {
+  final MultiPartMethod method;
+  final List<MultiPartFile> files;
+  final Map<String, String>? formFields;
+
+  MultiPartRequestUrl({
+    required this.method,
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    required super.headers,
+    super.queries,
+    //
+    required this.files,
+    this.formFields,
+    //
+    required Mappable<RDT> super.responseMapper,
+    super.responseEncoder,
+    //
+    super.logsName,
+    super.obscureLogOptions,
+  });
+
+  @override
+  String get signature {
+    var s = super.signature;
+    for (var file in files) {
+      s += file.signature;
+    }
+    formFields?.forEach((key, value) {
+      s += key.hashCode.toString();
+      s += value.hashCode.toString();
+    });
+    return s;
+  }
+
+  //--------------------------------------------
+
+  Map? get obscuredFormFields => _obscureMap(formFields);
+
+  @override
+  String toString() {
+    var t = super.toString();
+    t = t.substring(0, t.length - 1);
+
+    for (var file in files) {
+      t += ',\n'
+          'fileMappedKey: ${file.mappedKey},\n'
+          'file: $file,\n'
+          'customFileName: ${file.customFileName},\n'
+          'fileMimeType: ${file.mimeType},\n';
+    }
+
+    t += 'formFields: $formFields';
+    t += '}';
+    return t;
+  }
+}
+
+//-----------------------------------------------------
 
 class DeleteUrl<RDT> extends Url<RDT> {
   DeleteUrl({

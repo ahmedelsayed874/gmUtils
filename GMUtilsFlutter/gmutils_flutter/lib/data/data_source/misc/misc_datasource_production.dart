@@ -16,13 +16,14 @@ class MiscDataSourceProduction extends MiscDataSource {
     required String fileName,
     required String? attachmentType,
   }) async {
-    var url = UploadFileUrl(
+    /*var url = UploadFileUrl(
       file: file,
       fileName: fileName,
       attachmentType: attachmentType,
     );
-    var response = await WebRequestExecutor().executePostMultiPartFile(url, 10);
-    return Response.fromWebResponse(response);
+    var response = await WebRequestExecutor().executeMultiPartRequest(url, cacheIntervalInSeconds:  10);
+    return Response.fromWebResponse(response);*/
+    throw UnimplementedError();
   }
 
   @override

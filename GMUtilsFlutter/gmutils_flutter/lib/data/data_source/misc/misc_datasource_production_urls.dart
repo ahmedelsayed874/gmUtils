@@ -7,7 +7,7 @@ import 'package:gmutils_flutter/zgmutils/data_utils/web/web_url.dart';
 
 import '../../models/response.dart';
 
-class UploadFileUrl extends PostMultiPartFileUrl<Response<Attachment>> {
+/*class UploadFileUrl extends MultiPartRequestUrl<Response<Attachment>> {
   UploadFileUrl({
     required File file,
     required String fileName,
@@ -27,7 +27,7 @@ class UploadFileUrl extends PostMultiPartFileUrl<Response<Attachment>> {
           file: file,
           fileMimeType: null,
         );
-}
+}*/
 
 class DeleteFileUrl extends PostUrl<Response<Void>> {
   DeleteFileUrl({
