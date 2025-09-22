@@ -33,7 +33,10 @@ class WebRequestExecutor {
     }
   }
 
-  Future<Pair<bool, String>> checkUrlValidity(String link, {String? logsName,}) async {
+  Future<Pair<bool, String>> checkUrlValidity(
+    String link, {
+    String? logsName,
+  }) async {
     try {
       link = link.toLowerCase().trim();
 
@@ -162,93 +165,104 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> executePostMultiPartFile<DT>(
-    PostMultiPartFileUrl<DT> url,
+  Future<Response<DT>> executeMultiPartRequest<DT>(
+    MultiPartRequestUrl<DT> url, {
     int? cacheIntervalInSeconds,
-  ) async {
-    dynamic fileBytesLength;
-    try {
-      fileBytesLength = url.fileBytes.length;
-    } catch (e) {
-      fileBytesLength = e;
-    }
+  }) async {
+    Logs.get(url.logsName).print(() {
+      final info = [
+        'API::Call',
+        '[${url.method.name} / MULTIPART]',
+        'url: ${url.obscuredUri}',
+        'headers: ${url.obscuredHeaders}',
+        'formFields: ${url.obscuredFormFields}',
+      ];
 
-    Logs.get(url.logsName).print(() => [
-          'API::Call',
-          '[POST / MULTIPART]',
-          'url: ${url.obscuredUri}',
-          //'\n',
-          'headers: ${url.obscuredHeaders}',
-          //'\n',
-          'fileMappedKey: ${url.fileMappedKey}',
-          //'\n',
-          'fileBytes-length: $fileBytesLength',
-          //'\n',
-          'fileName: ${url.fileName}',
-          //'\n',
-          'fileMimeType: ${url.fileMimeType}',
-          //'\n',
-          'formFields: ${url.obscuredFormFields}',
-          //'\n',
-        ]);
+      for (var file in url.files) {
+        info.add('>>> ');
+        info.add('fileMappedKey: ${file.mappedKey}');
+        info.add('fileBytes-length: ${file.fileBytesLength}');
+        info.add('fileName: ${file.fileName}');
+        info.add('fileMimeType: ${file.mimeType}');
+      }
 
-    if (fileBytesLength is int) {
-      if (fileBytesLength == 0) {
+      return info;
+    });
+
+    for (var file in url.files) {
+      if (file.fileBytesLength is int) {
+        if (file.fileBytesLength == 0) {
+          Logs.get(url.logsName).print(() => [
+                'API::Response',
+                'url: ${url.uri}',
+                '\n',
+                '<[File (${file.fileName}) size is zero]>',
+              ]);
+          return Response.failed(
+            url: url,
+            error: 'File size is zero',
+            rawResponse: '"error":"File size is zero"',
+            httpCode: -1,
+          );
+        }
+      }
+      //
+      else {
         Logs.get(url.logsName).print(() => [
               'API::Response',
               'url: ${url.uri}',
               '\n',
-              '<[File size is zero]>',
+              '<[File (${file.fileName}) size is unknown]>',
+              '\n',
+              '<[ERROR: ${file.fileBytesLength}]>',
             ]);
         return Response.failed(
           url: url,
-          error: 'File size is zero',
-          rawResponse: '"error":"File size is zero"',
+          error: 'File size is unknown',
+          rawResponse: '"error":"File size is unknown"',
           httpCode: -1,
         );
       }
-    }
-    //
-    else {
-      Logs.get(url.logsName).print(() => [
-            'API::Response',
-            'url: ${url.uri}',
-            '\n',
-            '<[File size is unknown]>',
-            '\n',
-            '<[ERROR: $fileBytesLength]>',
-          ]);
-      return Response.failed(
-        url: url,
-        error: 'File size is unknown',
-        rawResponse: '"error":"File size is unknown"',
-        httpCode: -1,
-      );
     }
 
     return _executeWithTries(
       url: url,
       cacheIntervalInSeconds: cacheIntervalInSeconds,
       run: () async {
-        var request = http.MultipartRequest('POST', url.uri);
-        final httpImage = http.MultipartFile.fromBytes(
-          url.fileMappedKey,
-          url.fileBytes,
-          filename: url.fileName,
-          contentType: url.fileMimeType == null
-              ? null
-              : MediaType.parse(url.fileMimeType!),
-        );
-
+        var request = http.MultipartRequest(url.method.name, url.uri);
         request.headers.addAll(url.headers);
-        request.files.add(httpImage);
+
+        if (url.files.isNotEmpty) {
+          for (var file in url.files) {
+            final httpImage = http.MultipartFile.fromBytes(
+              file.mappedKey,
+              file.fileBytes,
+              filename: file.fileName,
+              contentType: file.mimeType == null
+                  ? null
+                  : MediaType.parse(file.mimeType!),
+            );
+
+            /*final httpImage = await http.MultipartFile.fromPath(
+              file.fileMappedKey,
+              file.file.path,
+              filename: file.fileName,
+              contentType: file.fileMimeType == null
+                  ? null
+                  : MediaType.parse(file.fileMimeType!),
+            );*/
+
+            request.files.add(httpImage);
+          }
+        }
+
         if (url.formFields != null) {
           request.fields.addAll(url.formFields!);
         }
 
         final response1 = await request.send();
 
-        if (response1.statusCode == 200) {
+        /*if (response1.statusCode == 200) {
           Completer<http.Response> completer = Completer();
 
           response1.stream.listen((value) {
@@ -268,15 +282,37 @@ class WebRequestExecutor {
           });
 
           return completer.future;
-        } else {
+        }
+        //
+        else {
+          String? errorBody;
+          try {
+            errorBody = await response1.stream.bytesToString();
+          } catch (_) {}
+
           return http.Response(
-            response1.reasonPhrase ?? '',
+            errorBody ?? response1.reasonPhrase ?? '',
             response1.statusCode,
             headers: response1.headers,
             request: response1.request,
             reasonPhrase: response1.reasonPhrase,
           );
-        }
+        }*/
+
+        String? body;
+        try {
+          body = await response1.stream.bytesToString();
+        } catch (_) {}
+
+        return http.Response(
+          body ?? response1.reasonPhrase ?? '',
+          response1.statusCode,
+          headers: response1.headers,
+          request: response1.request,
+          isRedirect: response1.isRedirect,
+          persistentConnection: response1.persistentConnection,
+          reasonPhrase: response1.reasonPhrase,
+        );
       },
     );
   }
@@ -435,7 +471,9 @@ class WebRequestExecutor {
       try {
         error = '$exception';
       } catch (_) {}
-    } else {
+    }
+    //
+    else {
       error = 'Can\'t connect the server';
     }
 
@@ -471,55 +509,26 @@ class WebRequestExecutor {
           '\n',
         ]);
 
-    /*//if (code == 200) {
-    if ((code ~/ 100) == 2) {
-      try {
-        final responseObj = url.encodeResponse(response.body);
-        responseObj.httpCode = code;
-        responseObj.responseHeader = response.headers;
-        cache?.set(responseObj);
-        _removeExpiredCaches();
-        return responseObj;
-      } catch (e) {
-        Logs.get(logsName).print(() =>
-            'WebRequestExecutor -> Error:: $e ------> Code: $code ------> response: ${response.body}');
+    dynamic encodingBodyException;
+    dynamic encodingBodyStackTrace;
 
-        _removeExpiredCaches();
-        return Response.failed(
-          url: url,
-          error: '$e',
-          rawResponse: response.body,
-          httpCode: code,
-          responseHeader: response.headers,
-        );
-      }
-    }
-    //
-    else {
-      _removeExpiredCaches();
-      return Response.failed(
-        url: url,
-        error: response.reasonPhrase ?? response.body,
-        rawResponse: response.reasonPhrase ?? response.body,
-        httpCode: code,
-        responseHeader: response.headers,
-      );
-    }*/
+    dynamic encodingErrorException;
+    dynamic encodingErrorStackTrace;
 
     Response<DT>? responseObj;
     try {
       responseObj = url.encodeResponse(response.body);
-    } catch (e) {
-      Logs.get(url.logsName).print(() =>
-          'WebRequestExecutor -> Error:: parsing-body: "${response.body}" ---> got "$e"');
+    } catch (e, s) {
+      encodingBodyException = e;
+      encodingBodyStackTrace = s;
     }
 
-    if (responseObj == null) {
+    if (responseObj == null && response.reasonPhrase?.isNotEmpty == true) {
       try {
         responseObj = url.encodeResponse(response.reasonPhrase!);
-      } catch (e) {
-        Logs.get(url.logsName).print(() =>
-            'WebRequestExecutor -> Error:: parsing-reasonPhrase: ${response.reasonPhrase} ---> got "$e"');
+      } catch (e, s) {
+        encodingErrorException = e;
+        encodingErrorStackTrace = s;
       }
     }
 
@@ -532,15 +541,56 @@ class WebRequestExecutor {
     }
     //
     else {
-      Logs.get(url.logsName).print(() =>
-          'WebRequestExecutor -> Fatal error while handling the response');
-
       _removeExpiredCaches();
+
+      String error;
+
+      if (encodingBodyException != null || encodingErrorException != null) {
+        Logs.get(url.logsName).print(() {
+          String m = 'WebRequestExecutor._resolveResponse '
+              '--> Exception on parsing endpoint: ${url.endPoint}\n';
+
+          if (encodingBodyException != null) {
+            m += '-----> Body parsing Exception= "$encodingBodyException"\n'
+                '-----> StackTrace= $encodingBodyStackTrace\n';
+          }
+
+          if (encodingErrorException != null) {
+            m += '----------\n'
+                '-----> Reason parsing Exception= "$encodingErrorException"\n'
+                '-----> StackTrace= $encodingErrorException\n';
+          }
+
+          m += '-----> Response=$response';
+
+          return m;
+        });
+
+        error = 'Exception:\n';
+        if (encodingBodyException != null) {
+          error += '\tParsing body: ${encodingBodyException ?? 'NONE'}.\n';
+        }
+        if (encodingErrorException != null) {
+          error += '\tParsing error: ${encodingErrorException ?? 'NONE'}';
+        }
+      }
+      //
+      else {
+        Logs.get(url.logsName)
+            .print(() => 'WebRequestExecutor._resolveResponse '
+                '-> Unknown error while handling the response');
+
+        error = 'UNKNOWN ERROR: parsing response failed'.toUpperCase();
+      }
+
       responseObj = Response.failed(
         url: url,
-        error: 'FATAL ERROR: parsing response failed'.toUpperCase(),
-        rawResponse:
-            '{"status":"Fatal error", "body":${response.body}, "error":${response.reasonPhrase}}',
+        error: error,
+        rawResponse: '{'
+            '"status":"Fatal error", '
+            '"body":"${response.body}", '
+            '"error":"${response.reasonPhrase}"'
+            '}',
         httpCode: code,
         responseHeader: response.headers,
       );
@@ -672,7 +722,8 @@ class WebRequestExecutor {
       }
     }
 
-    Logs.get(logsName).print(() => 'API-Dummy-Response:: http://$apiName -> $response');
+    Logs.get(logsName)
+        .print(() => 'API-Dummy-Response:: http://$apiName -> $response');
 
     return response;
   }
@@ -718,7 +769,9 @@ _Cache<DT>? _createOrGetCacheStorage<DT>({
       if (cache.isExpired || cache._response == null) {
         _cacheStorage.remove(key2);
         cache = null;
-      } else if (cache.cacheIntervalInSeconds != cacheIntervalInSeconds) {
+      }
+      //
+      else if (cache.cacheIntervalInSeconds != cacheIntervalInSeconds) {
         _cacheStorage.remove(key2);
         cache = null;
       }
@@ -730,7 +783,9 @@ _Cache<DT>? _createOrGetCacheStorage<DT>({
 
   if (cache == null) {
     return null;
-  } else {
+  }
+  //
+  else {
     try {
       return cache as _Cache<DT>?;
     } catch (e) {

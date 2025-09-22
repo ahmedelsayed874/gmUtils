@@ -201,7 +201,9 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
         children: [
           //bg
           Container(
-            color: widget.statusBarColor ?? AppTheme.appColors?.background ?? Colors.white,
+            color: widget.statusBarColor ??
+                AppTheme.appColors?.background ??
+                Colors.white,
           ),
 
           /*SafeArea(
@@ -253,6 +255,21 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
                     ),
                   ),
             ),
+
+          //
+          SafeArea(
+            child: IconButton(onPressed: () => App.navBack(), icon: Container(
+              decoration: BoxDecoration(
+                color: AppTheme.appColors?.secondary,
+                borderRadius: BorderRadius.circular(7),
+                boxShadow: [
+                  BoxShadow(blurRadius: 20, color: Colors.grey),
+                ],
+              ),
+              padding: EdgeInsets.fromLTRB(12, 7, 5, 7),
+              child: Icon(Icons.arrow_back_ios, color: AppTheme.appColors?.secondaryVariant,),
+            ),),
+          ),
         ],
       );
     }
