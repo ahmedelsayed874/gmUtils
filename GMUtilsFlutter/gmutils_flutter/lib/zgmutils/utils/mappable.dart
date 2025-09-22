@@ -10,12 +10,17 @@ abstract class Mappable<T> {
     try {
       map = jsonDecode(json!);
       return fromMap(map);
-    } catch (e) {
+    } catch (e, s) {
       Logs.print(
         () =>
             'Mappable.fromJsonObject ----> EXCEPTION:: $e ----> json: $json -----> map: $map',
       );
-      throw 'decoding json failed ... json: $json -----> map: $map';
+      Logs.print(
+            () =>
+        'Mappable.fromJsonObject ----> STACKTRACE:: $s',
+      );
+      //throw 'decoding json failed ... json: $json -----> map: $map';
+      rethrow;
     }
   }
 
@@ -26,12 +31,17 @@ abstract class Mappable<T> {
     try {
       map = jsonDecode(json!);
       return fromMapList(map);
-    } catch (e) {
+    } catch (e, s) {
       Logs.print(
         () =>
             'Mappable.fromJsonArray ----> EXCEPTION:: $e ----> json: $json -----> map: $map',
       );
-      throw 'decoding json failed ... json: $json -----> map: $map';
+      Logs.print(
+            () =>
+        'Mappable.fromJsonArray ----> STACKTRACE:: $s',
+      );
+      //throw 'decoding json failed ... json: $json -----> map: $map';
+      rethrow;
     }
   }
 
@@ -75,8 +85,15 @@ abstract class Mappable<T> {
     try {
       map = toMap(data);
       return jsonEncode(map);
-    } catch (e) {
-      throw '$e\nmap: $map';
+    } catch (e, s) {
+      //throw '$e\n$s\n-----> map: $map';
+
+      Logs.print(() => 'Mappable.toJsonObject '
+          '----> EXCEPTION: $e \n'
+          '-----> STACKTRACE:: $s, \n'
+          '-----> RESULTED-MAP: $map',
+      );
+      rethrow;
     }
   }
 
@@ -87,8 +104,16 @@ abstract class Mappable<T> {
     try {
       map = toMapList(data);
       return jsonEncode(map);
-    } catch (e) {
-      throw '$e\nmap: $map';
+    } catch (e, s) {
+      //throw '$e\n$s\n-----> map: $map';
+
+      Logs.print(() => 'Mappable.toJsonObject '
+          '----> EXCEPTION: $e \n'
+          '-----> STACKTRACE:: $s, \n'
+          '-----> RESULTED-MAP: $map',
+      );
+
+      rethrow;
     }
   }
 }
