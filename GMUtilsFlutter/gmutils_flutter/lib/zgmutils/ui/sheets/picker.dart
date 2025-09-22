@@ -4,27 +4,25 @@ import 'package:gmutils_flutter/zgmutils/resources/app_theme.dart';
 import '../../gm_main.dart';
 import '../../utils/pairs.dart';
 
-class Picker<T> {
-  Future<Pair<T, int>?> show({
+class Picker {
+  Future<List<Pair<dynamic, int>>?> show({
     required BuildContext context,
     required String title,
     required String? hint,
-    required List<T> items,
-    required T? initialItem,
-    Widget Function(T item, int index)? itemBuilder,
+    required List<ListItems> lists,
+    Widget Function(int listIndex, dynamic item, int index)? itemBuilder,
   }) async {
-    assert(items.isNotEmpty);
+    assert(lists.isNotEmpty);
 
-    return showModalBottomSheet<Pair<T, int>>(
+    return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return _PickerBody<T>(
+        return _PickerBody(
           title: title,
           hint: hint,
-          items: items,
-          initialItem: initialItem,
+          lists: lists,
           itemBuilder: itemBuilder,
         );
       },
@@ -32,31 +30,42 @@ class Picker<T> {
   }
 }
 
-class _PickerBody<T> extends StatefulWidget {
+class ListItems {
+  final List items;
+  final dynamic initialItem;
+
+  ListItems({required this.items, required this.initialItem})
+      : assert(items.isNotEmpty);
+}
+
+//------------------------------------------------------------------------------
+
+class _PickerBody extends StatefulWidget {
   final String title;
   final String? hint;
-  final List<T> items;
-  final T? initialItem;
-  final Widget Function(T item, int index)? itemBuilder;
+  final List<ListItems> lists;
+  final Widget Function(int listIndex, dynamic item, int index)? itemBuilder;
 
   const _PickerBody({
     required this.title,
     required this.hint,
-    required this.items,
-    required this.initialItem,
+    required this.lists,
     required this.itemBuilder,
   });
 
   @override
-  State<_PickerBody> createState() => _PickerBodyState<T>();
+  State<_PickerBody> createState() => _PickerBodyState();
 }
 
-class _PickerBodyState<T> extends State<_PickerBody>
-    with TickerProviderStateMixin {
+class _UiListArgs {
   late FixedExtentScrollController _scrollController;
-
-  late T _selectedItem;
+  dynamic _selectedItem;
   late int _selectedItemIndex;
+}
+
+class _PickerBodyState extends State<_PickerBody>
+    with TickerProviderStateMixin {
+  List<_UiListArgs> uiListArgs = [];
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -67,16 +76,24 @@ class _PickerBodyState<T> extends State<_PickerBody>
   void initState() {
     super.initState();
 
-    if (widget.initialItem != null) {
-      _selectedItemIndex = widget.items.indexOf(widget.initialItem);
-      if (_selectedItemIndex < 0) _selectedItemIndex = 0;
-    } else {
-      _selectedItemIndex = 0;
+    for (var lst in widget.lists) {
+      final args = _UiListArgs();
+      uiListArgs.add(args);
+
+      if (lst.initialItem != null) {
+        args._selectedItemIndex = lst.items.indexOf(lst.initialItem);
+        if (args._selectedItemIndex < 0) args._selectedItemIndex = 0;
+      }
+      //
+      else {
+        args._selectedItemIndex = 0;
+      }
+
+      args._selectedItem = lst.items[args._selectedItemIndex];
+      args._scrollController = FixedExtentScrollController(
+        initialItem: args._selectedItemIndex,
+      );
     }
-    _selectedItem = widget.items[_selectedItemIndex];
-    _scrollController = FixedExtentScrollController(
-      initialItem: _selectedItemIndex,
-    );
 
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 200),
@@ -103,7 +120,9 @@ class _PickerBodyState<T> extends State<_PickerBody>
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    for (var args in uiListArgs) {
+      args._scrollController.dispose();
+    }
     _fadeController.dispose();
     _slideController.dispose();
     super.dispose();
@@ -180,7 +199,7 @@ class _PickerBodyState<T> extends State<_PickerBody>
                     const SizedBox(height: 10),
 
                     // Time roller
-                    _buildTimeRoller(),
+                    _buildRoller(),
 
                     const SizedBox(height: 20),
 
@@ -190,11 +209,17 @@ class _PickerBodyState<T> extends State<_PickerBody>
                       child: Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton(onPressed: _cancelSelection, child: Text(App.isEnglish ? 'Cancel' : 'إلغاء'),),
+                            child: OutlinedButton(
+                              onPressed: _cancelSelection,
+                              child: Text(App.isEnglish ? 'Cancel' : 'إلغاء'),
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: OutlinedButton(onPressed: _confirm, child: Text(App.isEnglish ? 'Apply' : 'تطبيق'),),
+                            child: OutlinedButton(
+                              onPressed: _confirm,
+                              child: Text(App.isEnglish ? 'Apply' : 'تطبيق'),
+                            ),
                           ),
                         ],
                       ),
@@ -214,21 +239,29 @@ class _PickerBodyState<T> extends State<_PickerBody>
 
   //------------------------------------
 
-  Widget _buildTimeRoller() {
+  Widget _buildRoller() {
+    int listIndex = -1;
+
     return Container(
       height: 200,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
-        children: [
-          Expanded(
+        children: uiListArgs.map((args) {
+          listIndex++;
+
+          return Expanded(
             child: Stack(
               children: [
                 ListWheelScrollView.useDelegate(
-                  controller: _scrollController,
+                  controller: args._scrollController,
                   itemExtent: 50,
                   physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: onSelectedItemChanged,
-                  childDelegate: itemListBuildDelegate(),
+                  onSelectedItemChanged: (index) => onSelectedItemChanged(
+                    listIndex,
+                    args,
+                    index,
+                  ),
+                  childDelegate: itemListBuildDelegate(listIndex, args),
                 ),
                 //
                 Align(
@@ -251,30 +284,23 @@ class _PickerBodyState<T> extends State<_PickerBody>
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
 
-  onSelectedItemChanged(int index) {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _selectedItem = widget.items[index];
-      _selectedItemIndex = index;
-    });
-  }
-
-  itemListBuildDelegate() {
+  itemListBuildDelegate(int listIndex, _UiListArgs args) {
     return ListWheelChildBuilderDelegate(
       builder: (context, index) {
-        final item = widget.items[index];
+        final item = widget.lists[listIndex].items[index];
 
         if (widget.itemBuilder != null) {
-          return widget.itemBuilder!(item, index);
+          return widget.itemBuilder!(listIndex, item, index);
         }
         //
-        final isSelected = index == _selectedItemIndex;
+        final isSelected = index == args._selectedItemIndex;
+
         return Center(
           child: Text(
             item.toString(),
@@ -286,8 +312,16 @@ class _PickerBodyState<T> extends State<_PickerBody>
           ),
         );
       },
-      childCount: widget.items.length,
+      childCount: widget.lists[listIndex].items.length,
     );
+  }
+
+  onSelectedItemChanged(int listIndex, _UiListArgs args, int index) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      args._selectedItem = widget.lists[listIndex].items[index];
+      args._selectedItemIndex = index;
+    });
   }
 
   //------------------------------------
@@ -295,9 +329,14 @@ class _PickerBodyState<T> extends State<_PickerBody>
   void _confirm() async {
     await _slideController.reverse();
     if (mounted) {
-      Navigator.of(context).pop(
-        Pair(value1: _selectedItem, value2: _selectedItemIndex),
-      );
+      Navigator.of(context).pop(uiListArgs
+          .map(
+            (args) => Pair(
+              value1: args._selectedItem,
+              value2: args._selectedItemIndex,
+            ),
+          )
+          .toList());
     }
   }
 
