@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'logs.dart';
+import '../../utils/logs.dart';
 
 abstract class Mappable<T> {
   T? fromJsonObject(String? json) {

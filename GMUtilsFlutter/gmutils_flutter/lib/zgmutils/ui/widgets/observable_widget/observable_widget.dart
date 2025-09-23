@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/observable_value.dart';
+import 'observable_value.dart';
 
 class ObservableWidget<T> extends StatefulWidget {
   final ObservableValue<T> observableValue;

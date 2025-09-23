@@ -1,4 +1,4 @@
-import '../../utils/mappable.dart';
+import '../utils/mappable.dart';
 import 'web_url.dart';
 
 class Response<DATA> {

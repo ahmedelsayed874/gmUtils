@@ -7,11 +7,11 @@ import 'package:gmutils_flutter/main.dart' as main;
 import 'package:gmutils_flutter/zgmutils/data_utils/firebase/firebase_configs.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/storages/general_storage.dart';
 import 'package:gmutils_flutter/zgmutils/utils/app_version_check.dart';
+import 'package:gmutils_flutter/zgmutils/utils/collections/pairs.dart';
 import 'package:gmutils_flutter/zgmutils/utils/date_op.dart';
 import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
-import 'package:gmutils_flutter/zgmutils/utils/mappable.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/mappable.dart';
 
-import '../../zgmutils/utils/pairs.dart';
 
 class AppConfigs {
   String get currentAppVersion => main.appVersion;

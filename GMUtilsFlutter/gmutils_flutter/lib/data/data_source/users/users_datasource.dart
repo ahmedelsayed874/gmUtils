@@ -5,7 +5,7 @@ import 'package:gmutils_flutter/data/models/users/auth_user_account.dart';
 import 'package:gmutils_flutter/main.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/firebase/fcm.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/storages/account_storage.dart';
-import 'package:gmutils_flutter/zgmutils/utils/pairs.dart';
+import 'package:gmutils_flutter/zgmutils/utils/collections/pairs.dart';
 
 import '../../models/users/user_account.dart';
 import '../../models/users/user_account_header.dart';

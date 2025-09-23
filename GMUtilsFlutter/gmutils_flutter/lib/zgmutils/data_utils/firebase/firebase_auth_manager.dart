@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import '../../utils/logs.dart';
-import '../../utils/result.dart';
-import '../../utils/string_set.dart';
-import '../../utils/text_utils.dart';
+import '../utils/result.dart';
+import '../../utils/collections/string_set.dart';
+import '../../utils/text/text_utils.dart';
 import 'firebase_utils.dart';
 import 'response.dart';
 

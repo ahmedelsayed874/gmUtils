@@ -1,6 +1,6 @@
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
-import 'package:gmutils_flutter/zgmutils/utils/mappable.dart';
-import 'package:gmutils_flutter/zgmutils/utils/result.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/mappable.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/result.dart';
 
 import '../../zgmutils/data_utils/web/response.dart' as webResponse;
 

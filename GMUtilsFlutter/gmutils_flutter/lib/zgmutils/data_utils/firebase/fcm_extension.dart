@@ -3,8 +3,8 @@ import "package:googleapis_auth/auth_io.dart";
 import 'package:googleapis_auth/googleapis_auth.dart' as google_auth;
 import 'package:http/http.dart' as http;
 
-import '../../utils/result.dart';
-import '../../utils/string_set.dart';
+import '../utils/result.dart';
+import '../../utils/collections/string_set.dart';
 import 'fcm.dart';
 
 class FCM_Extension {

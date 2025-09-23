@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../utils/logs.dart';
-import '../../utils/mappable.dart';
+import '../utils/mappable.dart';
 import 'page_info.dart';
 import 'sql_database_table.dart';
 import 'sql_instructions.dart';

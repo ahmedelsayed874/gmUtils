@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gmutils_flutter/zgmutils/resources/app_theme.dart';
 import '../../gm_main.dart';
-import '../../utils/pairs.dart';
+import '../../utils/collections/pairs.dart';
 
 class Picker {
   Future<List<Pair<dynamic, int>>?> show({

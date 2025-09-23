@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'result.dart';
-import 'string_set.dart';
+import '../../utils/collections/string_set.dart';
 
 class ValidationChecker {
   String _errorsEn = '';

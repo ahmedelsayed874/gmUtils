@@ -8,9 +8,9 @@ import 'package:gmutils_flutter/ui/widgets/toolbar.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/firebase/fcm.dart';
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/ui/dialogs/message_dialog.dart';
-import 'package:gmutils_flutter/zgmutils/ui/widgets/observable_widget.dart';
+import 'package:gmutils_flutter/zgmutils/ui/widgets/observable_widget/observable_widget.dart';
+import 'package:gmutils_flutter/zgmutils/utils/collections/pairs.dart';
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
-import 'package:gmutils_flutter/zgmutils/utils/pairs.dart';
 
 import '../../../zgmutils/ui/utils/base_stateful_state.dart';
 import '../../widgets/titled_icon_button.dart';

@@ -1,6 +1,6 @@
 import 'package:gmutils_flutter/main.dart' as main;
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/mappable.dart';
 
-import '../../../zgmutils/utils/mappable.dart';
 
 class UserAccount {
   static const String accountTypeManager = 'Manager';

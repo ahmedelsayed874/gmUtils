@@ -1,5 +1,5 @@
-import '../../utils/mappable.dart';
-import '../../utils/string_set.dart';
+import '../../utils/collections/string_set.dart';
+import '../utils/mappable.dart';
 
 class Response<DATA> {
   DATA? data;

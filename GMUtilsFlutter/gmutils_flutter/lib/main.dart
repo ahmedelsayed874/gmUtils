@@ -13,7 +13,7 @@ import 'services/notifications/notifications_handler.dart';
 import 'zgmutils/data_utils/firebase/fcm.dart';
 import 'zgmutils/gm_main.dart';
 import 'zgmutils/utils/logs.dart';
-import 'zgmutils/utils/notifications_manager.dart';
+
 
 //------------------------------------------------------------------------------
 

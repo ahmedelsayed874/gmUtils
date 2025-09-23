@@ -8,7 +8,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../gm_main.dart';
 import '../../utils/date_op.dart';
-import '../../utils/files.dart';
+import '../../utils/files/files.dart';
 import '../dialogs/message_dialog.dart';
 
 class CapturingScreenshotWidget extends StatefulWidget {

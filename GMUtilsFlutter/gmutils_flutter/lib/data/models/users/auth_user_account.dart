@@ -1,6 +1,6 @@
 import 'package:gmutils_flutter/zgmutils/data_utils/storages/account_storage.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/mappable.dart';
 
-import '../../../zgmutils/utils/mappable.dart';
 import 'user_account.dart';
 
 class AuthUserAccount extends UserAccount implements IAccount {

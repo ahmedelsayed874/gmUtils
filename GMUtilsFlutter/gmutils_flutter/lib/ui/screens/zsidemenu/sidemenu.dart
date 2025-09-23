@@ -16,10 +16,10 @@ import 'package:gmutils_flutter/zgmutils/ui/dialogs/message_dialog.dart';
 import 'package:gmutils_flutter/zgmutils/ui/utils/base_stateful_state.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/_root_widget.dart';
 import 'package:gmutils_flutter/zgmutils/utils/date_op.dart';
-import 'package:gmutils_flutter/zgmutils/utils/files.dart';
+import 'package:gmutils_flutter/zgmutils/utils/files/files.dart';
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
 import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
-import 'package:gmutils_flutter/zgmutils/utils/notifications_manager.dart';
+import 'package:gmutils_flutter/zgmutils/utils/notifications/notifications_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../user_profile/user_profile_screen.dart';

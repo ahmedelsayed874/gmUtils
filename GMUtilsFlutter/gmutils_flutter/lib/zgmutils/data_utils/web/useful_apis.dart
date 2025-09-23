@@ -1,5 +1,5 @@
 
-import '../../utils/mappable.dart';
+import '../utils/mappable.dart';
 import 'response.dart';
 import 'web_request_executors.dart';
 import 'web_url.dart';

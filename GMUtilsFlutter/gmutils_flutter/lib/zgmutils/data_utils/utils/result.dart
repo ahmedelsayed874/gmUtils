@@ -1,4 +1,4 @@
-import 'string_set.dart';
+import '../../utils/collections/string_set.dart';
 
 class Result<T> {
   final T? result;

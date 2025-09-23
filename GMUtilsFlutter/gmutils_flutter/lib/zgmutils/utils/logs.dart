@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import '../data_utils/storages/general_storage.dart';
 import 'date_op.dart';
-import 'files.dart';
-import 'result.dart';
+import 'files/files.dart';
 
 class Logs {
   static core.Map<core.String?, LogsManager>? _logs;

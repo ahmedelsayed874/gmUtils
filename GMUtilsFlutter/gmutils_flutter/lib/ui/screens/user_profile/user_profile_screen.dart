@@ -20,8 +20,8 @@ import 'package:gmutils_flutter/zgmutils/ui/widgets/_root_widget.dart';
 import 'package:gmutils_flutter/zgmutils/ui/widgets/image_viewer_screen.dart';
 import 'package:gmutils_flutter/zgmutils/utils/calculations.dart';
 import 'package:gmutils_flutter/zgmutils/utils/date_op.dart';
-import 'package:gmutils_flutter/zgmutils/utils/image_cropper.dart';
-import 'package:gmutils_flutter/zgmutils/utils/image_picker.dart';
+import 'package:gmutils_flutter/zgmutils/utils/images/image_cropper.dart';
+import 'package:gmutils_flutter/zgmutils/utils/images/image_picker.dart';
 import 'package:gmutils_flutter/zgmutils/utils/launcher.dart';
 
 import '../../../zgmutils/ui/utils/base_stateful_state.dart';

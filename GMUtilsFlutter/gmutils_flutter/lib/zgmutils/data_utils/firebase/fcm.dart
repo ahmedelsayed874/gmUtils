@@ -8,9 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../../main.dart' as main;
 import '../../utils/logs.dart';
-import '../../utils/notifications_manager.dart';
-import '../../utils/result.dart';
-import '../../utils/string_set.dart';
+import '../../utils/notifications/notifications_manager.dart';
+import '../utils/result.dart';
+import '../../utils/collections/string_set.dart';
 import '../storages/app_preferences_storage.dart';
 import 'fcm_extension.dart';
 

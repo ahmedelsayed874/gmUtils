@@ -1,5 +1,5 @@
 import 'package:gmutils_flutter/main.dart' as main;
-import 'package:gmutils_flutter/zgmutils/utils/mappable.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/mappable.dart';
 
 class Attachment {
   static const String attachmentTypeImage = 'Image';

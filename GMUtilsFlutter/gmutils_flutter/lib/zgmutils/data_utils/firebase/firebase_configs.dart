@@ -2,7 +2,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../../utils/date_op.dart';
 import '../../utils/logs.dart';
-import '../../utils/pairs.dart';
+import '../../utils/collections/pairs.dart';
 import '../storages/general_storage.dart';
 
 abstract class IFirebaseConfigs {

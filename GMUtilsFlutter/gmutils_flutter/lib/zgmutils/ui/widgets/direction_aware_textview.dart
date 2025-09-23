@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/text_utils.dart';
+import '../../utils/text/text_utils.dart';
 
 class DirectionAwareTextView extends StatelessWidget {
   final bool rich;

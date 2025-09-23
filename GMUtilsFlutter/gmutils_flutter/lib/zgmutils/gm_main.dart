@@ -11,7 +11,7 @@ import 'resources/app_measurement.dart';
 import 'resources/app_theme.dart';
 import 'ui/utils/screen_utils.dart';
 import 'utils/logs.dart';
-import 'utils/notifications_manager.dart';
+import 'utils/notifications/notifications_manager.dart';
 
 typedef OnInitialize = void Function(BuildContext);
 

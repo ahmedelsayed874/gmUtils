@@ -3,7 +3,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 
 import '../../resources/app_theme.dart';
 import '../../utils/launcher.dart';
-import '../../utils/text_utils.dart';
+import '../../utils/text/text_utils.dart';
 
 class MyLinkify extends StatelessWidget {
   final String text;

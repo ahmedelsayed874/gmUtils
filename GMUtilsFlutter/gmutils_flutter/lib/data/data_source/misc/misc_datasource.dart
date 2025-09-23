@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:gmutils_flutter/data/models/response.dart';
 import 'package:gmutils_flutter/main.dart';
-import 'package:gmutils_flutter/zgmutils/utils/files.dart';
+import 'package:gmutils_flutter/zgmutils/utils/files/files.dart';
 
 import '../../models/attachment.dart';
 import 'misc_datasource_mockup.dart';

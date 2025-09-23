@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart' as files_provider;
 
 //path_provider: ^2.0.3
-import 'logs.dart';
+import '../logs.dart';
 
 ///Directory tempDir = await getTemporaryDirectory();
 /// String tempPath = tempDir.path;

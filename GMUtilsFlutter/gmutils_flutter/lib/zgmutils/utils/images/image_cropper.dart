@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:image_cropper/image_cropper.dart' as ic;
 
-import '../../resources/_resources.dart';
+import '../../../resources/_resources.dart';
 
 ///https://pub.dev/packages/image_cropper
 /*

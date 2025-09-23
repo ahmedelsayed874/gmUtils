@@ -5,10 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 import '../../utils/logs.dart';
-import '../../utils/mappable.dart';
-import '../../utils/pairs.dart';
-import '../../utils/result.dart';
-import '../../utils/string_set.dart';
+import '../utils/mappable.dart';
+import '../../utils/collections/pairs.dart';
+import '../utils/result.dart';
+import '../../utils/collections/string_set.dart';
 import 'response.dart';
 import 'web_url.dart';
 

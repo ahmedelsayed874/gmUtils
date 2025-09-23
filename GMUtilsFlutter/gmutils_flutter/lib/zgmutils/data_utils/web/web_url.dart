@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import '../../utils/mappable.dart';
+import '../utils/mappable.dart';
 import 'response.dart';
 
 ///RDT: response data type

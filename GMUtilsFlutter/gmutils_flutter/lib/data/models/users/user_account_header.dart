@@ -1,4 +1,4 @@
-import '../../../zgmutils/utils/mappable.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/mappable.dart';
 
 class UserAccountHeader {
   final int accountId;

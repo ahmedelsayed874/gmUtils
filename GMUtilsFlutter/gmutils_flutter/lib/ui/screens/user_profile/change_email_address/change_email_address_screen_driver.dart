@@ -1,8 +1,9 @@
 import 'package:gmutils_flutter/data/data_source/users/users_datasource.dart';
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/ui/utils/iscreen_driver.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/utils/validation_checker.dart';
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
-import 'package:gmutils_flutter/zgmutils/utils/validation_checker.dart';
+
 
 abstract class ChangeEmailAddressScreenDelegate
     extends IScreenDriverDependantDelegate {}

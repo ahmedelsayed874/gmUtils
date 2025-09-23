@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
-import '../../utils/mappable.dart';
-import '../../utils/pairs.dart';
+import '../utils/mappable.dart';
+import '../../utils/collections/pairs.dart';
 import 'page_info.dart';
 import 'sql_instructions.dart';
 
