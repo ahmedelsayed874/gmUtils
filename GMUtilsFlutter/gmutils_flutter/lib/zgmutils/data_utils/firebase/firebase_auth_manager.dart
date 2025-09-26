@@ -162,11 +162,6 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
       UserCredential userCredential = res.result!;
 
-      /*userCredential = await (await fbAuth).createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );*/
-
       var registered = userCredential.additionalUserInfo?.isNewUser == true;
 
       Logs.print(() => 'FirebaseAuthManager.registerByEmail('
@@ -211,11 +206,6 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
       UserCredential userCredential = res.result!;
 
-      /*userCredential = await (await fbAuth).signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );*/
-
       Response<User> response;
 
       if (userCredential.user != null) {
@@ -242,7 +232,8 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       Logs.print(() => 'FirebaseAuthManager.loginByEmail ---> Exception: $e');
       return Response.failed(
           error: StringSet('Request timeout. please check your connection.',
-              'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'));
+              'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'),
+      );
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager.loginByEmail ---> FirebaseAuthException:: $e');

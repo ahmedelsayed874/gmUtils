@@ -53,7 +53,7 @@ class FirebaseStorage implements IFirebaseStorage {
       return Response.success(data: link);
     } on FirebaseException catch (e) {
       Logs.print(() => 'FirebaseStorage.uploadTo() ----> EXCEPTION:: $e');
-      return Response.failed(error: StringSet(e.code, e.code));
+      return Response.failed(error: StringSet(e.code));
     }
   }
 
@@ -70,9 +70,9 @@ class FirebaseStorage implements IFirebaseStorage {
     } catch (e) {
       Logs.print(() => 'FirebaseStorage.getDownloadURL ---> EXCEPTION:: $e');
       if (e is FirebaseException) {
-        return Response.failed(error: StringSet(e.code, e.code));
+        return Response.failed(error: StringSet(e.code));
       } else {
-        return Response.failed(error: StringSet('$e', '$e'));
+        return Response.failed(error: StringSet('$e'));
       }
     }
   }
@@ -119,7 +119,7 @@ class FirebaseStorage implements IFirebaseStorage {
     } on FirebaseException catch (e) {
       // e.g, e.code == 'canceled'
       Logs.print(() => 'FirebaseStorage.download() ---> EXCEPTION:: $e');
-      return Response.failed(error: StringSet(e.code, e.code));
+      return Response.failed(error: StringSet(e.code));
     }
   }
 

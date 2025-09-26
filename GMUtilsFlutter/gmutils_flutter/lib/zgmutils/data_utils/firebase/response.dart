@@ -2,28 +2,31 @@ import '../../utils/collections/string_set.dart';
 import '../utils/mappable.dart';
 
 class Response<DATA> {
-  DATA? data;
-  StringSet? error;
-  bool connectionFailed;
+  final DATA? data;
+  final StringSet? error;
+  final bool noData;
+  final bool connectionFailed;
 
   Response._({
     this.data,
     this.error,
+    this.noData = false,
     this.connectionFailed = false,
   });
 
   Response.success({
     required this.data,
-  }) : connectionFailed = false;
+  }) : error = null, noData = false, connectionFailed = false;
 
   Response.failed({
     required this.error,
+    this.noData = false,
     this.connectionFailed = false,
-  });
+  }) : data = null;
 
   @override
   String toString() {
-    return 'Response{data: $data, error: $error, connectionFailed: $connectionFailed}';
+    return 'Response{data: $data, error: $error, noData: $noData, connectionFailed: $connectionFailed}';
   }
 
 }

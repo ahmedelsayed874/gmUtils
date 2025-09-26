@@ -240,13 +240,6 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     List<Map> Function(Object value)? collectionSource,
     String? subNodePath,
   }) async {
-    /*if (await is ConnectionAvailable() == false) {
-      return Response.failed(
-        error: StringSet('No Connection', 'لا يوجد اتصال'),
-        connectionFailed: true,
-      );
-    }*/
-
     DatabaseReference ref = await _getReferenceOfNode(subNodePath);
     DataSnapshot? snapshot;
 
@@ -280,16 +273,6 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         }
       }
 
-      /*if (query == null) {
-        var result = await ref.once();
-        snapshot = result.snapshot;
-      }
-      //
-      else {
-        var result = await query.once();
-        snapshot = result.snapshot;
-      }*/
-
       snapshot = await Future.sync(() async {
         if (query == null) {
           var result = await ref.once();
@@ -316,6 +299,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       else {
         response = Response.failed(
           error: StringSet('No data', "لا توجد بيانات"),
+          noData: true,
         );
       }
 
@@ -389,19 +373,9 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   Future<Response<T>> retrieveOnlyFrom({
     required DatabaseReference ref,
   }) async {
-    /*if (await is ConnectionAvailable() == false) {
-      return Response.failed(
-        error: StringSet('No Connection', 'لا يوجد اتصال'),
-        connectionFailed: true,
-      );
-    }*/
-
     Map<String, dynamic> map = {};
 
     try {
-      /*var event = await ref.once();
-      var snapshot = event.snapshot;*/
-
       var snapshot = await Future.sync(() async {
         var event = await ref.once();
         return event.snapshot;
@@ -431,6 +405,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       else {
         response = Response.failed(
           error: StringSet('No data', "لا توجد بيانات"),
+          noData: true,
         );
       }
 
