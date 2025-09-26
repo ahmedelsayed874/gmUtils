@@ -9,8 +9,8 @@ import '../../utils/launcher.dart';
 import '../../utils/logs.dart';
 import '_root_widget.dart';
 
-// import 'package:webview_flutter_android/webview_flutter_android.dart';
-// import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class WebViewScreen extends StatefulWidget {
   static Future<void> showWithToolbar({
@@ -18,8 +18,9 @@ class WebViewScreen extends StatefulWidget {
     required String toolbarTitle,
     bool allowOpenLinkExternal = true,
     //
-    VoidCallback? onLoadCompleted,
-    VoidCallback? onLoadFailed,
+    bool Function(String url)? isUrlAllowedToVisit,
+    void Function(String url)? onLoadCompleted,
+    void Function(String? url)? onLoadFailed,
   }) {
     return App.navTo(
       WebViewScreen(
@@ -39,6 +40,7 @@ class WebViewScreen extends StatefulWidget {
         //
         height: null,
         //
+        isUrlAllowedToVisit: isUrlAllowedToVisit,
         onLoadCompleted: onLoadCompleted,
         onLoadFailed: onLoadFailed,
       ),
@@ -57,8 +59,9 @@ class WebViewScreen extends StatefulWidget {
     Color? currentOpenExternalBgColor,
     Color? currentOpenExternalIconColor,
     //
-    VoidCallback? onLoadCompleted,
-    VoidCallback? onLoadFailed,
+    bool Function(String url)? isUrlAllowedToVisit,
+    void Function(String url)? onLoadCompleted,
+    void Function(String? url)? onLoadFailed,
   }) {
     return App.navTo(
       WebViewScreen(
@@ -78,6 +81,7 @@ class WebViewScreen extends StatefulWidget {
         //
         height: null,
         //
+        isUrlAllowedToVisit: isUrlAllowedToVisit,
         onLoadCompleted: onLoadCompleted,
         onLoadFailed: onLoadFailed,
       ),
@@ -96,8 +100,10 @@ class WebViewScreen extends StatefulWidget {
     Color? currentOpenExternalIconColor,
     //
     int? height,
-    VoidCallback? onLoadCompleted,
-    VoidCallback? onLoadFailed,
+    //
+    bool Function(String url)? isUrlAllowedToVisit,
+    void Function(String url)? onLoadCompleted,
+    void Function(String? url)? onLoadFailed,
   }) {
     return WebViewScreen(
       url: url,
@@ -116,6 +122,7 @@ class WebViewScreen extends StatefulWidget {
       //
       height: height,
       //
+      isUrlAllowedToVisit: isUrlAllowedToVisit,
       onLoadCompleted: onLoadCompleted,
       onLoadFailed: onLoadFailed,
     );
@@ -143,8 +150,9 @@ class WebViewScreen extends StatefulWidget {
   final int? height;
 
   //
-  final VoidCallback? onLoadCompleted;
-  final VoidCallback? onLoadFailed;
+  final bool Function(String url)? isUrlAllowedToVisit;
+  final void Function(String url)? onLoadCompleted;
+  final void Function(String? url)? onLoadFailed;
 
   const WebViewScreen({
     required this.url,
@@ -163,6 +171,7 @@ class WebViewScreen extends StatefulWidget {
     //
     required this.height,
     //
+    required this.isUrlAllowedToVisit,
     required this.onLoadCompleted,
     required this.onLoadFailed,
     //
@@ -170,11 +179,18 @@ class WebViewScreen extends StatefulWidget {
   });
 
   @override
-  State<WebViewScreen> createState() => _ImageViewerScreenState();
+  State<WebViewScreen> createState() => _WebViewScreenState();
 }
 
-class _ImageViewerScreenState extends State<WebViewScreen> {
+class _WebViewScreenState extends State<WebViewScreen> {
   WebViewController? controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Logs.print(() => 'WebView2Screen -> this url will open (${widget.url})');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -258,71 +274,69 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
 
           //
           SafeArea(
-            child: IconButton(onPressed: () => App.navBack(), icon: Container(
-              decoration: BoxDecoration(
-                color: AppTheme.appColors?.secondary,
-                borderRadius: BorderRadius.circular(7),
-                boxShadow: [
-                  BoxShadow(blurRadius: 20, color: Colors.grey),
-                ],
+            child: IconButton(
+              onPressed: () => App.navBack(),
+              icon: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.appColors?.secondary,
+                  borderRadius: BorderRadius.circular(7),
+                  boxShadow: [
+                    BoxShadow(blurRadius: 20, color: Colors.grey),
+                  ],
+                ),
+                padding: EdgeInsets.fromLTRB(12, 7, 5, 7),
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  color: AppTheme.appColors?.secondaryVariant,
+                ),
               ),
-              padding: EdgeInsets.fromLTRB(12, 7, 5, 7),
-              child: Icon(Icons.arrow_back_ios, color: AppTheme.appColors?.secondaryVariant,),
-            ),),
+            ),
           ),
         ],
       );
     }
   }
 
-  int _tries = 0;
-
   Widget body(BuildContext context) {
-    controller ??= WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            Logs.print(() =>
-                'WebViewScreen->WebViewController->onProgress: [progress= $progress]');
-          },
-          onPageStarted: (String url) {
-            Logs.print(() => 'WebViewScreen->WebViewController->onPageStarted');
-          },
-          onPageFinished: (String url) {
-            Logs.print(
-              () => 'WebViewScreen->WebViewController->onPageFinished',
-            );
-            widget.onLoadCompleted?.call();
-          },
-          onWebResourceError: (WebResourceError error) {
-            Logs.print(
-              () => 'WebViewScreen->WebViewController->'
-                  'onWebResourceError: [errorCode: ${error.errorCode}, '
-                  'errorDesc: ${error.description}]',
-            );
+    if (controller == null) {
+      late final PlatformWebViewControllerCreationParams params;
 
-            _dispatchLoadingFailed();
+      if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+        params = WebKitWebViewControllerCreationParams(
+          allowsInlineMediaPlayback: true,
+          mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{
+            //PlaybackMediaTypes.audio,
+            //PlaybackMediaTypes.video,
           },
-          onNavigationRequest: (NavigationRequest request) {
-            _tries++;
+        );
+      }
+      //
+      else {
+        params = const PlatformWebViewControllerCreationParams();
+      }
 
-            Logs.print(() =>
-                'WebViewScreen->WebViewController->onNavigationRequest: [request#$_tries: isMainFrame: ${request.isMainFrame}, ${request.url}]');
+      final WebViewController controllerX =
+          WebViewController.fromPlatformCreationParams(params);
 
-            if (_tries == 1) {
-              return NavigationDecision.navigate;
-            } else {
-              if (_tries == 2) {
-                _dispatchLoadingFailed();
-              }
+      if (controllerX.platform is AndroidWebViewController) {
+        AndroidWebViewController.enableDebugging(true);
+        (controllerX.platform as AndroidWebViewController)
+            .setMediaPlaybackRequiresUserGesture(false);
+      }
 
-              return NavigationDecision.prevent;
-            }
-          },
-        ),
-      );
+      //
+      controllerX.setJavaScriptMode(JavaScriptMode.unrestricted);
+      controllerX.setBackgroundColor(const Color(0x00000000));
+      controllerX.setNavigationDelegate(NavigationDelegate(
+        onProgress: _onProgressChanged,
+        onPageStarted: _onPageStarted,
+        onPageFinished: _onPageFinished,
+        onWebResourceError: _onWebResourceError,
+        onNavigationRequest: _onNavigationRequest,
+      ));
+
+      controller = controllerX;
+    }
 
     try {
       controller?.loadRequest(Uri.parse(widget.url));
@@ -344,8 +358,58 @@ class _ImageViewerScreenState extends State<WebViewScreen> {
     }
   }
 
-  void _dispatchLoadingFailed() {
-    widget.onLoadFailed?.call();
+  //------------------------------------------
+
+  void _onProgressChanged(int progress) {
+    //Logs.print(() => 'WebViewScreen->onProgress: [progress= $progress]');
+  }
+
+  void _onPageStarted(String url) {
+    Logs.print(() => 'WebViewScreen->onPageStarted($url)');
+  }
+
+  void _onPageFinished(String url) {
+    Logs.print(() => 'WebViewScreen->onPageFinished($url)');
+
+    widget.onLoadCompleted?.call(url);
+  }
+
+  void _onWebResourceError(WebResourceError error) {
+    Logs.print(
+      () => 'WebViewScreen->WebViewController->'
+          'onWebResourceError: [errorCode: ${error.errorCode}, '
+          'errorDesc: ${error.description}]',
+    );
+
+    _dispatchLoadingFailed(error.url);
+  }
+
+  NavigationDecision _onNavigationRequest(NavigationRequest request) {
+    /*_tries++;
+            Logs.print(() => 'WebViewScreen->WebViewController->onNavigationRequest: [request#$_tries: isMainFrame: ${request.isMainFrame}, ${request.url}]');
+            if (_tries == 1) { return NavigationDecision.navigate; }
+            else { if (_tries == 2) { _dispatchLoadingFailed(); } return NavigationDecision.prevent; }*/
+
+    Logs.print(
+      () => 'WebViewScreen->onNavigationRequest: '
+          'request={isMainFrame: ${request.isMainFrame}, ${request.url}}',
+    );
+
+    if (widget.isUrlAllowedToVisit?.call(request.url) == false) {
+      Logs.print(
+        () => 'WebViewScreen->onNavigationRequest: '
+            'NOT-ALLOWED-TO-VISIT-THIS-URL',
+      );
+
+      return NavigationDecision.prevent;
+    }
+    return NavigationDecision.navigate;
+  }
+
+  //------------------------------------------
+
+  void _dispatchLoadingFailed(String? url) {
+    widget.onLoadFailed?.call(url);
 
     MyRootWidget.showSnackBar(
       context,
