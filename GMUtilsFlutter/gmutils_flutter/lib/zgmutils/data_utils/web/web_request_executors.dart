@@ -558,10 +558,8 @@ class WebRequestExecutor {
           if (encodingErrorException != null) {
             m += '----------\n'
                 '-----> Reason parsing Exception= "$encodingErrorException"\n'
-                '-----> StackTrace= $encodingErrorException\n';
+                '-----> StackTrace= $encodingErrorStackTrace\n';
           }
-
-          m += '-----> Response=$response';
 
           return m;
         });
