@@ -12,7 +12,7 @@ class Widgets {
     return Text(
       text,
       textAlign: textAlign,
-      style: AppTheme.textStyleOfSectionTitle (
+      style: AppTheme.textStyleOfSectionTitle(
         textColor: textColor,
         textSize: fontSize,
       ),
@@ -24,22 +24,36 @@ class Widgets {
     TextEditingController? controller,
     ValueChanged<String>? onChanged,
     bool forPassword = false,
+    void Function()? onPasswordVisibilityTapped,
+    bool Function()? getCurrentPasswordVisibilityStatus,
     TextInputType? inputType,
     TextInputAction? textInputAction,
     VoidCallback? onEditingComplete,
     TextAlign textAlign = TextAlign.start,
     int? minLines,
     int? maxLines = 1,
-        bool useUnderlineStyle = false,
+    bool useUnderlineStyle = false,
   }) {
     return TextField(
       decoration: InputDecoration(
         hintText: hint,
         contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-        border: useUnderlineStyle ? const UnderlineInputBorder() : OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          gapPadding: 1,
-        ),
+        border: useUnderlineStyle
+            ? const UnderlineInputBorder()
+            : OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                gapPadding: 1,
+              ),
+        suffix: (forPassword && onPasswordVisibilityTapped != null)
+            ? GestureDetector(
+                onTap: onPasswordVisibilityTapped,
+                child: Icon(
+                  getCurrentPasswordVisibilityStatus?.call() ?? false
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+              )
+            : null,
       ),
       textAlign: textAlign,
       obscureText: forPassword,
