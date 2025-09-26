@@ -7,6 +7,7 @@ import '../../utils/text/text_utils.dart';
 
 class MyLinkify extends StatelessWidget {
   final String text;
+  final TextAlign? textAlign;
   final TextStyle? textStyle;
   final TextStyle? linkTextStyle;
   final bool enableSelect;
@@ -15,6 +16,7 @@ class MyLinkify extends StatelessWidget {
 
   const MyLinkify({
     required this.text,
+    this.textAlign,
     this.textStyle,
     this.linkTextStyle,
     this.enableSelect = false,
@@ -57,6 +59,7 @@ class MyLinkify extends StatelessWidget {
             text: text2,
             linkifiers: linkifiers,
             style: defaultStyle,
+            textAlign: textAlign,
             linkStyle: linkifyLinkStyle,
             textDirection: textDirection,
             options: options ?? const LinkifyOptions(),
@@ -64,6 +67,7 @@ class MyLinkify extends StatelessWidget {
           )
         : Linkify(
             text: text2,
+            textAlign: textAlign ?? TextAlign.start,
             linkifiers: linkifiers,
             style: defaultStyle,
             linkStyle: linkifyLinkStyle,

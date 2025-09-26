@@ -13,9 +13,10 @@ class MessageDialog {
   Color? _backgroundColor;
   BoxConstraints? _constraints;
   Widget? _topIcon;
-  String _title = '';
+  String? _title;
   TextStyle? _titleStyle;
   String _message = '';
+  TextAlign? _textAlign;
   TextStyle? _messageStyle;
   bool _enableLinks = false;
   bool _enableTextSelect = false;
@@ -48,8 +49,9 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog setMessage(String message, {TextStyle? style}) {
+  MessageDialog setMessage(String message, {TextAlign? textAlign, TextStyle? style}) {
     _message = message;
+    _textAlign = textAlign;
     _messageStyle = style;
     return this;
   }
@@ -151,6 +153,7 @@ class MessageDialog {
     if (_enableLinks) {
       textWidget = MyLinkify(
         text: _message,
+        textAlign: _textAlign,
         enableSelect: _enableTextSelect,
         options:
             _enableTextSelect ? null : const LinkifyOptions(humanize: false),
@@ -162,6 +165,7 @@ class MessageDialog {
       if (_enableTextSelect) {
         textWidget = SelectableText(
           _message,
+          textAlign: _textAlign,
           style: _messageStyle ?? AppTheme.defaultTextStyle(),
         );
       }
@@ -169,6 +173,7 @@ class MessageDialog {
       else {
         textWidget = Text(
           _message,
+          textAlign: _textAlign,
           style: _messageStyle ?? AppTheme.defaultTextStyle(),
         );
       }
@@ -180,15 +185,15 @@ class MessageDialog {
         builder: (context) {
           return AlertDialog(
             icon: _topIcon,
-            //
-            title: Padding(
+            //title
+            title: _title == null ? null : Padding(
               padding: const EdgeInsets.only(left: 7, right: 7, top: 5),
               child: Text(
-                _title,
+                _title!,
                 style: _titleStyle ?? AppTheme.textStyleOfScreenTitle(),
               ),
             ),
-            //
+            //body
             content: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 7),
               child: _extraWidget == null
