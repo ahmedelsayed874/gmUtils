@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
+import '../../utils/logs.dart';
 import '../utils/mappable.dart';
 import '../../utils/collections/pairs.dart';
 import 'page_info.dart';
@@ -136,6 +137,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   }) {
     final customData = mapper.toMap(data);
 
+    /*
     if (customValueConverter != null) {
       Map<String, dynamic> newData = {};
 
@@ -150,6 +152,25 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
 
       customData.addAll(newData);
     }
+     */
+
+    Map<String, dynamic> newData = {};
+    for (var entry in customData.entries) {
+      if (entry.value != null) {
+        if (entry.value is bool) {
+          var newValue = entry.value ? 1 : 0;
+          newData[entry.key] = newValue;
+        }
+        //
+        else {
+          var newValue = customValueConverter?.call(entry.key, entry.value);
+          if (newValue != null) {
+            newData[entry.key] = newValue.value;
+          }
+        }
+      }
+    }
+    customData.addAll(newData);
 
     return customData;
   }
@@ -314,7 +335,6 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       retrieveCustomSingle(
         customColumns: null,
         whereCondition: whereCondition,
-        //converter: (map) => mapper.fromMap(map),
         converter: (map) => _dataConverter(
           data: map,
           customValueConverter: customValueConverter,
@@ -344,6 +364,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required Map<String, dynamic> data,
     required CustomValueConverter? customValueConverter,
   }) {
+    Map<String, dynamic> mutableData = Map.from(data);
+
     if (customValueConverter != null) {
       Map<String, dynamic> newData = {};
 
@@ -356,10 +378,17 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
         }
       }
 
-      data.addAll(newData);
+      mutableData.addAll(newData);
     }
 
-    return mapper.fromMap(data);
+    try {
+      return mapper.fromMap(mutableData);
+    } catch (e, s) {
+      Logs.print(() => 'SQLDatabaseTable._dataConverter '
+          '---> EXCEPTION at decoding data (($e)) '
+          '----> StackTrace:: $s');
+      rethrow;
+    }
   }
 
   //endregion

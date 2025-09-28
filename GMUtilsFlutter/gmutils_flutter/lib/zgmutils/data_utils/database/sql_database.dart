@@ -117,14 +117,22 @@ abstract class SQLDatabase {
     return r;
   }
 
+  int _tries = 3;
+
   ///it's preferred to use newTransaction(..)
   Future<SQLDatabaseTable> newTableInstance({required String tableName}) async {
-    Database _database;
-    try {
-      _database = await database.timeout(const Duration(seconds: 3));
-    } catch (e) {
-      throw 'database may not created yet ---> exception $e';
+    Database? _database;
+    while (_tries-- > 0 && _database == null) {
+      try {
+        _database = await database.timeout(const Duration(seconds: 5));
+      } catch (e) {
+        if (_tries == 0) {
+          throw 'database may not created yet after 3 tries';
+        }
+      }
     }
+
+    assert (_database != null);
 
     try {
       var t = tables.firstWhere((e) => e.tableName == tableName);
