@@ -9,12 +9,22 @@ class BottomSheetCreator {
     void Function(dynamic)? onClosed,
     bool isExpanded = false,
     bool disableDrag = false,
+    bool useSafeArea = false,
     double contentPadding = 15,
     Color? backgroundColor,
   }) {
     showModalBottomSheet(
       context: context,
+      //
       isScrollControlled: isExpanded,
+      useSafeArea: useSafeArea,
+      //
+      // useRootNavigator: true,
+      // isDismissible: true,
+      // enableDrag: true,
+      // barrierColor: Colors.black54,
+      // backgroundColor: Colors.transparent,
+      //
       builder: (context) => _BottomSheetBody(
         onClosing: onClosing,
         disableDrag: disableDrag,
@@ -22,6 +32,38 @@ class BottomSheetCreator {
         backgroundColor: backgroundColor,
         title: title,
         children: children,
+      ),
+    ).then((value) => onClosed?.call(value));
+  }
+
+  void showAsDraggableScroll({
+    required BuildContext context,
+    required List<Widget> children,
+    void Function(dynamic)? onClosed,
+    //
+    bool useSafeArea = false,
+    Color? backgroundColor,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      //
+      isScrollControlled: true,
+      useSafeArea: useSafeArea,
+      //
+      useRootNavigator: true,
+      isDismissible: true,
+      enableDrag: true,
+      barrierColor: Colors.black54,
+      backgroundColor: Colors.transparent,
+      //
+      builder: (context) => _DraggableScrollWidget(
+        backgroundColor: backgroundColor,
+        child: children.length == 1
+            ? children.first
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              ),
       ),
     ).then((value) => onClosed?.call(value));
   }
@@ -115,7 +157,7 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
     return BottomSheet(
       enableDrag: disableDrag,
       animationController:
-      !disableDrag ? BottomSheet.createAnimationController(this) : null,
+          !disableDrag ? BottomSheet.createAnimationController(this) : null,
       backgroundColor: backgroundColor,
 
       // shape: RoundedRectangleBorder(
@@ -140,53 +182,65 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
       ),
     );
   }
+}
 
-  /*Widget _bottomOfSingleContent(
-    children,
-    contentPadding,
-    enableDrag,
-    backgroundColor,
-    onClosing,
-  ) {
-    return BottomSheet(
-      enableDrag: enableDrag,
-      animationController:
-          enableDrag ? BottomSheet.createAnimationController(this) : null,
-      backgroundColor: backgroundColor,
-      builder: (context) => Padding(
-        padding: MediaQuery.of(context).viewInsets,
-        child: Padding(
-          padding: EdgeInsets.all(contentPadding),
-          child: children[0],
-        ),
-      ),
-      onClosing: () => onClosing?.call(),
-      constraints: BoxConstraints.expand(
-          height: MediaQuery.of(context).size.height - 70),
-    );
-  }
+//-----
 
-  Widget _bottomOfScrolledContent(
-    children,
-    contentPadding,
-  ) {
+class _DraggableScrollWidget extends StatelessWidget {
+  final Color? backgroundColor;
+  final Widget child;
+
+  const _DraggableScrollWidget({
+    this.backgroundColor,
+    required this.child,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: .2,
-      minChildSize: .1,
-      maxChildSize: .6,
-      //expand: false,
-      builder: (context, scrollController) {
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: Padding(
-            padding: EdgeInsets.all(contentPadding),
-            child: ListView(
-              controller: scrollController,
-              children: children,
+      initialChildSize: 0.7,
+      minChildSize: 0.30,
+      maxChildSize: 0.90,
+      builder: (_, controller) {
+        return Container(
+          decoration: BoxDecoration(
+            color: backgroundColor ?? Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: const [
+              BoxShadow(color: Colors.black26, blurRadius: 50),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1),
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  //
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: controller,
+                      child: child,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
       },
     );
-  }*/
+  }
 }
