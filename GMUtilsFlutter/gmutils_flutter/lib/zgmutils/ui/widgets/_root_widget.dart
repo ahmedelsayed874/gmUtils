@@ -182,7 +182,7 @@ class MyRootWidget {
     TextStyle? hintStyle,
   }) {
     return SizedBox(
-      height: titleHeight,
+      height: titleHeight + 10,
       child: Center(
         child: Column(
           children: [
