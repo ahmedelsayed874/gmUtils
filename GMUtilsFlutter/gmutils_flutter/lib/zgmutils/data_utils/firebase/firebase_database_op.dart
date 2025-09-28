@@ -140,7 +140,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       try {
         init();
       } catch (e) {
-        Logs.print(() => 'FirebaseDatabaseOp.databaseReference ---> Exception:: $e');
+        Logs.print(() => 'FirebaseDatabaseOp[].databaseReference ---> Exception:: $e');
         await Firebase.initializeApp();
         init();
       }
@@ -171,6 +171,11 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   }
 
   Future<Response<bool>> saveDataTo(DatabaseReference ref, T data) async {
+    Logs.print(() => 'FirebaseDatabaseOp[Call].saveDataTo'
+        '(ref: ${ref.path}, '
+        'data: ${TextUtils().trimEnd('$data')}'
+        ')');
+
     try {
       bool added = false;
 
@@ -179,13 +184,13 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           .whenComplete(() async => added = true)
           .onError((error, stackTrace) async => added = false);
 
-      Logs.print(() => 'FirebaseDatabaseOp.saveDataTo'
-          '(ref: ${ref.path}, data: ${TextUtils().trimEnd('$data')}) '
+      Logs.print(() => 'FirebaseDatabaseOp[Response].saveDataTo'
+          '(ref: ${ref.path}) '
           '---> added: $added');
 
       return Response.success(data: added);
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.saveDataTo(ref: ${ref.path}) ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].saveDataTo(ref: ${ref.path}) ---> $e');
       return Response.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
@@ -203,6 +208,11 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       DatabaseReference ref, {
         required Map<String, T> nodesAndData,
       }) async {
+    Logs.print(() => 'FirebaseDatabaseOp[Call].saveMultipleDataTo'
+        '(ref: ${ref.path}, '
+        'data-length: ${nodesAndData.length}, '
+        'data: ${TextUtils().trimEnd('$nodesAndData')})');
+
     try {
       bool added = false;
 
@@ -218,13 +228,13 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           .whenComplete(() async => added = true)
           .onError((error, stackTrace) async => added = false);
 
-      Logs.print(() => 'FirebaseDatabaseOp.saveMultipleDataTo'
-          '(ref: ${ref.path}, data-length: ${nodesAndData.length}, data: ${TextUtils().trimEnd('$nodesAndData')}) '
+      Logs.print(() => 'FirebaseDatabaseOp[Response].saveMultipleDataTo '
+          '(ref: ${ref.path}) '
           '---> added: $added');
 
       return Response.success(data: added);
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.saveMultipleDataTo(ref: ${ref.path}) ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].saveMultipleDataTo(ref: ${ref.path}) ---> $e');
       return Response.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
@@ -241,6 +251,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     String? subNodePath,
   }) async {
     DatabaseReference ref = await _getReferenceOfNode(subNodePath);
+
+    Logs.print(() => 'FirebaseDatabaseOp[Call].retrieveAll'
+        '(ref: ${ref.path}, '
+        'filterOption: $filterOption,'
+        'collectionSource: $collectionSource)');
+
     DataSnapshot? snapshot;
 
     try {
@@ -303,8 +319,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         );
       }
 
-      Logs.print(() => 'FirebaseDatabaseOp.retrieveAll'
-          '(ref: ${ref.path}, filterOption: $filterOption) '
+      Logs.print(() => 'FirebaseDatabaseOp[Response].retrieveAll'
+          '(ref: ${ref.path}) '
           '---> '
           'response.data-length: ${response.data?.length}, '
           'response.data: ${TextUtils().trimEnd('${response.data}')}, '
@@ -312,13 +328,13 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       
       return response;
     } on TimeoutException catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response.TimeoutException].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
       return Response.failed(
         error: _timeoutErrorMessage,
         connectionFailed: true,
       );
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
       return Response.failed(
         error: StringSet(e.toString()),
         connectionFailed: false,
@@ -373,6 +389,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   Future<Response<T>> retrieveOnlyFrom({
     required DatabaseReference ref,
   }) async {
+    Logs.print(() => 'FirebaseDatabaseOp[Call].retrieveOnlyFrom(ref: ${ref.path})',);
+
     Map<String, dynamic> map = {};
 
     try {
@@ -409,7 +427,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         );
       }
 
-      Logs.print(() => 'FirebaseDatabaseOp.retrieveOnlyFrom(ref: ${ref.path}) '
+      Logs.print(() => 'FirebaseDatabaseOp[Response].retrieveOnlyFrom(ref: ${ref.path}) '
           '---> '
           'response.data: ${TextUtils().trimEnd('${response.data}')}, '
           'response.message: ${response.error}',
@@ -417,14 +435,14 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
       return response;
     } on TimeoutException catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response.TimeoutException].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
 
       return Response.failed(
         error: _timeoutErrorMessage,
         connectionFailed: true,
       );
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
       
       return Response.failed(
         error: StringSet(e.toString()),
@@ -539,14 +557,16 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
   @override
   Future<Response<bool>> clear() async {
+    Logs.print(() => 'FirebaseDatabaseOp[Call].clear()');
+
     try {
       bool suc = true;
       var ref = await databaseReference;
       await ref.remove().onError((error, stackTrace) => suc = false);
-      Logs.print(() => 'FirebaseDatabaseOp.clear() ---> success:: $suc');
+      Logs.print(() => 'FirebaseDatabaseOp[Response].clear() ---> success:: $suc');
       return Response.success(data: suc);
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.clear() ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response].clear() ---> $e');
       return Response.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
@@ -557,13 +577,16 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   @override
   Future<Response<bool>> removeNode({required String subNodePath}) async {
     var ref = await _getReferenceOfNode(subNodePath);
+
+    Logs.print(() => 'FirebaseDatabaseOp[Call].removeNode(ref: ${ref.path})');
+
     try {
       bool deleted = true;
       await ref.remove().onError((error, stackTrace) => deleted = false);
-      Logs.print(() => 'FirebaseDatabaseOp.removeNode(ref: ${ref.path}) ---> deleted:: $deleted');
+      Logs.print(() => 'FirebaseDatabaseOp[Response].removeNode(ref: ${ref.path}) ---> deleted:: $deleted');
       return Response.success(data: deleted);
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp.removeNode(ref: ${ref.path}) ---> Exception:: $e');
+      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].removeNode(ref: ${ref.path}) ---> $e');
       return Response.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,

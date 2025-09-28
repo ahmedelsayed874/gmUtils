@@ -46,13 +46,17 @@ class FirebaseStorage implements IFirebaseStorage {
     firebase_storage.Reference reference,
     File file,
   ) async {
+    Logs.print(() => 'FirebaseStorage[Call].uploadTo('
+        'reference: ${reference.fullPath}, '
+        'file: ${file.path})');
+
     try {
       await reference.putFile(file);
       var link = await reference.getDownloadURL();
-      Logs.print(() => 'FirebaseStorage.uploadTo(reference: ${reference.fullPath}, file: ${file.path}) ----> $link');
+      Logs.print(() => 'FirebaseStorage[Response].uploadTo(reference: ${reference.fullPath}) ----> $link');
       return Response.success(data: link);
     } on FirebaseException catch (e) {
-      Logs.print(() => 'FirebaseStorage.uploadTo() ----> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage[Response.Exception].uploadTo() ----> $e');
       return Response.failed(error: StringSet(e.code));
     }
   }
@@ -61,14 +65,16 @@ class FirebaseStorage implements IFirebaseStorage {
 
   @override
   Future<Response<String>> getDownloadURL(String firebasePath) async {
+    Logs.print(() => 'FirebaseStorage[Call].getDownloadURL(firebasePath: $firebasePath)');
+
     try {
       firebasePath = _refinePath(firebasePath);
       var reference = storage.ref(firebasePath);
       var url = await reference.getDownloadURL();
-      Logs.print(() => 'FirebaseStorage.getDownloadURL(firebasePath: $firebasePath) ---> $url');
+      Logs.print(() => 'FirebaseStorage[Response].getDownloadURL(firebasePath: $firebasePath) ---> $url');
       return Response.success(data: url);
     } catch (e) {
-      Logs.print(() => 'FirebaseStorage.getDownloadURL ---> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage[Response.Exception].getDownloadURL ---> $e');
       if (e is FirebaseException) {
         return Response.failed(error: StringSet(e.code));
       } else {
@@ -84,6 +90,8 @@ class FirebaseStorage implements IFirebaseStorage {
     String fromPath, {
     File? suggestedOutFile,
   }) async {
+    Logs.print(() => 'FirebaseStorage[Call].download(fromPath: $fromPath)');
+
     File outFile;
     if (suggestedOutFile != null) {
       outFile = suggestedOutFile;
@@ -114,11 +122,10 @@ class FirebaseStorage implements IFirebaseStorage {
     try {
       fromPath = _refinePath(fromPath);
       await storage.ref(fromPath).writeToFile(outFile);
-      Logs.print(() => 'FirebaseStorage.download(fromPath: $fromPath) ---> file downloaded to: ${outFile.path}');
+      Logs.print(() => 'FirebaseStorage[Response].download(fromPath: $fromPath) ---> file downloaded to: ${outFile.path}');
       return Response.success(data: outFile);
     } on FirebaseException catch (e) {
-      // e.g, e.code == 'canceled'
-      Logs.print(() => 'FirebaseStorage.download() ---> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage[Response.Exception].download() ---> $e');
       return Response.failed(error: StringSet(e.code));
     }
   }
@@ -127,14 +134,16 @@ class FirebaseStorage implements IFirebaseStorage {
 
   @override
   Future<Response<bool>> delete(String atPath) async {
+    Logs.print(() => 'FirebaseStorage[Call].delete(atPath: $atPath)');
+
     try {
       atPath = _refinePath(atPath);
       var reference = storage.ref(atPath);
       await reference.delete();
-      Logs.print(() => 'FirebaseStorage.delete(atPath: $atPath) -----> true');
+      Logs.print(() => 'FirebaseStorage[Response].delete(atPath: $atPath) -----> true');
       return Response.success(data: true);
     } catch (e) {
-      Logs.print(() => 'FirebaseStorage.delete() -----> EXCEPTION:: $e');
+      Logs.print(() => 'FirebaseStorage[Response].delete() -----> EXCEPTION:: $e');
       if (e is FirebaseException) {
         return Response.failed(error: StringSet(e.code, e.code));
       } else {
