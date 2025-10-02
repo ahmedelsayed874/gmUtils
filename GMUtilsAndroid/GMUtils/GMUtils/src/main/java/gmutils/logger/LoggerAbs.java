@@ -58,7 +58,7 @@ public abstract class LoggerAbs {
         private DateOp fileContentEncryptionDeadline;
 
         private Integer fileContentEncryptionKey;
-        private int maxFileSizeInKiloBytes = 2 /*MB*/ * 1024 /*KB*/;
+        private int maxFileSizeInKiloBytes = 500 /*KB*/;
         public int maxLogsFilesCount = 20;
 
         private boolean writeLogsOnUiThread = false;
