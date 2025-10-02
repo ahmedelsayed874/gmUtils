@@ -140,7 +140,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       try {
         init();
       } catch (e) {
-        Logs.print(() => 'FirebaseDatabaseOp[].databaseReference ---> Exception:: $e');
+        Logs.print(() => 'FirebaseDatabaseOp.databaseReference ---> Exception:: $e');
         await Firebase.initializeApp();
         init();
       }

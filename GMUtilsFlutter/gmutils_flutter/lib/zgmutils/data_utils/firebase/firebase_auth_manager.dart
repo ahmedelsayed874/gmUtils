@@ -109,7 +109,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       return Result(userCredential);
     } on TimeoutException catch (e) {
       Logs.print(
-          () => 'FirebaseAuthManager[TimeoutException]._userCredential ---> $e');
+          () => 'FirebaseAuthManager[Response.TimeoutException]._userCredential ---> $e');
       return Result(null,
           message: StringSet(
             'Request timeout. please check your connection.',
@@ -117,12 +117,12 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
           ));
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
-          'FirebaseAuthManager[FirebaseAuthException]._userCredential ---> $e');
+          'FirebaseAuthManager[Response.FirebaseAuthException]._userCredential ---> $e');
       var r = firebaseAuthExceptionMessage(e);
       return Result(null, message: r.error);
     } catch (e) {
       Logs.print(
-          () => 'FirebaseAuthManager[Exception]._userCredential ---> $e');
+          () => 'FirebaseAuthManager[Response.Exception]._userCredential ---> $e');
       return Result(null, message: StringSet(e.toString()));
     }
   }
