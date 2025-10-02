@@ -3,6 +3,11 @@ import 'dart:convert';
 import '../../utils/logs.dart';
 
 abstract class Mappable<T> {
+  T? from(values) {
+    throw UnimplementedError(
+        'implement this method to handle this value --> [type: ${values?.runtimeType}] --> $values');
+  }
+
   T? fromJsonObject(String? json) {
     if (json?.isNotEmpty != true) return null;
 
