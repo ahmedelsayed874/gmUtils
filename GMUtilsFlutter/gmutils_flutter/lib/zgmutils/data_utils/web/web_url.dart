@@ -81,8 +81,19 @@ abstract class Url<RDT> {
     }
     //
     else {
-      var dataMap = jsonDecode(response);
-      final responseObj = ResponseMapper(responseMapper!).from(dataMap);
+      response = response.trim();
+      dynamic data;
+
+      if ((response.startsWith('{') && response.endsWith('}')) ||
+          (response.startsWith('[') && response.endsWith(']'))) {
+        data = jsonDecode(response);
+      }
+      //
+      else {
+        data = response;
+      }
+
+      final responseObj = ResponseMapper(responseMapper!).from(data);
       responseObj.url = this;
       return responseObj;
     }
@@ -419,6 +430,7 @@ class MultiPartFile {
   });
 
   List<int>? _fileBytes;
+
   List<int> get fileBytes => _fileBytes ??= file.readAsBytesSync();
 
   dynamic get fileBytesLength {

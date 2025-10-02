@@ -585,11 +585,13 @@ class WebRequestExecutor {
         url: url,
         error: error,
         rawResponse: '{'
-            '"status":"Fatal error", '
-            '"body":"${response.body}", '
-            '"error":"${response.reasonPhrase}"'
+            '"status": "Fatal error", '
+            '"body": "${response.body}", '
+            '"reasonPhrase": "${response.reasonPhrase}", '
+            '"error": "$error"'
             '}',
-        httpCode: code,
+        // httpCode: code,
+        httpCode: 400,
         responseHeader: response.headers,
       );
     }

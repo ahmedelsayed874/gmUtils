@@ -55,17 +55,31 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
 
   ResponseMapper(this.dataMapper);
 
-  Response<DT> from(value) {
-    if (value is Map) {
-      return fromMap(value as Map<String, dynamic>);
+  @override
+  Response<DT> from(values) {
+    try {
+      final data = dataMapper.from(values);
+
+      return Response._(
+        url: null,
+        data: data,
+        error: null,
+        rawResponse: null,
+        httpCode: values['httpCode'],
+        responseHeader: null,
+      );
+    } catch (_) {}
+
+    //-----------------------------------------------
+
+    if (values is Map) {
+      return fromMap(values as Map<String, dynamic>);
     }
     //
-    else if (value is List) {
-      List? data;
-
+    else if (values is List) {
+      /*List? data;
       if (value.isNotEmpty) {
         data = [];
-
         for (var i in value) {
           if (i is Map<String, dynamic>) {
             var x = dataMapper.fromMap(i);
@@ -77,7 +91,6 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
           }
         }
       }
-
       return Response._(
         url: null,
         data: data as DT?,
@@ -85,18 +98,31 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
         rawResponse: null,
         httpCode: null,
         responseHeader: null,
-      );
+      );*/
+
+      return fromMap({'list': values});
     }
     //
     else {
-      return Response._(
-        url: null,
-        data: value,
-        error: null,
-        rawResponse: null,
-        httpCode: null,
-        responseHeader: null,
-      );
+      try {
+        return Response._(
+          url: null,
+          data: values,
+          error: null,
+          rawResponse: null,
+          httpCode: null,
+          responseHeader: null,
+        );
+      } catch (e) {
+        return Response._(
+          url: null,
+          data: null,
+          error: '$e',
+          rawResponse: '$values',
+          httpCode: null,
+          responseHeader: null,
+        );
+      }
     }
   }
 
