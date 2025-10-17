@@ -36,7 +36,7 @@ public class LogsOptions {
                     if (length <= 0) return "";
                     else return String.format(
                             "%0" + length + "d",
-                            "0"
+                            0
                     ).replaceAll("0", "*");
                 };
 

@@ -412,6 +412,25 @@ class PutUrl<RDT> extends _PostUrl<RDT> {
   });
 }
 
+class DeleteUrl<RDT> extends _PostUrl<RDT> {
+  DeleteUrl({
+    required super.domain,
+    required super.fragments,
+    required super.endPoint,
+    super.headers,
+    super.queries,
+    //
+    super.params,
+    super.asJson,
+    //
+    required super.responseMapper,
+    super.responseEncoder,
+    //
+    super.logsName,
+    super.obscureLogOptions,
+  });
+}
+
 //-----------------------------------------------------
 
 enum MultiPartMethod { POST, PATCH, PUT }
@@ -545,24 +564,6 @@ class MultiPartRequestUrl<RDT> extends Url<RDT> {
     t += '}';
     return t;
   }
-}
-
-//-----------------------------------------------------
-
-class DeleteUrl<RDT> extends Url<RDT> {
-  DeleteUrl({
-    required super.domain,
-    required super.fragments,
-    required super.endPoint,
-    super.headers,
-    super.queries,
-    //
-    required super.responseMapper,
-    super.responseEncoder,
-    //
-    super.logsName,
-    super.obscureLogOptions,
-  });
 }
 
 //-----------------------------------------------------------------------------

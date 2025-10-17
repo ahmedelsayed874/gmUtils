@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +52,8 @@ import gmutils.utils.ZipFileUtils;
  * +201022663988
  */
 public abstract class LoggerAbs {
+    public enum ExportedFileType { Csv, Json, Text }
+
     public static class LogConfigs {
         private DateOp logDeadline;
         private DateOp writeLogsToPrivateFileDeadline;
@@ -58,17 +61,20 @@ public abstract class LoggerAbs {
         private DateOp fileContentEncryptionDeadline;
 
         private Integer fileContentEncryptionKey;
-        private int maxFileSizeInKiloBytes = 500 /*KB*/;
+        private int maxFileSizeInKiloBytes = 300;
         public int maxLogsFilesCount = 20;
 
         private boolean writeLogsOnUiThread = false;
 
-        //region set printing logs deadline
+        private ExportedFileType exportedFileType = ExportedFileType.Csv;
+
+        //--------------------------------------------------------
+
+        //region setters
         public LogConfigs setLogDeadline(DateOp dateOp) {
             this.logDeadline = dateOp;
             return this;
         }
-        //endregion set printing logs deadline
 
         //region set writing <<<logs>>> to file deadline
         public LogConfigs setWriteLogsToPrivateFileDeadline(DateOp dateOp) {
@@ -98,39 +104,42 @@ public abstract class LoggerAbs {
         }
         //endregion set encrypting file content deadline
 
-        //region set maxFileSizeInKiloBytes
         public LogConfigs setMaxFileSizeInKiloBytes(int maxFileSizeInKiloBytes) {
             this.maxFileSizeInKiloBytes = maxFileSizeInKiloBytes;
             return this;
         }
 
-        //endregion
-
-        //region set maxLogsFilesCount
         public LogConfigs setMaxLogsFilesCount(int maxLogsFilesCount) {
             this.maxLogsFilesCount = maxLogsFilesCount;
             return this;
         }
 
-        //endregion
-
-        public void setWriteLogsOnUiThread(boolean writeLogsOnUiThread) {
+        public LogConfigs setWriteLogsOnUiThread(boolean writeLogsOnUiThread) {
             this.writeLogsOnUiThread = writeLogsOnUiThread;
+            return this;
         }
 
+        public LogConfigs setExportedFileType(ExportedFileType exportedFileType) {
+            this.exportedFileType = exportedFileType;
+            return this;
+        }
+        //endregion
 
-        //--------------------------------------------------------
-
-        //region getters: check enable status, fileContentEncryptionKey, maxFileSizeInKiloBytes,maxLogsFilesCount
+        //region getters
         public boolean isLogEnabled() {
             return logDeadline != null && logDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
 
         public boolean isWriteLogsToFileEnabled() {
-            boolean b = writeLogsToPrivateFileDeadline != null && writeLogsToPrivateFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
+            boolean b = isWriteLogsToPrivateFileEnabled();
             if (b) return true;
 
-            b = writeLogsToPublicFileDeadline != null && writeLogsToPublicFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
+            b = isWriteLogsToPublicFileEnabled();
+            return b;
+        }
+
+        public boolean isWriteLogsToPrivateFileEnabled() {
+            boolean b = writeLogsToPrivateFileDeadline != null && writeLogsToPrivateFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
             return b;
         }
 
@@ -142,34 +151,7 @@ public abstract class LoggerAbs {
         public boolean isFileContentEncryptEnabled() {
             return fileContentEncryptionDeadline != null && fileContentEncryptionDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
-
-        public Integer getFileContentEncryptionKey() {
-            return fileContentEncryptionKey;
-        }
-
-        public int getMaxFileSizeInKiloBytes() {
-            return maxFileSizeInKiloBytes;
-        }
-
-        public int getMaxLogsFilesCount() {
-            return maxLogsFilesCount;
-        }
         //endregion
-
-        public boolean isWriteLogsOnUiThread() {
-            return writeLogsOnUiThread;
-        }
-
-        @Override
-        public String toString() {
-            return "LogConfigs{" +
-                    "logDeadline=" + logDeadline +
-                    ", writeLogsToPrivateFileDeadline=" + writeLogsToPrivateFileDeadline +
-                    ", writeLogsToPublicFileDeadline=" + writeLogsToPublicFileDeadline +
-                    ", fileContentEncryptionDeadline=" + fileContentEncryptionDeadline +
-                    ", fileContentEncryptionKey=" + fileContentEncryptionKey +
-                    '}';
-        }
 
         @Override
         protected void finalize() throws Throwable {
@@ -184,14 +166,34 @@ public abstract class LoggerAbs {
 
     public static class LogFileWriter {
         public final File file;
+        public final ExportedFileType exportedFileType;
         public final boolean enableEncryption;
         public final Integer encryptionKey;
 
-        public LogFileWriter(Context context, @Nullable String dirName, @NotNull String fileName, boolean enableEncryption, Integer encryptionKey) {
+        public LogFileWriter(
+                Context context,
+                @Nullable String dirName,
+                @NotNull String fileName,
+                @NotNull ExportedFileType exportedFileType,
+                boolean enableEncryption,
+                Integer encryptionKey
+        ) {
             File root = context.getExternalFilesDir(null);
             if (dirName != null && !dirName.isEmpty()) {
                 root = new File(root, dirName);
                 if (!root.exists()) root.mkdirs();
+            }
+
+            if (exportedFileType == ExportedFileType.Csv) {
+                fileName += ".csv";
+            }
+            //
+            else if (exportedFileType == ExportedFileType.Json) {
+                fileName += ".json";
+            }
+            //
+            else {
+                fileName += ".txt";
             }
 
             File file = new File(root, fileName);
@@ -204,66 +206,148 @@ public abstract class LoggerAbs {
             }
 
             this.file = file;
+            this.exportedFileType = exportedFileType;
             this.enableEncryption = enableEncryption;
             this.encryptionKey = encryptionKey;
         }
 
-        public LogFileWriter(File file, boolean enableEncryption, Integer encryptionKey) {
+        public LogFileWriter(
+                @NotNull File file,
+                @NotNull ExportedFileType exportedFileType,
+                boolean enableEncryption,
+                Integer encryptionKey
+        ) {
             this.file = file;
+            this.exportedFileType = exportedFileType;
             this.enableEncryption = enableEncryption;
             this.encryptionKey = encryptionKey;
         }
 
-        public void write(String text) {
-            write(text, true, true);
-        }
+        //--------------------------------------------------
 
         private Long writeTime = null;
 
-        public void write(String text, boolean addDate, boolean addSeparation) {
+        public void write(String title, String content) {
+            write(title, content, true, true);
+        }
+
+        public void write(String title, String content, boolean addDate, boolean addSeparation) {
             try {
                 OutputStream os = new FileOutputStream(file, true);
                 OutputStreamWriter sw = new OutputStreamWriter(os);
+
+                if (enableEncryption) {
+                    try {
+                        int encryptionKey2 = encryptionKey != null ? encryptionKey : LoggerAbs.DEF_ENC_KEY;
+                        content = Security.getSimpleInstance(encryptionKey2).encrypt(content);
+                    } catch (Exception ignore) {}
+                }
+
                 try {
-                    if (addDate && writeTime == null) {
-                        writeTime = System.currentTimeMillis();
-                        sw.write("::: ");
-                        sw.write(new Date().toString());
-                        sw.write(" :::\n");
-                    }
-
-                    if (addDate) {
-                        long now = System.currentTimeMillis();
-                        long diff = now - writeTime;
-                        writeTime = now;
-                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
-                        sw.write(
-                                timeComponent[1] + ":" +        //hours
-                                        timeComponent[2] + ":" +    //minutes
-                                        timeComponent[3] + "." +    //seconds
-                                        timeComponent[4] +          //milliseconds
-                                        " [+" + diff + "]"
-                        );
-                    }
-
-                    sw.write(":-\n");
-
-                    if (enableEncryption) {
-                        try {
-                            int encryptionKey2 = encryptionKey != null ? encryptionKey : LoggerAbs.DEF_ENC_KEY;
-                            String encText = Security.getSimpleInstance(encryptionKey2).encrypt(text);
-                            sw.write(encText);
-                        } catch (Exception e) {
-                            sw.write(text);
+                    if (exportedFileType == ExportedFileType.Csv) {
+                        if (addDate && writeTime == null) {
+                            writeTime = System.currentTimeMillis();
+                            sw.write("\"" + new Date() + "\"\n");
+                            sw.write("Time,ElapsedTime,Title,Content\n");
                         }
-                    } else {
-                        sw.write(text);
-                    }
 
-                    if (addSeparation) {
-                        sw.write("\n\n*-----*-----*-----*-----*\n\n");
-                    } else {
+                        if (addDate) {
+                            long now = System.currentTimeMillis();
+                            long diff = now - writeTime;
+                            writeTime = now;
+                            int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+
+                            //time
+                            sw.write("\"" +
+                                    timeComponent[1] + ":" +        //hours
+                                    timeComponent[2] + ":" +    //minutes
+                                    timeComponent[3] + "." +    //seconds
+                                    timeComponent[4] +          //milliseconds
+                                    "\","
+                            );
+
+                            //elapsedTime
+                            sw.write("\"" + diff + "\",");
+                        }
+
+                        //Title
+                        sw.write("\"" + title + "\",");
+
+                        //Content
+                        sw.write("\"" + content + "\"");
+
                         sw.write("\n");
+                    }
+                    //
+                    else if (exportedFileType == ExportedFileType.Json) {
+                        if (addDate && writeTime == null) {
+                            writeTime = System.currentTimeMillis();
+                            sw.write("[ \"Time\", \"ElapsedTime\", \"Title\", \"Content\" ],\n");
+                            sw.write("[\"" + new Date() + "\"],\n");
+                        }
+
+                        sw.write("[");
+
+                        if (addDate) {
+                            long now = System.currentTimeMillis();
+                            long diff = now - writeTime;
+                            writeTime = now;
+                            int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+
+                            //time
+                            sw.write("\"" +
+                                    timeComponent[1] + ":" +        //hours
+                                    timeComponent[2] + ":" +    //minutes
+                                    timeComponent[3] + "." +    //seconds
+                                    timeComponent[4] +          //milliseconds
+                                    "\","
+                            );
+
+                            //elapsedTime
+                            sw.write("\"" + diff + "\",");
+                        }
+
+                        //Title
+                        sw.write("\"" + title + "\",");
+
+                        //Content
+                        sw.write("\"" + content + "\"");
+
+                        sw.write("],\n");
+                    }
+                    //
+                    else {
+                        String text = "";
+                        if (!TextUtils.isEmpty(title)) text += ">> " + title + "\n";
+                        if (content != null) text += ">> " + content;
+
+                        if (addDate && writeTime == null) {
+                            writeTime = System.currentTimeMillis();
+                            sw.write("::: " + new Date() + " :::\n");
+                        }
+
+                        if (addDate) {
+                            long now = System.currentTimeMillis();
+                            long diff = now - writeTime;
+                            writeTime = now;
+                            int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+                            sw.write(
+                                    timeComponent[1] + ":" +        //hours
+                                            timeComponent[2] + ":" +    //minutes
+                                            timeComponent[3] + "." +    //seconds
+                                            timeComponent[4] +          //milliseconds
+                                            " [+" + diff + "]"
+                            );
+                        }
+
+                        sw.write(":-\n");
+                        sw.write(text);
+
+                        if (addSeparation) {
+                            sw.write("\n\n*-----*-----*-----*-----*\n\n");
+                        } else {
+                            sw.write("\n");
+                        }
                     }
                 } finally {
                     sw.flush();
@@ -275,27 +359,7 @@ public abstract class LoggerAbs {
             }
         }
 
-        public void writeCurrentStep() {
-            writeCurrentStep("");
-        }
-
-        public void writeCurrentStep(String moreInfo) {
-            try {
-                StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
-                StackTraceElement stackTrace = null;
-                stackTrace = stackTraceList[2];
-
-                write(
-                        stackTrace.getFileName() +
-                                "\n" +
-                                stackTrace.getMethodName() +
-                                " -> line: " + stackTrace.getLineNumber() +
-                                (("" + moreInfo).isEmpty() ? "" : ("\n-> " + moreInfo))
-                );
-            } catch (Exception e) {
-                write(moreInfo);
-            }
-        }
+        //--------------------------------------------------
 
         public String readFileContent() {
             try {
@@ -503,11 +567,12 @@ public abstract class LoggerAbs {
         if (logConfigs.isWriteLogsToFileEnabled() || forceWriteToFile) {
             if (BaseApplication.current() != null) {
                 try {
-                    String[] title2 = new String[]{""};
-                    if (title != null) title2[0] = "<<|(" + title.getTitle() + ")|>>\n";
-
-                    writeToFileSync(BaseApplication.current(), () -> title2[0] + contentStr);
-                } catch (Exception e) {
+                    writeToFileSync(
+                            BaseApplication.current(),
+                            title,
+                            () -> contentStr
+                    );
+                } catch (Exception ignore) {
                 }
             }
         }
@@ -645,18 +710,28 @@ public abstract class LoggerAbs {
     public void writeToFile(Context context, ContentGetter text) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
             runOnLoggerThread(() -> {
-                writeToFileSync(context, text);
+                writeToFileSync(context, null, text);
             });
         }
     }
 
-    private void writeToFileSync(Context context, ContentGetter text) {
+    public void writeToFile(Context context, TitleGetter title, ContentGetter text) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
-            getLogFileWriter(
-                    context
-            ).write(
-                    text.getContent().toString()
-            );
+            runOnLoggerThread(() -> {
+                writeToFileSync(context, title, text);
+            });
+        }
+    }
+
+    private void writeToFileSync(Context context, TitleGetter title, ContentGetter text) {
+        if (logConfigs.isWriteLogsToFileEnabled()) {
+            LogFileWriter writer = getLogFileWriter(context);
+            if (writer != null) {
+                String title2 = null;
+                if (title != null) title2 = title.getTitle();
+
+                writer.write(title2, text.getContent().toString());
+            }
         }
     }
     //endregion write to files
@@ -752,11 +827,25 @@ public abstract class LoggerAbs {
         }
         String fileName = "LOG_FILE_" + sessionId() + "_" + (filesCount + 1);
 
+        String fileExtension;
+        if (logConfigs.exportedFileType == ExportedFileType.Csv) {
+            fileExtension = "csv";
+        }
+        //
+        else if (logConfigs.exportedFileType == ExportedFileType.Json) {
+            fileExtension = "json";
+        }
+        //
+        else {
+            fileExtension = "txt";
+        }
+
         try {
-            String filePath = logFilesDir.getPath() + "/" + fileName + ".txt";
+            String filePath = logFilesDir.getPath() + "/" + fileName + "." + fileExtension;
             File file = new File(filePath);
             if (!file.exists()) {
-                file.createNewFile();
+                boolean created = file.createNewFile();
+                created = created;
             }
             return file;
         } catch (Exception e) {
@@ -830,8 +919,11 @@ public abstract class LoggerAbs {
         if (logFileWriter == null) {
             File file = createOrGetLogFile(context);
 
+            if (file == null) return null;
+
             logFileWriter = new LogFileWriter(
                     file,
+                    logConfigs.exportedFileType,
                     logConfigs.isFileContentEncryptEnabled(),
                     logConfigs.fileContentEncryptionKey
             );

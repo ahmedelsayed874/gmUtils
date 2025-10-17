@@ -238,10 +238,11 @@ public abstract class BaseApplication extends Application implements Application
                 for (File bugFile : bugFiles) {
                     Logger.LogFileWriter fileWriter = new Logger.LogFileWriter(
                             bugFile,
+                            LoggerAbs.ExportedFileType.Text,
                             false,
                             null
                     );
-                    fileWriter.write(stack.toString());
+                    fileWriter.write(null, stack.toString());
                 }
 
                 Application application = thisApp();
@@ -379,6 +380,7 @@ public abstract class BaseApplication extends Application implements Application
         try {
             return new Logger.LogFileWriter(
                     getBugFiles()[0],
+                    LoggerAbs.ExportedFileType.Text,
                     false,
                     null
             ).readFileContent();

@@ -356,6 +356,60 @@ class MainActivity : BaseActivity() {
         }
 
 
+        this.view.btn27.text = "Write logs to text file"
+        this.view.btn27.setOnClickListener {
+            Logger.instance("text").apply {
+                logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Text)
+
+                for (x in 0 .. 30) {
+                    //writeToFile(this@MainActivity, {
+                    print({
+                        "Title #$x"
+                    }) {
+                        "Content #$x, Content #$x, Content #$x, Content #$x"
+                    }
+                }
+            }
+        }
+
+        this.view.btn28.text = "Write logs to csv file"
+        this.view.btn28.setOnClickListener {
+            Logger.instance("csv").apply {
+                logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Csv)
+
+                for (x in 0 .. 30) {
+                    //writeToFile(this@MainActivity, {
+                    print({
+                        "Title #$x"
+                    }) {
+                        "Content #$x, Content #$x, Content #$x, Content #$x"
+                    }
+                }
+            }
+        }
+
+        this.view.btn29.text = "Write logs to json file"
+        this.view.btn29.setOnClickListener {
+            Logger.instance("json").apply {
+                logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Json)
+
+                for (x in 0 .. 30) {
+                    //writeToFile(this@MainActivity, {
+                    print({
+                        "Title #$x"
+                    }) {
+                        "Content #$x, Content #$x, Content #$x, Content #$x"
+                    }
+                }
+            }
+        }
+
         //------------------------------------------------------------------------------------------
 
         this.view.logTv.viewTreeObserver.addOnGlobalLayoutListener {

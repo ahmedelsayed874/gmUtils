@@ -392,6 +392,7 @@ class WebRequestExecutor {
       run: () async => await http.delete(
         url.uri,
         headers: url.headers,
+        body: url.postObject,
       ),
     );
   }

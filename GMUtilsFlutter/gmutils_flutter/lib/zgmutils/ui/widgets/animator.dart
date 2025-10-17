@@ -5,12 +5,14 @@ class Animator extends StatefulWidget {
   final int end;
   final Duration duration;
   final int? repeats;
+  final VoidCallback? onCompleted;
   final Widget Function(int value) child;
 
   const Animator({this.start = 0,
     this.end = 100,
     this.duration = const Duration(milliseconds: 500),
     this.repeats,
+    this.onCompleted,
     required this.child,
     super.key});
 
@@ -38,6 +40,14 @@ class _AnimatorState extends State<Animator>
       begin: widget.start,
       end: widget.end,
     ).animate(controller);
+
+    if (widget.onCompleted != null) {
+      animation.addStatusListener((status) {
+        if (status.isCompleted) {
+          widget.onCompleted?.call();
+        }
+      });
+    }
 
     if ((widget.repeats ?? 0) > 0) {
       controller.repeat(
