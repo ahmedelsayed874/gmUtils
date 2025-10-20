@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fox_transportation/ui/widgets/widgets.dart';
-import 'package:fox_transportation/zgmutils/utils/collections/pairs.dart';
+import 'package:gmutils_flutter/zgmutils/resources/app_theme.dart';
 
-import '../../resources/_resources.dart';
+import '../../gm_main.dart';
+import '../../utils/collections/pairs.dart';
 
 class Picker<T> {
   Future<Pair<T, int>?> show({
@@ -165,8 +165,8 @@ class _PickerBodyState<T> extends State<_PickerBody>
                       child: Text(
                         widget.title,
                         style: TextStyle(
-                          fontSize: Res.fonts.sectionTitleSize,
-                          fontFamily: Res.themes.fonts.defaultFontFamily,
+                          fontSize: AppTheme.appMeasurement?.screenTitleSize,
+                          fontFamily: AppTheme.defaultFontFamily,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
                         ),
@@ -184,8 +184,8 @@ class _PickerBodyState<T> extends State<_PickerBody>
                           widget.hint!,
                           style: TextStyle(
                             fontSize: 12,
-                            fontFamily: Res.themes.fonts.defaultFontFamily,
-                            color: Res.themes.colors.text.withAlpha(200),
+                            fontFamily: AppTheme.defaultFontFamily,
+                            color: AppTheme.appColors?.text.withAlpha(200),
                           ),
                         ),
                       ),
@@ -204,16 +204,28 @@ class _PickerBodyState<T> extends State<_PickerBody>
                     child: Row(
                       children: [
                         Expanded(
-                          child: Widgets.instant.customButton(
+                          /*child: Widgets.instant.customButton(
                             text: Res.strings.apply,
                             onPressed: _confirm,
+                          ),*/
+                          child: ElevatedButton(
+                            onPressed: _confirm,
+                            child: Text(
+                              App.isEnglish ? 'Confirm' : 'تطبيق',
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: Widgets.instant.customButton2(
+                          /*child: Widgets.instant.customButton2(
                             text: Res.strings.cancel,
                             onPressed: _cancelSelection,
+                          ),*/
+                          child: ElevatedButton(
+                            onPressed: _cancelSelection,
+                            child: Text(
+                              App.isEnglish ? 'Cancel' : 'إلغاء',
+                            ),
                           ),
                         ),
                       ],
