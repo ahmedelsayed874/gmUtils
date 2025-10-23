@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:core' as core;
-
 //import 'dart:core';
 import 'dart:io';
 
@@ -256,6 +255,8 @@ abstract class LogsManager {
     return false;
   }
 
+  core.bool useExcelFileFormat = true;
+
   //----------------------------------------------------------------------------
 
   Files? _files;
@@ -318,7 +319,7 @@ abstract class LogsManager {
     final now = core.DateTime.now();
     final fileName =
         'log_${DateOp().format(now, pattern: 'yyyy-MM-dd-HH-mm-ss')}';
-    const fileExtension = 'txt';
+    final fileExtension = useExcelFileFormat ? 'csv' : 'txt';
 
     if (intoPublic) {
       _files = Files.public(
@@ -340,7 +341,7 @@ abstract class LogsManager {
     if (dir != null) {
       final files = dir
           .listSync(followLinks: false)
-          .where((e) => e.path.endsWith('txt'))
+          .where((e) => e.path.endsWith(fileExtension))
           .toList();
 
       while (files.length > maxLogsFiles) {
@@ -375,7 +376,13 @@ abstract class LogsManager {
 
     var now = core.DateTime.now();
     var order = '000000${_x++}'.substring('$_x'.length); //0000 001234
-    final log = '[$order]:: $now::\n$text \r\n\r\n';
+
+    core.String log;
+    if (useExcelFileFormat) {
+      log = '"$order","$now","$text"\n';
+    } else {
+      log = '[$order]:: $now::\n$text \r\n\r\n';
+    }
 
     await _files?.append(log);
 

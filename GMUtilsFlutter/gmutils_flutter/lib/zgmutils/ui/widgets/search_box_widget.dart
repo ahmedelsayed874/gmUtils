@@ -4,6 +4,7 @@ class SearchBoxWidget extends StatelessWidget {
   void Function(String)? onSearchTextChanged;
   TextEditingController? textEditingController;
   String? hint;
+  IconData? suffixIcon;
   InputDecoration? inputDecoration;
   bool autoConvertToLowerCase;
   int delay;
@@ -13,6 +14,7 @@ class SearchBoxWidget extends StatelessWidget {
     required this.onSearchTextChanged,
     this.textEditingController,
     this.hint,
+    this.suffixIcon,
     this.inputDecoration,
     this.autoConvertToLowerCase = true,
     this.delay = 1000,
@@ -33,7 +35,7 @@ class SearchBoxWidget extends StatelessWidget {
       decoration: inputDecoration ?? InputDecoration(
           hintText: hint,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(15),),
-          suffixIcon: const Icon(Icons.search_outlined),
+          suffixIcon: Icon(suffixIcon ?? Icons.search_outlined),
           contentPadding: const EdgeInsets.symmetric(horizontal: 10),
       ),
       onChanged: (text) => _onSearchTextChanged(text),
@@ -60,15 +62,26 @@ class SearchBoxWidget extends StatelessWidget {
   }
 
   void _executeSearchAfterPeriod() {
+    if (searchingText.trim().length == 1) {
+      _callSearch();
+      return;
+    }
+
     Future.delayed(Duration(milliseconds: delay), () {
       var current = DateTime.now().millisecondsSinceEpoch;
 
       if (current - _lastInputTime >= delay - 10) {
-        _futureSearchExecuted = false;
-        onSearchTextChanged?.call(searchingText);
-      } else {
+        _callSearch();
+      }
+      //
+      else {
         _executeSearchAfterPeriod();
       }
     });
+  }
+
+  void _callSearch() {
+    _futureSearchExecuted = false;
+    onSearchTextChanged?.call(searchingText);
   }
 }

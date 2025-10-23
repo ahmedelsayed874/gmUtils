@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../gm_main.dart';
 import '../../resources/app_theme.dart';
 import '../../utils/launcher.dart';
 import '../../utils/logs.dart';
 import '_root_widget.dart';
-
-import 'package:webview_flutter_android/webview_flutter_android.dart';
-import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class WebViewScreen extends StatefulWidget {
   static Future<void> showWithToolbar({
@@ -243,33 +242,35 @@ class _WebViewScreenState extends State<WebViewScreen> {
             Positioned(
               right: 10,
               bottom: 10,
-              child: widget.customOpenExternalWidget ??
-                  Opacity(
-                    opacity: widget.currentOpenExternalOpacity ?? 0.8,
-                    child: GestureDetector(
-                      onTap: () => Launcher().openUrl(widget.url),
-                      child: Container(
-                        width: widget.currentOpenExternalSize ?? 50,
-                        height: widget.currentOpenExternalSize ?? 50,
-                        decoration: BoxDecoration(
-                          color: widget.currentOpenExternalBgColor ??
-                              AppTheme.appColors?.primary ??
-                              Colors.red,
-                          borderRadius: BorderRadius.circular(100),
-                          boxShadow: [
-                            BoxShadow(offset: Offset(1, 1), blurRadius: 5),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.open_in_browser,
-                          color: widget.currentOpenExternalIconColor ??
-                              AppTheme.appColors?.primaryVariant ??
-                              Colors.white,
-                          size: 30,
+              child: SafeArea(
+                child: widget.customOpenExternalWidget ??
+                    Opacity(
+                      opacity: widget.currentOpenExternalOpacity ?? 0.8,
+                      child: GestureDetector(
+                        onTap: () => Launcher().openUrl(widget.url),
+                        child: Container(
+                          width: widget.currentOpenExternalSize ?? 50,
+                          height: widget.currentOpenExternalSize ?? 50,
+                          decoration: BoxDecoration(
+                            color: widget.currentOpenExternalBgColor ??
+                                AppTheme.appColors?.primary ??
+                                Colors.red,
+                            borderRadius: BorderRadius.circular(100),
+                            boxShadow: [
+                              BoxShadow(offset: Offset(1, 1), blurRadius: 5),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.open_in_browser,
+                            color: widget.currentOpenExternalIconColor ??
+                                AppTheme.appColors?.primaryVariant ??
+                                Colors.white,
+                            size: 30,
+                          ),
                         ),
                       ),
                     ),
-                  ),
+              ),
             ),
 
           //

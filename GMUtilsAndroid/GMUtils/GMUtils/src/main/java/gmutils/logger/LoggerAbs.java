@@ -243,6 +243,8 @@ public abstract class LoggerAbs {
                     } catch (Exception ignore) {}
                 }
 
+                title = title == null ? "" : title;
+
                 try {
                     if (exportedFileType == ExportedFileType.Csv) {
                         if (addDate && writeTime == null) {

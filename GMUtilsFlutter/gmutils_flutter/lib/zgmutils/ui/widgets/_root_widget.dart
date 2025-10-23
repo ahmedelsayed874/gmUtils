@@ -10,6 +10,7 @@ import '../../utils/logs.dart';
 class MyRootWidget {
   String toolbarTitle = '';
   bool awareTopSafeArea = true;
+  bool? awareBottomSafeArea;
   PreferredSizeWidget? _appBar;
   bool _showBackButton = false;
   Color? _backButtonColor;
@@ -34,6 +35,7 @@ class MyRootWidget {
 
   MyRootWidget.withoutToolbar({
     bool? awareTopSafeArea,
+    this.awareBottomSafeArea,
     bool showBackButton = false,
     Color? backButtonColor,
   }) {
@@ -235,7 +237,7 @@ class MyRootWidget {
       body: _appBar == null
           ? SafeArea(
               top: awareTopSafeArea,
-              bottom: Platform.isIOS ? false : true,
+              bottom: awareBottomSafeArea ?? Platform.isIOS ? false : true,
               child: AnnotatedRegion<SystemUiOverlayStyle>(
                 value: _isStatusBarThemeLight
                     ? SystemUiOverlayStyle.light
