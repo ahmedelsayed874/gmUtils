@@ -2,11 +2,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import '../../utils/collections/pairs.dart';
-import '../../utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../gm_main.dart';
+import '../../utils/collections/pairs.dart';
+import '../../utils/logs.dart';
 import '../utils/data_security.dart';
 import '../utils/mappable.dart';
 
@@ -196,7 +196,7 @@ class AccountStorage<Account extends IAccount>
   }
 
   static void removeObserver(String name) {
-    App.removeObserver(category: 'AccountCache', name: name);
+    App.removeObserver(category: 'AccountCache', observerName: name);
   }
 
   //----------------------------------------------------------------------------

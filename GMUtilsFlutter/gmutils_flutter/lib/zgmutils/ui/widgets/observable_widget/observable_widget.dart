@@ -18,21 +18,25 @@ class ObservableWidget<T> extends StatefulWidget {
 
 class _ObservableWidgetState<T> extends State<ObservableWidget<T>> {
   bool _isValueSet = false;
+  late int _observerId;
 
   @override
   void initState() {
     super.initState();
-    widget.observableValue.observer = (ov) {
+
+    _observerId = hashCode;
+
+    widget.observableValue.addObserver(_observerId, (ov) {
       try {
         _isValueSet = true;
         setState(() {});
       } catch (_) {}
-    };
+    });
   }
 
   @override
   void dispose() {
-    widget.observableValue.observer = null;
+    widget.observableValue.removeObserver(_observerId);
     super.dispose();
   }
 

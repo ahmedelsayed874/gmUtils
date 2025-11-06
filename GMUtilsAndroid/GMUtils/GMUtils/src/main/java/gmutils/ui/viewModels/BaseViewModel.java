@@ -631,9 +631,9 @@ public class BaseViewModel extends AndroidViewModel {
         runOnBackgroundThread(task, 0, null);
     }
 
-    public void runOnBackgroundThread(Runnable task, ResultCallback<Throwable> onException) {
+    /*public void runOnBackgroundThread(Runnable task, ResultCallback<Throwable> onException) {
         runOnBackgroundThread(task, 0, onException);
-    }
+    }*/
 
     public void runOnBackgroundThread(Runnable task, long delay) {
         runOnBackgroundThread(task, delay, null);

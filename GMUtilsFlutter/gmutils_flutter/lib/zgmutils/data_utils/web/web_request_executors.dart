@@ -4,11 +4,11 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
+import '../../utils/collections/pairs.dart';
+import '../../utils/collections/string_set.dart';
 import '../../utils/logs.dart';
 import '../utils/mappable.dart';
-import '../../utils/collections/pairs.dart';
 import '../utils/result.dart';
-import '../../utils/collections/string_set.dart';
 import 'response.dart';
 import 'web_url.dart';
 
@@ -436,14 +436,13 @@ class WebRequestExecutor {
         var response = await run();
         code = response.statusCode;
 
-        if (code != 0) {
-          return _resolveResponse(
-            url,
-            response,
-            cache: cache,
-            tries: tries,
-          );
-        }
+        return _resolveResponse(
+          url,
+          response,
+          statusCode: code,
+          cache: cache,
+          tries: tries,
+        );
       } catch (e) {
         exception = e;
       }
@@ -467,6 +466,7 @@ class WebRequestExecutor {
       }
     }
 
+    //in case request failure -------------------------------------
     var error = '';
     if (exception != null) {
       try {
@@ -480,7 +480,12 @@ class WebRequestExecutor {
 
     return _resolveResponse(
       url,
-      http.Response(error, 100),
+      http.Response(
+        '',
+        100 /*just for passing exception*/,
+        reasonPhrase: error,
+      ),
+      statusCode: 0,
       cache: cache,
       tries: tries,
     );
@@ -489,10 +494,12 @@ class WebRequestExecutor {
   Future<Response<DT>> _resolveResponse<DT>(
     Url<DT> url,
     http.Response response, {
+    required int statusCode,
     required _Cache<DT>? cache,
     required int tries,
   }) async {
-    final code = response.statusCode;
+    //final code = response.statusCode;
+    final code = statusCode;
 
     Logs.get(url.logsName).print(() => [
           'API::Response',

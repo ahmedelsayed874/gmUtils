@@ -1,14 +1,25 @@
 
 class ObservableValue<T> {
-  Observer<T>? _observer;
-  set observer(Observer<T>? o) {
-    _observer = o;
+  ObservableValue([T? value]) : _value = value;
+
+  //---------------------------------
+
+  final Map<int, Observer<T>> _observers = {};
+
+  void addObserver(int id, Observer<T> o) {
+    _observers[id] = o;
     _callObserver();
   }
 
+  void removeObserver(int id) {
+    _observers.remove(id);
+  }
+
   void _callObserver() {
-    if (_observer != null) {
-      _observer?.call(_value);
+    if (_observers.isNotEmpty) {
+      for (var o in _observers.values) {
+        o.call(_value);
+      }
     }
   }
 

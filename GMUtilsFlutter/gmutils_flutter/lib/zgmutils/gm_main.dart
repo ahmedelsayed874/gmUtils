@@ -34,7 +34,8 @@ class GMMain {
     WidgetsFlutterBinding.ensureInitialized();
 
     if (localNotificationsConfigurations != null) {
-      await NotificationsManager.instance.init(localNotificationsConfigurations);
+      await NotificationsManager.instance
+          .init(localNotificationsConfigurations);
     }
 
     if (fcmRequirements != null && localNotificationsConfigurations != null) {
@@ -132,11 +133,16 @@ class App extends StatefulWidget {
     _observers![category]![observerName] = observer;
   }
 
-  static void removeObserver({required String category, String? name}) {
-    if (name == null) {
+  static void removeObserver({
+    required String category,
+    String? observerName,
+  }) {
+    if (observerName == null) {
       _observers?.remove(category);
-    } else {
-      _observers?[category]?.remove(name);
+    }
+    //
+    else {
+      _observers?[category]?.remove(observerName);
       if (_observers?[category]?.isEmpty == true) _observers?.remove(category);
     }
 
@@ -258,7 +264,7 @@ class App extends StatefulWidget {
     required bool toEnglish,
   }) {
     Logs.print(() =>
-    'App.changeAppLanguage(toEnglish: $toEnglish) ... current is en? ${_appPreferences.isEn}');
+        'App.changeAppLanguage(toEnglish: $toEnglish) ... current is en? ${_appPreferences.isEn}');
 
     if (_appPreferences.isEn != null && _appPreferences.isEn == toEnglish) {
       return false;
@@ -329,6 +335,7 @@ class _AppState extends State<App> {
             surfaceTintColor: colors.card,
           ),
           hintColor: colors.hint,
+          // iconTheme: colors.isLightMode ? null : IconThemeData(color: colors.black,),
           inputDecorationTheme: InputDecorationTheme(
             hintStyle: AppTheme.defaultTextStyle(
               textColor: colors.hint,
@@ -469,7 +476,8 @@ class _StarterWidgetState extends State<StarterWidget> {
         widget.measurements?.call(context) ?? AppMeasurement.def();
 
     var isLight = App.isLightTheme;
-    var appColors = widget.appColors?.call(context, isLight) ?? AppColors.def(isLightMode: isLight);
+    var appColors = widget.appColors?.call(context, isLight) ??
+        AppColors.def(isLightMode: isLight);
 
     //init app theme
     AppTheme(

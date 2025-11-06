@@ -1,8 +1,8 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
+import '../../utils/collections/pairs.dart';
 import '../../utils/date_op.dart';
 import '../../utils/logs.dart';
-import '../../utils/collections/pairs.dart';
 import '../storages/general_storage.dart';
 
 abstract class IFirebaseConfigs {
@@ -92,7 +92,11 @@ class FirebaseConfigs extends IFirebaseConfigs {
 
       //
       else if (error.contains('[firebase_remote_config/internal]')) {
-        error = error.replaceAll('[firebase_remote_config/internal]', '');
+        error = error.replaceAll('[firebase_remote_config/internal]', '').trim();
+
+        if (error.contains('internal remote config fetch error')) {
+          error = 'Please check your internet connection';
+        }
       }
 
       //
