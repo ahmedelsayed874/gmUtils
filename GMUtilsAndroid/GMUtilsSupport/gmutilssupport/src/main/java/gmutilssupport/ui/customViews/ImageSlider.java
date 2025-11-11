@@ -22,7 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import gmutils.Intents;
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.listeners.SimpleWindowAttachListener;
 
 /**
@@ -106,7 +106,7 @@ public class ImageSlider {
                     }
                 });
             } else {
-                gmutils.images.ImageLoader.load(
+                gmutils.images.ImageLoader.instance().load(
                         url,
                         imageView,
                         (imgUrl, imageView1, success) -> {
@@ -600,7 +600,7 @@ public class ImageSlider {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Logger.print(e);
+                Logger.d().print(e);
             }
         }
 
@@ -625,10 +625,10 @@ public class ImageSlider {
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-//                    Logger.print("ViewPager :: ACTION :: " + event.getAction());
+//                    Logger.d().print("ViewPager :: ACTION :: " + event.getAction());
 
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                        Logger.print("ViewPager :: ACTION-DOWN");
+//                        Logger.d().print("ViewPager :: ACTION-DOWN");
                         mTimerActions.pauseTimer();
                         wasDown = true;
                         downTime = System.currentTimeMillis();
@@ -638,7 +638,7 @@ public class ImageSlider {
                         if (++moves > 5) downTime = 0;
 
                     } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-//                        Logger.print("ViewPager :: ACTION-UP");
+//                        Logger.d().print("ViewPager :: ACTION-UP");
                         v.postDelayed(() -> {
                             if (wasDown) mTimerActions.resumeTimer();
                             wasDown = false;

@@ -39,7 +39,7 @@ public class OptionsDialog {
                     if (listener != null) listener.onItemSelected(which);
                     dialog.dismiss();
                 })
-                .setPositiveButton(R.string.cancel, (dialog, which) -> {
+                .setPositiveButton(gmutils.R.string.cancel, (dialog, which) -> {
                     dialog.dismiss();
                 })
                 .show();

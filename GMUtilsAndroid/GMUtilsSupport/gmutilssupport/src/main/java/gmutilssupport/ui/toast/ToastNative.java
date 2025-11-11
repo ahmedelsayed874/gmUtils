@@ -73,7 +73,7 @@ public class ToastNative implements MyToast.IToast {
         try {
             root.setBackgroundResource(bgRes);
 
-            int plr = root.getContext().getResources().getDimensionPixelOffset(R.dimen.size_10);
+            int plr = root.getContext().getResources().getDimensionPixelOffset(gmutils.R.dimen.size_10);
             int ptd = 0;
 
             tv.setPadding(plr, ptd, plr, ptd);

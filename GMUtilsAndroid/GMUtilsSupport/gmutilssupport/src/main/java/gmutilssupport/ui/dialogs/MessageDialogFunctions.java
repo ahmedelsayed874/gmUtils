@@ -54,15 +54,15 @@ public class MessageDialogFunctions {
         this.mListener = listener;
 
         View view = listener.getView();
-        lyContainer = view.findViewById(R.id.lyContainer);
-        tvTitle = view.findViewById(R.id.tv_title);
-        tvMsg = view.findViewById(R.id.tv_msg);
-        lyDontShowAgain = view.findViewById(R.id.lyDontShowAgain);
-        tvDontShowAgain = view.findViewById(R.id.tvDontShowAgain);
-        chkDontShowAgain = view.findViewById(R.id.chkDontShowAgain);
-        tvButton1 = view.findViewById(R.id.tv_btn1);
-        tvButton2 = view.findViewById(R.id.tv_btn2);
-        tvButton3 = view.findViewById(R.id.tv_btn3);
+        lyContainer = view.findViewById(gmutils.R.id.lyContainer);
+        tvTitle = view.findViewById(gmutils.R.id.tv_title);
+        tvMsg = view.findViewById(gmutils.R.id.tv_msg);
+        lyDontShowAgain = view.findViewById(gmutils.R.id.lyDontShowAgain);
+        tvDontShowAgain = view.findViewById(gmutils.R.id.tvDontShowAgain);
+        chkDontShowAgain = view.findViewById(gmutils.R.id.chkDontShowAgain);
+        tvButton1 = view.findViewById(gmutils.R.id.tv_btn1);
+        tvButton2 = view.findViewById(gmutils.R.id.tv_btn2);
+        tvButton3 = view.findViewById(gmutils.R.id.tv_btn3);
 
         tvButton1.setOnClickListener(v -> {
             if (mListener != null)

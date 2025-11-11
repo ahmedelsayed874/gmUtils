@@ -41,11 +41,11 @@ public class ToastCustom implements MyToast.IToast {
         windowLayout = activity.findViewById(android.R.id.content);
 
         rootLayout = LayoutInflater.from(activity)
-                .inflate(R.layout.mytoast_gmutils, null);
+                .inflate(gmutils.R.layout.mytoast_gmutils, null);
         
-        textContainer = rootLayout.findViewById(R.id.text_container);
+        textContainer = rootLayout.findViewById(gmutils.R.id.text_container);
 
-        tv = textContainer.findViewById(R.id.tv_msg);
+        tv = textContainer.findViewById(gmutils.R.id.tv_msg);
         tv.setText(msg);
 
         if (!systemStyle) {
@@ -60,7 +60,7 @@ public class ToastCustom implements MyToast.IToast {
         try {
             textContainer.setBackgroundResource(bgRes);
 
-            int plr = textContainer.getContext().getResources().getDimensionPixelOffset(R.dimen.size_10);
+            int plr = textContainer.getContext().getResources().getDimensionPixelOffset(gmutils.R.dimen.size_10);
             int ptd = 0;
 
             tv.setPadding(plr, ptd, plr, ptd);

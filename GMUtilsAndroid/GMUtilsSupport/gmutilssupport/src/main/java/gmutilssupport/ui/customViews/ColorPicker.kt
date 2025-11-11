@@ -61,33 +61,33 @@ class ColorPicker @JvmOverloads constructor(
     //----------------------------------------------------------------------------------------------
 
     init {
-        val view = LayoutInflater.from(context).inflate(R.layout.color_picker, this, true)
+        val view = LayoutInflater.from(context).inflate(gmutils.R.layout.color_picker, this, true)
 
-        redValueSeekBar = view.findViewById(R.id.redValueSeekBar)
-        redValueEt = view.findViewById(R.id.redValueEt)
+        redValueSeekBar = view.findViewById(gmutils.R.id.redValueSeekBar)
+        redValueEt = view.findViewById(gmutils.R.id.redValueEt)
         setupSeekBarWithEditText(redValueSeekBar, redValueEt, 1)
 
-        greenValueSeekBar = view.findViewById(R.id.greenValueSeekBar)
-        greenValueEt = view.findViewById(R.id.greenValueEt)
+        greenValueSeekBar = view.findViewById(gmutils.R.id.greenValueSeekBar)
+        greenValueEt = view.findViewById(gmutils.R.id.greenValueEt)
         setupSeekBarWithEditText(greenValueSeekBar, greenValueEt, 2)
 
-        blueValueSeekBar = view.findViewById(R.id.blueValueSeekBar)
-        blueValueEt = view.findViewById(R.id.blueValueEt)
+        blueValueSeekBar = view.findViewById(gmutils.R.id.blueValueSeekBar)
+        blueValueEt = view.findViewById(gmutils.R.id.blueValueEt)
         setupSeekBarWithEditText(blueValueSeekBar, blueValueEt, 3)
 
-        alphaValueSeekBar = view.findViewById(R.id.alphaValueSeekBar)
-        alphaValueEt = view.findViewById(R.id.alphaValueEt)
+        alphaValueSeekBar = view.findViewById(gmutils.R.id.alphaValueSeekBar)
+        alphaValueEt = view.findViewById(gmutils.R.id.alphaValueEt)
         setupSeekBarWithEditText(alphaValueSeekBar, alphaValueEt, 0)
 
-        hexValueEt = view.findViewById(R.id.hexValueEt)
-        colorPreviewCard = view.findViewById(R.id.colorPreviewCard)
+        hexValueEt = view.findViewById(gmutils.R.id.hexValueEt)
+        colorPreviewCard = view.findViewById(gmutils.R.id.colorPreviewCard)
         colorPreviewCard.setCardBackgroundColor(Color.parseColor("#39AFAEAE"))
         colorPreviewCard.cardElevation = 0f
         colorPreviewCard.radius =
-            view.context.resources.getDimensionPixelSize(R.dimen.size_10).toFloat()
+            view.context.resources.getDimensionPixelSize(gmutils.R.dimen.size_10).toFloat()
         setupResultedHexValue()
 
-        val colorPreviewCardContainer = view.findViewById<CardView>(R.id.colorPreviewCardContainer)
+        val colorPreviewCardContainer = view.findViewById<CardView>(gmutils.R.id.colorPreviewCardContainer)
         colorPreviewCardContainer.setCardBackgroundColor(
             /*ContextCompat.getColor(
                 view.context,
@@ -97,12 +97,12 @@ class ColorPicker @JvmOverloads constructor(
         )
         colorPreviewCardContainer.cardElevation = 0f
         colorPreviewCardContainer.radius =
-            view.context.resources.getDimensionPixelSize(R.dimen.size_10).toFloat()
+            view.context.resources.getDimensionPixelSize(gmutils.R.dimen.size_10).toFloat()
 
-        colorsRv = view.findViewById(R.id.colorsRv)
+        colorsRv = view.findViewById(gmutils.R.id.colorsRv)
         setupColorsRecyclerView()
 
-        recentColorsRv = view.findViewById(R.id.recentColorsRv)
+        recentColorsRv = view.findViewById(gmutils.R.id.recentColorsRv)
         setupRecentColorsRecyclerView()
 
     }
@@ -254,20 +254,20 @@ class ColorPicker @JvmOverloads constructor(
             viewType: Int,
             inflater: LayoutInflater,
             container: ViewGroup?
-        ) = VH(R.layout.adapter_colors, inflater, container)
+        ) = VH(gmutils.R.layout.adapter_colors, inflater, container)
 
         inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
             ViewHolder(resId, inflater, container) {
 
-            val card1 = findViewById<CardView>(R.id.card1)
+            val card1 = findViewById<CardView>(gmutils.R.id.card1)
 
             init {
                 itemView.setOnClickListener(null)
                 card1.setOnClickListener(this)
 
                 val elevation =
-                    card1.context.resources.getDimensionPixelSize(R.dimen.size_1).toFloat()
-                val radius = card1.context.resources.getDimensionPixelSize(R.dimen.size_5).toFloat()
+                    card1.context.resources.getDimensionPixelSize(gmutils.R.dimen.size_1).toFloat()
+                val radius = card1.context.resources.getDimensionPixelSize(gmutils.R.dimen.size_5).toFloat()
 
                 listOf<CardView>(card1/*, card2, card3*/).forEach {
                     it.cardElevation = elevation
@@ -349,12 +349,12 @@ class ColorPicker @JvmOverloads constructor(
             viewType: Int,
             inflater: LayoutInflater,
             container: ViewGroup?
-        ) = VH(R.layout.adapter_single_color, inflater, container)
+        ) = VH(gmutils.R.layout.adapter_single_color, inflater, container)
 
         inner class VH(resId: Int, inflater: LayoutInflater, container: ViewGroup?) :
             ViewHolder(resId, inflater, container) {
 
-            val card = findViewById<CardView>(R.id.card)
+            val card = findViewById<CardView>(gmutils.R.id.card)
 
             init {
                 itemView.setOnClickListener(null)
@@ -362,8 +362,8 @@ class ColorPicker @JvmOverloads constructor(
                 card.setOnLongClickListener(this)
 
                 card.cardElevation =
-                    card.context.resources.getDimensionPixelSize(R.dimen.size_1).toFloat()
-                card.radius = card.context.resources.getDimensionPixelSize(R.dimen.size_5).toFloat()
+                    card.context.resources.getDimensionPixelSize(gmutils.R.dimen.size_1).toFloat()
+                card.radius = card.context.resources.getDimensionPixelSize(gmutils.R.dimen.size_5).toFloat()
 
             }
 
@@ -407,7 +407,7 @@ class ColorPicker @JvmOverloads constructor(
 
             onRemove = { adapter, view, position ->
                 val popupMenu = PopupMenu(view.context, view, Gravity.BOTTOM)
-                popupMenu.menu.add(R.string.remove).setOnMenuItemClickListener {
+                popupMenu.menu.add(gmutils.R.string.remove).setOnMenuItemClickListener {
                     adapter.removeAt(position, true)
                     updateSavedRecentColors()
                     true

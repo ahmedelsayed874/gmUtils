@@ -38,12 +38,12 @@ public class RetryPromptDialog {
     RetryPromptDialog(Context context, CharSequence msg, Listener onRetry, Listener onCancel) {
         dialog = new MessageDialog(context);
         dialog.setMessage(msg);
-        dialog.setButton1(R.string.retry, d -> {
+        dialog.setButton1(gmutils.R.string.retry, d -> {
             if (onRetry != null) onRetry.invoke(this);
             dialog.dismiss();
         });
 
-        dialog.setButton2(R.string.cancel, d -> {
+        dialog.setButton2(gmutils.R.string.cancel, d -> {
             if (onCancel != null) onCancel.invoke(this);
             dialog.dismiss();
         });

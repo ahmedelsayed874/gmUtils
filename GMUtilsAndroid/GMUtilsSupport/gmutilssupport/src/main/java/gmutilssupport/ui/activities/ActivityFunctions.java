@@ -18,12 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.viewbinding.ViewBinding;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import gmutils.BackgroundTask;
 import gmutils.KeypadOp;
-import gmutils.Logger;
+import gmutils.backgroundWorkers.BackgroundTask;
+import gmutils.logger.Logger;
 import gmutils.listeners.ResultCallback;
 import gmutils.storage.SettingsStorage;
 import gmutils.ui.toast.MyToast;
@@ -158,13 +159,6 @@ public class ActivityFunctions implements BaseFragmentListener {
         //-----------------------------------------------------------------------------------
 
         public void onCreateOptionsMenu(Menu menu) {
-            if (Logger.IS_WRITE_TO_FILE_ENABLED()) {
-                if (showBugsMenuItemId == 0) {
-                    showBugsMenuItemId = "Show Log".hashCode();
-                    if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
-                }
-                menu.add(0, showBugsMenuItemId, 10, "Show Log");
-            }
         }
 
         public boolean onOptionsItemSelected(Activity activity, MenuItem item) {
@@ -173,33 +167,6 @@ public class ActivityFunctions implements BaseFragmentListener {
                     activity.onBackPressed();
                 } catch (Exception e) {
                 }
-
-                return true;
-            }
-
-            if (item.getItemId() == showBugsMenuItemId) {
-                if (activity instanceof BaseActivity) {
-                    ((BaseActivity) activity).showWaitView();
-                }
-                BackgroundTask.run(() -> Logger.readAllFilesContents(activity), (ResultCallback<String>) txt -> {
-                    if (activity instanceof BaseActivity) {
-                        ((BaseActivity) activity).hideWaitView();
-                    }
-                    MessageDialog.create(activity)
-                            .setMessage(txt)
-                            .setMessageGravity(Gravity.START)
-                            .setButton1(R.string.copy, (d) -> {
-                                if (Utils.createInstance().copyText(activity, txt)) {
-                                    gmutils.ui.toast.MyToast.showError(activity, "copied");
-                                } else {
-                                    MyToast.showError(activity, "failed");
-                                }
-                            })
-                            .setButton2(R.string.delete, (d) -> {
-                                Logger.deleteSavedFiles(activity);
-                            })
-                            .show();
-                });
 
                 return true;
             }
@@ -266,7 +233,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     @Override
     public void showWaitView(Context context, int msg) {
         if (waitDialogCount == 0) {
-            if (msg == 0) msg = R.string.wait_moments;
+            if (msg == 0) msg = gmutils.R.string.wait_moments;
             waitDialog = WaitDialog.show(context, msg);
         }
 
@@ -336,7 +303,7 @@ public class ActivityFunctions implements BaseFragmentListener {
         MessageDialog dialog = MessageDialog.create(context);
 
         if (options != null && options.title != null) dialog.setTitle(options.title);
-        else dialog.setTitle(R.string.message);
+        else dialog.setTitle(gmutils.R.string.message);
 
         dialog.setMessage(msg);
 
@@ -352,7 +319,7 @@ public class ActivityFunctions implements BaseFragmentListener {
             }
 
         } else {
-            dialog.setButton1(R.string.ok, null);
+            dialog.setButton1(gmutils.R.string.ok, null);
         }
 
         dialog.show();

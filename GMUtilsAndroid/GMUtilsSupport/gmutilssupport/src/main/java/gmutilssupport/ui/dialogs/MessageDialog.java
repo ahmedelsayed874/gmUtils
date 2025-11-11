@@ -40,7 +40,7 @@ public class MessageDialog extends BaseDialog {
     @NonNull
     @Override
     public View createView(LayoutInflater layoutInflater) {
-        return layoutInflater.inflate(R.layout.dialog_message_gm4s, null);
+        return layoutInflater.inflate(gmutils.R.layout.dialog_message_gm4s, null);
     }
 
     private MessageDialogFunctions functions;
@@ -227,7 +227,7 @@ public class MessageDialog extends BaseDialog {
      * @param minWidth: -1 = MatchParent
      */
     public MessageDialog setMinimumWidth(int minWidth) {
-        View lyContainer = getView().findViewById(R.id.lyContainer);
+        View lyContainer = getView().findViewById(gmutils.R.id.lyContainer);
 
         if (minWidth < 0) {
             ViewGroup.LayoutParams layoutParams = lyContainer.getLayoutParams();

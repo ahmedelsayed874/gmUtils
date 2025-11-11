@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutilsSupport.R;
 import gmutilssupport.ui.dialogs.MessageDialog;
 import gmutilssupport.ui.dialogs.RetryPromptDialog;
@@ -210,12 +210,12 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
 
     public void showFragment(Fragment fragment, boolean addToBackStack) {
-        showFragment(fragment, addToBackStack, null, R.id.layout_fragment_container);
+        showFragment(fragment, addToBackStack, null, gmutils.R.id.layout_fragment_container);
     }
 
     @Override
     public void showFragment(Fragment fragment, String stackName) {
-        showFragment(fragment, true, stackName, R.id.layout_fragment_container);
+        showFragment(fragment, true, stackName, gmutils.R.id.layout_fragment_container);
     }
 
     @Override
@@ -260,7 +260,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
                         currentFragment = fragmentManager.getFragments().get(0);
                         currentFragment.setArguments(fragment.getArguments());
                     } catch (Exception e) {
-                        Logger.print(e);
+                        Logger.d().print(e);
                     }
                 }
             } else {

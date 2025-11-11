@@ -108,7 +108,7 @@ public abstract class BaseLegacyFragment extends Fragment {
     private int waitViewShowCount = 0;
 
     public void showWaitView() {
-        showWaitView(R.string.wait_moments);
+        showWaitView(gmutils.R.string.wait_moments);
     }
 
     public void showWaitView(int msg) {
@@ -128,7 +128,7 @@ public abstract class BaseLegacyFragment extends Fragment {
     }
 
     public void onWaitViewWillShow() {
-        onWaitViewWillShow(R.string.wait_moments);
+        onWaitViewWillShow(gmutils.R.string.wait_moments);
     }
 
     public void onWaitViewWillShow(int msg) {

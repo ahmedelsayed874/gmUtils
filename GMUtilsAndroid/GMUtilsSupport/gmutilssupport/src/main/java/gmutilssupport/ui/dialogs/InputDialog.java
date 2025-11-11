@@ -47,19 +47,19 @@ public class InputDialog extends BaseDialog {
     @NonNull
     @Override
     protected View createView(LayoutInflater layoutInflater) {
-        return layoutInflater.inflate(R.layout.dialog_input_gm4s, null);
+        return layoutInflater.inflate(gmutils.R.layout.dialog_input_gm4s, null);
     }
 
     public InputDialog(Context context) {
         super(context);
 
         View view = getView();
-        lyContainer = view.findViewById(R.id.lyContainer);
-        tvTitle = view.findViewById(R.id.tv_title);
-        tvMsg = view.findViewById(R.id.tv_msg);
-        tvInput = view.findViewById(R.id.tv_input);
-        tvPositiveBtn = view.findViewById(R.id.tv_done);
-        tvCancelBtn = view.findViewById(R.id.tv_cancel);
+        lyContainer = view.findViewById(gmutils.R.id.lyContainer);
+        tvTitle = view.findViewById(gmutils.R.id.tv_title);
+        tvMsg = view.findViewById(gmutils.R.id.tv_msg);
+        tvInput = view.findViewById(gmutils.R.id.inputEt);
+        tvPositiveBtn = view.findViewById(gmutils.R.id.tv_done);
+        tvCancelBtn = view.findViewById(gmutils.R.id.tv_cancel);
 
         tvPositiveBtn.setOnClickListener(v -> {
             if (positiveButtonCallback != null)
@@ -226,7 +226,7 @@ public class InputDialog extends BaseDialog {
      * @param minWidth: -1 = MatchParent
      */
     public InputDialog setMinimumWidth(int minWidth) {
-        View lyContainer = getView().findViewById(R.id.lyContainer);
+        View lyContainer = getView().findViewById(gmutils.R.id.lyContainer);
 
         if (minWidth < 0) {
             ViewGroup.LayoutParams layoutParams = lyContainer.getLayoutParams();

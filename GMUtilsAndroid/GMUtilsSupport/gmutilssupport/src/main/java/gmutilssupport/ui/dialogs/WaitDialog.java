@@ -25,7 +25,7 @@ import gmutilsSupport.R;
 public class WaitDialog extends BaseDialog {
 
     public static WaitDialog show(Context context) {
-        return show(context, R.string.wait_moments);
+        return show(context, gmutils.R.string.wait_moments);
     }
 
     public static WaitDialog show(Context context, @StringRes int msg) {
@@ -44,12 +44,12 @@ public class WaitDialog extends BaseDialog {
     @NonNull
     @Override
     protected View createView(LayoutInflater layoutInflater) {
-        return layoutInflater.inflate(R.layout.dialog_wait, null);
+        return layoutInflater.inflate(gmutils.R.layout.dialog_wait_hor, null);
     }
 
     public WaitDialog(Context context) {
         super(context);
-        textView = getView().findViewById(R.id.tv_msg);
+        textView = getView().findViewById(gmutils.R.id.tv_msg);
     }
 
     @Override

@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 
-import gmutils.Logger;
+import gmutils.logger.Logger;
 import gmutils.storage.SettingsStorage;
 import gmutils.ui.toast.MyToast;
 import gmutilsSupport.R;
@@ -329,7 +329,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @SuppressLint("WrongConstant")
     @Override
     public void showFragment(Fragment fragment, ShowFragmentOptions options) {
-        int fragmentContainerId = R.id.layout_fragment_container;
+        int fragmentContainerId = gmutils.R.id.layout_fragment_container;
         if (options != null && options.getFragmentContainerId() != null) {
             fragmentContainerId = options.getFragmentContainerId();
         }
@@ -376,7 +376,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                         currentFragment = fragmentManager.getFragments().get(0);
                         currentFragment.setArguments(fragment.getArguments());
                     } catch (Exception e) {
-                        Logger.print(e);
+                        Logger.d().print(e);
                     }
                 }
             } else {
@@ -457,10 +457,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     protected void onMessageReceivedFromViewModel(BaseViewModel.Message message) {
-        String msg = "";
+        CharSequence msg = "";
         if (message.messageIds != null && !message.messageIds.isEmpty()) {
             for (Integer messageId : message.messageIds) {
-                if (!msg.isEmpty()) msg += message.getMultiMessageIdsSeparator();
+                if (msg.length() > 0) msg += message.getMultiMessageIdsSeparator();
                 msg += message.getMultiMessageIdsPrefix() + " " + getString(messageId);
             }
         } else if (message.messageString != null) {

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-import gmutils.CountryPhoneCodes;
+import gmutils.geography.CountryPhoneCodes;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.SearchTextChangeListener;
 import gmutilsSupport.R;
@@ -53,7 +53,7 @@ public class CountryCodeDialog extends BaseDialog {
         View view = getView();
         countryPhoneCodes = CountryPhoneCodes.getInstance();
 
-        RecyclerView recyclerCountryCodes = view.findViewById(R.id.recycler_country_code);
+        RecyclerView recyclerCountryCodes = view.findViewById(gmutils.R.id.recycler_country_code);
         recyclerCountryCodes.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
 
         CountryCodesAdapter adapter = new CountryCodesAdapter(recyclerCountryCodes, hideDialCode);
@@ -63,7 +63,7 @@ public class CountryCodeDialog extends BaseDialog {
             dismiss();
         });
 
-        EditText txtSearch = view.findViewById(R.id.text_search);
+        EditText txtSearch = view.findViewById(gmutils.R.id.text_search);
         ResultCallback<ArrayList<CountryPhoneCodes.CountryCode>> callback = result -> {
             adapter.clear(false);
             adapter.add(result, true);
@@ -76,7 +76,7 @@ public class CountryCodeDialog extends BaseDialog {
     @NotNull
     @Override
     protected View createView(LayoutInflater layoutInflater) {
-        return layoutInflater.inflate(R.layout.dialog_country_code, null);
+        return layoutInflater.inflate(gmutils.R.layout.dialog_country_code, null);
     }
 
     @Override
@@ -87,12 +87,12 @@ public class CountryCodeDialog extends BaseDialog {
     //----------------------------------------------------------------------------------------------
 
     public void setListBackground(int color) {
-        RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
+        RecyclerView recyclerCountryCodes = getView().findViewById(gmutils.R.id.recycler_country_code);
         recyclerCountryCodes.setBackgroundColor(color);
     }
 
     public void setListBackgroundRes(@DrawableRes int resid) {
-        RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
+        RecyclerView recyclerCountryCodes = getView().findViewById(gmutils.R.id.recycler_country_code);
         recyclerCountryCodes.setBackgroundResource(resid);
     }
 
@@ -101,9 +101,9 @@ public class CountryCodeDialog extends BaseDialog {
     @Override
     protected BaseDialog reinitialize(Context context) {
         CountryCodeDialog dialog = new CountryCodeDialog(context, this.hideDialCode, this.mListener);
-        RecyclerView recyclerCountryCodes = getView().findViewById(R.id.recycler_country_code);
+        RecyclerView recyclerCountryCodes = getView().findViewById(gmutils.R.id.recycler_country_code);
         if (recyclerCountryCodes != null) {
-            RecyclerView recyclerCountryCodes2 = dialog.getView().findViewById(R.id.recycler_country_code);
+            RecyclerView recyclerCountryCodes2 = dialog.getView().findViewById(gmutils.R.id.recycler_country_code);
             recyclerCountryCodes2.setBackground(recyclerCountryCodes.getBackground());
         }
         return dialog;
@@ -122,7 +122,7 @@ public class CountryCodeDialog extends BaseDialog {
         @NotNull
         @Override
         protected ViewHolder getViewHolder(int viewType, @NotNull LayoutInflater inflater, ViewGroup container) {
-            return new CViewHolder(R.layout.adapter_country_codes, inflater, container);
+            return new CViewHolder(gmutils.R.layout.adapter_country_codes, inflater, container);
         }
 
         @Override
@@ -135,8 +135,8 @@ public class CountryCodeDialog extends BaseDialog {
             public CViewHolder(int resId, @NotNull LayoutInflater inflater, ViewGroup container) {
                 super(resId, inflater, container);
 
-                txtCode = findViewById(R.id.text_code);
-                txtName = findViewById(R.id.text_name);
+                txtCode = findViewById(gmutils.R.id.text_code);
+                txtName = findViewById(gmutils.R.id.text_name);
             }
 
             @Override

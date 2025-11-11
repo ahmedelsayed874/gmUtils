@@ -51,26 +51,26 @@ public class ListDialog extends BaseDialog {
     @NonNull
     @Override
     protected View createView(LayoutInflater layoutInflater) {
-        return layoutInflater.inflate(R.layout.dialog_list_gm4s, null);
+        return layoutInflater.inflate(gmutils.R.layout.dialog_list_gm4s, null);
     }
 
     public ListDialog(Context context, Listener listener) {
         super(context);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            setBackground(context.getColor(R.color.gmDialogBackground));
+            setBackground(context.getColor(gmutils.R.color.gmDialogBackground));
         } else {
-            setBackground(context.getResources().getColor(R.color.gmDialogBackground));
+            setBackground(context.getResources().getColor(gmutils.R.color.gmDialogBackground));
         }
 
         View view = getView();
-        tvTitle = view.findViewById(R.id.text_title);
-        tvHint = view.findViewById(R.id.text_hint);
-        View ivClose = view.findViewById(R.id.image_close);
-        final EditText etSearchToken = view.findViewById(R.id.text_search_token);
-        lvList = view.findViewById(R.id.list);
-        tvNoResult = view.findViewById(R.id.text_no_result);
-        tvAddValue = view.findViewById(R.id.text_add_value);
+        tvTitle = view.findViewById(gmutils.R.id.text_title);
+        tvHint = view.findViewById(gmutils.R.id.text_hint);
+        View ivClose = view.findViewById(gmutils.R.id.image_close);
+        final EditText etSearchToken = view.findViewById(gmutils.R.id.text_search_token);
+        lvList = view.findViewById(gmutils.R.id.list);
+        tvNoResult = view.findViewById(gmutils.R.id.text_no_result);
+        tvAddValue = view.findViewById(gmutils.R.id.text_add_value);
 
         mListener = listener;
 

@@ -42,7 +42,7 @@ public class MyToast {
 
     public static Boolean DEFAULT_STYLE = true;
 
-    public static Integer BACKGROUND_RES = R.color.gmPrimary; //android.R.color.black;
+    public static Integer BACKGROUND_RES = gmutils.R.color.gmPrimary; //android.R.color.black;
     public static Integer TEXT_COLOR_RES = Color.WHITE;
 
     public static Integer ERROR_BACKGROUND_RES = android.R.color.holo_red_dark;
