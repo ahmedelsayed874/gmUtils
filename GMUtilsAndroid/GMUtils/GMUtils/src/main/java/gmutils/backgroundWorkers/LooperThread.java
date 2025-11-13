@@ -9,7 +9,9 @@ import android.text.TextUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import gmutils.listeners.ValueGetter;
 
@@ -126,6 +128,23 @@ public class LooperThread extends Thread {
         handler = null;
         onMessageHandled = null;
         totalMessageCountGetter = null;
+    }
+
+    public boolean isRunning() {
+        if (handler != null) {
+            return !unHandledMessages.isEmpty() || handledMsgCount < totalMsgCount;
+        }
+
+        return false;
+    }
+
+    public Map<String, Object> report() {
+        Map<String, Object> m = new HashMap<>();
+        m.put("unhandledMessages", unHandledMessages);
+        m.put("totalMessagesCount", totalMsgCount);
+        m.put("handledMessagesCount", handledMsgCount);
+        m.put("isRunning", isRunning());
+        return m;
     }
 
     public static class MyHandler extends Handler {
