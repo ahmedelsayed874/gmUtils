@@ -89,7 +89,7 @@ class _ToolbarState extends State<Toolbar> {
     notificationsDataSource.cancelObserveCount('toolbar-$hashCode');
     App.removeObserver(
       category: toolbarProfileObserverCategory,
-      name: 'toolbar-$hashCode',
+      observerName: 'toolbar-$hashCode',
     );
     super.dispose();
   }

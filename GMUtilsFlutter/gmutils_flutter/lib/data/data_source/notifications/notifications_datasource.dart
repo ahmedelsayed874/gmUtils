@@ -94,7 +94,7 @@ abstract class NotificationsDataSource {
   void cancelObserveCount(String observerName) {
     Logs.print(() =>
         'NotificationsDataSource.cancelObserveCount(observerName: $observerName)');
-    App.removeObserver(category: "notifications", name: observerName);
+    App.removeObserver(category: "notifications", observerName: observerName);
   }
 
   //-------------------------------------------------------------
