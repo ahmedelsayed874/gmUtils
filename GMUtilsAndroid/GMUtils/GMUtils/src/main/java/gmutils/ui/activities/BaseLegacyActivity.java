@@ -334,7 +334,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
         getActivityFunctions().startActivityForResult(
                 this,
                 intent,
-                (int) System.currentTimeMillis(),
+                Math.abs((int) System.currentTimeMillis()),
                 callback,
                 null
         );

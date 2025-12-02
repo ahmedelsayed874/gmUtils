@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -536,7 +538,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         getActivityFunctions().startActivityForResult(
                 this,
                 intent,
-                (int) System.currentTimeMillis(),
+                Math.abs((int) System.currentTimeMillis()),
                 callback,
                 null
         );
