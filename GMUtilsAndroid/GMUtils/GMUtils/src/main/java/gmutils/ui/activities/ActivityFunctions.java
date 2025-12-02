@@ -329,7 +329,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     public boolean updateWaitViewMsg(CharSequence msg) {
         try {
             if (waitDialog != null) {
-                waitDialog.textView().setText(msg);
+                waitDialog.getTextView(tv -> tv.setText(msg));
                 return true;
             }
         } catch (Exception e) {
@@ -375,9 +375,16 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     private Map<Integer, ResultCallback<Intent>> activityResultCallback;
 
-    public void startActivityForResult(Activity activity, @NonNull Intent intent, int requestCode, ResultCallback<Intent> callback, Bundle options) {
+    public void startActivityForResult(
+            Activity activity,
+            @NonNull Intent intent,
+            int requestCode,
+            ResultCallback<Intent> callback,
+            Bundle options
+    ) {
         if (activityResultCallback == null) activityResultCallback = new HashMap<>();
         activityResultCallback.put(requestCode, callback);
+
         activity.startActivityForResult(intent, requestCode, options);
     }
 

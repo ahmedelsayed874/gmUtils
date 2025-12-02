@@ -438,9 +438,15 @@ public class BaseViewModel extends AndroidViewModel {
         class Retry implements MessageType {
             private int iconRes;
             private Runnable _onRetry;
+            private Runnable onDismiss;
 
             public Retry(Runnable onRetry) {
                 this._onRetry = onRetry;
+            }
+
+            public Retry(Runnable onRetry, Runnable onDismiss) {
+                this._onRetry = onRetry;
+                this.onDismiss = onDismiss;
             }
 
             //-----------------------------------------------------------
@@ -456,12 +462,21 @@ public class BaseViewModel extends AndroidViewModel {
 
             //-----------------------------------------------------------
 
+            public final Runnable onDismiss() {
+                return onDismiss;
+            }
+
+            //-----------------------------------------------------------
+
             public final Runnable onRetry() {
                 return _onRetry;
             }
 
+            //-----------------------------------------------------------
+
             public void destroy() {
                 this._onRetry = null;
+                this.onDismiss = null;
             }
 
             @Override
@@ -558,8 +573,18 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
+    public void postRetryMessage(CharSequence message, Runnable onRetry, Runnable onDismiss) {
+        Message m = new Message(message, new MessageType.Retry(onRetry, onDismiss));
+        postMessage(m);
+    }
+
     public void postRetryMessage(StringSet message, Runnable onRetry) {
         Message m = new Message(message, new MessageType.Retry(onRetry));
+        postMessage(m);
+    }
+
+    public void postRetryMessage(StringSet message, Runnable onRetry, Runnable onDismiss) {
+        Message m = new Message(message, new MessageType.Retry(onRetry, onDismiss));
         postMessage(m);
     }
 

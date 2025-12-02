@@ -113,6 +113,7 @@ public class BaseViewModelObserversHandlers {
         else if (message.type instanceof
                 BaseViewModel.MessageType.Retry mt) {
             Runnable onRetry = mt.onRetry();
+            Runnable onDismiss = mt.onDismiss();
             mt.destroy();
 
             RetryPromptDialog dialog = showRetryPromptDialog.invoke(msg, () -> {
@@ -121,6 +122,10 @@ public class BaseViewModelObserversHandlers {
 
             if (mt.getIconRes() > 0) {
                 dialog.dialog.setIcon(mt.getIconRes());
+            }
+
+            if (onDismiss != null) {
+                dialog.dialog.setOnDismissListener(d -> onDismiss.run());
             }
         }
     }
