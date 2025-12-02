@@ -20,6 +20,7 @@ import java.util.List;
 import gmutils.Animations;
 import gmutils.KeypadOp;
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 import gmutils.listeners.SearchTextChangeListener;
 import gmutils.ui.adapters.BaseListAdapter;
 
@@ -50,6 +51,8 @@ public class ListDialog<T> extends BaseDialog {
     private Listener<T> mListener;
     private Listener2 mListener2;
     private SearchDelegate<T> mSearchDelegate;
+
+    private boolean dismissOnSelection = true;
 
     @NonNull
     @Override
@@ -129,9 +132,11 @@ public class ListDialog<T> extends BaseDialog {
 
     private AdapterView.OnItemClickListener getOnListItemClickListener() {
         return (adapterView, view, i, l) -> {
-            if (mListener != null)
+            if (mListener != null) {
                 mListener.onItemSelected((T) adapterView.getItemAtPosition(i), i);
-            dismiss();
+            }
+
+            if (dismissOnSelection) dismiss();
         };
     }
 
@@ -147,16 +152,20 @@ public class ListDialog<T> extends BaseDialog {
             lvList.setAdapter(adapter);
             lvList.setOnItemClickListener(getOnListItemClickListener());
 
-        } else {
+        }
+        //
+        else {
             if (isNewList) {
                 mCustomAdapter.replaceList(list);
             }
 
             lvList.setAdapter(mCustomAdapter);
             mCustomAdapter.setOnItemClickListener((adapter, item, position) -> {
-                if (mListener != null)
+                if (mListener != null) {
                     mListener.onItemSelected(item, position);
-                dismiss();
+                }
+
+                if (dismissOnSelection) dismiss();
             });
         }
 
@@ -182,6 +191,11 @@ public class ListDialog<T> extends BaseDialog {
         return this;
     }
 
+    public ListDialog<T> getTitleTextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvTitle);
+        return this;
+    }
+
     public ListDialog<T> setHint(@StringRes int hint) {
         tvHint.setText(hint);
         tvHint.setVisibility(View.VISIBLE);
@@ -191,6 +205,11 @@ public class ListDialog<T> extends BaseDialog {
     public ListDialog<T> setHint(CharSequence hint) {
         tvHint.setText(hint);
         tvHint.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public ListDialog<T> getHintTextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvHint);
         return this;
     }
 
@@ -236,6 +255,11 @@ public class ListDialog<T> extends BaseDialog {
         return this;
     }
 
+    public ListDialog<T> setDismissOnSelection(boolean dismissOnSelection) {
+        this.dismissOnSelection = dismissOnSelection;
+        return this;
+    }
+
     public ListDialog<T> show() {
         setListAdapter(mList, false);
         super.show();
@@ -261,13 +285,11 @@ public class ListDialog<T> extends BaseDialog {
         return dialog;
     }
 
-
     //----------------------------------------------------------------------------------------------
 
     public TextView getAddValueButton() {
         return tvAddValue;
     }
-
 
     //----------------------------------------------------------------------------------------------
 

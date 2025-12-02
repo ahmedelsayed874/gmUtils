@@ -89,54 +89,6 @@ public class MessageDialogFunctions {
 
     }
 
-    public MessageDialogFunctions setTitleColorRes(int resid) {
-        tvTitle.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
-        return this;
-    }
-
-    public MessageDialogFunctions setTextColorRes(int resid) {
-        tvMsg.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
-        return this;
-    }
-
-    public MessageDialogFunctions setButton1ColorRes(int resid) {
-        tvButton1.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
-        return this;
-    }
-
-    public MessageDialogFunctions setButton2ColorRes(int resid) {
-        tvButton2.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
-        return this;
-    }
-
-    public MessageDialogFunctions setButton3ColorRes(int resid) {
-        tvButton3.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
-        return this;
-    }
-
-    public MessageDialogFunctions setBackground(int resId) {
-        lyContainer.setBackgroundResource(resId);
-        return this;
-    }
-
-    public MessageDialogFunctions setBackgroundColor(int color) {
-        lyContainer.setBackgroundColor(color);
-        return this;
-    }
-
-
-    public MessageDialogFunctions setIcon(int imageRes) {
-        iconIv.setImageResource(imageRes);
-        iconIv.setVisibility(View.VISIBLE);
-        return this;
-    }
-
-    public MessageDialogFunctions setIcon(Uri image) {
-        iconIv.setImageURI(image);
-        iconIv.setVisibility(View.VISIBLE);
-        return this;
-    }
-
 
     public MessageDialogFunctions setTextColor(int color) {
         tvTitle.setTextColor(color);
@@ -152,6 +104,31 @@ public class MessageDialogFunctions {
         return this;
     }
 
+    public MessageDialogFunctions setTextColorRes(int resid) {
+        tvMsg.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    //-----------------------------------------------------------------
+
+    public MessageDialogFunctions setIcon(int imageRes) {
+        iconIv.setImageResource(imageRes);
+        iconIv.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public MessageDialogFunctions setIcon(Uri image) {
+        iconIv.setImageURI(image);
+        iconIv.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public MessageDialogFunctions getIconImageView(ResultCallback<ImageView> callback) {
+        callback.invoke(iconIv);
+        return this;
+    }
+
+    //-----------------------------------------------------------------
 
     public MessageDialogFunctions setTitle(int txt) {
         tvTitle.setText(txt);
@@ -165,6 +142,17 @@ public class MessageDialogFunctions {
         return this;
     }
 
+    public MessageDialogFunctions setTitleColorRes(int resid) {
+        tvTitle.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions getTitleTextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvTitle);
+        return this;
+    }
+
+    //-----------------------------------------------------------------
 
     public MessageDialogFunctions setMessage(int msg) {
         tvMsg.setText(msg);
@@ -194,6 +182,112 @@ public class MessageDialogFunctions {
         return this;
     }
 
+    public MessageDialogFunctions getMessageTextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvMsg);
+        return this;
+    }
+
+    //-----------------------------------------------------------------
+
+    public MessageDialogFunctions setButton1(int textId) {
+        if (textId != 0) {
+            return setButton1(tvButton1.getResources().getString(textId));
+        }
+        return this;
+    }
+
+    public MessageDialogFunctions setButton1(CharSequence text) {
+        if (!TextUtils.isEmpty(text)) {
+            tvButton1.setText(text);
+            tvButton1.setVisibility(View.VISIBLE);
+        } else {
+            tvButton1.setVisibility(View.GONE);
+        }
+
+        return this;
+    }
+
+    public MessageDialogFunctions setButton1ColorRes(int resid) {
+        tvButton1.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions getButton1TextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvButton1);
+        return this;
+    }
+
+    //-----------------------------------------------------------------
+
+    public MessageDialogFunctions setButton2(int textId) {
+        if (textId != 0) {
+            return setButton2(tvButton2.getResources().getString(textId));
+        }
+        return this;
+    }
+
+    public MessageDialogFunctions setButton2(CharSequence text) {
+        if (!TextUtils.isEmpty(text)) {
+            tvButton2.setText(text);
+            tvButton2.setVisibility(View.VISIBLE);
+        } else {
+            tvButton2.setVisibility(View.GONE);
+        }
+
+        return this;
+    }
+
+    public MessageDialogFunctions setButton2ColorRes(int resid) {
+        tvButton2.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions getButton2TextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvButton2);
+        return this;
+    }
+
+    //-----------------------------------------------------------------
+
+    public MessageDialogFunctions setButton3(int textId) {
+        if (textId != 0) {
+            return setButton3(tvButton3.getResources().getString(textId));
+        }
+        return this;
+    }
+
+    public MessageDialogFunctions setButton3(CharSequence text) {
+        if (!TextUtils.isEmpty(text)) {
+            tvButton3.setText(text);
+            tvButton3.setVisibility(View.VISIBLE);
+        } else {
+            tvButton3.setVisibility(View.GONE);
+        }
+
+        return this;
+    }
+
+    public MessageDialogFunctions setButton3ColorRes(int resid) {
+        tvButton3.setTextColor(ContextCompat.getColor(tvTitle.getContext(), resid));
+        return this;
+    }
+
+    public MessageDialogFunctions getButton3TextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvButton3);
+        return this;
+    }
+
+    //-----------------------------------------------------------------
+
+    public MessageDialogFunctions setBackground(int resId) {
+        lyContainer.setBackgroundResource(resId);
+        return this;
+    }
+
+    public MessageDialogFunctions setBackgroundColor(int color) {
+        lyContainer.setBackgroundColor(color);
+        return this;
+    }
 
     //----------------------------------------------------------------------------------------------
 
@@ -303,59 +397,13 @@ public class MessageDialogFunctions {
         return this;
     }
 
-    //----------------------------------------------------------------------------------------------
-
-    public MessageDialogFunctions setButton1(int textId) {
-        if (textId != 0) {
-            return setButton1(tvButton1.getResources().getString(textId));
-        }
+    public MessageDialogFunctions getDontShowAgainCheckBox(ResultCallback<CheckBox> callback) {
+        callback.invoke(chkDontShowAgain);
         return this;
     }
 
-    public MessageDialogFunctions setButton1(CharSequence text) {
-        if (!TextUtils.isEmpty(text)) {
-            tvButton1.setText(text);
-            tvButton1.setVisibility(View.VISIBLE);
-        } else {
-            tvButton1.setVisibility(View.GONE);
-        }
-
-        return this;
-    }
-
-    public MessageDialogFunctions setButton2(int textId) {
-        if (textId != 0) {
-            return setButton2(tvButton2.getResources().getString(textId));
-        }
-        return this;
-    }
-
-    public MessageDialogFunctions setButton2(CharSequence text) {
-        if (!TextUtils.isEmpty(text)) {
-            tvButton2.setText(text);
-            tvButton2.setVisibility(View.VISIBLE);
-        } else {
-            tvButton2.setVisibility(View.GONE);
-        }
-
-        return this;
-    }
-
-    public MessageDialogFunctions setButton3(int textId) {
-        if (textId != 0) {
-            return setButton3(tvButton3.getResources().getString(textId));
-        }
-        return this;
-    }
-
-    public MessageDialogFunctions setButton3(CharSequence text) {
-        if (!TextUtils.isEmpty(text)) {
-            tvButton3.setText(text);
-            tvButton3.setVisibility(View.VISIBLE);
-        } else {
-            tvButton3.setVisibility(View.GONE);
-        }
-
+    public MessageDialogFunctions getDontShowAgainTextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvDontShowAgain);
         return this;
     }
 

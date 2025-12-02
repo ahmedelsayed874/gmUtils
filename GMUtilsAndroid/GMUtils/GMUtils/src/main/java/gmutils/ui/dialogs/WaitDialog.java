@@ -13,6 +13,7 @@ import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -29,15 +30,15 @@ import gmutils.R;
 public class WaitDialog extends BaseDialog {
 
     public static WaitDialog show(Context context) {
-        return show(context, true);
+        return show(context, false);
     }
 
     public static WaitDialog show(Context context, @StringRes int msg) {
-        return show(context, msg, true);
+        return show(context, msg, false);
     }
 
     public static WaitDialog show(Context context, CharSequence msg) {
-        return show(context, msg, true);
+        return show(context, msg, false);
     }
 
     public static WaitDialog show(Context context, boolean useHorizontalLayout) {
@@ -88,16 +89,19 @@ public class WaitDialog extends BaseDialog {
         getDialog().setCanceledOnTouchOutside(false);
     }
 
-    public TextView textView() {
-        return textView;
+    public WaitDialog getContainer(ResultCallback<LinearLayout> callback) {
+        callback.invoke(container);
+        return this;
     }
 
-    public ProgressBar progressBar() {
-        return progressBar;
+    public WaitDialog getProgressBar(ResultCallback<ProgressBar> callback) {
+        callback.invoke(progressBar);
+        return this;
     }
 
-    public LinearLayout container() {
-        return container;
+    public WaitDialog getTextView(ResultCallback<TextView> callback) {
+        callback.invoke(textView);
+        return this;
     }
 
     @Override

@@ -52,7 +52,6 @@ public class InputDialog extends BaseDialog {
     private ActionCallback<String[], CharSequence[]> positiveButtonCallback;
     private Runnable cancelButtonCallback;
 
-
     @NonNull
     @Override
     protected View createView(LayoutInflater layoutInflater) {
@@ -134,6 +133,11 @@ public class InputDialog extends BaseDialog {
         return this;
     }
 
+    public InputDialog getTitleTextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvTitle);
+        return this;
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public InputDialog setMessage(int msg) {
@@ -165,6 +169,11 @@ public class InputDialog extends BaseDialog {
     public InputDialog setMessageBold() {
         Typeface typeface = tvMsg.getTypeface();
         Typeface.create(typeface, Typeface.BOLD);
+        return this;
+    }
+
+    public InputDialog getMessageTextView(ResultCallback<TextView> callback) {
+        callback.invoke(tvMsg);
         return this;
     }
 
@@ -251,6 +260,11 @@ public class InputDialog extends BaseDialog {
         return this;
     }
 
+    public InputDialog getPositiveButton(ResultCallback<TextView> callback) {
+        callback.invoke(tvPositiveBtn);
+        return this;
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public InputDialog setCancelButtonText(int textId) {
@@ -275,6 +289,11 @@ public class InputDialog extends BaseDialog {
 
     public InputDialog setCancelButtonCallback(Runnable callback) {
         this.cancelButtonCallback = callback;
+        return this;
+    }
+
+    public InputDialog getCancelButton(ResultCallback<TextView> callback) {
+        callback.invoke(tvCancelBtn);
         return this;
     }
 

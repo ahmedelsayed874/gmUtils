@@ -29,9 +29,9 @@ import gmutils.ui.adapters.BaseRecyclerAdapterViewHolder;
  * Computer Engineer / 2012
  * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
  * Have precedent experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -92,6 +92,21 @@ public class CountryCodeDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
+    public CountryCodeDialog getSearchEditText(ResultCallback<EditText> callback) {
+        callback.invoke(getView().findViewById(R.id.text_search));
+        return this;
+    }
+
+    public CountryCodeDialog getAdapter(ResultCallback<CountryCodesAdapter> callback) {
+        callback.invoke(adapter);
+        return this;
+    }
+
+    public CountryCodeDialog getCountryPhoneCodes(ResultCallback<CountryPhoneCodes> callback) {
+        callback.invoke(countryPhoneCodes);
+        return this;
+    }
+
     @Override
     public CountryCodeDialog setTitleColorRes(int resid) {
         return this;
@@ -150,6 +165,7 @@ public class CountryCodeDialog extends BaseDialog {
         }
 
         private int customTextColor = 0;
+
         public void setTextColor(int resid) {
             customTextColor = resid;
         }

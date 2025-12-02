@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi;
 import org.json.JSONArray;
 
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 
 /**
@@ -78,6 +79,11 @@ public class MessageDialog extends BaseDialog {
                 dismiss();
             }
         });
+    }
+
+    public MessageDialog getMessageDialogFunctions(ResultCallback<MessageDialogFunctions> callback) {
+        callback.invoke(functions);
+        return this;
     }
 
     @Override
