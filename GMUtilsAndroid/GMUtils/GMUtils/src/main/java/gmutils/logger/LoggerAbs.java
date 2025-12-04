@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +53,7 @@ import gmutils.utils.ZipFileUtils;
  * +201022663988
  */
 public abstract class LoggerAbs {
-    public enum ExportedFileType { Csv, Json, Text }
+    public enum ExportedFileType {Csv, Json, Text}
 
     public static class LogConfigs {
         private DateOp logDeadline;
@@ -227,137 +228,134 @@ public abstract class LoggerAbs {
 
         private Long writeTime = null;
 
-        public void write(String title, String content) {
+        public void write(String title, String content) throws IOException {
             write(title, content, true, true);
         }
 
-        public void write(String title, String content, boolean addDate, boolean addSeparation) {
-            try {
-                OutputStream os = new FileOutputStream(file, true);
-                OutputStreamWriter sw = new OutputStreamWriter(os);
+        public void write(String title, String content, boolean addDate, boolean addSeparation) throws IOException /*, FileNotFoundException*/ {
+            OutputStream os = new FileOutputStream(file, true);
+            OutputStreamWriter sw = new OutputStreamWriter(os);
 
-                if (enableEncryption) {
-                    try {
-                        int encryptionKey2 = encryptionKey != null ? encryptionKey : LoggerAbs.DEF_ENC_KEY;
-                        content = Security.getSimpleInstance(encryptionKey2).encrypt(content);
-                    } catch (Exception ignore) {}
-                }
-
-                title = title == null ? "" : title;
-
+            if (enableEncryption) {
                 try {
-                    if (exportedFileType == ExportedFileType.Csv) {
-                        if (addDate && writeTime == null) {
-                            writeTime = System.currentTimeMillis();
-                            sw.write("\"" + new Date() + "\"\n");
-                            sw.write("Time,ElapsedTime,Title,Content\n");
-                        }
+                    int encryptionKey2 = encryptionKey != null ? encryptionKey : LoggerAbs.DEF_ENC_KEY;
+                    content = Security.getSimpleInstance(encryptionKey2).encrypt(content);
+                } catch (Exception ignore) {
+                }
+            }
 
-                        if (addDate) {
-                            long now = System.currentTimeMillis();
-                            long diff = now - writeTime;
-                            writeTime = now;
-                            int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+            title = title == null ? "" : title;
 
-                            //time
-                            sw.write("\"" +
-                                    timeComponent[1] + ":" +        //hours
-                                    timeComponent[2] + ":" +    //minutes
-                                    timeComponent[3] + "." +    //seconds
-                                    timeComponent[4] +          //milliseconds
-                                    "\","
-                            );
+            try {
+                if (exportedFileType == ExportedFileType.Csv) {
+                    if (addDate && writeTime == null) {
+                        writeTime = System.currentTimeMillis();
+                        sw.write("\"" + new Date() + "\"\n");
+                        sw.write("Time,ElapsedTime,Title,Content\n");
+                    }
 
-                            //elapsedTime
-                            sw.write("\"" + diff + "\",");
-                        }
+                    if (addDate) {
+                        long now = System.currentTimeMillis();
+                        long diff = now - writeTime;
+                        writeTime = now;
+                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
 
-                        //Title
-                        sw.write("\"" + title + "\",");
+                        //time
+                        sw.write("\"" +
+                                timeComponent[1] + ":" +        //hours
+                                timeComponent[2] + ":" +    //minutes
+                                timeComponent[3] + "." +    //seconds
+                                timeComponent[4] +          //milliseconds
+                                "\","
+                        );
 
-                        //Content
-                        sw.write("\"" + content + "\"");
+                        //elapsedTime
+                        sw.write("\"" + diff + "\",");
+                    }
 
+                    //Title
+                    sw.write("\"" + title + "\",");
+
+                    //Content
+                    sw.write("\"" + content + "\"");
+
+                    sw.write("\n");
+                }
+                //
+                else if (exportedFileType == ExportedFileType.Json) {
+                    if (addDate && writeTime == null) {
+                        writeTime = System.currentTimeMillis();
+                        sw.write("[ \"Time\", \"ElapsedTime\", \"Title\", \"Content\" ],\n");
+                        sw.write("[\"" + new Date() + "\"],\n");
+                    }
+
+                    sw.write("[");
+
+                    if (addDate) {
+                        long now = System.currentTimeMillis();
+                        long diff = now - writeTime;
+                        writeTime = now;
+                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+
+                        //time
+                        sw.write("\"" +
+                                timeComponent[1] + ":" +        //hours
+                                timeComponent[2] + ":" +    //minutes
+                                timeComponent[3] + "." +    //seconds
+                                timeComponent[4] +          //milliseconds
+                                "\","
+                        );
+
+                        //elapsedTime
+                        sw.write("\"" + diff + "\",");
+                    }
+
+                    //Title
+                    sw.write("\"" + title + "\",");
+
+                    //Content
+                    sw.write("\"" + content + "\"");
+
+                    sw.write("],\n");
+                }
+                //
+                else {
+                    String text = "";
+                    if (!TextUtils.isEmpty(title)) text += ">> " + title + "\n";
+                    if (content != null) text += ">> " + content;
+
+                    if (addDate && writeTime == null) {
+                        writeTime = System.currentTimeMillis();
+                        sw.write("::: " + new Date() + " :::\n");
+                    }
+
+                    if (addDate) {
+                        long now = System.currentTimeMillis();
+                        long diff = now - writeTime;
+                        writeTime = now;
+                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+                        sw.write(
+                                timeComponent[1] + ":" +        //hours
+                                        timeComponent[2] + ":" +    //minutes
+                                        timeComponent[3] + "." +    //seconds
+                                        timeComponent[4] +          //milliseconds
+                                        " [+" + diff + "]"
+                        );
+                    }
+
+                    sw.write(":-\n");
+                    sw.write(text);
+
+                    if (addSeparation) {
+                        sw.write("\n\n*-----*-----*-----*-----*\n\n");
+                    } else {
                         sw.write("\n");
                     }
-                    //
-                    else if (exportedFileType == ExportedFileType.Json) {
-                        if (addDate && writeTime == null) {
-                            writeTime = System.currentTimeMillis();
-                            sw.write("[ \"Time\", \"ElapsedTime\", \"Title\", \"Content\" ],\n");
-                            sw.write("[\"" + new Date() + "\"],\n");
-                        }
-
-                        sw.write("[");
-
-                        if (addDate) {
-                            long now = System.currentTimeMillis();
-                            long diff = now - writeTime;
-                            writeTime = now;
-                            int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
-
-                            //time
-                            sw.write("\"" +
-                                    timeComponent[1] + ":" +        //hours
-                                    timeComponent[2] + ":" +    //minutes
-                                    timeComponent[3] + "." +    //seconds
-                                    timeComponent[4] +          //milliseconds
-                                    "\","
-                            );
-
-                            //elapsedTime
-                            sw.write("\"" + diff + "\",");
-                        }
-
-                        //Title
-                        sw.write("\"" + title + "\",");
-
-                        //Content
-                        sw.write("\"" + content + "\"");
-
-                        sw.write("],\n");
-                    }
-                    //
-                    else {
-                        String text = "";
-                        if (!TextUtils.isEmpty(title)) text += ">> " + title + "\n";
-                        if (content != null) text += ">> " + content;
-
-                        if (addDate && writeTime == null) {
-                            writeTime = System.currentTimeMillis();
-                            sw.write("::: " + new Date() + " :::\n");
-                        }
-
-                        if (addDate) {
-                            long now = System.currentTimeMillis();
-                            long diff = now - writeTime;
-                            writeTime = now;
-                            int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
-                            sw.write(
-                                    timeComponent[1] + ":" +        //hours
-                                            timeComponent[2] + ":" +    //minutes
-                                            timeComponent[3] + "." +    //seconds
-                                            timeComponent[4] +          //milliseconds
-                                            " [+" + diff + "]"
-                            );
-                        }
-
-                        sw.write(":-\n");
-                        sw.write(text);
-
-                        if (addSeparation) {
-                            sw.write("\n\n*-----*-----*-----*-----*\n\n");
-                        } else {
-                            sw.write("\n");
-                        }
-                    }
-                } finally {
-                    sw.flush();
-                    sw.close();
-                    os.close();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } finally {
+                sw.flush();
+                sw.close();
+                os.close();
             }
         }
 
@@ -732,7 +730,12 @@ public abstract class LoggerAbs {
                 String title2 = null;
                 if (title != null) title2 = title.getTitle();
 
-                writer.write(title2, text.getContent().toString());
+                try {
+                    writer.write(title2, text.getContent().toString());
+                } catch (IOException e) {
+                    logFileWriter = null;
+                    new Thread(() -> writeToFileSync(context, title, text)).start();
+                }
             }
         }
     }
