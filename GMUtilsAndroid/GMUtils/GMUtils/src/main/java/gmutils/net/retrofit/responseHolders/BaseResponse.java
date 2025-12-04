@@ -270,6 +270,7 @@ public abstract class BaseResponse implements IResponse {
 
         _requestTime = otherResponse._requestTime;
         _responseTime = otherResponse._responseTime;
+        _rawResponse = otherResponse._rawResponse;
     }
 
     //----------------------------------------------------------------------------------------------
