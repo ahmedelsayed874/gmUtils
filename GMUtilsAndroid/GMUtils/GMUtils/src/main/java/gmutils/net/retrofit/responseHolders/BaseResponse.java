@@ -111,7 +111,7 @@ public abstract class BaseResponse implements IResponse {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public int getStatusCode() {
+    public Integer getStatusCode() {
         return _code;
     }
 
@@ -140,7 +140,7 @@ public abstract class BaseResponse implements IResponse {
     }
 
     @Override
-    public long getRequestTime() {
+    public Long getRequestTime() {
         return _requestTime;
     }
 
@@ -152,7 +152,7 @@ public abstract class BaseResponse implements IResponse {
     }
 
     @Override
-    public long getResponseTime() {
+    public Long getResponseTime() {
         return _responseTime;
     }
 
@@ -221,7 +221,7 @@ public abstract class BaseResponse implements IResponse {
     }
 
     @Override
-    public boolean isErrorDueException() {
+    public Boolean isErrorDueException() {
         return _isErrorDueException;
     }
 
@@ -233,7 +233,7 @@ public abstract class BaseResponse implements IResponse {
     }
 
     @Override
-    public boolean isSSLCertificateRequired() {
+    public Boolean isSSLCertificateRequired() {
         return _isSSLCertificateRequired;
     }
 

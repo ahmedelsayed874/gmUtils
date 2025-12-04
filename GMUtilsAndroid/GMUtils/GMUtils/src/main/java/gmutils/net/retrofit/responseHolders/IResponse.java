@@ -19,7 +19,7 @@ public interface IResponse {
     public enum Status {Succeeded, Error, ConnectionFailed}
 
     void setStatusCode(int code);
-    int getStatusCode();
+    Integer getStatusCode();
 
     //-----------------------------
 
@@ -29,12 +29,12 @@ public interface IResponse {
     //-----------------------------
 
     void setRequestTime(long time);
-    long getRequestTime();
+    Long getRequestTime();
 
     //-----------------------------
 
     void setResponseTime(long time);
-    long getResponseTime();
+    Long getResponseTime();
 
     //-----------------------------
 
@@ -59,11 +59,11 @@ public interface IResponse {
     //-----------------------------
 
     void setIsErrorDueException(boolean dueException);
-    boolean isErrorDueException();
+    Boolean isErrorDueException();
 
     //-----------------------------
 
     void setIsSSLCertificateRequired(boolean required);
-    boolean isSSLCertificateRequired();
+    Boolean isSSLCertificateRequired();
 
 }
