@@ -52,8 +52,25 @@ public class JsonReader {
                 keys.add(i);
             }
             return keys;
-        } else {
-            return null;
+        }
+        //
+        else {
+            throw new IllegalStateException();
+        }
+    }
+
+    public boolean hasKey(Object key) {
+        if (json instanceof JSONObject) {
+            return ((JSONObject) json).has("" + key);
+        }
+        //
+        else if (json instanceof JSONArray) {
+            var x = ((JSONArray) json).length();
+            return key instanceof Integer && ((int) key) < x;
+        }
+        //
+        else {
+            throw new IllegalStateException();
         }
     }
 
@@ -82,7 +99,7 @@ public class JsonReader {
     //----------------------------------------------------
 
     public String getString(Object key) {
-        return getString(key, "");
+        return getString(key, null);
     }
 
     public String getString(Object key, String defaultValue) {
@@ -239,7 +256,6 @@ public class JsonReader {
         return value;
     }
 
-
     //----------------------------------------------------
 
     public JsonReader getJSONArray(Object key) {
@@ -311,4 +327,9 @@ public class JsonReader {
         return null;
     }
 
+    //----------------------------------------------------
+
+    public Object getJson() {
+        return json;
+    }
 }
