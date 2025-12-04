@@ -107,11 +107,6 @@ public class Callback2<DT, R extends BaseObjectResponse<DT>> implements retrofit
 
     //----------------------------------------------------------------------------------------------
 
-    public Callback2<DT, R> setKeepOnRawResponse(boolean keepOnRawResponse) {
-        this.callbackOperations.setKeepOnRawResponse(keepOnRawResponse);
-        return this;
-    }
-
     public Callback2<DT, R> setExtras(Map<String, Object> extras) {
         this.callbackOperations.setExtras(extras);
         return this;

@@ -56,11 +56,6 @@ public interface IResponse {
     void setError(String error);
     String getError();
 
-    //-----------------------------------------------------------------
-
-    void setRawResponse(String rawResponse);
-    String getRawResponse();
-
     //-----------------------------
 
     void setIsErrorDueException(boolean dueException);

@@ -108,14 +108,6 @@ public abstract class BaseResponse implements IResponse {
     @Ignore
     public Long _responseTime;
 
-    /**
-     * this value will set only when
-     * Callback..setKeepOnRawResponse(true)
-     */
-    @Expose(serialize = false, deserialize = false)
-    @Ignore
-    public String _rawResponse;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -224,18 +216,6 @@ public abstract class BaseResponse implements IResponse {
     //-----------------------------
 
     @Override
-    public String getRawResponse() {
-        return _rawResponse;
-    }
-
-    @Override
-    public void setRawResponse(String rawResponse) {
-        this._rawResponse = rawResponse;
-    }
-
-    //-----------------------------
-
-    @Override
     public void setIsErrorDueException(boolean dueException) {
         _isErrorDueException = dueException;
     }
@@ -270,7 +250,6 @@ public abstract class BaseResponse implements IResponse {
 
         _requestTime = otherResponse._requestTime;
         _responseTime = otherResponse._responseTime;
-        _rawResponse = otherResponse._rawResponse;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -307,7 +286,6 @@ public abstract class BaseResponse implements IResponse {
                 "responseTime=" + _responseTime + ",\n" +
                 "requestInterval=" + requestInterval() + ",\n" +
                 "header=" + header + "\n" +
-                (_rawResponse == null ? "" : "rawResponse=" + _rawResponse + "\n") +
                 '}';
     }
 }
