@@ -10,6 +10,7 @@ import java.util.Set;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.responseHolders.IResponse;
 import okhttp3.Request;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 
 /**
@@ -217,18 +218,24 @@ public final class CallbackOperations<R extends IResponse> {
     }
 
     public void onFailure(Call<R> call, Throwable t) {
+        R r = setError(
+                t.getClass().getName() + ":\n" + t.getMessage(),
+                true,
+                0,
+                null
+        );
+
         printCallInfo(
                 call,
                 null,
                 "Exception[" +
                         t.getClass().getName() + ":: " + t.getMessage() +
-                        "]"
+                        "]",
+                r
         );
-
-        setError( t.getClass().getName() + ":\n" + t.getMessage(), true, 0, null);
     }
 
-    private void setError(String error, boolean exception, int code, Map<String, List<String>> headers) {
+    private R setError(String error, boolean exception, int code, Map<String, List<String>> headers) {
         R response = null;
 
         try {
@@ -277,6 +284,8 @@ public final class CallbackOperations<R extends IResponse> {
         response.setHeaders(headers);
 
         setResult(response, headers);
+
+        return response;
     }
 
     private void setResult(R result, Map<String, List<String>> headers) {
@@ -305,6 +314,10 @@ public final class CallbackOperations<R extends IResponse> {
     //----------------------------------------------------------------------------------------------
 
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response, String errorBody) {
+        printCallInfo(call, response, errorBody, null);
+    }
+
+    private void printCallInfo(Call<R> call, retrofit2.Response<R> response, String errorBody, R responseOfFail) {
         if (this.logger == null || !this.logger.getLogConfigs().isLogEnabled()) return;
 
         String url = "";
@@ -347,6 +360,7 @@ public final class CallbackOperations<R extends IResponse> {
                     () -> "API:Response:",
                     () -> "url: <" + finalUrl1 + ">," +
                             "\nresponseType: " + responseType + ", " +
+                            "\nresponse: " + responseOfFail + ", " +
                             "\nerrorBody: " + errorBody +
                             "\nextras= " + finalExtrasString1
             );
