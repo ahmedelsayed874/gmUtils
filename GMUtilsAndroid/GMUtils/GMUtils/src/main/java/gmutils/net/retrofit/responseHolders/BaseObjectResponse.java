@@ -89,14 +89,14 @@ public abstract class BaseObjectResponse<T> extends BaseResponse {
     @Override
     public void copyFrom(@NonNull BaseResponse otherResponse) {
         super.copyFrom(otherResponse);
-            if (otherResponse instanceof BaseObjectResponse) {
-                try {
-                    Object data = ((BaseObjectResponse) otherResponse).getData();
-                    this.setData((T) data);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        if (otherResponse instanceof BaseObjectResponse) {
+            try {
+                Object data = ((BaseObjectResponse) otherResponse).getData();
+                this.setData((T) data);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }
     }
 
     public <To> void copyFrom(@NonNull BaseObjectResponse<To> otherResponse, ActionCallback<To, T> dataConverter) {
@@ -112,7 +112,7 @@ public abstract class BaseObjectResponse<T> extends BaseResponse {
 
     @Override
     public String toString() {
-        return "BaseObjectResponse{" + "\n" +
+        /*return "BaseObjectResponse{" + "\n" +
                 "data='" + getData() + '\'' + ",\n" +
                 "callbackStatus='" + getCallbackStatus() + '\'' + ",\n" +
                 "code=" + _code + ",\n" +
@@ -120,6 +120,11 @@ public abstract class BaseObjectResponse<T> extends BaseResponse {
                 "extras=" + _extras + ",\n" +
                 "requestTime=" + _requestTime + ",\n" +
                 "responseTime=" + _responseTime + "\n" +
+                '}';*/
+
+        return "BaseObjectResponse{" + "\n" +
+                super.toString() + ",\n" +
+                "data='" + getData() + '\'' + ",\n" +
                 '}';
     }
 }

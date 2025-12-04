@@ -40,12 +40,8 @@ public final class StringResponse extends BaseResponse {
     @Override
     public String toString() {
         return "StringResponse{" + "\n" +
-                "text='" + text + '\'' + ",\n" +
-                "code=" + _code + ",\n" +
-                "error='" + _error + '\'' + ",\n" +
-                "extras=" + _extras + ",\n" +
-                "requestTime=" + _requestTime + ",\n" +
-                "responseTime=" + _responseTime + "\n" +
+                super.toString() + ",\n" +
+                "text='" + text + '\'' + "\n" +
                 '}';
     }
 }

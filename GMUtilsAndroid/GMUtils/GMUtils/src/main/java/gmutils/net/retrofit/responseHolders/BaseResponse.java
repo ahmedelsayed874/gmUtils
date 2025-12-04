@@ -259,7 +259,9 @@ public abstract class BaseResponse implements IResponse {
         StringBuffer header = new StringBuffer();
         if (_headers == null) {
             header.append("NULL");
-        } else {
+        }
+        //
+        else {
             header.append("{");
             for (Map.Entry<String, List<String>> entry : _headers.entrySet()) {
                 header.append(entry.getKey()).append(": [");
