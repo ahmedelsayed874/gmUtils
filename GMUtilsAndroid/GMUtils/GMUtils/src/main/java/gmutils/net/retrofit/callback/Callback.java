@@ -104,6 +104,11 @@ public class Callback<R extends IResponse> implements retrofit2.Callback<R> {
 
     //----------------------------------------------------------------------------------------------
 
+    public Callback<R> setKeepOnRawResponse(boolean keepOnRawResponse) {
+        this.callbackOperations.setKeepOnRawResponse(keepOnRawResponse);
+        return this;
+    }
+
     public Callback<R> setExtras(Map<String, Object> extras) {
         this.callbackOperations.setExtras(extras);
         return this;

@@ -36,6 +36,7 @@ public final class CallbackOperations<R extends IResponse> {
     private final LoggerAbs logger;
 
     private final long requestTime;
+    private boolean keepOnRawResponse = false;
 
 
     public CallbackOperations(
@@ -167,6 +168,10 @@ public final class CallbackOperations<R extends IResponse> {
 
     //----------------------------------------------------------------------------------------------
 
+    public void setKeepOnRawResponse(boolean keepOnRawResponse) {
+        this.keepOnRawResponse = keepOnRawResponse;
+    }
+
     public void setExtras(Map<String, Object> extras) {
         this.extras = extras;
     }
@@ -196,6 +201,15 @@ public final class CallbackOperations<R extends IResponse> {
 
         if (response.isSuccessful()) {
             R body = response.body();
+
+            String rawResponse = null;
+            if (keepOnRawResponse) {
+                try {
+                    rawResponse = response.raw().body().string();
+                } catch (Exception e) {
+                }
+            }
+
             if (body != null) {
                 if (extras != null) {
                     body.setExtras(extras);
@@ -203,13 +217,16 @@ public final class CallbackOperations<R extends IResponse> {
 
                 body.setStatusCode(response.code());
 
-                setResult(body, headers);
-
-            } else {
-                setError("", false, response.code(), headers);
+                setResult(body, rawResponse, headers);
             }
-        } else {
-            setError(error, false, response.code(), headers);
+            //
+            else {
+                setError(rawResponse, "", false, response.code(), headers);
+            }
+        }
+        //
+        else {
+            setError(null, error, false, response.code(), headers);
         }
     }
 
@@ -222,10 +239,10 @@ public final class CallbackOperations<R extends IResponse> {
                         "]"
         );
 
-        setError(t.getClass().getName() + ":\n" + t.getMessage(), true, 0, null);
+        setError(null, t.getClass().getName() + ":\n" + t.getMessage(), true, 0, null);
     }
 
-    private void setError(String error, boolean exception, int code, Map<String, List<String>> headers) {
+    private void setError(String rawResponse, String error, boolean exception, int code, Map<String, List<String>> headers) {
         R response = null;
 
         try {
@@ -273,10 +290,10 @@ public final class CallbackOperations<R extends IResponse> {
         response.setStatusCode(code);
         response.setHeaders(headers);
 
-        setResult(response, headers);
+        setResult(response, rawResponse, headers);
     }
 
-    private void setResult(R result, Map<String, List<String>> headers) {
+    private void setResult(R result, String rawResponse, Map<String, List<String>> headers) {
         if (this.logger != null && this.logger.getLogConfigs().isLogEnabled()) {
             this.logger.print(
                     () -> "EXTRA_INFO:",
@@ -285,6 +302,7 @@ public final class CallbackOperations<R extends IResponse> {
             );
         }
 
+        result.setRawResponse(rawResponse);
         result.setHeaders(headers);
         result.setRequestTime(requestTime);
         result.setResponseTime(System.currentTimeMillis());
