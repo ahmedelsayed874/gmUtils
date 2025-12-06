@@ -161,7 +161,7 @@ class MainActivity : BaseActivity() {
 
         }
 
-        this.view.btn9.text = "time api"
+        /*this.view.btn9.text = "time api"
         this.view.btn9.setOnClickListener {
             val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
             log("api", "getting time from: $url")
@@ -197,7 +197,7 @@ class MainActivity : BaseActivity() {
                     log("api", "Exception: ${response.second.exception}")
                 }
             }.start()
-        }
+        }*/
 
         this.view.btn10.text = "LooperThread"
         var x = 1

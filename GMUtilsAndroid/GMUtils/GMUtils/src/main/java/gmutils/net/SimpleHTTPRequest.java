@@ -26,6 +26,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,6 +37,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 
+import gmutils.collections.ListWrapper;
+import gmutils.collections.MapWrapper;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.utils.FileUtils;
@@ -95,7 +99,7 @@ public class SimpleHTTPRequest {
         }
     }
 
-    public enum Method {GET, POST, PUT, DELETE}
+    public enum Method {GET, POST, PUT, PATCH, DELETE}
 
     public static class Request {
         private final long time;
@@ -105,31 +109,28 @@ public class SimpleHTTPRequest {
         private final Map<String, Object> postParameters;
         private final String postBody;
 
+        public Request(String url, Method method) {
+            this(url, method, null, null, null);
+        }
 
         public Request(String url, Method method, Map<String, String> headers) {
-            this.time = System.currentTimeMillis();
-            this.url = url;
-            this.method = method;
-            this.headers = headers;
-            this.postParameters = null;
-            this.postBody = null;
+            this(url, method, headers, null, null);
         }
 
         public Request(String url, Method method, Map<String, String> headers, Map<String, Object> postParameters) {
+            this(url, method, headers, postParameters, null);
+        }
+
+        public Request(String url, Method method, Map<String, String> headers, String postBody) {
+            this(url, method, headers, null, postBody);
+        }
+
+        private Request(String url, Method method, Map<String, String> headers, Map<String, Object> postParameters, String postBody) {
             this.time = System.currentTimeMillis();
             this.url = url;
             this.method = method;
             this.headers = headers;
             this.postParameters = postParameters;
-            this.postBody = null;
-        }
-
-        public Request(String url, Method method, Map<String, String> headers, String postBody) {
-            this.time = System.currentTimeMillis();
-            this.url = url;
-            this.method = method;
-            this.headers = headers;
-            this.postParameters = null;
             this.postBody = postBody;
         }
 
@@ -171,6 +172,7 @@ public class SimpleHTTPRequest {
 
     public static class Response {
         private int code;
+        private Map<String, String> headers;
         private final long time;
         private String error;
         private Exception exception;
@@ -182,6 +184,7 @@ public class SimpleHTTPRequest {
         protected Response(Response other) {
             this();
             this.code = other.code;
+            this.headers = other.headers;
             this.error = other.error;
             this.exception = other.exception;
         }
@@ -189,6 +192,10 @@ public class SimpleHTTPRequest {
         protected Response setCode(int code) {
             this.code = code;
             return this;
+        }
+
+        protected void setHeaders(Map<String, String> headers) {
+            this.headers = headers;
         }
 
         protected Response setError(String error) {
@@ -205,6 +212,10 @@ public class SimpleHTTPRequest {
 
         public int getCode() {
             return code;
+        }
+
+        public Map<String, String> getHeaders() {
+            return headers;
         }
 
         public long getTime() {
@@ -227,6 +238,7 @@ public class SimpleHTTPRequest {
         public String toString() {
             return "Response{" +
                     "code=" + code +
+                    "headers=" + MapWrapper.create(headers).toString() +
                     ", time=" + time +
                     ", error=" + error +
                     ", exception=" + exception +
@@ -297,7 +309,6 @@ public class SimpleHTTPRequest {
         private Configurations configurations;
         private boolean isDisposed = false;
 
-
         public RequestExecutor(Request request) {
             this(request, null);
         }
@@ -328,8 +339,9 @@ public class SimpleHTTPRequest {
         public Pair<Request, R> executeSynchronously() {
             AtomicReference<Pair<Request, R>> result = new AtomicReference<>();
 
+            Request req = getRequest();
             doRequest((response) -> {
-                result.set(new Pair<>(getRequest(), response));
+                result.set(new Pair<>(req, response));
             });
 
             return result.get();
@@ -337,10 +349,12 @@ public class SimpleHTTPRequest {
 
         public void executeAsynchronously(ResultCallback2<Request, R> callback) {
             new Thread(() -> {
+                Request req = getRequest();
+
                 doRequest((response) -> {
                     if (callback != null) {
                         new Handler(Looper.getMainLooper()).post(() -> {
-                            callback.invoke(getRequest(), response);
+                            callback.invoke(req, response);
                         });
                     }
                 });
@@ -443,7 +457,7 @@ public class SimpleHTTPRequest {
                 urlConnection.connect();
 
                 if (postDataBytes != null) {
-                    outputStream = new BufferedOutputStream( urlConnection.getOutputStream() );
+                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
                     outputStream.write(postDataBytes);
                 }
 
@@ -461,9 +475,19 @@ public class SimpleHTTPRequest {
 
                 response.setCode(urlConnection.getResponseCode());
 
+                Map<String, String> headers = MapWrapper.create(urlConnection.getHeaderFields())
+                        .map((key, valueList) -> {
+                            if (valueList == null || valueList.isEmpty()) return "";
+                            else if (valueList.size() == 1) return valueList.get(0);
+                            else return ListWrapper.create(valueList).toString();
+                        });
+                response.setHeaders(headers);
+
                 if (response.code == 200) {
                     inputStream = new BufferedInputStream(urlConnection.getInputStream());
-                } else {
+                }
+                //
+                else {
                     try (var errorStream = urlConnection.getErrorStream()) {
                         BufferedReader in = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8));
                         String err = "";
@@ -474,18 +498,24 @@ public class SimpleHTTPRequest {
                         } while (!TextUtils.isEmpty(ln));
 
                         response.setError(err);
-                    } catch (Exception e) {
+                    }
+                    //
+                    catch (Exception e) {
                         Log.e(SimpleHTTPRequest.class.getSimpleName(), e.getMessage());
                     }
                 }
 
                 resultCallback.invoke(response, inputStream);
 
-            } catch (Exception e) {
+            }
+            //
+            catch (Exception e) {
                 response.setException(e);
                 resultCallback.invoke(response, null);
 
-            } finally {
+            }
+            //
+            finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -737,94 +767,54 @@ public class SimpleHTTPRequest {
         }
     }
 
-
     //==============================================================================================
 
-
-    public static void get(String url, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, null)).executeAsynchronously(callback);
+    public static Pair<Request, TextResponse> call(
+            boolean async,
+            Request request,
+            Configurations configurations,
+            ResultCallback2<Request, TextResponse> callback
+    ) {
+        TextRequestExecutor e = new TextRequestExecutor(request, configurations);
+        if (async) e.executeAsynchronously(callback);
+        else return e.executeSynchronously();
+        return null;
     }
 
-    public static void get(String url, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, null), configurations).executeAsynchronously(callback);
+    //----------------------------------------------------------------------------------------------
+
+    public static Pair<Request, FileResponse> downloadFile(
+            boolean async,
+            String url,
+            Map<String, String> headers,
+            @NotNull File destFile,
+            Configurations configurations,
+            ResultCallback2<Request, FileResponse> callback
+    ) {
+        FileDownloadRequestExecutor e = new FileDownloadRequestExecutor(url, headers, destFile, configurations);
+        if (async) e.executeAsynchronously(callback);
+        else return e.executeSynchronously();
+        return null;
     }
 
-    public static void get(String url, Map<String, String> headers, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.GET, headers), configurations).executeAsynchronously(callback);
-    }
+    //----------------------------------------------------------------------------------------------
 
+    public static Pair<Request, TextResponse> uploadFile(
+            boolean async,
+            String url,
+            Map<String, String> headers,
+            String fieldName,
+            File uploadingFile,
+            @Nullable String mimeType,
+            Configurations configurations,
+            ResultCallback2<Request, Integer> progressCallback,
+            ResultCallback2<Request, TextResponse> callback
+    ) {
+        FileUploadRequestExecutor e = new FileUploadRequestExecutor(url, headers, fieldName, uploadingFile, mimeType, configurations, progressCallback);
 
-    public static void post(String url, Map<String, Object> parameters, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, parameters)).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, parameters), configurations).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, Map<String, String> headers, Map<String, Object> parameters, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, headers, parameters), configurations).executeAsynchronously(callback);
-    }
-
-
-    public static void post(String url, String body, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, body)).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, null, body), configurations).executeAsynchronously(callback);
-    }
-
-    public static void post(String url, Map<String, String> headers, String body, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(new Request(url, Method.POST, headers, body), configurations).executeAsynchronously(callback);
-    }
-
-
-    public static void downloadFile(String url, @NotNull File destFile, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, null, destFile).executeAsynchronously(callback);
-    }
-
-    public static void downloadFile(String url, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, null, destFile, configurations).executeAsynchronously(callback);
-    }
-
-    public static void downloadFile(String url, Map<String, String> headers, @NotNull File destFile, Configurations configurations, @NotNull ResultCallback2<Request, FileResponse> callback) {
-        new FileDownloadRequestExecutor(url, headers, destFile, configurations).executeAsynchronously(callback);
-    }
-
-
-    public static void uploadFile(String url, String fieldName, File uploadingFile, @Nullable String mimeType, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, null, fieldName, uploadingFile, mimeType, null, progressCallback, callback);
-    }
-
-    public static void uploadFile(String url, String fieldName, File uploadingFile, @Nullable String mimeType, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, null, fieldName, uploadingFile, mimeType, configurations, progressCallback, callback);
-    }
-
-    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, @Nullable String mimeType, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        uploadFile(url, headers, fieldName, uploadingFile, mimeType, null, progressCallback, callback);
-    }
-
-    public static void uploadFile(String url, Map<String, String> headers, String fieldName, File uploadingFile, @Nullable String mimeType, Configurations configurations, ResultCallback2<Request, Integer> progressCallback, ResultCallback2<Request, TextResponse> callback) {
-        new FileUploadRequestExecutor(url, headers, fieldName, uploadingFile, mimeType, configurations, progressCallback)
-                .executeAsynchronously(callback);
-    }
-
-
-    public static void createAsynchronously(@NotNull Request request, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        createAsynchronously(request, null, callback);
-    }
-
-    public static void createAsynchronously(@NotNull Request request, Configurations configurations, @NotNull ResultCallback2<Request, TextResponse> callback) {
-        new TextRequestExecutor(request, configurations).executeAsynchronously(callback);
-    }
-
-    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request) {
-        return createSynchronously(request, null);
-    }
-
-    public static Pair<Request, TextResponse> createSynchronously(@NotNull Request request, Configurations configurations) {
-        return new TextRequestExecutor(request, configurations).executeSynchronously();
+        if (async) e.executeAsynchronously(callback);
+        else return e.executeSynchronously();
+        return null;
     }
 
 }

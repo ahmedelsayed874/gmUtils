@@ -570,10 +570,14 @@ public class FCM implements FCMFunctions {
     @NotNull
     public ActionCallback2<HttpRequest, ResultCallback<SendFcmCallbackArgs>, Void> httpExecuteDelegate
             = (request, callback) -> {
-        SimpleHTTPRequest.post(
-                request.url,
-                request.headers,
-                request.body,
+        SimpleHTTPRequest.call(
+                true,
+                new SimpleHTTPRequest.Request(
+                        request.url,
+                        SimpleHTTPRequest.Method.POST,
+                        request.headers,
+                        request.body
+                ),
                 null,
                 (request2, response) -> {
                     //success response: { "name":"projects/{project_id}/messages/{message_id}" }

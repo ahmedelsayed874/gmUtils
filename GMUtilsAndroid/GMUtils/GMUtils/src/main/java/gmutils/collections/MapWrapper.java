@@ -1,5 +1,7 @@
 package gmutils.collections;
 
+import androidx.annotation.NonNull;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -228,5 +230,18 @@ public class MapWrapper<K, V> {
 
     public Map<K, V> getMap() {
         return map;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (K k : map.keySet()) {
+            if (sb.length() > 1) sb.append(", ");
+            sb.append(k).append(":").append(map.get(k));
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }

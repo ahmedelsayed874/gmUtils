@@ -1,6 +1,8 @@
 package gmutils.collections;
 
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -252,5 +254,19 @@ public class ListWrapper<T> {
 
     public List<T> getList() {
         return list;
+    }
+
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (T t : list) {
+            if (sb.length() > 1) sb.append(", ");
+            sb.append(t);
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

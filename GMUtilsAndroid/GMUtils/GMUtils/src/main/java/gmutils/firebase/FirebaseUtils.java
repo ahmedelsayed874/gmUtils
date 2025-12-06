@@ -69,10 +69,18 @@ public class FirebaseUtils {
             _lastConnectionCheckTime = now;
             if (diff < 15000 && _lastConnectionCheckResult) callback.invoke(true);
 
-            SimpleHTTPRequest.get("https://www.google.com", (result1, result2) -> {
-                callback.invoke(result2.getException() == null);
-                _lastConnectionCheckResult = true;
-            });
+            SimpleHTTPRequest.call(
+                    true,
+                    new SimpleHTTPRequest.Request(
+                            "https://www.google.com",
+                            SimpleHTTPRequest.Method.GET
+                    ),
+                    null,
+                    (result1, result2) -> {
+                        callback.invoke(result2.getException() == null);
+                        _lastConnectionCheckResult = true;
+                    }
+            );
 
         } catch (Exception e) {
             _lastConnectionCheckResult = false;
