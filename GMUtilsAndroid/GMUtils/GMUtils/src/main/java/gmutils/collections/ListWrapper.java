@@ -264,7 +264,7 @@ public class ListWrapper<T> {
         sb.append("[");
         for (T t : list) {
             if (sb.length() > 1) sb.append(", ");
-            sb.append(t);
+            sb.append("\"").append(t).append("\"");
         }
         sb.append("]");
         return sb.toString();

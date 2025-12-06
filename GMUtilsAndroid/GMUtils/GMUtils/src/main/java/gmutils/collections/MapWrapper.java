@@ -239,7 +239,7 @@ public class MapWrapper<K, V> {
         sb.append("{");
         for (K k : map.keySet()) {
             if (sb.length() > 1) sb.append(", ");
-            sb.append(k).append(":").append(map.get(k));
+            sb.append("\"").append(k).append("\":\"").append(map.get(k)).append("\"");
         }
         sb.append("}");
         return sb.toString();

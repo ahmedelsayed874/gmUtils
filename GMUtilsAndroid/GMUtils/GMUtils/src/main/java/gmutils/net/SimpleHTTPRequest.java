@@ -164,8 +164,10 @@ public class SimpleHTTPRequest {
             return "Request{" +
                     "\nurl='" + url + '\'' +
                     "\n, method=" + method +
+                    "\n, headers=" + MapWrapper.create(headers).toString() +
                     "\n, postParameters=" + postParameters +
                     "\n, postBody='" + postBody + '\'' +
+                    "\n, time='" + time + '\'' +
                     "\n}";
         }
     }
@@ -237,12 +239,12 @@ public class SimpleHTTPRequest {
         @Override
         public String toString() {
             return "Response{" +
-                    "code=" + code +
-                    "headers=" + MapWrapper.create(headers).toString() +
-                    ", time=" + time +
-                    ", error=" + error +
-                    ", exception=" + exception +
-                    '}';
+                    "\ncode=" + code +
+                    "\nheaders=" + MapWrapper.create(headers).toString() +
+                    ",\nerror=" + error +
+                    ",\nexception=" + exception +
+                    ",\ntime=" + time +
+                    "\n}";
         }
     }
 
@@ -268,9 +270,10 @@ public class SimpleHTTPRequest {
         @Override
         public String toString() {
             return "TextResponse{" +
-                    "text='" + text + "', " +
+                    "\ntext='" + text +
+                    "', \n" +
                     super.toString() +
-                    '}';
+                    "\n}";
         }
     }
 
@@ -296,9 +299,10 @@ public class SimpleHTTPRequest {
         @Override
         public String toString() {
             return "FileResponse{" +
-                    "file=" + file + ", " +
+                    "\nfile=" + file +
+                    ", \n" +
                     super.toString() +
-                    '}';
+                    "\n}";
         }
     }
 
