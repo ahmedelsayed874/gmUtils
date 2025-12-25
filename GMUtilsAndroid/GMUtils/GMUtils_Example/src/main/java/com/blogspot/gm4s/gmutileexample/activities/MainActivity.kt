@@ -32,6 +32,7 @@ import gmutils.net.volley.example.URLs.TimeURLs
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.InputDialog
 import gmutils.ui.dialogs.ListDialog
+import gmutils.ui.dialogs.MessageDialog
 import gmutils.ui.toast.MyToast
 import gmutils.ui.utils.ViewSource
 import gmutils.utils.FileUtils
@@ -161,13 +162,17 @@ class MainActivity : BaseActivity() {
 
         }
 
-        /*this.view.btn9.text = "time api"
+        this.view.btn9.text = "time api"
         this.view.btn9.setOnClickListener {
             val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
             log("api", "getting time from: $url")
 
             //execute using static methods
-            SimpleHTTPRequest.get(url) { request, response ->
+            SimpleHTTPRequest.call(
+                true,
+                SimpleHTTPRequest.Request(url, SimpleHTTPRequest.Method.GET),
+                null
+            ) { request, response ->
                 log("api", response.code.toString())
                 log("api", response.text)
                 log("api", "Exception: ${response.exception}")
@@ -184,12 +189,15 @@ class MainActivity : BaseActivity() {
 
             //execute synchronously
             Thread {
-                val response = SimpleHTTPRequest.createSynchronously(
+                val response = SimpleHTTPRequest.call(
+                    false,
                     SimpleHTTPRequest.Request(
                         url,
                         SimpleHTTPRequest.Method.GET,
                         null
-                    )
+                    ),
+                    null,
+                    null
                 )
                 runOnUiThread {
                     log("api", response.second.code.toString())
@@ -197,7 +205,7 @@ class MainActivity : BaseActivity() {
                     log("api", "Exception: ${response.second.exception}")
                 }
             }.start()
-        }*/
+        }
 
         this.view.btn10.text = "LooperThread"
         var x = 1
@@ -315,14 +323,18 @@ class MainActivity : BaseActivity() {
             Logger.instance("l1").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
             Logger.instance("l2").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
             Logger.instance("l3").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.printToAll() {"test"}
+            Logger.printToAll() { "test" }
 
             error("throw bug to test writing to all logs file")
         }
 
         this.view.btn26.text = "Open File"
         this.view.btn26.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
@@ -363,7 +375,7 @@ class MainActivity : BaseActivity() {
                 logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Text)
 
-                for (x in 0 .. 30) {
+                for (x in 0..30) {
                     //writeToFile(this@MainActivity, {
                     print({
                         "Title #$x"
@@ -381,7 +393,7 @@ class MainActivity : BaseActivity() {
                 logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Csv)
 
-                for (x in 0 .. 30) {
+                for (x in 0..30) {
                     //writeToFile(this@MainActivity, {
                     print({
                         "Title #$x"
@@ -399,7 +411,7 @@ class MainActivity : BaseActivity() {
                 logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Json)
 
-                for (x in 0 .. 30) {
+                for (x in 0..30) {
                     //writeToFile(this@MainActivity, {
                     print({
                         "Title #$x"
@@ -408,6 +420,103 @@ class MainActivity : BaseActivity() {
                     }
                 }
             }
+        }
+
+        var methodCache = ""
+        var urlCache = ""
+        var headersCache = ""
+        var bodyCache = ""
+        this.view.btn30.text = "Call API"
+        this.view.btn30.setOnClickListener {
+            InputDialog.create(this)
+                .setTitle("Call API")
+                //
+                .setInputTitle("Method")
+                .setInputText(methodCache)
+                .addInputField {
+                    it.setTitle("URL")
+                    it.setText(urlCache)
+                }
+                .addInputField {
+                    it.setTitle("Headers")
+                    it.setHint("KEY1:VALUE1,KEY2:VALUE2")
+                    it.setText(headersCache)
+                    it.inputEditText.maxLines = 5
+                }
+                .addInputField {
+                    it.setTitle("Body")
+                    it.setText(bodyCache)
+                    it.inputEditText.maxLines = 5
+                }
+                //.setMinimumWidth(windowManager.currentWindowMetrics.windowInsets.frame.width)
+                .setMinimumWidth(resources.getDimensionPixelSize(R.dimen.size_400))
+                .setPositiveButtonCallback { inputs ->
+                    val errors = arrayOf("", "", "", "")
+
+                    val method = when (inputs[0].trim().uppercase()) {
+                        SimpleHTTPRequest.Method.GET.name -> SimpleHTTPRequest.Method.GET
+                        SimpleHTTPRequest.Method.POST.name -> SimpleHTTPRequest.Method.POST
+                        SimpleHTTPRequest.Method.PUT.name -> SimpleHTTPRequest.Method.PUT
+                        SimpleHTTPRequest.Method.PATCH.name -> SimpleHTTPRequest.Method.PATCH
+                        SimpleHTTPRequest.Method.DELETE.name -> SimpleHTTPRequest.Method.DELETE
+                        else -> null
+                    }
+                    methodCache = method?.toString() ?: ""
+                    if (method == null) {
+                        errors[0] = ("Method name is wrong")
+                    }
+
+                    val url = inputs[1].trim().lowercase()
+                    urlCache = url
+                    if (url.isEmpty()) {
+                        errors[1] = ("Url is empty")
+                    }
+                    //
+                    else if (
+                        !url.startsWith("http://", true) &&
+                        !url.startsWith("https://", true)
+                    ) {
+                        errors[1] = ("Enter a valid URL (start by http:// or https://)")
+                    }
+
+                    val headers = mutableMapOf<String, String>()
+                    headersCache = inputs[2].trim()
+                    if (headersCache.isNotEmpty()) {
+                        val headerPairs = headersCache.split(",")
+                        if (headerPairs.isNotEmpty()) {
+                            for (pair in headerPairs) {
+                                val kv = pair.trim().split(":")
+                                if (kv.size == 2) {
+                                    val k = kv[0].trim()
+                                    val v = kv[1].trim()
+
+                                    if (k.isNotEmpty()) {
+                                        headers[k] = v
+                                    } else {
+                                        errors[2] += ("$kv is  not correct\n")
+                                    }
+                                } else {
+                                    errors[2] += ("$kv is  not correct\n")
+                                }
+                            }
+                        }
+                    }
+
+                    val body = inputs[3]
+                    bodyCache = body
+
+                    if (errors.none { it.isNotEmpty() }) {
+                        callApi(
+                            method = method,
+                            url = url,
+                            headers = headers,
+                            body = body
+                        )
+                    }
+
+                    errors
+                }
+                .show()
         }
 
         //------------------------------------------------------------------------------------------
@@ -421,7 +530,29 @@ class MainActivity : BaseActivity() {
             Log.d(this::class.java.name, "onCreate: ")
         }
 
+    }
 
+    private fun callApi(
+        method: gmutils.net.SimpleHTTPRequest.Method?,
+        url: String,
+        headers: kotlin.collections.MutableMap<String, String>,
+        body: String
+    ) {
+        MyToast.show(this, "wait...")
+        SimpleHTTPRequest.call(
+            true,
+            SimpleHTTPRequest.Request(
+                url,
+                method,
+                headers,
+                body
+            ),
+            null
+        ) { req, res ->
+            MessageDialog.create(this)
+                .setMessage(res.toString())
+                .show()
+        }
     }
 
     fun log(tag: String, text: String?) {
@@ -572,13 +703,14 @@ class MainActivity : BaseActivity() {
             }
         )
         val c = s.getCurrentTime("cairo")
-        c.enqueue(gmutils.net.retrofit.callback.Callback(
-            c.request(),
-            TimeOfArea::class.java
-        ) {
-            Logger.d().print { it }
-            log("Test Untrusted Connection", it.toString())
-        })
+        c.enqueue(
+            gmutils.net.retrofit.callback.Callback(
+                c.request(),
+                TimeOfArea::class.java
+            ) {
+                Logger.d().print { it }
+                log("Test Untrusted Connection", it.toString())
+            })
     }
 
 }

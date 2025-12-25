@@ -388,7 +388,9 @@ public class SimpleHTTPRequest {
 
                     if (configurations.hostnameVerifier != null) {
                         urlConnectionSecure.setHostnameVerifier(configurations.hostnameVerifier);
-                    } else {
+                    }
+                    //
+                    else {
                         urlConnectionSecure.setHostnameVerifier(new HostnameVerifier() {
                             @Override
                             public boolean verify(String hostname, SSLSession session) {
@@ -413,7 +415,7 @@ public class SimpleHTTPRequest {
 
                 byte[] postDataBytes = null;
 
-                if (request.method == Method.POST || request.method == Method.PUT) {
+                if (request.method == Method.POST || request.method == Method.PUT || request.method == Method.PATCH) {
                     urlConnection.setDoInput(true);
                     urlConnection.setDoOutput(true);
 
@@ -447,15 +449,10 @@ public class SimpleHTTPRequest {
                 }
 
                 if (request.headers != null) {
-                    //Map<String, List<String>> requestProperties = urlConnection.getRequestProperties();
-
                     Set<Map.Entry<String, String>> entries = request.headers.entrySet();
                     for (Map.Entry<String, String> entry : entries) {
                         urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
                     }
-
-                    //requestProperties = urlConnection.getRequestProperties();
-                    //requestProperties.size();
                 }
 
                 urlConnection.connect();
@@ -479,7 +476,8 @@ public class SimpleHTTPRequest {
 
                 response.setCode(urlConnection.getResponseCode());
 
-                Map<String, String> headers = MapWrapper.create(urlConnection.getHeaderFields())
+                Map<String, String> headers = MapWrapper
+                        .create(urlConnection.getHeaderFields())
                         .map((key, valueList) -> {
                             if (valueList == null || valueList.isEmpty()) return "";
                             else if (valueList.size() == 1) return valueList.get(0);
@@ -487,8 +485,12 @@ public class SimpleHTTPRequest {
                         });
                 response.setHeaders(headers);
 
-                if (response.code == 200) {
-                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                if (response.code >= 200 && response.code <= 299) {
+                    try {
+                        inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                    } catch (Exception e) {
+                        response.setException(e);
+                    }
                 }
                 //
                 else {
@@ -497,6 +499,7 @@ public class SimpleHTTPRequest {
                         String err = "";
                         String ln;
                         do {
+                            int read = in.read();
                             ln = in.readLine();
                             if (!TextUtils.isEmpty(ln)) err += ln;
                         } while (!TextUtils.isEmpty(ln));
@@ -505,18 +508,16 @@ public class SimpleHTTPRequest {
                     }
                     //
                     catch (Exception e) {
-                        Log.e(SimpleHTTPRequest.class.getSimpleName(), e.getMessage());
+                        response.setException(e);
                     }
                 }
 
                 resultCallback.invoke(response, inputStream);
-
             }
             //
             catch (Exception e) {
                 response.setException(e);
                 resultCallback.invoke(response, null);
-
             }
             //
             finally {
