@@ -92,6 +92,7 @@ class WebRequestExecutor {
   Future<Response<DT>> execute<DT>(
     Url<DT> url, {
     int? cacheIntervalInSeconds,
+    OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     if (url is PostUrl) {
       return executePost(
@@ -117,6 +118,7 @@ class WebRequestExecutor {
   Future<Response<DT>> executeGet<DT>(
     GetUrl<DT> url, {
     int? cacheIntervalInSeconds,
+    OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     Logs.get(url.logsName).print(() => [
           'API::Call',
@@ -134,12 +136,14 @@ class WebRequestExecutor {
         url.uri,
         headers: url.headers,
       ),
+      onEncodeResponseFailed: onEncodeResponseFailed,
     );
   }
 
   Future<Response<DT>> executePost<DT>(
     PostUrl<DT> url, {
     int? cacheIntervalInSeconds,
+    OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     Logs.get(url.logsName).print(() => [
           'API::Call',
@@ -162,12 +166,14 @@ class WebRequestExecutor {
         headers: url.headers,
         body: url.postObject,
       ),
+      onEncodeResponseFailed: onEncodeResponseFailed,
     );
   }
 
   Future<Response<DT>> executeMultiPartRequest<DT>(
     MultiPartRequestUrl<DT> url, {
     int? cacheIntervalInSeconds,
+    OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     Logs.get(url.logsName).print(() {
       final info = [
@@ -314,12 +320,14 @@ class WebRequestExecutor {
           reasonPhrase: response1.reasonPhrase,
         );
       },
+      onEncodeResponseFailed: onEncodeResponseFailed,
     );
   }
 
   Future<Response<DT>> executePatch<DT>(
     PatchUrl<DT> url, {
     int? cacheIntervalInSeconds,
+    OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     Logs.get(url.logsName).print(() => [
           'API::Call',
@@ -342,12 +350,14 @@ class WebRequestExecutor {
         headers: url.headers,
         body: url.postObject,
       ),
+      onEncodeResponseFailed: onEncodeResponseFailed,
     );
   }
 
   Future<Response<DT>> executePut<DT>(
     PutUrl<DT> url, {
     int? cacheIntervalInSeconds,
+    OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     Logs.get(url.logsName).print(() => [
           'API::Call',
@@ -370,12 +380,14 @@ class WebRequestExecutor {
         headers: url.headers,
         body: url.postObject,
       ),
+      onEncodeResponseFailed: onEncodeResponseFailed,
     );
   }
 
   Future<Response<DT>> executeDelete<DT>(
     DeleteUrl<DT> url, {
     int? cacheIntervalInSeconds,
+    OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     Logs.get(url.logsName).print(() => [
           'API::Call',
@@ -394,6 +406,7 @@ class WebRequestExecutor {
         headers: url.headers,
         body: url.postObject,
       ),
+      onEncodeResponseFailed: onEncodeResponseFailed,
     );
   }
 
@@ -403,6 +416,7 @@ class WebRequestExecutor {
     required Url<DT> url,
     required int? cacheIntervalInSeconds,
     required Future<http.Response> Function() run,
+    required OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
     _Cache<DT>? cache = _createOrGetCacheStorage(
       key: () => url.signature,
@@ -440,8 +454,10 @@ class WebRequestExecutor {
           url,
           response,
           statusCode: code,
+          exception: null,
           cache: cache,
           tries: tries,
+          onEncodeResponseFailed: onEncodeResponseFailed,
         );
       } catch (e) {
         exception = e;
@@ -483,11 +499,13 @@ class WebRequestExecutor {
       http.Response(
         '',
         100 /*just for passing exception*/,
-        reasonPhrase: error,
+        //reasonPhrase: error,
       ),
       statusCode: 0,
+      exception: error,
       cache: cache,
       tries: tries,
+      onEncodeResponseFailed: onEncodeResponseFailed,
     );
   }
 
@@ -495,17 +513,16 @@ class WebRequestExecutor {
     Url<DT> url,
     http.Response response, {
     required int statusCode,
+    required String? exception,
     required _Cache<DT>? cache,
     required int tries,
+    required OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
-    //final code = response.statusCode;
-    final code = statusCode;
-
     Logs.get(url.logsName).print(() => [
           'API::Response',
           'url: ${url.obscuredUri}',
           '\n',
-          'code: $code',
+          'code: $statusCode',
           '\n',
           'response: ${response.body}',
           '\n',
@@ -517,31 +534,44 @@ class WebRequestExecutor {
           '\n',
         ]);
 
+    Response<DT>? responseObj;
+
     dynamic encodingBodyException;
     dynamic encodingBodyStackTrace;
 
     dynamic encodingErrorException;
     dynamic encodingErrorStackTrace;
 
-    Response<DT>? responseObj;
-    try {
-      responseObj = url.encodeResponse(response.body);
-    } catch (e, s) {
-      encodingBodyException = e;
-      encodingBodyStackTrace = s;
-    }
-
-    if (responseObj == null && response.reasonPhrase?.isNotEmpty == true) {
+    if (exception == null) {
       try {
-        responseObj = url.encodeResponse(response.reasonPhrase!);
+        responseObj = url.encodeResponse(response.body);
       } catch (e, s) {
-        encodingErrorException = e;
-        encodingErrorStackTrace = s;
+        encodingBodyException = e;
+        encodingBodyStackTrace = s;
       }
+
+      if (responseObj == null && response.reasonPhrase?.isNotEmpty == true) {
+        try {
+          responseObj = url.encodeResponse(response.reasonPhrase!);
+        } catch (e, s) {
+          encodingErrorException = e;
+          encodingErrorStackTrace = s;
+        }
+      }
+
+      responseObj ??= await onEncodeResponseFailed?.call(
+        statusCode,
+        response.body,
+        response.reasonPhrase,
+        {
+          'body': encodingBodyException,
+          'error': encodingErrorException,
+        },
+      );
     }
 
     if (responseObj != null) {
-      responseObj.httpCode = code;
+      responseObj.httpCode = statusCode;
       responseObj.responseHeader = response.headers;
 
       cache?.set(responseObj);
@@ -581,6 +611,10 @@ class WebRequestExecutor {
         }
       }
       //
+      else if (exception != null) {
+        error = exception;
+      }
+      //
       else {
         Logs.get(url.logsName)
             .print(() => 'WebRequestExecutor._resolveResponse '
@@ -598,8 +632,8 @@ class WebRequestExecutor {
             '"reasonPhrase": "${response.reasonPhrase}", '
             '"error": "$error"'
             '}',
-        // httpCode: code,
-        httpCode: 400,
+        httpCode: statusCode,
+        // httpCode: 400,
         responseHeader: response.headers,
       );
     }
@@ -736,6 +770,13 @@ class WebRequestExecutor {
     return response;
   }
 }
+
+typedef OnEncodeResponseFailed<DT> = Future<Response<DT>?> Function(
+  int statusCode,
+  String responseBody,
+  String? responseError,
+  Map<String, dynamic> exceptions,
+);
 
 //==============================================================================
 

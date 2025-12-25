@@ -29,6 +29,7 @@ class GMMain {
     required NotificationsConfigurations? localNotificationsConfigurations,
     required OnInitialize? onInitialize,
     required Widget startScreen,
+    Map<String, WidgetBuilder>? screensRoutes,
     required CustomWaitViewController? customWaitViewController,
   }) async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -68,6 +69,7 @@ class GMMain {
           toolbarTitleFontFamily: toolbarTitleFontFamily,
           defaultFontFamily: defaultFontFamily,
           startScreen: startScreen,
+          screensRoutes: screensRoutes,
           onInitialize: onInitialize,
         ));
       },
@@ -96,6 +98,7 @@ class App extends StatefulWidget {
   String? Function()? toolbarTitleFontFamily;
   String? Function()? defaultFontFamily;
   Widget? startScreen;
+  Map<String, WidgetBuilder>? screensRoutes;
   OnInitialize? onInitialize;
 
   App({
@@ -105,6 +108,7 @@ class App extends StatefulWidget {
     required this.toolbarTitleFontFamily,
     required this.defaultFontFamily,
     required Widget this.startScreen,
+    required this.screensRoutes,
     required this.onInitialize,
     super.key,
   });
@@ -186,6 +190,7 @@ class App extends StatefulWidget {
 
   static Future<RT?> navTo<RT>(
     Widget screen, {
+    BuildContext? context,
     Object? args,
     bool singleTop = false,
     bool animate = false,
@@ -224,7 +229,7 @@ class App extends StatefulWidget {
             settings: settings,
           );
 
-    final nav = Navigator.of(context);
+    final nav = Navigator.of(context ?? App.context);
 
     RT? result;
     if (singleTop) {
@@ -264,7 +269,7 @@ class App extends StatefulWidget {
     required bool toEnglish,
   }) {
     Logs.print(() =>
-        'App.changeAppLanguage(toEnglish: $toEnglish) ... current is en? ${_appPreferences.isEn}');
+        '[GMMain] App.changeAppLanguage(toEnglish: $toEnglish) ... current is en? ${_appPreferences.isEn}');
 
     if (_appPreferences.isEn != null && _appPreferences.isEn == toEnglish) {
       return false;
@@ -283,7 +288,7 @@ class App extends StatefulWidget {
     required bool? toLight,
   }) {
     Logs.print(() =>
-        'App.changeAppAppearance(toLight: $toLight) ... current is light? ${_appPreferences.isLightMode}');
+        '[GMMain] App.changeAppAppearance(toLight: $toLight) ... current is light? ${_appPreferences.isLightMode}');
 
     if (_appPreferences.isLightMode != null &&
         _appPreferences.isLightMode == toLight) {
@@ -309,7 +314,11 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    Logs.print(() => '_AppState.build()');
+    Logs.print(() => '[GMMain] _AppState.build()');
+
+    if (App._context?.widget == null) {
+      App._context = context;
+    }
 
     App._appPreferences.isEn ??=
         (!Platform.localeName.toLowerCase().startsWith('ar'));
@@ -420,6 +429,8 @@ class _AppState extends State<App> {
         defaultFontFamily: widget.defaultFontFamily,
         onInitialize: widget.onInitialize,
       ),
+      routes: widget.screensRoutes ?? const <String, WidgetBuilder>{},
+      initialRoute: null,
       navigatorObservers: [_NavigatorObserver()],
       debugShowCheckedModeBanner: false,
     );
@@ -427,6 +438,8 @@ class _AppState extends State<App> {
 
   @override
   void dispose() {
+    Logs.print(() => '[GMMain] _AppState.dispose() ---> ${App._context}');
+
     widget.appName = null;
     widget.startScreen = null;
     widget.measurements = null;
@@ -468,9 +481,12 @@ class StarterWidget extends StatefulWidget {
 class _StarterWidgetState extends State<StarterWidget> {
   @override
   Widget build(BuildContext context) {
-    Logs.print(() => '_StarterWidgetState.build()');
+    Logs.print(() => '[GMMain] _StarterWidgetState.build() '
+        '---> startScreen: ${widget.startScreen}');
 
-    App._context = context;
+    if (App._context?.widget == null) {
+      App._context = context;
+    }
 
     var appMeasurement =
         widget.measurements?.call(context) ?? AppMeasurement.def();
@@ -510,11 +526,15 @@ class _NavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     App._context = route.navigator?.context;
+    Logs.print(() => '[GMMain] _NavigatorObserver.didPush() '
+        '---> ${App._context?.widget} (MOUNTED: ${App._context?.mounted})');
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     App._context = route.navigator?.context;
+    Logs.print(() => '[GMMain] _NavigatorObserver.didPop() '
+        '---> ${App._context?.widget} (MOUNTED: ${App._context?.mounted})');
   }
 }
 

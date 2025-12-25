@@ -9,13 +9,13 @@ class Response<DATA> {
   int? httpCode;
   Map<String, String>? responseHeader;
 
-  Response._({
+  Response({
     required this.url,
-    this.data,
-    this.error,
-    this.rawResponse,
-    this.httpCode,
-    this.responseHeader,
+    required this.data,
+    required this.error,
+    required this.rawResponse,
+    required this.httpCode,
+    required this.responseHeader,
   });
 
   Response.success({
@@ -60,7 +60,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
     try {
       final data = dataMapper.from(values);
 
-      return Response._(
+      return Response(
         url: null,
         data: data,
         error: null,
@@ -68,7 +68,9 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
         httpCode: values['httpCode'],
         responseHeader: null,
       );
-    } catch (_) {}
+    } catch (e) {
+      //Logs.print(() => 'ResponseMapper.from ---> EXCEPTION:: $e');
+    }
 
     //-----------------------------------------------
 
@@ -77,35 +79,54 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
     }
     //
     else if (values is List) {
-      /*List? data;
-      if (value.isNotEmpty) {
-        data = [];
-        for (var i in value) {
-          if (i is Map<String, dynamic>) {
-            var x = dataMapper.fromMap(i);
-            data.add(x);
-          }
-          //
-          else {
-            data.add(i);
+      try {
+        var lst = dataMapper.fromMapList(values);
+
+        return Response(
+          url: null,
+          data: lst as DT?,
+          error: null,
+          rawResponse: null,
+          httpCode: null,
+          responseHeader: null,
+        );
+
+        /*List? data;
+
+        if (values.isNotEmpty) {
+          data = [];
+          for (var value in values) {
+            if (value is Map<String, dynamic>) {
+              var x = dataMapper.fromMap(value);
+              data.add(x);
+            }
+            //
+            else if (value is List) {
+              what have to do here?
+            }
+            //
+            else {
+              data.add(i);
+            }
           }
         }
-      }
-      return Response._(
-        url: null,
-        data: data as DT?,
-        error: null,
-        rawResponse: null,
-        httpCode: null,
-        responseHeader: null,
-      );*/
 
-      return fromMap({'list': values});
+        return Response(
+          url: null,
+          data: data as DT?,
+          error: null,
+          rawResponse: null,
+          httpCode: null,
+          responseHeader: null,
+        );*/
+      } catch (e) {
+        return fromMap({'list': values});
+      }
     }
     //
     else {
       try {
-        return Response._(
+        return Response(
           url: null,
           data: values,
           error: null,
@@ -114,7 +135,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
           responseHeader: null,
         );
       } catch (e) {
-        return Response._(
+        return Response(
           url: null,
           data: null,
           error: '$e',
@@ -130,7 +151,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
   Response<DT> fromMap(Map<String, dynamic> values) {
     final data = dataMapper.fromMap(values);
 
-    return Response._(
+    return Response(
       url: null,
       data: data,
       error: null,

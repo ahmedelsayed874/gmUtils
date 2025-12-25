@@ -27,7 +27,7 @@ class ScreenUtils {
 
   const ScreenUtils();
 
-  void showWaitView(String? message) {
+  void showWaitView(BuildContext? context, String? message) {
     message ??= App.isEnglish ? 'Please wait...' : 'يرجى الإنتظار...';
 
     if (_waitDialogShowCount[hashCode] == null) {
@@ -41,7 +41,7 @@ class ScreenUtils {
 
       if (waitViewController == null) {
         _waitDialog[hashCode] =
-            WaitDialog.create.setMessage(message).show(() => App.context);
+            WaitDialog.create.setMessage(message).show(() => context ?? App.context);
       }
       //
       else {

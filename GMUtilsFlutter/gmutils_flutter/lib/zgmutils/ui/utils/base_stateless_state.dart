@@ -15,7 +15,7 @@ abstract class BaseStatelessWidget extends StatelessWidget
 
   @override
   void showWaitView([String? message]) {
-    _screenUtils.showWaitView(message ?? defaultWaitViewMessage);
+    _screenUtils.showWaitView(null, message ?? defaultWaitViewMessage);
   }
 
   @override

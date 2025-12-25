@@ -33,7 +33,9 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
   void showWaitView([String? message]) async {
     await waitForMount();
 
-    _screenUtils.showWaitView(message ?? defaultWaitViewMessage);
+    if (mounted) {
+      _screenUtils.showWaitView(context, message ?? defaultWaitViewMessage);
+    }
   }
 
   @override

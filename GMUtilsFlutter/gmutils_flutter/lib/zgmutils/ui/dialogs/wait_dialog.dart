@@ -95,7 +95,11 @@ class WaitDialog {
   }
 
   WaitDialog _show(BuildContext Function() context) {
-    _context = context;
+    Logs.print(() => "WaitDialog._show() ---> "
+        "_shown: $_shown, "
+        "_dismissed: $_dismissed");
+
+    if (_dismissed || _shown) return this;
 
     if (_message.isEmpty) {
       _message = App.isEnglish ? 'Please wait...' : 'يرجى الانتظار...';
@@ -119,6 +123,8 @@ class WaitDialog {
       },
       routeSettings: routeSettings,
     ).then((value) {
+      _shown = false;
+      _dismissed = true;
       _dispose();
     });
 
@@ -128,16 +134,20 @@ class WaitDialog {
   }
 
   void dismiss() {
+    final context = _context;
+
+    Logs.print(() => "WaitDialog.dismiss() "
+        "--> context != null: ${context != null}, "
+        "_shown: $_shown");
+
     _dismissed = true;
 
     if (_context != null) {
       if (_shown) {
         Navigator.pop(_context!());
       }
-      //
-      else {
-        _dispose();
-      }
+
+      _dispose();
     }
     //
     else {
@@ -146,6 +156,8 @@ class WaitDialog {
   }
 
   void _dispose() {
+    Logs.print(() => "WaitDialog._dispose()");
+
     _context = null;
     _waitDialogBodyHor = null;
     _waitDialogBodyVer = null;
@@ -164,7 +176,8 @@ class _WaitDialogBodyHorizontal extends StatefulWidget {
   });
 
   @override
-  State<_WaitDialogBodyHorizontal> createState() => _WaitDialogBodyHorizontalState();
+  State<_WaitDialogBodyHorizontal> createState() =>
+      _WaitDialogBodyHorizontalState();
 
   void updateMessage(String message) {
     _WaitDialogBodyHorizontalState.updateMessage(message);
@@ -238,7 +251,8 @@ class _WaitDialogBodyVertical extends StatefulWidget {
   });
 
   @override
-  State<_WaitDialogBodyVertical> createState() => _WaitDialogBodyVerticalState();
+  State<_WaitDialogBodyVertical> createState() =>
+      _WaitDialogBodyVerticalState();
 
   void updateMessage(String message) {
     _WaitDialogBodyVerticalState.updateMessage(message);
@@ -292,7 +306,9 @@ class _WaitDialogBodyVerticalState extends State<_WaitDialogBodyVertical> {
                   const SizedBox(height: 10),
                   Text(
                     message,
-                    style: AppTheme.defaultTextStyle(fontWeight: FontWeight.bold,),
+                    style: AppTheme.defaultTextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
