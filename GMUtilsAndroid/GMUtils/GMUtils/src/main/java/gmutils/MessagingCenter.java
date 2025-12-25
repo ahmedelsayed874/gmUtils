@@ -83,7 +83,7 @@ public class MessagingCenter {
     }
 
     public interface Observer {
-        void onObserver(String messageName, Object data);
+        void onObserve(String messageName, Object data);
     }
 
     private final Map<MessageKey, Observer> observers = new HashMap<>();
@@ -142,16 +142,16 @@ public class MessagingCenter {
         for (MessageKey it : observers.keySet()) {
             if (("" + it.messageName).equals(messageName)) {
                 Observer observer = observers.get(it);
-                if (observer != null) observer.onObserver(messageName, data);
+                if (observer != null) observer.onObserve(messageName, data);
 
                 if (!it.hasLongLife) {
-                    observers.remove(it);
+                    //observers.remove(it);
                     consumedMessages.add(it);
                 }
             }
         }
 
-        if (consumedMessages.size() != 0) {
+        if (!consumedMessages.isEmpty()) {
             for (MessageKey it : consumedMessages) {
                 observers.remove(it);
             }
