@@ -15,9 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -201,7 +199,7 @@ public abstract class LoggerAbs {
             if (!file.exists()) {
                 try {
                     file.createNewFile();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -228,11 +226,11 @@ public abstract class LoggerAbs {
 
         private Long writeTime = null;
 
-        public void write(String title, String content) throws IOException {
+        public void write(String title, String content) throws Exception {
             write(title, content, true, true);
         }
 
-        public void write(String title, String content, boolean addDate, boolean addSeparation) throws IOException /*, FileNotFoundException*/ {
+        public void write(String title, String content, boolean addDate, boolean addSeparation) throws Exception /*, FileNotFoundException*/ {
             OutputStream os = new FileOutputStream(file, true);
             OutputStreamWriter sw = new OutputStreamWriter(os);
 
@@ -276,8 +274,8 @@ public abstract class LoggerAbs {
                     //Title
                     sw.write("\"" + title + "\",");
 
-                    //Content
-                    sw.write("\"" + content + "\"");
+                    //Content --> "x",
+                    sw.write("\"" + ("" + content).replaceAll(",", ";") + "\"");
 
                     sw.write("\n");
                 }
@@ -314,7 +312,7 @@ public abstract class LoggerAbs {
                     sw.write("\"" + title + "\",");
 
                     //Content
-                    sw.write("\"" + content + "\"");
+                    sw.write("\"" + ("" + content).replaceAll(",", ";") + "\"");
 
                     sw.write("],\n");
                 }
@@ -363,9 +361,12 @@ public abstract class LoggerAbs {
 
         public String readFileContent() {
             try {
-                FileInputStream is = new FileInputStream(file);
-                byte[] b = new byte[is.available()];
-                is.read(b);
+                byte[] b;
+                try (FileInputStream is = new FileInputStream(file)) {
+                    b = new byte[is.available()];
+                    if (is.read(b) <= 0) return "";
+                }
+
                 String text = new String(b);
 
                 if (enableEncryption) {
@@ -471,7 +472,6 @@ public abstract class LoggerAbs {
         }
 
         Message message = Message.obtain();
-        //Message message = new Message();
         message.obj = task;
         _looperThread.sendMessage(message);
     }
@@ -537,7 +537,7 @@ public abstract class LoggerAbs {
         }
     }
 
-    private void printSync(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
+    private void printSync0(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
         String contentStr = ("" + content.getContent());
 
         if (logConfigs.isLogEnabled() || forceLog) {
@@ -552,13 +552,15 @@ public abstract class LoggerAbs {
                 if (t.length == 1)
                     writeToLog(t[0], m[0]);
                 else
-                    writeToLog(t[0], t[1] + ": " + m[0]);
-            } else {
+                    writeToLog(t[0], t[1] + ":\n" + m[0]);
+            }
+            //
+            else {
                 for (int i = 0; i < m.length; i++) {
                     if (t.length == 1) {
                         writeToLog(t[0], "LOG[" + i + "]-> " + m[i]);
                     } else {
-                        writeToLog(t[0], t[1] + ": " + "LOG[" + i + "]-> " + m[i]);
+                        writeToLog(t[0], t[1] + ":\n" + "LOG[" + i + "]-> " + m[i]);
                     }
                 }
             }
@@ -571,6 +573,50 @@ public abstract class LoggerAbs {
                             BaseApplication.current(),
                             title,
                             () -> contentStr
+                    );
+                } catch (Exception ignore) {
+                }
+            }
+        }
+    }
+
+    private void printSync(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
+        if (logConfigs.isLogEnabled() || forceLog) {
+            String title2 = "**** ";
+            if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
+            if (title != null) title2 += title.getTitle();
+
+            String contentStr;
+            if (title2.length() > maxTitleLength) {
+                String[] t = refineTitle(title2);
+                title2 = t[0];
+                contentStr = (t[1] + ":\n" + content.getContent());
+            }
+            //
+            else {
+                contentStr = ("" + content.getContent());
+            }
+
+            if (contentStr.length() < maxLogLength) {
+                writeToLog(title2, contentStr);
+            }
+            //
+            else {
+                String[] m = divideLogMsg(contentStr, 0);
+
+                for (int i = 0; i < m.length; i++) {
+                    writeToLog(title2, "LOG[" + i + "]-> " + m[i]);
+                }
+            }
+        }
+
+        if (logConfigs.isWriteLogsToFileEnabled() || forceWriteToFile) {
+            if (BaseApplication.current() != null) {
+                try {
+                    writeToFileSync(
+                            BaseApplication.current(),
+                            title,
+                            content
                     );
                 } catch (Exception ignore) {
                 }
@@ -595,7 +641,7 @@ public abstract class LoggerAbs {
         printMethod(null, moreInfoCallback, 0);
     }
 
-    public void printMethod(ContentGetter moreInfoCallback, int tuner) { //Class<?> stopClass) {
+    public void printMethod(ContentGetter moreInfoCallback, int tuner) {
         printMethod(null, moreInfoCallback, tuner);
     }
 
@@ -656,12 +702,17 @@ public abstract class LoggerAbs {
 
     //----------------------------------------------------------------------------------------------
 
+    private static final int maxTitleLength = 23;
+    private final int maxLogLength = 4000;
+
     private String[] refineTitle(String title) {
         String reqTitle, remTitle;
-        if (title.length() > 23) {
-            reqTitle = (title).substring(0, 23);
-            remTitle = (title).substring(23);
-        } else {
+        if (title.length() > maxTitleLength) {
+            reqTitle = (title).substring(0, maxTitleLength);
+            remTitle = (title).substring(maxTitleLength);
+        }
+        //
+        else {
             reqTitle = title;
             remTitle = "";
         }
@@ -669,18 +720,18 @@ public abstract class LoggerAbs {
         return new String[]{reqTitle, remTitle};
     }
 
-    private final int MAX_LOG_LENGTH = 4000;
-
     private String[] divideLogMsg(String msg, int offset) {
         if (msg == null) msg = "null";
-        final int partLength = MAX_LOG_LENGTH - (offset == 0 ? 0 : (offset + 2));
+        final int partLength = maxLogLength - (offset == 0 ? 0 : (offset + 2));
 
         int parts = (int) Math.ceil(msg.length() / ((float) partLength));
 
         if (parts <= 1) {
             return new String[]{msg};
 
-        } else {
+        }
+        //
+        else {
             String[] strings = new String[parts];
             int i = 0;
 
@@ -732,7 +783,7 @@ public abstract class LoggerAbs {
 
                 try {
                     writer.write(title2, text.getContent().toString());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     logFileWriter = null;
                     new Thread(() -> writeToFileSync(context, title, text)).start();
                 }
