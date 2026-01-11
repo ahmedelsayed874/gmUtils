@@ -28,6 +28,7 @@ class GMMain {
     required FcmRequirements? fcmRequirements,
     required NotificationsConfigurations? localNotificationsConfigurations,
     required OnInitialize? onInitialize,
+    Widget Function(Widget child)? appRoot,
     required Widget startScreen,
     Map<String, WidgetBuilder>? screensRoutes,
     required CustomWaitViewController? customWaitViewController,
@@ -62,7 +63,8 @@ class GMMain {
         .then(
       (value) {
         App._appPreferences = value;
-        runApp(App(
+
+        final root = App(
           appName: appName,
           measurements: measurements,
           appColors: appColors,
@@ -71,7 +73,9 @@ class GMMain {
           startScreen: startScreen,
           screensRoutes: screensRoutes,
           onInitialize: onInitialize,
-        ));
+        );
+
+        runApp(appRoot?.call(root) ?? root);
       },
     );
   }
