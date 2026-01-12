@@ -29,9 +29,10 @@ class GMMain {
     required NotificationsConfigurations? localNotificationsConfigurations,
     required OnInitialize? onInitialize,
     Widget Function(Widget child)? appRoot,
+    Widget Function(Widget child)? startScreenWrapper,
     required Widget startScreen,
     Map<String, WidgetBuilder>? screensRoutes,
-    required CustomWaitViewController? customWaitViewController,
+    CustomWaitViewController? customWaitViewController,
   }) async {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -70,6 +71,7 @@ class GMMain {
           appColors: appColors,
           toolbarTitleFontFamily: toolbarTitleFontFamily,
           defaultFontFamily: defaultFontFamily,
+          startScreenWrapper: startScreenWrapper,
           startScreen: startScreen,
           screensRoutes: screensRoutes,
           onInitialize: onInitialize,
@@ -101,6 +103,7 @@ class App extends StatefulWidget {
   AppColors Function(BuildContext context, bool isLight)? appColors;
   String? Function()? toolbarTitleFontFamily;
   String? Function()? defaultFontFamily;
+  Widget Function(Widget child)? startScreenWrapper;
   Widget? startScreen;
   Map<String, WidgetBuilder>? screensRoutes;
   OnInitialize? onInitialize;
@@ -111,6 +114,7 @@ class App extends StatefulWidget {
     required this.appColors,
     required this.toolbarTitleFontFamily,
     required this.defaultFontFamily,
+    required this.startScreenWrapper,
     required Widget this.startScreen,
     required this.screensRoutes,
     required this.onInitialize,
@@ -425,14 +429,7 @@ class _AppState extends State<App> {
               ? const Locale('en', '')
               : const Locale('ar', '')),
       //
-      home: StarterWidget(
-        startScreen: widget.startScreen!,
-        measurements: widget.measurements,
-        appColors: widget.appColors,
-        toolbarTitleFontFamily: widget.toolbarTitleFontFamily,
-        defaultFontFamily: widget.defaultFontFamily,
-        onInitialize: widget.onInitialize,
-      ),
+      home: _starterWidget(),
       routes: widget.screensRoutes ?? const <String, WidgetBuilder>{},
       initialRoute: null,
       navigatorObservers: [_NavigatorObserver()],
@@ -440,11 +437,25 @@ class _AppState extends State<App> {
     );
   }
 
+  Widget _starterWidget() {
+    final starterWidget = StarterWidget(
+      startScreen: widget.startScreen!,
+      measurements: widget.measurements,
+      appColors: widget.appColors,
+      toolbarTitleFontFamily: widget.toolbarTitleFontFamily,
+      defaultFontFamily: widget.defaultFontFamily,
+      onInitialize: widget.onInitialize,
+    );
+
+    return widget.startScreenWrapper?.call(starterWidget) ?? starterWidget;
+  }
+
   @override
   void dispose() {
     Logs.print(() => '[GMMain] _AppState.dispose() ---> ${App._context}');
 
     widget.appName = null;
+    widget.startScreenWrapper = null;
     widget.startScreen = null;
     widget.measurements = null;
     widget.appColors = null;
@@ -514,6 +525,8 @@ class _StarterWidgetState extends State<StarterWidget> {
 
   @override
   void dispose() {
+    Logs.print(() => '[GMMain] _StarterWidgetState.dispose()');
+
     super.dispose();
     widget.startScreen = null;
     widget.measurements = null;
