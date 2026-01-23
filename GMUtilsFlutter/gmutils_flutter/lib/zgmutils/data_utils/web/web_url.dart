@@ -13,7 +13,6 @@ abstract class Url<RDT> {
   final Map<String, String>? queries;
 
   final Mappable<RDT>? responseMapper;
-  //final Mappable? responseMapper;
   final Response<RDT> Function(String response)? responseEncoder;
   final String? logsName;
   final List<ObscureLogOption>? obscureLogOptions;
@@ -100,20 +99,14 @@ abstract class Url<RDT> {
 
       // //to do remove
       // print("*************API-RESPONSE:::>> "
+      //     "'${responseObj.rawResponse}' ---> "
       //     "${responseObj.runtimeType} ---> "
       //     "${responseObj.data?.runtimeType} ---> "
-      //     "${responseObj.data?.toString()}");
+      //     "${responseObj.data?.toString()} ---> "
+      //     "${responseObj.error}"
+      // );
 
       return responseObj as Response<RDT>;
-
-      // return Response(
-      //   url: responseObj.url,
-      //   data: responseObj.data,
-      //   error: responseObj.error,
-      //   rawResponse: responseObj.rawResponse,
-      //   httpCode: responseObj.httpCode,
-      //   responseHeader: responseObj.responseHeader,
-      // );
     }
   }
 

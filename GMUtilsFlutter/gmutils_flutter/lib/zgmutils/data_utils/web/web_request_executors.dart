@@ -94,22 +94,56 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
-    if (url is PostUrl) {
-      return executePost(
-        url as PostUrl<DT>,
-        cacheIntervalInSeconds: cacheIntervalInSeconds,
-      );
-    }
-    //
-    else if (url is GetUrl) {
+    if (url is GetUrl) {
       return executeGet(
         url as GetUrl<DT>,
         cacheIntervalInSeconds: cacheIntervalInSeconds,
+        onEncodeResponseFailed: onEncodeResponseFailed,
+      );
+    }
+    //
+    else if (url is PostUrl) {
+      return executePost(
+        url as PostUrl<DT>,
+        cacheIntervalInSeconds: cacheIntervalInSeconds,
+        onEncodeResponseFailed: onEncodeResponseFailed,
+      );
+    }
+    //
+    else if (url is PatchUrl) {
+      return executePatch(
+        url as PatchUrl<DT>,
+        cacheIntervalInSeconds: cacheIntervalInSeconds,
+        onEncodeResponseFailed: onEncodeResponseFailed,
+      );
+    }
+    //
+    else if (url is PutUrl) {
+      return executePut(
+        url as PutUrl<DT>,
+        cacheIntervalInSeconds: cacheIntervalInSeconds,
+        onEncodeResponseFailed: onEncodeResponseFailed,
+      );
+    }
+    //
+    else if (url is DeleteUrl) {
+      return executeDelete(
+        url as DeleteUrl<DT>,
+        cacheIntervalInSeconds: cacheIntervalInSeconds,
+        onEncodeResponseFailed: onEncodeResponseFailed,
+      );
+    }
+    //
+    else if (url is MultiPartRequestUrl) {
+      return executeMultiPartRequest(
+        url as MultiPartRequestUrl<DT>,
+        cacheIntervalInSeconds: cacheIntervalInSeconds,
+        onEncodeResponseFailed: onEncodeResponseFailed,
       );
     }
     //
     else {
-      throw 'this method supports only PostUrl and GetUrl only';
+      throw 'provided Url is not supported';
     }
   }
 
@@ -532,6 +566,8 @@ class WebRequestExecutor {
           '\n',
           'numberOfTries: $tries',
           '\n',
+          'exception: $exception',
+          '\n',
         ]);
 
     Response<DT>? responseObj;
@@ -546,6 +582,7 @@ class WebRequestExecutor {
       try {
         responseObj = url.encodeResponse(response.body);
       } catch (e, s) {
+        //print('render-exception1: $e');//to do remove
         encodingBodyException = e;
         encodingBodyStackTrace = s;
       }
@@ -554,6 +591,7 @@ class WebRequestExecutor {
         try {
           responseObj = url.encodeResponse(response.reasonPhrase!);
         } catch (e, s) {
+          //print('render-exception2: $e');//to do remove
           encodingErrorException = e;
           encodingErrorStackTrace = s;
         }
@@ -604,11 +642,12 @@ class WebRequestExecutor {
 
         error = 'Exception:\n';
         if (encodingBodyException != null) {
-          error += '\tParsing body: ${encodingBodyException ?? 'NONE'}.\n';
+          error += '• Parsing body: ${encodingBodyException ?? 'NONE'}.\n';
         }
         if (encodingErrorException != null) {
-          error += '\tParsing error: ${encodingErrorException ?? 'NONE'}';
+          error += '\n• Parsing error: ${encodingErrorException ?? 'NONE'}';
         }
+        error += '\n\n';
       }
       //
       else if (exception != null) {
