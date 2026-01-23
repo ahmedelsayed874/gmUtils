@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../gm_main.dart';
 import 'logs.dart';
 
@@ -638,9 +636,12 @@ class DateOp {
       );
       return null;
     }
+    return remainTo2(tdt);
+  }
 
+  DateOpDuration? remainTo2(DateTime date) {
     var remainMillisec =
-        tdt.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch;
+        date.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch;
 
     int days = remainMillisec ~/ (DateOp.ONE_DAY_MILLISECONDS);
     remainMillisec -= (days * DateOp.ONE_DAY_MILLISECONDS);
@@ -678,9 +679,37 @@ class DateOp {
     bool includeSeconds = true,
     bool acceptNegative = false,
   }) {
+    var tdt = parse(date);
+    if (tdt == null) {
+      Logs.print(
+        () => 'DateOp.remainToAsStatement --> NULL due wrong date format $date',
+      );
+      return null;
+    }
+
+    return remainToAsStatement2(
+      tdt,
+      en: en,
+      useShortNames: useShortNames,
+      reportExactDaysCount: reportExactDaysCount,
+      includeMinutes: includeMinutes,
+      includeSeconds: includeSeconds,
+        acceptNegative: acceptNegative,
+    );
+  }
+
+  String? remainToAsStatement2(
+    DateTime date, {
+    bool? en,
+    bool useShortNames = true,
+    bool reportExactDaysCount = false,
+    bool includeMinutes = true,
+    bool includeSeconds = true,
+    bool acceptNegative = false,
+  }) {
     en ??= App.isEnglish;
 
-    var duration = remainTo(date);
+    var duration = remainTo2(date);
     if (duration == null) return null;
 
     if (!acceptNegative) {
