@@ -12,7 +12,8 @@ abstract class Url<RDT> {
   final Map<String, String> headers = {};
   final Map<String, String>? queries;
 
-  final Mappable<RDT>? responseMapper;
+  //final Mappable<RDT>? responseMapper;
+  final Mappable? responseMapper;
   final Response<RDT> Function(String response)? responseEncoder;
   final String? logsName;
   final List<ObscureLogOption>? obscureLogOptions;
