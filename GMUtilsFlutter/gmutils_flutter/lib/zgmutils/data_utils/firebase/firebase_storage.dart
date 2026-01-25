@@ -8,16 +8,16 @@ import '../../utils/date_op.dart';
 import '../../utils/logs.dart';
 import '../../utils/collections/string_set.dart';
 import 'firebase_utils.dart';
-import 'response.dart';
+import 'fb_response.dart';
 
 abstract class IFirebaseStorage {
-  Future<Response<String>> upload(File file, {required String toPath});
+  Future<FBResponse<String>> upload(File file, {required String toPath});
 
-  Future<Response<String>> getDownloadURL(String firebasePath);
+  Future<FBResponse<String>> getDownloadURL(String firebasePath);
 
-  Future<Response<File>> download(String fromPath, {File? suggestedOutFile});
+  Future<FBResponse<File>> download(String fromPath, {File? suggestedOutFile});
 
-  Future<Response<bool>> delete(String atPath);
+  Future<FBResponse<bool>> delete(String atPath);
 }
 
 class FirebaseStorage implements IFirebaseStorage {
@@ -36,13 +36,13 @@ class FirebaseStorage implements IFirebaseStorage {
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<String>> upload(File file, {required String toPath}) async {
+  Future<FBResponse<String>> upload(File file, {required String toPath}) async {
     toPath = _refinePath(toPath);
     var ref = storage.ref(toPath);
     return uploadTo(ref, file);
   }
 
-  Future<Response<String>> uploadTo(
+  Future<FBResponse<String>> uploadTo(
     firebase_storage.Reference reference,
     File file,
   ) async {
@@ -54,17 +54,17 @@ class FirebaseStorage implements IFirebaseStorage {
       await reference.putFile(file);
       var link = await reference.getDownloadURL();
       Logs.print(() => 'FirebaseStorage[Response].uploadTo(reference: ${reference.fullPath}) ----> $link');
-      return Response.success(data: link);
+      return FBResponse.success(data: link);
     } on FirebaseException catch (e) {
       Logs.print(() => 'FirebaseStorage[Response.Exception].uploadTo() ----> $e');
-      return Response.failed(error: StringSet(e.code));
+      return FBResponse.failed(error: StringSet(e.code));
     }
   }
 
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<String>> getDownloadURL(String firebasePath) async {
+  Future<FBResponse<String>> getDownloadURL(String firebasePath) async {
     Logs.print(() => 'FirebaseStorage[Call].getDownloadURL(firebasePath: $firebasePath)');
 
     try {
@@ -72,13 +72,13 @@ class FirebaseStorage implements IFirebaseStorage {
       var reference = storage.ref(firebasePath);
       var url = await reference.getDownloadURL();
       Logs.print(() => 'FirebaseStorage[Response].getDownloadURL(firebasePath: $firebasePath) ---> $url');
-      return Response.success(data: url);
+      return FBResponse.success(data: url);
     } catch (e) {
       Logs.print(() => 'FirebaseStorage[Response.Exception].getDownloadURL ---> $e');
       if (e is FirebaseException) {
-        return Response.failed(error: StringSet(e.code));
+        return FBResponse.failed(error: StringSet(e.code));
       } else {
-        return Response.failed(error: StringSet('$e'));
+        return FBResponse.failed(error: StringSet('$e'));
       }
     }
   }
@@ -86,7 +86,7 @@ class FirebaseStorage implements IFirebaseStorage {
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<File>> download(
+  Future<FBResponse<File>> download(
     String fromPath, {
     File? suggestedOutFile,
   }) async {
@@ -123,17 +123,17 @@ class FirebaseStorage implements IFirebaseStorage {
       fromPath = _refinePath(fromPath);
       await storage.ref(fromPath).writeToFile(outFile);
       Logs.print(() => 'FirebaseStorage[Response].download(fromPath: $fromPath) ---> file downloaded to: ${outFile.path}');
-      return Response.success(data: outFile);
+      return FBResponse.success(data: outFile);
     } on FirebaseException catch (e) {
       Logs.print(() => 'FirebaseStorage[Response.Exception].download() ---> $e');
-      return Response.failed(error: StringSet(e.code));
+      return FBResponse.failed(error: StringSet(e.code));
     }
   }
 
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<bool>> delete(String atPath) async {
+  Future<FBResponse<bool>> delete(String atPath) async {
     Logs.print(() => 'FirebaseStorage[Call].delete(atPath: $atPath)');
 
     try {
@@ -141,13 +141,13 @@ class FirebaseStorage implements IFirebaseStorage {
       var reference = storage.ref(atPath);
       await reference.delete();
       Logs.print(() => 'FirebaseStorage[Response].delete(atPath: $atPath) -----> true');
-      return Response.success(data: true);
+      return FBResponse.success(data: true);
     } catch (e) {
       Logs.print(() => 'FirebaseStorage[Response].delete() -----> EXCEPTION:: $e');
       if (e is FirebaseException) {
-        return Response.failed(error: StringSet(e.code, e.code));
+        return FBResponse.failed(error: StringSet(e.code, e.code));
       } else {
-        return Response.failed(error: StringSet('$e', '$e'));
+        return FBResponse.failed(error: StringSet('$e', '$e'));
       }
     }
   }

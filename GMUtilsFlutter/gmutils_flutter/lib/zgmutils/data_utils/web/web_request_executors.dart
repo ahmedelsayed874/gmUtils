@@ -9,7 +9,7 @@ import '../../utils/collections/string_set.dart';
 import '../../utils/logs.dart';
 import '../utils/mappable.dart';
 import '../utils/result.dart';
-import 'response.dart';
+import 'web_response.dart';
 import 'web_url.dart';
 
 class WebRequestExecutor {
@@ -89,7 +89,7 @@ class WebRequestExecutor {
 
   //---------------------------------------------------------------------------
 
-  Future<Response<DT>> execute<DT>(
+  Future<WebResponse<DT>> execute<DT>(
     Url<DT> url, {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
@@ -149,7 +149,7 @@ class WebRequestExecutor {
 
   //---------------------------------------------------------------------------
 
-  Future<Response<DT>> executeGet<DT>(
+  Future<WebResponse<DT>> executeGet<DT>(
     GetUrl<DT> url, {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
@@ -174,7 +174,7 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> executePost<DT>(
+  Future<WebResponse<DT>> executePost<DT>(
     PostUrl<DT> url, {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
@@ -186,9 +186,7 @@ class WebRequestExecutor {
           //'\n',
           'headers: ${url.obscuredHeaders}',
           //'\n',
-          'PostParams: ${url.obscuredParams} ..... asJson: ${url.asJson}',
-          //'\n',
-          'postObject(body): ${url.obscuredPostObject}',
+          'PostBody: (asJson: ${url.asJson}) ----> ${url.asJson ? url.obscuredPostObject : url.obscuredParams}',
           //'\n',
         ]);
 
@@ -204,7 +202,7 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> executeMultiPartRequest<DT>(
+  Future<WebResponse<DT>> executeMultiPartRequest<DT>(
     MultiPartRequestUrl<DT> url, {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
@@ -238,7 +236,7 @@ class WebRequestExecutor {
                 '\n',
                 '<[File (${file.fileName}) size is zero]>',
               ]);
-          return Response.failed(
+          return WebResponse.failed(
             url: url,
             error: 'File size is zero',
             rawResponse: '"error":"File size is zero"',
@@ -256,7 +254,7 @@ class WebRequestExecutor {
               '\n',
               '<[ERROR: ${file.fileBytesLength}]>',
             ]);
-        return Response.failed(
+        return WebResponse.failed(
           url: url,
           error: 'File size is unknown',
           rawResponse: '"error":"File size is unknown"',
@@ -358,7 +356,7 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> executePatch<DT>(
+  Future<WebResponse<DT>> executePatch<DT>(
     PatchUrl<DT> url, {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
@@ -370,9 +368,7 @@ class WebRequestExecutor {
           //'\n',
           'headers: ${url.obscuredHeaders}',
           //'\n',
-          'PatchParams: ${url.obscuredParams} ..... asJson: ${url.asJson}',
-          //'\n',
-          'patchObject(body): ${url.obscuredPostObject}',
+          'PatchBody: (asJson: ${url.asJson}) ----> ${url.asJson ? url.obscuredPostObject : url.obscuredParams}',
           //'\n',
         ]);
 
@@ -388,7 +384,7 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> executePut<DT>(
+  Future<WebResponse<DT>> executePut<DT>(
     PutUrl<DT> url, {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
@@ -400,9 +396,7 @@ class WebRequestExecutor {
           //'\n',
           'headers: ${url.obscuredHeaders}',
           //'\n',
-          'PutParams: ${url.obscuredParams} ..... asJson: ${url.asJson}',
-          //'\n',
-          'putObject(body): ${url.obscuredPostObject}',
+          'PutBody: (asJson: ${url.asJson}) ----> ${url.asJson ? url.obscuredPostObject : url.obscuredParams}',
           //'\n',
         ]);
 
@@ -418,7 +412,7 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> executeDelete<DT>(
+  Future<WebResponse<DT>> executeDelete<DT>(
     DeleteUrl<DT> url, {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
@@ -446,7 +440,7 @@ class WebRequestExecutor {
 
   //---------------------------------------------------------------------------
 
-  Future<Response<DT>> _executeWithTries<DT>({
+  Future<WebResponse<DT>> _executeWithTries<DT>({
     required Url<DT> url,
     required int? cacheIntervalInSeconds,
     required Future<http.Response> Function() run,
@@ -543,7 +537,7 @@ class WebRequestExecutor {
     );
   }
 
-  Future<Response<DT>> _resolveResponse<DT>(
+  Future<WebResponse<DT>> _resolveResponse<DT>(
     Url<DT> url,
     http.Response response, {
     required int statusCode,
@@ -570,7 +564,7 @@ class WebRequestExecutor {
           '\n',
         ]);
 
-    Response<DT>? responseObj;
+    WebResponse<DT>? responseObj;
 
     dynamic encodingBodyException;
     dynamic encodingBodyStackTrace;
@@ -662,7 +656,7 @@ class WebRequestExecutor {
         error = 'UNKNOWN ERROR: parsing response failed'.toUpperCase();
       }
 
-      responseObj = Response.failed(
+      responseObj = WebResponse.failed(
         url: url,
         error: error,
         rawResponse: '{'
@@ -682,7 +676,7 @@ class WebRequestExecutor {
 
   //============================================================================
 
-  Future<Response<Result<DT>>> createDummyResponse<DT>({
+  Future<WebResponse<Result<DT>>> createDummyResponse<DT>({
     required String apiName,
     required DummyResponseBuilder<DT> Function() responseBuilder,
     int delayInSeconds = 1,
@@ -692,11 +686,11 @@ class WebRequestExecutor {
 
     await Future.delayed(Duration(seconds: delayInSeconds));
 
-    Response<Result<DT>> response;
+    WebResponse<Result<DT>> response;
 
     final r = Random().nextInt(100);
     if (r > 0 && r < 5) {
-      response = Response.failed(
+      response = WebResponse.failed(
         url: null,
         error: "no connection",
         rawResponse: null,
@@ -705,7 +699,7 @@ class WebRequestExecutor {
     }
     //
     else if (r < 10) {
-      response = Response.failed(
+      response = WebResponse.failed(
         url: null,
         error: "Supposed error on server side",
         rawResponse: '{"error":"Supposed error on server side"}',
@@ -787,14 +781,14 @@ class WebRequestExecutor {
       }
 
       if (data != null) {
-        response = Response.success(
+        response = WebResponse.success(
           url: null,
           data: data,
         );
       }
       //
       else {
-        response = Response.failed(
+        response = WebResponse.failed(
           url: null,
           error: error,
           rawResponse: '"error":"$error"',
@@ -810,7 +804,7 @@ class WebRequestExecutor {
   }
 }
 
-typedef OnEncodeResponseFailed<DT> = Future<Response<DT>?> Function(
+typedef OnEncodeResponseFailed<DT> = Future<WebResponse<DT>?> Function(
   int statusCode,
   String responseBody,
   String? responseError,
@@ -822,11 +816,11 @@ typedef OnEncodeResponseFailed<DT> = Future<Response<DT>?> Function(
 class _Cache<DT> {
   final int cacheIntervalInSeconds;
   int? _expireTime;
-  Response<DT>? _response;
+  WebResponse<DT>? _response;
 
   _Cache({required this.cacheIntervalInSeconds});
 
-  void set(Response<DT> response) {
+  void set(WebResponse<DT> response) {
     _expireTime = DateTime.now()
         .add(Duration(seconds: cacheIntervalInSeconds))
         .millisecondsSinceEpoch;
@@ -838,7 +832,7 @@ class _Cache<DT> {
     return DateTime.now().millisecondsSinceEpoch > _expireTime!;
   }
 
-  Response<DT> get response => _response!;
+  WebResponse<DT> get response => _response!;
 }
 
 Map<String, _Cache> _cacheStorage = {};

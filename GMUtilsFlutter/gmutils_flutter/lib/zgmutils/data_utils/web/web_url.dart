@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../utils/mappable.dart';
-import 'response.dart';
+import 'web_response.dart';
 
-///RDT: response data type
+///RDT: Response Data Type
 abstract class Url<RDT> {
   final String domain;
   final String fragments;
@@ -12,9 +12,9 @@ abstract class Url<RDT> {
   final Map<String, String> headers = {};
   final Map<String, String>? queries;
 
-  //final Mappable<RDT>? responseMapper;
-  final Mappable? responseMapper;
-  final Response<RDT> Function(String response)? responseEncoder;
+  final Mappable<RDT>? responseMapper;
+  final WebResponse<RDT> Function(dynamic response)? customResponseHandler;
+
   final String? logsName;
   final List<ObscureLogOption>? obscureLogOptions;
 
@@ -26,7 +26,7 @@ abstract class Url<RDT> {
     required this.queries,
     //
     required this.responseMapper,
-    required this.responseEncoder,
+    required this.customResponseHandler,
     //
     required this.logsName,
     required this.obscureLogOptions,
@@ -66,48 +66,58 @@ abstract class Url<RDT> {
 
   Uri get uri => Uri.parse(Uri.encodeFull(uriAsString));
 
-  Response<RDT> encodeResponse(String response) {
-    if (responseEncoder != null) {
-      var response2 = responseEncoder!(response);
-      return response2;
-    }
-    //
-    else if (responseMapper == null) {
-      return Response.failed(
-        url: this,
-        error: 'Internal error: either "Url.responseEncoder" or '
-            '"Url.responseMapper" should has value',
-        rawResponse: response,
-        httpCode: 0,
+  WebResponse<RDT> encodeResponse(String response) {
+    if (responseMapper == null && customResponseHandler == null) {
+      throw Exception(
+        'Internal error: either '
+        '"Url.responseMapper" or '
+        '"Url.customResponseHandler" or '
+        'should has value',
       );
+    }
+
+    response = response.trim();
+    dynamic data;
+
+    if ((response.startsWith('{') && response.endsWith('}')) ||
+        (response.startsWith('[') && response.endsWith(']'))) {
+      data = jsonDecode(response);
     }
     //
     else {
-      response = response.trim();
-      dynamic data;
+      data = response;
+    }
 
-      if ((response.startsWith('{') && response.endsWith('}')) ||
-          (response.startsWith('[') && response.endsWith(']'))) {
-        data = jsonDecode(response);
-      }
-      //
-      else {
-        data = response;
-      }
-
-      final responseObj = ResponseMapper(responseMapper!).from(data);
+    if (customResponseHandler != null) {
+      var response2 = customResponseHandler!(data);
+      return response2;
+    }
+    //
+    else {
+      final responseObj = WebResponseMapper(responseMapper!).from(data);
       responseObj.url = this;
 
-      // //to do remove
-      // print("*************API-RESPONSE:::>> "
-      //     "'${responseObj.rawResponse}' ---> "
-      //     "${responseObj.runtimeType} ---> "
-      //     "${responseObj.data?.runtimeType} ---> "
-      //     "${responseObj.data?.toString()} ---> "
-      //     "${responseObj.error}"
-      // );
+      /*//to do remove
+      print(
+        "*************API-RESPONSE:::>> "
+        "\n---> rawResponse: '${responseObj.rawResponse}' "
+        "\n---> runtimeType: ${responseObj.runtimeType} "
+        "\n---> data.runtimeType: ${responseObj.data?.runtimeType} "
+        "\n---> data: ${responseObj.data?.toString()} "
+        "\n---> error: ${responseObj.error} "
+        "\n---> responseObj: ${responseObj.toString()}",
+      );*/
 
-      return responseObj as Response<RDT>;
+      return responseObj as WebResponse<RDT>;
+
+      /*return Response<RDT>(
+        url: responseObj.url,
+        data: responseObj.data,
+        error: responseObj.error,
+        rawResponse: responseObj.rawResponse,
+        httpCode: responseObj.httpCode,
+        responseHeader: responseObj.responseHeader,
+      );*/
     }
   }
 
@@ -248,7 +258,7 @@ class GetUrl<RDT> extends Url<RDT> {
     super.queries,
     //
     required super.responseMapper,
-    super.responseEncoder,
+    super.customResponseHandler,
     //
     super.logsName,
     super.obscureLogOptions,
@@ -272,7 +282,7 @@ class _PostUrl<RDT> extends Url<RDT> {
     this.asJson = true,
     //
     required super.responseMapper,
-    super.responseEncoder,
+    super.customResponseHandler,
     //
     super.logsName,
     super.obscureLogOptions,
@@ -377,11 +387,16 @@ class PostUrl<RDT> extends _PostUrl<RDT> {
     super.asJson,
     //
     required super.responseMapper,
-    super.responseEncoder,
+    super.customResponseHandler,
     //
     super.logsName,
     super.obscureLogOptions,
   });
+
+  @override
+  String toString() {
+    return 'PostUrl{${super.toString()}}';
+  }
 }
 
 //-----------------------------------------------------
@@ -398,11 +413,16 @@ class PatchUrl<RDT> extends _PostUrl<RDT> {
     super.asJson,
     //
     required super.responseMapper,
-    super.responseEncoder,
+    super.customResponseHandler,
     //
     super.logsName,
     super.obscureLogOptions,
   });
+
+  @override
+  String toString() {
+    return 'PatchUrl{${super.toString()}}';
+  }
 }
 
 class PutUrl<RDT> extends _PostUrl<RDT> {
@@ -417,11 +437,16 @@ class PutUrl<RDT> extends _PostUrl<RDT> {
     super.asJson,
     //
     required super.responseMapper,
-    super.responseEncoder,
+    super.customResponseHandler,
     //
     super.logsName,
     super.obscureLogOptions,
   });
+
+  @override
+  String toString() {
+    return 'PutUrl{${super.toString()}}';
+  }
 }
 
 class DeleteUrl<RDT> extends _PostUrl<RDT> {
@@ -436,11 +461,16 @@ class DeleteUrl<RDT> extends _PostUrl<RDT> {
     super.asJson,
     //
     required super.responseMapper,
-    super.responseEncoder,
+    super.customResponseHandler,
     //
     super.logsName,
     super.obscureLogOptions,
   });
+
+  @override
+  String toString() {
+    return 'DeleteUrl{${super.toString()}}';
+  }
 }
 
 //-----------------------------------------------------
@@ -526,17 +556,18 @@ class MultiPartRequestUrl<RDT> extends Url<RDT> {
 
   MultiPartRequestUrl({
     required this.method,
+    //
     required super.domain,
     required super.fragments,
     required super.endPoint,
-    required super.headers,
+    super.headers,
     super.queries,
     //
     required this.files,
     this.formFields,
     //
     required Mappable<RDT> super.responseMapper,
-    super.responseEncoder,
+    super.customResponseHandler,
     //
     super.logsName,
     super.obscureLogOptions,

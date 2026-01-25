@@ -1,7 +1,7 @@
 import '../utils/mappable.dart';
 import 'web_url.dart';
 
-class Response<DATA> {
+class WebResponse<DATA> {
   Url? url;
   DATA? data;
   String? error;
@@ -9,7 +9,7 @@ class Response<DATA> {
   int? httpCode;
   Map<String, String>? responseHeader;
 
-  Response({
+  WebResponse({
     required this.url,
     required this.data,
     required this.error,
@@ -18,13 +18,13 @@ class Response<DATA> {
     required this.responseHeader,
   });
 
-  Response.success({
+  WebResponse.success({
     required this.url,
     required this.data,
     this.responseHeader,
   }) : httpCode = 200;
 
-  Response.failed({
+  WebResponse.failed({
     required this.url,
     required this.error,
     required this.rawResponse,
@@ -50,17 +50,17 @@ class Response<DATA> {
   }
 }
 
-class ResponseMapper<DT> extends Mappable<Response<DT>> {
+class WebResponseMapper<DT> extends Mappable<WebResponse<DT>> {
   final Mappable<DT> dataMapper;
 
-  ResponseMapper(this.dataMapper);
+  WebResponseMapper(this.dataMapper);
 
   @override
-  Response<DT> from(values) {
+  WebResponse<DT> from(values) {
     try {
       final data = dataMapper.from(values);
 
-      return Response(
+      return WebResponse(
         url: null,
         data: data,
         error: null,
@@ -82,7 +82,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
       try {
         var lst = dataMapper.fromMapList(values);
 
-        return Response(
+        return WebResponse(
           url: null,
           data: lst as DT?,
           error: null,
@@ -97,7 +97,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
     //
     else {
       try {
-        return Response(
+        return WebResponse(
           url: null,
           data: values,
           error: null,
@@ -120,10 +120,10 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
   }
 
   @override
-  Response<DT> fromMap(Map<String, dynamic> values) {
+  WebResponse<DT> fromMap(Map<String, dynamic> values) {
     final data = dataMapper.fromMap(values);
 
-    return Response(
+    return WebResponse(
       url: null,
       data: data,
       error: null,
@@ -134,7 +134,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
   }
 
   @override
-  Map<String, dynamic> toMap(Response<DT> object) {
+  Map<String, dynamic> toMap(WebResponse<DT> object) {
     throw UnimplementedError();
   }
 }

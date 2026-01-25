@@ -438,7 +438,7 @@ class _AppState extends State<App> {
   }
 
   Widget _starterWidget() {
-    final starterWidget = StarterWidget(
+    final starterWidget = _StarterWidget(
       startScreen: widget.startScreen!,
       measurements: widget.measurements,
       appColors: widget.appColors,
@@ -471,7 +471,7 @@ class _AppState extends State<App> {
   }
 }
 
-class StarterWidget extends StatefulWidget {
+class _StarterWidget extends StatefulWidget {
   Widget? startScreen;
   AppMeasurement Function(BuildContext context)? measurements;
   AppColors Function(BuildContext context, bool isLight)? appColors;
@@ -479,7 +479,7 @@ class StarterWidget extends StatefulWidget {
   String? Function()? defaultFontFamily;
   OnInitialize? onInitialize;
 
-  StarterWidget({
+  _StarterWidget({
     required Widget this.startScreen,
     required this.measurements,
     required this.appColors,
@@ -490,10 +490,10 @@ class StarterWidget extends StatefulWidget {
   }) : super();
 
   @override
-  State<StarterWidget> createState() => _StarterWidgetState();
+  State<_StarterWidget> createState() => _StarterWidgetState();
 }
 
-class _StarterWidgetState extends State<StarterWidget> {
+class _StarterWidgetState extends State<_StarterWidget> {
   @override
   Widget build(BuildContext context) {
     Logs.print(() => '[GMMain] _StarterWidgetState.build() '
@@ -558,3 +558,23 @@ class _NavigatorObserver extends NavigatorObserver {
 //==============================================================================
 
 typedef ObserverDelegate = void Function(String observerName, dynamic /*args*/);
+
+//============================================================================
+
+extension GMRouter on BuildContext {
+  void go(String path, {Object? extra}) => Navigator.pushNamed(
+    this,
+    path,
+    arguments: extra,
+  );
+
+  void push(String path, {Object? extra}) => Navigator.pushNamed(
+    this,
+    path,
+    arguments: extra,
+  );
+
+  bool canPop() => Navigator.canPop(this);
+
+  void pop([result]) => Navigator.pop(this, result);
+}

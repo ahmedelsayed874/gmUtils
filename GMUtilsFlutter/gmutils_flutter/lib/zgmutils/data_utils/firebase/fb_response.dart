@@ -1,24 +1,24 @@
 import '../../utils/collections/string_set.dart';
 import '../utils/mappable.dart';
 
-class Response<DATA> {
+class FBResponse<DATA> {
   final DATA? data;
   final StringSet? error;
   final bool noData;
   final bool connectionFailed;
 
-  Response._({
+  FBResponse._({
     this.data,
     this.error,
     this.noData = false,
     this.connectionFailed = false,
   });
 
-  Response.success({
+  FBResponse.success({
     required this.data,
   }) : error = null, noData = false, connectionFailed = false;
 
-  Response.failed({
+  FBResponse.failed({
     required this.error,
     this.noData = false,
     this.connectionFailed = false,
@@ -26,21 +26,21 @@ class Response<DATA> {
 
   @override
   String toString() {
-    return 'Response{data: $data, error: $error, noData: $noData, connectionFailed: $connectionFailed}';
+    return 'FBResponse{data: $data, error: $error, noData: $noData, connectionFailed: $connectionFailed}';
   }
 
 }
 
-class ResponseMapper<DT> extends Mappable<Response<DT>> {
+class FBResponseMapper<DT> extends Mappable<FBResponse<DT>> {
   final Mappable<DT> dataMapper;
 
-  ResponseMapper(this.dataMapper);
+  FBResponseMapper(this.dataMapper);
 
   @override
-  Response<DT> fromMap(Map<String, dynamic> values) {
+  FBResponse<DT> fromMap(Map<String, dynamic> values) {
     final data = dataMapper.fromMap(values);
 
-    return Response._(
+    return FBResponse._(
       data: data,
       error: null,
       connectionFailed: values['connectionFailed'],
@@ -48,7 +48,7 @@ class ResponseMapper<DT> extends Mappable<Response<DT>> {
   }
 
   @override
-  Map<String, dynamic> toMap(Response<DT> object) {
+  Map<String, dynamic> toMap(FBResponse<DT> object) {
     throw UnimplementedError();
   }
 }

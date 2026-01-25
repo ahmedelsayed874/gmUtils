@@ -1,12 +1,11 @@
-
 import '../utils/mappable.dart';
-import 'response.dart';
+import 'web_response.dart';
 import 'web_request_executors.dart';
 import 'web_url.dart';
 
 class UsefulApis {
-  Future<Response<_TimeOfAreaModel>> currentTimeInCairo() async {
-    Response<_TimeOfAreaModel> res = await WebRequestExecutor().executeGet(
+  Future<WebResponse<_TimeOfAreaModel>> currentTimeInCairo() async {
+    WebResponse<_TimeOfAreaModel> res = await WebRequestExecutor().executeGet(
       _TimeOfAreaUrl(),
     );
     return res;

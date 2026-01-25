@@ -2,7 +2,7 @@ import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/utils/mappable.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/utils/result.dart';
 
-import '../../zgmutils/data_utils/web/response.dart' as webResponse;
+import '../../zgmutils/data_utils/web/web_response.dart' as webResponse;
 
 class Response<T> {
   static const String statusSuccess = 'Success';
@@ -62,7 +62,7 @@ class Response<T> {
   }
 
   static Response<T> fromWebResponse<T>(
-    webResponse.Response<Response<T>> response,
+    webResponse.WebResponse<Response<T>> response,
   ) {
     if (response.isConnectionFailed) {
       return Response(
@@ -100,7 +100,7 @@ class Response<T> {
   }
 
   static Response<T> fromDummyResponse<T>(
-    webResponse.Response<Result<T?>> response,
+    webResponse.WebResponse<Result<T?>> response,
   ) {
     if (response.isSuccess) {
       if (response.error != null) {

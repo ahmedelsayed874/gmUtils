@@ -5,7 +5,7 @@ import 'package:gmutils_flutter/data/data_source/users/users_datasource.dart';
 import 'package:gmutils_flutter/data/models/notifications/notifications_count.dart';
 import 'package:gmutils_flutter/data/models/users/user_account.dart';
 import 'package:gmutils_flutter/ui/utils/iscreen_driver.dart';
-import 'package:gmutils_flutter/zgmutils/data_utils/web/response.dart';
+import 'package:gmutils_flutter/zgmutils/data_utils/web/web_response.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/web/web_request_executors.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/web/web_url.dart';
 import 'package:gmutils_flutter/zgmutils/gm_main.dart';
@@ -87,7 +87,7 @@ abstract class HomeScreenDriverAbs extends IScreenDriver {
           endPoint: '',
           responseMapper: null,
           queries: null,
-          responseEncoder: (response) {
+          customResponseHandler: (response) {
             try {
               var map = jsonDecode(response) as Map<String, dynamic>;
               var dateMap = map['data']['hijri'];
@@ -95,9 +95,9 @@ abstract class HomeScreenDriverAbs extends IScreenDriver {
               var month = dateMap['month']['ar'];
               var year = dateMap['year'];
 
-              return Response.success(url: null, data: ["$day", "$month", "$year"]);
+              return WebResponse.success(url: null, data: ["$day", "$month", "$year"]);
             } catch (e) {
-              return Response.failed(url: null, rawResponse: response, error: e.toString(), httpCode: 400);
+              return WebResponse.failed(url: null, rawResponse: response, error: e.toString(), httpCode: 400);
             }
           }),
     );

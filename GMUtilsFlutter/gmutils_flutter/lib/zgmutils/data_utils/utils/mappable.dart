@@ -21,8 +21,7 @@ abstract class Mappable<T> {
             'Mappable.fromJsonObject ----> EXCEPTION:: $e ----> json: $json -----> map: $map',
       );
       Logs.print(
-            () =>
-        'Mappable.fromJsonObject ----> STACKTRACE:: $s',
+        () => 'Mappable.fromJsonObject ----> STACKTRACE:: $s',
       );
       //throw 'decoding json failed ... json: $json -----> map: $map';
       rethrow;
@@ -42,8 +41,7 @@ abstract class Mappable<T> {
             'Mappable.fromJsonArray ----> EXCEPTION:: $e ----> json: $json -----> map: $map',
       );
       Logs.print(
-            () =>
-        'Mappable.fromJsonArray ----> STACKTRACE:: $s',
+        () => 'Mappable.fromJsonArray ----> STACKTRACE:: $s',
       );
       //throw 'decoding json failed ... json: $json -----> map: $map';
       rethrow;
@@ -93,10 +91,11 @@ abstract class Mappable<T> {
     } catch (e, s) {
       //throw '$e\n$s\n-----> map: $map';
 
-      Logs.print(() => 'Mappable.toJsonObject '
-          '----> EXCEPTION: $e \n'
-          '-----> STACKTRACE:: $s, \n'
-          '-----> RESULTED-MAP: $map',
+      Logs.print(
+        () => 'Mappable.toJsonObject '
+            '----> EXCEPTION: $e \n'
+            '-----> STACKTRACE:: $s, \n'
+            '-----> RESULTED-MAP: $map',
       );
       rethrow;
     }
@@ -112,14 +111,47 @@ abstract class Mappable<T> {
     } catch (e, s) {
       //throw '$e\n$s\n-----> map: $map';
 
-      Logs.print(() => 'Mappable.toJsonObject '
-          '----> EXCEPTION: $e \n'
-          '-----> STACKTRACE:: $s, \n'
-          '-----> RESULTED-MAP: $map',
+      Logs.print(
+        () => 'Mappable.toJsonObject '
+            '----> EXCEPTION: $e \n'
+            '-----> STACKTRACE:: $s, \n'
+            '-----> RESULTED-MAP: $map',
       );
 
       rethrow;
     }
+  }
+
+  static Mappable<T> anonymous<T>(
+    T Function(Map<String, dynamic> values) handler,
+  ) =>
+      AnonymousMapper(handler);
+}
+
+class AnonymousMapper<T> extends Mappable<T> {
+  final T Function(Map<String, dynamic> values) handler;
+
+  AnonymousMapper(this.handler);
+
+  @override
+  T fromMap(Map<String, dynamic> values) {
+    return handler(values);
+  }
+}
+
+class ListMapper<T> extends Mappable<List<T>> {
+  final Mappable<T> itemMapper;
+
+  ListMapper(this.itemMapper);
+
+  @override
+  List<T> fromMap(Map<String, dynamic> values) {
+    return itemMapper.fromMapList(values.values.first) ?? [];
+  }
+
+  @override
+  List<List<T>>? fromMapList(List<dynamic>? values) {
+    throw UnimplementedError();
   }
 }
 

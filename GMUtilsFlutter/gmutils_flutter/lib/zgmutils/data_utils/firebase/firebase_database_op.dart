@@ -8,7 +8,7 @@ import '../../utils/logs.dart';
 import '../utils/mappable.dart';
 import '../../utils/collections/string_set.dart';
 import 'firebase_utils.dart';
-import 'response.dart';
+import 'fb_response.dart';
 
 abstract class IFirebaseDatabaseOp<T> {
   final Mappable<T> mappable;
@@ -27,15 +27,15 @@ abstract class IFirebaseDatabaseOp<T> {
 
   //----------------------------------------------------------------------------
 
-  Future<Response<bool>> saveData(T data, {required String? subNodePath});
+  Future<FBResponse<bool>> saveData(T data, {required String? subNodePath});
 
-  Future<Response<bool>> saveMultipleData({
+  Future<FBResponse<bool>> saveMultipleData({
     required Map<String, T> nodesAndData,
   });
 
   //----------------------------------------------------------------------------
 
-  Future<Response<List<T>>> retrieveAll({
+  Future<FBResponse<List<T>>> retrieveAll({
     FBFilterOption? filterOption,
     List<Map> Function(Object value)? collectionSource,
     String? subNodePath,
@@ -43,7 +43,7 @@ abstract class IFirebaseDatabaseOp<T> {
 
   //----------------------------------------------------------------------------
 
-  Future<Response<T>> retrieveOnly({
+  Future<FBResponse<T>> retrieveOnly({
     required String? subNodePath,
   });
 
@@ -81,9 +81,9 @@ abstract class IFirebaseDatabaseOp<T> {
 
   //----------------------------------------------------------------------------
 
-  Future<Response<bool>> clear();
+  Future<FBResponse<bool>> clear();
 
-  Future<Response<bool>> removeNode({required String subNodePath});
+  Future<FBResponse<bool>> removeNode({required String subNodePath});
 }
 
 class FBFilterOption {
@@ -165,12 +165,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<bool>> saveData(T data, {required String? subNodePath}) async {
+  Future<FBResponse<bool>> saveData(T data, {required String? subNodePath}) async {
     DatabaseReference ref = await _getReferenceOfNode(subNodePath);
     return saveDataTo(ref, data);
   }
 
-  Future<Response<bool>> saveDataTo(DatabaseReference ref, T data) async {
+  Future<FBResponse<bool>> saveDataTo(DatabaseReference ref, T data) async {
     Logs.print(() => 'FirebaseDatabaseOp[Call].saveDataTo'
         '(ref: ${ref.path}, '
         'data: ${TextUtils().trimEnd('$data')}'
@@ -188,10 +188,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           '(ref: ${ref.path}) '
           '---> added: $added');
 
-      return Response.success(data: added);
+      return FBResponse.success(data: added);
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].saveDataTo(ref: ${ref.path}) ---> $e');
-      return Response.failed(
+      return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
       );
@@ -199,12 +199,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   }
 
   @override
-  Future<Response<bool>> saveMultipleData({required Map<String, T> nodesAndData,}) async {
+  Future<FBResponse<bool>> saveMultipleData({required Map<String, T> nodesAndData,}) async {
     DatabaseReference ref = await _getReferenceOfNode(null);
     return saveMultipleDataTo(ref, nodesAndData: nodesAndData);
   }
 
-  Future<Response<bool>> saveMultipleDataTo(
+  Future<FBResponse<bool>> saveMultipleDataTo(
       DatabaseReference ref, {
         required Map<String, T> nodesAndData,
       }) async {
@@ -232,10 +232,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           '(ref: ${ref.path}) '
           '---> added: $added');
 
-      return Response.success(data: added);
+      return FBResponse.success(data: added);
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].saveMultipleDataTo(ref: ${ref.path}) ---> $e');
-      return Response.failed(
+      return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
       );
@@ -245,7 +245,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<List<T>>> retrieveAll({
+  Future<FBResponse<List<T>>> retrieveAll({
     FBFilterOption? filterOption,
     List<Map> Function(Object value)? collectionSource,
     String? subNodePath,
@@ -301,7 +301,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         }
       }).timeout(const Duration(seconds: 10));
 
-      Response<List<T>> response;
+      FBResponse<List<T>> response;
       
       if (snapshot.exists) {
         List<T> list = await _mapData(
@@ -309,11 +309,11 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           collectionSource,
         );
 
-        response = Response.success(data: list);
+        response = FBResponse.success(data: list);
       }
       //
       else {
-        response = Response.failed(
+        response = FBResponse.failed(
           error: StringSet('No data', "لا توجد بيانات"),
           noData: true,
         );
@@ -329,13 +329,13 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       return response;
     } on TimeoutException catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response.TimeoutException].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
-      return Response.failed(
+      return FBResponse.failed(
         error: _timeoutErrorMessage,
         connectionFailed: true,
       );
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
-      return Response.failed(
+      return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: false,
       );
@@ -381,12 +381,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<T>> retrieveOnly({required String? subNodePath}) async {
+  Future<FBResponse<T>> retrieveOnly({required String? subNodePath}) async {
     var ref = await _getReferenceOfNode(subNodePath);
     return await retrieveOnlyFrom(ref: ref);
   }
 
-  Future<Response<T>> retrieveOnlyFrom({
+  Future<FBResponse<T>> retrieveOnlyFrom({
     required DatabaseReference ref,
   }) async {
     Logs.print(() => 'FirebaseDatabaseOp[Call].retrieveOnlyFrom(ref: ${ref.path})',);
@@ -399,7 +399,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         return event.snapshot;
       }).timeout(const Duration(seconds: 10));
 
-      Response<T> response;
+      FBResponse<T> response;
       
       if (snapshot.exists) {
         if (snapshot.value is List) {
@@ -417,11 +417,11 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           }
         }
 
-        response = Response.success(data: mappable.fromMap(map));
+        response = FBResponse.success(data: mappable.fromMap(map));
       }
       //
       else {
-        response = Response.failed(
+        response = FBResponse.failed(
           error: StringSet('No data', "لا توجد بيانات"),
           noData: true,
         );
@@ -437,14 +437,14 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     } on TimeoutException catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response.TimeoutException].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
 
-      return Response.failed(
+      return FBResponse.failed(
         error: _timeoutErrorMessage,
         connectionFailed: true,
       );
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
       
-      return Response.failed(
+      return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: false,
       );
@@ -556,7 +556,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<bool>> clear() async {
+  Future<FBResponse<bool>> clear() async {
     Logs.print(() => 'FirebaseDatabaseOp[Call].clear()');
 
     try {
@@ -564,10 +564,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       var ref = await databaseReference;
       await ref.remove().onError((error, stackTrace) => suc = false);
       Logs.print(() => 'FirebaseDatabaseOp[Response].clear() ---> success:: $suc');
-      return Response.success(data: suc);
+      return FBResponse.success(data: suc);
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response].clear() ---> $e');
-      return Response.failed(
+      return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
       );
@@ -575,7 +575,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   }
 
   @override
-  Future<Response<bool>> removeNode({required String subNodePath}) async {
+  Future<FBResponse<bool>> removeNode({required String subNodePath}) async {
     var ref = await _getReferenceOfNode(subNodePath);
 
     Logs.print(() => 'FirebaseDatabaseOp[Call].removeNode(ref: ${ref.path})');
@@ -584,10 +584,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       bool deleted = true;
       await ref.remove().onError((error, stackTrace) => deleted = false);
       Logs.print(() => 'FirebaseDatabaseOp[Response].removeNode(ref: ${ref.path}) ---> deleted:: $deleted');
-      return Response.success(data: deleted);
+      return FBResponse.success(data: deleted);
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].removeNode(ref: ${ref.path}) ---> $e');
-      return Response.failed(
+      return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
       );

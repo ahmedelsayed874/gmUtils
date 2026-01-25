@@ -3,27 +3,27 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import '../../utils/logs.dart';
-import '../utils/result.dart';
 import '../../utils/collections/string_set.dart';
+import '../../utils/logs.dart';
 import '../../utils/text/text_utils.dart';
+import '../utils/result.dart';
+import 'fb_response.dart';
 import 'firebase_utils.dart';
-import 'response.dart';
 
 abstract class IFirebaseAuthManager {
-  Future<Response<bool>> registerByNonEmail({
+  Future<FBResponse<bool>> registerByNonEmail({
     required String text,
     required String password,
   });
 
-  Future<Response<bool>> registerByEmail({
+  Future<FBResponse<bool>> registerByEmail({
     required String email,
     required String password,
   });
 
-  Future<Response<User>> loginByNonEmail(String text, String password);
+  Future<FBResponse<User>> loginByNonEmail(String text, String password);
 
-  Future<Response<User>> loginByEmail(String email, String password);
+  Future<FBResponse<User>> loginByEmail(String email, String password);
 
   Future<void> logout();
 
@@ -39,25 +39,25 @@ abstract class IFirebaseAuthManager {
 
   //----------------------------------------------------------------------------
 
-  Future<Response<bool>> startPasswordReset({
+  Future<FBResponse<bool>> startPasswordReset({
     required String identifier,
     required bool isEmailIdentifier,
   });
 
-  Future<Response<bool>> verifyResetPasswordCode({
+  Future<FBResponse<bool>> verifyResetPasswordCode({
     required String identifier,
     required bool isEmailIdentifier,
     required String resetPasswordCode,
   });
 
-  Future<Response<bool>> changePasswordAfterResetting(
+  Future<FBResponse<bool>> changePasswordAfterResetting(
     String resetPasswordCode,
     String newPassword,
   );
 
   //----------------------------------------------------------------------------
 
-  Future<Response<bool>> changePassword({
+  Future<FBResponse<bool>> changePassword({
     required String identifier,
     required bool isEmailIdentifier,
     required String currentPassword,
@@ -68,13 +68,14 @@ abstract class IFirebaseAuthManager {
 
   static const String EMAIL_ALREADY_IN_USE = 'User identifier already in use';
 
-  Response<T> firebaseAuthExceptionMessage<T>(FirebaseAuthException e);
+  FBResponse<T> firebaseAuthExceptionMessage<T>(FirebaseAuthException e);
 }
 
 class FirebaseAuthManager extends IFirebaseAuthManager {
   final String _nonEmailHostName;
 
-  FirebaseAuthManager({String nonEmailHostName = 'myusers.org'}) : _nonEmailHostName = nonEmailHostName;
+  FirebaseAuthManager({String nonEmailHostName = 'myusers.org'})
+      : _nonEmailHostName = nonEmailHostName;
 
   FirebaseAuth? _auth;
 
@@ -108,8 +109,8 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
       return Result(userCredential);
     } on TimeoutException catch (e) {
-      Logs.print(
-          () => 'FirebaseAuthManager[Response.TimeoutException]._userCredential ---> $e');
+      Logs.print(() =>
+          'FirebaseAuthManager[Response.TimeoutException]._userCredential ---> $e');
       return Result(null,
           message: StringSet(
             'Request timeout. please check your connection.',
@@ -121,14 +122,14 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       var r = firebaseAuthExceptionMessage(e);
       return Result(null, message: r.error);
     } catch (e) {
-      Logs.print(
-          () => 'FirebaseAuthManager[Response.Exception]._userCredential ---> $e');
+      Logs.print(() =>
+          'FirebaseAuthManager[Response.Exception]._userCredential ---> $e');
       return Result(null, message: StringSet(e.toString()));
     }
   }
 
   @override
-  Future<Response<bool>> registerByNonEmail({
+  Future<FBResponse<bool>> registerByNonEmail({
     required String text,
     required String password,
   }) async {
@@ -144,7 +145,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
   }
 
   @override
-  Future<Response<bool>> registerByEmail({
+  Future<FBResponse<bool>> registerByEmail({
     required String email,
     required String password,
   }) async {
@@ -165,7 +166,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
         Logs.print(() => 'FirebaseAuthManager[Response].registerByEmail '
             '----> ERROR:: ${res.message?.en}');
 
-        return Response.failed(error: res.message);
+        return FBResponse.failed(error: res.message);
       }
 
       UserCredential userCredential = res.result!;
@@ -175,20 +176,20 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       Logs.print(() => 'FirebaseAuthManager[Response].registerByEmail '
           '----> registered: $registered');
 
-      return Response.success(data: registered);
+      return FBResponse.success(data: registered);
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager[Response.FirebaseAuthException].registerByEmail ---> $e');
       return firebaseAuthExceptionMessage(e);
     } catch (e) {
-      Logs.print(
-          () => 'FirebaseAuthManager[Response.Exception].registerByEmail ---> $e');
-      return Response.failed(error: StringSet(e.toString()));
+      Logs.print(() =>
+          'FirebaseAuthManager[Response.Exception].registerByEmail ---> $e');
+      return FBResponse.failed(error: StringSet(e.toString()));
     }
   }
 
   @override
-  Future<Response<User>> loginByNonEmail(String text, String password) {
+  Future<FBResponse<User>> loginByNonEmail(String text, String password) {
     Logs.print(() => 'FirebaseAuthManager[Call].loginByNonEmail('
         'text: $text, '
         'password: ********');
@@ -197,7 +198,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
   }
 
   @override
-  Future<Response<User>> loginByEmail(String email, String password) async {
+  Future<FBResponse<User>> loginByEmail(String email, String password) async {
     Logs.print(() => 'FirebaseAuthManager[Call].loginByEmail('
         'text: $email, '
         'password: ********');
@@ -214,19 +215,19 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
         Logs.print(() => 'FirebaseAuthManager[Response].loginByEmail '
             '----> ERROR:: ${res.message?.en}');
 
-        return Response.failed(error: res.message);
+        return FBResponse.failed(error: res.message);
       }
 
       UserCredential userCredential = res.result!;
 
-      Response<User> response;
+      FBResponse<User> response;
 
       if (userCredential.user != null) {
-        response = Response.success(data: userCredential.user);
+        response = FBResponse.success(data: userCredential.user);
       }
       //
       else {
-        response = Response.failed(
+        response = FBResponse.failed(
           error: StringSet(
             "login failed",
             "تعذر تسجيل الدخول",
@@ -240,18 +241,20 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
 
       return response;
     } on TimeoutException catch (e) {
-      Logs.print(() => 'FirebaseAuthManager[Response.TimeoutException].loginByEmail ---> $e');
-      return Response.failed(
-          error: StringSet('Request timeout. please check your connection.',
-              'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'),
+      Logs.print(() =>
+          'FirebaseAuthManager[Response.TimeoutException].loginByEmail ---> $e');
+      return FBResponse.failed(
+        error: StringSet('Request timeout. please check your connection.',
+            'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.'),
       );
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager[Response.FirebaseAuthException].loginByEmail ---> $e');
       return firebaseAuthExceptionMessage(e);
     } catch (e) {
-      Logs.print(() => 'FirebaseAuthManager[Response.Exception].loginByEmail ---> $e');
-      return Response.failed(error: StringSet(e.toString()));
+      Logs.print(
+          () => 'FirebaseAuthManager[Response.Exception].loginByEmail ---> $e');
+      return FBResponse.failed(error: StringSet(e.toString()));
     }
   }
 
@@ -262,14 +265,15 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       await (await fbAuth).signOut();
       Logs.print(() => 'FirebaseAuthManager[Response].logout ---> DONE');
     } catch (e) {
-      Logs.print(() => 'FirebaseAuthManager[Response].logout ---> Exception:: $e');
+      Logs.print(
+          () => 'FirebaseAuthManager[Response].logout ---> Exception:: $e');
     }
   }
 
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<bool>> startPasswordReset({
+  Future<FBResponse<bool>> startPasswordReset({
     required String identifier,
     required bool isEmailIdentifier,
   }) async {
@@ -286,20 +290,20 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       Logs.print(() => 'FirebaseAuthManager[Response].startPasswordReset '
           '---> DONE');
 
-      return Response.success(data: true);
+      return FBResponse.success(data: true);
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager[Response.FirebaseAuthException].startPasswordReset ---> $e');
       return firebaseAuthExceptionMessage(e);
     } catch (e) {
-      Logs.print(
-          () => 'FirebaseAuthManager[Response.Exception].startPasswordReset ---> $e');
-      return Response.failed(error: StringSet(e.toString()));
+      Logs.print(() =>
+          'FirebaseAuthManager[Response.Exception].startPasswordReset ---> $e');
+      return FBResponse.failed(error: StringSet(e.toString()));
     }
   }
 
   @override
-  Future<Response<bool>> verifyResetPasswordCode({
+  Future<FBResponse<bool>> verifyResetPasswordCode({
     required String identifier,
     required bool isEmailIdentifier,
     required String resetPasswordCode,
@@ -318,10 +322,10 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
         resetPasswordCode,
       );
 
-      Response<bool> response;
+      FBResponse<bool> response;
 
       if (emailRelatedCode != email) {
-        response = Response.failed(
+        response = FBResponse.failed(
             error: StringSet(
           'The resetting code is wrong',
           'الكود خاطيء',
@@ -329,7 +333,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       }
       //
       else {
-        response = Response.success(data: true);
+        response = FBResponse.success(data: true);
       }
 
       Logs.print(() => 'FirebaseAuthManager[Response].verifyResetPasswordCode '
@@ -345,17 +349,16 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     } catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager[Response.Exception].verifyResetPasswordCode ---> $e');
-      return Response.failed(error: StringSet(e.toString()));
+      return FBResponse.failed(error: StringSet(e.toString()));
     }
   }
 
   @override
-  Future<Response<bool>> changePasswordAfterResetting(
+  Future<FBResponse<bool>> changePasswordAfterResetting(
     String resetPasswordCode,
     String newPassword,
   ) async {
-    Logs.print(
-            () => 'FirebaseAuthManager[Call].changePasswordAfterResetting');
+    Logs.print(() => 'FirebaseAuthManager[Call].changePasswordAfterResetting');
 
     try {
       await (await fbAuth).confirmPasswordReset(
@@ -363,10 +366,10 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
         newPassword: newPassword,
       );
 
-      Logs.print(
-          () => 'FirebaseAuthManager[Call].changePasswordAfterResetting ---> DONE');
+      Logs.print(() =>
+          'FirebaseAuthManager[Call].changePasswordAfterResetting ---> DONE');
 
-      return Response.success(data: true);
+      return FBResponse.success(data: true);
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager[Response.FirebaseAuthException].changePasswordAfterResetting ---> $e');
@@ -374,14 +377,14 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
     } catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager[Response.Exception].changePasswordAfterResetting ---> $e');
-      return Response.failed(error: StringSet(e.toString()));
+      return FBResponse.failed(error: StringSet(e.toString()));
     }
   }
 
   //----------------------------------------------------------------------------
 
   @override
-  Future<Response<bool>> changePassword({
+  Future<FBResponse<bool>> changePassword({
     required String identifier,
     required bool isEmailIdentifier,
     required String currentPassword,
@@ -409,7 +412,7 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       await fauth.currentUser!.updatePassword(newPassword);
       Logs.print(() => 'FirebaseAuthManager[Response].changePassword '
           '---> currentUser.uid: ${fauth.currentUser?.uid} ----> DONE');
-      return Response.success(data: true);
+      return FBResponse.success(data: true);
     } on FirebaseAuthException catch (e) {
       Logs.print(() =>
           'FirebaseAuthManager[Response.FirebaseAuthException].changePassword ----> $e');
@@ -421,9 +424,9 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
             password: currentPassword,
           );
           await fauth.currentUser!.updatePassword(newPassword);
-          return Response.success(data: true);
+          return FBResponse.success(data: true);
         } catch (e) {
-          return Response.failed(
+          return FBResponse.failed(
               error: StringSet(
             'failed to change password',
             'تعذر تغيير كلمة المرور',
@@ -435,23 +438,23 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
         return firebaseAuthExceptionMessage(e);
       }
     } catch (e) {
-      Logs.print(
-          () => 'FirebaseAuthManager[Response.Exception].changePassword ----> $e');
-      return Response.failed(error: StringSet(e.toString()));
+      Logs.print(() =>
+          'FirebaseAuthManager[Response.Exception].changePassword ----> $e');
+      return FBResponse.failed(error: StringSet(e.toString()));
     }
   }
 
   //----------------------------------------------------------------------------
 
   @override
-  Response<T> firebaseAuthExceptionMessage<T>(FirebaseAuthException e) {
+  FBResponse<T> firebaseAuthExceptionMessage<T>(FirebaseAuthException e) {
     String errEn = e.code.replaceAll('-', ' ');
     String errAr = errEn;
 
     if (e.code == 'network-request-failed') {
       errEn = "No internet connection";
       errAr = 'لا يوجد اتصال بالإنترنت';
-      return Response.failed(
+      return FBResponse.failed(
         error: StringSet(errEn, errAr),
         connectionFailed: true,
       );
@@ -504,6 +507,6 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       errAr += '\n\n<<${e.message}>>';
     }
 
-    return Response.failed(error: StringSet(errEn, errAr));
+    return FBResponse.failed(error: StringSet(errEn, errAr));
   }
 }
