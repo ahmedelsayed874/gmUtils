@@ -9,6 +9,7 @@ abstract class Url<RDT> {
   final String domain;
   final String fragments;
   final String endPoint;
+
   final Map<String, String> headers = {};
   final Map<String, String>? queries;
 
@@ -110,7 +111,7 @@ abstract class Url<RDT> {
 
       return responseObj as WebResponse<RDT>;
 
-      /*return Response<RDT>(
+      /*return WebResponse<RDT>(
         url: responseObj.url,
         data: responseObj.data,
         error: responseObj.error,
@@ -139,6 +140,22 @@ abstract class Url<RDT> {
 
     return s;
   }
+
+  Url<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  });
 
   //-----------------------------------------------
 
@@ -198,10 +215,6 @@ abstract class Url<RDT> {
         newList.add(_obscureMap(lstItem));
       }
       //
-      /*else if (lstItem is List) {
-        newList.add(_obscureList(lstItem));
-      }*/
-      //
       else {
         newList.add(lstItem);
       }
@@ -210,9 +223,9 @@ abstract class Url<RDT> {
     return newList;
   }
 
-  Map? get obscuredHeaders => _obscureMap(headers);
+  get obscuredHeaders => _obscureMap(headers);
 
-  Map? get obscuredQueries => _obscureMap(queries);
+  get obscuredQueries => _obscureMap(queries);
 
   String get obscuredUriAsString {
     if (obscureLogOptions == null) return uriAsString;
@@ -263,15 +276,48 @@ class GetUrl<RDT> extends Url<RDT> {
     super.logsName,
     super.obscureLogOptions,
   });
+
+  @override
+  GetUrl<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  }) =>
+      GetUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+      );
 }
 
-class _PostUrl<RDT> extends Url<RDT> {
-  final Map<String, dynamic>? params;
+//-----------------------------------------------------
+
+class _DataUrl<RDT> extends Url<RDT> {
+  ///Map<String, dynamic> or List or String or num or null
+  final dynamic params;
   final bool asJson;
 
-  //final String? body;
-
-  _PostUrl({
+  _DataUrl({
     required super.domain,
     required super.fragments,
     required super.endPoint,
@@ -294,18 +340,49 @@ class _PostUrl<RDT> extends Url<RDT> {
       }
       //
       else {
+        assert(
+          params is Map,
+          'for POST/PATCH/PUT only Map is allowed when using asJson = false',
+        );
+
         addHeaderIfNotExist(
-            'Content-Type', 'application/x-www-form-urlencoded');
+          'Content-Type',
+          'application/x-www-form-urlencoded',
+        );
       }
     }
   }
 
   Object get postObject {
-    if (params?.isNotEmpty == true) {
+    if (params != null) {
       if (asJson) {
-        final json = jsonEncode(params);
-        //Logs.print(() => 'PostUrl -> json: $json');
-        return json;
+        try {
+          final json = jsonEncode(params);
+          return json;
+        } catch (_) {
+          var b = false;
+          if (params is String) {
+            b = true;
+          } else if (params is num) {
+            b = true;
+          } else if (params is bool) {
+            b = true;
+          }
+          assert(
+            b,
+            'for POST/PATCH/PUT only '
+            'Map<String, dynamic>, '
+            'List, '
+            'String, '
+            'num, '
+            'bool '
+            'is allowed when using asJson = true, '
+            'provided params type is: ${params.runtimeType}, '
+            'provided params value is: $params',
+          );
+
+          return params;
+        }
       }
       //
       else {
@@ -314,7 +391,6 @@ class _PostUrl<RDT> extends Url<RDT> {
           if (q.isNotEmpty) q += '&';
           q += '$key=$value';
         });
-        //Logs.print(() => 'PostUrl -> parameters: $q');
         return q;
       }
     }
@@ -327,24 +403,89 @@ class _PostUrl<RDT> extends Url<RDT> {
   @override
   String get signature {
     var s = super.signature;
-    params?.forEach((key, value) {
-      s += key.hashCode.toString();
-      s += '$value'.hashCode.toString();
-    });
+    if (params is Map) {
+      params?.forEach((key, value) {
+        s += key.hashCode.toString();
+        s += '$value'.hashCode.toString();
+      });
+    }
+    //
+    else if (params is List) {
+      params?.forEach((value) {
+        s += '$value'.hashCode.toString();
+      });
+    }
+    //
+    else if (params != null) {
+      s += '$params'.hashCode.toString();
+    }
     s += '$asJson'.hashCode.toString();
     return s;
   }
 
+  @override
+  _DataUrl<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  }) =>
+      this;
+
+  _DataUrl<RDT> clone2({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+    //
+    dynamic overriddenParams,
+    bool? overriddenAsJson,
+  }) =>
+      this;
+
   //-----------------------------------------
 
-  Map? get obscuredParams => _obscureMap(params);
+  get obscuredParams {
+    if (params is Map) {
+      return _obscureMap(params);
+    }
+    //
+    else if (params is List) {
+      return _obscureList(params);
+    }
+    //
+    else {
+      return params;
+    }
+  }
 
-  Object get obscuredPostObject {
+  get obscuredPostObject {
     if (obscuredParams?.isNotEmpty == true) {
       if (asJson) {
-        final json = jsonEncode(obscuredParams);
-        //Logs.print(() => 'PostUrl -> json: $json');
-        return json;
+        try {
+          final json = jsonEncode(obscuredParams);
+          return json;
+        } catch (_) {
+          return obscuredParams;
+        }
       }
       //
       else {
@@ -353,7 +494,6 @@ class _PostUrl<RDT> extends Url<RDT> {
           if (q.isNotEmpty) q += '&';
           q += '$key=$value';
         });
-        //Logs.print(() => 'PostUrl -> parameters: $q');
         return q;
       }
     }
@@ -375,7 +515,7 @@ class _PostUrl<RDT> extends Url<RDT> {
   }
 }
 
-class PostUrl<RDT> extends _PostUrl<RDT> {
+class PostUrl<RDT> extends _DataUrl<RDT> {
   PostUrl({
     required super.domain,
     required super.fragments,
@@ -394,14 +534,84 @@ class PostUrl<RDT> extends _PostUrl<RDT> {
   });
 
   @override
+  PostUrl<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  }) =>
+      PostUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+        //
+        params: params,
+        asJson: asJson,
+      );
+
+  @override
+  PostUrl<RDT> clone2({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+    //
+    dynamic overriddenParams,
+    bool? overriddenAsJson,
+  }) =>
+      PostUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+        //
+        params: overriddenParams ?? params,
+        asJson: overriddenAsJson ?? asJson,
+      );
+
+  @override
   String toString() {
     return 'PostUrl{${super.toString()}}';
   }
 }
 
-//-----------------------------------------------------
-
-class PatchUrl<RDT> extends _PostUrl<RDT> {
+class PatchUrl<RDT> extends _DataUrl<RDT> {
   PatchUrl({
     required super.domain,
     required super.fragments,
@@ -420,12 +630,84 @@ class PatchUrl<RDT> extends _PostUrl<RDT> {
   });
 
   @override
+  PatchUrl<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  }) =>
+      PatchUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+        //
+        params: params,
+        asJson: asJson,
+      );
+
+  @override
+  PatchUrl<RDT> clone2({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+    //
+    dynamic overriddenParams,
+    bool? overriddenAsJson,
+  }) =>
+      PatchUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+        //
+        params: overriddenParams ?? params,
+        asJson: overriddenAsJson ?? asJson,
+      );
+
+  @override
   String toString() {
     return 'PatchUrl{${super.toString()}}';
   }
 }
 
-class PutUrl<RDT> extends _PostUrl<RDT> {
+class PutUrl<RDT> extends _DataUrl<RDT> {
   PutUrl({
     required super.domain,
     required super.fragments,
@@ -444,12 +726,85 @@ class PutUrl<RDT> extends _PostUrl<RDT> {
   });
 
   @override
+  PutUrl<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  }) =>
+      PutUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+        //
+        params: params,
+        asJson: asJson,
+      );
+
+  @override
+  PutUrl<RDT> clone2({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+    //
+    dynamic overriddenParams,
+    bool? overriddenAsJson,
+  }) =>
+      PutUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+        //
+        params: overriddenParams ?? params,
+        asJson: overriddenAsJson ?? asJson,
+      );
+
+  @override
   String toString() {
     return 'PutUrl{${super.toString()}}';
   }
 }
 
-class DeleteUrl<RDT> extends _PostUrl<RDT> {
+class DeleteUrl<RDT> extends _DataUrl<RDT> {
   DeleteUrl({
     required super.domain,
     required super.fragments,
@@ -466,6 +821,80 @@ class DeleteUrl<RDT> extends _PostUrl<RDT> {
     super.logsName,
     super.obscureLogOptions,
   });
+
+  @override
+  DeleteUrl<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  }) =>
+      DeleteUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+
+        //
+        params: params,
+        asJson: asJson,
+      );
+
+  @override
+  DeleteUrl<RDT> clone2({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+    //
+    dynamic overriddenParams,
+    bool? overriddenAsJson,
+  }) =>
+      DeleteUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        //
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+        //
+        params: overriddenParams ?? params,
+        asJson: overriddenAsJson ?? asJson,
+      );
 
   @override
   String toString() {
@@ -566,7 +995,7 @@ class MultiPartRequestUrl<RDT> extends Url<RDT> {
     required this.files,
     this.formFields,
     //
-    required Mappable<RDT> super.responseMapper,
+    required super.responseMapper,
     super.customResponseHandler,
     //
     super.logsName,
@@ -586,9 +1015,84 @@ class MultiPartRequestUrl<RDT> extends Url<RDT> {
     return s;
   }
 
+  @override
+  MultiPartRequestUrl<RDT> clone({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+  }) =>
+      MultiPartRequestUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+
+        method: method,
+        //
+        files: files,
+        formFields: formFields,
+      );
+
+  MultiPartRequestUrl<RDT> clone2({
+    String? overriddenDomain,
+    String? overriddenFragments,
+    String? overriddenEndPoint,
+    //
+    Map<String, String>? overriddenHeaders,
+    Map<String, String>? overriddenQueries,
+    //
+    Mappable<RDT>? overriddenResponseMapper,
+    WebResponse<RDT> Function(dynamic response)?
+        overriddenCustomResponseHandler,
+    //
+    String? overriddenLogsName,
+    List<ObscureLogOption>? overriddenObscureLogOptions,
+    //
+    MultiPartMethod? overriddenMethod,
+    List<MultiPartFile>? overriddenFiles,
+    Map<String, String>? overriddenFormFields,
+  }) =>
+      MultiPartRequestUrl(
+        domain: overriddenDomain ?? domain,
+        fragments: overriddenFragments ?? fragments,
+        endPoint: overriddenEndPoint ?? endPoint,
+        headers: overriddenHeaders ?? headers,
+        queries: overriddenQueries ?? queries,
+        //
+        responseMapper: overriddenResponseMapper ?? responseMapper,
+        customResponseHandler:
+            overriddenCustomResponseHandler ?? customResponseHandler,
+        //
+        logsName: overriddenLogsName ?? logsName,
+        obscureLogOptions: overriddenObscureLogOptions ?? obscureLogOptions,
+
+        method: overriddenMethod ?? method,
+        //
+        files: overriddenFiles ?? files,
+        formFields: overriddenFormFields ?? formFields,
+      );
+
   //--------------------------------------------
 
-  Map? get obscuredFormFields => _obscureMap(formFields);
+  get obscuredFormFields => _obscureMap(formFields);
 
   @override
   String toString() {

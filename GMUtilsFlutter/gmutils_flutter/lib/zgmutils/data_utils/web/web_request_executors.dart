@@ -13,6 +13,60 @@ import 'web_response.dart';
 import 'web_url.dart';
 
 class WebRequestExecutor {
+  static List<RequestInterceptor>? _requestInterceptors;
+
+  static int get requestInterceptorsCount => _requestInterceptors?.length ?? 0;
+
+  static void clearRequestInterceptors() => _requestInterceptors?.clear();
+
+  /// example:
+  /// WebRequestExecutor.addRequestInterceptor((url) {
+  ///      if (url is GetUrl) {
+  ///          return GetUrl(...);
+  ///      }
+  ///      else if (url is PostUrl) {
+  ///           return PostUrl(...);
+  ///      }
+  ///      else if (url is PatchUrl) {
+  ///           return PatchUrl(...);
+  ///      }
+  ///      else if (url is PutUrl) {
+  ///           return PutUrl(...);
+  ///      }
+  ///      else if (url is DeleteUrl) {
+  ///           return DeleteUrl(...);
+  ///      }
+  ///      else if (url is MultiPartRequestUrl) {
+  ///           return MultiPartRequestUrl(...);
+  ///      }
+  ///
+  ///      return url;
+  /// })
+  static void addRequestInterceptor(RequestInterceptor interceptor) {
+    _requestInterceptors ??= [];
+    _requestInterceptors!.add(interceptor);
+  }
+
+  //----------------------------------------------------
+
+  static RawResponseInterceptor? rawResponseInterceptor;
+
+  //----------------------------------------------------
+
+  static List<ResponseInterceptor>? _responseInterceptors;
+
+  static int get responseInterceptorsCount =>
+      _responseInterceptors?.length ?? 0;
+
+  static void clearResponseInterceptors() => _responseInterceptors?.clear();
+
+  static void addResponseInterceptor(ResponseInterceptor interceptor) {
+    _responseInterceptors ??= [];
+    _responseInterceptors!.add(interceptor);
+  }
+
+  //===========================================================================
+
   Future<http.Response?> openUrl(String link, {String? logsName}) async {
     try {
       var response = await http.get(Uri.parse(link.trim()));
@@ -154,6 +208,10 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
+    _requestInterceptors?.forEach((interceptor) {
+      url = interceptor(url) as GetUrl<DT>;
+    });
+
     Logs.get(url.logsName).print(() => [
           'API::Call',
           '[GET]',
@@ -179,6 +237,10 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
+    _requestInterceptors?.forEach((interceptor) {
+      url = interceptor(url) as PostUrl<DT>;
+    });
+
     Logs.get(url.logsName).print(() => [
           'API::Call',
           '[POST]',
@@ -207,6 +269,10 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
+    _requestInterceptors?.forEach((interceptor) {
+      url = interceptor(url) as MultiPartRequestUrl<DT>;
+    });
+
     Logs.get(url.logsName).print(() {
       final info = [
         'API::Call',
@@ -361,6 +427,10 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
+    _requestInterceptors?.forEach((interceptor) {
+      url = interceptor(url) as PatchUrl<DT>;
+    });
+
     Logs.get(url.logsName).print(() => [
           'API::Call',
           '[PATCH]',
@@ -389,6 +459,10 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
+    _requestInterceptors?.forEach((interceptor) {
+      url = interceptor(url) as PutUrl<DT>;
+    });
+
     Logs.get(url.logsName).print(() => [
           'API::Call',
           '[PUT]',
@@ -417,6 +491,10 @@ class WebRequestExecutor {
     int? cacheIntervalInSeconds,
     OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
+    _requestInterceptors?.forEach((interceptor) {
+      url = interceptor(url) as DeleteUrl<DT>;
+    });
+
     Logs.get(url.logsName).print(() => [
           'API::Call',
           '[DELETE]',
@@ -446,22 +524,25 @@ class WebRequestExecutor {
     required Future<http.Response> Function() run,
     required OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
-    _Cache<DT>? cache = _createOrGetCacheStorage(
+    _Cache? cache = _createOrGetCacheStorage(
       key: () => url.signature,
       cacheIntervalInSeconds: cacheIntervalInSeconds,
     );
-    if (cache != null) {
+
+    if (cache?._response != null) {
       Logs.get(url.logsName).print(() => [
             'API::Response',
             'url: ${url.uri}',
             '\n',
             '<[RESULT WILL RETURN FROM CACHE]>',
             '\n',
-            'cachedResponse: ${cache.response}',
+            'cachedResponse: ${cache?.response}',
             '\n',
           ]);
 
-      return cache.response;
+      try {
+        return cache?.response as WebResponse<DT>;
+      } catch (_) {}
     }
 
     const supposedTries = 3;
@@ -542,10 +623,14 @@ class WebRequestExecutor {
     http.Response response, {
     required int statusCode,
     required String? exception,
-    required _Cache<DT>? cache,
+    required _Cache? cache,
     required int tries,
     required OnEncodeResponseFailed<DT>? onEncodeResponseFailed,
   }) async {
+    if (rawResponseInterceptor != null) {
+      response = await rawResponseInterceptor!(url, response);
+    }
+
     Logs.get(url.logsName).print(() => [
           'API::Response',
           'url: ${url.obscuredUri}',
@@ -591,15 +676,23 @@ class WebRequestExecutor {
         }
       }
 
-      responseObj ??= await onEncodeResponseFailed?.call(
-        statusCode,
-        response.body,
-        response.reasonPhrase,
-        {
-          'body': encodingBodyException,
-          'error': encodingErrorException,
-        },
-      );
+      if (responseObj == null && onEncodeResponseFailed != null) {
+        Logs.get(url.logsName).print(
+          () =>
+              'xXxXxX<< handling unexpected response (${url.fragments}/${url.endPoint}) >>XxXxXx',
+        );
+
+        responseObj = await onEncodeResponseFailed.call(
+          url,
+          statusCode,
+          response.body,
+          response.reasonPhrase,
+          {
+            'body': encodingBodyException,
+            'error': encodingErrorException,
+          },
+        );
+      }
     }
 
     if (responseObj != null) {
@@ -634,14 +727,20 @@ class WebRequestExecutor {
           return m;
         });
 
-        error = 'Exception:\n';
-        if (encodingBodyException != null) {
-          error += '• Parsing body: ${encodingBodyException ?? 'NONE'}.\n';
+        if (response.reasonPhrase != null) {
+          error = response.reasonPhrase!;
         }
-        if (encodingErrorException != null) {
-          error += '\n• Parsing error: ${encodingErrorException ?? 'NONE'}';
+        //
+        else {
+          error = 'Exception:\n';
+          if (encodingBodyException != null) {
+            error += '• Parsing body: ${encodingBodyException ?? 'NONE'}.\n';
+          }
+          if (encodingErrorException != null) {
+            error += '\n• Parsing error: ${encodingErrorException ?? 'NONE'}';
+          }
+          error += '\n\n';
         }
-        error += '\n\n';
       }
       //
       else if (exception != null) {
@@ -666,12 +765,19 @@ class WebRequestExecutor {
             '"error": "$error"'
             '}',
         httpCode: statusCode,
-        // httpCode: 400,
         responseHeader: response.headers,
       );
     }
 
-    return responseObj;
+    if (_responseInterceptors?.isNotEmpty == true) {
+      for (var interceptor in _responseInterceptors!) {
+        final res = await interceptor(url, responseObj!);
+        responseObj = res.response as WebResponse<DT>;
+        if (res.finalReturn) break;
+      }
+    }
+
+    return responseObj!;
   }
 
   //============================================================================
@@ -805,22 +911,44 @@ class WebRequestExecutor {
 }
 
 typedef OnEncodeResponseFailed<DT> = Future<WebResponse<DT>?> Function(
+  Url<DT> url,
   int statusCode,
   String responseBody,
   String? responseError,
   Map<String, dynamic> exceptions,
 );
 
+//------------------------------------------------------------------------------
+
+typedef RequestInterceptor<T> = Url<T> Function(Url<T>);
+
+typedef RawResponseInterceptor = Future<http.Response> Function(
+  Url url,
+  http.Response,
+);
+
+class ResponseInterceptorReturn<T> {
+  final WebResponse<T> response;
+  final bool finalReturn;
+
+  ResponseInterceptorReturn(this.response, [this.finalReturn = false]);
+}
+
+typedef ResponseInterceptor<T> = Future<ResponseInterceptorReturn<T>> Function(
+  Url<T> url,
+  WebResponse<T>,
+);
+
 //==============================================================================
 
-class _Cache<DT> {
+class _Cache {
   final int cacheIntervalInSeconds;
   int? _expireTime;
-  WebResponse<DT>? _response;
+  WebResponse? _response;
 
   _Cache({required this.cacheIntervalInSeconds});
 
-  void set(WebResponse<DT> response) {
+  void set(WebResponse response) {
     _expireTime = DateTime.now()
         .add(Duration(seconds: cacheIntervalInSeconds))
         .millisecondsSinceEpoch;
@@ -832,12 +960,21 @@ class _Cache<DT> {
     return DateTime.now().millisecondsSinceEpoch > _expireTime!;
   }
 
-  WebResponse<DT> get response => _response!;
+  WebResponse get response => _response!;
+
+  @override
+  String toString() {
+    return '_Cache{'
+        'cacheIntervalInSeconds: $cacheIntervalInSeconds, '
+        'expireTime: $_expireTime, '
+        'response: $_response'
+        '}';
+  }
 }
 
 Map<String, _Cache> _cacheStorage = {};
 
-_Cache<DT>? _createOrGetCacheStorage<DT>({
+_Cache? _createOrGetCacheStorage<DT>({
   required String Function() key,
   required int? cacheIntervalInSeconds,
 }) {
@@ -869,7 +1006,7 @@ _Cache<DT>? _createOrGetCacheStorage<DT>({
   //
   else {
     try {
-      return cache as _Cache<DT>?;
+      return cache as _Cache?;
     } catch (e) {
       return null;
     }

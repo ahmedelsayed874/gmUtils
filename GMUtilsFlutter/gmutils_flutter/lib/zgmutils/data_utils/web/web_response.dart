@@ -35,7 +35,8 @@ class WebResponse<DATA> {
   //bool get isSuccess => httpCode == 200;
   bool get isSuccess => ((httpCode ?? 0) ~/ 100) == 2;
 
-  bool get isConnectionFailed => (httpCode == 0 || httpCode == 100 || httpCode == null);
+  bool get isConnectionFailed =>
+      (httpCode == 0 || httpCode == 100 || httpCode == null);
 
   @override
   String toString() {
@@ -65,7 +66,7 @@ class WebResponseMapper<DT> extends Mappable<WebResponse<DT>> {
         data: data,
         error: null,
         rawResponse: null,
-        httpCode: values['httpCode'],
+        httpCode: null,
         responseHeader: null,
       );
     } catch (_) {
@@ -79,7 +80,7 @@ class WebResponseMapper<DT> extends Mappable<WebResponse<DT>> {
     }
     //
     else if (values is List) {
-      try {
+      /*try {
         var lst = dataMapper.fromMapList(values);
 
         return WebResponse(
@@ -90,9 +91,9 @@ class WebResponseMapper<DT> extends Mappable<WebResponse<DT>> {
           httpCode: null,
           responseHeader: null,
         );
-      } catch (e) {
-        return fromMap({'list': values});
-      }
+      } catch (e) {*/
+      return fromMap({'list': values});
+      //}
     }
     //
     else {
@@ -106,14 +107,6 @@ class WebResponseMapper<DT> extends Mappable<WebResponse<DT>> {
           responseHeader: null,
         );
       } catch (_) {
-        /*return Response(
-          url: null,
-          data: null,
-          error: '$e',
-          rawResponse: '$values',
-          httpCode: null,
-          responseHeader: null,
-        );*/
         rethrow;
       }
     }
@@ -128,7 +121,7 @@ class WebResponseMapper<DT> extends Mappable<WebResponse<DT>> {
       data: data,
       error: null,
       rawResponse: null,
-      httpCode: values['httpCode'],
+      httpCode: null, //values['httpCode'],
       responseHeader: null,
     );
   }
