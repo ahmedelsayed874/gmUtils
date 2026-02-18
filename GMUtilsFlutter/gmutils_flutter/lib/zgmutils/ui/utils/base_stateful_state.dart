@@ -128,7 +128,7 @@ abstract class BaseState<W extends StatefulWidget> extends State<W>
   //-----------------------------------------------------------------
 
   @override
-  void updateView() {
+  void updateView([String? target]) {
     try {
       setState(() {});
     } catch (_) {}

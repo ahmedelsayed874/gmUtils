@@ -102,7 +102,7 @@ abstract class BaseStatelessWidget extends StatelessWidget
   //-----------------------------------------------------------------
 
   @override
-  void updateView() {}
+  void updateView([String? target]) {}
 
   @override
   void goBack([result]) {

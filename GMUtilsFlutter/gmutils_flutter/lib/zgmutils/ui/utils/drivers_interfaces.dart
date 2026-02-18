@@ -36,7 +36,7 @@ abstract class IScreenDriverDependantDelegate {
     double? estimatedOptionHeight,
   });
 
-  void updateView();
+  void updateView([String? target]);
 
   void goBack([result]);
 }
