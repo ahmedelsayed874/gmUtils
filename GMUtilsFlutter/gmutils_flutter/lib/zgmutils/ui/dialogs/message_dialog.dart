@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:foxscope/zgmutils/utils/rich_text.dart';
 
 import '../../resources/app_theme.dart';
 import '../../utils/logs.dart';
@@ -15,23 +16,26 @@ class MessageDialog {
   Widget? _topIcon;
   String? _title;
   TextStyle? _titleStyle;
-  String _message = '';
+  String? _message;
+  RichSentence? _richMessage;
   TextAlign? _textAlign;
   TextStyle? _messageStyle;
   bool _enableLinks = false;
   bool _enableTextSelect = false;
   Widget? _extraWidget;
   final List<Widget> _actions = [];
+  MainAxisAlignment? _actionsAlignment;
   bool _enableOuterDismiss = true;
   bool _dismissed = false;
   String? _dismissedBy;
   Function(String? dismissedBy)? _onDismiss;
   bool _allowManualDismiss = true;
 
-  MessageDialog setBoxStyle(
-      {Color? backgroundColor,
-      double? borderRadius,
-      BoxConstraints? constraints}) {
+  MessageDialog setBoxStyle({
+    Color? backgroundColor,
+    double? borderRadius,
+    BoxConstraints? constraints,
+  }) {
     _backgroundColor = backgroundColor;
     _borderRadius = borderRadius;
     _constraints = constraints;
@@ -49,10 +53,20 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog setMessage(String message, {TextAlign? textAlign, TextStyle? style}) {
+  MessageDialog setMessage(
+    String message, {
+    TextAlign? textAlign,
+    TextStyle? style,
+  }) {
     _message = message;
     _textAlign = textAlign;
     _messageStyle = style;
+    return this;
+  }
+
+  MessageDialog setRichMessage(RichSentence message, {TextAlign? textAlign,}) {
+    _richMessage = message;
+    _textAlign = textAlign;
     return this;
   }
 
@@ -76,7 +90,10 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog addActions(List<MessageDialogActionButton> actions) {
+  MessageDialog addActions(
+    List<MessageDialogActionButton> actions, {
+    MainAxisAlignment? alignment,
+  }) {
     int i = 0;
 
     for (var action in actions) {
@@ -87,21 +104,30 @@ class MessageDialog {
         action.action?.call();
       }
 
+      final widget = action.useTextButton
+          ? TextButton(
+              onPressed: onPressed,
+              style: action.buttonStyle,
+              child: Text(action.title, style: action.textStyle(i)),
+            )
+          : ElevatedButton(
+              onPressed: onPressed,
+              style: action.buttonStyle,
+              child: Text(action.title, style: action.textStyle(i)),
+            );
+
       _actions.insert(
         0,
-        action.useTextButton
-            ? TextButton(
-                onPressed: onPressed,
-                style: action.buttonStyle,
-                child: Text(action.title, style: action.textStyle(i)),
-              )
-            : ElevatedButton(
-                onPressed: onPressed,
-                style: action.buttonStyle,
-                child: Text(action.title, style: action.textStyle(i)),
+        action.width == null
+            ? widget
+            : SizedBox(
+                width: action.width,
+                child: widget,
               ),
       );
     }
+
+    _actionsAlignment = alignment;
 
     return this;
   }
@@ -150,9 +176,17 @@ class MessageDialog {
     _context = context;
 
     Widget textWidget;
-    if (_enableLinks) {
+    if (_richMessage != null) {
+      textWidget = Text.rich(
+        _richMessage!.asTextSpan(),
+        textAlign: _textAlign,
+        style: _richMessage!.style ?? AppTheme.defaultTextStyle(),
+      );
+    }
+    //
+    else if (_enableLinks) {
       textWidget = MyLinkify(
-        text: _message,
+        text: _message ?? '',
         textAlign: _textAlign,
         enableSelect: _enableTextSelect,
         options:
@@ -162,21 +196,17 @@ class MessageDialog {
     }
     //
     else {
-      if (_enableTextSelect) {
-        textWidget = SelectableText(
-          _message,
-          textAlign: _textAlign,
-          style: _messageStyle ?? AppTheme.defaultTextStyle(),
-        );
-      }
-      //
-      else {
-        textWidget = Text(
-          _message,
-          textAlign: _textAlign,
-          style: _messageStyle ?? AppTheme.defaultTextStyle(),
-        );
-      }
+      textWidget = _enableTextSelect
+          ? SelectableText(
+              _message ?? '',
+              textAlign: _textAlign,
+              style: _messageStyle ?? AppTheme.defaultTextStyle(),
+            )
+          : Text(
+              _message ?? '',
+              textAlign: _textAlign,
+              style: _messageStyle ?? AppTheme.defaultTextStyle(),
+            );
     }
 
     showDialog(
@@ -186,13 +216,15 @@ class MessageDialog {
           return AlertDialog(
             icon: _topIcon,
             //title
-            title: _title == null ? null : Padding(
-              padding: const EdgeInsets.only(left: 7, right: 7, top: 5),
-              child: Text(
-                _title!,
-                style: _titleStyle ?? AppTheme.textStyleOfScreenTitle(),
-              ),
-            ),
+            title: _title == null
+                ? null
+                : Padding(
+                    padding: const EdgeInsets.only(left: 7, right: 7, top: 5),
+                    child: Text(
+                      _title!,
+                      style: _titleStyle ?? AppTheme.textStyleOfScreenTitle(),
+                    ),
+                  ),
             //body
             content: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 7),
@@ -209,6 +241,7 @@ class MessageDialog {
             ),
             //
             actions: _actions,
+            actionsAlignment: _actionsAlignment,
             //
             backgroundColor: _backgroundColor ??
                 AppTheme.appColors?.background ??
@@ -255,6 +288,7 @@ class MessageDialogActionButton {
   TextStyle? _textStyle;
   Color? _textColor;
   FontWeight? _textFontWeight;
+  double? width;
   final Function()? action;
 
   MessageDialogActionButton(
@@ -262,6 +296,7 @@ class MessageDialogActionButton {
     this.useTextButton = true,
     Color? color,
     FontWeight? fontWeight,
+    this.width,
     this.action,
   }) : buttonStyle = null;
 
@@ -270,6 +305,7 @@ class MessageDialogActionButton {
     this.useTextButton = true,
     this.buttonStyle,
     TextStyle? textStyle,
+    this.width,
     this.action,
   }) : _textStyle = textStyle;
 
