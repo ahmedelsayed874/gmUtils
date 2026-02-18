@@ -114,20 +114,7 @@ class NetworkImageWithLoading extends StatelessWidget {
     _onLoadInvoked = false;
 
     return GestureDetector(
-      onTap: imgUrl == null
-          ? null
-          : () {
-              if (allowEnlargeOnClick) {
-                ImageViewerScreen.showFromUrl(
-                  toolbarTitle: toolbarTitle,
-                  photoUrl: imgUrl!,
-                );
-              }
-              //
-              else if (onClick != null) {
-                onClick?.call(imgUrl!);
-              }
-            },
+      onTap: _imageTapCallback(),
       child: Image.memory(
         cache.imageBytes,
         width: desiredImageWidth,
@@ -166,20 +153,7 @@ class NetworkImageWithLoading extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: imgUrl == null
-          ? null
-          : () {
-              if (allowEnlargeOnClick) {
-                ImageViewerScreen.showFromUrl(
-                  toolbarTitle: toolbarTitle,
-                  photoUrl: imgUrl!,
-                );
-              }
-              //
-              else if (onClick != null) {
-                onClick?.call(imgUrl!);
-              }
-            },
+      onTap: _imageTapCallback(),
       child: Image.memory(
         imgBytes,
         width: desiredImageWidth,
@@ -199,6 +173,25 @@ class NetworkImageWithLoading extends StatelessWidget {
       ),
     );
   }
+
+  VoidCallback? _imageTapCallback() {
+    return allowEnlargeOnClick || onClick != null
+        ? () {
+            if (allowEnlargeOnClick) {
+              ImageViewerScreen.showFromUrl(
+                toolbarTitle: toolbarTitle,
+                photoUrl: imgUrl!,
+              );
+            }
+            //
+            else if (onClick != null) {
+              onClick?.call(imgUrl!);
+            }
+          }
+        : null;
+  }
+
+  //----------------------------------------
 
   Widget _loadImageFromWeb() {
     Logs.print(
@@ -406,19 +399,27 @@ void _appendCachedImage(_CachedImage image) {
 }
 
 List<_CachedImage> get _cachedImagesList {
-  var lst = App.globalVariables['NetworkImageWithLoading.cachedImages.storage'];
+  var lst = App.globalVariables.get(
+    'NetworkImageWithLoading.cachedImages.storage',
+  );
   if (lst == null) {
     lst = <_CachedImage>[];
-    App.globalVariables['NetworkImageWithLoading.cachedImages.storage'] = lst;
+    App.globalVariables.put(
+      'NetworkImageWithLoading.cachedImages.storage',
+      value: lst,
+    );
   }
   return lst;
 }
 
 Map<String, int> get _cachedImagesIndexes {
-  var map = App.globalVariables['NetworkImageWithLoading.cachedImages.indexes'];
+  var map = App.globalVariables.get(
+    'NetworkImageWithLoading.cachedImages.indexes',
+  );
   if (map == null) {
     map = <String, int>{};
-    App.globalVariables['NetworkImageWithLoading.cachedImages.indexes'] = map;
+    App.globalVariables
+        .put('NetworkImageWithLoading.cachedImages.indexes', value: map);
   }
   return map;
 }
