@@ -26,8 +26,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,6 +49,7 @@ import gmutils.net.retrofit.callback.LogsOptions;
 import gmutils.net.retrofit.listeners.OnResponseReady;
 import gmutils.net.retrofit.responseHolders.IResponse;
 import gmutils.storage.GeneralStorage;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -341,6 +344,7 @@ public class RetrofitService {
 
         private int connectionTimeoutInSeconds = 15;
         private int readTimeoutInSeconds = 15;
+        private List<Interceptor> interceptors;
 
         public Parameters(@NotNull String baseUrl) {
             this.baseUrl = baseUrl;
@@ -358,6 +362,12 @@ public class RetrofitService {
 
         public Parameters setReadTimeoutInSeconds(int readTimeoutInSeconds) {
             this.readTimeoutInSeconds = readTimeoutInSeconds;
+            return this;
+        }
+
+        public Parameters addInterceptor(Interceptor interceptor) {
+            if (this.interceptors == null) this.interceptors = new ArrayList<>();
+            this.interceptors.add(interceptor);
             return this;
         }
 
@@ -487,10 +497,15 @@ public class RetrofitService {
 
         this.parameters = parameters;
 
-        OkHttpClient client = createOkHttpClient(parameters, clientBuildCallback)
+        OkHttpClient.Builder clientBuilder = createOkHttpClient(parameters, clientBuildCallback)
                 .readTimeout(parameters.readTimeoutInSeconds, TimeUnit.SECONDS)
-                .connectTimeout(parameters.connectionTimeoutInSeconds, TimeUnit.SECONDS)
-                .build();
+                .connectTimeout(parameters.connectionTimeoutInSeconds, TimeUnit.SECONDS);
+        if (parameters.interceptors != null) {
+            for (Interceptor interceptor : parameters.interceptors) {
+                clientBuilder.addInterceptor(interceptor);
+            }
+        }
+        OkHttpClient client = clientBuilder.build();
 
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(parameters.baseUrl)
@@ -498,6 +513,7 @@ public class RetrofitService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
+
     }
 
     /**
