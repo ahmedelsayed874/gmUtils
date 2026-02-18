@@ -78,6 +78,15 @@ class Logs {
 
   static void print(core.Object? Function() info) => _defLogs.print(info);
 
+  static void printTo(core.String? logsName, core.Object? Function() info) =>
+      get(logsName).print(info);
+
+  static void printToAll(core.Object? Function() info) {
+    for (var logs in allLogs) {
+      logs.print(info);
+    }
+  }
+
   //----------------------------------------------------------------------------
 
   ///fromPublicLogs: null mean read from current logs dir
@@ -374,12 +383,12 @@ abstract class LogsManager {
 
     _fileWriterBusy = true;
 
-    var now = core.DateTime.now();
     var order = '000000${_x++}'.substring('$_x'.length); //0000 001234
+    var now = core.DateTime.now();
 
     core.String log;
     if (useExcelFileFormat) {
-      log = '"$order","$now","$text"\n';
+      log = '"$order","$now","${text.replaceAll('"', '""')}"\n';
     } else {
       log = '[$order]:: $now::\n$text \r\n\r\n';
     }
