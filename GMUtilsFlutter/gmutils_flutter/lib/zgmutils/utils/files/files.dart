@@ -54,9 +54,14 @@ class Files {
         else {
           if (downloadDir) {
             try {
-              directory = await files_provider.getDownloadsDirectory();
+              directory = Directory('/storage/emulated/0/Download');
+              if (!directory.existsSync()) throw '';
             } catch (e) {
-              directory = await files_provider.getExternalStorageDirectory();
+              try {
+                directory = await files_provider.getDownloadsDirectory();
+              } catch (e) {
+                directory = await files_provider.getExternalStorageDirectory();
+              }
             }
           }
           //
