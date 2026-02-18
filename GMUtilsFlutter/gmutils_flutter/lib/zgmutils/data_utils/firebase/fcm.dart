@@ -7,12 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../../main.dart' as main;
+import '../../utils/collections/string_set.dart';
 import '../../utils/logs.dart';
 import '../../utils/notifications/notifications_manager.dart';
-import '../utils/result.dart';
-import '../../utils/collections/string_set.dart';
 import '../storages/app_preferences_storage.dart';
-import 'fcm_extension.dart';
+import '../utils/result.dart';
 
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/
@@ -212,23 +211,23 @@ class FCM extends IFCM {
 
   void _popupNotification(RemoteMessage message) {
     try {
-      AppPreferencesStorage().isEn().then((en) {
-        _popupNotification2(message, en);
+      AppPreferencesStorage().getLanguage().then((langCode) {
+        _popupNotification2(message, langCode);
       });
     } catch (e) {
       _popupNotification2(message, null);
     }
   }
 
-  void _popupNotification2(RemoteMessage message, bool? en) {
+  void _popupNotification2(RemoteMessage message, String? langCode) {
     Logs.print(
-      () => ['FCM._popupNotification2(message: ${message.toMap()}, en: $en)'],
+      () => ['FCM._popupNotification2(message: ${message.toMap()}, langCode: $langCode)'],
     );
 
     var title = '${message.notification?.title ?? 'Notification'}•';
     var body = message.notification?.body ?? '';
 
-    var localNotification = resolveNotification(message, en);
+    var localNotification = resolveNotification(message, langCode);
     var payload = localNotification.payload;
     if (payload == null) {
       try {
@@ -687,12 +686,12 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
 }
 
 @pragma('vm:entry-point')
-FcmNotificationProperties resolveNotification(RemoteMessage message, bool? en) {
+FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {
   /*add this method to main file
     @pragma('vm:entry-point')
-    FcmNotificationProperties resolveNotification(RemoteMessage message, bool? en) {}
+    FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {}
   */
-  return main.resolveNotification(message, en);
+  return main.resolveNotification(message, langCode);
 }
 
 //------------------------------------------------------------------------------

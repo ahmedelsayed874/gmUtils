@@ -3,9 +3,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'collections/string_set.dart';
 
+import '../gm_main.dart';
 import '../ui/dialogs/message_dialog.dart';
+import 'collections/string_set.dart';
 import 'launcher.dart';
 import 'logs.dart';
 import 'package_info.dart';
@@ -135,11 +136,13 @@ class AppVersionCheck {
     BuildContext Function() context, {
     required String? publishedAndroidVersion,
     required String? publishedIosVersion,
-    required bool en,
+    String? langCode,
     required bool forceSelectAction,
     required String? message,
     String? title,
   }) async {
+    langCode ??= App.langCode;
+
     Logs.print(() => [
           'AppVersionCheck.check ---> ',
           'publishedAndroidVersion: $publishedAndroidVersion',
@@ -162,12 +165,12 @@ class AppVersionCheck {
       MessageDialog? md;
 
       md = MessageDialog.create
-          .setTitle(title ?? (en ? 'Alert' : 'تنبيه'))
-          .setMessage(message ?? defaultWarnMessage.get(en))
+          .setTitle(title ?? (langCode == 'ar' ? 'تنبيه' : 'Alert'))
+          .setMessage(message ?? defaultWarnMessage.v)
           .setEnableLinks(true)
           .addActions([
             MessageDialogActionButton(
-              en ? 'Update' : 'تحديث',
+              langCode == 'ar' ? 'تحديث' : 'Update',
               action: () {
                 md?.allowManualDismiss(true);
                 md?.dismiss();
@@ -181,7 +184,7 @@ class AppVersionCheck {
             ),
             if (!forceSelectAction)
               MessageDialogActionButton(
-                en ? 'Later' : 'لاحقا',
+                langCode == 'ar' ? 'لاحقا' : 'Later',
                 action: null,
               ),
           ])

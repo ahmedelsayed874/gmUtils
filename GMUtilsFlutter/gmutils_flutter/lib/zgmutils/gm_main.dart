@@ -123,7 +123,12 @@ class App extends StatefulWidget {
 
   //============================================================================
 
-  static Map<String, dynamic> globalVariables = {};
+  static GlobalVariables? _globalVariables;
+
+  static GlobalVariables get globalVariables {
+    _globalVariables ??= GlobalVariables();
+    return _globalVariables!;
+  }
 
   //============================================================================
 
@@ -196,16 +201,34 @@ class App extends StatefulWidget {
 
   static BuildContext get context => _context!;
 
+  //static NavigationObserver? navigationObserver;
+
   static Future<RT?> navTo<RT>(
     Widget screen, {
     BuildContext? context,
     Object? args,
     bool singleTop = false,
+    bool replacement = false,
     bool animate = false,
   }) async {
+    /*navigationObserver?.navTo?.call(screen, {
+      'args': args,
+      'singleTop': singleTop,
+      'replacement': replacement,
+    });*/
+    for (var log in Logs.allLogs) {
+      log.print(() => '\n'
+          '=============================='
+          '[ NAVTO:: $screen ]'
+          '==============================\n');
+    }
+
     RouteSettings? settings = RouteSettings(name: null, arguments: args);
 
-    /*final route = MaterialPageRoute<RT>(builder: (context) => screen, settings: settings);*/
+    /*final route = MaterialPageRoute<RT>(
+        builder: (context) => screen,
+        settings: settings,
+    );*/
 
     pageBuilder(context, animation, secondaryAnimation) => screen;
 
@@ -244,6 +267,10 @@ class App extends StatefulWidget {
       result = await nav.pushAndRemoveUntil(route, (route) => false);
     }
     //
+    else if (replacement) {
+      result = await nav.pushReplacement(route);
+    }
+    //
     else {
       result = await nav.push(route);
     }
@@ -256,6 +283,15 @@ class App extends StatefulWidget {
   }
 
   static void navBack<T extends Object?>([T? result]) {
+    //navigationObserver?.navBack?.call(result);
+    for (var log in Logs.allLogs) {
+      log.print(() => '\n'
+          '=============================='
+          '[NAVBACK]'
+          '=============================='
+          '\n');
+    }
+
     Navigator.of(context).pop(result);
   }
 
@@ -264,27 +300,32 @@ class App extends StatefulWidget {
   //============================================================================
 
   static AppPreferences _appPreferences = AppPreferences(
-    isEn: null,
+    langCode: null,
     isLightMode: null,
   );
 
-  static bool get isEnglish => _appPreferences.isEn ?? true;
+  static String get langCode => _appPreferences.langCode?.toLowerCase() ?? 'en';
+
+  static bool get isEnglish => langCode == 'en';
 
   static bool get isLightTheme => _appPreferences.isLightMode ?? true;
 
   static bool changeAppLanguage({
     required BuildContext context,
-    required bool toEnglish,
+    required String langCode,
   }) {
-    Logs.print(() =>
-        '[GMMain] App.changeAppLanguage(toEnglish: $toEnglish) ... current is en? ${_appPreferences.isEn}');
+    Logs.print(
+      () => '[GMMain] App.changeAppLanguage(langCode: $langCode) ... '
+          'current is en? ${_appPreferences.langCode}',
+    );
 
-    if (_appPreferences.isEn != null && _appPreferences.isEn == toEnglish) {
+    if (_appPreferences.langCode != null &&
+        _appPreferences.langCode == langCode) {
       return false;
     }
 
-    _appPreferences.isEn = toEnglish;
-    AppPreferencesStorage().setLanguage(toEnglish);
+    _appPreferences.langCode = langCode;
+    AppPreferencesStorage().setLanguage(langCode);
 
     var s = context.findAncestorStateOfType<_AppState>();
     s?.invalidate();
@@ -295,8 +336,8 @@ class App extends StatefulWidget {
     required BuildContext context,
     required bool? toLight,
   }) {
-    Logs.print(() =>
-        '[GMMain] App.changeAppAppearance(toLight: $toLight) ... current is light? ${_appPreferences.isLightMode}');
+    Logs.print(() => '[GMMain] App.changeAppAppearance(toLight: $toLight) ... '
+        'current is light? ${_appPreferences.isLightMode}');
 
     if (_appPreferences.isLightMode != null &&
         _appPreferences.isLightMode == toLight) {
@@ -328,8 +369,8 @@ class _AppState extends State<App> {
       App._context = context;
     }
 
-    App._appPreferences.isEn ??=
-        (!Platform.localeName.toLowerCase().startsWith('ar'));
+    App._appPreferences.langCode ??=
+        (Platform.localeName.toLowerCase().substring(0, 2));
 
     App._appPreferences.isLightMode ??=
         MediaQuery.platformBrightnessOf(context) == Brightness.light;
@@ -423,11 +464,9 @@ class _AppState extends State<App> {
         Locale('en', ''), // English, no country code
         Locale('ar', ''), // Arabic, no country code
       ],
-      locale: App._appPreferences.isEn == null
+      locale: App._appPreferences.langCode == null
           ? null
-          : (App._appPreferences.isEn!
-              ? const Locale('en', '')
-              : const Locale('ar', '')),
+          : Locale(App._appPreferences.langCode!, ''),
       //
       home: _starterWidget(),
       routes: widget.screensRoutes ?? const <String, WidgetBuilder>{},
@@ -465,7 +504,7 @@ class _AppState extends State<App> {
 
     App.clearObservers();
     App._context = null;
-    App.globalVariables.clear();
+    App.globalVariables._clear();
 
     super.dispose();
   }
@@ -557,24 +596,137 @@ class _NavigatorObserver extends NavigatorObserver {
 
 //==============================================================================
 
+class GlobalVariables {
+  final Map<String, dynamic> _globalVariables = {};
+
+  Map<String, dynamic> _getGlobalVariables(String? parentKey) {
+    Map<String, dynamic> globalVariables;
+
+    if (parentKey != null) {
+      var gv = getOrCreateSubVariables(parentKey);
+      globalVariables = gv._globalVariables;
+    }
+    //
+    else {
+      globalVariables = _globalVariables;
+    }
+
+    return globalVariables;
+  }
+
+  GlobalVariables getOrCreateSubVariables(String parentKey) {
+    var gv = _globalVariables[parentKey];
+    if (gv == null) {
+      gv = GlobalVariables();
+      _globalVariables[parentKey] = gv;
+    }
+    return gv;
+  }
+
+  //---------------------------------------------------------------------
+
+  T? get<T>(String key, {String? parentKey, T? Function()? builder}) {
+    final globalVariables = _getGlobalVariables(parentKey);
+    final v = globalVariables[key];
+
+    if (v == null && builder != null) {
+      final nv = builder.call();
+      globalVariables[key] = nv;
+    }
+
+    return globalVariables[key];
+  }
+
+  void put(String key, {String? parentKey, dynamic value}) {
+    final globalVariables = _getGlobalVariables(parentKey);
+    globalVariables[key] = value;
+  }
+
+  //---------------------------------------------------------------------
+
+  bool has(String key, {String? parentKey}) {
+    final globalVariables = _getGlobalVariables(parentKey);
+    return globalVariables.containsKey(key);
+  }
+
+  List<String> variablesKeys({String? parentKey}) {
+    final globalVariables = _getGlobalVariables(parentKey);
+    return globalVariables.keys.toList();
+  }
+
+  //---------------------------------------------------------------------
+
+  dynamic remove(String key, {String? parentKey}) {
+    final globalVariables = _getGlobalVariables(parentKey);
+    return globalVariables.remove(key);
+  }
+
+  dynamic removeParent(String parentKey) {
+    return _globalVariables.remove(parentKey);
+  }
+
+  void _clear() {
+    _globalVariables.clear();
+  }
+}
+
+//==============================================================================
+
 typedef ObserverDelegate = void Function(String observerName, dynamic /*args*/);
 
 //============================================================================
 
 extension GMRouter on BuildContext {
-  void go(String path, {Object? extra}) => Navigator.pushNamed(
-    this,
-    path,
-    arguments: extra,
-  );
+  void go(String path, {Object? extra}) {
+    for (var log in Logs.allLogs) {
+      log.print(() => '\n'
+          'GMRouter.go>=============================='
+          '[ $path ]'
+          '==============================\n');
+    }
 
-  void push(String path, {Object? extra}) => Navigator.pushNamed(
-    this,
-    path,
-    arguments: extra,
-  );
+    Navigator.pushNamed(
+      this,
+      path,
+      arguments: extra,
+    );
+  }
+
+  void push(String path, {Object? extra}) {
+    for (var log in Logs.allLogs) {
+      log.print(() => '\n'
+          'GMRouter.push>=============================='
+          '[ $path ]'
+          '==============================\n');
+    }
+
+    Navigator.pushNamed(
+      this,
+      path,
+      arguments: extra,
+    );
+  }
+
+  void singleTop(String path, {Object? extra}) {
+    for (var log in Logs.allLogs) {
+      log.print(() => '\n'
+          'GMRouter.singleTop>=============================='
+          '[ $path ]'
+          '==============================\n');
+    }
+
+    Navigator.pushNamedAndRemoveUntil(this, path, (route) => false);
+  }
 
   bool canPop() => Navigator.canPop(this);
 
-  void pop([result]) => Navigator.pop(this, result);
+  void pop([result]) {
+    for (var log in Logs.allLogs) {
+      log.print(() => '\n'
+          'GMRouter.pop>=============================='
+          '==============================\n');
+    }
+
+    Navigator.pop(this, result);
+  }
 }

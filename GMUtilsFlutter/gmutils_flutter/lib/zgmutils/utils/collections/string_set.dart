@@ -1,28 +1,37 @@
+import '../../gm_main.dart';
 
 class StringSet {
-  Map<String, String> _strings = {};
+  final Map<String, String> _strings = {};
 
   StringSet(String en, [String? ar, Map<String, String>? more]) {
     _strings['en'] = en;
-    _strings['ar'] = (ar ?? en);
-    if (more?.isNotEmpty == true) {
-      _strings.addAll(more!);
+    if (ar != null) _strings['ar'] = ar;
+    if (more != null && more.isNotEmpty) {
+      _strings.addAll(more);
     }
   }
 
   StringSet.multiple(Map<String, String> strings) {
-    _strings = strings;
+    _strings.addAll(strings);
   }
 
+  /// Quick getters
   String get en => _strings['en'] ?? '';
-  String get ar => _strings['ar'] ?? '';
 
-  String get(bool en) => en ? this.en : ar;
+  String get ar => _strings['ar'] ?? en;
+
+  String get fr => _strings['fr'] ?? en;
+
+  /// Main getter
+  String of(String langCode) {
+    final s = _strings[langCode.toLowerCase()];
+    return s ?? en;
+  }
+
+  String get v => of(App.langCode);
 
   @override
-  String toString() {
-    return 'StringSet{strings: $_strings}';
-  }
+  String toString() => _strings.toString();
 
   @override
   bool operator ==(Object other) =>
