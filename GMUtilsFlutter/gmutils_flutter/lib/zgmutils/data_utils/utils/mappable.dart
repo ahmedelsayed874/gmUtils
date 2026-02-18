@@ -50,6 +50,12 @@ abstract class Mappable<T> {
 
   T fromMap(Map<String, dynamic> values);
 
+  ///NS: null-safety
+  T? fromMapNS(Map<String, dynamic>? values) {
+    if (values == null) return null;
+    return fromMap(values);
+  }
+
   List<T>? fromMapList(List<dynamic>? values) {
     if (values == null) return null;
 
@@ -74,6 +80,12 @@ abstract class Mappable<T> {
   Map<String, dynamic> toMap(T object) {
     throw UnimplementedError(
         'implement this method to handle this object --> $object');
+  }
+
+  ///NS: null-safety
+  Map<String, dynamic>? toMapNS(T? object) {
+    if (object == null) return null;
+    return toMap(object);
   }
 
   List<Map<String, dynamic>>? toMapList(List<T>? objects) {
@@ -126,7 +138,14 @@ abstract class Mappable<T> {
     T Function(Map<String, dynamic> values) handler,
   ) =>
       AnonymousMapper(handler);
+
+  static Mappable<T?> anonymous2<T>(
+    final T? Function(dynamic values) handler,
+  ) =>
+      AnonymousMapper2(handler);
 }
+
+//==============================================================================
 
 class AnonymousMapper<T> extends Mappable<T> {
   final T Function(Map<String, dynamic> values) handler;
@@ -138,6 +157,24 @@ class AnonymousMapper<T> extends Mappable<T> {
     return handler(values);
   }
 }
+
+class AnonymousMapper2<T> extends Mappable<T?> {
+  final T? Function(dynamic values) handler;
+
+  AnonymousMapper2(this.handler);
+
+  @override
+  T? from(values) {
+    return handler(values);
+  }
+
+  @override
+  T? fromMap(Map<String, dynamic> values) {
+    return handler(values);
+  }
+}
+
+//==============================================================================
 
 class ListMapper<T> extends Mappable<List<T>> {
   final Mappable<T> itemMapper;
