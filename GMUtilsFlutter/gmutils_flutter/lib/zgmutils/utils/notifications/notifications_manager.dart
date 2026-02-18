@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import '../logs.dart';
 
 abstract class INotificationsManager {
@@ -170,7 +171,7 @@ class NotificationsManager extends INotificationsManager {
     );
 
     await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
       onDidReceiveBackgroundNotificationResponse: _onDidReceiveNotificationResponse,
     );
@@ -209,7 +210,7 @@ class NotificationsManager extends INotificationsManager {
         var cnfg = _notificationsConfigurations!;
         var lst = cnfg.androidNotificationChannelsIdsToDelete!();
         for (var channelId in lst) {
-          await notificationsPlugin?.deleteNotificationChannel(channelId);
+          await notificationsPlugin?.deleteNotificationChannel(channelId: channelId);
         }
 
         _notificationsConfigurations?.androidNotificationChannelsIdsToDelete =
@@ -321,10 +322,10 @@ class NotificationsManager extends INotificationsManager {
         customChannel?.soundFile ?? defaultNotificationChannelSound;
 
     _flutterLocalNotificationsPlugin.show(
-      notifId,
-      title,
-      body,
-      NotificationDetails(
+      id: notifId,
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           customChannel?.channelId ?? defaultNotificationChannelId,
           customChannel?.channelName ?? defaultNotificationChannelName,
