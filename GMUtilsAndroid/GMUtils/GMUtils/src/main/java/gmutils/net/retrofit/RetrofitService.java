@@ -371,6 +371,11 @@ public class RetrofitService {
             return this;
         }
 
+        public Parameters setInterceptors(List<Interceptor> interceptors) {
+            this.interceptors = interceptors;
+            return this;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

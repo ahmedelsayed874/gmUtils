@@ -12,6 +12,7 @@ import '../../utils/logs.dart';
 import '../../utils/notifications/notifications_manager.dart';
 import '../storages/app_preferences_storage.dart';
 import '../utils/result.dart';
+import 'fcm_extension.dart';
 
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/

@@ -14,7 +14,7 @@ import '../../zgmutils/data_utils/firebase/fcm.dart';
 class NotificationsHandler {
   static FcmNotificationProperties resolveNotification(
     RemoteMessage message,
-    bool? en,
+    String? langCode,
   ) {
     Logs.print(() => 'NotificationsHandler.resolveNotification('
         'message: {'
@@ -26,8 +26,9 @@ class NotificationsHandler {
     Notification? notification;
     try {
       notification = NotificationMapper().fromMap(message.data);
-      Logs.print(() => 'NotificationsHandler.resolveNotification ---> '
-          'ParsedNotification:: $notification',
+      Logs.print(
+        () => 'NotificationsHandler.resolveNotification ---> '
+            'ParsedNotification:: $notification',
       );
     } catch (e) {
       Logs.print(
@@ -42,8 +43,8 @@ class NotificationsHandler {
 
     bool popup = true;
 
-    String? title = en == null ? notification?.titleEn : notification?.titleAr;
-    String? body = en == null ? notification?.bodyEn : notification?.bodyAr;
+    String? title = langCode != 'ar' ? notification?.titleEn : notification?.titleAr;
+    String? body = langCode != 'ar' ? notification?.bodyEn : notification?.bodyAr;
 
     return FcmNotificationProperties(
       allowPopup: popup,

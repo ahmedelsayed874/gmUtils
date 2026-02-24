@@ -666,7 +666,9 @@ class _UserProfileScreenState extends BaseState<UserProfileScreen>
       actions: [
         MessageDialogActionButton('Yes / نعم', action: () {
           if (App.changeAppLanguage(
-              context: context, toEnglish: !App.isEnglish)) {
+              context: context,
+              langCode: App.isEnglish ? 'ar' : 'en',
+          )) {
             HomeScreen.show();
           } else {
             MyRootWidget.showSnackBar(context,

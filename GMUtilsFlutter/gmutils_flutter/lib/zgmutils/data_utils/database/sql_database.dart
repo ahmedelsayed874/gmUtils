@@ -2,7 +2,6 @@ import 'dart:async';
 
 //yaml -> path:
 import 'package:path/path.dart';
-
 //yaml -> sqflite:
 import 'package:sqflite/sqflite.dart';
 

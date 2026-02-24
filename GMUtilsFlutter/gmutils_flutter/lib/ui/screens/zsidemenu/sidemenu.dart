@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -239,7 +238,7 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
     msg += '---------- DESCRIBE THE ISSUE BELOW ----------';
     msg += '\n\n\n\n\n';
 
-    var logFileContent = await Logs.getLastLogsContent(upTo: 5);
+    var logFileContent = await Logs.getLastLogsContent(numOfFiles: 5);
     if (logFileContent?.isNotEmpty == true) {
       msg += '---------- DON\'T CHANGE ANY OF THE FOLLOWING ----------';
       msg += '\n\n';

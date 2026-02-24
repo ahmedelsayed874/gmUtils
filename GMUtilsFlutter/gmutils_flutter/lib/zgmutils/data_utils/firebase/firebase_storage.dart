@@ -4,11 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:path_provider/path_provider.dart';
 
+import '../../utils/collections/string_set.dart';
 import '../../utils/date_op.dart';
 import '../../utils/logs.dart';
-import '../../utils/collections/string_set.dart';
-import 'firebase_utils.dart';
 import 'fb_response.dart';
+import 'firebase_utils.dart';
 
 abstract class IFirebaseStorage {
   Future<FBResponse<String>> upload(File file, {required String toPath});

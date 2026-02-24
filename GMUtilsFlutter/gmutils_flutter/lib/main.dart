@@ -1,9 +1,4 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:gmutils_flutter/data/data_source/notifications/notifications_datasource.dart';
-import 'package:gmutils_flutter/data/models/notifications/notification.dart'
-    as nm;
-import 'package:gmutils_flutter/services/notifications/firebase_options.dart';
-import 'package:gmutils_flutter/ui/screens/notifications/notifications_screen.dart';
 import 'package:gmutils_flutter/ui/screens/splash/splash_screen.dart';
 import 'package:gmutils_flutter/zgmutils/utils/device_info.dart';
 
@@ -136,6 +131,6 @@ void main() {
 //------------------------------------------------------------------------------
 
 @pragma('vm:entry-point')
-FcmNotificationProperties resolveNotification(RemoteMessage message, bool? en) {
-  return NotificationsHandler.resolveNotification(message, en);
+FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {
+  return NotificationsHandler.resolveNotification(message, langCode);
 }

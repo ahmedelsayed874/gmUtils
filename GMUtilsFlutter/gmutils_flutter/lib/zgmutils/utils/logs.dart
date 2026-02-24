@@ -91,7 +91,7 @@ class Logs {
 
   ///fromPublicLogs: null mean read from current logs dir
   static core.Future<core.String?> getLastLogsContent({
-    core.int upTo = 1,
+    core.int numOfFiles = 1,
     core.bool encrypted = true,
     core.bool? fromPublicLogs,
   }) async {
@@ -100,13 +100,36 @@ class Logs {
     for (var logs in allLogs) {
       if (content.isNotEmpty) content += '\n';
       content += '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(
-        upTo: upTo,
+        numOfFiles: numOfFiles,
         encrypted: encrypted,
         fromPublicLogs: fromPublicLogs,
       )}';
     }
 
     return content;
+  }
+
+  static core.Future<void> saveLastLogsContent({
+    required Files files,
+    core.int numOfFiles = 1,
+    core.bool encrypted = true,
+    core.bool? fromPublicLogs,
+  }) async {
+    core.int x = 0;
+
+    for (var logs in allLogs) {
+      x++;
+
+      if (x > 1) await files.write('\n');
+
+      await files.write(
+        '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(
+          numOfFiles: numOfFiles,
+          encrypted: encrypted,
+          fromPublicLogs: fromPublicLogs,
+        )}',
+      );
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -320,6 +343,7 @@ abstract class LogsManager {
   }
 
   core.String get _subDirName => 'logs${_getLogsSetStr(prefix: '/')}';
+  core.String get _fileExtension => useExcelFileFormat ? 'csv' : 'txt';
 
   void _createLogFileIfNotExist(core.bool intoPublic) async {
     if (_files != null && _intoPublic == intoPublic) return;
@@ -328,12 +352,11 @@ abstract class LogsManager {
     final now = core.DateTime.now();
     final fileName =
         'log_${DateOp().format(now, pattern: 'yyyy-MM-dd-HH-mm-ss')}';
-    final fileExtension = useExcelFileFormat ? 'csv' : 'txt';
 
     if (intoPublic) {
       _files = Files.public(
         fileName,
-        fileExtension,
+        _fileExtension,
         subDirName: _subDirName,
       );
     }
@@ -341,7 +364,7 @@ abstract class LogsManager {
     else {
       _files = Files.private(
         fileName,
-        fileExtension,
+        _fileExtension,
         subDirName: _subDirName,
       );
     }
@@ -350,7 +373,7 @@ abstract class LogsManager {
     if (dir != null) {
       final files = dir
           .listSync(followLinks: false)
-          .where((e) => e.path.endsWith(fileExtension))
+          .where((e) => e.path.endsWith(_fileExtension))
           .toList();
 
       while (files.length > maxLogsFiles) {
@@ -430,15 +453,15 @@ abstract class LogsManager {
 
   ///fromPublicLogs: null will get from current logs dir
   core.Future<core.String?> getLastLogsContent({
-    core.int upTo = 1,
+    core.int numOfFiles = 1,
     core.bool encrypted = true,
     core.bool? fromPublicLogs,
   }) async {
-    if (upTo < 1) {
+    if (numOfFiles < 1) {
       return null;
     }
     //
-    else if (upTo == 1) {
+    else if (numOfFiles == 1) {
       var file = await currentLogFile;
       if (file == null) return null;
 
@@ -458,16 +481,16 @@ abstract class LogsManager {
 
     final files = dir
         .listSync(followLinks: false)
-        .where((e) => e.path.endsWith('txt'))
+        .where((e) => e.path.endsWith(_fileExtension))
         .toList()
         .reversed;
 
     var content = '';
     var i = 0;
-    while (i < upTo && i < files.length) {
+    while (i < numOfFiles && i < files.length) {
       if (content.isNotEmpty) content += '\n\n';
 
-      var file = File(files.elementAt(i).path);
+      var file = File(files.elementAt(files.length - i - 1).path);
 
       if (encrypted) {
         content += await _encodeFileContent(file);

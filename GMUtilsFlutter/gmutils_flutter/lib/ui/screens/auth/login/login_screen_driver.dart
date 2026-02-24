@@ -3,7 +3,6 @@ import 'package:gmutils_flutter/main.dart' as main;
 import 'package:gmutils_flutter/resources/_resources.dart';
 import 'package:gmutils_flutter/services/configs/app_configs.dart';
 import 'package:gmutils_flutter/ui/utils/iscreen_driver.dart';
-import 'package:gmutils_flutter/zgmutils/data_utils/firebase/fcm.dart';
 import 'package:gmutils_flutter/zgmutils/utils/logs.dart';
 
 abstract class LoginScreenDelegate extends IScreenDriverDependantDelegate {

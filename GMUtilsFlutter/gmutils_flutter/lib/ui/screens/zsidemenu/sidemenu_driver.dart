@@ -46,7 +46,7 @@ abstract class SidemenuDriverAbs extends IScreenDriver {
     var accountId = account.id;
 
     final key = 'sidemenu_${App.isEnglish}_$accountId';
-    var data = App.globalVariables[key];
+    var data = App.globalVariables.get(key);
     _sidemenuItems = data;
 
     if (_sidemenuItems == null) {
@@ -154,7 +154,7 @@ abstract class SidemenuDriverAbs extends IScreenDriver {
         }
       });
 
-      App.globalVariables[key] = _sidemenuItems;
+      App.globalVariables.put(key, value:  _sidemenuItems);
 
       Future.delayed(const Duration(milliseconds: 300), () {
         delegate.updateView();

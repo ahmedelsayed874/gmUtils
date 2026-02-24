@@ -1,7 +1,6 @@
 import 'package:gmutils_flutter/data/data_source/users/users_datasource.dart';
 import 'package:gmutils_flutter/ui/utils/iscreen_driver.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/utils/validation_checker.dart';
-import 'package:gmutils_flutter/zgmutils/gm_main.dart';
 
 abstract class RPInquiryEmailScreenDelegate
     extends IScreenDriverDependantDelegate {
@@ -19,7 +18,7 @@ abstract class RPInquiryEmailScreenDriverAbs extends IScreenDriver {
   void startEmailVerification({required String email}) async {
     var r = ValidationChecker().check(validators: [EmailValidator(email: email)]);
     if (r.result == false) {
-      delegate.showMessage( message: r.message?.get(App.isEnglish) ?? 'Enter a valid email address, example: username@domain.com');
+      delegate.showMessage( message: r.message?.v ?? 'Enter a valid email address, example: username@domain.com');
       return;
     }
 

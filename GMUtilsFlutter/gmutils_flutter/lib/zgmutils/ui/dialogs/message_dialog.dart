@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:foxscope/zgmutils/utils/rich_text.dart';
 
 import '../../resources/app_theme.dart';
 import '../../utils/logs.dart';
+import '../../utils/rich_text.dart';
 import '../widgets/my_linkify.dart';
 
 class MessageDialog {

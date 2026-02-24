@@ -67,7 +67,7 @@ class _LoginScreenState extends BaseState<LoginScreen>
         onPressed: () {
           App.changeAppLanguage(
             context: context,
-            toEnglish: !App.isEnglish,
+            langCode: App.isEnglish ? 'ar' : 'en',
           );
           Future.delayed(
               const Duration(milliseconds: 100), () => setState(() {}));

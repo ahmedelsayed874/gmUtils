@@ -1,8 +1,6 @@
 import 'dart:ffi';
-import 'dart:io';
 
 import 'package:gmutils_flutter/data/data_source/requests_helper.dart';
-import 'package:gmutils_flutter/data/models/attachment.dart';
 import 'package:gmutils_flutter/zgmutils/data_utils/web/web_url.dart';
 
 import '../../models/response.dart';
