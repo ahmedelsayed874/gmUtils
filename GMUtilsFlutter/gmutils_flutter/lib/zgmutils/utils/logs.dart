@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:core' as core;
-//import 'dart:core';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -110,7 +109,7 @@ class Logs {
   }
 
   static core.Future<void> saveLastLogsContent({
-    required Files files,
+    required File outputFile,
     core.int numOfFiles = 1,
     core.bool encrypted = true,
     core.bool? fromPublicLogs,
@@ -120,14 +119,24 @@ class Logs {
     for (var logs in allLogs) {
       x++;
 
-      if (x > 1) await files.write('\n');
+      if (x > 1) {
+        await outputFile.writeAsString(
+          '\n\n-------------------------------\n\n',
+          mode: FileMode.append,
+          flush: true,
+        );
+      }
 
-      await files.write(
-        '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(
-          numOfFiles: numOfFiles,
-          encrypted: encrypted,
-          fromPublicLogs: fromPublicLogs,
-        )}',
+      final content = await logs.getLastLogsContent(
+        numOfFiles: numOfFiles,
+        encrypted: encrypted,
+        fromPublicLogs: fromPublicLogs,
+      );
+
+      await outputFile.writeAsString(
+        '=>${logs.logsSet ?? 'DEF'}::$content',
+        mode: FileMode.append,
+        flush: true,
       );
     }
   }
@@ -343,6 +352,7 @@ abstract class LogsManager {
   }
 
   core.String get _subDirName => 'logs${_getLogsSetStr(prefix: '/')}';
+
   core.String get _fileExtension => useExcelFileFormat ? 'csv' : 'txt';
 
   void _createLogFileIfNotExist(core.bool intoPublic) async {

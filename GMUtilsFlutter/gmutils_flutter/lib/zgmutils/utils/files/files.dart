@@ -14,6 +14,7 @@ class Files {
   final String fileName;
   final String fileExtension;
   final bool saveToCacheDir;
+  final bool saveToTempDir;
   final bool downloadDir;
   final bool privateDir;
   final String? subDirName;
@@ -24,7 +25,7 @@ class Files {
     this.saveToCacheDir = false,
     this.subDirName,
   })  : privateDir = true,
-        downloadDir = false;
+        downloadDir = false, saveToTempDir = false;
 
   Files.public(
     this.fileName,
@@ -32,67 +33,82 @@ class Files {
     this.downloadDir = false,
     this.saveToCacheDir = false,
     this.subDirName,
-  }) : privateDir = false;
+  }) : privateDir = false, saveToTempDir = false;
+
+  Files.temp(
+    this.fileName,
+    this.fileExtension, {
+    this.subDirName,
+  }) : privateDir = false, saveToTempDir = true, downloadDir = false, saveToCacheDir = false;
 
   //----------------------------------------------------------------------------
 
   Future<Directory> get directory async {
     Directory? directory;
-    if (Platform.isAndroid) {
-      if (privateDir) {
-        directory = saveToCacheDir
-            ? await files_provider.getApplicationCacheDirectory()
-            : await files_provider.getApplicationDocumentsDirectory();
+
+    if (!saveToTempDir) {
+      if (Platform.isAndroid) {
+        if (privateDir) {
+          directory = saveToCacheDir
+              ? await files_provider.getApplicationCacheDirectory()
+              : await files_provider.getApplicationDocumentsDirectory();
+        }
+        //
+        else {
+          if (saveToCacheDir) {
+            directory =
+                (await files_provider.getExternalCacheDirectories())?.first;
+          }
+          //
+          else {
+            if (downloadDir) {
+              try {
+                directory = Directory('/storage/emulated/0/Download');
+                if (!directory.existsSync()) throw '';
+              } catch (e) {
+                try {
+                  directory = await files_provider.getDownloadsDirectory();
+                } catch (e) {
+                  directory =
+                  await files_provider.getExternalStorageDirectory();
+                }
+              }
+            }
+            //
+            else {
+              directory = await files_provider.getExternalStorageDirectory();
+            }
+          }
+        }
       }
       //
       else {
-        if (saveToCacheDir) {
-          directory =
-              (await files_provider.getExternalCacheDirectories())?.first;
+        if (privateDir) {
+          directory = await files_provider.getApplicationSupportDirectory();
         }
         //
         else {
           if (downloadDir) {
             try {
-              directory = Directory('/storage/emulated/0/Download');
-              if (!directory.existsSync()) throw '';
+              directory = await files_provider.getDownloadsDirectory();
             } catch (e) {
-              try {
-                directory = await files_provider.getDownloadsDirectory();
-              } catch (e) {
-                directory = await files_provider.getExternalStorageDirectory();
-              }
+              directory =
+              await files_provider.getApplicationDocumentsDirectory();
             }
           }
           //
           else {
-            directory = await files_provider.getExternalStorageDirectory();
-          }
-        }
-      }
-    }
-    //
-    else {
-      if (privateDir) {
-        directory = await files_provider.getApplicationSupportDirectory();
-      }
-      //
-      else {
-        if (downloadDir) {
-          try {
-            directory = await files_provider.getDownloadsDirectory();
-          } catch (e) {
             directory = await files_provider.getApplicationDocumentsDirectory();
           }
         }
-        //
-        else {
-          directory = await files_provider.getApplicationDocumentsDirectory();
-        }
       }
-    }
 
-    directory ??= (await files_provider.getTemporaryDirectory());
+      directory ??= (await files_provider.getTemporaryDirectory());
+    }
+    //
+    else {
+      directory = await files_provider.getTemporaryDirectory();
+    }
 
     if (subDirName?.isNotEmpty == true) {
       directory = Directory('${directory.path}/$subDirName');
