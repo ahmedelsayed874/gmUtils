@@ -35,6 +35,7 @@ import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.backgroundWorkers.LooperThread;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
+import gmutils.listeners.Runnable2;
 import gmutils.security.Security;
 import gmutils.utils.ZipFileUtils;
 
@@ -51,7 +52,7 @@ import gmutils.utils.ZipFileUtils;
  * +201022663988
  */
 public abstract class LoggerAbs {
-    public enum ExportedFileType {Csv, Json, Text}
+    public enum ExportedFileType {Csv, /*Json,*/ Text}
 
     public static class LogConfigs {
         private DateOp logDeadline;
@@ -187,9 +188,9 @@ public abstract class LoggerAbs {
                 fileName += ".csv";
             }
             //
-            else if (exportedFileType == ExportedFileType.Json) {
+            /*else if (exportedFileType == ExportedFileType.Json) {
                 fileName += ".json";
-            }
+            }*/
             //
             else {
                 fileName += ".txt";
@@ -226,11 +227,11 @@ public abstract class LoggerAbs {
 
         private Long writeTime = null;
 
-        public void write(String title, String content) throws Exception {
-            write(title, content, true, true);
+        public void write(int order, String title, String content) throws Exception {
+            write(order, title, content, true, true);
         }
 
-        public void write(String title, String content, boolean addDate, boolean addSeparation) throws Exception /*, FileNotFoundException*/ {
+        public void write(int order, String title, String content, boolean addDate, boolean addSeparation) throws Exception {
             OutputStream os = new FileOutputStream(file, true);
             OutputStreamWriter sw = new OutputStreamWriter(os);
 
@@ -252,6 +253,10 @@ public abstract class LoggerAbs {
                         sw.write("Time,ElapsedTime,Title,Content\n");
                     }
 
+                    //order
+                    sw.write(order + ",");
+
+                    //time | elapsedTime
                     if (addDate) {
                         long now = System.currentTimeMillis();
                         long diff = now - writeTime;
@@ -275,12 +280,12 @@ public abstract class LoggerAbs {
                     sw.write("\"" + title + "\",");
 
                     //Content --> "x",
-                    sw.write("\"" + ("" + content).replaceAll(",", ";") + "\"");
+                    sw.write("\"" + ("" + content).replaceAll("\"", "\"\"") + "\"");
 
                     sw.write("\n");
                 }
                 //
-                else if (exportedFileType == ExportedFileType.Json) {
+                /*else if (exportedFileType == ExportedFileType.Json) {
                     if (addDate && writeTime == null) {
                         writeTime = System.currentTimeMillis();
                         sw.write("[ \"Time\", \"ElapsedTime\", \"Title\", \"Content\" ],\n");
@@ -315,10 +320,10 @@ public abstract class LoggerAbs {
                     sw.write("\"" + ("" + content).replaceAll(",", ";") + "\"");
 
                     sw.write("],\n");
-                }
+                }*/
                 //
                 else {
-                    String text = "";
+                    String text = "[" + order + "]\n";
                     if (!TextUtils.isEmpty(title)) text += ">> " + title + "\n";
                     if (content != null) text += ">> " + content;
 
@@ -448,9 +453,9 @@ public abstract class LoggerAbs {
     private static int numberOnInstances = 0;
     private static LooperThread _looperThread;
 
-    protected void runOnLoggerThread(Runnable task) {
+    protected void runOnLoggerThread(int order, Runnable2<Integer> task) {
         if (logConfigs.writeLogsOnUiThread) {
-            task.run();
+            task.run(order);
             return;
         }
 
@@ -460,10 +465,10 @@ public abstract class LoggerAbs {
                     args -> {
                         Message msg = args.getMsg();
                         Object o = msg.obj;
-                        if (o instanceof Runnable) {
+                        if (o instanceof Runnable2<?>) {
                             try {
                                 //noinspection
-                                ((Runnable) o).run();
+                                ((Runnable2<Integer>) o).run(msg.arg1);
                             } catch (Exception ignored) {
                             }
                         }
@@ -473,6 +478,7 @@ public abstract class LoggerAbs {
 
         Message message = Message.obtain();
         message.obj = task;
+        message.arg1 = order;
         _looperThread.sendMessage(message);
     }
 
@@ -505,6 +511,8 @@ public abstract class LoggerAbs {
         this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
     }
 
+    private int orderRecoder = 0;
+
     //----------------------------------------------------------------------------------------------
 
     //region LOGs
@@ -531,56 +539,13 @@ public abstract class LoggerAbs {
 
     public void print(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
         if ((forceLog || logConfigs.isLogEnabled()) || (forceWriteToFile || logConfigs.isWriteLogsToFileEnabled())) {
-            runOnLoggerThread(() -> {
-                printSync(title, content, forceLog, forceWriteToFile);
+            runOnLoggerThread(++orderRecoder, (order) -> {
+                printSync(order, title, content, forceLog, forceWriteToFile);
             });
         }
     }
 
-    private void printSync0(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
-        String contentStr = ("" + content.getContent());
-
-        if (logConfigs.isLogEnabled() || forceLog) {
-            String title2 = "**** ";
-            if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
-            if (title != null) title2 += title.getTitle();
-
-            String[] t = refineTitle(title2);
-            String[] m = divideLogMsg(contentStr, t.length > 1 ? t[1].length() : 0);
-
-            if (m.length == 1) {
-                if (t.length == 1)
-                    writeToLog(t[0], m[0]);
-                else
-                    writeToLog(t[0], t[1] + ":\n" + m[0]);
-            }
-            //
-            else {
-                for (int i = 0; i < m.length; i++) {
-                    if (t.length == 1) {
-                        writeToLog(t[0], "LOG[" + i + "]-> " + m[i]);
-                    } else {
-                        writeToLog(t[0], t[1] + ":\n" + "LOG[" + i + "]-> " + m[i]);
-                    }
-                }
-            }
-        }
-
-        if (logConfigs.isWriteLogsToFileEnabled() || forceWriteToFile) {
-            if (BaseApplication.current() != null) {
-                try {
-                    writeToFileSync(
-                            BaseApplication.current(),
-                            title,
-                            () -> contentStr
-                    );
-                } catch (Exception ignore) {
-                }
-            }
-        }
-    }
-
-    private void printSync(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
+    private void printSync(int order, TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
         if (logConfigs.isLogEnabled() || forceLog) {
             String title2 = "**** ";
             if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
@@ -615,6 +580,7 @@ public abstract class LoggerAbs {
                 try {
                     writeToFileSync(
                             BaseApplication.current(),
+                            order,
                             title,
                             content
                     );
@@ -649,10 +615,10 @@ public abstract class LoggerAbs {
         printMethod(title, moreInfoCallback, 0);
     }
 
-    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, int tuner) { //Class<?> stopClass) {
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, int tuner) {
         if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
-            runOnLoggerThread(() -> {
+            runOnLoggerThread(++orderRecoder, (order) -> {
                 try {
                     StackTraceElement stackTrace = null;
                     int idx = 1;
@@ -680,6 +646,7 @@ public abstract class LoggerAbs {
                             (moreInfo.isEmpty() ? "" : ("\n-> " + moreInfo));
 
                     printSync(
+                            order,
                             title,
                             () -> msg,
                             false,
@@ -687,6 +654,7 @@ public abstract class LoggerAbs {
                     );
                 } catch (Exception e) {
                     printSync(
+                            order,
                             title,
                             () -> "printMethod failed with exception: " + e.getMessage() +
                                     (moreInfoCallback == null ? "" : "\nMORE-INFO: " + moreInfoCallback.getContent()),
@@ -760,21 +728,21 @@ public abstract class LoggerAbs {
     //region write to files
     public void writeToFile(Context context, ContentGetter text) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
-            runOnLoggerThread(() -> {
-                writeToFileSync(context, null, text);
+            runOnLoggerThread(++orderRecoder, (order) -> {
+                writeToFileSync(context, order, null, text);
             });
         }
     }
 
     public void writeToFile(Context context, TitleGetter title, ContentGetter text) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
-            runOnLoggerThread(() -> {
-                writeToFileSync(context, title, text);
+            runOnLoggerThread(++orderRecoder, (order) -> {
+                writeToFileSync(context, order, title, text);
             });
         }
     }
 
-    private void writeToFileSync(Context context, TitleGetter title, ContentGetter text) {
+    private void writeToFileSync(Context context, int order, TitleGetter title, ContentGetter text) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
             LogFileWriter writer = getLogFileWriter(context);
             if (writer != null) {
@@ -782,10 +750,10 @@ public abstract class LoggerAbs {
                 if (title != null) title2 = title.getTitle();
 
                 try {
-                    writer.write(title2, text.getContent().toString());
+                    writer.write(order, title2, text.getContent().toString());
                 } catch (Exception e) {
                     logFileWriter = null;
-                    new Thread(() -> writeToFileSync(context, title, text)).start();
+                    new Thread(() -> writeToFileSync(context, order, title, text)).start();
                 }
             }
         }
@@ -799,7 +767,7 @@ public abstract class LoggerAbs {
     }
 
     public void getSavedFiles(File logFiles, ResultCallback<List<File>> callback) {
-        runOnLoggerThread(() -> {
+        runOnLoggerThread(orderRecoder, (order) -> {
             List<File> savedFiles = new ArrayList<>();
 
             try {
@@ -888,9 +856,9 @@ public abstract class LoggerAbs {
             fileExtension = "csv";
         }
         //
-        else if (logConfigs.exportedFileType == ExportedFileType.Json) {
+        /*else if (logConfigs.exportedFileType == ExportedFileType.Json) {
             fileExtension = "json";
-        }
+        }*/
         //
         else {
             fileExtension = "txt";

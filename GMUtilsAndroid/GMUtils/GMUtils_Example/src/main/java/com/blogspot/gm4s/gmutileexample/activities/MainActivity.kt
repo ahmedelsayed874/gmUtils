@@ -404,7 +404,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        this.view.btn29.text = "Write logs to json file"
+        /*this.view.btn29.text = "Write logs to json file"
         this.view.btn29.setOnClickListener {
             Logger.instance("json").apply {
                 logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
@@ -420,7 +420,7 @@ class MainActivity : BaseActivity() {
                     }
                 }
             }
-        }
+        }*/
 
         var methodCache = ""
         var urlCache = ""

@@ -242,7 +242,7 @@ public abstract class BaseApplication extends Application implements Application
                             false,
                             null
                     );
-                    fileWriter.write("FATAL EXCEPTION", stack.toString());
+                    fileWriter.write(0, "FATAL EXCEPTION", stack.toString());
                 }
 
                 Application application = thisApp();
