@@ -250,7 +250,7 @@ public abstract class LoggerAbs {
                     if (addDate && writeTime == null) {
                         writeTime = System.currentTimeMillis();
                         sw.write("\"" + new Date() + "\"\n");
-                        sw.write("Time,ElapsedTime,Title,Content\n");
+                        sw.write("#,Time,ElapsedTime,Title,Content\n");
                     }
 
                     //order
