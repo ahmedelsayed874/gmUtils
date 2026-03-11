@@ -22,7 +22,13 @@ import androidx.fragment.app.Fragment;
  * +201022663988
  */
 public class Activities {
+    public interface Interceptor {
+        boolean allowStartActivity(Object caller, Intent intent);
+    }
+
     private static final int DEFAULT_TRANSITION_RES = android.R.anim.slide_in_left;
+
+    public static Interceptor interceptor;
 
 
     public static void start(Class<?> activity, Context context) {
@@ -43,6 +49,8 @@ public class Activities {
 
     public static void start(Class<?> activityClass, Context context, Bundle extraData, @AnimRes int enterResId, @AnimRes int exitResId, boolean bringToTop, boolean startNewTask) {
         Intent intent = createIntent(activityClass, context, extraData, bringToTop, startNewTask);
+        if (interceptor != null && !interceptor.allowStartActivity(context, intent)) return;
+
         try {
             Bundle bundle = createAnimationBundle(
                     context,
@@ -132,6 +140,9 @@ public class Activities {
                 context,
                 DEFAULT_TRANSITION_RES,
                 0);
+
+        if (interceptor != null && !interceptor.allowStartActivity(context, intent)) return;
+
         context.startActivityForResult(intent, requestCode, bundle);
     }
 
@@ -141,6 +152,9 @@ public class Activities {
                 fragment.getContext(),
                 DEFAULT_TRANSITION_RES,
                 0);
+
+        if (interceptor != null && !interceptor.allowStartActivity(fragment, intent)) return;
+
         fragment.startActivityForResult(intent, requestCode, bundle);
     }
 
@@ -150,6 +164,9 @@ public class Activities {
                 fragment.getActivity(),
                 DEFAULT_TRANSITION_RES,
                 0);
+
+        if (interceptor != null && !interceptor.allowStartActivity(fragment, intent)) return;
+
         fragment.startActivityForResult(intent, requestCode, bundle);
     }
 
@@ -160,6 +177,8 @@ public class Activities {
     }
 
     public static void startActivityWithFadeTrans(Activity activity, Intent intent, boolean finishCurrent) {
+        if (interceptor != null && !interceptor.allowStartActivity(activity, intent)) return;
+
         activity.startActivity(intent);
         activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         if (finishCurrent) activity.finish();
@@ -170,6 +189,8 @@ public class Activities {
     }
 
     public static void startActivityWithSlideTrans(Activity activity, Intent intent, boolean finishCurrent) {
+        if (interceptor != null && !interceptor.allowStartActivity(activity, intent)) return;
+
         activity.startActivity(intent);
         activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         if (finishCurrent) activity.finish();

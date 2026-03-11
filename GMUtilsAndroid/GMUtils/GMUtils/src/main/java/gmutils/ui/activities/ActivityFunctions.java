@@ -224,14 +224,6 @@ public class ActivityFunctions implements BaseFragmentListener {
 
                 return true;
             }
-            //
-//            else if (item.getItemId() == reportBugsMenuItemId) {
-//                ZipFileUtils zipFileUtils = new ZipFileUtils(Logger.d());
-//                if (!delegate.reportBugs()) {
-//
-//                }
-//                return true;
-//            }
 
             return false;
         }

@@ -170,7 +170,7 @@ class MyRootWidget {
           titleStyle: titleStyle,
           hintStyle: hintStyle,
         ),
-        Expanded(child: body2)
+        Expanded(child: body2),
       ],
     );
     return this;
@@ -198,12 +198,13 @@ class MyRootWidget {
               Text(
                 hint,
                 textAlign: TextAlign.center,
-                style: hintStyle ??
+                style:
+                    hintStyle ??
                     TextStyle(
                       color: AppTheme.appColors?.hint,
                       fontSize: AppTheme.appMeasurement?.screenTitleSize,
                     ),
-              )
+              ),
           ],
         ),
       ),
@@ -223,9 +224,12 @@ class MyRootWidget {
   Widget build() {
     if (_drawer != null && _appBar == null) {
       if (_body is! StatelessWidget && _body is! StatefulWidget) {
-        Logs.print(() => '******** ERROR ********* it is recommended to extend '
-            '"body" from StatelessWidget or StatefulWidget to be able to use '
-            'getCurrentScaffoldState() method');
+        Logs.print(
+          () =>
+              '******** ERROR ********* it is recommended to extend '
+              '"body" from StatelessWidget or StatefulWidget to be able to use '
+              'getCurrentScaffoldState() method',
+        );
       }
     }
 
@@ -246,19 +250,21 @@ class MyRootWidget {
                   color: _background,
                   width: double.maxFinite,
                   height: double.maxFinite,
-                  child: Stack(children: [
-                    _defaultWidget(),
-                    if (_showBackButton)
-                      IconButton(
-                        onPressed: () => App.navBack(),
-                        icon: Icon(
-                          App.isEnglish
-                              ? Icons.arrow_back_ios_new
-                              : Icons.arrow_forward_ios,
-                          color: _backButtonColor,
+                  child: Stack(
+                    children: [
+                      _defaultWidget(),
+                      if (_showBackButton)
+                        IconButton(
+                          onPressed: () => App.navBack(),
+                          icon: Icon(
+                            App.isEnglish
+                                ? Icons.arrow_back_ios_new
+                                : Icons.arrow_forward_ios,
+                            color: _backButtonColor,
+                          ),
                         ),
-                      ),
-                  ]),
+                    ],
+                  ),
                 ),
               ),
             )
@@ -273,17 +279,15 @@ class MyRootWidget {
     return Container(
       color: _background,
       width: double.maxFinite,
-      padding: _screenPadding ??
+      padding:
+          _screenPadding ??
           EdgeInsets.only(
             top: AppTheme.appMeasurement?.screenPaddingTop ?? 0.0,
             left: AppTheme.appMeasurement?.screenPaddingLeft ?? 0.3,
             right: AppTheme.appMeasurement?.screenPaddingRight ?? 0.3,
             bottom: AppTheme.appMeasurement?.screenPaddingBottom ?? 0.0,
           ),
-      child: DefaultTextStyle(
-        style: AppTheme.defaultTextStyle(),
-        child: _body,
-      ),
+      child: DefaultTextStyle(style: AppTheme.defaultTextStyle(), child: _body),
     );
   }
 
@@ -298,11 +302,13 @@ class MyRootWidget {
     required String message,
     SnackBarAction? action,
     Color? backgroundColor,
+    int durationMS = 4000,
   }) {
     final snackBar = SnackBar(
       content: Text(message),
       action: action,
       backgroundColor: backgroundColor,
+      duration: Duration(milliseconds: durationMS),
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);

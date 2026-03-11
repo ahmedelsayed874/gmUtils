@@ -23,6 +23,8 @@ class ObservableValue<T> {
     }
   }
 
+  bool get hasObservers => _observers.isNotEmpty;
+
   //---------------------------------
 
   T? _value;
