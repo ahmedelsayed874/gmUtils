@@ -2,6 +2,7 @@ import 'dart:async';
 
 //yaml -> path:
 import 'package:path/path.dart';
+
 //yaml -> sqflite:
 import 'package:sqflite/sqflite.dart';
 
@@ -19,27 +20,59 @@ abstract class SQLDatabase {
   SQLDatabase({
     required this.databaseName,
     required this.version,
-  }) : assert(databaseName.isNotEmpty);
+  }) : assert(databaseName.isNotEmpty) {
+    database.then(
+      (db) => Logs.print(
+        () => 'database ($databaseName, version: $version) '
+            'created in constructor',
+      ),
+    );
+  }
 
   //----------------------------------------------------------------------------
 
   List<SQLDatabaseTable> get tables;
 
-  List<SQLInstruction> onUpgrade(int oldVer, int newVer) => [];
+  List<SQLInstruction> onUpgrade(
+    int oldVer,
+    int newVer,
+    void Function(bool) setRecreateDb,
+  ) =>
+      [];
 
   //----------------------------------------------------------------------------
 
+  bool _isCreateBusy = false;
+  List<Completer<Database>>? _completers;
+
   Future<Database> get database async {
+    if (_isCreateBusy) {
+      var c = Completer<Database>();
+
+      _completers ??= [];
+      _completers?.add(c);
+
+      return c.future;
+    }
+
     if (_database == null || _database?.isOpen != true) {
+      _isCreateBusy = true;
+
       _database = await openDatabase(
         join(await getDatabasesPath(), '$databaseName.db'),
         onCreate: _onCreateDb,
         onUpgrade: _onUpgradeDb,
         version: version,
       );
+
+      _isCreateBusy = false;
+      _completers?.forEach((completer) => completer.complete(_database));
     }
+
     return _database!;
   }
+
+  //----------------------------------------------------------------------------
 
   FutureOr<void> _onCreateDb(Database db, int version) async {
     var tablesLst = tables;
@@ -50,24 +83,13 @@ abstract class SQLDatabase {
       try {
         await db.execute(sql);
       } catch (e1) {
-        var alterSqls = table.onExecuteSqlError(table, e1);
-        if (alterSqls == null) {
-          Logs.print(() =>
-              'SQLDatabase.onCreateDb ----> EXCEPTION@execute($sql): $e1');
-          rethrow;
-        }
-        //
-        else {
-          for (var sql in alterSqls) {
-            try {
-              await db.execute(sql.getSQLInstruction());
-            } catch (e2) {
-              Logs.print(() =>
-                  'SQLDatabase.onCreateDb--> after onExecuteSqlError ----> EXCEPTION@execute(${sql.getSQLInstruction()}): $e2');
-              rethrow;
-            }
-          }
-        }
+        _onExecuteSqlError(
+          db: db,
+          method: "onCreateDb",
+          sql: sql,
+          failedSql: table,
+          executeSqlError: e1,
+        );
       }
     }
   }
@@ -79,29 +101,80 @@ abstract class SQLDatabase {
   ) async {
     if (newVersion <= oldVersion) return;
 
-    var instructions = onUpgrade(oldVersion, newVersion);
+    bool recreateDb = true;
+
+    var instructions = onUpgrade(
+      oldVersion,
+      newVersion,
+      (b) => recreateDb = b,
+    );
+
     for (var ins in instructions) {
       try {
         await db.execute(ins.getSQLInstruction());
       } catch (e1) {
-        var alterSqls = ins.onExecuteSqlError(ins, e1);
-        if (alterSqls == null) {
-          Logs.print(() =>
-              'SQLDatabase._onUpgradeDb ----> EXCEPTION@execute(${ins.getSQLInstruction()}): $e1');
-          rethrow;
-        } else {
-          for (var sql in alterSqls) {
-            try {
-              await db.execute(sql.getSQLInstruction());
-            } catch (e2) {
-              Logs.print(() =>
-                  'SQLDatabase.onCreateDb--> after onExecuteSqlError ----> EXCEPTION@execute(${sql.getSQLInstruction()}): $e2');
-              rethrow;
-            }
-          }
+        _onExecuteSqlError(
+          db: db,
+          method: "onUpgradeDb",
+          sql: ins.getSQLInstruction(),
+          failedSql: ins,
+          executeSqlError: e1,
+        );
+      }
+    }
+
+    if (recreateDb) await _onCreateDb(db, newVersion);
+  }
+
+  void _onExecuteSqlError({
+    required Database db,
+    required String method,
+    required String sql,
+    required SQLInstruction failedSql,
+    required executeSqlError,
+  }) async {
+    List<SQLInstruction>? alterSqls = onExecuteSqlError(
+      method: method,
+      failedSql: failedSql,
+      executeSqlError: executeSqlError,
+    );
+
+    if (alterSqls == null) {
+      Logs.print(
+        () => 'SQLDatabase.$method '
+            '----> EXCEPTION@execute($sql): $executeSqlError',
+      );
+
+      throw executeSqlError;
+    }
+    //
+    else {
+      for (var sql in alterSqls) {
+        try {
+          await db.execute(sql.getSQLInstruction());
+        } catch (e2) {
+          Logs.print(
+            () => 'SQLDatabase.$method '
+                '----> after onExecuteSqlError '
+                '----> EXCEPTION@execute(${sql.getSQLInstruction()}): $e2',
+          );
+
+          throw executeSqlError;
         }
       }
     }
+  }
+
+  List<SQLInstruction>? onExecuteSqlError({
+    required String method,
+    required SQLInstruction failedSql,
+    required executeSqlError,
+  }) {
+    throw UnimplementedError(
+      'implement this to handle the following error of "$method": "$executeSqlError" '
+      'on table "${failedSql.tableName}" '
+      'which occurred due to executing ${failedSql.getSQLInstruction()}',
+    );
   }
 
   //----------------------------------------------------------------------------
@@ -110,16 +183,18 @@ abstract class SQLDatabase {
     required String tableName,
     required Future<dynamic> Function(SQLDatabaseTable) task,
   }) async {
-    SQLDatabaseTable table = await newTableInstance(tableName: tableName);
+    SQLDatabaseTable table = await tableOf(tableName: tableName);
     final r = await task(table);
-    table.setDatabase(null);
+    table.dispose();
     return r;
   }
 
-  int _tries = 3;
+  int _tries = 0;
 
   ///it's preferred to use newTransaction(..)
-  Future<SQLDatabaseTable> newTableInstance({required String tableName}) async {
+  Future<SQLDatabaseTable> tableOf({required String tableName}) async {
+    if (_tries <= 0) _tries = 3;
+
     Database? _database;
     while (_tries-- > 0 && _database == null) {
       try {
@@ -131,7 +206,7 @@ abstract class SQLDatabase {
       }
     }
 
-    assert (_database != null);
+    assert(_database != null);
 
     try {
       var t = tables.firstWhere((e) => e.tableName == tableName);

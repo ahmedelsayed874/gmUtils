@@ -21,16 +21,21 @@ abstract class IFirebaseDatabaseOp<T> {
 
   //----------------------------------------------------------------------------
 
-  /*Future<bool> is ConnectionAvailable() {
-    return FirebaseUtils.is ConnectionAvailable();
-  }*/
-
-  //----------------------------------------------------------------------------
-
   Future<FBResponse<bool>> saveData(T data, {required String? subNodePath});
+
+  Future<FBResponse<bool>> saveCustomData<CD>(
+    CD data, {
+    required Mappable<CD> mappable,
+    required String? subNodePath,
+  });
 
   Future<FBResponse<bool>> saveMultipleData({
     required Map<String, T> nodesAndData,
+  });
+
+  Future<FBResponse<bool>> saveMultipleCustomData<CD>({
+    required Map<String, CD> nodesAndData,
+    required Mappable<CD> mappable,
   });
 
   //----------------------------------------------------------------------------
@@ -41,9 +46,21 @@ abstract class IFirebaseDatabaseOp<T> {
     String? subNodePath,
   });
 
+  Future<FBResponse<List<CD>>> retrieveAllCustom<CD>({
+    required Mappable<CD> mappable,
+    FBFilterOption? filterOption,
+    List<Map> Function(Object value)? collectionSource,
+    String? subNodePath,
+  });
+
   //----------------------------------------------------------------------------
 
   Future<FBResponse<T>> retrieveOnly({
+    required String? subNodePath,
+  });
+
+  Future<FBResponse<CD>> retrieveOnlyCustom<CD>({
+    required Mappable<CD> mappable,
     required String? subNodePath,
   });
 
@@ -56,9 +73,10 @@ abstract class IFirebaseDatabaseOp<T> {
     void Function(Object, StackTrace)? onError,
   });
 
-  void listenToChangesSpecific<N>({
+  void listenToSpecificChanges<Tx>({
     required String? subNodePath,
-    required Function(N) onChange,
+    required Mappable<Tx> mappable,
+    required Function(Tx) onChange,
     void Function()? onDone,
     void Function(Object, StackTrace)? onError,
   });
@@ -70,9 +88,10 @@ abstract class IFirebaseDatabaseOp<T> {
     void Function(Object, StackTrace)? onError,
   });
 
-  void listenToAddingSpecific<N>({
+  void listenToSpecificAdding<Tx>({
     required String? subNodePath,
-    required Function(N) onAdd,
+    required Mappable<Tx> mappable,
+    required Function(Tx) onAdd,
     void Function()? onDone,
     void Function(Object, StackTrace)? onError,
   });
@@ -111,6 +130,7 @@ enum FBFilterTypes {
   greaterThanOrEqual,
   lessThan,
   lessThanOrEqual,
+  none,
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -121,7 +141,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     required super.rootNodeName,
   });
 
-  final _timeoutErrorMessage = StringSet(
+  final timeoutErrorMessage = StringSet(
     'Request timeout. please check your connection.',
     'انتهى الوقت المتوقع، يرجى التأكد من الاتصال بالانترنت.',
   );
@@ -140,7 +160,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       try {
         init();
       } catch (e) {
-        Logs.print(() => 'FirebaseDatabaseOp.databaseReference ---> Exception:: $e');
+        Logs.print(
+            () => 'FirebaseDatabaseOp.databaseReference ---> Exception:: $e');
         await Firebase.initializeApp();
         init();
       }
@@ -153,7 +174,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
   String _refineKeyName(String name) => FirebaseUtils.refineKeyName(name);
 
-  Future<DatabaseReference> _getReferenceOfNode(String? subNodePath) async {
+  Future<DatabaseReference> getReferenceOfNode(String? subNodePath) async {
     if (subNodePath == null) return databaseReference;
 
     subNodePath = FirebaseUtils.refinePathFragmentNames(subNodePath);
@@ -165,12 +186,33 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   //----------------------------------------------------------------------------
 
   @override
-  Future<FBResponse<bool>> saveData(T data, {required String? subNodePath}) async {
-    DatabaseReference ref = await _getReferenceOfNode(subNodePath);
+  Future<FBResponse<bool>> saveData(
+    T data, {
+    required String? subNodePath,
+  }) async {
+    DatabaseReference ref = await getReferenceOfNode(subNodePath);
     return saveDataTo(ref, data);
   }
 
-  Future<FBResponse<bool>> saveDataTo(DatabaseReference ref, T data) async {
+  @override
+  Future<FBResponse<bool>> saveCustomData<CD>(
+    CD data, {
+    required Mappable<CD> mappable,
+    required String? subNodePath,
+  }) async {
+    DatabaseReference ref = await getReferenceOfNode(subNodePath);
+    return saveCustomDataTo(ref, data, mappable: mappable);
+  }
+
+  Future<FBResponse<bool>> saveDataTo(DatabaseReference ref, T data) {
+    return saveCustomDataTo(ref, data, mappable: mappable);
+  }
+
+  Future<FBResponse<bool>> saveCustomDataTo<Tx>(
+    DatabaseReference ref,
+    Tx data, {
+    required Mappable<Tx> mappable,
+  }) async {
     Logs.print(() => 'FirebaseDatabaseOp[Call].saveDataTo'
         '(ref: ${ref.path}, '
         'data: ${TextUtils().trimEnd('$data')}'
@@ -190,7 +232,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
       return FBResponse.success(data: added);
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].saveDataTo(ref: ${ref.path}) ---> $e');
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response.Exception].saveDataTo(ref: ${ref.path}) ---> $e');
       return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
@@ -198,16 +241,45 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     }
   }
 
+  //-------------------------------------------------------
+
   @override
-  Future<FBResponse<bool>> saveMultipleData({required Map<String, T> nodesAndData,}) async {
-    DatabaseReference ref = await _getReferenceOfNode(null);
+  Future<FBResponse<bool>> saveMultipleData({
+    required Map<String, T> nodesAndData,
+  }) async {
+    DatabaseReference ref = await getReferenceOfNode(null);
     return saveMultipleDataTo(ref, nodesAndData: nodesAndData);
   }
 
+  @override
+  Future<FBResponse<bool>> saveMultipleCustomData<CD>({
+    required Map<String, CD> nodesAndData,
+    required Mappable<CD> mappable,
+  }) async {
+    DatabaseReference ref = await getReferenceOfNode(null);
+    return saveMultipleCustomDataTo(
+      ref,
+      nodesAndData: nodesAndData,
+      mappable: mappable,
+    );
+  }
+
   Future<FBResponse<bool>> saveMultipleDataTo(
-      DatabaseReference ref, {
-        required Map<String, T> nodesAndData,
-      }) async {
+    DatabaseReference ref, {
+    required Map<String, T> nodesAndData,
+  }) {
+    return saveMultipleCustomDataTo(
+      ref,
+      nodesAndData: nodesAndData,
+      mappable: mappable,
+    );
+  }
+
+  Future<FBResponse<bool>> saveMultipleCustomDataTo<Tx>(
+    DatabaseReference ref, {
+    required Map<String, Tx> nodesAndData,
+    required Mappable<Tx> mappable,
+  }) async {
     Logs.print(() => 'FirebaseDatabaseOp[Call].saveMultipleDataTo'
         '(ref: ${ref.path}, '
         'data-length: ${nodesAndData.length}, '
@@ -217,7 +289,7 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       bool added = false;
 
       var nodesAndMappedData = nodesAndData.map(
-            (key, value) => MapEntry(
+        (key, value) => MapEntry(
           _refineKeyName(key),
           mappable.toMap(value),
         ),
@@ -234,7 +306,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
       return FBResponse.success(data: added);
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].saveMultipleDataTo(ref: ${ref.path}) ---> $e');
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response.Exception].saveMultipleDataTo(ref: ${ref.path}) ---> $e');
       return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
@@ -249,8 +322,23 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     FBFilterOption? filterOption,
     List<Map> Function(Object value)? collectionSource,
     String? subNodePath,
+  }) {
+    return retrieveAllCustom(
+      mappable: mappable,
+      filterOption: filterOption,
+      collectionSource: collectionSource,
+      subNodePath: subNodePath,
+    );
+  }
+
+  @override
+  Future<FBResponse<List<CD>>> retrieveAllCustom<CD>({
+    required Mappable<CD> mappable,
+    FBFilterOption? filterOption,
+    List<Map> Function(Object value)? collectionSource,
+    String? subNodePath,
   }) async {
-    DatabaseReference ref = await _getReferenceOfNode(subNodePath);
+    DatabaseReference ref = await getReferenceOfNode(subNodePath);
 
     Logs.print(() => 'FirebaseDatabaseOp[Call].retrieveAll'
         '(ref: ${ref.path}, '
@@ -301,12 +389,13 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         }
       }).timeout(const Duration(seconds: 10));
 
-      FBResponse<List<T>> response;
-      
+      FBResponse<List<CD>> response;
+
       if (snapshot.exists) {
-        List<T> list = await _mapData(
+        List<CD> list = await _mapData(
           snapshot,
           collectionSource,
+          mappable: mappable,
         );
 
         response = FBResponse.success(data: list);
@@ -325,16 +414,18 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           'response.data-length: ${response.data?.length}, '
           'response.data: ${TextUtils().trimEnd('${response.data}')}, '
           'response.message: ${response.error}');
-      
+
       return response;
     } on TimeoutException catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp[Response.TimeoutException].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response.TimeoutException].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
       return FBResponse.failed(
-        error: _timeoutErrorMessage,
+        error: timeoutErrorMessage,
         connectionFailed: true,
       );
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response.Exception].retrieveAll(ref: ${ref.path}) ---> snapshot: ${snapshot?.value} ---> $e');
       return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: false,
@@ -342,11 +433,12 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     }
   }
 
-  Future<List<T>> _mapData(
-      DataSnapshot dataSnapshot,
-      List<Map> Function(Object value)? collectionSource,
-      ) async {
-    List<T> list = [];
+  Future<List<Tx>> _mapData<Tx>(
+    DataSnapshot dataSnapshot,
+    List<Map> Function(Object value)? collectionSource, {
+    required Mappable<Tx> mappable,
+  }) async {
+    List<Tx> list = [];
 
     if (dataSnapshot.value != null) {
       dynamic values;
@@ -382,14 +474,35 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
   @override
   Future<FBResponse<T>> retrieveOnly({required String? subNodePath}) async {
-    var ref = await _getReferenceOfNode(subNodePath);
+    var ref = await getReferenceOfNode(subNodePath);
     return await retrieveOnlyFrom(ref: ref);
+  }
+
+  @override
+  Future<FBResponse<CD>> retrieveOnlyCustom<CD>({
+    required Mappable<CD> mappable,
+    required String? subNodePath,
+  }) async {
+    var ref = await getReferenceOfNode(subNodePath);
+    return await retrieveOnlyCustomFrom(
+      ref: ref,
+      mappable: mappable,
+    );
   }
 
   Future<FBResponse<T>> retrieveOnlyFrom({
     required DatabaseReference ref,
+  }) {
+    return retrieveOnlyCustomFrom(ref: ref, mappable: mappable);
+  }
+
+  Future<FBResponse<Tx>> retrieveOnlyCustomFrom<Tx>({
+    required DatabaseReference ref,
+    required Mappable<Tx> mappable,
   }) async {
-    Logs.print(() => 'FirebaseDatabaseOp[Call].retrieveOnlyFrom(ref: ${ref.path})',);
+    Logs.print(
+      () => 'FirebaseDatabaseOp[Call].retrieveOnlyFrom(ref: ${ref.path})',
+    );
 
     Map<String, dynamic> map = {};
 
@@ -399,8 +512,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         return event.snapshot;
       }).timeout(const Duration(seconds: 10));
 
-      FBResponse<T> response;
-      
+      FBResponse<Tx> response;
+
       if (snapshot.exists) {
         if (snapshot.value is List) {
           var data = snapshot.value as List;
@@ -427,23 +540,26 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         );
       }
 
-      Logs.print(() => 'FirebaseDatabaseOp[Response].retrieveOnlyFrom(ref: ${ref.path}) '
-          '---> '
-          'response.data: ${TextUtils().trimEnd('${response.data}')}, '
-          'response.message: ${response.error}',
+      Logs.print(
+        () => 'FirebaseDatabaseOp[Response].retrieveOnlyFrom(ref: ${ref.path}) '
+            '---> '
+            'response.data: ${TextUtils().trimEnd('${response.data}')}, '
+            'response.message: ${response.error}',
       );
 
       return response;
     } on TimeoutException catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp[Response.TimeoutException].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response.TimeoutException].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
 
       return FBResponse.failed(
-        error: _timeoutErrorMessage,
+        error: timeoutErrorMessage,
         connectionFailed: true,
       );
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
-      
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response.Exception].retrieveOnlyFrom(ref: ${ref.path}) ---> result: $map ---> $e');
+
       return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: false,
@@ -460,28 +576,35 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     void Function()? onDone,
     void Function(Object, StackTrace)? onError,
   }) async {
-    return listenToChangesOn(
-      ref: await _getReferenceOfNode(subNodePath),
-      onChange: onChange,
-      onDone: onDone,
-      onError: onError,
-    );
-  }
-
-  void listenToChangesOn({
-    required DatabaseReference ref,
-    required Function(T) onChange,
-    void Function()? onDone,
-    void Function(Object, StackTrace)? onError,
-  }) async {
     return _listenTo(
-      ref: ref,
+      ref: await getReferenceOfNode(subNodePath),
       listenToAnyChange: true,
+      mappable: mappable,
       onNewUpdate: onChange,
       onDone: onDone,
       onError: onError,
     );
   }
+
+  @override
+  void listenToSpecificChanges<Tx>({
+    required String? subNodePath,
+    required Mappable<Tx> mappable,
+    required Function(Tx p1) onChange,
+    void Function()? onDone,
+    void Function(Object p1, StackTrace p2)? onError,
+  }) async {
+    return _listenTo(
+      ref: await getReferenceOfNode(subNodePath),
+      listenToAnyChange: true,
+      mappable: mappable,
+      onNewUpdate: onChange,
+      onDone: onDone,
+      onError: onError,
+    );
+  }
+
+  //------------------------------------------------------
 
   @override
   void listenToAdding({
@@ -490,21 +613,9 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     void Function()? onDone,
     void Function(Object, StackTrace)? onError,
   }) async {
-    return listenToAddingTo(
-        ref: await _getReferenceOfNode(subNodePath),
-        onAdd: onAdd,
-        onDone: onDone,
-        onError: onError);
-  }
-
-  void listenToAddingTo({
-    required DatabaseReference ref,
-    required Function(T) onAdd,
-    void Function()? onDone,
-    void Function(Object, StackTrace)? onError,
-  }) async {
     return _listenTo(
-      ref: ref,
+      ref: await getReferenceOfNode(subNodePath),
+      mappable: mappable,
       listenToAnyChange: false,
       onNewUpdate: onAdd,
       onDone: onDone,
@@ -512,45 +623,77 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     );
   }
 
-  void _listenTo({
+  @override
+  void listenToSpecificAdding<Tx>({
+    required String? subNodePath,
+    required Mappable<Tx> mappable,
+    required Function(Tx p1) onAdd,
+    void Function()? onDone,
+    void Function(Object p1, StackTrace p2)? onError,
+  }) async {
+    return _listenTo(
+      ref: await getReferenceOfNode(subNodePath),
+      mappable: mappable,
+      listenToAnyChange: false,
+      onNewUpdate: onAdd,
+      onDone: onDone,
+      onError: onError,
+    );
+  }
+
+  List<StreamSubscription>? _childChangeStreamSubscriptions;
+  List<StreamSubscription>? _childAddedStreamSubscriptions;
+
+  void _listenTo<Tx>({
     required DatabaseReference ref,
     required bool listenToAnyChange,
-    required Function(T) onNewUpdate,
+    required Mappable<Tx> mappable,
+    required Function(Tx) onNewUpdate,
     void Function()? onDone,
     void Function(Object, StackTrace)? onError,
   }) async {
     onData(event) => (event) {
-      Map<String, dynamic>? map;
-      try {
-        var snapshot = event.snapshot;
-        map = Map.from(snapshot.value as Map);
-        onNewUpdate(mappable.fromMap(map));
-      } catch (e) {
-        Logs.print(
+          Map<String, dynamic>? map;
+          try {
+            var snapshot = event.snapshot;
+            map = Map.from(snapshot.value as Map);
+            onNewUpdate(mappable.fromMap(map));
+          } catch (e) {
+            Logs.print(
               () => '***** FirebaseDatabaseOp.setOnChildAddedListener() **** '
-              'args(into: ${ref.path}) \n'
-              'result: $map \n'
-              '$e',
-        );
-      }
-    };
+                  'args(into: ${ref.path}) \n'
+                  'result: $map \n'
+                  '$e',
+            );
+          }
+        };
 
     if (listenToAnyChange) {
-      ref.onChildChanged.listen(onData, onDone: onDone, onError: onError);
-    } else {
-      ref.onChildAdded.listen(onData, onDone: onDone, onError: onError);
+      var s = ref.onChildChanged.listen(onData, onDone: onDone, onError: onError,);
+
+      _childChangeStreamSubscriptions ??= [];
+      _childChangeStreamSubscriptions!.add(s);
+    }
+    //
+    else {
+      var s = ref.onChildAdded.listen(onData, onDone: onDone, onError: onError,);
+
+      _childAddedStreamSubscriptions ??= [];
+      _childAddedStreamSubscriptions!.add(s);
     }
   }
 
+  //------------------------------------------------------
+
   @override
   void removeListeners({required String? subNodePath}) async {
-    var ref = await _getReferenceOfNode(subNodePath);
+    var ref = await getReferenceOfNode(subNodePath);
     removeListenersOf(ref: ref);
   }
 
   void removeListenersOf({required DatabaseReference ref}) {
-    ref.onChildChanged.listen(null);
-    ref.onChildAdded.listen(null);
+    _childChangeStreamSubscriptions?.forEach((element) => element.cancel());
+    _childAddedStreamSubscriptions?.forEach((element) => element.cancel());
   }
 
   //----------------------------------------------------------------------------
@@ -563,7 +706,8 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       bool suc = true;
       var ref = await databaseReference;
       await ref.remove().onError((error, stackTrace) => suc = false);
-      Logs.print(() => 'FirebaseDatabaseOp[Response].clear() ---> success:: $suc');
+      Logs.print(
+          () => 'FirebaseDatabaseOp[Response].clear() ---> success:: $suc');
       return FBResponse.success(data: suc);
     } catch (e) {
       Logs.print(() => 'FirebaseDatabaseOp[Response].clear() ---> $e');
@@ -576,31 +720,23 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
 
   @override
   Future<FBResponse<bool>> removeNode({required String subNodePath}) async {
-    var ref = await _getReferenceOfNode(subNodePath);
+    var ref = await getReferenceOfNode(subNodePath);
 
     Logs.print(() => 'FirebaseDatabaseOp[Call].removeNode(ref: ${ref.path})');
 
     try {
       bool deleted = true;
       await ref.remove().onError((error, stackTrace) => deleted = false);
-      Logs.print(() => 'FirebaseDatabaseOp[Response].removeNode(ref: ${ref.path}) ---> deleted:: $deleted');
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response].removeNode(ref: ${ref.path}) ---> deleted:: $deleted');
       return FBResponse.success(data: deleted);
     } catch (e) {
-      Logs.print(() => 'FirebaseDatabaseOp[Response.Exception].removeNode(ref: ${ref.path}) ---> $e');
+      Logs.print(() =>
+          'FirebaseDatabaseOp[Response.Exception].removeNode(ref: ${ref.path}) ---> $e');
       return FBResponse.failed(
         error: StringSet(e.toString()),
         connectionFailed: true,
       );
     }
-  }
-
-  @override
-  void listenToAddingSpecific<N>({required String? subNodePath, required Function(N p1) onAdd, void Function()? onDone, void Function(Object p1, StackTrace p2)? onError}) {
-    throw 'implement listenToAddingSpecific';
-  }
-
-  @override
-  void listenToChangesSpecific<N>({required String? subNodePath, required Function(N p1) onChange, void Function()? onDone, void Function(Object p1, StackTrace p2)? onError}) {
-    throw 'implement listenToChangesSpecific';
   }
 }

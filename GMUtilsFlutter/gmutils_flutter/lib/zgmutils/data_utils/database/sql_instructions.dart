@@ -5,24 +5,29 @@ abstract class SQLInstruction {
 
   String getSQLInstruction();
 
-  List<SQLInstruction>? onExecuteSqlError(SQLInstruction failedSql, error) {
+  /*List<SQLInstruction>? onExecuteSqlError({
+    required executeSqlError,
+  }) {
     throw UnimplementedError(
-      'implement this to handle the following error: $error '
-      'which occurred due to executing ${failedSql.getSQLInstruction()}',
+      'implement this to handle the following error: $executeSqlError '
+      'which occurred due to executing ${getSQLInstruction()}',
     );
-  }
+  }*/
 
   @override
   String toString() {
-    return 'SQLInstruction = ${getSQLInstruction()}';
+    return '$runtimeType = ${getSQLInstruction()}';
   }
 }
 
 //------------------------------------------------------------------------------
 
 abstract class SQLCreateTable extends SQLInstruction {
+  final bool ifNotExists;
+
   SQLCreateTable({
     required String tableName,
+    this.ifNotExists = false,
   }) : super(tableName);
 
   List<SQLTableColumn> get columns;
@@ -54,7 +59,7 @@ abstract class SQLCreateTable extends SQLInstruction {
       primaryColumnsStr += ')';
     }
 
-    return 'CREATE TABLE $tableName ($columnsStr$primaryColumnsStr)';
+    return 'CREATE TABLE ${ifNotExists ? 'IF NOT EXISTS' : ''} $tableName ($columnsStr$primaryColumnsStr)';
   }
 
   static SQLCreateTable obj({
@@ -108,7 +113,7 @@ class SQLTableColumn extends SQLInstruction {
     Map map, {
     required FieldType? Function(String fieldName, Type? valueType)?
         onFieldTypeError,
-    required List<String>? Function(String fieldName) constraints,
+    required List<String>? Function(String fieldName)? constraints,
   }) {
     List<SQLTableColumn> cols = [];
 
@@ -153,7 +158,7 @@ class SQLTableColumn extends SQLInstruction {
       cols.add(SQLTableColumn(
         name: fieldName,
         type: fieldType,
-        constraints: constraints.call(fieldName),
+        constraints: constraints?.call(fieldName),
       ));
     }
 
@@ -181,13 +186,16 @@ class SQLCreateTableImpl extends SQLCreateTable {
 //------------------------------------------------------------------------------
 
 class SQLDropTable extends SQLInstruction {
+  final bool ifExists;
+
   SQLDropTable({
     required String tableName,
+    this.ifExists = false,
   }) : super(tableName);
 
   @override
   String getSQLInstruction() {
-    return 'DROP TABLE $tableName';
+    return 'DROP TABLE ${ifExists ? 'IF EXISTS' : ''} $tableName';
   }
 }
 

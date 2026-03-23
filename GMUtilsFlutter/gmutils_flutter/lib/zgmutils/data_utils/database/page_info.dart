@@ -1,6 +1,6 @@
 class PageInfo {
-  late final int offset;
-  late final int limit;
+  late final int? offset;
+  late final int? limit;
 
   PageInfo({required this.offset, required this.limit});
 
@@ -11,6 +11,6 @@ class PageInfo {
 
   @override
   String toString() {
-    return '{offset: $offset (page: ${offset / limit + 1}), limit: $limit}';
+    return '{offset: $offset (page: ${(offset ?? 0) / (limit ?? 1) + 1}), limit: $limit}';
   }
 }

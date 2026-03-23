@@ -1,5 +1,4 @@
 import 'package:sqflite/sqflite.dart';
-
 import '../../utils/collections/pairs.dart';
 import '../../utils/logs.dart';
 import '../utils/mappable.dart';
@@ -137,23 +136,6 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   }) {
     final customData = mapper.toMap(data);
 
-    /*
-    if (customValueConverter != null) {
-      Map<String, dynamic> newData = {};
-
-      for (var entry in customData.entries) {
-        if (entry.value != null) {
-          var newValue = customValueConverter(entry.key, entry.value);
-          if (newValue != null) {
-            newData[entry.key] = newValue.value;
-          }
-        }
-      }
-
-      customData.addAll(newData);
-    }
-     */
-
     Map<String, dynamic> newData = {};
     for (var entry in customData.entries) {
       if (entry.value != null) {
@@ -187,6 +169,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     bool? isOrderAsc,
     PageInfo? pageInfo,
     bool? distinct,
+    String? groupBy,
+    String? having,
     CustomValueConverter? customValueConverter,
   }) {
     List<String>? customColumns;
@@ -202,6 +186,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       isOrderAsc: isOrderAsc,
       pageInfo: pageInfo,
       distinct: distinct,
+      groupBy: groupBy,
+      having: having,
       converter: (map) => _dataConverter(
         data: map,
         customValueConverter: customValueConverter,
@@ -216,6 +202,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     bool? isOrderAsc,
     PageInfo? pageInfo,
     bool? distinct,
+    String? groupBy,
+    String? having,
     required Ct Function(Map<String, dynamic>) converter,
   }) async {
     return await _retrieve(
@@ -226,6 +214,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       isOrderAsc: isOrderAsc,
       pageInfo: pageInfo,
       distinct: distinct,
+      groupBy: groupBy,
+      having: having,
       converter: converter,
     );
   }
@@ -237,6 +227,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     bool? isOrderAsc,
     PageInfo? pageInfo,
     bool? distinct,
+    String? groupBy,
+    String? having,
     CustomValueConverter? customValueConverter,
   }) {
     List<String>? customColumns;
@@ -252,6 +244,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       isOrderAsc: isOrderAsc,
       pageInfo: pageInfo,
       distinct: distinct,
+      groupBy: groupBy,
+      having: having,
       converter: (map) => _dataConverter(
         data: map,
         customValueConverter: customValueConverter,
@@ -266,6 +260,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     bool? isOrderAsc,
     PageInfo? pageInfo,
     bool? distinct,
+    String? groupBy,
+    String? having,
     required Ct Function(Map<String, dynamic>) converter,
   }) async {
     return await _retrieve(
@@ -276,6 +272,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       isOrderAsc: isOrderAsc,
       pageInfo: pageInfo,
       distinct: distinct,
+      groupBy: groupBy,
+      having: having,
       converter: converter,
     );
   }
@@ -288,6 +286,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     bool? isOrderAsc,
     PageInfo? pageInfo,
     bool? distinct,
+    String? groupBy,
+    String? having,
     required T2 Function(Map<String, dynamic>) converter,
   }) async {
     String? orderBy;
@@ -308,6 +308,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       limit: pageInfo?.limit,
       offset: pageInfo?.offset,
       distinct: distinct,
+      groupBy: groupBy,
+      having: having,
     );
 
     if (returnSet) {
@@ -331,6 +333,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   Future<T?> retrieveSingle({
     required SQLConditions? whereCondition,
     CustomValueConverter? customValueConverter,
+    String? having,
   }) =>
       retrieveCustomSingle(
         customColumns: null,
@@ -339,12 +342,14 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
           data: map,
           customValueConverter: customValueConverter,
         ),
+        having: having,
       );
 
   Future<Ct?> retrieveCustomSingle<Ct>({
     required List<String>? customColumns,
     required SQLConditions? whereCondition,
     required Ct Function(Map<String, dynamic>) converter,
+    String? having,
   }) async {
     // Query the table for all
 
@@ -352,6 +357,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       tableName,
       columns: customColumns,
       where: whereCondition?.statement,
+      having: having,
     );
 
     // Convert the List<Map<String, dynamic> into a List
@@ -425,7 +431,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required List<Pair<T, SQLConditions?>> data,
     CustomValueConverter? customValueConverter,
   }) async {
-    return await updateMultiple2(
+    return await updateMultiple3(
       length: data.length,
       data: (i) => _columnsVsValues(
         data: data[i].value1,
@@ -436,6 +442,22 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   }
 
   Future<List<int>> updateMultiple2({
+    required int length,
+    required T Function(int index) data,
+    CustomValueConverter? Function(int index)? customValueConverter,
+    required SQLConditions? Function(int index) whereCondition,
+  }) async {
+    return await updateMultiple3(
+      length: length,
+      data: (i) => _columnsVsValues(
+        data: data(i),
+        customValueConverter: customValueConverter?.call(i),
+      ),
+      whereCondition: (i) => whereCondition(i),
+    );
+  }
+
+  Future<List<int>> updateMultiple3({
     required int length,
     required Map<String, dynamic> Function(int index) data,
     required SQLConditions? Function(int index) whereCondition,
@@ -469,7 +491,14 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       where: whereCondition?.statement,
     );
   }
+
 //endregion
+
+  //----------------------------------------------------------------------------
+
+  void dispose() {
+    setDatabase(null);
+  }
 }
 
 //------------------------------------------------------------------------------
