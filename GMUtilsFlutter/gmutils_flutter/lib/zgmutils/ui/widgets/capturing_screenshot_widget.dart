@@ -4,11 +4,11 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../gm_main.dart';
 import '../../utils/date_op.dart';
 import '../../utils/files/files.dart';
+import '../../utils/sharing_helper.dart';
 import '../dialogs/message_dialog.dart';
 
 class CapturingScreenshotWidget extends StatefulWidget {
@@ -39,10 +39,15 @@ class CapturingScreenshotWidget extends StatefulWidget {
     var file = await WidgetCapture(key).captureAsFile();
     if (file != null) {
       //share file
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'image/*')],
-        text: text,
+      await SharingHelper.shareFile(
+          text: text,
+          outputFilePath: file.path
       );
+
+      // await Share.shareXFiles(
+      //   [XFile(file.path, mimeType: 'image/*')],
+      //   text: text,
+      // );
     }
     //
     else {
