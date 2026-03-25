@@ -249,4 +249,16 @@ class TextUtils {
 
     return txt;
   }
+
+  String formatIntNumber(int number) {
+    var n = '$number';
+
+    var end = n.length - 3;
+    while (end > 0) {
+      n = '${n.substring(0, end)},${n.substring(end)}';
+      end -= 3;
+    }
+
+    return n;
+  }
 }
