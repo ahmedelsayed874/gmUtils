@@ -615,8 +615,6 @@ public abstract class LoggerAbs {
         }
     }
 
-    public abstract void writeToLog(String tag, String msg, @Nullable LogCategory logCategory);
-
     //----------------
 
     //region printMethod
@@ -773,6 +771,8 @@ public abstract class LoggerAbs {
         }
     }
     //endregion LOGs
+
+    public abstract void writeToLog(String tag, String msg, @Nullable LogCategory logCategory);
 
     //----------------------------------------------------------------------------------------------
 

@@ -2,13 +2,11 @@ package gmutils.logger;
 
 import android.util.Log;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import gmutils.DateOp;
@@ -85,9 +83,12 @@ public class Logger extends LoggerAbs {
 
     @Override
     public void writeToLog(String tag, String msg, @Nullable LogCategory logCategory) {
-        if (logCategory == null) Log.e(tag, msg);
+        if (logCategory == null) {
+            Log.e(tag, msg);
+            return;
+        }
 
-        switch (Objects.requireNonNull(logCategory)) {
+        switch (logCategory) {
             case Verbose:
                 Log.v(tag, msg);
                 break;
