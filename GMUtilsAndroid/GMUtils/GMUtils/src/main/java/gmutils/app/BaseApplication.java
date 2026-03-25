@@ -249,7 +249,7 @@ public abstract class BaseApplication extends Application implements Application
                 boolean b = false;
                 for (LoggerAbs logger : Logger.loggers()) {
                     if (!b) {
-                        if (logger.getLogConfigs().isLogEnabled()) {
+                        if (logger.getLogConfigs().isLogcatEnabled()) {
                             b = true;
                             Log.e("***** EXCEPTION", stack.toString());
                         }

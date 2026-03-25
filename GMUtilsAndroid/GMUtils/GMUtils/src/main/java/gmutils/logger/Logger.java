@@ -2,9 +2,13 @@ package gmutils.logger;
 
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import gmutils.DateOp;
@@ -39,7 +43,7 @@ public class Logger extends LoggerAbs {
         LogConfigs logsOptions = null;
         if (deadline != null) {
             logsOptions = new LogConfigs()
-                    .setLogDeadline(deadline)
+                    .setLogcatDeadline(deadline)
                     .setWriteLogsToPublicFileDeadline(deadline)
                     .setWriteLogsToPrivateFileDeadline(deadline);
         }
@@ -68,7 +72,7 @@ public class Logger extends LoggerAbs {
     }
 
     public static void printToAll(ContentGetter content) {
-        for(LoggerAbs logger : loggers()) {
+        for (LoggerAbs logger : loggers()) {
             logger.print(content);
         }
     }
@@ -80,8 +84,34 @@ public class Logger extends LoggerAbs {
     }
 
     @Override
-    public void writeToLog(String tag, String msg) {
-        Log.e(tag, msg);
+    public void writeToLog(String tag, String msg, @Nullable LogCategory logCategory) {
+        if (logCategory == null) Log.e(tag, msg);
+
+        switch (Objects.requireNonNull(logCategory)) {
+            case Verbose:
+                Log.v(tag, msg);
+                break;
+
+            case Debug:
+                Log.d(tag, msg);
+                break;
+
+            case Info:
+                Log.i(tag, msg);
+                break;
+
+            case Warning:
+                Log.w(tag, msg);
+                break;
+
+            case Error:
+                Log.e(tag, msg);
+                break;
+
+            case Assert:
+                Log.wtf(tag, msg);
+                break;
+        }
     }
 
 }

@@ -250,7 +250,7 @@ class MainActivity : BaseActivity() {
 
             log("get-app-backup", "getting app backup started")
             Logger.d().logConfigs
-                .setLogDeadline(DateOp.getInstance().increaseDays(1))
+                .setLogcatDeadline(DateOp.getInstance().increaseDays(1))
                 .setWriteLogsToPublicFileDeadline(DateOp.getInstance().increaseDays(1))
                 .setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
 
@@ -319,10 +319,10 @@ class MainActivity : BaseActivity() {
         this.view.btn25.text = "BUG"
         this.view.btn25.setOnClickListener {
             val dl = DateOp.getInstance().increaseDays(5)
-            Logger.d().logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l1").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l2").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l3").logConfigs.setLogDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.d().logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l1").logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l2").logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l3").logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
             Logger.printToAll() { "test" }
 
             error("throw bug to test writing to all logs file")
@@ -371,7 +371,7 @@ class MainActivity : BaseActivity() {
         this.view.btn27.text = "Write logs to text file"
         this.view.btn27.setOnClickListener {
             Logger.instance("text").apply {
-                logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Text)
 
@@ -389,7 +389,7 @@ class MainActivity : BaseActivity() {
         this.view.btn28.text = "Write logs to csv file"
         this.view.btn28.setOnClickListener {
             Logger.instance("csv").apply {
-                logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Csv)
 
@@ -407,7 +407,7 @@ class MainActivity : BaseActivity() {
         /*this.view.btn29.text = "Write logs to json file"
         this.view.btn29.setOnClickListener {
             Logger.instance("json").apply {
-                logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+                logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Json)
 
@@ -604,7 +604,7 @@ class MainActivity : BaseActivity() {
         val logger = Logger.instance("testLogger")
         logger.logConfigs.apply {
             val dl = DateOp.getInstance().increaseDays(1)
-            setLogDeadline(dl)
+            setLogcatDeadline(dl)
             setWriteLogsToPublicFileDeadline(dl)
         }
 
@@ -651,7 +651,7 @@ class MainActivity : BaseActivity() {
 
 
     private fun testUntrustedConnection() {
-        Logger.d().logConfigs.setLogDeadline(DateOp.getInstance().increaseDays(1))
+        Logger.d().logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
         log("Test Untrusted Connection", "Test Untrusted Connection (Retrofit)")
 
         FileUtils.createInstance().showFileExplorer(

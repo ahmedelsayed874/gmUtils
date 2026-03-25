@@ -289,12 +289,14 @@ public final class CallbackOperations<R extends IResponse> {
     }
 
     private void setResult(R result, Map<String, List<String>> headers) {
-        if (this.logger != null && this.logger.getLogConfigs().isLogEnabled()) {
-            this.logger.print(
-                    () -> "EXTRA_INFO:",
-                    () -> "[callbackStatus=" + result.getCallbackStatus() +
-                            ", responseStatus=" + result.getResponseStatus() + "]"
-            );
+        if (this.logger != null) {
+            if (this.logger.getLogConfigs().isLogcatEnabled()) {
+                this.logger.print(
+                        () -> "EXTRA_INFO:",
+                        () -> "[callbackStatus=" + result.getCallbackStatus() +
+                                ", responseStatus=" + result.getResponseStatus() + "]"
+                );
+            }
         }
 
         result.setHeaders(headers);
@@ -318,7 +320,9 @@ public final class CallbackOperations<R extends IResponse> {
     }
 
     private void printCallInfo(Call<R> call, retrofit2.Response<R> response, String errorBody, R responseOfFail) {
-        if (this.logger == null || !this.logger.getLogConfigs().isLogEnabled()) return;
+        if (this.logger == null) return;
+        LoggerAbs.LogConfigs logConfigs = this.logger.getLogConfigs();
+        if (!logConfigs.isLogcatEnabled() && !logConfigs.isWriteLogsToFileEnabled()) return;
 
         String url = "";
 

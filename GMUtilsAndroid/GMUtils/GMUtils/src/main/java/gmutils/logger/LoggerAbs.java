@@ -55,7 +55,7 @@ public abstract class LoggerAbs {
     public enum ExportedFileType {Csv, /*Json,*/ Text}
 
     public static class LogConfigs {
-        private DateOp logDeadline;
+        private DateOp logcatDeadline;
         private DateOp writeLogsToPrivateFileDeadline;
         private DateOp writeLogsToPublicFileDeadline;
         private DateOp fileContentEncryptionDeadline;
@@ -71,8 +71,8 @@ public abstract class LoggerAbs {
         //--------------------------------------------------------
 
         //region setters
-        public LogConfigs setLogDeadline(DateOp dateOp) {
-            this.logDeadline = dateOp;
+        public LogConfigs setLogcatDeadline(DateOp dateOp) {
+            this.logcatDeadline = dateOp;
             return this;
         }
 
@@ -126,8 +126,8 @@ public abstract class LoggerAbs {
         //endregion
 
         //region getters
-        public boolean isLogEnabled() {
-            return logDeadline != null && logDeadline.getTimeInMillis() >= System.currentTimeMillis();
+        public boolean isLogcatEnabled() {
+            return logcatDeadline != null && logcatDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
 
         public boolean isWriteLogsToFileEnabled() {
@@ -157,7 +157,7 @@ public abstract class LoggerAbs {
         protected void finalize() throws Throwable {
             super.finalize();
 
-            logDeadline = null;
+            logcatDeadline = null;
             writeLogsToPrivateFileDeadline = null;
             writeLogsToPublicFileDeadline = null;
             fileContentEncryptionDeadline = null;
@@ -413,6 +413,8 @@ public abstract class LoggerAbs {
         Object getContent();
     }
 
+    public enum LogCategory {Verbose, Debug, Info, Warning, Error, Assert}
+
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     private final static int DEF_ENC_KEY = 112439;
@@ -437,7 +439,11 @@ public abstract class LoggerAbs {
             try {
                 deleteSavedFiles(BaseApplication.current(), true, null);
             } catch (Exception e) {
-                writeToLog("***** EXCEPTION", "deleting log files failed (" + e.getMessage() + ")");
+                writeToLog(
+                        "***** EXCEPTION",
+                        "deleting log files failed (" + e.getMessage() + ")",
+                        null
+                );
             }
         }
     }
@@ -517,36 +523,55 @@ public abstract class LoggerAbs {
 
     //region LOGs
     public void print(Throwable throwable) {
-        print(null, throwable);
+        print(null, throwable, null);
     }
 
     public void print(TitleGetter title, Throwable throwable) {
+        print(title, throwable, null);
+    }
+
+    public void print(TitleGetter title, Throwable throwable, LogCategory logCategory) {
         print(
                 () -> "EXCEPTION **** " + (title == null ? "" : title.getTitle()),
-                () -> throwable == null ? "null" : throwable.toString()
+                () -> throwable == null ? "null" : throwable.toString(),
+                logCategory,
+                false,
+                false
         );
     }
 
     //----------------
 
     public void print(@NotNull ContentGetter content) {
-        print(null, content);
+        print(null, content, null, false, false);
+    }
+
+    public void print(@NotNull ContentGetter content, LogCategory logCategory) {
+        print(null, content, logCategory, false, false);
     }
 
     public void print(TitleGetter title, @NotNull ContentGetter content) {
-        print(title, content, false, false);
+        print(title, content, null, false, false);
+    }
+
+    public void print(TitleGetter title, @NotNull ContentGetter content, LogCategory logCategory) {
+        print(title, content, logCategory, false, false);
     }
 
     public void print(TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
-        if ((forceLog || logConfigs.isLogEnabled()) || (forceWriteToFile || logConfigs.isWriteLogsToFileEnabled())) {
+        print(title, content, null, forceLog, forceWriteToFile);
+    }
+
+    public void print(TitleGetter title, @NotNull ContentGetter content, LogCategory logCategory, boolean forceLog, boolean forceWriteToFile) {
+        if ((forceLog || logConfigs.isLogcatEnabled()) || (forceWriteToFile || logConfigs.isWriteLogsToFileEnabled())) {
             runOnLoggerThread(++orderRecoder, (order) -> {
-                printSync(order, title, content, forceLog, forceWriteToFile);
+                printSync(order, title, content, logCategory, forceLog, forceWriteToFile);
             });
         }
     }
 
-    private void printSync(int order, TitleGetter title, @NotNull ContentGetter content, boolean forceLog, boolean forceWriteToFile) {
-        if (logConfigs.isLogEnabled() || forceLog) {
+    public void printSync(int order, TitleGetter title, @NotNull ContentGetter content, LogCategory logCategory, boolean forceLog, boolean forceWriteToFile) {
+        if (logConfigs.isLogcatEnabled() || forceLog) {
             String title2 = "**** ";
             if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
             if (title != null) title2 += title.getTitle();
@@ -563,14 +588,14 @@ public abstract class LoggerAbs {
             }
 
             if (contentStr.length() < maxLogLength) {
-                writeToLog(title2, contentStr);
+                writeToLog(title2, contentStr, logCategory);
             }
             //
             else {
                 String[] m = divideLogMsg(contentStr, 0);
 
                 for (int i = 0; i < m.length; i++) {
-                    writeToLog(title2, "LOG[" + i + "]-> " + m[i]);
+                    writeToLog(title2, "LOG[" + i + "]-> " + m[i], logCategory);
                 }
             }
         }
@@ -590,33 +615,57 @@ public abstract class LoggerAbs {
         }
     }
 
-    public abstract void writeToLog(String tag, String msg);
+    public abstract void writeToLog(String tag, String msg, @Nullable LogCategory logCategory);
 
     //----------------
 
     //region printMethod
     public void printMethod() {
-        printMethod(null, null, 0);
+        printMethod(null, null, null, 0);
     }
 
-    public void printMethod(int tuner) { //Class<?> stopClass) {
-        printMethod(null, null, tuner);
+    public void printMethod(LogCategory logCategory) {
+        printMethod(null, null, logCategory, 0);
+    }
+
+    public void printMethod(int tuner) {
+        printMethod(null, null, null, tuner);
+    } //Class<?> stopClass) {
+
+    public void printMethod(LogCategory logCategory, int tuner) { //Class<?> stopClass) {
+        printMethod(null, null, logCategory, tuner);
     }
 
     public void printMethod(ContentGetter moreInfoCallback) {
-        printMethod(null, moreInfoCallback, 0);
+        printMethod(null, moreInfoCallback, null, 0);
+    }
+
+    public void printMethod(ContentGetter moreInfoCallback, LogCategory logCategory) {
+        printMethod(null, moreInfoCallback, logCategory, 0);
     }
 
     public void printMethod(ContentGetter moreInfoCallback, int tuner) {
-        printMethod(null, moreInfoCallback, tuner);
+        printMethod(null, moreInfoCallback, null, tuner);
+    }
+
+    public void printMethod(ContentGetter moreInfoCallback, LogCategory logCategory, int tuner) {
+        printMethod(null, moreInfoCallback, logCategory, tuner);
     }
 
     public void printMethod(TitleGetter title, ContentGetter moreInfoCallback) {
-        printMethod(title, moreInfoCallback, 0);
+        printMethod(title, moreInfoCallback, null, 0);
+    }
+
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, LogCategory logCategory) {
+        printMethod(title, moreInfoCallback, logCategory, 0);
     }
 
     public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, int tuner) {
-        if (logConfigs.isLogEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
+        printMethod(title, moreInfoCallback, null, tuner);
+    }
+
+    public void printMethod(TitleGetter title, ContentGetter moreInfoCallback, LogCategory logCategory, int tuner) {
+        if (logConfigs.isLogcatEnabled() || logConfigs.isWriteLogsToFileEnabled()) {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             runOnLoggerThread(++orderRecoder, (order) -> {
                 try {
@@ -649,6 +698,7 @@ public abstract class LoggerAbs {
                             order,
                             title,
                             () -> msg,
+                            logCategory,
                             false,
                             false
                     );
@@ -658,6 +708,7 @@ public abstract class LoggerAbs {
                             title,
                             () -> "printMethod failed with exception: " + e.getMessage() +
                                     (moreInfoCallback == null ? "" : "\nMORE-INFO: " + moreInfoCallback.getContent()),
+                            logCategory,
                             false,
                             false
                     );

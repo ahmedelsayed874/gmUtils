@@ -345,6 +345,7 @@ public class RetrofitService {
         private int connectionTimeoutInSeconds = 15;
         private int readTimeoutInSeconds = 15;
         private List<Interceptor> interceptors;
+        private LoggerAbs rawResponseLogger;
 
         public Parameters(@NotNull String baseUrl) {
             this.baseUrl = baseUrl;
@@ -373,6 +374,11 @@ public class RetrofitService {
 
         public Parameters setInterceptors(List<Interceptor> interceptors) {
             this.interceptors = interceptors;
+            return this;
+        }
+
+        public Parameters setEnablePrintingRawResponse(LoggerAbs logger) {
+            rawResponseLogger = logger;
             return this;
         }
 
@@ -514,7 +520,7 @@ public class RetrofitService {
 
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(parameters.baseUrl)
-                .addConverterFactory(new StringResponseConverterFactory())
+                .addConverterFactory(new StringResponseConverterFactory(parameters.rawResponseLogger))
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();

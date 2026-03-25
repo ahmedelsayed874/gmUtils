@@ -594,11 +594,11 @@ class FirebaseTestActivity : BaseActivity() {
     inner class LoggerImpl : LoggerAbs(FirebaseTestActivity::class.java.simpleName) {
         init {
             val dl = DateOp.getInstance().increaseDays(10)
-            logConfigs.setLogDeadline(dl)
+            logConfigs.setLogcatDeadline(dl)
             logConfigs.setWriteLogsToPublicFileDeadline(dl)
         }
 
-        override fun writeToLog(tag: String?, msg: String?) {
+        override fun writeToLog(tag: String?, msg: String?, logCategory: LogCategory?) {
             runOnUiThread {
                 log(tag ?: "", msg)
             }
