@@ -13,7 +13,7 @@ import '../dialogs/message_dialog.dart';
 
 class CapturingScreenshotWidget extends StatefulWidget {
   late final GlobalKey globalKey;// = GlobalKey();
-  final Widget Function() builder;
+  final Widget Function(GlobalKey) builder;
   
   CapturingScreenshotWidget({
     GlobalKey? globalKey,
@@ -71,7 +71,7 @@ class _ToBeCapturedWidgetState extends State<CapturingScreenshotWidget> {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       key: widget.globalKey,
-      child: widget.builder.call(),
+      child: widget.builder.call(widget.globalKey),
     );
   }
 }
