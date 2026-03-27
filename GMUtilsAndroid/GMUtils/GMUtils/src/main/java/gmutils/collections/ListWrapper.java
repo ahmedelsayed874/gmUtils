@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import gmutils.collections.dataGroup.DataGroup2;
+import gmutils.collections.values.Value2;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ResultCallback;
@@ -230,7 +230,7 @@ public class ListWrapper<T> {
     }
 
 
-    public <R> ListWrapper<T> performOperation(ActionCallback<DataGroup2<T, R>, R> action, ResultCallback<R> result) {
+    public <R> ListWrapper<T> performOperation(ActionCallback<Value2<T, R>, R> action, ResultCallback<R> result) {
         if (result == null) throw new IllegalArgumentException();
 
         R finalResult = performOperation(action);
@@ -239,13 +239,13 @@ public class ListWrapper<T> {
         return this;
     }
 
-    public <R> R performOperation(ActionCallback<DataGroup2<T, R>, R> action) {
+    public <R> R performOperation(ActionCallback<Value2<T, R>, R> action) {
         if (action == null) throw new IllegalArgumentException();
 
         R result = null;
 
         for (T item : list) {
-            result = action.invoke(new DataGroup2<>(item, result));
+            result = action.invoke(new Value2<>(item, result));
         }
 
         return result;

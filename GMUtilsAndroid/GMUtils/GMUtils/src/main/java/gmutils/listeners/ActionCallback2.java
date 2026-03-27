@@ -1,11 +1,11 @@
 package gmutils.listeners;
 
 
-import gmutils.collections.dataGroup.DataGroup1;
+import gmutils.collections.values.Value;
 
 /**
  *
- * @param <Args1> you can use {@link DataGroup1} to represent multiple arguments or use whatever you want
+ * @param <Args1> you can use {@link Value} to represent multiple arguments or use whatever you want
  * @param <Return>
  */
 public interface ActionCallback2<Args1, Args2, Return> {

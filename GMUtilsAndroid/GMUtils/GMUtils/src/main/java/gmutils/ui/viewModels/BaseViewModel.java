@@ -2,7 +2,6 @@ package gmutils.ui.viewModels;
 
 import android.app.Application;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
@@ -16,7 +15,7 @@ import java.util.List;
 import gmutils.StringSet;
 import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.backgroundWorkers.BackgroundTaskAbs;
-import gmutils.collections.dataGroup.DataGroup2;
+import gmutils.collections.values.Value2;
 import gmutils.listeners.ActionCallback0;
 import gmutils.listeners.ResultCallback;
 import gmutils.ui.utils.uihandler.UiHandlerAbs;
@@ -264,9 +263,9 @@ public class BaseViewModel extends AndroidViewModel {
         class Dialog implements MessageType {
             private int iconRes;
             private Object title;
-            private DataGroup2<Object, Runnable> button1;
-            private DataGroup2<Object, Runnable> button2;
-            private DataGroup2<Object, Runnable> button3;
+            private Value2<Object, Runnable> button1;
+            private Value2<Object, Runnable> button2;
+            private Value2<Object, Runnable> button3;
             private Runnable onDismiss;
             private final boolean error;
             private boolean enableOuterDismiss = true;
@@ -306,51 +305,51 @@ public class BaseViewModel extends AndroidViewModel {
             //-----------------
 
             public Dialog setButton1(int title, Runnable action) {
-                this.button1 = new DataGroup2<>(title, action);
+                this.button1 = new Value2<>(title, action);
                 return this;
             }
 
             public Dialog setButton1(CharSequence title, Runnable action) {
-                this.button1 = new DataGroup2<>(title, action);
+                this.button1 = new Value2<>(title, action);
                 return this;
             }
 
             public Dialog setButton1(StringSet title, Runnable action) {
-                this.button1 = new DataGroup2<>(title, action);
+                this.button1 = new Value2<>(title, action);
                 return this;
             }
 
             //------------------
 
             public Dialog setButton2(int title, Runnable action) {
-                this.button2 = new DataGroup2<>(title, action);
+                this.button2 = new Value2<>(title, action);
                 return this;
             }
 
             public Dialog setButton2(CharSequence title, Runnable action) {
-                this.button2 = new DataGroup2<>(title, action);
+                this.button2 = new Value2<>(title, action);
                 return this;
             }
 
             public Dialog setButton2(StringSet title, Runnable action) {
-                this.button2 = new DataGroup2<>(title, action);
+                this.button2 = new Value2<>(title, action);
                 return this;
             }
 
             //-------------------
 
             public Dialog setButton3(int title, Runnable action) {
-                this.button3 = new DataGroup2<>(title, action);
+                this.button3 = new Value2<>(title, action);
                 return this;
             }
 
             public Dialog setButton3(CharSequence title, Runnable action) {
-                this.button3 = new DataGroup2<>(title, action);
+                this.button3 = new Value2<>(title, action);
                 return this;
             }
 
             public Dialog setButton3(StringSet title, Runnable action) {
-                this.button3 = new DataGroup2<>(title, action);
+                this.button3 = new Value2<>(title, action);
                 return this;
             }
 
@@ -380,15 +379,15 @@ public class BaseViewModel extends AndroidViewModel {
                 return button1 != null || button2 != null || button3 != null;
             }
 
-            public final DataGroup2<Object, Runnable> button1() {
+            public final Value2<Object, Runnable> button1() {
                 return button1;
             }
 
-            public final DataGroup2<Object, Runnable> button2() {
+            public final Value2<Object, Runnable> button2() {
                 return button2;
             }
 
-            public final DataGroup2<Object, Runnable> button3() {
+            public final Value2<Object, Runnable> button3() {
                 return button3;
             }
 

@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import gmutils.collections.dataGroup.DataGroup1;
+import gmutils.collections.values.Value;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 
@@ -149,14 +149,14 @@ public class SetWrapper<T> {
     }
 
 
-    public SetWrapper<T> serialize(ActionCallback<DataGroup1<T>, String> action, ResultCallback<String> result) {
+    public SetWrapper<T> serialize(ActionCallback<Value<T>, String> action, ResultCallback<String> result) {
         if (action == null) throw new IllegalArgumentException();
         if (result == null) throw new IllegalArgumentException();
 
         StringBuilder sb = new StringBuilder();
 
         for (T item : set) {
-            sb.append(action.invoke(new DataGroup1<>(item)));
+            sb.append(action.invoke(new Value<>(item)));
         }
 
         result.invoke(sb.toString());
@@ -164,7 +164,7 @@ public class SetWrapper<T> {
         return this;
     }
 
-    public String serialize(ActionCallback<DataGroup1<T>, String> action) {
+    public String serialize(ActionCallback<Value<T>, String> action) {
         final String[] result = new String[1];
 
         serialize(action, r -> {

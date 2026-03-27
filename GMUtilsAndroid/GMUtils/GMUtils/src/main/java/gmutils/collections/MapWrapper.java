@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import gmutils.collections.dataGroup.DataGroup2;
+import gmutils.collections.values.Value2;
 import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ResultCallback;
@@ -57,10 +57,10 @@ public class MapWrapper<K, V> {
         return this;
     }
 
-    public MapWrapper<K, V> add(List<DataGroup2<K, V>> items) {
+    public MapWrapper<K, V> add(List<Value2<K, V>> items) {
         if (items == null) return this;
 
-        for (DataGroup2<K, V> item : items) {
+        for (Value2<K, V> item : items) {
             map.put(item.value1, item.value2);
         }
 
@@ -177,14 +177,14 @@ public class MapWrapper<K, V> {
     }
 
 
-    public MapWrapper<K, V> serialize(ActionCallback<DataGroup2<K, V>, String> action, ResultCallback<String> result) {
+    public MapWrapper<K, V> serialize(ActionCallback<Value2<K, V>, String> action, ResultCallback<String> result) {
         if (action == null) throw new IllegalArgumentException();
         if (result == null) throw new IllegalArgumentException();
 
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            sb.append(action.invoke(new DataGroup2<>(entry.getKey(), entry.getValue())));
+            sb.append(action.invoke(new Value2<>(entry.getKey(), entry.getValue())));
         }
 
         result.invoke(sb.toString());
@@ -192,7 +192,7 @@ public class MapWrapper<K, V> {
         return this;
     }
 
-    public String serialize(ActionCallback<DataGroup2<K, V>, String> action) {
+    public String serialize(ActionCallback<Value2<K, V>, String> action) {
         final String[] result = new String[1];
 
         serialize(action, r -> {
