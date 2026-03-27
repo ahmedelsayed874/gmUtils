@@ -132,6 +132,18 @@ class MessageDialog {
     return this;
   }
 
+  List<MessageDialogActionButton>? _actionsCache;
+
+  MessageDialog addAction(String title, [Function()? action]) {
+    _actions.clear();
+
+    _actionsCache ??= [];
+    _actionsCache?.add(MessageDialogActionButton(title, action: action));
+    addActions(_actionsCache!);
+
+    return this;
+  }
+
   MessageDialog setEnableOuterDismiss(bool enable) {
     _enableOuterDismiss = enable;
     return this;
