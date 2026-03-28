@@ -10,7 +10,7 @@ import gmutils.listeners.ResultCallback2;
 
 public class ObservableValue<T> {
     private Value<T> value;
-    private final List<ResultCallback2<T, ObservableValueArgs>> observers = new ArrayList<>();
+    private final List<ResultCallback2<T, Args>> observers = new ArrayList<>();
 
     public void setValue(T value) {
         this.value = new Value<>(value);
@@ -18,10 +18,10 @@ public class ObservableValue<T> {
         List<Integer> toDeleteObservers = new ArrayList<>();
 
         for (int i = 0; i < observers.size(); i++) {
-            ResultCallback2<T, ObservableValueArgs> observer = observers.get(i);
+            ResultCallback2<T, Args> observer = observers.get(i);
 
             if (observer != null) {
-                ObservableValueArgs args = new ObservableValueArgs();
+                Args args = new Args();
                 observer.invoke(value, args);
                 if (!args.keepAlive) toDeleteObservers.add(i);
             }
@@ -30,8 +30,8 @@ public class ObservableValue<T> {
         if (!toDeleteObservers.isEmpty()) {
             int x = 0;
             do {
-                int idx = toDeleteObservers.getFirst();
-                toDeleteObservers.removeFirst();
+                int idx = toDeleteObservers.get(0);
+                toDeleteObservers.remove(0);
 
                 observers.remove(idx - x);
                 x++;
@@ -39,8 +39,12 @@ public class ObservableValue<T> {
         }
     }
 
-    public void addObserver(@NotNull ResultCallback2<T, ObservableValueArgs> callback) {
+    public void addObserver(@NotNull ResultCallback2<T, Args> callback) {
         observers.add(callback);
         if (value != null) callback.invoke(value.value, null);
+    }
+
+    public static class Args {
+        public boolean keepAlive = false;
     }
 }
