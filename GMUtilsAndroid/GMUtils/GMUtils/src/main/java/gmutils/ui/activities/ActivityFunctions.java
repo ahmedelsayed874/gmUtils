@@ -180,7 +180,7 @@ public class ActivityFunctions implements BaseFragmentListener {
 //        private int reportBugsMenuItemId;
 
         public void onCreateOptionsMenu(Menu menu) {
-            if (Logger.d().getLogConfigs().isWriteLogsToFileEnabled()) {
+            if (Logger.d().getLogConfigs().isWriteLogsToPublicFileEnabled()) {
                 if (showBugsMenuItemId == 0) {
                     showBugsMenuItemId = "Show Log".hashCode();
                     if (showBugsMenuItemId < 0) showBugsMenuItemId *= -1;
@@ -199,7 +199,7 @@ public class ActivityFunctions implements BaseFragmentListener {
             if (item.getItemId() == android.R.id.home) {
                 try {
                     activity.onBackPressed();
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
                 return true;
             }

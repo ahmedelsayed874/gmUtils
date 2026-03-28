@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gmutils.storage.SettingsStorage;
+import gmutils.utils.FileUtils;
 import gmutils.utils.ImageUtils;
 import gmutils.utils.Utils;
 
@@ -182,12 +183,31 @@ public class Intents {
     }
 
     public boolean showDir(Context context, String dirPath) {
-        //Uri uri = FileUtils.createInstance().createUriForFileUsingFileProvider(context, new File(dirPath));
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromFile(new File(dirPath)));
-        if (intent.resolveActivity(context.getPackageManager()) != null) {
-            context.startActivity(intent);
-            return true;
+        Uri[] uris = new Uri[2];
+
+        try {
+            uris[0] = FileUtils.createInstance().createUriForFileUsingFileProvider(context, new File(dirPath));
+        } catch (Exception e) {
+            e.printStackTrace();
+            uris[0] = null;
         }
+
+        uris[1] = Uri.fromFile(new File(dirPath));
+
+        for (Uri uri : uris) {
+            if (uri == null) continue;
+
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+                return true;
+            }
+        }
+
         return false;
     }
 
