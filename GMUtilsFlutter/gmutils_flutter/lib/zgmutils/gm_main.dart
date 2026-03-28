@@ -677,56 +677,87 @@ typedef ObserverDelegate = void Function(String observerName, dynamic /*args*/);
 //============================================================================
 
 extension GMRouter on BuildContext {
-  void go(String path, {Object? extra}) {
-    for (var log in Logs.allLogs) {
-      log.print(() => '\n'
-          'GMRouter.go>=============================='
-          '[ $path ]'
-          '==============================\n');
-    }
+  Future<T?> go<T>(
+    String path, {
+    Object? arguments,
+    GMRouterOption? option,
+    LogsManager? logger,
+  }) async {
+    final log = () => '\n'
+        'GMRouter.go>=============================='
+        '[ $path / option: ${option?.name} / arguments: $arguments]'
+        '==============================\n';
+    if (logger != null)
+      logger.print(log);
+    else
+      Logs.printToAll(log);
 
-    Navigator.pushNamed(
-      this,
+    if (option == null) {
+      return Navigator.pushNamed<T>(
+        this,
+        path,
+        arguments: arguments,
+      );
+    }
+    //
+    else if (option == GMRouterOption.singleTop) {
+      return Navigator.pushNamedAndRemoveUntil<T>(
+        this,
+        path,
+        (route) => false,
+        arguments: arguments,
+      );
+    }
+    //
+    else if (option == GMRouterOption.replace) {
+      return Navigator.pushReplacementNamed<T, Object>(
+        this,
+        path,
+        arguments: arguments,
+      );
+    }
+    //
+    else {
+      throw 'NOT-HANDLED-OPTION ($option)';
+    }
+  }
+
+  Future<T?> push<T>(
+    String path, {
+    Object? arguments,
+    GMRouterOption? option,
+    LogsManager? logger,
+  }) {
+    return go<T>(
       path,
-      arguments: extra,
+      arguments: arguments,
+      option: option,
+      logger: logger,
     );
   }
 
-  void push(String path, {Object? extra}) {
-    for (var log in Logs.allLogs) {
-      log.print(() => '\n'
-          'GMRouter.push>=============================='
-          '[ $path ]'
-          '==============================\n');
-    }
+  //---------------------------------------
 
-    Navigator.pushNamed(
-      this,
-      path,
-      arguments: extra,
-    );
-  }
-
-  void singleTop(String path, {Object? extra}) {
-    for (var log in Logs.allLogs) {
-      log.print(() => '\n'
-          'GMRouter.singleTop>=============================='
-          '[ $path ]'
-          '==============================\n');
-    }
-
-    Navigator.pushNamedAndRemoveUntil(this, path, (route) => false);
-  }
+  bool canBack() => Navigator.canPop(this);
 
   bool canPop() => Navigator.canPop(this);
 
-  void pop([result]) {
-    for (var log in Logs.allLogs) {
-      log.print(() => '\n'
-          'GMRouter.pop>=============================='
-          '==============================\n');
-    }
+  //---------------------------------------
+
+  void back([result, LogsManager? logger]) {
+    final log = () => '\n'
+        'GMRouter.pop>==============================\n'
+        '[ result: $result ]\n'
+        '==============================\n';
+    if (logger != null)
+      logger.print(log);
+    else
+      Logs.printToAll(log);
 
     Navigator.pop(this, result);
   }
+
+  void pop([result, LogsManager? logger]) => back(result, logger);
 }
+
+enum GMRouterOption { singleTop, replace }
