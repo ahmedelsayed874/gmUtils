@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import gmutils.listeners.ResultCallback;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.responseHolders.StringResponse;
 import okhttp3.ResponseBody;
@@ -16,10 +17,12 @@ import retrofit2.Retrofit;
  * this class depend on {@link StringResponse}
  */
 public class StringResponseConverterFactory extends Converter.Factory {
+    private ResultCallback<String> responseListener;
     private LoggerAbs logger;
 
-    public StringResponseConverterFactory(LoggerAbs logger) {
+    public StringResponseConverterFactory(ResultCallback<String> responseListener, LoggerAbs logger) {
         super();
+        this.responseListener = responseListener;
         this.logger = logger;
     }
 
@@ -32,6 +35,7 @@ public class StringResponseConverterFactory extends Converter.Factory {
                 public StringResponse convert(ResponseBody value) throws IOException {
                     String text = value.string();
                     if (logger != null) logger.print(() -> "RawResponse", () -> text);
+                    if (responseListener != null) responseListener.invoke(text);
                     return new StringResponse(text);
                 }
             };
@@ -43,6 +47,7 @@ public class StringResponseConverterFactory extends Converter.Factory {
                 public String convert(ResponseBody value) throws IOException {
                     String res = value.string();
                     if (logger != null) logger.print(() -> "RawResponse", () -> res);
+                    if (responseListener != null) responseListener.invoke(res);
                     return res;
                 }
             };

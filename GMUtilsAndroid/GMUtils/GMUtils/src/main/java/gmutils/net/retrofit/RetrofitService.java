@@ -43,6 +43,7 @@ import javax.net.ssl.X509ExtendedTrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import gmutils.listeners.ActionCallback0;
+import gmutils.listeners.ResultCallback;
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.net.retrofit.callback.LogsOptions;
@@ -346,6 +347,7 @@ public class RetrofitService {
         private int readTimeoutInSeconds = 15;
         private List<Interceptor> interceptors;
         private LoggerAbs rawResponseLogger;
+        private ResultCallback<String> rawResponseListener;
 
         public Parameters(@NotNull String baseUrl) {
             this.baseUrl = baseUrl;
@@ -380,6 +382,10 @@ public class RetrofitService {
         public Parameters setEnablePrintingRawResponse(LoggerAbs logger) {
             rawResponseLogger = logger;
             return this;
+        }
+
+        public void setRawResponseListener(ResultCallback<String> rawResponseListener) {
+            this.rawResponseListener = rawResponseListener;
         }
 
         @Override
@@ -520,7 +526,10 @@ public class RetrofitService {
 
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(parameters.baseUrl)
-                .addConverterFactory(new StringResponseConverterFactory(parameters.rawResponseLogger))
+                .addConverterFactory(new StringResponseConverterFactory(
+                        parameters.rawResponseListener,
+                        parameters.rawResponseLogger
+                ))
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
