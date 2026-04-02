@@ -274,13 +274,24 @@ public class Utils {
 
     //------------------------------------------------------------------------------------------
 
-    public Integer compareAppVersion(Context context, String focalVersion) {
+    public String currentAppVersion(Context context) {
         try {
             String versionName = context.getPackageManager().getPackageInfo(
                     context.getPackageName(),
                     0
             ).versionName;
 
+            return versionName;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Integer compareAppVersion(Context context, String focalVersion) {
+        try {
+            String versionName = currentAppVersion(context);
+            if (versionName == null) return null;
             return compareAppVersion(focalVersion, versionName);
         } catch (Exception e) {
             e.printStackTrace();
@@ -288,9 +299,9 @@ public class Utils {
         }
     }
 
-    public Integer compareAppVersion(String focalVersion, String appVersion) {
-        String[] focalAppVerSplits = focalVersion.split(".");//1.23.4 ==> [1, 23, 4]
-        String[] appVerSplits = appVersion.split("."); //1.0.0 ==> [1, 0, 0];
+    public int compareAppVersion(String focalVersion, String appVersion) {
+        String[] focalAppVerSplits = focalVersion.split("\\.");//1.23.4 ==> [1, 23, 4]
+        String[] appVerSplits = appVersion.split("\\."); //1.0.0 ==> [1, 0, 0];
 
         int ar = 0;
         String focalAppVerStr = "";
@@ -317,7 +328,7 @@ public class Utils {
         }
 
         long focalAppVer = Long.parseLong(focalAppVerStr); //1234
-        long appVer = Long.parseLong(appVerStr);         //1000
+        long appVer = Long.parseLong(appVerStr);           //1000
 
         if (appVer > focalAppVer) return 1;
         if (appVer < focalAppVer) return -1;

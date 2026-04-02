@@ -1,7 +1,6 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -18,11 +17,8 @@ import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
 import gmutils.Activities
 import gmutils.DateOp
 import gmutils.Intents
-import gmutils.backgroundWorkers.LooperThread
 import gmutils.app.BaseApplication
-import gmutils.firebase.fcm.FCM
-import gmutils.firebase.fcm.FcmMessageHandler
-import gmutils.firebase.fcm.FcmNotificationProperties
+import gmutils.backgroundWorkers.LooperThread
 import gmutils.logger.Logger
 import gmutils.logger.LoggerAbs
 import gmutils.net.SimpleHTTPRequest
@@ -320,9 +316,12 @@ class MainActivity : BaseActivity() {
         this.view.btn25.setOnClickListener {
             val dl = DateOp.getInstance().increaseDays(5)
             Logger.d().logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l1").logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l2").logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l3").logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l1").logConfigs.setLogcatDeadline(dl)
+                .setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l2").logConfigs.setLogcatDeadline(dl)
+                .setWriteLogsToPublicFileDeadline(dl)
+            Logger.instance("l3").logConfigs.setLogcatDeadline(dl)
+                .setWriteLogsToPublicFileDeadline(dl)
             Logger.printToAll() { "test" }
 
             error("throw bug to test writing to all logs file")
@@ -404,23 +403,22 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        /*this.view.btn29.text = "Write logs to json file"
-        this.view.btn29.setOnClickListener {
-            Logger.instance("json").apply {
-                logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
-                logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
-                logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Json)
+        this.view.btn28.text = "Compare App Version"
+        this.view.btn28.setOnClickListener {
+            var randomVer = Random.nextInt(0, 3).toString()
+            randomVer += "."
+            randomVer += Random.nextInt(0, 3).toString()
+            randomVer += "."
+            randomVer += Random.nextInt(0, 3).toString()
 
-                for (x in 0..30) {
-                    //writeToFile(this@MainActivity, {
-                    print({
-                        "Title #$x"
-                    }) {
-                        "Content #$x, Content #$x, Content #$x, Content #$x"
-                    }
-                }
-            }
-        }*/
+            val b = Utils.createInstance().compareAppVersion(this, randomVer)
+            val vn = Utils.createInstance().currentAppVersion(this)
+
+            log(
+                "compareAppVersion",
+                "compareAppVersion(focalVersion: $randomVer, currentAppVersion: $vn) ------> $b"
+            )
+        }
 
         var methodCache = ""
         var urlCache = ""
