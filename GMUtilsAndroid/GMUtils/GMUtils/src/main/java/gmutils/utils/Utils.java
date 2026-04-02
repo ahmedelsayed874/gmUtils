@@ -255,8 +255,9 @@ public class Utils {
     /**
      * must request permission in manifest
      * <uses-permission
-     *       android:name="android.permission.WRITE_SETTINGS"
-     *       tools:ignore="ProtectedPermissions" />
+     * android:name="android.permission.WRITE_SETTINGS"
+     * tools:ignore="ProtectedPermissions" />
+     *
      * @param value from = 0, to = 100
      */
     @RequiresPermission("android.permission.WRITE_SETTINGS")
@@ -269,5 +270,57 @@ public class Utils {
                 WindowManager.LayoutParams.FLAG_SECURE,
                 WindowManager.LayoutParams.FLAG_SECURE
         );
+    }
+
+    //------------------------------------------------------------------------------------------
+
+    public Integer compareAppVersion(Context context, String focalVersion) {
+        try {
+            String versionName = context.getPackageManager().getPackageInfo(
+                    context.getPackageName(),
+                    0
+            ).versionName;
+
+            return compareAppVersion(focalVersion, versionName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Integer compareAppVersion(String focalVersion, String appVersion) {
+        String[] focalAppVerSplits = focalVersion.split(".");//1.23.4 ==> [1, 23, 4]
+        String[] appVerSplits = appVersion.split("."); //1.0.0 ==> [1, 0, 0];
+
+        int ar = 0;
+        String focalAppVerStr = "";
+        String appVerStr = "";
+        while (ar < Math.max(focalAppVerSplits.length, appVerSplits.length)) {
+            String focalVer = "";
+            if (ar < focalAppVerSplits.length) focalVer = focalAppVerSplits[ar]; //1 - 23 - 4
+
+            String appVer = "";
+            if (ar < appVerSplits.length) appVer = appVerSplits[ar]; //1 - 0  - 0
+
+            ar++;
+
+            int min = Math.min(appVer.length(), focalVer.length());
+            int max = Math.max(appVer.length(), focalVer.length());
+            while (min < max) {
+                if (focalVer.length() < max) focalVer = "0" + focalVer;
+                if (appVer.length() < max) appVer = "0" + appVer;
+                min++;
+            }
+
+            focalAppVerStr += focalVer; //1234
+            appVerStr += appVer;    //1000
+        }
+
+        long focalAppVer = Long.parseLong(focalAppVerStr); //1234
+        long appVer = Long.parseLong(appVerStr);         //1000
+
+        if (appVer > focalAppVer) return 1;
+        if (appVer < focalAppVer) return -1;
+        return 0;
     }
 }
