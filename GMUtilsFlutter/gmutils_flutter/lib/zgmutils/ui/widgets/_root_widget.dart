@@ -25,8 +25,8 @@ class MyRootWidget {
   Color? _statusBarColor;
   bool _isStatusBarThemeLight = true;
 
-  MyRootWidget.withToolbar(this.toolbarTitle) {
-    setupToolbar(null);
+  MyRootWidget.withToolbar(this.toolbarTitle, {bool centerTitle = true}) {
+    setupToolbar(centerTitle: centerTitle);
     _showBackButton = false;
 
     _background = AppTheme.appColors?.background ?? Colors.white;
@@ -56,9 +56,17 @@ class MyRootWidget {
     _isStatusBarThemeLight = isStatusBarThemeLight;
   }
 
-  void setupToolbar(Widget? leading, [List<Widget>? action]) {
+  bool? _centerToolbarTitleCache;
+
+  void setupToolbar({
+    bool centerTitle = true,
+    Widget? leading,
+    List<Widget>? action,
+  }) {
+    _centerToolbarTitleCache = centerTitle;
+
     _appBar = AppBar(
-      centerTitle: true,
+      centerTitle: _centerToolbarTitleCache,
       leading: leading,
       actions: action,
       foregroundColor: AppTheme.appColors?.toolbarVariant,
@@ -74,7 +82,7 @@ class MyRootWidget {
     );
   }
 
-  MyRootWidget setToolbarActions({
+  MyRootWidget addToolbarActions({
     List<IconButton>? actions,
     PopupMenuButton? popupMenuButton,
     Widget? leading,
@@ -84,12 +92,18 @@ class MyRootWidget {
     if (actions?.isNotEmpty == true) a.addAll(actions!);
     if (popupMenuButton != null) a.add(popupMenuButton);
 
-    if (a.isNotEmpty) setupToolbar(leading, a);
+    if (a.isNotEmpty) {
+      setupToolbar(
+        centerTitle: _centerToolbarTitleCache ?? true,
+        leading: leading,
+        action: a,
+      );
+    }
 
     return this;
   }
 
-  MyRootWidget setAppBar(AppBar? appBar) {
+  MyRootWidget setCustomAppBar(AppBar? appBar) {
     _appBar = appBar;
     return this;
   }
@@ -198,8 +212,7 @@ class MyRootWidget {
               Text(
                 hint,
                 textAlign: TextAlign.center,
-                style:
-                    hintStyle ??
+                style: hintStyle ??
                     TextStyle(
                       color: AppTheme.appColors?.hint,
                       fontSize: AppTheme.appMeasurement?.screenTitleSize,
@@ -225,8 +238,7 @@ class MyRootWidget {
     if (_drawer != null && _appBar == null) {
       if (_body is! StatelessWidget && _body is! StatefulWidget) {
         Logs.print(
-          () =>
-              '******** ERROR ********* it is recommended to extend '
+          () => '******** ERROR ********* it is recommended to extend '
               '"body" from StatelessWidget or StatefulWidget to be able to use '
               'getCurrentScaffoldState() method',
         );
@@ -279,8 +291,7 @@ class MyRootWidget {
     return Container(
       color: _background,
       width: double.maxFinite,
-      padding:
-          _screenPadding ??
+      padding: _screenPadding ??
           EdgeInsets.only(
             top: AppTheme.appMeasurement?.screenPaddingTop ?? 0.0,
             left: AppTheme.appMeasurement?.screenPaddingLeft ?? 0.3,

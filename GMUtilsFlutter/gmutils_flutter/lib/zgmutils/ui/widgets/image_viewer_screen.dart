@@ -69,7 +69,7 @@ class _ImageViewerScreenOnWebViewState
 
     return MyRootWidget.withToolbar(widget.toolbarTitle)
         .setBody(body(context))
-        .setToolbarActions(
+        .addToolbarActions(
       actions: [
         IconButton(
           onPressed: () => Launcher().openUrl(_photoUrl),
@@ -154,7 +154,7 @@ class _ImageViewerScreenOnImageViewState
 
     return MyRootWidget.withToolbar(widget.toolbarTitle)
         .setBody(body(context))
-        .setToolbarActions(actions: [
+        .addToolbarActions(actions: [
       if (_image is String)
         IconButton(
           onPressed: () => Launcher().openUrl(_image as String),
@@ -305,7 +305,7 @@ class _ImageViewerScreenOnImageViewAndNoScrollViewState
 
     return MyRootWidget.withToolbar(widget.toolbarTitle)
         .setBody(body(context))
-        .setToolbarActions(actions: [
+        .addToolbarActions(actions: [
       if (_image is String)
         IconButton(
           onPressed: () => Launcher().openUrl(_image as String),

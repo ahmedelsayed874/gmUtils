@@ -198,7 +198,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
       rw.setBody(body(context));
 
       if (widget.allowOpenLinkExternal) {
-        rw.setToolbarActions(
+        rw.addToolbarActions(
           actions: [
             IconButton(
               onPressed: () => Launcher().openUrl(widget.url),
