@@ -485,6 +485,7 @@ class FCM extends IFCM {
   ///googleapis_auth: ^1.6.0
   Future<Result<String>> _getAccessToken() {
     return FCM_Extension().getAccessToken(fcmConfigurations: fcmConfigurations);
+    //return Future.value(Result(null));
   }
 
   Map<String, dynamic> _buildRequestData({
