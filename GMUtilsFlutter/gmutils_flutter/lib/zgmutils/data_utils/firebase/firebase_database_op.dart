@@ -136,6 +136,8 @@ enum FBFilterTypes {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
+  static int maxResponseLengthForLogger = 100;
+
   FirebaseDatabaseOp({
     required super.mappable,
     required super.rootNodeName,
@@ -215,7 +217,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
   }) async {
     Logs.print(() => 'FirebaseDatabaseOp[Call].saveDataTo'
         '(ref: ${ref.path}, '
-        'data: ${TextUtils().trimEnd('$data')}'
+        'data: ${TextUtils().trimEnd(
+          '$data',
+          endIndex: maxResponseLengthForLogger,
+        )}'
         ')');
 
     try {
@@ -283,7 +288,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     Logs.print(() => 'FirebaseDatabaseOp[Call].saveMultipleDataTo'
         '(ref: ${ref.path}, '
         'data-length: ${nodesAndData.length}, '
-        'data: ${TextUtils().trimEnd('$nodesAndData')})');
+        'data: ${TextUtils().trimEnd(
+          '$nodesAndData',
+          endIndex: maxResponseLengthForLogger,
+        )})');
 
     try {
       bool added = false;
@@ -412,7 +420,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
           '(ref: ${ref.path}) '
           '---> '
           'response.data-length: ${response.data?.length}, '
-          'response.data: ${TextUtils().trimEnd('${response.data}')}, '
+          'response.data: ${TextUtils().trimEnd(
+            '${response.data}',
+            endIndex: maxResponseLengthForLogger,
+          )}, '
           'response.message: ${response.error}');
 
       return response;
@@ -543,7 +554,10 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
       Logs.print(
         () => 'FirebaseDatabaseOp[Response].retrieveOnlyFrom(ref: ${ref.path}) '
             '---> '
-            'response.data: ${TextUtils().trimEnd('${response.data}')}, '
+            'response.data: ${TextUtils().trimEnd(
+          '${response.data}',
+          endIndex: maxResponseLengthForLogger,
+        )}, '
             'response.message: ${response.error}',
       );
 
@@ -669,14 +683,22 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
         };
 
     if (listenToAnyChange) {
-      var s = ref.onChildChanged.listen(onData, onDone: onDone, onError: onError,);
+      var s = ref.onChildChanged.listen(
+        onData,
+        onDone: onDone,
+        onError: onError,
+      );
 
       _childChangeStreamSubscriptions ??= [];
       _childChangeStreamSubscriptions!.add(s);
     }
     //
     else {
-      var s = ref.onChildAdded.listen(onData, onDone: onDone, onError: onError,);
+      var s = ref.onChildAdded.listen(
+        onData,
+        onDone: onDone,
+        onError: onError,
+      );
 
       _childAddedStreamSubscriptions ??= [];
       _childAddedStreamSubscriptions!.add(s);
