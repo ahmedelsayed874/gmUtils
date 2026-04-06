@@ -3,7 +3,8 @@ import 'dart:ui';
 
 import 'package:image_cropper/image_cropper.dart' as ic;
 
-import '../../../resources/_resources.dart';
+import '../../resources/app_theme.dart';
+
 
 ///https://pub.dev/packages/image_cropper
 /*
@@ -27,7 +28,7 @@ class ImageCropper {
       uiSettings: [
         ic.AndroidUiSettings(
           toolbarTitle: toolbarTitle,
-          toolbarColor: toolbarColor ?? Res.themes.colors.primary,
+          toolbarColor: toolbarColor ?? AppTheme.appColors?.primary,
           toolbarWidgetColor: const Color.fromARGB(255, 255, 255, 255),
           initAspectRatio: ic.CropAspectRatioPreset.square,
           lockAspectRatio: true,
