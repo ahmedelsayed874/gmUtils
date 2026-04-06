@@ -471,7 +471,7 @@ class _AppState extends State<App> {
       home: _starterWidget(),
       routes: widget.screensRoutes ?? const <String, WidgetBuilder>{},
       initialRoute: null,
-      navigatorObservers: [_NavigatorObserver()],
+      navigatorObservers: [_NavigatorObserver(), appRouteObserver],
       debugShowCheckedModeBanner: false,
     );
   }
@@ -594,6 +594,8 @@ class _NavigatorObserver extends NavigatorObserver {
   }
 }
 
+final RouteObserver<PageRoute> appRouteObserver = RouteObserver<PageRoute>();
+
 //==============================================================================
 
 class GlobalVariables {
@@ -683,14 +685,15 @@ extension GMRouter on BuildContext {
     GMRouterOption? option,
     LogsManager? logger,
   }) async {
-    final log = () => '\n'
+    log() => '\n'
         'GMRouter.go>=============================='
         '[ $path / option: ${option?.name} / arguments: $arguments]'
         '==============================\n';
-    if (logger != null)
+    if (logger != null) {
       logger.print(log);
-    else
+    } else {
       Logs.printToAll(log);
+    }
 
     if (option == null) {
       return Navigator.pushNamed<T>(
@@ -745,14 +748,15 @@ extension GMRouter on BuildContext {
   //---------------------------------------
 
   void back([result, LogsManager? logger]) {
-    final log = () => '\n'
+    log() => '\n'
         'GMRouter.pop>==============================\n'
         '[ result: $result ]\n'
         '==============================\n';
-    if (logger != null)
+    if (logger != null) {
       logger.print(log);
-    else
+    } else {
       Logs.printToAll(log);
+    }
 
     Navigator.pop(this, result);
   }
