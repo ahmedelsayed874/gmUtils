@@ -502,9 +502,9 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       errAr = 'الحساب غير موجود';
     }
 
-    if (e.message != null) {
-      errEn += '\n\n<<${e.message}>>';
-      errAr += '\n\n<<${e.message}>>';
+    if (errEn.isEmpty && e.message != null) {
+      errEn = e.message ?? '';
+      errAr = e.message ?? '';
     }
 
     return FBResponse.failed(error: StringSet(errEn, errAr));
