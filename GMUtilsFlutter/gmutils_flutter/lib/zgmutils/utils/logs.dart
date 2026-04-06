@@ -49,11 +49,12 @@ class Logs {
     core.String? publicLogFileDeadline,
     core.String? privateLogFileDeadline,
     core.bool saveDate = false,
-  }) => _defLogs.setLogFileDeadline(
-    publicLogFileDeadline: publicLogFileDeadline,
-    privateLogFileDeadline: privateLogFileDeadline,
-    saveDate: saveDate,
-  );
+  }) =>
+      _defLogs.setLogFileDeadline(
+        publicLogFileDeadline: publicLogFileDeadline,
+        privateLogFileDeadline: privateLogFileDeadline,
+        saveDate: saveDate,
+      );
 
   static core.Future<core.DateTime?> get savedPublicLogsDeadline =>
       _defLogs.savedPublicLogsDeadline;
@@ -75,6 +76,17 @@ class Logs {
   //----------------------------------------------------------------------------
 
   static void print(core.Object? Function() info) => _defLogs.print(info);
+
+  static void printMethod({
+    core.bool printMethodPath = true,
+    core.int downTo = 2,
+    core.Object? Function()? extraInfo,
+  }) =>
+      _defLogs.printMethod(
+        printMethodPath: printMethodPath,
+        downTo: downTo + 1,
+        extraInfo: extraInfo,
+      );
 
   static void printTo(core.String? logsName, core.Object? Function() info) =>
       get(logsName).print(info);
@@ -150,8 +162,8 @@ class Logs {
       final dir = fromPublicLogs == null
           ? (await value.currentLogsDir)
           : (fromPublicLogs
-                ? (await value.publicLogsDir)
-                : (await value.privateLogsDir));
+              ? (await value.publicLogsDir)
+              : (await value.privateLogsDir));
       final files = dir?.listSync(followLinks: false);
 
       if (files?.isNotEmpty == true) {
@@ -331,6 +343,7 @@ abstract class LogsManager {
 
   void printMethod({
     core.bool printMethodPath = true,
+    core.int downTo = 2,
     core.Object? Function()? extraInfo,
   }) {
     try {
@@ -343,7 +356,7 @@ abstract class LogsManager {
         core.String log;
 
         if (idx0 >= 0) {
-          core.int idx1 = str.indexOf('#2');
+          core.int idx1 = str.indexOf('#$downTo');
 
           if (idx1 > idx0) {
             log = str.substring(idx0 + 2, idx1).trim();
