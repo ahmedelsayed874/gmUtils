@@ -49,12 +49,11 @@ class Logs {
     core.String? publicLogFileDeadline,
     core.String? privateLogFileDeadline,
     core.bool saveDate = false,
-  }) =>
-      _defLogs.setLogFileDeadline(
-        publicLogFileDeadline: publicLogFileDeadline,
-        privateLogFileDeadline: privateLogFileDeadline,
-        saveDate: saveDate,
-      );
+  }) => _defLogs.setLogFileDeadline(
+    publicLogFileDeadline: publicLogFileDeadline,
+    privateLogFileDeadline: privateLogFileDeadline,
+    saveDate: saveDate,
+  );
 
   static core.Future<core.DateTime?> get savedPublicLogsDeadline =>
       _defLogs.savedPublicLogsDeadline;
@@ -98,11 +97,8 @@ class Logs {
 
     for (var logs in allLogs) {
       if (content.isNotEmpty) content += '\n';
-      content += '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(
-        numOfFiles: numOfFiles,
-        encrypted: encrypted,
-        fromPublicLogs: fromPublicLogs,
-      )}';
+      content +=
+          '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(numOfFiles: numOfFiles, encrypted: encrypted, fromPublicLogs: fromPublicLogs)}';
     }
 
     return content;
@@ -154,8 +150,8 @@ class Logs {
       final dir = fromPublicLogs == null
           ? (await value.currentLogsDir)
           : (fromPublicLogs
-              ? (await value.publicLogsDir)
-              : (await value.privateLogsDir));
+                ? (await value.publicLogsDir)
+                : (await value.privateLogsDir));
       final files = dir?.listSync(followLinks: false);
 
       if (files?.isNotEmpty == true) {
@@ -204,10 +200,9 @@ abstract class LogsManager {
       if (dt != null) {
         _publicLogFileDeadline = dt.microsecondsSinceEpoch;
         if (saveDate) {
-          GeneralStorage.o('logs').save(
-            'deadline${_getLogsSetStr()}_pub',
-            publicLogFileDeadline,
-          );
+          GeneralStorage.o(
+            'logs',
+          ).save('deadline${_getLogsSetStr()}_pub', publicLogFileDeadline);
         }
       }
     }
@@ -220,10 +215,9 @@ abstract class LogsManager {
       if (dt != null) {
         _privateLogFileDeadline = dt.microsecondsSinceEpoch;
         if (saveDate) {
-          GeneralStorage.o('logs').save(
-            'deadline${_getLogsSetStr()}_prv',
-            privateLogFileDeadline,
-          );
+          GeneralStorage.o(
+            'logs',
+          ).save('deadline${_getLogsSetStr()}_prv', privateLogFileDeadline);
         }
       }
     }
@@ -231,9 +225,9 @@ abstract class LogsManager {
 
   core.Future<core.DateTime?> get savedPublicLogsDeadline async {
     try {
-      var d = await GeneralStorage.o('logs').retrieve(
-        'deadline${_getLogsSetStr()}_pub',
-      );
+      var d = await GeneralStorage.o(
+        'logs',
+      ).retrieve('deadline${_getLogsSetStr()}_pub');
       var dt = DateOp().parse(d, convertToLocalTime: true);
       return dt;
     } catch (e) {
@@ -243,9 +237,9 @@ abstract class LogsManager {
 
   core.Future<core.DateTime?> get savedPrivateLogsDeadline async {
     try {
-      var d = await GeneralStorage.o('logs').retrieve(
-        'deadline${_getLogsSetStr()}_prv',
-      );
+      var d = await GeneralStorage.o(
+        'logs',
+      ).retrieve('deadline${_getLogsSetStr()}_prv');
       var dt = DateOp().parse(d, convertToLocalTime: true);
       return dt;
     } catch (e) {
@@ -335,6 +329,55 @@ abstract class LogsManager {
     }
   }
 
+  void printMethod({
+    core.bool printMethodPath = true,
+    core.Object? Function()? extraInfo,
+  }) {
+    try {
+      throw 'printMethod';
+    } catch (_, s) {
+      print(() {
+        core.String str = s.toString();
+        core.int idx0 = str.indexOf('#1');
+
+        core.String log;
+
+        if (idx0 >= 0) {
+          core.int idx1 = str.indexOf('#2');
+
+          if (idx1 > idx0) {
+            log = str.substring(idx0 + 2, idx1).trim();
+          }
+          //
+          else {
+            log = str.substring(idx0 + 2).trim();
+          }
+
+          if (printMethodPath) {
+            log = log.replaceFirst(' (package:', '\n      |- (package:');
+          }
+          //
+          else {
+            core.int idx2 = log.indexOf('(package:');
+            if (idx2 >= 0) {
+              log = log.substring(0, idx2);
+            }
+          }
+        }
+        //
+        else {
+          log = str;
+        }
+
+        if (extraInfo != null) {
+          log += '\n      |- ${extraInfo()}';
+        }
+
+        return log;
+      });
+    }
+  }
+
   void _print(core.String text) async {
     if (await writingToPublicLogFileEnabled) {
       _createLogFileIfNotExist(true);
@@ -364,19 +407,11 @@ abstract class LogsManager {
         'log_${DateOp().format(now, pattern: 'yyyy-MM-dd-HH-mm-ss')}';
 
     if (intoPublic) {
-      _files = Files.public(
-        fileName,
-        _fileExtension,
-        subDirName: _subDirName,
-      );
+      _files = Files.public(fileName, _fileExtension, subDirName: _subDirName);
     }
     //
     else {
-      _files = Files.private(
-        fileName,
-        _fileExtension,
-        subDirName: _subDirName,
-      );
+      _files = Files.private(fileName, _fileExtension, subDirName: _subDirName);
     }
 
     final dir = await currentLogsDir;

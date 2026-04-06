@@ -12,12 +12,12 @@ import '../../utils/sharing_helper.dart';
 import '../dialogs/message_dialog.dart';
 
 class CapturingScreenshotWidget extends StatefulWidget {
-  late final GlobalKey globalKey;// = GlobalKey();
+  late final GlobalKey globalKey; // = GlobalKey();
   final Widget Function(GlobalKey) builder;
-  
+
   CapturingScreenshotWidget({
     GlobalKey? globalKey,
-    required this.builder, 
+    required this.builder,
     super.key,
   }) {
     this.globalKey = globalKey ?? GlobalKey();
@@ -25,45 +25,6 @@ class CapturingScreenshotWidget extends StatefulWidget {
 
   @override
   State<CapturingScreenshotWidget> createState() => _ToBeCapturedWidgetState();
-
-  WidgetCapture get captureTool => WidgetCapture(globalKey);
-
-  void shareExternal({
-    required BuildContext context,
-    String text = '',
-    String onFailedMessage = ''
-        'Failed to capture a scene, '
-        'please a take screenshot instead.',
-  }) async {
-    var key = globalKey;
-    var file = await WidgetCapture(key).captureAsFile();
-    if (file != null) {
-      //share file
-      await SharingHelper.shareFile(
-          text: text,
-          outputFilePath: file.path
-      );
-
-      // await Share.shareXFiles(
-      //   [XFile(file.path, mimeType: 'image/*')],
-      //   text: text,
-      // );
-    }
-    //
-    else {
-      MessageDialog.create
-          .setTitle(App.isEnglish ? 'Error' : 'خطأ')
-          .setMessage(onFailedMessage)
-          .addActions([
-        MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا')
-      ]).show(() => context);
-    }
-  }
-
-  Future<Image?> takeSceneImage() async {
-    var image = await WidgetCapture(globalKey).captureAsImage();
-    return image;
-  }
 }
 
 class _ToBeCapturedWidgetState extends State<CapturingScreenshotWidget> {
@@ -78,10 +39,10 @@ class _ToBeCapturedWidgetState extends State<CapturingScreenshotWidget> {
 
 //------------------------------------------------------------------------------
 
-class WidgetCapture {
+class CapturingScreenshotTools {
   final GlobalKey widgetKey;
 
-  WidgetCapture(this.widgetKey);
+  CapturingScreenshotTools(this.widgetKey);
 
   Future<Uint8List?> captureAsBytes() async {
     RenderRepaintBoundary? boundary =
@@ -101,12 +62,10 @@ class WidgetCapture {
     var imageBytes = await captureAsBytes();
     if (imageBytes != null) {
       //file name
-      var fileName2 = fileName ??
+      var fileName2 =
+          fileName ??
           DateOp()
-              .formatForDatabase(
-                DateTime.now(),
-                dateOnly: false,
-              )
+              .formatForDatabase(DateTime.now(), dateOnly: false)
               .replaceAll(" ", '-')
               .replaceAll("+", '-')
               .replaceAll(":", '-');
@@ -118,5 +77,35 @@ class WidgetCapture {
     }
 
     return null;
+  }
+
+  void shareExternal({
+    required BuildContext context,
+    String text = '',
+    String onFailedMessage =
+        ''
+        'Failed to capture a scene, '
+        'please a take screenshot instead.',
+  }) async {
+    var file = await captureAsFile();
+    if (file != null) {
+      //share file
+      await SharingHelper.shareFile(text: text, outputFilePath: file.path);
+
+      // await Share.shareXFiles(
+      //   [XFile(file.path, mimeType: 'image/*')],
+      //   text: text,
+      // );
+    }
+    //
+    else {
+      MessageDialog.create
+          .setTitle(App.isEnglish ? 'Error' : 'خطأ')
+          .setMessage(onFailedMessage)
+          .addActions([
+            MessageDialogActionButton(App.isEnglish ? 'OK' : 'حسنا'),
+          ])
+          .show(() => context);
+    }
   }
 }

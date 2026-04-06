@@ -5,6 +5,7 @@ class Animator extends StatefulWidget {
   final int end;
   final Duration duration;
   final int? repeats;
+  final bool reverse;
   final VoidCallback? onCompleted;
   final Widget Function(int value) child;
 
@@ -12,6 +13,7 @@ class Animator extends StatefulWidget {
     this.end = 100,
     this.duration = const Duration(milliseconds: 500),
     this.repeats,
+    this.reverse = true,
     this.onCompleted,
     required this.child,
     super.key});
@@ -51,7 +53,7 @@ class _AnimatorState extends State<Animator>
 
     if ((widget.repeats ?? 0) > 0) {
       controller.repeat(
-        reverse: true,
+        reverse: widget.reverse,
         count: widget.repeats,
       );
     } else {
