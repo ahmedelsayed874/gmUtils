@@ -71,12 +71,16 @@ abstract class IFCM {
 //------------------------------------------------------------------------------
 
 class FCM extends IFCM {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  FCMConfigurations? fcmConfigurations;
+  final FirebaseMessaging messaging = FirebaseMessaging.instance;
+  final INotificationsManager localNotifications =
+      NotificationsManager.instance;
+  FCMConfigurations? _fcmConfigurations;
 
-  INotificationsManager localNotifications = NotificationsManager.instance;
+  Map<String, NotificationListener>? _notificationListeners;
 
-  //private constructor
+  //----------------------------------------
+
+  ///private constructor
   static FCM? _instance;
 
   static FCM get instance {
@@ -86,10 +90,14 @@ class FCM extends IFCM {
 
   FCM._();
 
+  //----------------------------------------------------------------------------
+
+  FCMConfigurations? get fcmConfigurations => _fcmConfigurations;
+
   Future<void> init(FCMConfigurations? fcmConfigs) async {
     Logs.print(() => 'Fcm.init');
 
-    fcmConfigurations ??= fcmConfigs;
+    _fcmConfigurations ??= fcmConfigs;
 
     //region Local Notification Config
     await localNotifications.init(
@@ -174,6 +182,8 @@ class FCM extends IFCM {
         'default notification channel (com.google.firebase.messaging.default_notification_channel_id)');
   }
 
+  //----------------------------------------------------------------------------
+
   @override
   Future<String?> get deviceToken async {
     int tries = 0;
@@ -199,15 +209,60 @@ class FCM extends IFCM {
     return null;
   }
 
+  ///must user on main screen starts
+  @override
+  void redirectToPendingScreen() async {
+    Logs.print(() => 'Fcm.redirectToPendingScreen');
+
+    //gets the notification that pushed by Firebase engine
+    var msg = await messaging.getInitialMessage();
+    if (msg != null) {
+      Logs.print(
+          () => 'Fcm.redirectToPendingScreen -> messaging.getInitialMessage -> '
+              'title: ${msg.notification?.title}, '
+              'body: ${msg.notification?.body}, '
+              'data: ${msg.data}');
+
+      openCorrespondingScreen(msg);
+    } else {
+      await localNotifications.redirectToPendingScreen();
+    }
+  }
+
+  //----------------------------------------------------------------------------
+
+  //region NotificationListener
+  bool isNotificationListenerRegistered(String name) =>
+      _notificationListeners?.containsKey(name) ?? false;
+
+  void registerNotificationListener(
+    String name,
+    NotificationListener listener,
+  ) {
+    Logs.print(() => 'Fcm.registerNotificationListener(name: $name)');
+
+    _notificationListeners ??= {};
+    _notificationListeners![name] = listener;
+  }
+
+  void unregisterNotificationListener(String name) {
+    Logs.print(() => 'Fcm.unregisterNotificationListener(name: $name)');
+
+    _notificationListeners?.remove(name);
+  }
+  //endregion
+
+  //----------------------------------------------------------------------------
+
   //region handle FCM message
   void openCorrespondingScreen(RemoteMessage message) {
     Logs.print(() => 'Fcm.openCorrespondingScreen');
-    openCorrespondingScreenByNotificationJson(message.data);
+    openCorrespondingScreenByNotificationData(message.data);
   }
 
-  void openCorrespondingScreenByNotificationJson(dynamic payload) {
-    Logs.print(() => 'Fcm.openCorrespondingScreenByNotificationJson');
-    localNotifications.openCorrespondingScreenByNotificationJson(payload);
+  void openCorrespondingScreenByNotificationData(dynamic payload) {
+    Logs.print(() => 'Fcm.openCorrespondingScreenByNotificationData');
+    localNotifications.openCorrespondingScreenByNotificationData(payload);
   }
 
   void _popupNotification(RemoteMessage message) {
@@ -222,7 +277,9 @@ class FCM extends IFCM {
 
   void _popupNotification2(RemoteMessage message, String? langCode) {
     Logs.print(
-      () => ['FCM._popupNotification2(message: ${message.toMap()}, langCode: $langCode)'],
+      () => [
+        'FCM._popupNotification2(message: ${message.toMap()}, langCode: $langCode)'
+      ],
     );
 
     var title = '${message.notification?.title ?? 'Notification'}•';
@@ -251,26 +308,6 @@ class FCM extends IFCM {
   }
 
   //endregion
-
-  ///must user on main screen starts
-  @override
-  void redirectToPendingScreen() async {
-    Logs.print(() => 'Fcm.redirectToPendingScreen');
-
-    //gets the notification that pushed by Firebase engine
-    var msg = await messaging.getInitialMessage();
-    if (msg != null) {
-      Logs.print(
-          () => 'Fcm.redirectToPendingScreen -> messaging.getInitialMessage -> '
-              'title: ${msg.notification?.title}, '
-              'body: ${msg.notification?.body}, '
-              'data: ${msg.data}');
-
-      openCorrespondingScreen(msg);
-    } else {
-      await localNotifications.redirectToPendingScreen();
-    }
-  }
 
   //----------------------------------------------------------------------------
 
@@ -563,7 +600,7 @@ class FCM extends IFCM {
     };
 
     if (dataPayload != null) {
-      notificationBody["data"] = {IOS_PAYLOAD_KEY_NAME : dataPayload};
+      notificationBody["data"] = {IOS_PAYLOAD_KEY_NAME: dataPayload};
     }
 
     Map<String, dynamic> messageJson = {};
@@ -588,8 +625,8 @@ class FCM extends IFCM {
 
     String? androidChannelId =
         channel?.channelId ?? NotificationsManager.defaultNotificationChannelId;
-    SoundFile? sound =
-        channel?.soundFile ?? NotificationsManager.defaultNotificationChannelSound;
+    SoundFile? sound = channel?.soundFile ??
+        NotificationsManager.defaultNotificationChannelSound;
 
     var android = {
       'title': title,
@@ -688,7 +725,8 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
 }
 
 @pragma('vm:entry-point')
-FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {
+FcmNotificationProperties resolveNotification(
+    RemoteMessage message, String? langCode) {
   /*add this method to main file
     @pragma('vm:entry-point')
     FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {}
@@ -739,3 +777,5 @@ class SendFcmMessageParameters {
     required this.firebaseServiceAccountFilePathInAssets,
   });
 }
+
+typedef NotificationListener = void Function(FcmNotificationProperties);

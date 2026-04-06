@@ -8,7 +8,7 @@ abstract class INotificationsManager {
   );
 
   ///handle Notifications message
-  void openCorrespondingScreenByNotificationJson(dynamic payload);
+  void openCorrespondingScreenByNotificationData(dynamic payload);
 
   ///must use on main screen starts
   Future<bool> redirectToPendingScreen();
@@ -30,6 +30,7 @@ abstract class INotificationsManager {
 
 class NotificationsManager extends INotificationsManager {
   static String defaultNotificationIconName = 'notif_icon';
+
   ///this value must set in android manifest
   ///         <meta-data
   ///             android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -43,7 +44,9 @@ class NotificationsManager extends INotificationsManager {
   /////////////////////////////////////////////////////////////////////////////
 
   NotificationsConfigurations? _notificationsConfigurations;
-  NotificationsConfigurations? get notificationsConfigurations => _notificationsConfigurations;
+
+  NotificationsConfigurations? get notificationsConfigurations =>
+      _notificationsConfigurations;
 
   //private constructor
   static NotificationsManager? _instance;
@@ -59,7 +62,8 @@ class NotificationsManager extends INotificationsManager {
   Future<void> init(
     NotificationsConfigurations? notificationsConfigurations,
   ) async {
-    Logs.print(() => 'Notifications.init ... follow setup instruction here: https://pub.dev/packages/flutter_local_notifications');
+    Logs.print(() =>
+        'Notifications.init ... follow setup instruction here: https://pub.dev/packages/flutter_local_notifications');
 
     _notificationsConfigurations ??= notificationsConfigurations;
 
@@ -77,7 +81,7 @@ class NotificationsManager extends INotificationsManager {
 
   //region handle Notifications message
   @override
-  void openCorrespondingScreenByNotificationJson(dynamic payload) {
+  void openCorrespondingScreenByNotificationData(dynamic payload) {
     Logs.print(() => 'Notifications.openCorrespondingScreenByNotificationJson');
     try {
       _notificationsConfigurations?.openCorrespondingScreen(payload);
@@ -126,15 +130,19 @@ class NotificationsManager extends INotificationsManager {
               ')',
         );
 
-        openCorrespondingScreenByNotificationJson(
+        openCorrespondingScreenByNotificationData(
           notificationResponse?.payload,
         );
 
         return true;
-      } else {
+      }
+      //
+      else {
         return false;
       }
-    } else {
+    }
+    //
+    else {
       Logs.print(
         () =>
             'Notifications.redirectToPendingScreen -> notificationAppLaunchDetails ->'
@@ -165,15 +173,15 @@ class NotificationsManager extends INotificationsManager {
       //------------------------------------
 
       iOS: const DarwinInitializationSettings(
-        //onDidReceiveLocalNotification: _onDidReceiveLocalNotificationOfIos,
-      ),
-
+          //onDidReceiveLocalNotification: _onDidReceiveLocalNotificationOfIos,
+          ),
     );
 
     await _flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
-      onDidReceiveBackgroundNotificationResponse: _onDidReceiveNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse:
+          _onDidReceiveNotificationResponse,
     );
     //endregion
 
@@ -205,12 +213,14 @@ class NotificationsManager extends INotificationsManager {
       await notificationsPlugin
           ?.createNotificationChannel(defaultNotificationChannel);
 
-      if (_notificationsConfigurations?.androidNotificationChannelsIdsToDelete !=
+      if (_notificationsConfigurations
+              ?.androidNotificationChannelsIdsToDelete !=
           null) {
         var cnfg = _notificationsConfigurations!;
         var lst = cnfg.androidNotificationChannelsIdsToDelete!();
         for (var channelId in lst) {
-          await notificationsPlugin?.deleteNotificationChannel(channelId: channelId);
+          await notificationsPlugin?.deleteNotificationChannel(
+              channelId: channelId);
         }
 
         _notificationsConfigurations?.androidNotificationChannelsIdsToDelete =
@@ -369,7 +379,8 @@ void _onDidReceiveNotificationResponse(NotificationResponse details) {
       ')');
 
   var payload = details.payload;
-  NotificationsManager.instance.openCorrespondingScreenByNotificationJson(payload);
+  NotificationsManager.instance
+      .openCorrespondingScreenByNotificationData(payload);
 }
 
 //------------------------------------------------------------------------------
