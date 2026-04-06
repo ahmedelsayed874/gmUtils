@@ -782,6 +782,16 @@ class WebRequestExecutor {
 
   //============================================================================
 
+  void clearAllCaches() {
+    _cacheStorage.clear();
+  }
+
+  void clearCacheForUrl(String contains) {
+    _cacheStorage.removeWhere((key, value) => key.contains(contains));
+  }
+
+  //============================================================================
+
   Future<WebResponse<Result<DT>>> createDummyResponse<DT>({
     required String apiName,
     required DummyResponseBuilder<DT> Function() responseBuilder,
