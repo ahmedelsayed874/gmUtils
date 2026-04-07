@@ -793,7 +793,7 @@ public abstract class LoggerAbs {
         }
     }
 
-    private void writeToFileSync(Context context, int order, TitleGetter title, ContentGetter text) {
+    public void writeToFileSync(Context context, int order, TitleGetter title, ContentGetter text) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
             LogFileWriter writer = getLogFileWriter(context);
             if (writer != null) {
