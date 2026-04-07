@@ -27,12 +27,12 @@ class GMMain {
     required String? Function()? defaultFontFamily,
     required FcmRequirements? fcmRequirements,
     required NotificationsConfigurations? localNotificationsConfigurations,
-    required OnInitialize? onInitialize,
     Widget Function(Widget child)? appRoot,
-    Widget Function(Widget child)? startScreenWrapper,
+    //Widget Function(Widget child)? startScreenWrapper,
     required Widget startScreen,
     Map<String, WidgetBuilder>? screensRoutes,
     CustomWaitViewController? customWaitViewController,
+    required OnInitialize? onInitialize,
   }) async {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -71,7 +71,7 @@ class GMMain {
           appColors: appColors,
           toolbarTitleFontFamily: toolbarTitleFontFamily,
           defaultFontFamily: defaultFontFamily,
-          startScreenWrapper: startScreenWrapper,
+          //startScreenWrapper: startScreenWrapper,
           startScreen: startScreen,
           screensRoutes: screensRoutes,
           onInitialize: onInitialize,
@@ -103,7 +103,7 @@ class App extends StatefulWidget {
   AppColors Function(BuildContext context, bool isLight)? appColors;
   String? Function()? toolbarTitleFontFamily;
   String? Function()? defaultFontFamily;
-  Widget Function(Widget child)? startScreenWrapper;
+  //Widget Function(Widget child)? startScreenWrapper;
   Widget? startScreen;
   Map<String, WidgetBuilder>? screensRoutes;
   OnInitialize? onInitialize;
@@ -114,7 +114,7 @@ class App extends StatefulWidget {
     required this.appColors,
     required this.toolbarTitleFontFamily,
     required this.defaultFontFamily,
-    required this.startScreenWrapper,
+    //required this.startScreenWrapper,
     required Widget this.startScreen,
     required this.screensRoutes,
     required this.onInitialize,
@@ -486,7 +486,8 @@ class _AppState extends State<App> {
       onInitialize: widget.onInitialize,
     );
 
-    return widget.startScreenWrapper?.call(starterWidget) ?? starterWidget;
+    //return widget.startScreenWrapper?.call(starterWidget) ?? starterWidget;
+    return starterWidget;
   }
 
   @override
@@ -494,7 +495,7 @@ class _AppState extends State<App> {
     Logs.print(() => '[GMMain] _AppState.dispose() ---> ${App._context}');
 
     widget.appName = null;
-    widget.startScreenWrapper = null;
+    //widget.startScreenWrapper = null;
     widget.startScreen = null;
     widget.measurements = null;
     widget.appColors = null;

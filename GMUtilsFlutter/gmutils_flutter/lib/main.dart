@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:gmutils_flutter/ui/screens/splash/splash_screen.dart';
 import 'package:gmutils_flutter/zgmutils/utils/device_info.dart';
 
@@ -126,6 +127,8 @@ void main() {
     startScreen: const SplashScreen(),
     customWaitViewController: null,
   );
+  //Theme.of(App.context);
+  //MediaQuery.of(App.context);
 }
 
 //------------------------------------------------------------------------------
