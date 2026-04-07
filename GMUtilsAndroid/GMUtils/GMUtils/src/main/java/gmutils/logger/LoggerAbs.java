@@ -434,18 +434,6 @@ public abstract class LoggerAbs {
         setLogConfigs(logConfigs);
 
         numberOnInstances++;
-
-        if (!this.logConfigs.isWriteLogsToPublicFileEnabled()) {
-            try {
-                deleteSavedFiles(BaseApplication.current(), true, null);
-            } catch (Exception e) {
-                writeToLog(
-                        "***** EXCEPTION",
-                        "deleting log files failed (" + e.getMessage() + ")",
-                        null
-                );
-            }
-        }
     }
 
     @NotNull
@@ -515,6 +503,31 @@ public abstract class LoggerAbs {
 
     public void setLogConfigs(LogConfigs logConfigs) {
         this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
+
+        if (!this.logConfigs.isWriteLogsToPublicFileEnabled()) {
+            try {
+                deleteSavedFiles(BaseApplication.current(), true, null);
+            } catch (Exception e) {
+                writeToLog(
+                        "***** EXCEPTION",
+                        "deleting public log files failed (" + e.getMessage() + ")",
+                        null
+                );
+            }
+        }
+
+        if (!this.logConfigs.isWriteLogsToPrivateFileEnabled()) {
+            try {
+                deleteSavedFiles(BaseApplication.current(), false, null);
+            } catch (Exception e) {
+                writeToLog(
+                        "***** EXCEPTION",
+                        "deleting private log files failed (" + e.getMessage() + ")",
+                        null
+                );
+            }
+        }
+
     }
 
     private int orderRecoder = 0;
