@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:sakan_masr_community_flutter/zgmutils/utils/text/text_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../../main.dart' as main;
@@ -491,8 +492,8 @@ class FCM extends IFCM {
 
     Logs.print(
       () => 'FCM.sendNotification ---> REQUEST:: '
-          'headers: $headers, '
-          'body: $requestBody',
+          'headers: ${TextUtils().trimEnd(headers.toString(), endIndex: 200)}, '
+          'body: ${TextUtils().trimEnd(requestBody, endIndex: 200)}',
     );
 
     var response = await http.post(

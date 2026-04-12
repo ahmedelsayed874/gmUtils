@@ -136,7 +136,7 @@ enum FBFilterTypes {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
-  static int maxResponseLengthForLogger = 100;
+  static int maxResponseLengthForLogger = 300;
 
   FirebaseDatabaseOp({
     required super.mappable,

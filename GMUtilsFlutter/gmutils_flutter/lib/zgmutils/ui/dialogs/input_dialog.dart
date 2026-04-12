@@ -20,8 +20,11 @@ class InputDialog {
   TextInputType? _keyboardType;
   bool _obscureText = false;
   String? _okButtonText;
+  TextStyle? _okButtonTextStyle;
   String? _skipButtonText;
+  TextStyle? _skipButtonTextStyle;
   String? _cancelButtonText;
+  TextStyle? _cancelButtonTextStyle;
   bool _enableOuterDismiss = true;
   bool _showSkipButton = false;
   void Function(String input)? _onSkipClick;
@@ -101,13 +104,28 @@ class InputDialog {
     return this;
   }
 
+  InputDialog setOkButtonTextStyle(TextStyle style) {
+    _okButtonTextStyle = style;
+    return this;
+  }
+
   InputDialog setSkipButtonText(String text) {
     _skipButtonText = text;
     return this;
   }
 
+  InputDialog setSkipButtonTextStyle(TextStyle style) {
+    _skipButtonTextStyle = style;
+    return this;
+  }
+
   InputDialog setCancelButtonText(String text) {
     _cancelButtonText = text;
+    return this;
+  }
+
+  InputDialog setCancelButtonTextStyle(TextStyle style) {
+    _cancelButtonTextStyle = style;
     return this;
   }
 
@@ -297,12 +315,15 @@ class _AlertDialogBodyState extends State<_AlertDialogBody> {
                   errorText: error,
                 ),
                 keyboardType: inputDialog._keyboardType,
-                minLines: inputDialog._obscureText ? null : inputDialog._minInputLines,
+                minLines: inputDialog._obscureText
+                    ? null
+                    : inputDialog._minInputLines,
                 maxLines: inputDialog._obscureText
                     ? 1
                     : (inputDialog._minInputLines == null
                         ? null
-                        : (inputDialog._maxInputLines ?? (inputDialog._minInputLines! + 3))),
+                        : (inputDialog._maxInputLines ??
+                            (inputDialog._minInputLines! + 3))),
                 obscureText: inputDialog._obscureText,
               ),
               if (inputDialog._extraWidget != null) inputDialog._extraWidget!,
@@ -314,7 +335,8 @@ class _AlertDialogBodyState extends State<_AlertDialogBody> {
                 error = null;
 
                 if (inputDialog._validationInputHandler != null) {
-                  error = inputDialog._validationInputHandler!(inputDialog._inputController.text);
+                  error = inputDialog._validationInputHandler!(
+                      inputDialog._inputController.text);
                   if (error != null) {
                     setState(() {});
                   }
@@ -322,26 +344,37 @@ class _AlertDialogBodyState extends State<_AlertDialogBody> {
 
                 if (error == null) {
                   inputDialog.dismiss();
-                  inputDialog._inputHandler?.call(inputDialog._inputController.text);
+                  inputDialog._inputHandler
+                      ?.call(inputDialog._inputController.text);
                 }
               },
-              child: Text(inputDialog._okButtonText ?? (App.isEnglish ? 'OK' : 'حسنا')),
+              child: Text(
+                inputDialog._okButtonText ?? (App.isEnglish ? 'OK' : 'حسنا'),
+                style: inputDialog._okButtonTextStyle,
+              ),
             ),
             if (inputDialog._showSkipButton)
               TextButton(
                 onPressed: () {
                   inputDialog.dismiss();
-                  inputDialog._onSkipClick?.call(inputDialog._inputController.text);
+                  inputDialog._onSkipClick
+                      ?.call(inputDialog._inputController.text);
                 },
-                child:
-                    Text(inputDialog._skipButtonText ?? (App.isEnglish ? 'Skip' : 'تخطي')),
+                child: Text(
+                  inputDialog._skipButtonText ??
+                      (App.isEnglish ? 'Skip' : 'تخطي'),
+                  style: inputDialog._skipButtonTextStyle,
+                ),
               ),
             TextButton(
               onPressed: () {
                 inputDialog.dismiss();
               },
               child: Text(
-                  inputDialog._cancelButtonText ?? (App.isEnglish ? 'Cancel' : 'إلغاء')),
+                inputDialog._cancelButtonText ??
+                    (App.isEnglish ? 'Cancel' : 'إلغاء'),
+                style: inputDialog._cancelButtonTextStyle,
+              ),
             ),
           ],
           backgroundColor: AppTheme.appColors?.background ?? Colors.white,

@@ -78,12 +78,13 @@ class Logs {
   static void print(core.Object? Function() info) => _defLogs.print(info);
 
   static void printMethod({
-    core.bool printMethodPath = true,
+    core.bool printMethodPath = false,
     core.int downTo = 2,
     core.Object? Function()? extraInfo,
   }) =>
-      _defLogs.printMethod(
+      _defLogs._printMethod(
         printMethodPath: printMethodPath,
+        from: 2,
         downTo: downTo + 1,
         extraInfo: extraInfo,
       );
@@ -345,13 +346,20 @@ abstract class LogsManager {
     core.bool printMethodPath = true,
     core.int downTo = 2,
     core.Object? Function()? extraInfo,
+  }) => _printMethod();
+
+  void _printMethod({
+    core.bool printMethodPath = false,
+    core.int from = 1,
+    core.int downTo = 2,
+    core.Object? Function()? extraInfo,
   }) {
     try {
       throw 'printMethod';
     } catch (_, s) {
       print(() {
         core.String str = s.toString();
-        core.int idx0 = str.indexOf('#1');
+        core.int idx0 = str.indexOf('#$from');
 
         core.String log;
 

@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+
 import '../../utils/collections/pairs.dart';
 import '../../utils/logs.dart';
 import '../utils/mappable.dart';
@@ -74,6 +75,11 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required Map<String, dynamic> customData,
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
+    Logs.printMethod(extraInfo: () => ''
+        'customData: ${customData.length}-items, '
+        'conflictAlgorithm: $conflictAlgorithm',
+    );
+
     return await database.insert(
       tableName,
       customData,
@@ -105,6 +111,12 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
     void Function(int)? progress,
   }) async {
+    Logs.printMethod(extraInfo: () => ''
+        'customData: ${customData.length}-items, '
+        'conflictAlgorithm: $conflictAlgorithm, '
+        'progress != null: ${progress != null}',
+    );
+
     List<int> ids = [];
 
     if (progress != null && customData.isEmpty) {
@@ -123,6 +135,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       ids.add(id);
 
       if (progress != null) {
+        Logs.print(() =>'>>> insert-progress: ${(i + 1) % customData.length}');
         progress((i + 1) % customData.length);
       }
     }
@@ -206,7 +219,19 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     String? having,
     required Ct Function(Map<String, dynamic>) converter,
   }) async {
-    return await _retrieve(
+    Logs.printMethod(extraInfo: () => ''
+        'customColumns: $customColumns, '
+        'whereCondition: $whereCondition, '
+        'orderOn: $orderOn, '
+        'isOrderAsc: $isOrderAsc, '
+        'pageInfo: $pageInfo, '
+        'distinct: $distinct, '
+        'groupBy: $groupBy, '
+        'having: $having'
+        '',
+    );
+
+    var res = await _retrieve(
       returnSet: false,
       customColumns: customColumns,
       whereCondition: whereCondition,
@@ -218,6 +243,10 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       having: having,
       converter: converter,
     );
+
+    Logs.print(() => '-----> return: ${res?.length}');
+
+    return res;
   }
 
   Future<Set<T>> retrieveSet({
@@ -264,7 +293,19 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     String? having,
     required Ct Function(Map<String, dynamic>) converter,
   }) async {
-    return await _retrieve(
+    Logs.printMethod(extraInfo: () => ''
+        'customColumns: $customColumns, '
+        'whereCondition: $whereCondition, '
+        'orderOn: $orderOn, '
+        'isOrderAsc: $isOrderAsc, '
+        'pageInfo: $pageInfo, '
+        'distinct: $distinct, '
+        'groupBy: $groupBy, '
+        'having: $having'
+        '',
+    );
+
+    var res = await _retrieve(
       returnSet: true,
       customColumns: customColumns,
       whereCondition: whereCondition,
@@ -276,6 +317,10 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       having: having,
       converter: converter,
     );
+
+    Logs.print(() => '-----> return: ${res?.length}');
+
+    return res;
   }
 
   Future<dynamic> _retrieve<T2>({
@@ -419,12 +464,21 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required Map<String, dynamic> data,
     required SQLConditions? whereCondition,
   }) async {
+    Logs.printMethod(extraInfo: () => ''
+        'data: ${data.length}-items, '
+        'whereCondition: $whereCondition',
+    );
+
     // Update
-    return await database.update(
+    var res = await database.update(
       tableName,
       data,
       where: whereCondition?.statement,
     );
+
+    Logs.print(() => '>>> return: $res');
+
+    return res;
   }
 
   Future<List<int>> updateMultiple({
@@ -462,6 +516,8 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required Map<String, dynamic> Function(int index) data,
     required SQLConditions? Function(int index) whereCondition,
   }) async {
+    Logs.printMethod();
+
     List<int> ids = [];
 
     for (int i = 0; i < length; i++) {
@@ -485,11 +541,17 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   Future<int> delete({
     required SQLConditions? whereCondition,
   }) async {
+    Logs.printMethod(extraInfo: () => 'whereCondition: $whereCondition');
+
     // Remove the Dog from the database.
-    return await database.delete(
+    var res = await database.delete(
       tableName,
       where: whereCondition?.statement,
     );
+
+    Logs.print(() => '>>> return: $res');
+
+    return res;
   }
 
 //endregion
@@ -497,6 +559,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   //----------------------------------------------------------------------------
 
   void dispose() {
+    Logs.printMethod();
     setDatabase(null);
   }
 }

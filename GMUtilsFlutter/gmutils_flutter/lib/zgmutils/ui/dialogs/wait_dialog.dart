@@ -47,7 +47,7 @@ class WaitDialog {
 
     retryShow() => Future.delayed(
           Duration(
-            milliseconds: _tries > 2 ? 500 : (_tries > 1 ? 800 : 1300),
+            milliseconds: _tries > 2 ? 1500 : (_tries > 1 ? 1000 : 600),
           ),
           () {
             if (_tries-- == 0) {
@@ -69,7 +69,11 @@ class WaitDialog {
       try {
         _show(context);
       } catch (e) {
-        Logs.print(() => "WaitDialog.show>> EXCEPTION: $e");
+        Logs.printMethod(
+          downTo: 4,
+          printMethodPath: true,
+          extraInfo: () => "WaitDialog.show>> EXCEPTION: $e",
+        );
         retryShow();
       }
     }

@@ -583,15 +583,15 @@ class _NavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     App._context = route.navigator?.context;
-    Logs.print(() => '[GMMain] _NavigatorObserver.didPush() '
-        '---> ${App._context?.widget} (MOUNTED: ${App._context?.mounted})');
+    /*Logs.print(() => '[GMMain] _NavigatorObserver.didPush() '
+        '---> ${App._context?.widget} (MOUNTED: ${App._context?.mounted})');*/
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     App._context = route.navigator?.context;
-    Logs.print(() => '[GMMain] _NavigatorObserver.didPop() '
-        '---> ${App._context?.widget} (MOUNTED: ${App._context?.mounted})');
+    /*Logs.print(() => '[GMMain] _NavigatorObserver.didPop() '
+        '---> ${App._context?.widget} (MOUNTED: ${App._context?.mounted})');*/
   }
 }
 

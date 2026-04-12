@@ -2,7 +2,6 @@ import 'dart:async';
 
 //yaml -> path:
 import 'package:path/path.dart';
-
 //yaml -> sqflite:
 import 'package:sqflite/sqflite.dart';
 
@@ -75,6 +74,8 @@ abstract class SQLDatabase {
   //----------------------------------------------------------------------------
 
   FutureOr<void> _onCreateDb(Database db, int version) async {
+    Logs.printMethod(extraInfo: () => 'version: $version');
+
     var tablesLst = tables;
     assert(tablesLst.isNotEmpty);
 
@@ -99,6 +100,8 @@ abstract class SQLDatabase {
     int oldVersion,
     int newVersion,
   ) async {
+    Logs.printMethod(extraInfo: () => 'newVersion: $newVersion, oldVersion: $oldVersion',);
+
     if (newVersion <= oldVersion) return;
 
     bool recreateDb = true;

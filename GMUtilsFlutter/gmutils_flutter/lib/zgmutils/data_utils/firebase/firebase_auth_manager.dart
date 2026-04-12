@@ -72,6 +72,8 @@ abstract class IFirebaseAuthManager {
 }
 
 class FirebaseAuthManager extends IFirebaseAuthManager {
+  static int maxResponseLengthForLogger = 300;
+
   final String _nonEmailHostName;
 
   FirebaseAuthManager({String nonEmailHostName = 'myusers.org'})
@@ -236,7 +238,10 @@ class FirebaseAuthManager extends IFirebaseAuthManager {
       }
 
       Logs.print(() => 'FirebaseAuthManager[Response].loginByEmail '
-          '----> response.data: ${TextUtils().trimEnd('${response.data}')}, '
+          '----> response.data: ${TextUtils().trimEnd(
+            '${response.data}',
+            endIndex: maxResponseLengthForLogger,
+          )}, '
           'response.message: ${response.error}');
 
       return response;
