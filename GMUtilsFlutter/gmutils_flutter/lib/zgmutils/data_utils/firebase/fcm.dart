@@ -4,13 +4,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
-import 'package:sakan_masr_community_flutter/zgmutils/utils/text/text_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../../main.dart' as main;
 import '../../utils/collections/string_set.dart';
 import '../../utils/logs.dart';
 import '../../utils/notifications/notifications_manager.dart';
+import '../../utils/text/text_utils.dart';
 import '../storages/app_preferences_storage.dart';
 import '../utils/result.dart';
 import 'fcm_extension.dart';
