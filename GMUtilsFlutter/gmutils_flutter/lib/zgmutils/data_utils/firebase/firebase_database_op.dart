@@ -96,7 +96,11 @@ abstract class IFirebaseDatabaseOp<T> {
     void Function(Object, StackTrace)? onError,
   });
 
-  void removeListeners({required String? subNodePath});
+  ///ofAddEvent => `null` for both, `true` for adding, `false` for changing`
+  void removeListeners({
+    required String? subNodePath,
+    required bool? ofAddEvent,
+  });
 
   //----------------------------------------------------------------------------
 
@@ -666,25 +670,23 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     void Function()? onDone,
     void Function(Object, StackTrace)? onError,
   }) async {
-    onData(event) => (event) {
-          Map<String, dynamic>? map;
-          try {
-            var snapshot = event.snapshot;
-            map = Map.from(snapshot.value as Map);
-            onNewUpdate(mappable.fromMap(map));
-          } catch (e) {
-            Logs.print(
-              () => '***** FirebaseDatabaseOp.setOnChildAddedListener() **** '
-                  'args(into: ${ref.path}) \n'
-                  'result: $map \n'
-                  '$e',
-            );
-          }
-        };
+    Logs.print(
+      () => 'FirebaseDatabaseOp.listenTo('
+          'ref: ${ref.path}, '
+          'listenToAnyChange: $listenToAnyChange, '
+          'mappable: ${mappable.runtimeType}'
+          ')',
+    );
 
     if (listenToAnyChange) {
       var s = ref.onChildChanged.listen(
-        onData,
+        (event) => _onDataChange(
+          "onChildChanged",
+          event,
+          ref: ref,
+          mappable: mappable,
+          onNewUpdate: onNewUpdate,
+        ),
         onDone: onDone,
         onError: onError,
       );
@@ -695,7 +697,13 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     //
     else {
       var s = ref.onChildAdded.listen(
-        onData,
+        (event) => _onDataChange(
+          "onChildAdded",
+          event,
+          ref: ref,
+          mappable: mappable,
+          onNewUpdate: onNewUpdate,
+        ),
         onDone: onDone,
         onError: onError,
       );
@@ -705,17 +713,56 @@ class FirebaseDatabaseOp<T> extends IFirebaseDatabaseOp<T> {
     }
   }
 
+  void _onDataChange<Tx>(
+    String listenerType,
+    DatabaseEvent event, {
+    required DatabaseReference ref,
+    required Mappable<Tx> mappable,
+    required Function(Tx) onNewUpdate,
+  }) {
+    Logs.print(
+      () => 'FirebaseDatabaseOp.listenTo('
+          'ref: ${ref.path}, listenerType: $listenerType'
+          ') -----> GOT-RESPONSE',
+    );
+
+    Map<String, dynamic>? map;
+    try {
+      var snapshot = event.snapshot;
+      map = Map.from(snapshot.value as Map);
+      onNewUpdate(mappable.fromMap(map));
+    } catch (e) {
+      Logs.print(
+        () => 'FirebaseDatabaseOp.onData ---> EXCEPTION ---> '
+            'ref: ${ref.path}\n'
+            'eventType: ${event.type}) \n'
+            'result: $map \n'
+            '$e',
+      );
+    }
+  }
+
   //------------------------------------------------------
 
   @override
-  void removeListeners({required String? subNodePath}) async {
+  void removeListeners({
+    required String? subNodePath,
+    required bool? ofAddEvent,
+  }) async {
     var ref = await getReferenceOfNode(subNodePath);
-    removeListenersOf(ref: ref);
+    removeListenersOf(ref: ref, ofAddEvent: ofAddEvent);
   }
 
-  void removeListenersOf({required DatabaseReference ref}) {
-    _childChangeStreamSubscriptions?.forEach((element) => element.cancel());
-    _childAddedStreamSubscriptions?.forEach((element) => element.cancel());
+  void removeListenersOf({
+    required DatabaseReference ref,
+    required bool? ofAddEvent,
+  }) {
+    if (ofAddEvent == null || ofAddEvent == true) {
+      _childAddedStreamSubscriptions?.forEach((element) => element.cancel());
+    }
+    if (ofAddEvent == null || ofAddEvent == false) {
+      _childChangeStreamSubscriptions?.forEach((element) => element.cancel());
+    }
   }
 
   //----------------------------------------------------------------------------
