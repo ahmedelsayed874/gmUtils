@@ -75,9 +75,11 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required Map<String, dynamic> customData,
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
-    Logs.printMethod(extraInfo: () => ''
-        'customData: ${customData.length}-items, '
-        'conflictAlgorithm: $conflictAlgorithm',
+    Logs.printMethod(
+      extraInfo: () => ''
+          'tableName: $tableName, '
+          'customData: ${customData.length}-items, '
+          'conflictAlgorithm: $conflictAlgorithm',
     );
 
     return await database.insert(
@@ -91,7 +93,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required List<T> data,
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
     CustomValueConverter? customValueConverter,
-    void Function(int)? progress,
+    InsertProgressHandler? progress,
   }) =>
       insertMultipleCustom(
         customData: data
@@ -109,18 +111,20 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   Future<List<int>> insertMultipleCustom({
     required List<Map<String, dynamic>> customData,
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
-    void Function(int)? progress,
+    InsertProgressHandler? progress,
   }) async {
-    Logs.printMethod(extraInfo: () => ''
-        'customData: ${customData.length}-items, '
-        'conflictAlgorithm: $conflictAlgorithm, '
-        'progress != null: ${progress != null}',
+    Logs.printMethod(
+      extraInfo: () => ''
+          'tableName: $tableName, '
+          'customData: ${customData.length}-items, '
+          'conflictAlgorithm: $conflictAlgorithm, '
+          'progress != null: ${progress != null}',
     );
 
     List<int> ids = [];
 
     if (progress != null && customData.isEmpty) {
-      progress(100);
+      progress(InsertProgress(index: 0, total: 0, percent: 100));
     }
 
     for (int i = 0; i < customData.length; i++) {
@@ -135,8 +139,13 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
       ids.add(id);
 
       if (progress != null) {
-        Logs.print(() =>'>>> insert-progress: ${(i + 1) % customData.length}');
-        progress((i + 1) % customData.length);
+        var p = InsertProgress(
+          index: i,
+          total: customData.length,
+          percent: ((i + 1) / customData.length * 100).toInt(),
+        );
+        Logs.print(() => '>>> insert-progress: $p');
+        progress(p);
       }
     }
 
@@ -219,16 +228,18 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     String? having,
     required Ct Function(Map<String, dynamic>) converter,
   }) async {
-    Logs.printMethod(extraInfo: () => ''
-        'customColumns: $customColumns, '
-        'whereCondition: $whereCondition, '
-        'orderOn: $orderOn, '
-        'isOrderAsc: $isOrderAsc, '
-        'pageInfo: $pageInfo, '
-        'distinct: $distinct, '
-        'groupBy: $groupBy, '
-        'having: $having'
-        '',
+    Logs.printMethod(
+      extraInfo: () => ''
+          'tableName: $tableName, '
+          'customColumns: $customColumns, '
+          'whereCondition: $whereCondition, '
+          'orderOn: $orderOn, '
+          'isOrderAsc: $isOrderAsc, '
+          'pageInfo: $pageInfo, '
+          'distinct: $distinct, '
+          'groupBy: $groupBy, '
+          'having: $having'
+          '',
     );
 
     var res = await _retrieve(
@@ -293,16 +304,18 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     String? having,
     required Ct Function(Map<String, dynamic>) converter,
   }) async {
-    Logs.printMethod(extraInfo: () => ''
-        'customColumns: $customColumns, '
-        'whereCondition: $whereCondition, '
-        'orderOn: $orderOn, '
-        'isOrderAsc: $isOrderAsc, '
-        'pageInfo: $pageInfo, '
-        'distinct: $distinct, '
-        'groupBy: $groupBy, '
-        'having: $having'
-        '',
+    Logs.printMethod(
+      extraInfo: () => ''
+          'tableName: $tableName, '
+          'customColumns: $customColumns, '
+          'whereCondition: $whereCondition, '
+          'orderOn: $orderOn, '
+          'isOrderAsc: $isOrderAsc, '
+          'pageInfo: $pageInfo, '
+          'distinct: $distinct, '
+          'groupBy: $groupBy, '
+          'having: $having'
+          '',
     );
 
     var res = await _retrieve(
@@ -464,9 +477,11 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required Map<String, dynamic> data,
     required SQLConditions? whereCondition,
   }) async {
-    Logs.printMethod(extraInfo: () => ''
-        'data: ${data.length}-items, '
-        'whereCondition: $whereCondition',
+    Logs.printMethod(
+      extraInfo: () => ''
+          'tableName: $tableName, '
+          'data: ${data.length}-items, '
+          'whereCondition: $whereCondition',
     );
 
     // Update
@@ -516,7 +531,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
     required Map<String, dynamic> Function(int index) data,
     required SQLConditions? Function(int index) whereCondition,
   }) async {
-    Logs.printMethod();
+    Logs.printMethod(extraInfo: () => 'tableName: $tableName');
 
     List<int> ids = [];
 
@@ -541,7 +556,11 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   Future<int> delete({
     required SQLConditions? whereCondition,
   }) async {
-    Logs.printMethod(extraInfo: () => 'whereCondition: $whereCondition');
+    Logs.printMethod(
+      extraInfo: () => ''
+          'tableName: $tableName, '
+          'whereCondition: $whereCondition',
+    );
 
     // Remove the Dog from the database.
     var res = await database.delete(
@@ -559,7 +578,7 @@ abstract class SQLDatabaseTable<T> extends SQLInstruction {
   //----------------------------------------------------------------------------
 
   void dispose() {
-    Logs.printMethod();
+    Logs.printMethod(extraInfo: () => 'tableName: $tableName');
     setDatabase(null);
   }
 }
@@ -581,6 +600,25 @@ typedef CustomValueConverter = NewValue? Function(
   String columnName,
   dynamic value,
 );
+
+class InsertProgress {
+  final int index;
+  final int total;
+  final int percent;
+
+  InsertProgress({
+    required this.index,
+    required this.total,
+    required this.percent,
+  });
+
+  @override
+  String toString() {
+    return 'InsertProgress{index: $index, total: $total, percent: $percent}';
+  }
+}
+
+typedef InsertProgressHandler = void Function(InsertProgress progress);
 
 //------------------------------------------------------------------------------
 
