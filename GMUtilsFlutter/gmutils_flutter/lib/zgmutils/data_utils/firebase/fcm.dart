@@ -45,18 +45,20 @@ abstract class IFCM {
     required String deviceToken,
     required String title,
     required String message,
+    //required Map<String, String>? payload,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = false,
+    bool isDataNotification = false,
   });
 
   Future<bool> sendMessageToTopic({
     required String topic,
     required String title,
     required String message,
+    //required Map<String, String>? payload,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = true,
+    bool isDataNotification = true,
   });
 
   int showNotification(
@@ -251,6 +253,7 @@ class FCM extends IFCM {
 
     _notificationListeners?.remove(name);
   }
+
   //endregion
 
   //----------------------------------------------------------------------------
@@ -292,7 +295,12 @@ class FCM extends IFCM {
       try {
         payload = jsonEncode(message.data);
       } catch (e) {
-        Logs.print(() => ['FCM._popupNotification2 ->', e]);
+        Logs.print(
+          () => [
+            'FCM._popupNotification2 -> EXCEPTION@encodeMessagaData',
+            e,
+          ],
+        );
       }
     }
 
@@ -403,16 +411,17 @@ class FCM extends IFCM {
   //----------------------------------------------------------------------------
 
   //region Send FCM message
-  final IOS_PAYLOAD_KEY_NAME = 'payload';
+  static const String PAYLOAD_KEY_NAME = 'payload';
 
   @override
   Future<bool> sendMessageToSpecificDevice({
     required String deviceToken,
     required String title,
     required String message,
+    //required Map<String, String>? payload,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = false,
+    bool isDataNotification = false,
   }) async {
     return _sendMessageTo(
       fcmToken: deviceToken,
@@ -421,7 +430,7 @@ class FCM extends IFCM {
       message: message,
       payload: payload,
       channel: channel,
-      dataNotification: dataNotification,
+      isDataNotification: isDataNotification,
     );
   }
 
@@ -430,9 +439,10 @@ class FCM extends IFCM {
     required String topic,
     required String title,
     required String message,
+    //required Map<String, String>? payload,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = false,
+    bool isDataNotification = false,
   }) async {
     return _sendMessageTo(
       //to: '/topics/$topic',
@@ -442,9 +452,11 @@ class FCM extends IFCM {
       message: message,
       payload: payload,
       channel: channel,
-      dataNotification: dataNotification,
+      isDataNotification: isDataNotification,
     );
   }
+
+  static int LOG_TEXT_LENGTH = 300;
 
   /// https://firebase.google.com/docs/cloud-messaging/migrate-v1?hl=en&authuser=0#java
   /// https://firebase.google.com/docs/cloud-messaging/send-message?authuser=0
@@ -457,9 +469,10 @@ class FCM extends IFCM {
     required String? topic,
     required String title,
     required String message,
+    //required Map<String, String>? payload,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = false,
+    bool isDataNotification = false,
   }) async {
     var accessToken = await _getAccessToken();
     if (accessToken.message != null) {
@@ -475,10 +488,9 @@ class FCM extends IFCM {
       topic: topic,
       title: title,
       message: message,
-      isDataNotification: dataNotification,
-      dataPayload: payload,
-      channelId: channel?.channelId,
-      //soundFileName: soundFileName,
+      isDataNotification: isDataNotification,
+      payload: payload,
+      channel: channel,
     );
     var requestBody = jsonEncode(requestBodyMap);
 
@@ -492,8 +504,8 @@ class FCM extends IFCM {
 
     Logs.print(
       () => 'FCM.sendNotification ---> REQUEST:: '
-          'headers: ${TextUtils().trimEnd(headers.toString(), endIndex: 200)}, '
-          'body: ${TextUtils().trimEnd(requestBody, endIndex: 200)}',
+          'headers: ${TextUtils().trimEnd(headers.toString(), endIndex: 100)}, '
+          'body: ${TextUtils().trimEnd(requestBody, endIndex: LOG_TEXT_LENGTH)}',
     );
 
     var response = await http.post(
@@ -534,11 +546,10 @@ class FCM extends IFCM {
     required String message,
     //
     required bool isDataNotification,
-    //required Map<String, dynamic>? dataPayload,
-    required String? dataPayload,
+    //required Map<String, String>? payload,
+    required String? payload,
     //
-    required String? channelId,
-    //required String? soundFileName,
+    required AndroidNotificationChannelProperties? channel,
   }) {
     //https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=0
     Map<String, dynamic> notificationBody = {};
@@ -566,7 +577,7 @@ class FCM extends IFCM {
         "title": title,
         "body": message,
         //"notification_priority": "PRIORITY_DEFAULT", //PRIORITY_HIGH - PRIORITY_MAX - PRIORITY_LOW - PRIORITY_MIN
-        if (channelId != null) "channel_id": channelId,
+        if (channel != null) "channel_id": channel.channelId,
         //"sound": soundFileName,
         //"icon": "stock_ticker_update",
         //"color": "#7e55c3",
@@ -590,18 +601,19 @@ class FCM extends IFCM {
             "title": title,
             "body": message,
           },
-          //"sound": soundFileName,
+          "sound": channel?.soundFile?.fileNameWithExtension ?? "default",
           // "badge": 1,
         },
-        //if (dataPayload != null) IOS_PAYLOAD_KEY_NAME: dataPayload, //"data" This was your original iOS custom payload placement
+        //if (dataPayload != null) PAYLOAD_KEY_NAME: dataPayload, //"data" This was your original iOS custom payload placement
       },
       // "headers": {
       //   "apns-priority": "10", // "5" for low priority
       // }
     };
 
-    if (dataPayload != null) {
-      notificationBody["data"] = {IOS_PAYLOAD_KEY_NAME: dataPayload};
+    if (isDataNotification) {
+      notificationBody["data"] = {PAYLOAD_KEY_NAME: payload};
+      //notificationBody["data"] = payload; //must be Map<String, String>
     }
 
     Map<String, dynamic> messageJson = {};
@@ -616,9 +628,10 @@ class FCM extends IFCM {
     required String to,
     required String title,
     required String message,
+    //required Map<String, String>? payload,
     required String? payload,
     AndroidNotificationChannelProperties? channel,
-    bool dataNotification = false,
+    bool isDataNotification = false,
   }) async {
     //https://firebase.google.com/docs/cloud-messaging/http-server-ref
     //https://firebase.google.com/docs/cloud-messaging/send-message?hl=en&authuser=0#send-messages-to-topics-legacy
@@ -646,7 +659,8 @@ class FCM extends IFCM {
       },
       'title': title,
       'body': message,
-      IOS_PAYLOAD_KEY_NAME: payload,
+      //PAYLOAD_KEY_NAME: payload,
+      'payload': payload,
     };
     if (sound != null) {
       apns['sound'] = sound.fileNameWithExtension;
@@ -655,14 +669,15 @@ class FCM extends IFCM {
     var notificationBody = {
       'to': to,
       'priority': 'high',
-      'data': {
-        IOS_PAYLOAD_KEY_NAME: payload,
-      },
+      'data': payload,
+      /*'data': {
+        PAYLOAD_KEY_NAME: payload,
+      },*/
       'apns': apns,
       'android': android
     };
 
-    if (!dataNotification) {
+    if (!isDataNotification) {
       notificationBody['notification'] = {
         'title': title,
         'body': message,
@@ -727,7 +742,9 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
 
 @pragma('vm:entry-point')
 FcmNotificationProperties resolveNotification(
-    RemoteMessage message, String? langCode) {
+  RemoteMessage message,
+  String? langCode,
+) {
   /*add this method to main file
     @pragma('vm:entry-point')
     FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {}

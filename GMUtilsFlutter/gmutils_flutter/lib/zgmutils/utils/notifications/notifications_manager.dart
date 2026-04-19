@@ -63,7 +63,7 @@ class NotificationsManager extends INotificationsManager {
     NotificationsConfigurations? notificationsConfigurations,
   ) async {
     Logs.print(() =>
-        'Notifications.init ... follow setup instruction here: https://pub.dev/packages/flutter_local_notifications');
+        'NotificationsManager.init ... follow setup instruction here: https://pub.dev/packages/flutter_local_notifications');
 
     _notificationsConfigurations ??= notificationsConfigurations;
 
@@ -71,10 +71,10 @@ class NotificationsManager extends INotificationsManager {
     await _setupLocalNotification();
     //endregion
 
-    Logs.print(() => '[Notifications.init()] -> '
-        'don\'t forget to use Notifications.instance.redirectToPendingScreen(); '
+    Logs.print(() => '[NotificationsManager.init()] -> '
+        'don\'t forget to use NotificationsManager.instance.redirectToPendingScreen(); '
         'in your list screen');
-    Logs.print(() => '[Notifications.init()] -> '
+    Logs.print(() => '[NotificationsManager.init()] -> '
         'don\'t forget to define this "$defaultNotificationChannelId" as '
         'default notification channel (com.google.firebase.messaging.default_notification_channel_id)');
   }
@@ -82,7 +82,8 @@ class NotificationsManager extends INotificationsManager {
   //region handle Notifications message
   @override
   void openCorrespondingScreenByNotificationData(dynamic payload) {
-    Logs.print(() => 'Notifications.openCorrespondingScreenByNotificationJson');
+    Logs.print(
+        () => 'NotificationsManager.openCorrespondingScreenByNotificationJson');
     try {
       _notificationsConfigurations?.openCorrespondingScreen(payload);
     } catch (_) {}
@@ -93,7 +94,7 @@ class NotificationsManager extends INotificationsManager {
   ///must use on main screen starts
   @override
   Future<bool> redirectToPendingScreen() async {
-    Logs.print(() => 'Notifications.redirectToPendingScreen');
+    Logs.print(() => 'NotificationsManager.redirectToPendingScreen');
 
     var notificationAppLaunchDetails = await _flutterLocalNotificationsPlugin
         .getNotificationAppLaunchDetails();
@@ -107,13 +108,13 @@ class NotificationsManager extends INotificationsManager {
 
       Logs.print(
         () =>
-            'Notifications.redirectToPendingScreen -> notificationAppLaunchDetails ->'
+            'NotificationsManager.redirectToPendingScreen -> notificationAppLaunchDetails ->'
             'lastOpenedNotificationId: $lastOpenedNotificationId, '
             'notificationId: $notificationId',
       );
       Logs.print(
         () =>
-            'Notifications.redirectToPendingScreen -> notificationAppLaunchDetails ->'
+            'NotificationsManager.redirectToPendingScreen -> notificationAppLaunchDetails ->'
             'didNotificationLaunchApp: ${notificationAppLaunchDetails?.didNotificationLaunchApp}',
       );
 
@@ -122,7 +123,7 @@ class NotificationsManager extends INotificationsManager {
             notificationAppLaunchDetails!.notificationResponse;
         Logs.print(
           () =>
-              'Notifications.redirectToPendingScreen -> notificationAppLaunchDetails ->'
+              'NotificationsManager.redirectToPendingScreen -> notificationAppLaunchDetails ->'
               'notificationResponse('
               'payload: ${notificationResponse?.payload}, '
               'input: ${notificationResponse?.input}, '
@@ -145,7 +146,7 @@ class NotificationsManager extends INotificationsManager {
     else {
       Logs.print(
         () =>
-            'Notifications.redirectToPendingScreen -> notificationAppLaunchDetails ->'
+            'NotificationsManager.redirectToPendingScreen -> notificationAppLaunchDetails ->'
             '(notificationId: $notificationId) opened before',
       );
       return false;
@@ -161,7 +162,7 @@ class NotificationsManager extends INotificationsManager {
       FlutterLocalNotificationsPlugin();
 
   Future<void> _setupLocalNotification() async {
-    Logs.print(() => 'Notifications._setupLocalNotification()');
+    Logs.print(() => 'NotificationsManager._setupLocalNotification()');
 
     //region initialize
     var initializationSettings = InitializationSettings(
@@ -261,7 +262,7 @@ class NotificationsManager extends INotificationsManager {
     String? body,
     String? payload,
   ) async {
-    Logs.print(() => 'Notifications._onDidReceiveLocalNotificationOfIos('
+    Logs.print(() => 'NotificationsManager._onDidReceiveLocalNotificationOfIos('
         'id: $id,'
         'title: $title,'
         'body: $body,'
@@ -315,17 +316,18 @@ class NotificationsManager extends INotificationsManager {
     var notifId = notificationId ?? body.hashCode;
     while (notifId > 0x7FFFFFFF || notifId < -0x80000000) {
       var v = '$notifId';
-      var v2 = '$notifId'.substring(0, v.length - 1);
+      //var v2 = '$notifId'.substring(0, v.length - 1);
+      var v2 = '$notifId'.substring(1);
       notifId = int.parse(v2);
     }
 
-    Logs.print(() => 'Notifications.showLocalNotification('
-        'title: $title, '
-        'body: $body, '
-        'payload: $payload, '
-        'notifId: $notifId (was: $notificationId), '
-        'customChannel: ${customChannel?.channelId ?? defaultNotificationChannelId}, '
-        'androidInformationStyle: ${androidInformationStyle?.runtimeType}'
+    Logs.print(() => 'NotificationsManager.showLocalNotification(\n'
+        'title: $title,\n'
+        'body: $body,\n'
+        'payload: $payload,\n'
+        'notifId: $notifId (was: $notificationId),\n'
+        'customChannel: ${customChannel?.channelId ?? defaultNotificationChannelId},\n'
+        'androidInformationStyle: ${androidInformationStyle?.runtimeType}\n'
         ')');
 
     SoundFile? sound =
@@ -343,6 +345,7 @@ class NotificationsManager extends INotificationsManager {
           channelDescription: customChannel?.channelDescription,
           importance: customChannel?.importance.importance ??
               Importance.defaultImportance,
+
           playSound: true,
           sound: sound == null
               ? null
@@ -353,6 +356,12 @@ class NotificationsManager extends INotificationsManager {
               BigTextStyleInformation(
                 body,
               ),
+
+          audioAttributesUsage: AudioAttributesUsage.alarm,
+          //fullScreenIntent: true, // Useful for emergency alerts to pop up
+
+          groupKey: customChannel?.channelId,
+          setAsGroupSummary: false,
         ),
         iOS: DarwinNotificationDetails(
           presentSound: true,
@@ -374,7 +383,7 @@ class NotificationsManager extends INotificationsManager {
 
 @pragma('vm:entry-point')
 void _onDidReceiveNotificationResponse(NotificationResponse details) {
-  Logs.print(() => 'Notifications._onDidReceiveNotificationResponse('
+  Logs.print(() => 'NotificationsManager._onDidReceiveNotificationResponse('
       'payload: ${details.payload}'
       ')');
 
