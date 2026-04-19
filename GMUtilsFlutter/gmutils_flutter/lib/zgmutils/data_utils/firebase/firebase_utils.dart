@@ -1,7 +1,5 @@
 // import 'package:http/http.dart' as http;
 
-
-
 class FirebaseUtils {
   //region refineKeyName
   static String refineKeyName(String name) => name
@@ -18,17 +16,31 @@ class FirebaseUtils {
   //endregion
 
   //region refinePath
-  static String refinePathFragmentNames(String path) {
+  static String refinePathFragmentNames(
+    String path, {
+    bool excludeLastDot = false,
+  }) {
+    var ext = '';
+    if (excludeLastDot) {
+      var i = path.lastIndexOf('.');
+      if (i >= 0 && i < path.length - 1) {
+        ext = '.' + path.substring(i + 1);
+        path = path.substring(0, i);
+      }
+    }
+
     var frags = path.split("/");
+
     path = '';
     for (var value in frags) {
       value = refineKeyName(value);
-      if (value.isEmpty) throw Exception("invalid_node_name");
+      if (value.isEmpty) throw "invalid_node_name";
 
-      if (path.isNotEmpty) path = '/';
+      if (path.isNotEmpty) path += '/';
       path += value;
     }
-    return path;
+
+    return path + ext;
   }
 
   //endregion
@@ -49,10 +61,10 @@ class FirebaseUtils {
       .replaceAll(';', '')
       .replaceAll('#', '');
 
-  //endregion
+//endregion
 
-  //region isConnectionAvailable
-  /*static int _lastConnectionCheckTime = 0;
+//region isConnectionAvailable
+/*static int _lastConnectionCheckTime = 0;
   static bool _lastConnectionCheckResult = false;
 
   static Future<bool> isConnectionAvailable() async {
