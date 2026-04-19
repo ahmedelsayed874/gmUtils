@@ -129,17 +129,17 @@ class MyRootWidget {
     return this;
   }
 
-  MyRootWidget setScreenPadding(
-    double top,
-    double left,
-    double right,
-    double bottom,
-  ) {
+  MyRootWidget setScreenPadding({
+    double? top,
+    double? left,
+    double? right,
+    double? bottom,
+  }) {
     _screenPadding = EdgeInsets.only(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
+      top: top ?? _screenPadding?.top ?? AppTheme.appMeasurement?.screenPaddingTop ?? 0.0,
+      left: left ?? _screenPadding?.left ?? AppTheme.appMeasurement?.screenPaddingLeft ?? 0.0,
+      right: right  ?? _screenPadding?.right ?? AppTheme.appMeasurement?.screenPaddingRight ?? 0.0,
+      bottom: bottom ?? _screenPadding?.bottom ?? AppTheme.appMeasurement?.screenPaddingBottom ?? 0.0,
     );
     return this;
   }

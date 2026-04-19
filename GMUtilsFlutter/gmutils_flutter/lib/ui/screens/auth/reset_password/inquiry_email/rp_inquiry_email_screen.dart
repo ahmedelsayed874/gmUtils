@@ -43,7 +43,7 @@ class _RPInquiryEmailScreenState extends BaseState<RPInquiryEmailScreen>
     return MyRootWidget.withoutToolbar(
             awareTopSafeArea: true,
             backButtonColor: Res.themes.colors.background)
-        .setScreenPadding(5, 15, 15, 5)
+        .setScreenPadding(top: 5, left: 15, right: 15, bottom: 5)
         .setBody(
           build2(context),
           scrollable: true,
