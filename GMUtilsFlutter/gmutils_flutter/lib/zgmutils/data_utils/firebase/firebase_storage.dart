@@ -29,7 +29,9 @@ class FirebaseStorage implements IFirebaseStorage {
   }
 
   String _refinePath(String path) {
-    path = FirebaseUtils.refinePathFragmentNames(path);
+    //final path0 = path;
+    path = FirebaseUtils.refinePathFragmentNames(path, excludeLastDot: true);
+    //Logs.print(() => 'FirebaseStorage._refinePath(path: $path0) ---> $path');
     return path;
   }
 
