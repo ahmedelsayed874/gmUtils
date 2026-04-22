@@ -10,6 +10,8 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import androidx.annotation.RequiresApi;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +21,9 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import gmutils.DateOp;
@@ -127,7 +133,8 @@ public abstract class LoggerAbs {
 
         //region getters
         public boolean isLogcatEnabled() {
-            return logcatDeadline != null && logcatDeadline.getTimeInMillis() >= System.currentTimeMillis();
+            if (logcatDeadline == null) return false;
+            return logcatDeadline.getTimeInMillis() >= System.currentTimeMillis();
         }
 
         public boolean isWriteLogsToFileEnabled() {
@@ -139,17 +146,58 @@ public abstract class LoggerAbs {
         }
 
         public boolean isWriteLogsToPrivateFileEnabled() {
-            boolean b = writeLogsToPrivateFileDeadline != null && writeLogsToPrivateFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
+            if (writeLogsToPrivateFileDeadline == null) return false;
+            boolean b = writeLogsToPrivateFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
             return b;
         }
 
         public boolean isWriteLogsToPublicFileEnabled() {
-            boolean b = writeLogsToPublicFileDeadline != null && writeLogsToPublicFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
+            if (writeLogsToPublicFileDeadline == null) return false;
+            boolean b = writeLogsToPublicFileDeadline.getTimeInMillis() >= System.currentTimeMillis();
             return b;
         }
 
         public boolean isFileContentEncryptEnabled() {
-            return fileContentEncryptionDeadline != null && fileContentEncryptionDeadline.getTimeInMillis() >= System.currentTimeMillis();
+            if (fileContentEncryptionDeadline == null) return false;
+            return fileContentEncryptionDeadline.getTimeInMillis() >= System.currentTimeMillis();
+        }
+
+        //----------------------------------------------------
+
+        public Long getLogcatDeadline() {
+            if (logcatDeadline == null) return null;
+            return logcatDeadline.getTimeInMillis();
+        }
+
+        public Long getWriteLogsToPrivateFileDeadline() {
+            if (writeLogsToPrivateFileDeadline == null) return null;
+            return writeLogsToPrivateFileDeadline.getTimeInMillis();
+        }
+
+        public Long getWriteLogsToPublicFileDeadline() {
+            if (writeLogsToPublicFileDeadline == null) return null;
+            return writeLogsToPublicFileDeadline.getTimeInMillis();
+        }
+
+        public ExportedFileType getExportedFileType() {
+            return exportedFileType;
+        }
+
+        public int getMaxFileSizeInKiloBytes() {
+            return maxFileSizeInKiloBytes;
+        }
+
+        public int getMaxLogsFilesCount() {
+            return maxLogsFilesCount;
+        }
+
+        public Long getFileContentEncryptionDeadline() {
+            if (fileContentEncryptionDeadline == null) return null;
+            return fileContentEncryptionDeadline.getTimeInMillis();
+        }
+
+        public Integer getFileContentEncryptionKey() {
+            return fileContentEncryptionKey;
         }
         //endregion
 
@@ -161,6 +209,30 @@ public abstract class LoggerAbs {
             writeLogsToPrivateFileDeadline = null;
             writeLogsToPublicFileDeadline = null;
             fileContentEncryptionDeadline = null;
+        }
+
+        @Override
+        public String toString() {
+            return "LogConfigs{" +
+                    "logcatDeadline=" + logcatDeadline +
+                    " (isEnabled: " + isLogcatEnabled() + ")" +
+
+                    ", writeLogsToPrivateFileDeadline=" + writeLogsToPrivateFileDeadline +
+                    " (isEnabled: " + isWriteLogsToPrivateFileEnabled() + ")" +
+
+                    ", writeLogsToPublicFileDeadline=" + writeLogsToPublicFileDeadline +
+                    " (isEnabled: " + isWriteLogsToPublicFileEnabled() + ")" +
+
+                    ", fileContentEncryptionDeadline=" + fileContentEncryptionDeadline +
+                    " (isEnabled: " + isFileContentEncryptEnabled() + ")" +
+
+                    ", fileContentEncryptionKey=" + fileContentEncryptionKey +
+
+                    ", maxFileSizeInKiloBytes=" + maxFileSizeInKiloBytes +
+                    ", maxLogsFilesCount=" + maxLogsFilesCount +
+                    ", writeLogsOnUiThread=" + writeLogsOnUiThread +
+                    ", exportedFileType=" + exportedFileType +
+                    '}';
         }
     }
 
@@ -403,6 +475,17 @@ public abstract class LoggerAbs {
 
             return kbi + (kb >= 0.5 ? 1 : 0);
         }
+
+        @Override
+        public String toString() {
+            return "LogFileWriter{" +
+                    "file=" + file +
+                    ", exportedFileType=" + exportedFileType +
+                    ", enableEncryption=" + enableEncryption +
+                    ", encryptionKey=" + encryptionKey +
+                    ", writeTime=" + writeTime +
+                    '}';
+        }
     }
 
     public interface TitleGetter {
@@ -417,7 +500,7 @@ public abstract class LoggerAbs {
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    private final static int DEF_ENC_KEY = 112439;
+    private final static int DEF_ENC_KEY = 11248;
 
     //----------------------------------------------------------------------------------------------
 
@@ -431,7 +514,8 @@ public abstract class LoggerAbs {
 
     public LoggerAbs(@Nullable String logId, LogConfigs logConfigs) {
         this.logId = logId;
-        setLogConfigs(logConfigs);
+
+        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
 
         numberOnInstances++;
     }
@@ -499,35 +583,6 @@ public abstract class LoggerAbs {
     @NotNull
     public LogConfigs getLogConfigs() {
         return logConfigs;
-    }
-
-    public void setLogConfigs(LogConfigs logConfigs) {
-        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
-
-        if (!this.logConfigs.isWriteLogsToPublicFileEnabled()) {
-            try {
-                deleteSavedFiles(BaseApplication.current(), true, null);
-            } catch (Exception e) {
-                writeToLog(
-                        "***** EXCEPTION",
-                        "deleting public log files failed (" + e.getMessage() + ")",
-                        null
-                );
-            }
-        }
-
-        if (!this.logConfigs.isWriteLogsToPrivateFileEnabled()) {
-            try {
-                deleteSavedFiles(BaseApplication.current(), false, null);
-            } catch (Exception e) {
-                writeToLog(
-                        "***** EXCEPTION",
-                        "deleting private log files failed (" + e.getMessage() + ")",
-                        null
-                );
-            }
-        }
-
     }
 
     private int orderRecoder = 0;
@@ -622,8 +677,13 @@ public abstract class LoggerAbs {
                             title,
                             content
                     );
-                } catch (Exception ignore) {
+                } catch (Exception e) {
+                    writeToLog("ERROR", "printSync->writeToFileSync got EXCEPTION: " + e.getMessage(), LogCategory.Error);
                 }
+            }
+            //
+            else {
+                writeToLog("ERROR", "BaseApplication.current() == null", LogCategory.Error);
             }
         }
     }
@@ -821,7 +881,44 @@ public abstract class LoggerAbs {
                 }
             }
         }
+        //
+        else {
+            if (filesDeleted) return;
+
+            if (!this.logConfigs.isWriteLogsToPublicFileEnabled()) {
+                try {
+                    if (this.logConfigs.writeLogsToPublicFileDeadline != null) {
+                        filesDeleted = true;
+                        deleteSavedFiles(BaseApplication.current(), true, null);
+                    }
+                } catch (Exception e) {
+                    writeToLog(
+                            "***** EXCEPTION",
+                            "deleting public log files failed (" + e.getMessage() + ")",
+                            null
+                    );
+                }
+            }
+
+            if (!this.logConfigs.isWriteLogsToPrivateFileEnabled()) {
+                try {
+                    if (this.logConfigs.writeLogsToPrivateFileDeadline != null) {
+                        filesDeleted = true;
+                        deleteSavedFiles(BaseApplication.current(), false, null);
+                    }
+                } catch (Exception e) {
+                    writeToLog(
+                            "***** EXCEPTION",
+                            "deleting private log files failed (" + e.getMessage() + ")",
+                            null
+                    );
+                }
+            }
+        }
     }
+
+    private boolean filesDeleted = false;
+
     //endregion write to files
 
     //region list saved files
@@ -906,6 +1003,29 @@ public abstract class LoggerAbs {
         return _sessionId;
     }
 
+    private LogFileWriter getLogFileWriter(Context context) {
+        if (logFileWriter == null) {
+            File file = createOrGetLogFile(context);
+
+            if (file == null) return null;
+
+            logFileWriter = new LogFileWriter(
+                    file,
+                    logConfigs.exportedFileType,
+                    logConfigs.isFileContentEncryptEnabled(),
+                    logConfigs.fileContentEncryptionKey
+            );
+        }
+
+        if (!logFileWriter.file.exists() || logFileWriter.fileSizeInKb() >= logConfigs.maxFileSizeInKiloBytes) {
+            _sessionId = null;
+            logFileWriter = null;
+            logFileWriter = getLogFileWriter(context);
+        }
+
+        return logFileWriter;
+    }
+
     private synchronized File createOrGetLogFile(Context context) {
         File logFilesDir = getLogDirector(context, null);
         int filesCount = 0;
@@ -933,7 +1053,11 @@ public abstract class LoggerAbs {
             File file = new File(filePath);
             if (!file.exists()) {
                 boolean created = file.createNewFile();
-                created = created;
+                if (!created) writeToLog(
+                        "ERROR",
+                        "Creating file failed on path: " + filePath,
+                        LogCategory.Error
+                );
             }
             return file;
         } catch (Exception e) {
@@ -943,25 +1067,25 @@ public abstract class LoggerAbs {
     }
 
     public synchronized File getLogDirector(Context context, @Nullable Boolean ofPublic) {
+        return getLogDirector(context, ofPublic, true);
+    }
+
+    public synchronized File getLogDirector(Context context, @Nullable Boolean ofPublic, boolean create) {
         String dirName = "LOGS";
         if (!logId().isEmpty()) dirName += "/" + logId();
 
-        return getLogDirector(context, dirName, ofPublic);
-    }
-
-    private synchronized File getLogDirector(Context context, String dirName, Boolean ofPublic) {
         File filesDir;
         if (ofPublic == null) {
             if (logConfigs.isWriteLogsToPublicFileEnabled()) {
                 filesDir = context.getExternalFilesDir(null);
             }
             //
-            else if (logConfigs.isWriteLogsToFileEnabled()) {
+            else if (logConfigs.isWriteLogsToPrivateFileEnabled()) {
                 filesDir = context.getFilesDir();
             }
             //
             else {
-                return null;
+                filesDir = null;
             }
         }
         //
@@ -975,8 +1099,19 @@ public abstract class LoggerAbs {
             }
         }
 
+        if (filesDir == null) {
+            writeToLog(
+                    "ERROR",
+                    "Creating log director failed\n" + getLogConfigs(),
+                    LogCategory.Error
+            );
+            return null;
+        }
+
         try {
             File logFiles = new File(filesDir, dirName);
+            if (!create) return logFiles;
+
             if (!logFiles.exists()) {
                 logFiles.mkdirs();
             }
@@ -998,34 +1133,14 @@ public abstract class LoggerAbs {
 
             return logFiles;
         } catch (Exception e) {
-            e.printStackTrace();
+            writeToLog(
+                    "ERROR",
+                    "Creating log director failed due to EXCEPTION: " + e,
+                    LogCategory.Error
+            );
             return null;
         }
     }
-
-    private LogFileWriter getLogFileWriter(Context context) {
-        if (logFileWriter == null) {
-            File file = createOrGetLogFile(context);
-
-            if (file == null) return null;
-
-            logFileWriter = new LogFileWriter(
-                    file,
-                    logConfigs.exportedFileType,
-                    logConfigs.isFileContentEncryptEnabled(),
-                    logConfigs.fileContentEncryptionKey
-            );
-        }
-
-        if (logFileWriter.fileSizeInKb() >= logConfigs.maxFileSizeInKiloBytes) {
-            _sessionId = null;
-            logFileWriter = null;
-            logFileWriter = getLogFileWriter(context);
-        }
-
-        return logFileWriter;
-    }
-
     //endregion create file
 
     //----------------------------------------------------------------------------------------------
@@ -1123,9 +1238,6 @@ public abstract class LoggerAbs {
                                 extensionOfBackupOfPrivate;
                     }
 
-                    /*outZipFiles[i] = includePublicFiles ?
-                            new File(context.getCacheDir(), backupFileName) :
-                            new File(backupDir, backupFileName);*/
                     outZipFiles[i] = new File(backupDir, backupFileName);
                     boolean b = outZipFiles[i].createNewFile();
                     if (!b) throw new IllegalStateException();
@@ -1157,12 +1269,15 @@ public abstract class LoggerAbs {
                 File outZipFile = outZipFiles[i];
                 File dirToZip = dirsToZip.get(i);
 
-                log.append("\n--------------------\n>>> zipping [")
+                log.append("----------------------------------------\n")
+                        .append(">>> zipping [")
                         .append(dirToZip)
-                        .append("]\nTO [")
+                        .append("]\nTO: [")
                         .append(outZipFile)
-                        .append("]\n");
+                        .append("]\n")
+                        .append("----------------------------------------\n");
 
+                AtomicBoolean acceptSubDirs = new AtomicBoolean(false);
                 idx.set(i);
                 File finalBackupDir = backupDir;
                 ZipFileUtils.Error error = zipFileUtils.compressSync(
@@ -1189,6 +1304,11 @@ public abstract class LoggerAbs {
                                     return false;
                                 }
 
+                                if (acceptSubDirs.get()) {
+                                    log.append(">>> >>> >>> NO\n");
+                                    return false;
+                                }
+
                                 log.append(">>> >>> >>> YES\n");
 
                                 return true;
@@ -1205,6 +1325,8 @@ public abstract class LoggerAbs {
                             }
                         },
                         (file) -> {
+                            acceptSubDirs.set(true);
+
                             log.append(">>> >>> compress ask: exclude FILE (")
                                     .append(file.getName())
                                     .append(")? NO\n");
@@ -1408,14 +1530,89 @@ public abstract class LoggerAbs {
 
         return returningBool;
     }
-    //endregion
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void importOtherAppBackup(Context context, Uri otherAppBackupFile, ResultCallback2<Boolean, String> onComplete) {
+        BackgroundTask.run(() -> {
+            ZipFileUtils unzipUtil = new ZipFileUtils();
+
+            File tempDir = new File(context.getCacheDir(), "temp-" + System.currentTimeMillis());
+            if (!tempDir.exists()) tempDir.mkdirs();
+
+            InputStream inputStream;
+            try {
+                inputStream = context.getContentResolver().openInputStream(otherAppBackupFile);
+            } catch (Exception e) {
+                return new Pair<>(false, e.getMessage());
+            }
+
+            ZipFileUtils.Error error = unzipUtil.extractSync(inputStream, tempDir);
+            boolean status = true;
+            String errorText = "";
+
+            if (error == null) {
+                File[] dirs = tempDir.listFiles();
+                for (File dir : dirs) {
+                    File target = new File(context.getFilesDir().getParentFile(), dir.getName());
+                    if (!target.exists()) {
+                        if (dir.isDirectory()) target.mkdirs();
+                        else {
+                            try {
+                                target.createNewFile();
+                            } catch (Exception e) {
+                                status = false;
+                                errorText += "Creating " + target + " failed\n";
+                                print(() -> "importOtherAppData >>> Creating " + target + " failed");
+                                continue;
+                            }
+                        }
+                    }
+
+                    try {
+                        Path p = Files.move(
+                                dir.toPath(),
+                                target.toPath(),
+                                StandardCopyOption.REPLACE_EXISTING,
+                                StandardCopyOption.COPY_ATTRIBUTES,
+                                StandardCopyOption.ATOMIC_MOVE
+                        );
+
+                        if (p == null) {
+                            status = false;
+                            errorText += "Moving " + dir + " to " + target + " failed\n";
+                            print(() -> "importOtherAppData >>> Moving " + dir + " to " + target + " failed");
+                        } else {
+                            print(() -> "importOtherAppData >>> " + dir + " <<[MOVED-TO]>> " + target);
+                        }
+
+                    } catch (Exception e) {
+                        status = false;
+                        errorText += "Moving " + dir + " to " + target + " failed (Exception: " + e.getMessage() + ")\n";
+                        print(() -> "importOtherAppData >>> Moving " + dir + " to " + target + " failed (Exception: " + e.getMessage() + ")");
+                    }
+                }
+            }
+            //
+            else {
+                status = false;
+                errorText = error.error;
+            }
+
+            tempDir.deleteOnExit();
+
+            return new Pair<>(status, errorText);
+        }, (p) -> {
+            print(() -> "importOtherAppData >>> COMPLETED ... status: " + p.first + ", error: " + p.second);
+            if (onComplete != null) onComplete.invoke(p.first, p.second);
+        });
+    }
+    //endregion
 
     @Override
     public String toString() {
         return "Logger{" +
                 "logId='" + logId + '\'' +
-                ", filePath='" + getLogDirector(BaseApplication.current(), null) + '\'' +
+                ", filePath='" + getLogDirector(BaseApplication.current(), null, false) + '\'' +
                 ", logConfigs=" + logConfigs +
                 '}';
     }

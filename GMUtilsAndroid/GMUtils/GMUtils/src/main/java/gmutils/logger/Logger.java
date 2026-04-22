@@ -37,23 +37,11 @@ public class Logger extends LoggerAbs {
         return instance(logId, (LogConfigs) null);
     }
 
-    public static LoggerAbs instance(String logId, DateOp deadline) {
-        LogConfigs logsOptions = null;
-        if (deadline != null) {
-            logsOptions = new LogConfigs()
-                    .setLogcatDeadline(deadline)
-                    .setWriteLogsToPublicFileDeadline(deadline)
-                    .setWriteLogsToPrivateFileDeadline(deadline);
-        }
-        return instance(logId, logsOptions);
-    }
-
     public static LoggerAbs instance(String logId, LogConfigs logsOptions) {
         if (logId != null && logId.isEmpty()) logId = null;
         if (_instances == null) _instances = new HashMap<>();
         if (!_instances.containsKey(logId)) {
-            Logger logger = new Logger(logId);
-            logger.setLogConfigs(logsOptions);
+            Logger logger = new Logger(logId, logsOptions);
             _instances.put(logId, logger);
         }
         return _instances.get(logId);
@@ -77,8 +65,8 @@ public class Logger extends LoggerAbs {
 
     //----------------------------------------------------------------------------------------------
 
-    private Logger(String logId) {
-        super(logId);
+    private Logger(String logId, LogConfigs logConfigs) {
+        super(logId, logConfigs);
     }
 
     @Override

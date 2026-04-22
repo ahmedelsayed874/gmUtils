@@ -147,9 +147,13 @@ public abstract class BaseApplication extends Application implements Application
         return this;
     }
 
+    public void onPreCreate() {}
+
     @Override
     public void onCreate() {
         current = this;
+
+        onPreCreate();
 
         if (thisApp() == this)
             super.onCreate();

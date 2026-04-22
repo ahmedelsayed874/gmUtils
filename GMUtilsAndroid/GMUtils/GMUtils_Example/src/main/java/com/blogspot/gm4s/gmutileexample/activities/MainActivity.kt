@@ -369,10 +369,12 @@ class MainActivity : BaseActivity() {
 
         this.view.btn27.text = "Write logs to text file"
         this.view.btn27.setOnClickListener {
-            Logger.instance("text").apply {
+            val l = Logger.instance("text").apply {
                 logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
                 logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
-                logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Text)
+                //logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Text)
+
+                log("", this.toString())
 
                 for (x in 0..30) {
                     //writeToFile(this@MainActivity, {
@@ -383,6 +385,8 @@ class MainActivity : BaseActivity() {
                     }
                 }
             }
+
+            log("", this.toString())
         }
 
         this.view.btn28.text = "Write logs to csv file"
