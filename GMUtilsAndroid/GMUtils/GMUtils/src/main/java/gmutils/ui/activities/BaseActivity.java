@@ -150,9 +150,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
             return viewModels.values().toArray(new ViewModel[0])[0];
         }
 
-        if (viewModels.size() == 0) {
+        if (viewModels.isEmpty()) {
             throw new IllegalStateException("You didn't declare any View Models in getViewModelClasses()");
-        } else {
+        }
+        //
+        else {
             throw new IllegalStateException("You have declared several View Models in getViewModelClasses()");
         }
     }
@@ -539,8 +541,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 this,
                 intent,
                 Math.abs((int) System.currentTimeMillis()),
-                callback,
-                null
+                null,
+                callback
         );
     }
 
@@ -549,18 +551,18 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 this,
                 intent,
                 requestCode,
-                callback,
-                null
+                null,
+                callback
         );
     }
 
-    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback, Bundle options) {
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, Bundle options, ResultCallback<Intent> callback) {
         getActivityFunctions().startActivityForResult(
                 this,
                 intent,
                 requestCode,
-                callback,
-                options
+                options,
+                callback
         );
     }
 

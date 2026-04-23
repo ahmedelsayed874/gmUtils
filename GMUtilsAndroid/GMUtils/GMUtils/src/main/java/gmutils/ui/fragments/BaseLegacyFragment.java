@@ -1,19 +1,27 @@
 package gmutils.ui.fragments;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
+import gmutils.logger.Logger;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.utils.ViewSource;
 
@@ -162,6 +170,60 @@ public abstract class BaseLegacyFragment extends Fragment {
 
     public void showFragment(BaseLegacyFragment fragment, String stackName) {
         listener.showFragment(fragment, stackName);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode, @androidx.annotation.Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
+    }
+
+    private Map<Integer, ResultCallback<Intent>> activityResultCallback;
+
+    public void startActivityForResult(@NonNull Intent intent, ResultCallback<Intent> callback) {
+        int requestCode = Math.abs((int) System.currentTimeMillis());
+
+        if (activityResultCallback == null) activityResultCallback = new HashMap<>();
+        activityResultCallback.put(requestCode, callback);
+
+        this.startActivityForResult(intent, requestCode);
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback) {
+        if (activityResultCallback == null) activityResultCallback = new HashMap<>();
+        activityResultCallback.put(requestCode, callback);
+
+        this.startActivityForResult(intent, requestCode);
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, Bundle options, ResultCallback<Intent> callback) {
+        if (activityResultCallback == null) activityResultCallback = new HashMap<>();
+        activityResultCallback.put(requestCode, callback);
+
+        this.startActivityForResult(intent, requestCode, options);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (activityResultCallback != null) {
+            if (activityResultCallback.containsKey(requestCode)) {
+                ResultCallback<Intent> callback = activityResultCallback.remove(requestCode);
+                if (callback == null) {
+                    Logger.d().print(() -> "startActivityForResult called with NULL callback");
+                    return;
+                }
+
+                callback.invoke(resultCode == Activity.RESULT_OK ? data : null);
+            }
+        }
     }
 
     //----------------------------------------------------------------------------------------------

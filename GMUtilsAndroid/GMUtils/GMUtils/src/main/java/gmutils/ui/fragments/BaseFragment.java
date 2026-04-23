@@ -1,12 +1,15 @@
 package gmutils.ui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
@@ -17,8 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
+import gmutils.logger.Logger;
 import gmutils.ui.dialogs.MessageDialog;
 import gmutils.ui.dialogs.RetryPromptDialog;
 import gmutils.ui.toast.MyToast;
@@ -100,7 +106,13 @@ public abstract class BaseFragment extends Fragment {
             return viewModels.values().toArray(new ViewModel[0])[0];
         }
 
-        throw new IllegalStateException("You have declare several View Models in getViewModelClasses()");
+        if (viewModels.isEmpty()) {
+            throw new IllegalStateException("You didn't declare any View Models in getViewModelClasses()");
+        }
+        //
+        else {
+            throw new IllegalStateException("You have declared several View Models in getViewModelClasses()");
+        }
     }
 
     public ViewModel getViewModel(int id) {
@@ -309,6 +321,60 @@ public abstract class BaseFragment extends Fragment {
 
     protected void showFragment(Fragment fragment, ShowFragmentOptions options) {
         listenerX.showFragment(fragment, options);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode, @androidx.annotation.Nullable Bundle options) {
+        super.startActivityForResult(intent, requestCode, options);
+    }
+
+    private Map<Integer, ResultCallback<Intent>> activityResultCallback;
+
+    public void startActivityForResult(@NonNull Intent intent, ResultCallback<Intent> callback) {
+        int requestCode = Math.abs((int) System.currentTimeMillis());
+
+        if (activityResultCallback == null) activityResultCallback = new HashMap<>();
+        activityResultCallback.put(requestCode, callback);
+
+        this.startActivityForResult(intent, requestCode);
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback) {
+        if (activityResultCallback == null) activityResultCallback = new HashMap<>();
+        activityResultCallback.put(requestCode, callback);
+
+        this.startActivityForResult(intent, requestCode);
+    }
+
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, Bundle options, ResultCallback<Intent> callback) {
+        if (activityResultCallback == null) activityResultCallback = new HashMap<>();
+        activityResultCallback.put(requestCode, callback);
+
+        this.startActivityForResult(intent, requestCode, options);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (activityResultCallback != null) {
+            if (activityResultCallback.containsKey(requestCode)) {
+                ResultCallback<Intent> callback = activityResultCallback.remove(requestCode);
+                if (callback == null) {
+                    Logger.d().print(() -> "startActivityForResult called with NULL callback");
+                    return;
+                }
+
+                callback.invoke(resultCode == Activity.RESULT_OK ? data : null);
+            }
+        }
     }
 
     //----------------------------------------------------------------------------------------------

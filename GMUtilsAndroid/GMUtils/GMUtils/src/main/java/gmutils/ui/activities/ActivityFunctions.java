@@ -371,8 +371,8 @@ public class ActivityFunctions implements BaseFragmentListener {
             Activity activity,
             @NonNull Intent intent,
             int requestCode,
-            ResultCallback<Intent> callback,
-            Bundle options
+            Bundle options,
+            ResultCallback<Intent> callback
     ) {
         if (activityResultCallback == null) activityResultCallback = new HashMap<>();
         activityResultCallback.put(requestCode, callback);
