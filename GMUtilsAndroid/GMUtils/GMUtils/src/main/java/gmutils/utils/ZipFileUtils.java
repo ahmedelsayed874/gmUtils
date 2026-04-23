@@ -35,6 +35,11 @@ public class ZipFileUtils {
         }
     }
 
+    public interface CompressExcludingDelegate {
+        boolean isDirectoryExcluded(File dir);
+        boolean isFileExcluded(File file);
+    }
+
     private final LoggerAbs logger;
 
     public ZipFileUtils() {
@@ -48,8 +53,7 @@ public class ZipFileUtils {
     public void compress(
             File outZipFile,
             File rootDir,
-            ActionCallback<File, Boolean> isDirExcluded,
-            ActionCallback<File, Boolean> isFileExcluded,
+            CompressExcludingDelegate excludeDelegate,
             ResultCallback<Error> onComplete
     ) {
         if (logger != null) logger.printMethod();
@@ -57,8 +61,7 @@ public class ZipFileUtils {
         BackgroundTask.run(() -> compressSync(
                 outZipFile,
                 rootDir,
-                isDirExcluded,
-                isFileExcluded
+                excludeDelegate
         ), (e) -> {
             if (logger != null) logger.print(() -> new StringBuilder()
                     .append("compress() ---> COMPLETED")
@@ -71,8 +74,7 @@ public class ZipFileUtils {
     public Error compressSync(
             File outZipFile,
             File rootDir,
-            ActionCallback<File, Boolean> isDirExcluded,
-            ActionCallback<File, Boolean> isFileExcluded
+            CompressExcludingDelegate excludeDelegate
     ) {
         if (logger != null) logger.printMethod(() -> new StringBuilder()
                 .append("outZipFile: ")
@@ -113,24 +115,24 @@ public class ZipFileUtils {
             if (subFiles != null) {
                 for (File sf : subFiles) {
                     if (sf.isFile()) {
-                        if (isFileExcluded == null)
+                        if (excludeDelegate == null) {
                             files.add(sf);
-                        else {
-                            Boolean exclude = isFileExcluded.invoke(sf);
-                            if (exclude == null) exclude = false;
-                            if (!exclude) {
-                                files.add(sf);
-                            }
                         }
-                    } else if (sf.isDirectory()) {
-                        if (isDirExcluded == null) {
+                        //
+                        else {
+                            boolean exclude = excludeDelegate.isFileExcluded(sf);
+                            if (!exclude) files.add(sf);
+                        }
+                    }
+                    //
+                    else if (sf.isDirectory()) {
+                        if (excludeDelegate == null) {
                             dirs.add(sf);
-                        } else {
-                            Boolean exclude = isDirExcluded.invoke(sf);
-                            if (exclude == null) exclude = false;
-                            if (!exclude) {
-                                dirs.add(sf);
-                            }
+                        }
+                        //
+                        else {
+                            boolean exclude = excludeDelegate.isDirectoryExcluded(sf);
+                            if (!exclude) dirs.add(sf);
                         }
                     }
                 }

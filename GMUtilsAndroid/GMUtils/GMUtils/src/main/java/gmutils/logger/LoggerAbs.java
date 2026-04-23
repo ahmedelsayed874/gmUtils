@@ -29,16 +29,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import gmutils.DateOp;
 import gmutils.app.BaseApplication;
 import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.backgroundWorkers.LooperThread;
+import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.listeners.Runnable2;
@@ -1161,7 +1163,31 @@ public abstract class LoggerAbs {
         }
     }
 
-    public void exportAppBackup(Context context, boolean includePublicFiles, ResultCallback<ExportBackupFeedback> onComplete) {
+    public void exportAppBackup(
+            Context context,
+            boolean includePublicFiles,
+            ResultCallback<ExportBackupFeedback> onComplete
+    ) {
+        Set<String> excludingDirNames = new HashSet<>();
+        excludingDirNames.add("cache");
+        excludingDirNames.add("code_cache");
+
+        exportAppBackup(
+                context,
+                includePublicFiles,
+                excludingDirNames,
+                null,
+                onComplete
+        );
+    }
+
+    public void exportAppBackup(
+            Context context,
+            boolean includePublicFiles,
+            Set<String> excludingDirNames,
+            ActionCallback<File, Boolean> isDirExcluded,
+            ResultCallback<ExportBackupFeedback> onComplete
+    ) {
         printMethod();
 
         BackgroundTask.run(() -> {
@@ -1277,61 +1303,58 @@ public abstract class LoggerAbs {
                         .append("]\n")
                         .append("----------------------------------------\n");
 
-                AtomicBoolean acceptSubDirs = new AtomicBoolean(false);
                 idx.set(i);
                 File finalBackupDir = backupDir;
                 ZipFileUtils.Error error = zipFileUtils.compressSync(
                         outZipFile,
                         dirToZip,
-                        (dir) -> {
-                            log.append(">>> >>> compress ask: exclude DIR (")
-                                    .append(dir.getName())
-                                    .append(")?\n");
+                        new ZipFileUtils.CompressExcludingDelegate() {
+                            @Override
+                            public boolean isDirectoryExcluded(File dir) {
+                                log.append(">>> >>> compress ask: exclude DIR (")
+                                        .append(dir.getName())
+                                        .append(")?\n");
 
-                            if (idx.get() == 0) {//private
-                                if (dir.getName().equalsIgnoreCase("databases")) {
-                                    log.append(">>> >>> >>> NO\n");
-                                    return false;
-                                }
-                                //
-                                else if (dir.getName().equalsIgnoreCase("files")) {
-                                    log.append(">>> >>> >>> NO\n");
-                                    return false;
-                                }
-                                //
-                                else if (dir.getName().equalsIgnoreCase("shared_prefs")) {
+                                if (idx.get() != 0) {
+                                    if (dir.getPath().equalsIgnoreCase(finalBackupDir.getPath())) {
+                                        log.append(">>> >>> >>> YES\n");
+                                        return true;
+                                    }
+
                                     log.append(">>> >>> >>> NO\n");
                                     return false;
                                 }
 
-                                if (acceptSubDirs.get()) {
-                                    log.append(">>> >>> >>> NO\n");
-                                    return false;
+                                Boolean exclude = null;
+
+                                if (excludingDirNames != null) {
+                                    if (excludingDirNames.contains(dir.getName())) {
+                                        exclude = true;
+                                    }
                                 }
 
-                                log.append(">>> >>> >>> YES\n");
+                                if (isDirExcluded != null) {
+                                    exclude = isDirExcluded.invoke(dir);
+                                }
 
-                                return true;
-                            }
-                            //
-                            else {
-                                if (dir.getPath().equalsIgnoreCase(finalBackupDir.getPath())) {
+                                if (exclude == Boolean.TRUE) {
                                     log.append(">>> >>> >>> YES\n");
                                     return true;
                                 }
+                                else {
+                                    log.append(">>> >>> >>> NO\n");
+                                    return false;
+                                }
+                            }
 
-                                log.append(">>> >>> >>> NO\n");
+                            @Override
+                            public boolean isFileExcluded(File file) {
+                                log.append(">>> >>> compress ask: exclude FILE (")
+                                        .append(file.getName())
+                                        .append(")? NO\n");
+
                                 return false;
                             }
-                        },
-                        (file) -> {
-                            acceptSubDirs.set(true);
-
-                            log.append(">>> >>> compress ask: exclude FILE (")
-                                    .append(file.getName())
-                                    .append(")? NO\n");
-
-                            return false;
                         }
                 );
                 if (error != null) {
@@ -1348,48 +1371,6 @@ public abstract class LoggerAbs {
 
             log.append(">>> zipping files COMPLETED √√√\n");
             //endregion
-
-            /*if (includePublicFiles) {
-                log.append(">>> zipping PUBLIC files going to start....");
-
-                try {
-                    File outZipFile = new File(backupDir, mainBackupFileName);
-                    outZipFile.createNewFile();
-
-                    log.append(">>> zipping PUBLIC files :: ")
-                            .append(Arrays.toString(outZipFiles))
-                            .append("\n");
-
-                    zipFileUtils.compressSync(
-                            outZipFile,
-                            outZipFiles,
-                            context.getCacheDir()
-                    );
-
-                } catch (Exception e) {
-                    log.append(">>> zipping PUBLIC files ... EXCEPTION: ").append(e.getMessage()).append("\n");
-                    print(() -> "Backup::: " + log);
-
-                    e.printStackTrace();
-                    return new ExportBackupFeedback(
-                            false,
-                            "Couldn't create a backup file in: '" + backupDir.getAbsolutePath() + "'\n" +
-                                    "Details: " + e.getMessage(),
-                            null
-                    );
-                }
-
-                //region delete
-                try {
-                    for (File zipFile : outZipFiles) {
-                        boolean deleted = zipFile.delete();
-                        log.append(">>> DELETE " + (deleted ? "COMPLETED" : "FAILED") + " ... for file: " + zipFile);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                //endregion
-            }*/
 
             print(() -> "Backup::: " + log);
 
