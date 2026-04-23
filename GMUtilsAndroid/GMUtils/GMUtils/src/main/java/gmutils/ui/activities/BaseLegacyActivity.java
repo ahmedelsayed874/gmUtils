@@ -335,8 +335,8 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
                 this,
                 intent,
                 Math.abs((int) System.currentTimeMillis()),
-                callback,
-                null
+                null,
+                callback
         );
     }
 
@@ -345,18 +345,18 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
                 this,
                 intent,
                 requestCode,
-                callback,
-                null
+                null,
+                callback
         );
     }
 
-    public void startActivityForResult(@NonNull Intent intent, int requestCode, ResultCallback<Intent> callback, Bundle options) {
+    public void startActivityForResult(@NonNull Intent intent, int requestCode, Bundle options, ResultCallback<Intent> callback) {
         getActivityFunctions().startActivityForResult(
                 this,
                 intent,
                 requestCode,
-                callback,
-                options
+                options,
+                callback
         );
     }
 
