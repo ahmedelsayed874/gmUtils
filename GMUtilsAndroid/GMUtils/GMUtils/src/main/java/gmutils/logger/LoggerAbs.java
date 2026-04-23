@@ -517,9 +517,13 @@ public abstract class LoggerAbs {
     public LoggerAbs(@Nullable String logId, LogConfigs logConfigs) {
         this.logId = logId;
 
-        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
+        setLogConfigs(logConfigs);
 
         numberOnInstances++;
+    }
+
+    public void setLogConfigs(LogConfigs logConfigs) {
+        this.logConfigs = logConfigs != null ? logConfigs : new LogConfigs();
     }
 
     @NotNull
