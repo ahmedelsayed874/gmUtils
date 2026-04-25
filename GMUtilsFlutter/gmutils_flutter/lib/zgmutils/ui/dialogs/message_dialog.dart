@@ -64,7 +64,10 @@ class MessageDialog {
     return this;
   }
 
-  MessageDialog setRichMessage(RichSentence message, {TextAlign? textAlign,}) {
+  MessageDialog setRichMessage(
+    RichSentence message, {
+    TextAlign? textAlign,
+  }) {
     _richMessage = message;
     _textAlign = textAlign;
     return this;
@@ -100,7 +103,7 @@ class MessageDialog {
       i++;
 
       void onPressed() {
-        _dismiss(action.title);
+        if (action.autoDismiss) _dismiss(action.title);
         action.action?.call();
       }
 
@@ -134,13 +137,35 @@ class MessageDialog {
 
   List<MessageDialogActionButton>? _actionsCache;
 
-  MessageDialog addAction(String title, [Function()? action]) {
+  MessageDialog addAction(
+    String title, {
+    bool autoDismiss = true,
+    Function()? action,
+  }) {
     _actions.clear();
 
     _actionsCache ??= [];
-    _actionsCache?.add(MessageDialogActionButton(title, action: action));
+    _actionsCache?.add(
+      MessageDialogActionButton(
+        title,
+        autoDismiss: autoDismiss,
+        action: action,
+      ),
+    );
     addActions(_actionsCache!);
 
+    return this;
+  }
+
+  MessageDialog addActionIf(
+    bool Function() condition, {
+    required String title,
+    bool autoDismiss = true,
+    Function()? action,
+  }) {
+    if (condition()) {
+      addAction(title, autoDismiss: autoDismiss, action: action);
+    }
     return this;
   }
 
@@ -298,9 +323,10 @@ class MessageDialogActionButton {
   final bool useTextButton;
   final ButtonStyle? buttonStyle;
   TextStyle? _textStyle;
-  Color? _textColor;
-  FontWeight? _textFontWeight;
-  double? width;
+  final Color? _textColor;
+  final FontWeight? _textFontWeight;
+  final double? width;
+  final bool autoDismiss;
   final Function()? action;
 
   MessageDialogActionButton(
@@ -309,8 +335,12 @@ class MessageDialogActionButton {
     Color? color,
     FontWeight? fontWeight,
     this.width,
+    this.autoDismiss = true,
     this.action,
-  }) : buttonStyle = null;
+  })  : buttonStyle = null,
+        _textStyle = null,
+        _textColor = color,
+        _textFontWeight = fontWeight;
 
   MessageDialogActionButton.customStyle(
     this.title, {
@@ -318,8 +348,11 @@ class MessageDialogActionButton {
     this.buttonStyle,
     TextStyle? textStyle,
     this.width,
+    this.autoDismiss = true,
     this.action,
-  }) : _textStyle = textStyle;
+  })  : _textStyle = textStyle,
+        _textColor = null,
+        _textFontWeight = null;
 
   TextStyle? textStyle(int idx) {
     _textStyle ??= AppTheme.defaultTextStyle(

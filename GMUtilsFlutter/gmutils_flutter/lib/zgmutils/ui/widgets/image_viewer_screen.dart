@@ -68,6 +68,12 @@ class _ImageViewerScreenOnWebViewState
     _photoUrl = ModalRoute.of(context)?.settings.arguments as String;
 
     return MyRootWidget.withToolbar(widget.toolbarTitle)
+        .setScreenPadding(
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+        )
         .setBody(body(context))
         .addToolbarActions(
       actions: [
@@ -516,9 +522,9 @@ class _ImageViewerScreenOnImageViewAndNoScrollViewState
         ]);
   }
 
-  //----------------------------------------------------
+//----------------------------------------------------
 
-  /*void onPanDown(DragDownDetails details) {
+/*void onPanDown(DragDownDetails details) {
     Logs.print(() => [
           '_ImageViewerScreenOnImageViewAndNoScrollViewState',
           '.onPanDown: ',

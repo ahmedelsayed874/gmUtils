@@ -195,6 +195,12 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Widget build(BuildContext context) {
     if (widget.hasToolbar) {
       var rw = MyRootWidget.withToolbar(widget.toolbarTitle ?? '');
+      rw.setScreenPadding(
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+      );
       rw.setBody(body(context));
 
       if (widget.allowOpenLinkExternal) {
