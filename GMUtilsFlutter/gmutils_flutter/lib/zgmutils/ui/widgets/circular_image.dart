@@ -26,9 +26,8 @@ class CircularImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget? placeholderWidget;
-    if (placeholder?.assetFileName != null) {
-      placeholderWidget =
-          Image.asset('assets/images/${placeholder!.assetFileName}');
+    if (placeholder?.assetFilePath != null) {
+      placeholderWidget = Image.asset(placeholder!.assetFilePath!);
     }
     //
     else if (placeholder?.alterName != null) {
@@ -85,12 +84,12 @@ class CircularImage extends StatelessWidget {
 }
 
 class CircularImagePlaceholder {
-  final String? assetFileName;
+  final String? assetFilePath;
   final String? alterName;
   final TextStyle? alterNameStyle;
 
   CircularImagePlaceholder({
-    this.assetFileName,
+    this.assetFilePath,
     this.alterName,
     this.alterNameStyle,
   });
