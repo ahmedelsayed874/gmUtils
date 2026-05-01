@@ -9,13 +9,22 @@ class Picker<T> {
   Future<Pair<T, int>?> show({
     required BuildContext context,
     required String title,
+    TextStyle? titleTextStyle,
     required String? hint,
+    TextStyle? hintTextStyle,
     required List<T> items,
     required T? initialItem,
-    Widget Function(T item, int index)? itemBuilder,
+    String Function(dynamic item, int index)? itemTextBuilder,
+    Widget Function(dynamic item, int index)? itemBuilder,
     double? itemHeight,
     double? topLinePosition,
     double? bottomLinePosition,
+    String? positiveButtonText,
+    ButtonStyle? positiveButtonStyle,
+    TextStyle? positiveButtonTextStyle,
+    String? negativeButtonText,
+    TextStyle? negativeButtonTextStyle,
+    ButtonStyle? negativeButtonStyle,
   }) async {
     assert(items.isNotEmpty);
 
@@ -26,14 +35,26 @@ class Picker<T> {
       builder: (BuildContext context) {
         return _PickerBody<T>(
           title: title,
+          titleTextStyle: titleTextStyle,
+          //
           hint: hint,
+          hintTextStyle: hintTextStyle,
+          //
           items: items,
           initialItem: initialItem,
+          itemTextBuilder: itemTextBuilder,
           itemBuilder: itemBuilder,
-          //
           itemHeight: itemHeight,
           topLinePosition: topLinePosition,
           bottomLinePosition: bottomLinePosition,
+          //
+          positiveButtonText: positiveButtonText,
+          positiveButtonStyle: positiveButtonStyle,
+          positiveButtonTextStyle: positiveButtonTextStyle,
+          //
+          negativeButtonText: negativeButtonText,
+          negativeButtonTextStyle: negativeButtonTextStyle,
+          negativeButtonStyle: negativeButtonStyle,
         );
       },
     );
@@ -42,23 +63,45 @@ class Picker<T> {
 
 class _PickerBody<T> extends StatefulWidget {
   final String title;
+  final TextStyle? titleTextStyle;
+
   final String? hint;
+  final TextStyle? hintTextStyle;
+
   final List<T> items;
   final T? initialItem;
-  final Widget Function(T item, int index)? itemBuilder;
+  final String Function(dynamic item, int index)? itemTextBuilder;
+  final Widget Function(dynamic item, int index)? itemBuilder;
   final double? itemHeight;
   final double? topLinePosition;
   final double? bottomLinePosition;
 
+  final String? positiveButtonText;
+  final ButtonStyle? positiveButtonStyle;
+  final TextStyle? positiveButtonTextStyle;
+
+  final String? negativeButtonText;
+  final TextStyle? negativeButtonTextStyle;
+  final ButtonStyle? negativeButtonStyle;
+
   const _PickerBody({
     required this.title,
+    required this.titleTextStyle,
     required this.hint,
+    required this.hintTextStyle,
     required this.items,
     required this.initialItem,
+    required this.itemTextBuilder,
     required this.itemBuilder,
     required this.itemHeight,
     required this.topLinePosition,
     required this.bottomLinePosition,
+    required this.positiveButtonText,
+    required this.positiveButtonStyle,
+    required this.positiveButtonTextStyle,
+    required this.negativeButtonText,
+    required this.negativeButtonTextStyle,
+    required this.negativeButtonStyle,
   });
 
   @override
@@ -164,12 +207,14 @@ class _PickerBodyState<T> extends State<_PickerBody>
                       padding: const EdgeInsets.fromLTRB(20, 10, 0, 0),
                       child: Text(
                         widget.title,
-                        style: TextStyle(
-                          fontSize: AppTheme.appMeasurement?.screenTitleSize,
-                          fontFamily: AppTheme.defaultFontFamily,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ),
+                        style: widget.titleTextStyle ??
+                            TextStyle(
+                              fontSize:
+                                  AppTheme.appMeasurement?.screenTitleSize,
+                              fontFamily: AppTheme.defaultFontFamily,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                            ),
                       ),
                     ),
                   ),
@@ -182,11 +227,12 @@ class _PickerBodyState<T> extends State<_PickerBody>
                         padding: const EdgeInsets.fromLTRB(22, 5, 0, 0),
                         child: Text(
                           widget.hint!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: AppTheme.defaultFontFamily,
-                            color: AppTheme.appColors?.text.withAlpha(200),
-                          ),
+                          style: widget.hintTextStyle ??
+                              TextStyle(
+                                fontSize: 12,
+                                fontFamily: AppTheme.defaultFontFamily,
+                                color: AppTheme.appColors?.text.withAlpha(200),
+                              ),
                         ),
                       ),
                     ),
@@ -204,27 +250,25 @@ class _PickerBodyState<T> extends State<_PickerBody>
                     child: Row(
                       children: [
                         Expanded(
-                          /*child: Widgets.instant.customButton(
-                            text: Res.strings.apply,
-                            onPressed: _confirm,
-                          ),*/
                           child: ElevatedButton(
                             onPressed: _confirm,
+                            style: widget.positiveButtonStyle,
                             child: Text(
-                              App.isEnglish ? 'Confirm' : 'تطبيق',
+                              widget.positiveButtonText ??
+                                  (App.isEnglish ? 'Confirm' : 'تطبيق'),
+                              style: widget.positiveButtonTextStyle,
                             ),
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          /*child: Widgets.instant.customButton2(
-                            text: Res.strings.cancel,
-                            onPressed: _cancelSelection,
-                          ),*/
                           child: ElevatedButton(
                             onPressed: _cancelSelection,
+                            style: widget.negativeButtonStyle,
                             child: Text(
-                              App.isEnglish ? 'Cancel' : 'إلغاء',
+                              widget.negativeButtonText ??
+                                  (App.isEnglish ? 'Cancel' : 'إلغاء'),
+                              style: widget.negativeButtonTextStyle,
                             ),
                           ),
                         ),
@@ -303,16 +347,16 @@ class _PickerBodyState<T> extends State<_PickerBody>
   itemListBuildDelegate() {
     return ListWheelChildBuilderDelegate(
       builder: (context, index) {
-        final item = widget.items[index];
+        final T item = widget.items[index];
 
         if (widget.itemBuilder != null) {
           return widget.itemBuilder!(item, index);
         }
-        //
+
         final isSelected = index == _selectedItemIndex;
         return Center(
           child: Text(
-            item.toString(),
+            widget.itemTextBuilder?.call(item, index) ?? item.toString(),
             style: TextStyle(
               fontSize: isSelected ? 20 : 14,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
