@@ -29,7 +29,6 @@ class MessageDialog {
   bool _dismissed = false;
   String? _dismissedBy;
   Function(String? dismissedBy)? _onDismiss;
-  bool _allowManualDismiss = true;
 
   MessageDialog setBoxStyle({
     Color? backgroundColor,
@@ -85,11 +84,6 @@ class MessageDialog {
 
   MessageDialog setExtraWidget(Widget widget) {
     _extraWidget = widget;
-    return this;
-  }
-
-  MessageDialog allowManualDismiss(bool allow) {
-    _allowManualDismiss = allow;
     return this;
   }
 
@@ -179,10 +173,13 @@ class MessageDialog {
     return this;
   }
 
+  //===========================================================================
+  
   int _tries = 3;
 
-  MessageDialog show(BuildContext Function() context) {
+  /*MessageDialog show(BuildContext Function() context) {
     Logs.print(() => "MessageDialog.show() .. _tries: $_tries");
+
     try {
       _show(context);
     } catch (e) {
@@ -207,9 +204,59 @@ class MessageDialog {
     }
 
     return this;
+  }*/
+
+  void show(BuildContext Function() context) {
+    _tryShow(false, context);
   }
 
-  MessageDialog _show(BuildContext Function() context) {
+  Future<dynamic> showAsync(BuildContext Function() context) async {
+    return _tryShow(true, context);
+  }
+
+  Future<dynamic> _tryShow(
+    bool forResult,
+    BuildContext Function() context,
+  ) async {
+    Logs.print(
+      () => "MessageDialog.tryShow(forResult: $forResult)",
+    );
+
+    bool b = false;
+
+    do {
+      try {
+        return await _show(context);
+      } catch (e) {
+        Logs.print(() => "MessageDialog.show:[_tries: $_tries]>> EXCEPTION: $e");
+
+        b = await Future.delayed(
+          Duration(
+            milliseconds: _tries > 2 ? 500 : (_tries > 1 ? 800 : 1300),
+          ),
+          () {
+            if (_tries-- == 0) {
+              _context = null;
+              return false;
+            }
+
+            if (!_dismissed && _context != null) {
+              return true;
+            }
+            //
+            else {
+              _context = null;
+              return false;
+            }
+          },
+        );
+      }
+    } while (b);
+
+    return this;
+  }
+
+  Future<dynamic> _show(BuildContext Function() context) async {
     _context = context;
 
     Widget textWidget;
@@ -246,74 +293,69 @@ class MessageDialog {
             );
     }
 
-    showDialog(
-        context: context(),
-        barrierDismissible: _enableOuterDismiss,
-        builder: (context) {
-          return AlertDialog(
-            icon: _topIcon,
-            //title
-            title: _title == null
-                ? null
-                : Padding(
-                    padding: const EdgeInsets.only(left: 7, right: 7, top: 5),
-                    child: Text(
-                      _title!,
-                      style: _titleStyle ?? AppTheme.textStyleOfScreenTitle(),
-                    ),
+    var r = await showDialog(
+      context: context(),
+      barrierDismissible: _enableOuterDismiss,
+      builder: (context) {
+        return AlertDialog(
+          icon: _topIcon,
+          //title
+          title: _title == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.only(left: 7, right: 7, top: 5),
+                  child: Text(
+                    _title!,
+                    style: _titleStyle ?? AppTheme.textStyleOfScreenTitle(),
                   ),
-            //body
-            content: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 7),
-              child: _extraWidget == null
-                  ? textWidget
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        textWidget,
-                        _extraWidget!,
-                      ],
-                    ),
-            ),
-            //
-            actions: _actions,
-            actionsAlignment: _actionsAlignment,
-            //
-            backgroundColor: _backgroundColor ??
-                AppTheme.appColors?.background ??
-                Colors.white,
-            //
-            shape: _borderRadius == null
-                ? null
-                : RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(_borderRadius!),
+                ),
+          //body
+          content: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 7),
+            child: _extraWidget == null
+                ? textWidget
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      textWidget,
+                      _extraWidget!,
+                    ],
                   ),
-            constraints: _constraints,
-          );
-        }).then((value) {
-      _context = null;
-      if (_onDismiss != null) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          _onDismiss?.call(_dismissedBy);
-        });
-      }
-    });
+          ),
+          //
+          actions: _actions,
+          actionsAlignment: _actionsAlignment,
+          //
+          backgroundColor: _backgroundColor ??
+              AppTheme.appColors?.background ??
+              Colors.white,
+          //
+          shape: _borderRadius == null
+              ? null
+              : RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(_borderRadius!),
+                ),
+          constraints: _constraints,
+        );
+      },
+    );
 
-    return this;
+    _context = null;
+    if (_onDismiss != null) {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _onDismiss?.call(_dismissedBy);
+      });
+    }
+
+    return r;
   }
 
   void _dismiss(String dismissedBy) {
-    if (!_allowManualDismiss) return;
     _dismissedBy = dismissedBy;
-    dismiss();
-  }
-
-  void dismiss() {
-    if (!_allowManualDismiss) return;
     _dismissed = true;
     if (_context != null) {
-      Navigator.pop(_context!());
+      Navigator.pop(_context!(), _dismissedBy);
     }
   }
 }

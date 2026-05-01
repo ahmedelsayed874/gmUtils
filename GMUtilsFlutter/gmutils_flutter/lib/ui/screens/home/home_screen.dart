@@ -117,8 +117,7 @@ class _HomeScreenState extends BaseState<HomeScreen>
       var forceUpdateNow = appConfigs.mustUpdateApp();
 
       Future.delayed(Duration(seconds: mounted ? 1 : 5), () {
-        var md = MessageDialog.create;
-        md
+        MessageDialog.create
             .setTitle(Res.strings.alert)
             .setMessage(
               Res.strings.a_new_version_has_been_released_please_update,
@@ -130,19 +129,17 @@ class _HomeScreenState extends BaseState<HomeScreen>
                 action: () {
                   appConfigs.updateApp();
                 },
+                autoDismiss: !forceUpdateNow,
               ),
 
               //
               if (!forceUpdateNow)
                 MessageDialogActionButton(
                   Res.strings.dismiss,
-                  action: () {
-                    md.allowManualDismiss(true);
-                  },
+                  action: null,
                 ),
             ])
             .setEnableOuterDismiss(!forceUpdateNow)
-            .allowManualDismiss(false)
             .show(() => context);
       });
     }

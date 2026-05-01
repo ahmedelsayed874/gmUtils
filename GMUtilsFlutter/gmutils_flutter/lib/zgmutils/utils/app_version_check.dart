@@ -162,9 +162,7 @@ class AppVersionCheck {
     );
 
     if (b == true) {
-      MessageDialog? md;
-
-      md = MessageDialog.create
+      MessageDialog.create
           .setTitle(title ?? (langCode == 'ar' ? 'تنبيه' : 'Alert'))
           .setMessage(message ?? defaultWarnMessage.v)
           .setEnableLinks(true)
@@ -172,8 +170,7 @@ class AppVersionCheck {
             MessageDialogActionButton(
               langCode == 'ar' ? 'تحديث' : 'Update',
               action: () {
-                md?.allowManualDismiss(true);
-                md?.dismiss();
+                Navigator.pop(context());
 
                 if (Platform.isIOS) {
                   openAppleStore();
@@ -181,6 +178,7 @@ class AppVersionCheck {
                   openPlayStore();
                 }
               },
+              autoDismiss: !forceSelectAction,
             ),
             if (!forceSelectAction)
               MessageDialogActionButton(
@@ -189,7 +187,6 @@ class AppVersionCheck {
               ),
           ])
           .setEnableOuterDismiss(!forceSelectAction)
-          .allowManualDismiss(!forceSelectAction)
           .show(context);
     }
   }
