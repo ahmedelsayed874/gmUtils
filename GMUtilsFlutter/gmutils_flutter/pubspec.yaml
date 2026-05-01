@@ -57,7 +57,8 @@ dependencies:
 
   webview_flutter: ^4.13.1
 
-  file_picker: ^10.3.10
+#  file_picker: ^10.3.10
+  file_picker: ^11.0.2
   image_picker: ^1.1.2
 
   image: ^4.5.4

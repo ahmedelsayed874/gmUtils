@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+///file_picker: ^11.0.2
 import 'package:file_picker/file_picker.dart' as file_picker;
 
 ///https://pub.dev/packages/file_picker
@@ -9,7 +11,7 @@ class FilePicker {
     List<String>? allowedExtensions,
   }) async {
     file_picker.FilePickerResult? result =
-        await file_picker.FilePicker.platform.pickFiles(
+        await file_picker.FilePicker.pickFiles(
       type: allowedExtensions == null
           ? _convertFileType(fileType)
           : _convertFileType(FileType.custom),
@@ -40,7 +42,7 @@ class FilePicker {
     List<String>? allowedExtensions,
   }) async {
     file_picker.FilePickerResult? result =
-        await file_picker.FilePicker.platform.pickFiles(
+        await file_picker.FilePicker.pickFiles(
       allowMultiple: true,
       type: allowedExtensions == null
           ? _convertFileType(fileType)
@@ -59,10 +61,12 @@ class FilePicker {
   Future<String?> openSaveDialog({
     String? pickerTitle,
     required String fileName,
+    required Uint8List? bytes,
   }) async {
-    String? outputFile = await file_picker.FilePicker.platform.saveFile(
+    String? outputFile = await file_picker.FilePicker.saveFile(
       dialogTitle: pickerTitle,
       fileName: fileName,
+      bytes: bytes,
     );
 
     return outputFile;
