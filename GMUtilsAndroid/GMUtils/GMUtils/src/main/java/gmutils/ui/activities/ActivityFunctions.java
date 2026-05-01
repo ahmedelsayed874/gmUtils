@@ -139,10 +139,14 @@ public class ActivityFunctions implements BaseFragmentListener {
                 if (viewSource instanceof ViewSource.LayoutResource) {
                     activity.setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
 
-                } else if (viewSource instanceof ViewSource.View) {
+                }
+                //
+                else if (viewSource instanceof ViewSource.View) {
                     activity.setContentView(((ViewSource.View) viewSource).getView());
 
-                } else if (viewSource instanceof ViewSource.ViewBinding) {
+                }
+                //
+                else if (viewSource instanceof ViewSource.ViewBinding) {
                     activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
                     activity.setContentView(activityViewBinding.getRoot());
                 }
