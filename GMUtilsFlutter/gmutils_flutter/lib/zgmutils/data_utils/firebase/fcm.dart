@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -45,8 +46,8 @@ abstract class IFCM {
     required String deviceToken,
     required String title,
     required String message,
-    //required Map<String, String>? payload,
     required String? payload,
+    String? imageUrl,
     AndroidNotificationChannelProperties? channel,
     bool isDataNotification = false,
   });
@@ -55,8 +56,8 @@ abstract class IFCM {
     required String topic,
     required String title,
     required String message,
-    //required Map<String, String>? payload,
     required String? payload,
+    String? imageUrl,
     AndroidNotificationChannelProperties? channel,
     bool isDataNotification = true,
   });
@@ -65,6 +66,7 @@ abstract class IFCM {
     String title,
     String body, {
     String? payload,
+    File? image,
     int? notificationId,
     AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
@@ -272,14 +274,21 @@ class FCM extends IFCM {
   void _popupNotification(RemoteMessage message) {
     try {
       AppPreferencesStorage().getLanguage().then((langCode) {
+        Logs.print(
+          () => 'FCM._popupNotification ---> LANGCODE: $langCode',
+        );
         _popupNotification2(message, langCode);
       });
     } catch (e) {
+      Logs.print(
+        () => 'FCM._popupNotification ---> '
+            'GETTING LANGCODE FAILED DUE TO EXCEPTION: $e',
+      );
       _popupNotification2(message, null);
     }
   }
 
-  void _popupNotification2(RemoteMessage message, String? langCode) {
+  void _popupNotification2(RemoteMessage message, String? langCode) async {
     Logs.print(
       () => [
         'FCM._popupNotification2(message: ${message.toMap()}, langCode: $langCode)'
@@ -288,8 +297,10 @@ class FCM extends IFCM {
 
     var title = '${message.notification?.title ?? 'Notification'}•';
     var body = message.notification?.body ?? '';
+    // final imageUrl = message.notification?.android?.imageUrl ??
+    //     message.notification?.apple?.imageUrl;
 
-    var localNotification = resolveNotification(message, langCode);
+    /*var localNotification = await resolveNotification(message, langCode);
     var payload = localNotification.payload;
     if (payload == null) {
       try {
@@ -309,11 +320,40 @@ class FCM extends IFCM {
         localNotification.title ?? title,
         localNotification.body ?? body,
         payload: payload,
+        image: localNotification.image,
         notificationId: localNotification.notificationId,
         customChannel: localNotification.customChannel,
         androidInformationStyle: localNotification.androidInformationStyle,
       );
-    }
+    }*/
+
+    resolveNotification(message, langCode).listen((notificationProp) {
+      var payload = notificationProp.payload;
+      if (payload == null) {
+        try {
+          payload = jsonEncode(message.data);
+        } catch (e) {
+          Logs.print(
+            () => [
+              'FCM._popupNotification2 -> EXCEPTION@encodeMessagaData',
+              e,
+            ],
+          );
+        }
+      }
+
+      if (notificationProp.allowPopup != false) {
+        showNotification(
+          notificationProp.title ?? title,
+          notificationProp.body ?? body,
+          payload: payload,
+          image: notificationProp.image,
+          notificationId: notificationProp.notificationId,
+          customChannel: notificationProp.customChannel,
+          androidInformationStyle: notificationProp.androidInformationStyle,
+        );
+      }
+    });
   }
 
   //endregion
@@ -418,8 +458,8 @@ class FCM extends IFCM {
     required String deviceToken,
     required String title,
     required String message,
-    //required Map<String, String>? payload,
     required String? payload,
+    String? imageUrl,
     AndroidNotificationChannelProperties? channel,
     bool isDataNotification = false,
   }) async {
@@ -429,6 +469,7 @@ class FCM extends IFCM {
       title: title,
       message: message,
       payload: payload,
+      imageUrl: imageUrl,
       channel: channel,
       isDataNotification: isDataNotification,
     );
@@ -439,8 +480,8 @@ class FCM extends IFCM {
     required String topic,
     required String title,
     required String message,
-    //required Map<String, String>? payload,
     required String? payload,
+    String? imageUrl,
     AndroidNotificationChannelProperties? channel,
     bool isDataNotification = false,
   }) async {
@@ -451,6 +492,7 @@ class FCM extends IFCM {
       title: title,
       message: message,
       payload: payload,
+      imageUrl: imageUrl,
       channel: channel,
       isDataNotification: isDataNotification,
     );
@@ -469,8 +511,8 @@ class FCM extends IFCM {
     required String? topic,
     required String title,
     required String message,
-    //required Map<String, String>? payload,
     required String? payload,
+    required String? imageUrl,
     AndroidNotificationChannelProperties? channel,
     bool isDataNotification = false,
   }) async {
@@ -488,6 +530,7 @@ class FCM extends IFCM {
       topic: topic,
       title: title,
       message: message,
+      imageUrl: imageUrl,
       isDataNotification: isDataNotification,
       payload: payload,
       channel: channel,
@@ -548,6 +591,7 @@ class FCM extends IFCM {
     required bool isDataNotification,
     //required Map<String, String>? payload,
     required String? payload,
+    required String? imageUrl,
     //
     required AndroidNotificationChannelProperties? channel,
   }) {
@@ -569,6 +613,7 @@ class FCM extends IFCM {
       notificationBody["notification"] = {
         "title": title,
         "body": message,
+        if (imageUrl != null) "image": imageUrl,
       };
     }
 
@@ -578,6 +623,7 @@ class FCM extends IFCM {
         "body": message,
         //"notification_priority": "PRIORITY_DEFAULT", //PRIORITY_HIGH - PRIORITY_MAX - PRIORITY_LOW - PRIORITY_MIN
         if (channel != null) "channel_id": channel.channelId,
+        if (imageUrl != null) "image": imageUrl,
         //"sound": soundFileName,
         //"icon": "stock_ticker_update",
         //"color": "#7e55c3",
@@ -588,7 +634,6 @@ class FCM extends IFCM {
         //"default_sound": true,
         //"visibility": "PUBLIC", //PRIVATE - SECRET
         //"notification_count": 1
-        //"image": "http://....",
         //"direct_boot_ok": false,
       },
       //"data": {},
@@ -602,10 +647,14 @@ class FCM extends IFCM {
             "body": message,
           },
           "sound": channel?.soundFile?.fileNameWithExtension ?? "default",
+          "mutable-content": 1, // REQUIRED for images on iOS
           // "badge": 1,
         },
         //if (dataPayload != null) PAYLOAD_KEY_NAME: dataPayload, //"data" This was your original iOS custom payload placement
       },
+      "fcm_options": {
+        if (imageUrl != null) "image": imageUrl, // Image for iOS
+      }
       // "headers": {
       //   "apns-priority": "10", // "5" for low priority
       // }
@@ -712,6 +761,7 @@ class FCM extends IFCM {
     String title,
     String body, {
     String? payload,
+    File? image,
     int? notificationId,
     AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
@@ -720,6 +770,7 @@ class FCM extends IFCM {
       title,
       body,
       payload: payload,
+      image: image,
       notificationId: notificationId,
       customChannel: customChannel,
       androidInformationStyle: androidInformationStyle,
@@ -741,13 +792,13 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
 }
 
 @pragma('vm:entry-point')
-FcmNotificationProperties resolveNotification(
+Stream<FcmNotificationProperties> resolveNotification(
   RemoteMessage message,
   String? langCode,
 ) {
   /*add this method to main file
     @pragma('vm:entry-point')
-    FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {}
+    Stream<FcmNotificationProperties> resolveNotification(RemoteMessage message, String? langCode) {}
   */
   return main.resolveNotification(message, langCode);
 }
@@ -772,6 +823,7 @@ class FcmNotificationProperties {
   String? title;
   String? body;
   String? payload;
+  File? image;
   AndroidNotificationChannelProperties? customChannel;
   DefaultStyleInformation? androidInformationStyle;
 
@@ -781,6 +833,7 @@ class FcmNotificationProperties {
     required this.title,
     required this.body,
     this.payload,
+    this.image,
     this.customChannel,
     this.androidInformationStyle,
   });
