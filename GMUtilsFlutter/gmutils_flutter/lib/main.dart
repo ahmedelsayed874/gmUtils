@@ -10,7 +10,6 @@ import 'zgmutils/data_utils/firebase/fcm.dart';
 import 'zgmutils/gm_main.dart';
 import 'zgmutils/utils/logs.dart';
 
-
 //------------------------------------------------------------------------------
 
 const bool useProductionData = true; //todo must true
@@ -55,7 +54,8 @@ void main() {
     toolbarTitleFontFamily: () => Res.themes.fonts.toolbarTitle,
     defaultFontFamily: () => Res.themes.fonts.cairo,
     localNotificationsConfigurations: null,
-    fcmRequirements: null/*FcmRequirements(
+    fcmRequirements:
+        null /*FcmRequirements(
       fcmConfigurations: FCMConfigurations(
         notificationsConfigurations: NotificationsConfigurations(
           androidNotificationIconName: 'notif_icon',
@@ -92,7 +92,7 @@ void main() {
       firebaseOptions: DefaultFirebaseOptions.currentPlatform,
       //
       onFcmInitialized: (fcm) async {
-        *//*var appConfigs = AppConfigs();
+        */ /*var appConfigs = AppConfigs();
 
         ///note: same steps repeated in login_driver
         var credentials = await UsersDataSource.instance.savedCredentials;
@@ -114,9 +114,10 @@ void main() {
           Logs.setLogFileDeadline(appConfigs.appConfigs.getLogFileDeadline(
             username: credentials.value1,
           ));
-        }*//*
+        }*/ /*
       },
-    )*/,
+    )*/
+    ,
     onInitialize: (ctx) {
       DeviceInfo((di) {
         isDeviceHasHardwareKeys = di.isDeviceHasHardwareKeys;
@@ -134,6 +135,9 @@ void main() {
 //------------------------------------------------------------------------------
 
 @pragma('vm:entry-point')
-FcmNotificationProperties resolveNotification(RemoteMessage message, String? langCode) {
-  return NotificationsHandler.resolveNotification(message, langCode);
+Stream<FcmNotificationProperties> resolveNotification(
+  RemoteMessage message,
+  String? langCode,
+) async* {
+  yield NotificationsHandler.resolveNotification(message, langCode);
 }

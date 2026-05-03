@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../logs.dart';
@@ -20,6 +22,7 @@ abstract class INotificationsManager {
     String title,
     String body, {
     String? payload,
+    File? image,
     int? notificationId,
     AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
@@ -309,6 +312,7 @@ class NotificationsManager extends INotificationsManager {
     String title,
     String body, {
     String? payload,
+    File? image,
     int? notificationId,
     AndroidNotificationChannelProperties? customChannel,
     DefaultStyleInformation? androidInformationStyle,
@@ -325,6 +329,7 @@ class NotificationsManager extends INotificationsManager {
         'title: $title,\n'
         'body: $body,\n'
         'payload: $payload,\n'
+        'image: ${image?.path},\n'
         'notifId: $notifId (was: $notificationId),\n'
         'customChannel: ${customChannel?.channelId ?? defaultNotificationChannelId},\n'
         'androidInformationStyle: ${androidInformationStyle?.runtimeType}\n'
@@ -332,6 +337,19 @@ class NotificationsManager extends INotificationsManager {
 
     SoundFile? sound =
         customChannel?.soundFile ?? defaultNotificationChannelSound;
+
+    StyleInformation? styleInformation = androidInformationStyle;
+    if (image != null && androidInformationStyle != null) {
+      // Note: For production, you should download the image to a local file
+      // and use FilePathAndroidBitmap(localPath).
+      // For a quick test, you can use ByteArrayAndroidBitmap if you download the bytes.
+      styleInformation = BigPictureStyleInformation(
+        FilePathAndroidBitmap(image.path), // requires internet permission
+        largeIcon: FilePathAndroidBitmap(image.path),
+        contentTitle: title,
+        summaryText: body,
+      );
+    }
 
     _flutterLocalNotificationsPlugin.show(
       id: notifId,
@@ -352,7 +370,7 @@ class NotificationsManager extends INotificationsManager {
               : RawResourceAndroidNotificationSound(sound.name),
           //
           priority: Priority.high,
-          styleInformation: androidInformationStyle ??
+          styleInformation: styleInformation ??
               BigTextStyleInformation(
                 body,
               ),
@@ -366,6 +384,11 @@ class NotificationsManager extends INotificationsManager {
         iOS: DarwinNotificationDetails(
           presentSound: true,
           sound: sound?.fileNameWithExtension,
+          attachments: image != null
+              ? [
+                  DarwinNotificationAttachment(image.path)
+                ] // This requires a local path on iOS
+              : null,
         ),
       ),
       payload: payload,
@@ -431,6 +454,14 @@ class AndroidNotificationChannelProperties {
     this.channelDescription,
     required this.importance,
     required this.soundFile,
+  });
+
+  AndroidNotificationChannelProperties.only({
+    required this.channelId,
+    this.channelName = 'No Name',
+    this.channelDescription,
+    this.importance = const Importance2(Importance2.defaultImportance),
+    this.soundFile,
   });
 
   @override

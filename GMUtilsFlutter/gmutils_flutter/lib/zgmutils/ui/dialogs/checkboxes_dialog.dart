@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../../gm_main.dart';
 import '../../resources/app_theme.dart';
 
-
 typedef ChecksHandler = void Function(List<CheckingElement> options);
 typedef CheckRules = Future<Set<CheckingElement>?> Function(
   List<CheckingElement> options,
@@ -21,9 +20,9 @@ class CheckboxesDialog {
     String title,
     List<CheckingElement> options, {
     List<CheckingElement>? selectedOptions,
-    required ChecksHandler checksHandler,
+    required ChecksHandler? checksHandler,
     CheckRules? checkRules,
-        int? maxNumberOfDisplayedItems,
+    int? maxNumberOfDisplayedItems,
   }) =>
       CheckboxesDialog(
         title,
@@ -42,21 +41,33 @@ class CheckboxesDialog {
   BuildContext? _context;
   int? maxNumberOfDisplayedItems;
 
-  CheckboxesDialog(this.title, this.options,
-      {this.selectedOptions,
-      required ChecksHandler checksHandler,
-      CheckRules? checkRules,
-      this.maxNumberOfDisplayedItems,}) {
+  CheckboxesDialog(
+    this.title,
+    this.options, {
+    this.selectedOptions,
+    required ChecksHandler? checksHandler,
+    CheckRules? checkRules,
+    this.maxNumberOfDisplayedItems,
+  }) {
     _checksHandler = checksHandler;
     _checkRules = checkRules;
   }
 
   CheckboxesDialog show(BuildContext context) {
+    _show(context);
+    return this;
+  }
+
+  Future<List<CheckingElement>?> showAsync(BuildContext context) {
+    return _show(context);
+  }
+
+  Future<List<CheckingElement>?> _show(BuildContext context) async {
     _context = context;
 
     RouteSettings routeSettings = const RouteSettings(name: 'options_dialog');
 
-    showDialog(
+    var res = await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -67,27 +78,26 @@ class CheckboxesDialog {
         );
       },
       routeSettings: routeSettings,
-    ).then((value) {
-      _context = null;
-      _checksHandler = null;
-    });
+    );
 
-    return this;
+    _context = null;
+    _checksHandler = null;
+
+    return res;
   }
 
   Widget _dialogBody(BuildContext context) {
     return _OptionDialogBody(
-      options: options,
-      selectedOptions: selectedOptions,
-      checksHandler: _checksHandler,
-      checkRules: _checkRules,
-      dismiss: dismiss,
-        maxNumberOfDisplayedItems: maxNumberOfDisplayedItems
-    );
+        options: options,
+        selectedOptions: selectedOptions,
+        checksHandler: _checksHandler,
+        checkRules: _checkRules,
+        dismiss: (s) => _dismiss(s),
+        maxNumberOfDisplayedItems: maxNumberOfDisplayedItems);
   }
 
-  void dismiss() {
-    if (_context != null) Navigator.pop(_context!);
+  void _dismiss(List<CheckingElement>? selOptions) {
+    if (_context != null) Navigator.pop(_context!, selOptions);
   }
 }
 
@@ -96,7 +106,7 @@ class _OptionDialogBody extends StatefulWidget {
   List<CheckingElement>? selectedOptions;
   ChecksHandler? checksHandler;
   CheckRules? checkRules;
-  void Function()? dismiss;
+  void Function(List<CheckingElement>?)? dismiss;
   int? maxNumberOfDisplayedItems;
 
   _OptionDialogBody({
@@ -179,18 +189,16 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
           children: [
             TextButton(
               onPressed: () {
-                widget.dismiss?.call();
+                widget.dismiss?.call(selectedOptions.toList());
                 if (widget.checksHandler != null) {
-                  //if (selectedOptions.length > 0) {
-                    widget.checksHandler?.call(selectedOptions.toList());
-                  //}
+                  widget.checksHandler?.call(selectedOptions.toList());
                 }
               },
               child: Text(App.isEnglish ? 'OK' : 'حسنا'),
             ),
             TextButton(
               onPressed: () {
-                widget.dismiss?.call();
+                widget.dismiss?.call(null);
               },
               child: Text(App.isEnglish ? 'Cancel' : 'إلغاء'),
             ),

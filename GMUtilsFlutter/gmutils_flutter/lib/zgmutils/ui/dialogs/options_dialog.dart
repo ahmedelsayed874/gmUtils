@@ -49,11 +49,20 @@ class OptionsDialog<T> {
   bool? _dismissedByOk;
 
   OptionsDialog<T> show(BuildContext Function() context) {
+    _show(context);
+    return this;
+  }
+
+  Future<OptionElement?> showAsync(BuildContext Function() context) {
+    return _show(context);
+  }
+
+  Future<OptionElement?> _show(BuildContext Function() context) async {
     _context = context;
 
     RouteSettings routeSettings = const RouteSettings(name: 'options_dialog');
 
-    showDialog(
+    var r = await showDialog(
       context: context(),
       builder: (context) {
         return AlertDialog(
@@ -69,15 +78,15 @@ class OptionsDialog<T> {
         );
       },
       routeSettings: routeSettings,
-    ).then((value) {
-      _context = null;
-      _optionSelectHandler = null;
+    );
 
-      _onDismiss?.call(_dismissedByOk);
-      _onDismiss = null;
-    });
+    _context = null;
+    _optionSelectHandler = null;
 
-    return this;
+    _onDismiss?.call(_dismissedByOk);
+    _onDismiss = null;
+
+    return r;
   }
 
   Widget _dialogBody(BuildContext context) {
@@ -91,13 +100,9 @@ class OptionsDialog<T> {
     );
   }
 
-  void _dismiss(bool ok) {
+  void _dismiss(bool ok, OptionElement? choice) {
     _dismissedByOk = ok;
-    dismiss();
-  }
-
-  void dismiss() {
-    if (_context != null) Navigator.pop(_context!());
+    if (_context != null) Navigator.pop(_context!(), choice);
   }
 }
 
@@ -105,7 +110,7 @@ class _OptionDialogBody<T> extends StatefulWidget {
   List<OptionElement<T>>? options;
   OptionElement<T>? selectedOption;
   OptionSelectHandler<T>? optionSelectHandler;
-  void Function(bool ok)? dismiss;
+  void Function(bool ok, OptionElement? choice)? dismiss;
   int? maxNumberOfDisplayedItems;
   double estimatedOptionHeight;
 
@@ -184,7 +189,7 @@ class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
             children: [
               TextButton(
                 onPressed: () {
-                  widget.dismiss?.call(true);
+                  widget.dismiss?.call(true, widget.selectedOption);
 
                   if (widget.optionSelectHandler != null) {
                     if (widget.selectedOption != null) {
@@ -202,7 +207,7 @@ class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
               ),
               TextButton(
                 onPressed: () {
-                  widget.dismiss?.call(false);
+                  widget.dismiss?.call(false, null);
                 },
                 child: Text(
                   App.isEnglish ? 'Cancel' : 'إلغاء',

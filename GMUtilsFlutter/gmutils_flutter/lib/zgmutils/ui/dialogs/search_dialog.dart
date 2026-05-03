@@ -133,7 +133,8 @@ class _SearchDialogWidgetState extends State<_SearchDialogWidget> {
     children.add(
       Center(
         child: Text(
-          widget.searchDialogArguments.title ?? (App.isEnglish ? 'search' : 'بحث'),
+          widget.searchDialogArguments.title ??
+              (App.isEnglish ? 'search' : 'بحث'),
           style: AppTheme.textStyleOfScreenTitle(),
         ),
       ),
@@ -223,7 +224,9 @@ class _SearchDialogWidgetState extends State<_SearchDialogWidget> {
           height: dialogHeight,
           child: listView,
         ));
-      } else {
+      }
+      //
+      else {
         children.add(const SizedBox(height: 10));
         children.add(Center(
           child: Text(App.isEnglish ? 'No data' : 'لا توجد بيانات'),
