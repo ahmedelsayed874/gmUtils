@@ -793,12 +793,14 @@ class WebRequestExecutor {
   //============================================================================
 
   Future<WebResponse<Result<DT>>> createDummyResponse<DT>({
-    required String apiName,
+    required String Function(bool forRequest) apiDescription,
     required DummyResponseBuilder<DT> Function() responseBuilder,
     int delayInSeconds = 1,
     String? logsName,
   }) async {
-    Logs.get(logsName).print(() => 'API-Dummy-Request:: http://$apiName');
+    Logs.get(logsName).print(
+      () => 'API-Dummy-Request:: http://${apiDescription(true)}',
+    );
 
     await Future.delayed(Duration(seconds: delayInSeconds));
 
@@ -913,8 +915,9 @@ class WebRequestExecutor {
       }
     }
 
-    Logs.get(logsName)
-        .print(() => 'API-Dummy-Response:: http://$apiName -> $response');
+    Logs.get(logsName).print(
+      () => 'API-Dummy-Response:: http://${apiDescription(false)} -> $response',
+    );
 
     return response;
   }
