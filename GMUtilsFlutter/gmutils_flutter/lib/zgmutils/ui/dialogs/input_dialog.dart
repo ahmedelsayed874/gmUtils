@@ -202,7 +202,7 @@ class InputDialog {
   //
   void _dismiss(String? input) {
     _dismissed = true;
-    if (_context != null) Navigator.pop(_context!());
+    if (_context != null) Navigator.pop(_context!(), input);
   }
 }
 
@@ -293,7 +293,7 @@ class _AlertDialogBodyState extends State<_AlertDialogBody> {
                 }
               },
               child: Text(
-                inputDialog._okButtonText ?? (App.isEnglish ? 'OK' : 'حسنا'),
+                inputDialog._okButtonText ?? (App.isEnglish ? 'OK' : 'موافق'),
                 style: inputDialog._okButtonTextStyle,
               ),
             ),
