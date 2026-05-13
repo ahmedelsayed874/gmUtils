@@ -55,13 +55,13 @@ class Logs {
 
   static core.bool get inDebugMode => _defLogs.inDebugMode;
 
-  static core.Future<core.bool> get writingToLogFileEnabled =>
+  static core.bool get writingToLogFileEnabled =>
       _defLogs.writingToLogFileEnabled;
 
-  static core.Future<core.bool> get writingToPublicLogFileEnabled =>
+  static core.bool get writingToPublicLogFileEnabled =>
       _defLogs.writingToPublicLogFileEnabled;
 
-  static core.Future<core.bool> get writingToPrivateLogFileEnabled =>
+  static core.bool get writingToPrivateLogFileEnabled =>
       _defLogs.writingToPrivateLogFileEnabled;
 
   //----------------------------------------------------------------------------
@@ -227,12 +227,11 @@ abstract class LogsManager {
     return kDebugMode;
   }
 
-  core.Future<core.bool> get writingToLogFileEnabled async {
-    return (await writingToPrivateLogFileEnabled) ||
-        (await writingToPublicLogFileEnabled);
+  core.bool get writingToLogFileEnabled {
+    return (writingToPrivateLogFileEnabled) || (writingToPublicLogFileEnabled);
   }
 
-  core.Future<core.bool> get writingToPublicLogFileEnabled async {
+  core.bool get writingToPublicLogFileEnabled {
     var now = core.DateTime.now();
 
     if (_publicLogFileDeadline != null) {
@@ -242,7 +241,7 @@ abstract class LogsManager {
     return false;
   }
 
-  core.Future<core.bool> get writingToPrivateLogFileEnabled async {
+  core.bool get writingToPrivateLogFileEnabled {
     var now = core.DateTime.now();
 
     if (_privateLogFileDeadline != null) {
