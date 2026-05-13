@@ -16,6 +16,7 @@ import '../storages/app_preferences_storage.dart';
 import '../utils/result.dart';
 import 'fcm_extension.dart';
 
+
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/
 ///https://pub.dev/packages/flutter_local_notifications#scheduled-notifications-and-daylight-saving-time
@@ -192,6 +193,25 @@ class FCM extends IFCM {
   @override
   Future<String?> get deviceToken async {
     int tries = 0;
+
+    if (Platform.isIOS) {
+      String? apnsToken;
+      while (tries < 10) {
+        apnsToken = await messaging.getAPNSToken();
+        if (apnsToken != null) break;
+
+        tries++;
+        Logs.print(() => 'FCM.deviceToken --> getAPNSToken [TRY#$tries]---> Waiting for APNS...');
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      if (apnsToken == null) {
+        Logs.print(() => 'FCM.deviceToken ---> Failed to get APNS token after 10 tries.');
+        // If we don't have APNS, getToken() will definitely fail on iOS
+      }
+    }
+
+    tries = 0;
     dynamic exception;
     while (tries < 10) {
       tries++;
