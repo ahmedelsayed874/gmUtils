@@ -798,7 +798,7 @@ Stream<FcmNotificationProperties> resolveNotification(
 ) {
   /*add this method to main file
     @pragma('vm:entry-point')
-    Stream<FcmNotificationProperties> resolveNotification(RemoteMessage message, String? langCode) {}
+    Stream<FcmNotificationProperties> resolveNotification(RemoteMessage message, String? langCode) async* { yield ...; }
   */
   return main.resolveNotification(message, langCode);
 }
