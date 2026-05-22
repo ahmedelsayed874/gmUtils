@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.RequiresApi;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ import java.util.List;
 
 import gmutils.collections.values.Value3;
 import gmutils.listeners.ActionCallback;
+import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.RecyclerViewPaginationListener;
 import gmutils.listeners.SimpleWindowAttachListener;
 
@@ -278,6 +280,47 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
         if (mOnDataSetChangedListener != null) {
             mOnDataSetChangedListener.onDataSetChanged(this, oldList, newList);
         }
+    }
+
+    public void replaceListWithAnimation(
+            List<T> newList,
+            ActionCallback2<T, T, Boolean> areItemsTheSame,
+            ActionCallback2<T, T, Boolean> areContentsTheSame
+    ) {
+        BaseRecyclerAdapterDiffCallback<T> diffCallback = new BaseRecyclerAdapterDiffCallback<T>(
+                mList,
+                newList
+        ) {
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                if (areItemsTheSame == null) return false;
+                try {
+                    return areItemsTheSame.invoke(
+                            getOldList().get(oldItemPosition),
+                            getNewList().get(newItemPosition)
+                    );
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                if (areContentsTheSame == null) return false;
+                try {
+                    return areContentsTheSame.invoke(
+                            getOldList().get(oldItemPosition),
+                            getNewList().get(newItemPosition)
+                    );
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        };
+
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+        replaceList(newList, false);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     public void add(T item, boolean refresh) {

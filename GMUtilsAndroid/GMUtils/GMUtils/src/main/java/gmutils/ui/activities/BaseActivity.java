@@ -146,12 +146,12 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     }
 
     public ViewModel getViewModel() {
-        if (viewModels.size() == 1) {
-            return viewModels.values().toArray(new ViewModel[0])[0];
-        }
-
-        if (viewModels.isEmpty()) {
+        if (viewModels == null || viewModels.isEmpty()) {
             throw new IllegalStateException("You didn't declare any View Models in getViewModelClasses()");
+        }
+        //
+        else if (viewModels.size() == 1) {
+            return viewModels.values().toArray(new ViewModel[0])[0];
         }
         //
         else {

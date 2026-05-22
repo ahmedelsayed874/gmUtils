@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:ro2ya_telal/zgmutils/utils/date_op2.dart';
 import 'package:shared_preferences/shared_preferences.dart' as shared_pref;
 
 import '../../gm_main.dart';
@@ -9,7 +10,6 @@ import '../../utils/collections/pairs.dart';
 import '../../utils/logs.dart';
 import '../utils/data_security.dart';
 import '../utils/mappable.dart';
-
 
 abstract class IAccount {
   get account_id;
@@ -38,7 +38,11 @@ abstract class IAccountStorage<Account extends IAccount> {
 
   Account? get cachedAccount;
 
-  Future<Pair<String, String>?> getUserNameAndPassword();
+  Future<String?> getUserName();
+
+  Future<String?> getPassword();
+
+  Future<String?> getLastSaveTime();
 
   Future<bool> clear();
 }
@@ -48,6 +52,7 @@ class AccountStorage<Account extends IAccount>
   static const KEY_ACCOUNT = "AccountStorage.ACCOUNT";
   static const KEY_USER_NAME = "AccountStorage.USER_NAME";
   static const KEY_PASSWORD = "AccountStorage.PASSWORD";
+  static const KEY_LAST_SAVE_TIME = "AccountStorage.LAST_SAVE_TIME";
 
   shared_pref.SharedPreferences? __prefs;
   static IAccount? cached_account;
@@ -79,6 +84,13 @@ class AccountStorage<Account extends IAccount>
 
     var b1 = await pref.setString(KEY_ACCOUNT, accountJsonEnc);
     var b2 = await saveUserNameAndPassword(username, password);
+
+    await pref.setString(
+      KEY_LAST_SAVE_TIME,
+      DateOp2.fromDateTime(DateTime.now()).formatForDatabase(
+        dateOnly: false,
+      ),
+    );
 
     AccountStorage.callObservers(account);
 
@@ -112,9 +124,10 @@ class AccountStorage<Account extends IAccount>
 
   @override
   Future<bool> updateAccount(Account account) async {
-    Pair? credentials = await getUserNameAndPassword();
-    if (credentials != null) {
-      return await saveAccount(account, credentials.value1, credentials.value2);
+    String? un = await getUserName();
+    String? pw = await getPassword();
+    if (un != null && pw != null) {
+      return await saveAccount(account, un, pw);
     }
     return false;
   }
@@ -146,24 +159,43 @@ class AccountStorage<Account extends IAccount>
   //----------------------------------------------------------------------------
 
   @override
-  Future<Pair<String, String>?> getUserNameAndPassword() async {
+  Future<String?> getUserName() async {
     var pref = await _prefs;
 
     var un = pref.getString(KEY_USER_NAME);
-    var pw = pref.getString(KEY_PASSWORD);
+    cached_username = null;
 
-    if (un != null && un.isNotEmpty && pw != null && pw.isNotEmpty) {
+    if (un != null && un.isNotEmpty) {
       un = await _dec(un);
-      pw = await _dec(pw);
 
       cached_username = un;
 
-      return Pair(value1: un, value2: pw);
+      return un;
     }
-    //
-    else {
-      return null;
+
+    return null;
+  }
+
+  @override
+  Future<String?> getPassword() async {
+    var pref = await _prefs;
+
+    var pw = pref.getString(KEY_PASSWORD);
+
+    if (pw != null && pw.isNotEmpty) {
+      pw = await _dec(pw);
+      return pw;
     }
+
+    return null;
+  }
+
+  //----------------------------------------------------------------------------
+
+  @override
+  Future<String?> getLastSaveTime() async {
+    var pref = await _prefs;
+    return pref.getString(KEY_LAST_SAVE_TIME);
   }
 
   //----------------------------------------------------------------------------

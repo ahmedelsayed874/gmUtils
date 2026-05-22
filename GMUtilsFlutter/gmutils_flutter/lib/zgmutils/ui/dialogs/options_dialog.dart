@@ -198,7 +198,7 @@ class _OptionDialogBodyState<T> extends State<_OptionDialogBody<T>> {
                   }
                 },
                 child: Text(
-                  App.isEnglish ? 'OK' : 'حسنا',
+                  App.isEnglish ? 'OK' : 'موافق',
                   style: AppTheme.defaultTextStyle(
                     fontWeight: FontWeight.bold,
                     textColor: AppTheme.appColors?.primary,

@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
-import '../data_utils/storages/general_storage.dart';
 import 'date_op.dart';
 import 'files/files.dart';
 
@@ -48,29 +47,21 @@ class Logs {
   static void setLogFileDeadline({
     core.String? publicLogFileDeadline,
     core.String? privateLogFileDeadline,
-    core.bool saveDate = false,
   }) =>
       _defLogs.setLogFileDeadline(
         publicLogFileDeadline: publicLogFileDeadline,
         privateLogFileDeadline: privateLogFileDeadline,
-        saveDate: saveDate,
       );
-
-  static core.Future<core.DateTime?> get savedPublicLogsDeadline =>
-      _defLogs.savedPublicLogsDeadline;
-
-  static core.Future<core.DateTime?> get savedPrivateLogsDeadline =>
-      _defLogs.savedPrivateLogsDeadline;
 
   static core.bool get inDebugMode => _defLogs.inDebugMode;
 
-  static core.Future<core.bool> get writingToLogFileEnabled =>
+  static core.bool get writingToLogFileEnabled =>
       _defLogs.writingToLogFileEnabled;
 
-  static core.Future<core.bool> get writingToPublicLogFileEnabled =>
+  static core.bool get writingToPublicLogFileEnabled =>
       _defLogs.writingToPublicLogFileEnabled;
 
-  static core.Future<core.bool> get writingToPrivateLogFileEnabled =>
+  static core.bool get writingToPrivateLogFileEnabled =>
       _defLogs.writingToPrivateLogFileEnabled;
 
   //----------------------------------------------------------------------------
@@ -110,8 +101,15 @@ class Logs {
 
     for (var logs in allLogs) {
       if (content.isNotEmpty) content += '\n';
-      content +=
-          '=>${logs.logsSet ?? 'DEF'}::${await logs.getLastLogsContent(numOfFiles: numOfFiles, encrypted: encrypted, fromPublicLogs: fromPublicLogs)}';
+      content += ''
+          '////////////////////////////////////////'
+          '${logs.logsSet ?? 'DEF'}'
+          '////////////////////////////////////////\n'
+          '${await logs.getLastLogsContent(
+        numOfFiles: numOfFiles,
+        encrypted: encrypted,
+        fromPublicLogs: fromPublicLogs,
+      )}';
     }
 
     return content;
@@ -195,11 +193,10 @@ abstract class LogsManager {
   void setLogFileDeadline({
     core.String? publicLogFileDeadline,
     core.String? privateLogFileDeadline,
-    core.bool saveDate = false,
   }) {
     if (publicLogFileDeadline == null && privateLogFileDeadline == null) {
       core.print(
-        'setLogsFileDeadline '
+        'LOGS.setLogsFileDeadline '
         'CALLED BUT WITHOUT PROVIDING DATES '
         '(LOGS NAME: ${_getLogsSetStr()})',
       );
@@ -211,12 +208,7 @@ abstract class LogsManager {
         convertToLocalTime: true,
       );
       if (dt != null) {
-        _publicLogFileDeadline = dt.microsecondsSinceEpoch;
-        if (saveDate) {
-          GeneralStorage.o(
-            'logs',
-          ).save('deadline${_getLogsSetStr()}_pub', publicLogFileDeadline);
-        }
+        _publicLogFileDeadline = dt.millisecondsSinceEpoch;
       }
     }
 
@@ -226,37 +218,8 @@ abstract class LogsManager {
         convertToLocalTime: true,
       );
       if (dt != null) {
-        _privateLogFileDeadline = dt.microsecondsSinceEpoch;
-        if (saveDate) {
-          GeneralStorage.o(
-            'logs',
-          ).save('deadline${_getLogsSetStr()}_prv', privateLogFileDeadline);
-        }
+        _privateLogFileDeadline = dt.millisecondsSinceEpoch;
       }
-    }
-  }
-
-  core.Future<core.DateTime?> get savedPublicLogsDeadline async {
-    try {
-      var d = await GeneralStorage.o(
-        'logs',
-      ).retrieve('deadline${_getLogsSetStr()}_pub');
-      var dt = DateOp().parse(d, convertToLocalTime: true);
-      return dt;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  core.Future<core.DateTime?> get savedPrivateLogsDeadline async {
-    try {
-      var d = await GeneralStorage.o(
-        'logs',
-      ).retrieve('deadline${_getLogsSetStr()}_prv');
-      var dt = DateOp().parse(d, convertToLocalTime: true);
-      return dt;
-    } catch (e) {
-      return null;
     }
   }
 
@@ -264,41 +227,26 @@ abstract class LogsManager {
     return kDebugMode;
   }
 
-  core.Future<core.bool> get writingToLogFileEnabled async {
-    return (await writingToPrivateLogFileEnabled) ||
-        (await writingToPublicLogFileEnabled);
+  core.bool get writingToLogFileEnabled {
+    return (writingToPrivateLogFileEnabled) || (writingToPublicLogFileEnabled);
   }
 
-  core.Future<core.bool> get writingToPublicLogFileEnabled async {
+  core.bool get writingToPublicLogFileEnabled {
     var now = core.DateTime.now();
-
-    if (_publicLogFileDeadline == null) {
-      var dl = await savedPublicLogsDeadline;
-      _publicLogFileDeadline = dl?.millisecondsSinceEpoch;
-    }
 
     if (_publicLogFileDeadline != null) {
       return now.millisecondsSinceEpoch < _publicLogFileDeadline!;
     }
 
-    _publicLogFileDeadline ??= 0;
-
     return false;
   }
 
-  core.Future<core.bool> get writingToPrivateLogFileEnabled async {
+  core.bool get writingToPrivateLogFileEnabled {
     var now = core.DateTime.now();
-
-    if (_privateLogFileDeadline == null) {
-      var dl = await savedPrivateLogsDeadline;
-      _privateLogFileDeadline = dl?.millisecondsSinceEpoch;
-    }
 
     if (_privateLogFileDeadline != null) {
       return now.millisecondsSinceEpoch < _privateLogFileDeadline!;
     }
-
-    _privateLogFileDeadline ??= 0;
 
     return false;
   }
@@ -346,7 +294,8 @@ abstract class LogsManager {
     core.bool printMethodPath = true,
     core.int downTo = 2,
     core.Object? Function()? extraInfo,
-  }) => _printMethod();
+  }) =>
+      _printMethod();
 
   void _printMethod({
     core.bool printMethodPath = false,
@@ -447,7 +396,7 @@ abstract class LogsManager {
           files.removeAt(0).deleteSync();
         } catch (e) {
           if (kDebugMode) {
-            core.print(e);
+            core.print('LOGS._createLogFileIfNotExist ----> EXCEPTION: $e');
           }
         }
       }
@@ -456,7 +405,7 @@ abstract class LogsManager {
     if (kDebugMode) {
       _files?.localFile.then((file) {
         if (kDebugMode) {
-          core.print('****** LOG-FILE-PATH: ${file.path}');
+          core.print('****** LOGS-FILE-PATH: ${file.path}');
         }
       });
     }
@@ -554,7 +503,7 @@ abstract class LogsManager {
     var content = '';
     var i = 0;
     while (i < numOfFiles && i < files.length) {
-      if (content.isNotEmpty) content += '\n\n';
+      if (content.isNotEmpty) content += ' \n \n';
 
       var file = File(files.elementAt(files.length - i - 1).path);
 
@@ -581,9 +530,10 @@ abstract class LogsManager {
       return '';
     }
 
-    return '${Files.extractFileName(file)}'
-        ':-------------------------\n'
-        '$content';
+    return '${Files.extractFileName(file)}:\n'
+        '[START]----------------------------------\n'
+        '$content\n'
+        '[END]----------------------------------\n';
   }
 
   core.Future<core.String> _encodeFileContent(File file) async {

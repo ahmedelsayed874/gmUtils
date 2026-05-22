@@ -18,7 +18,7 @@ class MiscDataSourceMockup extends MiscDataSource {
     required String? attachmentType,
   }) async {
     var response = await WebRequestExecutor().createDummyResponse(
-      apiName:
+      apiDescription: (x) =>
           'uploadFile(file: ${file.path}, fileName: $fileName, attachmentType: $attachmentType)',
       responseBuilder: () => DummyResponseBuilder(
         dataMappable: AttachmentMapper(),
@@ -41,7 +41,7 @@ class MiscDataSourceMockup extends MiscDataSource {
     required String filePath,
   }) async {
     var response = await WebRequestExecutor().createDummyResponse(
-      apiName: 'deleteFile(filePath: $filePath)',
+      apiDescription: (d) => 'deleteFile(filePath: $filePath)',
       responseBuilder: () {
         var e = (Random().nextInt(100) > 97);
 

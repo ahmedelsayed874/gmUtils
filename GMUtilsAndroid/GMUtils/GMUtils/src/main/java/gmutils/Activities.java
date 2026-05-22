@@ -9,15 +9,21 @@ import android.os.Bundle;
 import androidx.annotation.AnimRes;
 import androidx.fragment.app.Fragment;
 
+import gmutils.listeners.ResultCallback;
+import gmutils.ui.activities.BaseActivity;
+import gmutils.ui.activities.BaseLegacyActivity;
+import gmutils.ui.fragments.BaseFragment;
+import gmutils.ui.fragments.BaseLegacyFragment;
+
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
  * Android/iOS Developer (Java/Kotlin, Swift) also Flutter (Dart)
  * Have precedent experience with:
- *      - (C/C++, C#) languages
- *      - .NET environment
- *      - AVR Microcontrollers
+ * - (C/C++, C#) languages
+ * - .NET environment
+ * - AVR Microcontrollers
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
@@ -66,7 +72,6 @@ public class Activities {
 
     //----------------------------------------------------------------------------------------------
 
-
     public static Intent createIntent(Class<?> activityClass, Context context, Bundle extraData) {
         return createIntent(activityClass, context, extraData, false, false);
     }
@@ -111,7 +116,6 @@ public class Activities {
         return bundle;
     }
 
-
     //----------------------------------------------------------------------------------------------
 
     public static void bringToTop(Class<?> activity, Context context) {
@@ -122,6 +126,7 @@ public class Activities {
         start(activity, context, extraData, 0, 0, true, false);
     }
 
+    //----------------------------------------------------------------------------------------------
 
     public static void startNewTask(Class<?> activity, Context context, Bundle extraData) {
         start(activity, context, extraData, DEFAULT_TRANSITION_RES, 0, false, true);
@@ -133,8 +138,19 @@ public class Activities {
 
     //----------------------------------------------------------------------------------------------
 
-
     public static void startForResult(Class<?> activity, Activity context, Bundle extraData, int requestCode) {
+        _startForResult(activity, context, extraData, requestCode, null);
+    }
+
+    public static void startForResult(Class<?> activity, BaseActivity context, Bundle extraData, int requestCode, ResultCallback<Intent> callback) {
+        _startForResult(activity, context, extraData, requestCode, callback);
+    }
+
+    public static void startForResult(Class<?> activity, BaseLegacyActivity context, Bundle extraData, int requestCode, ResultCallback<Intent> callback) {
+        _startForResult(activity, context, extraData, requestCode, callback);
+    }
+
+    private static void _startForResult(Class<?> activity, Activity context, Bundle extraData, int requestCode, ResultCallback<Intent> callback) {
         Intent intent = createIntent(activity, context, extraData);
         Bundle bundle = createAnimationBundle(
                 context,
@@ -143,10 +159,30 @@ public class Activities {
 
         if (interceptor != null && !interceptor.allowStartActivity(context, intent)) return;
 
-        context.startActivityForResult(intent, requestCode, bundle);
+        if (context instanceof BaseActivity && callback != null) {
+            ((BaseActivity) context).startActivityForResult(intent, requestCode, bundle, callback);
+        }
+        //
+        else if (context instanceof BaseLegacyActivity && callback != null) {
+            ((BaseLegacyActivity) context).startActivityForResult(intent, requestCode, bundle, callback);
+        }
+        //
+        else {
+            context.startActivityForResult(intent, requestCode, bundle);
+        }
     }
 
+    //---------------------------------
+
     public static void startForResult(Class<?> activity, Fragment fragment, Bundle extraData, int requestCode) {
+        _startForResult(activity, fragment, extraData, requestCode, null);
+    }
+
+    public static void startForResult(Class<?> activity, BaseFragment fragment, Bundle extraData, int requestCode, ResultCallback<Intent> callback) {
+        _startForResult(activity, fragment, extraData, requestCode, callback);
+    }
+
+    private static void _startForResult(Class<?> activity, Fragment fragment, Bundle extraData, int requestCode, ResultCallback<Intent> callback) {
         Intent intent = createIntent(activity, fragment.getContext(), extraData);
         Bundle bundle = createAnimationBundle(
                 fragment.getContext(),
@@ -155,19 +191,42 @@ public class Activities {
 
         if (interceptor != null && !interceptor.allowStartActivity(fragment, intent)) return;
 
-        fragment.startActivityForResult(intent, requestCode, bundle);
+        if (fragment instanceof BaseFragment && callback != null) {
+            ((BaseFragment) fragment).startActivityForResult(intent, requestCode, bundle, callback);
+        }
+        //
+        else {
+            fragment.startActivityForResult(intent, requestCode, bundle);
+        }
     }
 
+    //---------------------------------
+
     public static void startForResult(Class<?> activity, android.app.Fragment fragment, Bundle extraData, int requestCode) {
+        _startForResult(activity, fragment, extraData, requestCode, null);
+    }
+
+    public static void startForResult(Class<?> activity, BaseLegacyFragment fragment, Bundle extraData, int requestCode, ResultCallback<Intent> callback) {
+        _startForResult(activity, fragment, extraData, requestCode, callback);
+    }
+
+    private static void _startForResult(Class<?> activity, android.app.Fragment fragment, Bundle extraData, int requestCode, ResultCallback<Intent> callback) {
         Intent intent = createIntent(activity, fragment.getActivity(), extraData);
         Bundle bundle = createAnimationBundle(
                 fragment.getActivity(),
                 DEFAULT_TRANSITION_RES,
-                0);
+                0
+        );
 
         if (interceptor != null && !interceptor.allowStartActivity(fragment, intent)) return;
 
-        fragment.startActivityForResult(intent, requestCode, bundle);
+        if (fragment instanceof BaseLegacyFragment && callback != null) {
+            ((BaseLegacyFragment) fragment).startActivityForResult(intent, requestCode, bundle, callback);
+        }
+        //
+        else {
+            fragment.startActivityForResult(intent, requestCode, bundle);
+        }
     }
 
     //----------------------------------------------------------------------------------------------

@@ -514,9 +514,36 @@ public class BaseViewModel extends AndroidViewModel {
 
     //----------------------------------------------------------------------------------------------
 
-    public void postProgressStatus(ProgressStatus progressStatus) {
+    private boolean isHideProgressCalled = false;
+
+    public void postProgressStatus(@NotNull ProgressStatus progressStatus) {
+        if (progressStatus instanceof ProgressStatus.Hide) {
+            isHideProgressCalled = true;
+        }
+
         progressStatusLiveData.postValue(progressStatus);
     }
+
+    public void postProgressStatusLazily(@NotNull ProgressStatus progressStatus) {
+        postProgressStatusLazily(progressStatus, 600);
+    }
+
+    public void postProgressStatusLazily(@NotNull ProgressStatus progressStatus, long delay) {
+        if (progressStatus instanceof ProgressStatus.Show) {
+            isHideProgressCalled = false;
+
+            runOnUiThread(() -> {
+                if (!isHideProgressCalled) postProgressStatus(progressStatus);
+            }, delay);
+        }
+
+        //
+        else {
+            postProgressStatus(progressStatus);
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     public void postMessage(Message message) {
         alertMessageLiveData.postValue(message);

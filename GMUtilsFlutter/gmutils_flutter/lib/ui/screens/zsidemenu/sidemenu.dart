@@ -208,7 +208,6 @@ class _SidemenuState extends BaseState<Sidemenu> implements SidemenuDelegate {
               var dl = DateOp().formatForDatabase(dateTime, dateOnly: false);
               Logs.setLogFileDeadline(
                 privateLogFileDeadline: dl,
-                saveDate: true,
               );
             },
           ),

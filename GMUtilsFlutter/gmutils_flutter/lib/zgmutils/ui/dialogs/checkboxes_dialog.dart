@@ -194,7 +194,7 @@ class _OptionDialogBodyState extends State<_OptionDialogBody> {
                   widget.checksHandler?.call(selectedOptions.toList());
                 }
               },
-              child: Text(App.isEnglish ? 'OK' : 'حسنا'),
+              child: Text(App.isEnglish ? 'OK' : 'موافق'),
             ),
             TextButton(
               onPressed: () {

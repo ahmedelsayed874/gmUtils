@@ -79,7 +79,7 @@ abstract class Mappable<T> {
 
   Map<String, dynamic> toMap(T object) {
     throw UnimplementedError(
-        'implement this method to handle this object --> $object');
+        'implement this method to handle this object --> type: ${object?.runtimeType} --> $object');
   }
 
   ///NS: null-safety
