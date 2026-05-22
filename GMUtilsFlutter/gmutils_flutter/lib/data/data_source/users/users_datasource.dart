@@ -83,8 +83,16 @@ abstract class UsersDataSource {
 
   //----------------------------------------------------------------------------
 
-  Future<Pair<String, String>?> get savedCredentials =>
-      accountStorage.getUserNameAndPassword();
+  Future<Pair<String, String>?> get savedCredentials async {
+    var un = await accountStorage.getUserName();
+    var pw = await accountStorage.getPassword();
+
+    if (un != null && pw != null) {
+      return Pair(value1: un, value2: pw);
+    } else {
+      return null;
+    }
+  }
 
   Future<AuthUserAccount?> get savedUserAccount async {
     var account = await accountStorage.account;
