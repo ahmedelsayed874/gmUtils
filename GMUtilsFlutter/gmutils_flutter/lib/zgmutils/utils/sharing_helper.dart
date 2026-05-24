@@ -2,18 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../gm_main.dart';
+import 'logs.dart';
 
 class SharingHelper {
-  static Future<void> share({
+  static Future<bool> share({
     required String text,
     required String? subject,
     bool careToBoxPosition = true,
     BuildContext? context,
   }) async {
     var context2 = context ?? App.context;
-    if (careToBoxPosition && !context2.mounted) return;
+    if (careToBoxPosition && !context2.mounted) {
+      Logs.printMethod(extraInfo: () => 'ERROR: context not mounted.');
+      return false;
+    }
+
     await Future.delayed(const Duration(milliseconds: 150));
-    if (careToBoxPosition && !context2.mounted) return;
+    if (careToBoxPosition && !context2.mounted) {
+      Logs.printMethod(extraInfo: () => 'ERROR:: context not mounted.');
+    }
 
     Rect? sharePositionOrigin;
 
@@ -25,20 +32,22 @@ class SharingHelper {
       }
       //
       else {
-        debugPrint("❌ RenderBox not found for Share");
+        Logs.printMethod(extraInfo: () => "❌ RenderBox not found for Share");
       }
     }
 
-    await SharePlus.instance.share(
+    var res = await SharePlus.instance.share(
       ShareParams(
         text: text,
         subject: subject,
         sharePositionOrigin: sharePositionOrigin,
       ),
     );
+
+    return res.status == ShareResultStatus.success;
   }
 
-  static Future<void> shareFile({
+  static Future<bool> shareFile({
     required String text,
     required String outputFilePath,
     String? mimeType,
@@ -56,14 +65,16 @@ class SharingHelper {
       }
       //
       else {
-        debugPrint("❌ RenderBox not found for Share");
+        Logs.printMethod(extraInfo: () => "❌ RenderBox not found for Share");
       }
     }
 
-    await SharePlus.instance.share(ShareParams(
+    var res = await SharePlus.instance.share(ShareParams(
       text: text,
       files: [XFile(outputFilePath, mimeType: mimeType)],
       sharePositionOrigin: sharePositionOrigin,
     ));
+
+    return res.status == ShareResultStatus.success;
   }
 }
