@@ -37,8 +37,9 @@ class GMMain {
     WidgetsFlutterBinding.ensureInitialized();
 
     if (localNotificationsConfigurations != null) {
-      await NotificationsManager.instance
-          .init(localNotificationsConfigurations);
+      await NotificationsManager.instance.init(
+        localNotificationsConfigurations,
+      );
     }
 
     if (fcmRequirements != null && localNotificationsConfigurations != null) {
@@ -46,12 +47,8 @@ class GMMain {
     }
 
     if (fcmRequirements != null) {
-      await Firebase.initializeApp(
-        options: fcmRequirements.firebaseOptions,
-      );
-      await FCM.instance.init(
-        fcmRequirements.fcmConfigurations,
-      );
+      await Firebase.initializeApp(options: fcmRequirements.firebaseOptions);
+      await FCM.instance.init(fcmRequirements.fcmConfigurations);
       fcmRequirements.onFcmInitialized?.call(FCM.instance);
     }
 
@@ -59,27 +56,25 @@ class GMMain {
       ScreenUtils.waitViewController = customWaitViewController;
     }
 
-    AppPreferencesStorage()
-        .savedAppPreferences(defaultAppPreferences: defaultAppPreferences)
-        .then(
-      (value) {
-        App._appPreferences = value;
-
-        final root = App(
-          appName: appName,
-          measurements: measurements,
-          appColors: appColors,
-          toolbarTitleFontFamily: toolbarTitleFontFamily,
-          defaultFontFamily: defaultFontFamily,
-          //startScreenWrapper: startScreenWrapper,
-          startScreen: startScreen,
-          screensRoutes: screensRoutes,
-          onInitialize: onInitialize,
-        );
-
-        runApp(appRoot?.call(root) ?? root);
-      },
+    var pref = await AppPreferencesStorage().savedAppPreferences(
+      defaultAppPreferences: defaultAppPreferences,
     );
+
+    App._appPreferences = pref;
+
+    final root = App(
+      appName: appName,
+      measurements: measurements,
+      appColors: appColors,
+      toolbarTitleFontFamily: toolbarTitleFontFamily,
+      defaultFontFamily: defaultFontFamily,
+      //startScreenWrapper: startScreenWrapper,
+      startScreen: startScreen,
+      screensRoutes: screensRoutes,
+      onInitialize: onInitialize,
+    );
+
+    runApp(appRoot?.call(root) ?? root);
   }
 }
 
@@ -134,11 +129,10 @@ class App extends StatefulWidget {
 
   //region observer
   static Map<
-      String /*category*/,
-      Map<
-          String /*name*/,
-          ObserverDelegate /*observer(name, args)*/
-          >>? _observers;
+    String /*category*/,
+    Map<String /*name*/, ObserverDelegate /*observer(name, args)*/>
+  >?
+  _observers;
 
   static void addObserver({
     required String category,
@@ -150,10 +144,7 @@ class App extends StatefulWidget {
     _observers![category]![observerName] = observer;
   }
 
-  static void removeObserver({
-    required String category,
-    String? observerName,
-  }) {
+  static void removeObserver({required String category, String? observerName}) {
     if (observerName == null) {
       _observers?.remove(category);
     }
@@ -217,10 +208,13 @@ class App extends StatefulWidget {
       'replacement': replacement,
     });*/
     for (var log in Logs.allLogs) {
-      log.print(() => '\n'
-          '=============================='
-          '[ NAVTO:: $screen ]'
-          '==============================\n');
+      log.print(
+        () =>
+            '\n'
+            '=============================='
+            '[ NAVTO:: $screen ]'
+            '==============================\n',
+      );
     }
 
     RouteSettings? settings = RouteSettings(name: null, arguments: args);
@@ -235,30 +229,25 @@ class App extends StatefulWidget {
     final route = animate
         ? PageRouteBuilder<RT>(
             transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder: (
-              context,
-              animation,
-              secondaryAnimation,
-              child,
-            ) {
-              const begin = Offset(1.0, 0.0);
-              const end = Offset.zero;
-              final tween = Tween(begin: begin, end: end)
-                  .chain(CurveTween(curve: Curves.ease));
-              return SlideTransition(
-                position: animation.drive(tween),
-                child: child,
-              );
-            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  final tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: Curves.ease));
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
 
             //
             pageBuilder: pageBuilder,
             settings: settings,
           )
-        : PageRouteBuilder<RT>(
-            pageBuilder: pageBuilder,
-            settings: settings,
-          );
+        : PageRouteBuilder<RT>(pageBuilder: pageBuilder, settings: settings);
 
     final nav = Navigator.of(context ?? App.context);
 
@@ -285,11 +274,14 @@ class App extends StatefulWidget {
   static void navBack<T extends Object?>([T? result]) {
     //navigationObserver?.navBack?.call(result);
     for (var log in Logs.allLogs) {
-      log.print(() => '\n'
-          '=============================='
-          '[NAVBACK]'
-          '=============================='
-          '\n');
+      log.print(
+        () =>
+            '\n'
+            '=============================='
+            '[NAVBACK]'
+            '=============================='
+            '\n',
+      );
     }
 
     Navigator.of(context).pop(result);
@@ -315,7 +307,8 @@ class App extends StatefulWidget {
     required String langCode,
   }) {
     Logs.print(
-      () => '[GMMain] App.changeAppLanguage(langCode: $langCode) ... '
+      () =>
+          '[GMMain] App.changeAppLanguage(langCode: $langCode) ... '
           'current is en? ${_appPreferences.langCode}',
     );
 
@@ -336,8 +329,11 @@ class App extends StatefulWidget {
     required BuildContext context,
     required bool? toLight,
   }) {
-    Logs.print(() => '[GMMain] App.changeAppAppearance(toLight: $toLight) ... '
-        'current is light? ${_appPreferences.isLightMode}');
+    Logs.print(
+      () =>
+          '[GMMain] App.changeAppAppearance(toLight: $toLight) ... '
+          'current is light? ${_appPreferences.isLightMode}',
+    );
 
     if (_appPreferences.isLightMode != null &&
         _appPreferences.isLightMode == toLight) {
@@ -369,80 +365,82 @@ class _AppState extends State<App> {
       App._context = context;
     }
 
-    App._appPreferences.langCode ??=
-        (Platform.localeName.toLowerCase().substring(0, 2));
+    App._appPreferences.langCode ??= (Platform.localeName
+        .toLowerCase()
+        .substring(0, 2));
 
     App._appPreferences.isLightMode ??=
         MediaQuery.platformBrightnessOf(context) == Brightness.light;
 
+    AppPreferencesStorage().updateAppPreferences(App._appPreferences);
+
     //------------------------------------------------------------------------
 
-    final lightColors = widget.appColors?.call(context, true) ??
+    final lightColors =
+        widget.appColors?.call(context, true) ??
         AppColors.def(isLightMode: true);
-    final darkColors = widget.appColors?.call(context, false) ??
+    final darkColors =
+        widget.appColors?.call(context, false) ??
         AppColors.def(isLightMode: false);
     widget.appColors?.call(context, App.isLightTheme);
 
     theme(AppColors colors) => ThemeData(
-          primarySwatch: colors.primarySwatch,
-          scaffoldBackgroundColor: colors.background,
-          //bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
-          bottomAppBarTheme: BottomAppBarThemeData(color: colors.toolbar),
-          cardTheme: CardTheme.of(context).copyWith(
-            color: colors.card,
-            surfaceTintColor: colors.card,
-          ),
-          hintColor: colors.hint,
-          // iconTheme: colors.isLightMode ? null : IconThemeData(color: colors.black,),
-          inputDecorationTheme: InputDecorationTheme(
-            hintStyle: AppTheme.defaultTextStyle(
-              textColor: colors.hint,
-              fontWeight: FontWeight.normal,
+      primarySwatch: colors.primarySwatch,
+      scaffoldBackgroundColor: colors.background,
+      //bottomAppBarTheme: BottomAppBarTheme(color: colors.toolbar),
+      bottomAppBarTheme: BottomAppBarThemeData(color: colors.toolbar),
+      cardTheme: CardTheme.of(
+        context,
+      ).copyWith(color: colors.card, surfaceTintColor: colors.card),
+      hintColor: colors.hint,
+      // iconTheme: colors.isLightMode ? null : IconThemeData(color: colors.black,),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: AppTheme.defaultTextStyle(
+          textColor: colors.hint,
+          fontWeight: FontWeight.normal,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(colors.primary),
+          textStyle: WidgetStatePropertyAll(
+            AppTheme.defaultTextStyle(
+              textColor: colors.primaryVariant,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(colors.primary),
-              textStyle: WidgetStatePropertyAll(AppTheme.defaultTextStyle(
-                textColor: colors.primaryVariant,
-                fontWeight: FontWeight.w600,
-              )),
-              foregroundColor: WidgetStatePropertyAll(colors.primaryVariant),
-              shape: WidgetStatePropertyAll(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
+          foregroundColor: WidgetStatePropertyAll(colors.primaryVariant),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          ),
+        ),
+      ),
+      colorScheme: colors.isLightMode
+          ? ColorScheme.light(
+              primary: colors.primary,
+              secondary: colors.primary,
+              background: colors.background,
+              surface: colors.background,
+            )
+          : ColorScheme.dark(
+              primary: colors.primary,
+              secondary: colors.primary,
+              background: colors.background,
+              surface: colors.background,
             ),
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: ButtonStyle(
-              shape: WidgetStatePropertyAll(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-            ),
-          ),
-          colorScheme: colors.isLightMode
-              ? ColorScheme.light(
-                  primary: colors.primary,
-                  secondary: colors.primary,
-                  background: colors.background,
-                  surface: colors.background,
-                )
-              : ColorScheme.dark(
-                  primary: colors.primary,
-                  secondary: colors.primary,
-                  background: colors.background,
-                  surface: colors.background,
-                ),
-          brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
-          bottomSheetTheme: BottomSheetThemeData(
-            backgroundColor: colors.background,
-            surfaceTintColor: colors.background,
-          ),
-        );
+      brightness: colors.isLightMode ? Brightness.light : Brightness.dark,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colors.background,
+        surfaceTintColor: colors.background,
+      ),
+    );
 
     return MaterialApp(
       title: widget.appName?.call(context) ?? '',
@@ -452,8 +450,8 @@ class _AppState extends State<App> {
       themeMode: App._appPreferences.isLightMode == null
           ? ThemeMode.system
           : (App._appPreferences.isLightMode!
-              ? ThemeMode.light
-              : ThemeMode.dark),
+                ? ThemeMode.light
+                : ThemeMode.dark),
       //
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -536,8 +534,11 @@ class _StarterWidget extends StatefulWidget {
 class _StarterWidgetState extends State<_StarterWidget> {
   @override
   Widget build(BuildContext context) {
-    Logs.print(() => '[GMMain] _StarterWidgetState.build() '
-        '---> startScreen: ${widget.startScreen}');
+    Logs.print(
+      () =>
+          '[GMMain] _StarterWidgetState.build() '
+          '---> startScreen: ${widget.startScreen}',
+    );
 
     if (App._context?.widget == null) {
       App._context = context;
@@ -547,7 +548,8 @@ class _StarterWidgetState extends State<_StarterWidget> {
         widget.measurements?.call(context) ?? AppMeasurement.def();
 
     var isLight = App.isLightTheme;
-    var appColors = widget.appColors?.call(context, isLight) ??
+    var appColors =
+        widget.appColors?.call(context, isLight) ??
         AppColors.def(isLightMode: isLight);
 
     //init app theme
@@ -686,7 +688,8 @@ extension GMRouter on BuildContext {
     GMRouterOption? option,
     LogsManager? logger,
   }) async {
-    log() => '\n'
+    log() =>
+        '\n'
         'GMRouter.go>=============================='
         '[ $path / option: ${option?.name} / arguments: $arguments]'
         '==============================\n';
@@ -697,11 +700,7 @@ extension GMRouter on BuildContext {
     }
 
     if (option == null) {
-      return Navigator.pushNamed<T>(
-        this,
-        path,
-        arguments: arguments,
-      );
+      return Navigator.pushNamed<T>(this, path, arguments: arguments);
     }
     //
     else if (option == GMRouterOption.singleTop) {
@@ -732,12 +731,7 @@ extension GMRouter on BuildContext {
     GMRouterOption? option,
     LogsManager? logger,
   }) {
-    return go<T>(
-      path,
-      arguments: arguments,
-      option: option,
-      logger: logger,
-    );
+    return go<T>(path, arguments: arguments, option: option, logger: logger);
   }
 
   //---------------------------------------
@@ -749,7 +743,8 @@ extension GMRouter on BuildContext {
   //---------------------------------------
 
   void back([result, LogsManager? logger]) {
-    log() => '\n'
+    log() =>
+        '\n'
         'GMRouter.pop>==============================\n'
         '[ result: $result ]\n'
         '==============================\n';

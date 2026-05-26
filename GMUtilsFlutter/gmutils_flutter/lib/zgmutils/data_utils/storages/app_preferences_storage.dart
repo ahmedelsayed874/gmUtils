@@ -1,4 +1,4 @@
-
+import '../../utils/logs.dart';
 import 'general_storage.dart';
 
 class AppPreferencesStorage {
@@ -24,13 +24,44 @@ class AppPreferencesStorage {
     );
   }
 
+  Future<bool> updateAppPreferences(AppPreferences appPreferences) async {
+    Logs.print(
+      () =>
+          '💡$runtimeType.updateAppPreferences('
+          'langCode: ${appPreferences.langCode},'
+          'isLightMode: ${appPreferences.isLightMode},'
+          ')',
+    );
+
+    bool b1 = true;
+    if (appPreferences.langCode != null) {
+      b1 = await setLanguage(appPreferences.langCode!);
+    }
+
+    bool b2 = true;
+    if (appPreferences.isLightMode != null) {
+      b2 = await setAppearance(appPreferences.isLightMode!);
+    }
+
+    return b1 && b2;
+  }
+
   Future<AppPreferences> savedAppPreferences({
     AppPreferences? defaultAppPreferences,
   }) async {
-    return AppPreferences(
-      langCode: (await getLanguage()) ?? defaultAppPreferences?.langCode,
-      isLightMode: (await isLightMode()) ?? defaultAppPreferences?.isLightMode,
-    );
+    var _langCode = await getLanguage();
+    if (_langCode == null) {
+      _langCode = defaultAppPreferences?.langCode;
+      if (_langCode != null) setLanguage(_langCode);
+    }
+
+    var _isLightMode = await isLightMode();
+    if (_isLightMode == null) {
+      _isLightMode = defaultAppPreferences?.isLightMode;
+      if (_isLightMode != null) setAppearance(_isLightMode);
+    }
+
+    return AppPreferences(langCode: _langCode, isLightMode: _isLightMode);
   }
 }
 
@@ -39,10 +70,7 @@ class AppPreferences {
   String? langCode;
   bool? isLightMode;
 
-  AppPreferences({
-    required this.langCode,
-    required this.isLightMode,
-  });
+  AppPreferences({required this.langCode, required this.isLightMode});
 
   @override
   String toString() {
