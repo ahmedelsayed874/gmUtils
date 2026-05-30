@@ -16,7 +16,6 @@ import '../storages/app_preferences_storage.dart';
 import '../utils/result.dart';
 import 'fcm_extension.dart';
 
-
 ///https://firebase.google.com/docs/cli?authuser=0#mac-linux-auto-script
 ///https://firebase.flutter.dev/docs/messaging/overview/
 ///https://pub.dev/packages/flutter_local_notifications#scheduled-notifications-and-daylight-saving-time
@@ -31,6 +30,13 @@ import 'fcm_extension.dart';
 //             android:resource="@drawable/notif_icon" />
 abstract class IFCM {
   Future<String?> get deviceToken;
+
+  void registerOnDeviceTokenRefreshed(
+    String id,
+    DeviceTokenRefreshListener listener,
+  );
+
+  void unregisterOnDeviceTokenRefreshed(String id);
 
   ///must user on main screen starts
   void redirectToPendingScreen();
@@ -73,6 +79,8 @@ abstract class IFCM {
     DefaultStyleInformation? androidInformationStyle,
   });
 }
+
+typedef DeviceTokenRefreshListener = Future<bool> Function(String token);
 
 //------------------------------------------------------------------------------
 
@@ -163,22 +171,21 @@ class FCM extends IFCM {
     FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
     //endregion
 
-    if (fcmConfigurations?.onDeviceTokenRefresh != null) {
-      String token;
-      try {
-        token = await deviceToken ?? '';
-      } catch (e) {
-        token = '';
+    ///if (fcmConfigurations?.onDeviceTokenRefresh != null) {
+    deviceToken.then((token) {
+      if (token?.isNotEmpty == true) {
+        fcmConfigurations?.onDeviceTokenRefresh?.call(token!);
+        _callDeviceTokenRefreshListeners(token!);
       }
+    });
 
-      if (token.isNotEmpty) {
-        fcmConfigurations?.onDeviceTokenRefresh?.call(token);
-      }
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      Logs.print(() => '[Fcm] -> DEVICE TOKEN REFRESHED');
+      fcmConfigurations?.onDeviceTokenRefresh?.call(newToken);
+      _callDeviceTokenRefreshListeners(newToken);
+    });
 
-      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-        fcmConfigurations?.onDeviceTokenRefresh?.call(newToken);
-      });
-    }
+    ///}
 
     Logs.print(() => '[Fcm.init()] -> '
         'don\'t forget to use FCM.instance.redirectToPendingScreen(); '
@@ -201,12 +208,14 @@ class FCM extends IFCM {
         if (apnsToken != null) break;
 
         tries++;
-        Logs.print(() => 'FCM.deviceToken --> getAPNSToken [TRY#$tries]---> Waiting for APNS...');
+        Logs.print(() =>
+            'FCM.deviceToken --> getAPNSToken [TRY#$tries]---> Waiting for APNS...');
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
       if (apnsToken == null) {
-        Logs.print(() => 'FCM.deviceToken ---> Failed to get APNS token after 10 tries.');
+        Logs.print(() =>
+            'FCM.deviceToken ---> Failed to get APNS token after 10 tries.');
         // If we don't have APNS, getToken() will definitely fail on iOS
       }
     }
@@ -233,6 +242,48 @@ class FCM extends IFCM {
         'FCM.deviceToken ---> trying to get token failed $tries times ... LAST_EXCEPTION: $exception');
     return null;
   }
+
+  //-------------------------------------------------------------
+
+  Map<String, DeviceTokenRefreshListener>? _deviceTokenRefreshListeners;
+
+  @override
+  void registerOnDeviceTokenRefreshed(
+    String id,
+    DeviceTokenRefreshListener listener,
+  ) {
+    _deviceTokenRefreshListeners ??= {};
+
+    _deviceTokenRefreshListeners![id] = listener;
+  }
+
+  @override
+  void unregisterOnDeviceTokenRefreshed(String id) {
+    _deviceTokenRefreshListeners?.remove(id);
+  }
+
+  void _callDeviceTokenRefreshListeners(String token) async {
+    List<String> toDelListenersIds = [];
+
+    var ids = _deviceTokenRefreshListeners?.keys.toList() ?? [];
+    for (var id in ids) {
+      try {
+        var listener = _deviceTokenRefreshListeners?[id];
+        var b = await listener?.call(token);
+        if (b != true) toDelListenersIds.add(id);
+      } catch (e) {
+        Logs.print(
+            () => 'FCM._callDeviceTokenRefreshListeners -> EXCEPTION: $e');
+        toDelListenersIds.add(id);
+      }
+    }
+
+    for (var value in toDelListenersIds) {
+      _deviceTokenRefreshListeners?.remove(value);
+    }
+  }
+
+  //----------------------------------------------------------------------------
 
   ///must user on main screen starts
   @override
@@ -598,7 +649,7 @@ class FCM extends IFCM {
   ///googleapis_auth: ^1.6.0
   Future<Result<String>> _getAccessToken() {
     return FCM_Extension().getAccessToken(fcmConfigurations: fcmConfigurations);
-    //return Future.value(Result(null));
+    // return Future.value(Result(null));
   }
 
   Map<String, dynamic> _buildRequestData({
