@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_measurement.dart';
 
-class AppTheme {
+final class AppTheme {
   static AppColors? appColors;
   static AppMeasurement? appMeasurement;
   static String? toolbarTitleFontFamily;
