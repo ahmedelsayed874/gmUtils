@@ -14,7 +14,7 @@ abstract class Url<RDT> {
   final Map<String, String>? queries;
 
   final Mappable<RDT>? responseMapper;
-  final WebResponse<RDT> Function(dynamic response)? customResponseHandler;
+  final WebResponse<RDT> Function(Url, dynamic response)? customResponseHandler;
 
   final String? logsName;
   final List<ObscureLogOption>? obscureLogOptions;
@@ -90,7 +90,7 @@ abstract class Url<RDT> {
     }
 
     if (customResponseHandler != null) {
-      var response2 = customResponseHandler!(data);
+      var response2 = customResponseHandler!(this, data);
       return response2;
     }
     //
@@ -150,7 +150,7 @@ abstract class Url<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -287,7 +287,7 @@ class GetUrl<RDT> extends Url<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -433,7 +433,7 @@ class _DataUrl<RDT> extends Url<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -450,7 +450,7 @@ class _DataUrl<RDT> extends Url<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -542,7 +542,7 @@ class PostUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -577,7 +577,7 @@ class PostUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -639,7 +639,7 @@ class PatchUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -673,7 +673,7 @@ class PatchUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -735,7 +735,7 @@ class PutUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -770,7 +770,7 @@ class PutUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -832,7 +832,7 @@ class DeleteUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -868,7 +868,7 @@ class DeleteUrl<RDT> extends _DataUrl<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -1025,7 +1025,7 @@ class MultiPartRequestUrl<RDT> extends Url<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,
@@ -1060,7 +1060,7 @@ class MultiPartRequestUrl<RDT> extends Url<RDT> {
     Map<String, String>? overriddenQueries,
     //
     Mappable<RDT>? overriddenResponseMapper,
-    WebResponse<RDT> Function(dynamic response)?
+    WebResponse<RDT> Function(Url, dynamic response)?
         overriddenCustomResponseHandler,
     //
     String? overriddenLogsName,

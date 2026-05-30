@@ -87,7 +87,7 @@ abstract class HomeScreenDriverAbs extends IScreenDriver {
           endPoint: '',
           responseMapper: null,
           queries: null,
-          customResponseHandler: (response) {
+          customResponseHandler: (url, response) {
             try {
               var map = jsonDecode(response) as Map<String, dynamic>;
               var dateMap = map['data']['hijri'];
