@@ -194,7 +194,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.hasToolbar) {
-      var rw = MyRootWidget.withToolbar(widget.toolbarTitle ?? '');
+      var rw = MyRootWidget.withToolbar(
+          widget.toolbarTitle ?? '',
+          actions: widget.allowOpenLinkExternal ? [
+            IconButton(
+              onPressed: () => Launcher().openUrl(widget.url),
+              icon: const Icon(Icons.open_in_browser),
+            ),
+          ] : null,
+      );
       rw.setScreenPadding(
         top: 0,
         bottom: 0,
@@ -202,17 +210,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
         right: 0,
       );
       rw.setBody(body(context));
-
-      if (widget.allowOpenLinkExternal) {
-        rw.addToolbarActions(
-          actions: [
-            IconButton(
-              onPressed: () => Launcher().openUrl(widget.url),
-              icon: const Icon(Icons.open_in_browser),
-            ),
-          ],
-        );
-      }
 
       return rw.build();
     }

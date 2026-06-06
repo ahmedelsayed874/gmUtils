@@ -25,8 +25,22 @@ class MyRootWidget {
   Color? _statusBarColor;
   bool _isStatusBarThemeLight = true;
 
-  MyRootWidget.withToolbar(this.toolbarTitle, {bool centerTitle = true}) {
-    setupToolbar(centerTitle: centerTitle);
+  MyRootWidget.withToolbar(
+    this.toolbarTitle, {
+    Widget? leading,
+    bool centerTitle = true,
+    Widget? customTitleWidget,
+    List<IconButton>? actions,
+    PopupMenuButton? popupMenuButton,
+  }) {
+    setupToolbar(
+      leading: leading,
+      centerTitle: centerTitle,
+      customTitleWidget: customTitleWidget,
+      actions: actions,
+      popupMenuButton: popupMenuButton,
+    );
+
     _showBackButton = false;
 
     _background = AppTheme.appColors?.background ?? Colors.white;
@@ -48,57 +62,47 @@ class MyRootWidget {
     _body = const Text('use "setBody" method');
   }
 
-  void configStatusBar({
+  MyRootWidget configStatusBar({
     required Color statusBarColor,
     bool isStatusBarThemeLight = true,
   }) {
     _statusBarColor = statusBarColor;
     _isStatusBarThemeLight = isStatusBarThemeLight;
+
+    return this;
   }
 
-  bool? _centerToolbarTitleCache;
-
-  void setupToolbar({
-    bool centerTitle = true,
+  MyRootWidget setupToolbar({
     Widget? leading,
-    List<Widget>? action,
-  }) {
-    _centerToolbarTitleCache = centerTitle;
-
-    _appBar = AppBar(
-      centerTitle: _centerToolbarTitleCache,
-      leading: leading,
-      actions: action,
-      foregroundColor: AppTheme.appColors?.toolbarVariant,
-      backgroundColor: AppTheme.appColors?.toolbar,
-      title: Text(
-        toolbarTitle,
-        style: AppTheme.textStyleOfScreenTitle(
-          textColor: AppTheme.appColors?.toolbarVariant,
-          textSize: AppTheme.appMeasurement?.toolbarTitleSize,
-          fontFamily: AppTheme.toolbarTitleFontFamily,
-        ),
-      ),
-    );
-  }
-
-  MyRootWidget addToolbarActions({
+    bool centerTitle = true,
+    Widget? customTitleWidget,
     List<IconButton>? actions,
     PopupMenuButton? popupMenuButton,
-    Widget? leading,
   }) {
-    List<Widget> a = [];
+    List<Widget>? _actions;
+    if (actions?.isNotEmpty == true || popupMenuButton != null) {
+      _actions = [];
 
-    if (actions?.isNotEmpty == true) a.addAll(actions!);
-    if (popupMenuButton != null) a.add(popupMenuButton);
-
-    if (a.isNotEmpty) {
-      setupToolbar(
-        centerTitle: _centerToolbarTitleCache ?? true,
-        leading: leading,
-        action: a,
-      );
+      if (actions?.isNotEmpty == true) _actions.addAll(actions!);
+      if (popupMenuButton != null) _actions.add(popupMenuButton);
     }
+
+    _appBar = AppBar(
+      centerTitle: centerTitle,
+      leading: leading,
+      actions: _actions,
+      foregroundColor: AppTheme.appColors?.toolbarVariant,
+      backgroundColor: AppTheme.appColors?.toolbar,
+      title: customTitleWidget ??
+          Text(
+            toolbarTitle,
+            style: AppTheme.textStyleOfScreenTitle(
+              textColor: AppTheme.appColors?.toolbarVariant,
+              textSize: AppTheme.appMeasurement?.toolbarTitleSize,
+              fontFamily: AppTheme.toolbarTitleFontFamily,
+            ),
+          ),
+    );
 
     return this;
   }
@@ -136,10 +140,22 @@ class MyRootWidget {
     double? bottom,
   }) {
     _screenPadding = EdgeInsets.only(
-      top: top ?? _screenPadding?.top ?? AppTheme.appMeasurement?.screenPaddingTop ?? 0.0,
-      left: left ?? _screenPadding?.left ?? AppTheme.appMeasurement?.screenPaddingLeft ?? 0.0,
-      right: right  ?? _screenPadding?.right ?? AppTheme.appMeasurement?.screenPaddingRight ?? 0.0,
-      bottom: bottom ?? _screenPadding?.bottom ?? AppTheme.appMeasurement?.screenPaddingBottom ?? 0.0,
+      top: top ??
+          _screenPadding?.top ??
+          AppTheme.appMeasurement?.screenPaddingTop ??
+          0.0,
+      left: left ??
+          _screenPadding?.left ??
+          AppTheme.appMeasurement?.screenPaddingLeft ??
+          0.0,
+      right: right ??
+          _screenPadding?.right ??
+          AppTheme.appMeasurement?.screenPaddingRight ??
+          0.0,
+      bottom: bottom ??
+          _screenPadding?.bottom ??
+          AppTheme.appMeasurement?.screenPaddingBottom ??
+          0.0,
     );
     return this;
   }
