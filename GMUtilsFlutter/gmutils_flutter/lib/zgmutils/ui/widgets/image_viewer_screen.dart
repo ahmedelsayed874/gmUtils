@@ -67,7 +67,15 @@ class _ImageViewerScreenOnWebViewState
   Widget build(BuildContext context) {
     _photoUrl = ModalRoute.of(context)?.settings.arguments as String;
 
-    return MyRootWidget.withToolbar(widget.toolbarTitle)
+    return MyRootWidget.withToolbar(
+        widget.toolbarTitle,
+        actions: [
+          IconButton(
+            onPressed: () => Launcher().openUrl(_photoUrl),
+            icon: const Icon(Icons.open_in_browser),
+          ),
+        ],
+    )
         .setScreenPadding(
           top: 0,
           bottom: 0,
@@ -75,14 +83,7 @@ class _ImageViewerScreenOnWebViewState
           right: 0,
         )
         .setBody(body(context))
-        .addToolbarActions(
-      actions: [
-        IconButton(
-          onPressed: () => Launcher().openUrl(_photoUrl),
-          icon: const Icon(Icons.open_in_browser),
-        ),
-      ],
-    ).build();
+        .build();
   }
 
   Widget body(BuildContext context) {
@@ -158,23 +159,26 @@ class _ImageViewerScreenOnImageViewState
 
     _screenWidth ??= MediaQuery.of(context).size.width;
 
-    return MyRootWidget.withToolbar(widget.toolbarTitle)
+    return MyRootWidget.withToolbar(
+        widget.toolbarTitle,
+        actions: [
+          if (_image is String)
+            IconButton(
+              onPressed: () => Launcher().openUrl(_image as String),
+              icon: const Icon(Icons.open_in_browser),
+            ),
+          IconButton(
+            onPressed: () => _changeImageSize(true),
+            icon: const Icon(Icons.remove),
+          ),
+          IconButton(
+            onPressed: () => _changeImageSize(false),
+            icon: const Icon(Icons.add),
+          ),
+        ],
+    )
         .setBody(body(context))
-        .addToolbarActions(actions: [
-      if (_image is String)
-        IconButton(
-          onPressed: () => Launcher().openUrl(_image as String),
-          icon: const Icon(Icons.open_in_browser),
-        ),
-      IconButton(
-        onPressed: () => _changeImageSize(true),
-        icon: const Icon(Icons.remove),
-      ),
-      IconButton(
-        onPressed: () => _changeImageSize(false),
-        icon: const Icon(Icons.add),
-      ),
-    ]).build();
+        .build();
   }
 
   Widget body(BuildContext context) {
@@ -309,23 +313,26 @@ class _ImageViewerScreenOnImageViewAndNoScrollViewState
 
     _screenWidth ??= MediaQuery.of(context).size.width;
 
-    return MyRootWidget.withToolbar(widget.toolbarTitle)
+    return MyRootWidget.withToolbar(
+        widget.toolbarTitle,
+        actions: [
+          if (_image is String)
+            IconButton(
+              onPressed: () => Launcher().openUrl(_image as String),
+              icon: const Icon(Icons.open_in_browser),
+            ),
+          IconButton(
+            onPressed: () => _changeImageSize(true),
+            icon: const Icon(Icons.remove),
+          ),
+          IconButton(
+            onPressed: () => _changeImageSize(false),
+            icon: const Icon(Icons.add),
+          ),
+        ],
+    )
         .setBody(body(context))
-        .addToolbarActions(actions: [
-      if (_image is String)
-        IconButton(
-          onPressed: () => Launcher().openUrl(_image as String),
-          icon: const Icon(Icons.open_in_browser),
-        ),
-      IconButton(
-        onPressed: () => _changeImageSize(true),
-        icon: const Icon(Icons.remove),
-      ),
-      IconButton(
-        onPressed: () => _changeImageSize(false),
-        icon: const Icon(Icons.add),
-      ),
-    ]).build();
+        .build();
   }
 
   Widget body(BuildContext context) {
