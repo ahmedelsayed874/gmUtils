@@ -91,32 +91,36 @@ public class InputDialog extends BaseDialog {
                         }
                     }
 
-                    if (x == 0) dismiss();
-                } else {
-                    dismiss();
+                    if (x == 0) dismiss(((TextView) v).getText().toString());
                 }
-            } else {
-                dismiss();
+                //
+                else {
+                    dismiss(((TextView) v).getText().toString());
+                }
+            }
+            //
+            else {
+                dismiss(((TextView) v).getText().toString());
             }
         });
 
         tvCancelBtn.setOnClickListener(v -> {
             if (cancelButtonCallback != null)
                 cancelButtonCallback.run();
-            dismiss();
+            dismiss(((TextView) v).getText().toString());
         });
 
     }
 
     @Override
-    public void dismiss() {
+    public void dismiss(String dismissedBy) {
         for (InputField inputField : inputFields) {
             try {
                 KeypadOp.hide(inputField.inputEditText);
             } catch (Exception e) {
             }
         }
-        super.dismiss();
+        super.dismiss(dismissedBy);
     }
 
     //----------------------------------------------------------------------------------------------

@@ -306,7 +306,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     @Override
     public void hideWaitView() {
         if (waitDialogCount == 1) {
-            if (waitDialog != null) waitDialog.dismiss();
+            if (waitDialog != null) waitDialog.dismiss(null);
             waitDialog = null;
         }
 
@@ -316,7 +316,7 @@ public class ActivityFunctions implements BaseFragmentListener {
 
     @Override
     public void hideWaitViewImmediately() {
-        if (waitDialog != null) waitDialog.dismiss();
+        if (waitDialog != null) waitDialog.dismiss(null);
         waitDialog = null;
         waitDialogCount = 0;
     }
@@ -401,7 +401,7 @@ public class ActivityFunctions implements BaseFragmentListener {
     //----------------------------------------------------------------------------------------------
 
     private void destroy0() {
-        if (waitDialog != null) waitDialog.dismiss();
+        if (waitDialog != null) waitDialog.dismiss(null);
         waitDialogCount = 0;
         waitDialog = null;
 

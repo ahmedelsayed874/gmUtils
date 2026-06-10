@@ -266,7 +266,7 @@ public class BaseViewModel extends AndroidViewModel {
             private Value2<Object, Runnable> button1;
             private Value2<Object, Runnable> button2;
             private Value2<Object, Runnable> button3;
-            private Runnable onDismiss;
+            private ResultCallback<String> onDismiss;
             private final boolean error;
             private boolean enableOuterDismiss = true;
 
@@ -355,7 +355,7 @@ public class BaseViewModel extends AndroidViewModel {
 
             //-----------------
 
-            public Dialog setOnDismiss(Runnable onDismiss) {
+            public Dialog setOnDismiss(ResultCallback<String> onDismiss) {
                 this.onDismiss = onDismiss;
                 return this;
             }
@@ -391,7 +391,7 @@ public class BaseViewModel extends AndroidViewModel {
                 return button3;
             }
 
-            public Runnable getOnDismiss() {
+            public ResultCallback<String> getOnDismiss() {
                 return onDismiss;
             }
 
@@ -437,13 +437,13 @@ public class BaseViewModel extends AndroidViewModel {
         class Retry implements MessageType {
             private int iconRes;
             private Runnable _onRetry;
-            private Runnable onDismiss;
+            private ResultCallback<String> onDismiss;
 
             public Retry(Runnable onRetry) {
                 this._onRetry = onRetry;
             }
 
-            public Retry(Runnable onRetry, Runnable onDismiss) {
+            public Retry(Runnable onRetry, ResultCallback<String> onDismiss) {
                 this._onRetry = onRetry;
                 this.onDismiss = onDismiss;
             }
@@ -461,7 +461,7 @@ public class BaseViewModel extends AndroidViewModel {
 
             //-----------------------------------------------------------
 
-            public final Runnable onDismiss() {
+            public final ResultCallback<String> onDismiss() {
                 return onDismiss;
             }
 
@@ -599,7 +599,7 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postRetryMessage(CharSequence message, Runnable onRetry, Runnable onDismiss) {
+    public void postRetryMessage(CharSequence message, Runnable onRetry, ResultCallback<String> onDismiss) {
         Message m = new Message(message, new MessageType.Retry(onRetry, onDismiss));
         postMessage(m);
     }
@@ -609,7 +609,7 @@ public class BaseViewModel extends AndroidViewModel {
         postMessage(m);
     }
 
-    public void postRetryMessage(StringSet message, Runnable onRetry, Runnable onDismiss) {
+    public void postRetryMessage(StringSet message, Runnable onRetry, ResultCallback<String> onDismiss) {
         Message m = new Message(message, new MessageType.Retry(onRetry, onDismiss));
         postMessage(m);
     }
@@ -681,10 +681,6 @@ public class BaseViewModel extends AndroidViewModel {
     public void runOnBackgroundThread(Runnable task) {
         runOnBackgroundThread(task, 0, null);
     }
-
-    /*public void runOnBackgroundThread(Runnable task, ResultCallback<Throwable> onException) {
-        runOnBackgroundThread(task, 0, onException);
-    }*/
 
     public void runOnBackgroundThread(Runnable task, long delay) {
         runOnBackgroundThread(task, delay, null);

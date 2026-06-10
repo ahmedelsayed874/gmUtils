@@ -83,7 +83,7 @@ public class ListDialog<T> extends BaseDialog {
 
         ivClose.setOnClickListener(v -> {
             Animations.getInstance().scaleDown(v);
-            dismiss();
+            dismiss("Close");
         });
 
         etSearchToken.addTextChangedListener(getTextChangeListener());
@@ -93,7 +93,7 @@ public class ListDialog<T> extends BaseDialog {
                 mListener2.onNewValueInserted(etSearchToken.getText().toString());
             }
 
-            dismiss();
+            dismiss("Add Value");
         });
     }
 
@@ -136,7 +136,7 @@ public class ListDialog<T> extends BaseDialog {
                 mListener.onItemSelected((T) adapterView.getItemAtPosition(i), i);
             }
 
-            if (dismissOnSelection) dismiss();
+            if (dismissOnSelection) dismiss(i + "");
         };
     }
 
@@ -165,7 +165,7 @@ public class ListDialog<T> extends BaseDialog {
                     mListener.onItemSelected(item, position);
                 }
 
-                if (dismissOnSelection) dismiss();
+                if (dismissOnSelection) dismiss(position + "");
             });
         }
 
@@ -267,9 +267,9 @@ public class ListDialog<T> extends BaseDialog {
     }
 
     @Override
-    public void dismiss() {
+    public void dismiss(String dismissedBy) {
         KeypadOp.hide(etSearchToken);
-        super.dismiss();
+        super.dismiss(dismissedBy);
     }
 
     //----------------------------------------------------------------------------------------------
