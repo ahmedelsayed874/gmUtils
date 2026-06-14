@@ -179,64 +179,97 @@ class MyRootWidget {
     String title,
     Widget body, {
     String? hint,
-    double titleHeight = 60,
+    double? titleTopMargin,
+    double? titleToHintSpace,
+    double? titleBottomMargin,
     bool scrollable = false,
+    bool attachTitleToScollableBody = false,
     TextStyle? titleStyle,
     TextStyle? hintStyle,
   }) {
-    Widget body2;
-    if (scrollable) {
-      body2 = SingleChildScrollView(child: body);
-    } else {
-      body2 = body;
+    final titleWdgt = titleWidget(
+      title,
+      hint: hint,
+      titleTopMargin: titleTopMargin,
+      titleToHintSpace: titleToHintSpace,
+      titleBottomMargin: titleBottomMargin,
+      titleStyle: titleStyle,
+      hintStyle: hintStyle,
+    );
+
+    if (scrollable && attachTitleToScollableBody) {
+      _body = SingleChildScrollView(
+        child: Column(
+          children: [
+            titleWdgt,
+            body,
+          ],
+        ),
+      );
+    }
+    //
+    else {
+      Widget body2;
+
+      if (scrollable) {
+        body2 = SingleChildScrollView(child: body);
+      }
+      //
+      else {
+        body2 = body;
+      }
+
+      _body = Column(
+        children: [
+          titleWdgt,
+          Expanded(child: body2),
+        ],
+      );
     }
 
-    _body = Column(
-      children: [
-        titleWidget(
-          title,
-          hint: hint,
-          titleHeight: titleHeight,
-          titleStyle: titleStyle,
-          hintStyle: hintStyle,
-        ),
-        Expanded(child: body2),
-      ],
-    );
     return this;
   }
 
   Widget titleWidget(
     String title, {
     String? hint,
-    double titleHeight = 150,
+    double? titleTopMargin,
+    double? titleToHintSpace,
+    double? titleBottomMargin,
     TextStyle? titleStyle,
     TextStyle? hintStyle,
   }) {
-    return SizedBox(
-      height: titleHeight + 10,
-      child: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: titleStyle ?? AppTheme.textStyleOfScreenTitle(),
-              textAlign: TextAlign.center,
-            ),
-            if (hint != null)
-              Text(
-                hint,
-                textAlign: TextAlign.center,
-                style: hintStyle ??
-                    TextStyle(
-                      color: AppTheme.appColors?.hint,
-                      fontSize: AppTheme.appMeasurement?.screenTitleSize,
-                    ),
-              ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (titleTopMargin != null) SizedBox(height: titleTopMargin),
+
+        //
+        Text(
+          title,
+          style: titleStyle ?? AppTheme.textStyleOfScreenTitle(),
+          textAlign: TextAlign.center,
         ),
-      ),
+
+        //
+        if (hint != null && titleToHintSpace != null)
+          SizedBox(height: titleToHintSpace),
+
+        if (hint != null)
+          Text(
+            hint,
+            textAlign: TextAlign.center,
+            style: hintStyle ??
+                TextStyle(
+                  color: AppTheme.appColors?.hint,
+                  fontSize: AppTheme.appMeasurement?.screenTitleSize,
+                ),
+          ),
+
+        //
+        if (titleBottomMargin != null) SizedBox(height: titleBottomMargin),
+        //SizedBox(height: titleBottomMargin ?? AppTheme.appMeasurement?.screenPaddingTop),
+      ],
     );
   }
 
