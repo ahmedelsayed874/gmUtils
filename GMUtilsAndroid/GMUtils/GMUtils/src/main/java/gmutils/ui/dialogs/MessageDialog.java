@@ -76,7 +76,7 @@ public class MessageDialog extends BaseDialog {
                         listenerBtn3.invoke();
                 }
 
-                dismiss();
+                dismiss("Button-" + button);
             }
         });
     }

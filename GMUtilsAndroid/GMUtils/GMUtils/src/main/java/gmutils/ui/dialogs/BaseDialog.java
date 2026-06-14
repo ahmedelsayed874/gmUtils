@@ -11,6 +11,7 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
+import gmutils.listeners.ResultCallback;
 import gmutils.listeners.SimpleWindowAttachListener;
 
 /**
@@ -85,8 +86,17 @@ public abstract class BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
-    public BaseDialog setOnDismissListener(DialogInterface.OnDismissListener listener) {
-        dialog.setOnDismissListener(listener);
+    private String dismissedBy;
+
+    //public BaseDialog setOnDismissListener(DialogInterface.OnDismissListener listener) {
+    public BaseDialog setOnDismissListener(ResultCallback<String> listener) {
+        if (listener == null) {
+            dialog.setOnDismissListener(null);
+        } else {
+            dialog.setOnDismissListener((d) -> {
+                listener.invoke(dismissedBy);
+            });
+        }
         return this;
     }
 
@@ -117,7 +127,9 @@ public abstract class BaseDialog {
         return this;
     }
 
-    public void dismiss() {
+    public void dismiss(String dismissedBy) {
+        this.dismissedBy = dismissedBy;
+
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
@@ -127,7 +139,7 @@ public abstract class BaseDialog {
         try {
             BaseDialog dialog = reinitialize(context);
             dialog.show();
-            this.dismiss();
+            this.dismiss(null);
         } catch (Exception e) {
             e.printStackTrace();
         }

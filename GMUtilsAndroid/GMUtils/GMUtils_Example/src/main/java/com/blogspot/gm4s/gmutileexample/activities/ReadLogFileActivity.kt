@@ -5,15 +5,15 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
-import gmutils.ui.toast.MyToast
 import gmutils.security.Security
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.WaitDialog
+import gmutils.ui.toast.MyToast
 import gmutils.ui.utils.ViewSource
 import gmutils.utils.FileUtils
 import java.io.OutputStreamWriter
 import java.nio.charset.Charset
-import java.util.*
+import java.util.Date
 
 class ReadLogFileActivity : BaseActivity() {
 
@@ -70,7 +70,7 @@ class ReadLogFileActivity : BaseActivity() {
 
             runOnUiThread {
                 this.view.textView.text = text
-                waitDialog.dismiss()
+                waitDialog.dismiss(null)
             }
         }.start()
     }
@@ -119,7 +119,7 @@ class ReadLogFileActivity : BaseActivity() {
             os?.close()
 
             runOnUiThread {
-                waitDialog.dismiss()
+                waitDialog.dismiss(null)
             }
         }.start()
     }

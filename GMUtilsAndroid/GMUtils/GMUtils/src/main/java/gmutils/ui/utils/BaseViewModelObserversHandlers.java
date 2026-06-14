@@ -69,8 +69,8 @@ public class BaseViewModelObserversHandlers {
             dialog.setCancelable(mt.isEnableOuterDismiss());
 
             if (mt.getOnDismiss() != null) {
-                Runnable onDismiss = mt.getOnDismiss();
-                dialog.setOnDismissListener(dialog1 -> onDismiss.run());
+                ResultCallback<String> onDismiss = mt.getOnDismiss();
+                dialog.setOnDismissListener(onDismiss);
             }
 
             if (mt.hasSpecialButtons()) {
@@ -113,7 +113,7 @@ public class BaseViewModelObserversHandlers {
         else if (message.type instanceof
                 BaseViewModel.MessageType.Retry mt) {
             Runnable onRetry = mt.onRetry();
-            Runnable onDismiss = mt.onDismiss();
+            ResultCallback<String> onDismiss = mt.onDismiss();
             mt.destroy();
 
             RetryPromptDialog dialog = showRetryPromptDialog.invoke(msg, () -> {
@@ -125,7 +125,7 @@ public class BaseViewModelObserversHandlers {
             }
 
             if (onDismiss != null) {
-                dialog.dialog.setOnDismissListener(d -> onDismiss.run());
+                dialog.dialog.setOnDismissListener(onDismiss);
             }
         }
     }

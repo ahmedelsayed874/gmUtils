@@ -66,7 +66,7 @@ public class CountryCodeDialog extends BaseDialog {
         adapter.add(countryPhoneCodes.sortByName().getCountryCodes(), true);
         adapter.setOnItemClickListener((itemView, item, position) -> {
             if (mListener != null) mListener.onCountryPhoneCodeSelected(item);
-            dismiss();
+            dismiss(position + "");
         });
 
         EditText txtSearch = view.findViewById(R.id.text_search);
