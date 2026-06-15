@@ -62,7 +62,8 @@ dependencies:
   image: ^4.5.4
   image_cropper: ^12.2.1
 
-  lucide_icons: ^0.257.0
+#  lucide_icons: ^0.257.0
+  lucide_icons_flutter: ^3.1.14+2
 #  font_awesome_flutter: ^10.7.0
 #  country_icons: ^3.0.0
 #  flutter_svg: ^2.0.7
