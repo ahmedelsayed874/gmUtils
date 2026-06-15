@@ -21,8 +21,10 @@ class LocationData {
 abstract class Geolocation {
   static Geolocation? _instance;
 
-  static Geolocation instance({bool dummy = false}) =>
-      _instance ??= (dummy ? GeolocationMock() : GeolocationReal());
+  static Geolocation get singleton => _instance ??= GeolocationReal();
+
+  static Geolocation mock({required List<LocationData> testLocations}) =>
+      GeolocationMock(testLocations: testLocations);
 
   Future<bool> isGpsServiceEnabled();
 
@@ -164,6 +166,10 @@ class GeolocationReal extends Geolocation {
 }
 
 class GeolocationMock extends Geolocation {
+  final List<LocationData> testLocations;
+
+  GeolocationMock({required this.testLocations});
+
   @override
   Future<bool> hasPermissions() async {
     return true;
@@ -204,21 +210,14 @@ class GeolocationMock extends Geolocation {
 
   //============================================================================
 
+  final Map<String, void Function(LocationData p1)> _listners = {};
+  bool _enablePositionUpdate = false;
   LocationData? locationData;
 
   @override
   Future<LocationData?> getCurrentPosition() async {
     return locationData;
   }
-
-  bool _enablePositionUpdate = false;
-  final List<LocationData> _someLocations = [
-    LocationData(latitude: 30.0001, longitude: 30.0001),
-    //LocationData(latitude: 30.0002, longitude: 30.0002),
-    LocationData(latitude: 30.0003, longitude: 30.0003),
-  ];
-
-  final Map<String, void Function(LocationData p1)> _listners = {};
 
   @override
   void addOnPositionUpdated({
@@ -233,7 +232,7 @@ class GeolocationMock extends Geolocation {
 
     while (_enablePositionUpdate) {
       await Future.delayed(const Duration(seconds: 10), () {
-        locationData = _someLocations[Random().nextInt(_someLocations.length)];
+        locationData = testLocations[Random().nextInt(testLocations.length)];
         _listners.forEach((k, v) => v(locationData!));
       });
     }
