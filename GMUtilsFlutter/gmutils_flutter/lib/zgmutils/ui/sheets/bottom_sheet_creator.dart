@@ -1,29 +1,22 @@
 import 'package:flutter/material.dart';
 
 class BottomSheetCreator {
-  void show({
+  Future show({
     required BuildContext context,
     required List<Widget> children,
     Widget? title,
     VoidCallback? onClosing,
-    void Function(dynamic)? onClosed,
     bool isExpanded = false,
     bool disableDrag = false,
     bool useSafeArea = false,
     double contentPadding = 15,
     Color? backgroundColor,
   }) {
-    showModalBottomSheet(
+    return showModalBottomSheet(
       context: context,
       //
       isScrollControlled: isExpanded,
       useSafeArea: useSafeArea,
-      //
-      // useRootNavigator: true,
-      // isDismissible: true,
-      // enableDrag: true,
-      // barrierColor: Colors.black54,
-      // backgroundColor: Colors.transparent,
       //
       builder: (context) => _BottomSheetBody(
         onClosing: onClosing,
@@ -33,18 +26,17 @@ class BottomSheetCreator {
         title: title,
         children: children,
       ),
-    ).then((value) => onClosed?.call(value));
+    );
   }
 
-  void showAsDraggableScroll({
+  Future showAsDraggableScroll({
     required BuildContext context,
     required List<Widget> children,
-    void Function(dynamic)? onClosed,
     //
     bool useSafeArea = false,
     Color? backgroundColor,
   }) {
-    showModalBottomSheet(
+    return showModalBottomSheet(
       context: context,
       //
       isScrollControlled: true,
@@ -65,7 +57,7 @@ class BottomSheetCreator {
                 children: children,
               ),
       ),
-    ).then((value) => onClosed?.call(value));
+    );
   }
 }
 
@@ -128,19 +120,6 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
     final double contentPadding = widget.contentPadding;
     final Color? backgroundColor = widget.backgroundColor;
 
-    /*return children.length > 1
-        ? _bottomOfSingleContent(
-            children,
-            contentPadding,
-            enableDrag,
-            backgroundColor,
-            onClosing,
-          )
-        : _bottomOfScrolledContent(
-            children,
-            contentPadding,
-          );*/
-
     var body = Padding(
       padding: EdgeInsets.all(contentPadding),
       child: children.length > 1
@@ -159,12 +138,6 @@ class _BottomSheetBodyState extends State<_BottomSheetBody>
       animationController:
           !disableDrag ? BottomSheet.createAnimationController(this) : null,
       backgroundColor: backgroundColor,
-
-      // shape: RoundedRectangleBorder(
-      //   borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-      //   side: BorderSide(),
-      // ),
-
       builder: (context) => Padding(
         padding: MediaQuery.of(context).viewInsets,
         child: Column(
