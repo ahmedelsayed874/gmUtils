@@ -90,14 +90,21 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
             }
         }
 
-
     }
 
     //----------------------------------------------------------------------------------------------
 
-    private Database database;
+    private SQLiteOpenHelper database;
 
     public BaseDatabase(@NotNull Context context) {
+        init(new Database(context, databaseName(), databaseVersion(), this));
+    }
+
+    public BaseDatabase(@NotNull SQLiteOpenHelper database) {
+        init(database);
+    }
+
+    private void init(SQLiteOpenHelper db) {
         try {
             Class.forName("com.google.gson.Gson");
         } catch (ClassNotFoundException e) {
@@ -106,7 +113,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                     "implementation 'com.google.code.gson:gson:2.8.6'");
         }
 
-        database = new Database(context, databaseName(), databaseVersion(), this);
+        this.database = db;
 
         if (BaseApplication.current() != null) {
             BaseApplication.current().setOnApplicationFinishedLastActivity(() -> {
@@ -526,7 +533,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, WhereClause whereClause, Boolean orderAscending) {
-        return select(entity, typeToken, whereClause == null? null : whereClause.getCode(), orderAscending);
+        return select(entity, typeToken, whereClause == null ? null : whereClause.getCode(), orderAscending);
     }
 
     public <T> List<T> select(@NotNull Class<T> entity, @NotNull TypeToken<List<T>> typeToken, String whereClause, Boolean orderAscending) {
@@ -577,7 +584,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     //endregion select single item
 
     public <T> JSONArray doSelect(@NotNull Class<T> entity, @NotNull String[] specialColumns, WhereClause whereClause, Boolean orderAscending) {
-        return doSelect(entity, specialColumns, whereClause == null? null : whereClause.getCode(), orderAscending);
+        return doSelect(entity, specialColumns, whereClause == null ? null : whereClause.getCode(), orderAscending);
     }
 
     public <T> JSONArray doSelect(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause, Boolean orderAscending) {
@@ -593,7 +600,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                     null,
                     null,
                     null,
-                    orderAscending == null? null : (orderAscending? "ASC" : "DESC")
+                    orderAscending == null ? null : (orderAscending ? "ASC" : "DESC")
             );
 
             if (query.moveToFirst()) {
@@ -691,7 +698,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
 
     @Nullable
     public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, WhereClause whereClause) {
-        return selectSpecial(entity, specialColumns, whereClause == null? null : whereClause.getCode());
+        return selectSpecial(entity, specialColumns, whereClause == null ? null : whereClause.getCode());
     }
 
     public <T> List<Map<String, Object>> selectSpecial(@NotNull Class<T> entity, @NotNull String[] specialColumns, String whereClause) {
@@ -713,7 +720,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
                 null,
                 null,
                 null,
-                orderAscending == null? null : (orderAscending? "ASC" : "DESC")
+                orderAscending == null ? null : (orderAscending ? "ASC" : "DESC")
         );
 
         List<Map<String, Object>> map = convertCursorToMap(cursor);
@@ -748,7 +755,7 @@ public abstract class BaseDatabase implements DatabaseCallbacks {
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String columnName, WhereClause whereClause) {
-        return getEntityCount(entity, columnName, whereClause == null? null : whereClause.getCode());
+        return getEntityCount(entity, columnName, whereClause == null ? null : whereClause.getCode());
     }
 
     public <T> long getEntityCount(@NotNull Class<T> entity, String columnName, String whereClause) {

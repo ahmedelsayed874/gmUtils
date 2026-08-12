@@ -24,6 +24,9 @@ public class CreateTable implements ICommand {
         Constraint[] constraints;
 
         public Column(String name, DataTypes dataType, Constraint[] constraints){
+            assert name != null && name.length() > 0 : "Column Name not allowed to be null or empty";
+            assert dataType != null : "Column DataType not allowed to be null";
+
             this.name = name;
             this.dataType = dataType;
             this.constraints = constraints;
@@ -37,6 +40,7 @@ public class CreateTable implements ICommand {
                     contraintstr += constraints[i].getCode() + " ";
                 }
             }
+
             return name + " " + dataType.name() + contraintstr;
         }
     }
