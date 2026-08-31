@@ -44,6 +44,7 @@ import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.listeners.Runnable2;
+import gmutils.listeners.ValueGetter;
 import gmutils.security.Security;
 import gmutils.utils.ZipFileUtils;
 
@@ -675,21 +676,28 @@ public abstract class LoggerAbs {
         }
 
         if (logConfigs.isWriteLogsToFileEnabled() || forceWriteToFile) {
-            if (BaseApplication.current() != null) {
+            if (getWritingToFileContext() != null) {
                 try {
                     writeToFileSync(
-                            BaseApplication.current(),
+                            getWritingToFileContext(),
                             order,
                             title,
                             content
                     );
                 } catch (Exception e) {
-                    writeToLog("ERROR", "printSync->writeToFileSync got EXCEPTION: " + e.getMessage(), LogCategory.Error);
+                    writeToLog(getClass().getSimpleName() + "[" + logId() + "] " + "ERROR", "printSync->writeToFileSync got EXCEPTION: " + e.getMessage(), LogCategory.Error);
                 }
             }
             //
             else {
-                writeToLog("ERROR", "BaseApplication.current() == null", LogCategory.Error);
+                writeToLog(
+                        getClass().getSimpleName() + "[" + logId() + "] " + "ERROR",
+                        "NO-CONTEXT-FOR-WRITING-LOGS: " +
+                                "BaseApplication.current() == null " +
+                                "also writingToFileContext is null, " +
+                                "so writing logs to file is not possible.",
+                        LogCategory.Error
+                );
             }
         }
     }
@@ -855,6 +863,19 @@ public abstract class LoggerAbs {
 
     //----------------------------------------------------------------------------------------------
 
+    private ValueGetter<Context> _writingToFileContext;
+
+    public void setWritingToFileContext(ValueGetter<Context> writingToFileContext) {
+        this._writingToFileContext = writingToFileContext;
+    }
+
+    public Context getWritingToFileContext() {
+        if (BaseApplication.current() != null) return BaseApplication.current();
+        return _writingToFileContext == null ? null : _writingToFileContext.get();
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     //region write to files
     public void writeToFile(Context context, ContentGetter text) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
@@ -895,7 +916,7 @@ public abstract class LoggerAbs {
                 try {
                     if (this.logConfigs.writeLogsToPublicFileDeadline != null) {
                         filesDeleted = true;
-                        deleteSavedFiles(BaseApplication.current(), true, null);
+                        deleteSavedFiles(getWritingToFileContext(), true, null);
                     }
                 } catch (Exception e) {
                     writeToLog(
@@ -910,7 +931,7 @@ public abstract class LoggerAbs {
                 try {
                     if (this.logConfigs.writeLogsToPrivateFileDeadline != null) {
                         filesDeleted = true;
-                        deleteSavedFiles(BaseApplication.current(), false, null);
+                        deleteSavedFiles(getWritingToFileContext(), false, null);
                     }
                 } catch (Exception e) {
                     writeToLog(
@@ -1060,7 +1081,7 @@ public abstract class LoggerAbs {
             if (!file.exists()) {
                 boolean created = file.createNewFile();
                 if (!created) writeToLog(
-                        "ERROR",
+                        getClass().getSimpleName() + "[" + logId() + "] " + "ERROR",
                         "Creating file failed on path: " + filePath,
                         LogCategory.Error
                 );
@@ -1107,7 +1128,7 @@ public abstract class LoggerAbs {
 
         if (filesDir == null) {
             writeToLog(
-                    "ERROR",
+                    getClass().getSimpleName() + "[" + logId() + "] " + "ERROR",
                     "Creating log director failed\n" + getLogConfigs(),
                     LogCategory.Error
             );
@@ -1140,7 +1161,7 @@ public abstract class LoggerAbs {
             return logFiles;
         } catch (Exception e) {
             writeToLog(
-                    "ERROR",
+                    getClass().getSimpleName() + "[" + logId() + "] " + "ERROR",
                     "Creating log director failed due to EXCEPTION: " + e,
                     LogCategory.Error
             );
@@ -1344,8 +1365,7 @@ public abstract class LoggerAbs {
                                 if (exclude == Boolean.TRUE) {
                                     log.append(">>> >>> >>> YES\n");
                                     return true;
-                                }
-                                else {
+                                } else {
                                     log.append(">>> >>> >>> NO\n");
                                     return false;
                                 }
@@ -1597,7 +1617,7 @@ public abstract class LoggerAbs {
     public String toString() {
         return "Logger{" +
                 "logId='" + logId + '\'' +
-                ", filePath='" + getLogDirector(BaseApplication.current(), null, false) + '\'' +
+                ", filePath='" + getLogDirector(getWritingToFileContext(), null, false) + '\'' +
                 ", logConfigs=" + logConfigs +
                 '}';
     }

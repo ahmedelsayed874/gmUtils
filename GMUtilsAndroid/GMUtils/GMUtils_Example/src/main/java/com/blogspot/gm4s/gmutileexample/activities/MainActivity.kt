@@ -714,5 +714,4 @@ class MainActivity : BaseActivity() {
                 log("Test Untrusted Connection", it.toString())
             })
     }
-
 }
