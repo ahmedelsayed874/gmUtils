@@ -93,11 +93,11 @@ public class ActivityFunctions implements BaseFragmentListener {
         }
 
         public Integer newViewTopMargin(View root, int systemBarsInsetsTop) {
-            return null;
+            return systemBarsInsetsTop;
         }
 
         public Boolean useLightStatusBarAppearance() {
-            return null;
+            return false;
         }
     }
 

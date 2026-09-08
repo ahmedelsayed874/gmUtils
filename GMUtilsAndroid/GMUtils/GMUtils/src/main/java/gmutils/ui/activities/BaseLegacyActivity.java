@@ -107,24 +107,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
     @Nullable
-    protected ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar() {
-        return new ActivityFunctions.StatusBarOverlappingController() {
-            @Override
-            public Insets newViewPadding(View root, Insets systemBarsInsets) {
-                return super.newViewPadding(root, systemBarsInsets);
-            }
-
-            @Override
-            public Integer newViewTopMargin(View root, int systemBarsInsetsTop) {
-                return super.newViewTopMargin(root, systemBarsInsetsTop);
-            }
-
-            @Override
-            public Boolean useLightStatusBarAppearance() {
-                return super.useLightStatusBarAppearance();
-            }
-        };
-    }
+    protected abstract ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar();
 
     //----------------------------------------------------------------------------------------------
 

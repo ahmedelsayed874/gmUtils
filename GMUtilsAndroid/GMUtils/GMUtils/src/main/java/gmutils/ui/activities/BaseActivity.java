@@ -117,24 +117,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
     @Nullable
-    protected ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar() {
-        return new ActivityFunctions.StatusBarOverlappingController() {
-            @Override
-            public Insets newViewPadding(View root, Insets systemBarsInsets) {
-                return super.newViewPadding(root, systemBarsInsets);
-            }
+    protected abstract ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar();
 
-            @Override
-            public Integer newViewTopMargin(View root, int systemBarsInsetsTop) {
-                return super.newViewTopMargin(root, systemBarsInsetsTop);
-            }
-
-            @Override
-            public Boolean useLightStatusBarAppearance() {
-                return super.useLightStatusBarAppearance();
-            }
-        };
-    }
+    //----------------------------------------------------------------------------------------------
 
     public ViewBinding getViewBinding() {
         return getActivityFunctions().getViewBinding();
