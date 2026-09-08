@@ -9,12 +9,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -66,9 +66,15 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     public final ActivityFunctions getActivityFunctions() {
         if (mActivityFunctions == null) {
             mActivityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
+
                 @Override
                 public ViewSource getViewSource(@NonNull LayoutInflater inflater) {
                     return BaseActivity.this.getViewSource(inflater);
+                }
+
+                @Override
+                public ActivityFunctions.@Nullable StatusBarOverlappingController onConfigureStatusBar() {
+                    return BaseActivity.this.allowOverlappingStatusBar();
                 }
 
                 @Override
@@ -109,6 +115,26 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
+
+    @Nullable
+    protected ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar() {
+        return new ActivityFunctions.StatusBarOverlappingController() {
+            @Override
+            public Insets newViewPadding(View root, Insets systemBarsInsets) {
+                return super.newViewPadding(root, systemBarsInsets);
+            }
+
+            @Override
+            public Integer newViewTopMargin(View root, int systemBarsInsetsTop) {
+                return super.newViewTopMargin(root, systemBarsInsetsTop);
+            }
+
+            @Override
+            public Boolean useLightStatusBarAppearance() {
+                return super.useLightStatusBarAppearance();
+            }
+        };
+    }
 
     public ViewBinding getViewBinding() {
         return getActivityFunctions().getViewBinding();
@@ -498,6 +524,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
             }
         };
     }
+
     protected void onMessageReceivedFromViewModel(BaseViewModel.Message message) {
         new BaseViewModelObserversHandlers().onMessageReceivedFromViewModel(
                 this,

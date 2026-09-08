@@ -13,10 +13,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.graphics.Insets;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,9 +55,15 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     public final ActivityFunctions getActivityFunctions() {
         if (_activityFunctions == null) {
             _activityFunctions = new ActivityFunctions(new ActivityFunctions.Delegate() {
+
                 @Override
                 public ViewSource getViewSource(LayoutInflater inflater) {
                     return BaseLegacyActivity.this.getViewSource(inflater);
+                }
+
+                @Override
+                public ActivityFunctions.@Nullable StatusBarOverlappingController onConfigureStatusBar() {
+                    return BaseLegacyActivity.this.allowOverlappingStatusBar();
                 }
 
                 @Override
@@ -97,6 +105,26 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     @NotNull
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
+
+    @Nullable
+    protected ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar() {
+        return new ActivityFunctions.StatusBarOverlappingController() {
+            @Override
+            public Insets newViewPadding(View root, Insets systemBarsInsets) {
+                return super.newViewPadding(root, systemBarsInsets);
+            }
+
+            @Override
+            public Integer newViewTopMargin(View root, int systemBarsInsetsTop) {
+                return super.newViewTopMargin(root, systemBarsInsetsTop);
+            }
+
+            @Override
+            public Boolean useLightStatusBarAppearance() {
+                return super.useLightStatusBarAppearance();
+            }
+        };
+    }
 
     //----------------------------------------------------------------------------------------------
 

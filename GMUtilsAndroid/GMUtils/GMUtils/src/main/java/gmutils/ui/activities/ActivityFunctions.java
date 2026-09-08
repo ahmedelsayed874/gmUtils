@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -15,9 +16,16 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.viewbinding.ViewBinding;
 
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +67,9 @@ public class ActivityFunctions implements BaseFragmentListener {
     public interface Delegate {
         ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
+        @Nullable
+        StatusBarOverlappingController onConfigureStatusBar();
+
         CharSequence getActivityTitle();
 
         boolean allowApplyingPreferenceLocale();
@@ -73,6 +84,21 @@ public class ActivityFunctions implements BaseFragmentListener {
         boolean keyboardShouldAutoHide(float rawX, float rawY);
 
         void keyboardDidHide();
+    }
+
+    public static class StatusBarOverlappingController {
+
+        public Insets newViewPadding(View root, Insets systemBarsInsets) {
+            return null;
+        }
+
+        public Integer newViewTopMargin(View root, int systemBarsInsetsTop) {
+            return null;
+        }
+
+        public Boolean useLightStatusBarAppearance() {
+            return null;
+        }
     }
 
     private Delegate delegate;
@@ -135,20 +161,95 @@ public class ActivityFunctions implements BaseFragmentListener {
 
             if (delegate != null) {
                 ViewSource viewSource = delegate.getViewSource(activity.getLayoutInflater());
+                View root = null;
 
                 if (viewSource instanceof ViewSource.LayoutResource) {
                     activity.setContentView(((ViewSource.LayoutResource) viewSource).getResourceId());
-
+                    root = activity.findViewById(android.R.id.content);
                 }
                 //
                 else if (viewSource instanceof ViewSource.View) {
-                    activity.setContentView(((ViewSource.View) viewSource).getView());
+                    root = ((ViewSource.View) viewSource).getView();
+                    activity.setContentView(root);
 
                 }
                 //
                 else if (viewSource instanceof ViewSource.ViewBinding) {
                     activityViewBinding = ((ViewSource.ViewBinding) viewSource).getViewBinding();
                     activity.setContentView(activityViewBinding.getRoot());
+                    root = activityViewBinding.getRoot();
+                }
+
+                //-----------------------------------------------------------------
+
+                StatusBarOverlappingController statusBarOverlappingController;
+                statusBarOverlappingController = delegate.onConfigureStatusBar();
+
+                if (
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                root != null &&
+                                statusBarOverlappingController != null
+                ) {
+                    ViewCompat.setOnApplyWindowInsetsListener(
+                            root,
+                            (v, insets) -> {
+                                // Get the insets for the system bars (status bar and navigation bar)
+                                Insets systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                                // either: Apply them as padding to the view
+                                Insets padding = statusBarOverlappingController.newViewPadding(
+                                        v,
+                                        systemBarsInsets
+                                );
+                                if (padding != null) {
+                                    v.setPadding(
+                                            padding.left,
+                                            padding.top,
+                                            padding.right,
+                                            padding.bottom
+                                    );
+                                }
+
+                                // or: Apply top margin to the view
+                                Integer topMargin = statusBarOverlappingController.newViewTopMargin(
+                                        v,
+                                        systemBarsInsets.top
+                                );
+                                if (topMargin != null) {
+                                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                                    lp.topMargin = topMargin;
+                                    v.setLayoutParams(lp);
+                                }
+
+                                return WindowInsetsCompat.CONSUMED;
+                            }
+                    );
+
+                    Boolean use = statusBarOverlappingController.useLightStatusBarAppearance();
+                    if (use != null) {
+                        Window window = activity.getWindow();
+                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+                        WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(
+                                window,
+                                window.getDecorView()
+                        );
+
+                        if (!use) {
+                            insetsController.setAppearanceLightStatusBars(false);
+
+                            root.setBackgroundColor(
+                                    ContextCompat.getColor(
+                                            activity,
+                                            R.color.gmBackground
+                                    )
+                            );
+                            ((View) root.getParent()).setBackgroundResource(R.color.gmPrimary);
+                        } else{
+                            insetsController.setAppearanceLightStatusBars(true);
+                        }
+                    }
                 }
             }
 
