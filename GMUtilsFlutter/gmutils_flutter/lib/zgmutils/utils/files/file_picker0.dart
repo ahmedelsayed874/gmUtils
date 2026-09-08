@@ -10,16 +10,18 @@ class FilePicker {
     FileType? fileType,
     List<String>? allowedExtensions,
   }) async {
-    file_picker.PlatformFile? pickedFile =
-        await file_picker.FilePicker.pickFile(
-          type: allowedExtensions == null
-              ? _convertFileType(fileType)
-              : _convertFileType(FileType.custom),
-          allowedExtensions: allowedExtensions,
-        );
+    file_picker.FilePickerResult? result =
+        await file_picker.FilePicker.pickFiles(
+      type: allowedExtensions == null
+          ? _convertFileType(fileType)
+          : _convertFileType(FileType.custom),
+      allowedExtensions: allowedExtensions,
+    );
 
-    if (pickedFile?.path != null) {
-      File file = File(pickedFile!.path!);
+    if (result?.files.isNotEmpty == true && result!.files.single.path != null) {
+      //List<File> files = result.paths.map((path) => File(path!)).toList();
+
+      File file = File(result.files.single.path!);
 
       //Uint8List fileBytes = result.files.first.bytes;
       //   String fileName = result.files.first.name;
@@ -30,9 +32,7 @@ class FilePicker {
       //   print(file.extension);
       //   print(file.path);
       return file;
-    }
-    //
-    else {
+    } else {
       return null;
     }
   }
@@ -41,32 +41,32 @@ class FilePicker {
     FileType? fileType,
     List<String>? allowedExtensions,
   }) async {
-    List<file_picker.PlatformFile>? pickedFiles =
+    file_picker.FilePickerResult? result =
         await file_picker.FilePicker.pickFiles(
-          //allowMultiple: true,
-          type: allowedExtensions == null
-              ? _convertFileType(fileType)
-              : _convertFileType(FileType.custom),
-          allowedExtensions: allowedExtensions,
-        );
+      allowMultiple: true,
+      type: allowedExtensions == null
+          ? _convertFileType(fileType)
+          : _convertFileType(FileType.custom),
+      allowedExtensions: allowedExtensions,
+    );
 
-    if (pickedFiles.isNotEmpty == true) {
-      List<File> files = pickedFiles.map((file) => File(file.path!)).toList();
+    if (result != null) {
+      List<File> files = result.paths.map((path) => File(path!)).toList();
       return files;
     } else {
       return [];
     }
   }
 
-  Future<Uri?> openSaveDialog({
+  Future<String?> openSaveDialog({
     String? pickerTitle,
     required String fileName,
     required Uint8List? bytes,
   }) async {
-    Uri? outputFile = await file_picker.FilePicker.saveFile(
+    String? outputFile = await file_picker.FilePicker.saveFile(
       dialogTitle: pickerTitle,
       fileName: fileName,
-      bytes: bytes ?? Uint8List(0),
+      bytes: bytes,
     );
 
     return outputFile;
@@ -83,4 +83,11 @@ class FilePicker {
   }
 }
 
-enum FileType { any, media, image, video, audio, custom }
+enum FileType {
+  any,
+  media,
+  image,
+  video,
+  audio,
+  custom,
+}
