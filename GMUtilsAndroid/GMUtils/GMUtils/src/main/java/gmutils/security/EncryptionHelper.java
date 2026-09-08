@@ -96,7 +96,9 @@ public class EncryptionHelper {
                                 .build());
                 keyGenerator.generateKey();
             }
-        } else {
+        }
+        //
+        else {
             if (!keyStore.containsAlias(KEY_ALIAS)) {
                 // Generate a key pair for encryption
                 Calendar start = Calendar.getInstance();
@@ -246,7 +248,6 @@ public class EncryptionHelper {
         byte[] decryptedVal = c.doFinal(decodedValue);
         return new String(decryptedVal);
     }
-
 
 
 }
