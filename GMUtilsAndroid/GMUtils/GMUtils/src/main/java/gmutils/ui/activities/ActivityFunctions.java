@@ -99,6 +99,15 @@ public class ActivityFunctions implements BaseFragmentListener {
         public Boolean useLightStatusBarAppearance() {
             return false;
         }
+
+        public Integer getBackLayerBackground(Context context) {
+            return ContextCompat.getColor(context, R.color.gmPrimary);
+        }
+
+        public Integer getFrontLayerBackground(Context context) {
+            return ContextCompat.getColor(context, R.color.gmBackground);
+        }
+
     }
 
     private Delegate delegate;
@@ -239,14 +248,16 @@ public class ActivityFunctions implements BaseFragmentListener {
                         if (!use) {
                             insetsController.setAppearanceLightStatusBars(false);
 
-                            root.setBackgroundColor(
-                                    ContextCompat.getColor(
-                                            activity,
-                                            R.color.gmBackground
-                                    )
-                            );
-                            ((View) root.getParent()).setBackgroundResource(R.color.gmPrimary);
-                        } else{
+                            Integer color1 = statusBarOverlappingController.getFrontLayerBackground(activity);
+                            if (color1 != null) {
+                                root.setBackgroundColor(color1);
+                            }
+
+                            Integer color2 = statusBarOverlappingController.getBackLayerBackground(activity);
+                            if (color2 != null) {
+                                ((View) root.getParent()).setBackgroundColor(color2);
+                            }
+                        } else {
                             insetsController.setAppearanceLightStatusBars(true);
                         }
                     }
