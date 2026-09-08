@@ -29,6 +29,7 @@ import gmutils.firebase.fcm.SendFcmMessageParameters
 import gmutils.firebase.storage.FirebaseStorage
 import gmutils.json.JsonBuilder
 import gmutils.logger.LoggerAbs
+import gmutils.ui.activities.ActivityFunctions
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.InputDialog
 import gmutils.ui.toast.MyToast
@@ -43,7 +44,9 @@ class FirebaseTestActivity : BaseActivity() {
         ViewSource.ViewBinding(ActivityMainBinding.inflate(inflater))
 
     private val view: ActivityMainBinding get() = viewBinding as ActivityMainBinding
-
+    override fun onConfigureStatusBar(): ActivityFunctions.StatusBarOverlappingController? {
+        return null
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

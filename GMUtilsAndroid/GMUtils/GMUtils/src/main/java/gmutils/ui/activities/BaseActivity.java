@@ -74,7 +74,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
 
                 @Override
                 public ActivityFunctions.@Nullable StatusBarOverlappingController onConfigureStatusBar() {
-                    return BaseActivity.this.allowOverlappingStatusBar();
+                    return BaseActivity.this.onConfigureStatusBar();
                 }
 
                 @Override
@@ -117,7 +117,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
     @Nullable
-    protected abstract ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar();
+    protected abstract ActivityFunctions.StatusBarOverlappingController onConfigureStatusBar();
 
     //----------------------------------------------------------------------------------------------
 

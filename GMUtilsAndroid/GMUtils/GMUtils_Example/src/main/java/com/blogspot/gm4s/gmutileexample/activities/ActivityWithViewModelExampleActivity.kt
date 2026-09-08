@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.blogspot.gm4s.gmutileexample.R
+import gmutils.ui.activities.ActivityFunctions
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.utils.ViewSource
 import gmutils.ui.viewModels.BaseViewModel
@@ -17,6 +18,10 @@ class ActivityWithViewModelExampleActivity : BaseActivity() {
     }
 
     override fun getViewSource(inflater: LayoutInflater) = ViewSource.LayoutResource(R.layout.activity_textbox_with_title_impl)
+
+    override fun onConfigureStatusBar(): ActivityFunctions.StatusBarOverlappingController? {
+        return null
+    }
 
     override fun onPreparingViewModels(): HashMap<Int, Class<out ViewModel>> {
         return hashMapOf(

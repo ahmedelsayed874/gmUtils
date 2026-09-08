@@ -63,7 +63,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
                 @Override
                 public ActivityFunctions.@Nullable StatusBarOverlappingController onConfigureStatusBar() {
-                    return BaseLegacyActivity.this.allowOverlappingStatusBar();
+                    return BaseLegacyActivity.this.onConfigureStatusBar();
                 }
 
                 @Override
@@ -107,7 +107,7 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
     protected abstract ViewSource getViewSource(@NotNull LayoutInflater inflater);
 
     @Nullable
-    protected abstract ActivityFunctions.StatusBarOverlappingController allowOverlappingStatusBar();
+    protected abstract ActivityFunctions.StatusBarOverlappingController onConfigureStatusBar();
 
     //----------------------------------------------------------------------------------------------
 

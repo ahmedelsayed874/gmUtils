@@ -26,6 +26,7 @@ import gmutils.ui.utils.ViewSource
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.Marker
+import gmutils.ui.activities.ActivityFunctions
 
 class MapAndLocationExample : BaseActivity() {
 
@@ -44,7 +45,9 @@ class MapAndLocationExample : BaseActivity() {
     private var mapPinId = 1 //important for tracking
 
     override fun getViewSource(inflater: LayoutInflater) = ViewSource.LayoutResource(R.layout.activity_map_and_location)
-
+    override fun onConfigureStatusBar(): ActivityFunctions.StatusBarOverlappingController? {
+        return null
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

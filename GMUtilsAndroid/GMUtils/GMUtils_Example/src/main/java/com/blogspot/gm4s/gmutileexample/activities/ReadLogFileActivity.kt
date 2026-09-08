@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityReadLogFileBinding
 import gmutils.security.Security
+import gmutils.ui.activities.ActivityFunctions
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.WaitDialog
 import gmutils.ui.toast.MyToast
@@ -22,7 +23,9 @@ class ReadLogFileActivity : BaseActivity() {
     override fun getViewSource(inflater: LayoutInflater) = ViewSource.ViewBinding(
         ActivityReadLogFileBinding.inflate(inflater)
     )
-
+    override fun onConfigureStatusBar(): ActivityFunctions.StatusBarOverlappingController? {
+        return null
+    }
     private val view: ActivityReadLogFileBinding get() = viewBinding as ActivityReadLogFileBinding
 
     //----------------------------------------------------------------------------------------------

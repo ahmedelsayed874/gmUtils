@@ -25,6 +25,7 @@ import gmutils.net.SimpleHTTPRequest
 import gmutils.net.retrofit.RetrofitService
 import gmutils.net.retrofit.example.data.TimeOfArea
 import gmutils.net.volley.example.URLs.TimeURLs
+import gmutils.ui.activities.ActivityFunctions
 import gmutils.ui.activities.BaseActivity
 import gmutils.ui.dialogs.InputDialog
 import gmutils.ui.dialogs.ListDialog
@@ -43,7 +44,9 @@ class MainActivity : BaseActivity() {
 
     override fun getViewSource(inflater: LayoutInflater) =
         ViewSource.ViewBinding(ActivityMainBinding.inflate(inflater))
-
+    override fun onConfigureStatusBar(): ActivityFunctions.StatusBarOverlappingController? {
+        return null
+    }
     private val view: ActivityMainBinding get() = viewBinding as ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -11,6 +11,7 @@ import androidx.viewbinding.ViewBinding;
 import com.blogspot.gm4s.gmutileexample.R;
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityTextboxWithTitleImplBinding;
 
+import gmutils.ui.activities.ActivityFunctions;
 import gmutils.ui.activities.BaseActivity;
 import gmutils.ui.utils.ViewSource;
 
@@ -21,6 +22,12 @@ public class TextBoxWithTitle_ImplActivity extends BaseActivity {
     protected ViewSource getViewSource(@NonNull LayoutInflater inflater) {
         //return new ViewSource.LayoutResource(R.layout.activity_textbox_with_title_impl);
         return new ViewSource.ViewBinding(ActivityTextboxWithTitleImplBinding.inflate(inflater));
+    }
+
+    @Nullable
+    @Override
+    protected @org.jetbrains.annotations.Nullable ActivityFunctions.StatusBarOverlappingController onConfigureStatusBar() {
+        return null;
     }
 
     @Override
