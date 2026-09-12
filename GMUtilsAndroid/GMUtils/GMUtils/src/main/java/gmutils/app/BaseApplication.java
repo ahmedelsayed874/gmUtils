@@ -105,7 +105,7 @@ public abstract class BaseApplication extends Application implements Application
 
     //==============================================================================================
 
-    private int activityCount = 0;
+    private Integer activityCount;
     private final long delayAmount = 500L;
     private GlobalVariables globalVariables = null;
     private MessagingCenter messagingCenter = null;
@@ -147,7 +147,8 @@ public abstract class BaseApplication extends Application implements Application
         return this;
     }
 
-    public void onPreCreate() {}
+    public void onPreCreate() {
+    }
 
     @Override
     public void onCreate() {
@@ -433,7 +434,8 @@ public abstract class BaseApplication extends Application implements Application
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-        activityCount++;
+        if (activityCount == null) activityCount = 0;
+        activityCount += 1;
         current = this;
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -466,10 +468,12 @@ public abstract class BaseApplication extends Application implements Application
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-        activityCount--;
+        if (activityCount == null) return;
+
+        activityCount -= 1;
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (activityCount <= 0) {
+            if (activityCount != null && activityCount <= 0) {
                 onApplicationFinishedLastActivity(activity);
 
                 if (onApplicationFinishedLastActivity != null)
@@ -480,6 +484,7 @@ public abstract class BaseApplication extends Application implements Application
                 dispose();
             }
         }, delayAmount);
+
     }
 
     //----------------------------------------------------------------------------------------------
@@ -500,7 +505,7 @@ public abstract class BaseApplication extends Application implements Application
 
     //----------------------------------------------------------------------------------------------
 
-    private void dispose() {
+    protected void dispose() {
         current = null;
 
         if (globalVariables != null) globalVariables.clear(globalVariables.secret);
@@ -516,11 +521,6 @@ public abstract class BaseApplication extends Application implements Application
                 if (value != null) value.run();
             }
         }
-
-        onDispose();
-    }
-
-    protected void onDispose() {
     }
 
     @Override
