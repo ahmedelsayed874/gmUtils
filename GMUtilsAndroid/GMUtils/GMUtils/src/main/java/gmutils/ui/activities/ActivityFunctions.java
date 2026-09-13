@@ -92,8 +92,8 @@ public class ActivityFunctions implements BaseFragmentListener {
             return null;
         }
 
-        public Integer newViewTopMargin(View root, int systemBarsInsetsTop) {
-            return systemBarsInsetsTop;
+        public Insets newViewMargin(View root, Insets systemBarsInsets) {
+            return systemBarsInsets;
         }
 
         public Boolean useLightStatusBarAppearance() {
@@ -220,13 +220,16 @@ public class ActivityFunctions implements BaseFragmentListener {
                                 }
 
                                 // or: Apply top margin to the view
-                                Integer topMargin = statusBarOverlappingController.newViewTopMargin(
+                                Insets margin = statusBarOverlappingController.newViewMargin(
                                         v,
-                                        systemBarsInsets.top
+                                        systemBarsInsets
                                 );
-                                if (topMargin != null) {
+                                if (margin != null) {
                                     ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                                    lp.topMargin = topMargin;
+                                    lp.topMargin = margin.top;
+                                    lp.bottomMargin = margin.bottom;
+                                    lp.leftMargin = margin.left;
+                                    lp.rightMargin = margin.right;
                                     v.setLayoutParams(lp);
                                 }
 
