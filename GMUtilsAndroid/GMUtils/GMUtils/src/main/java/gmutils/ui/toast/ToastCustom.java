@@ -30,19 +30,35 @@ public class ToastCustom implements MyToast.IToast {
     private TextView tv;
     private long duration = defaultDuration;
     private final boolean isFast;
-    
 
-    public ToastCustom(Activity activity, int msg, boolean fastShow, boolean systemStyle) {
-        this(activity, activity.getString(msg), fastShow, systemStyle);
+
+    public ToastCustom(Activity activity, int msg) {
+        this(activity, activity.getString(msg), false, false);
+    }
+
+    public ToastCustom(Activity activity, int msg, boolean fastShow) {
+        this(activity, activity.getString(msg), fastShow, false);
+    }
+
+    public ToastCustom(Activity activity, int msg, boolean fastShow, boolean useCustomStyle) {
+        this(activity, activity.getString(msg), fastShow, useCustomStyle);
+    }
+
+    public ToastCustom(Activity activity, CharSequence msg) {
+        this(activity, msg, false, false);
+    }
+
+    public ToastCustom(Activity activity, CharSequence msg, boolean fastShow) {
+        this(activity, msg, fastShow, false);
     }
 
     @SuppressLint("ShowToast")
-    public ToastCustom(Activity activity, CharSequence msg, boolean fastShow, boolean systemStyle) {
+    public ToastCustom(Activity activity, CharSequence msg, boolean fastShow, boolean useCustomStyle) {
         windowLayout = activity.findViewById(android.R.id.content);
 
         rootLayout = LayoutInflater.from(activity)
                 .inflate(R.layout.mytoast_gmutils, null);
-        
+
         textContainer = rootLayout.findViewById(R.id.text_container);
 
         tv = textContainer.findViewById(R.id.tv_msg);
@@ -50,12 +66,14 @@ public class ToastCustom implements MyToast.IToast {
 
         isFast = fastShow;
 
-        if (!systemStyle) {
-            setBackground(MyToast.BACKGROUND_RES);
-            setTextColor(MyToast.TEXT_COLOR_RES);
+        if (useCustomStyle) {
+            assert MyToast.customStyle != null;
+            setBackground(MyToast.customStyle.BACKGROUND_RES);
+            setTextColor(MyToast.customStyle.TEXT_COLOR_RES);
         }
     }
 
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public MyToast.IToast setBackground(int bgRes) {
@@ -112,7 +130,8 @@ public class ToastCustom implements MyToast.IToast {
             }
 
             rootLayout.postDelayed(this::hide, duration2);
-        } catch (Throwable e) {}
+        } catch (Throwable e) {
+        }
         return this;
     }
 
@@ -125,7 +144,7 @@ public class ToastCustom implements MyToast.IToast {
     private void dispose() {
         windowLayout = null;
         rootLayout = null;
-        textContainer  = null;
+        textContainer = null;
         tv = null;
     }
 

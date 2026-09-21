@@ -17,24 +17,47 @@ public class ToastNative implements MyToast.IToast {
     private View root;
     private TextView tv;
 
-    public ToastNative(Context context, int msg, boolean fastShow, boolean systemStyle) {
-        this(context, context.getString(msg), fastShow, systemStyle);
+    public ToastNative(Context context, int msg) {
+        this(context, context.getString(msg), false, false);
+    }
+
+    public ToastNative(Context context, int msg, boolean fastShow) {
+        this(context, context.getString(msg), fastShow, false);
+    }
+
+    public ToastNative(Context context, int msg, boolean fastShow, boolean useCustomStyle) {
+        this(context, context.getString(msg), fastShow, useCustomStyle);
+    }
+
+    public ToastNative(Context context, CharSequence msg) {
+        this(context, msg, false, false);
+    }
+
+    public ToastNative(Context context, CharSequence msg, boolean fastShow) {
+        this(context, msg, fastShow, false);
+    }
+
+    public ToastNative(Context context, CharSequence msg, boolean fastShow, boolean useCustomStyle) {
+        this(context, msg, fastShow, false, false);
     }
 
     @SuppressLint("ShowToast")
-    public ToastNative(Context context, CharSequence msg, boolean fastShow, boolean systemStyle) {
+    public ToastNative(Context context, CharSequence msg, boolean fastShow, boolean useCustomStyle, boolean throwException) {
         toast = Toast.makeText(context, msg, fastShow ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG);
 
         try {
             root = toast.getView();
+            assert root != null;
+
             View view = ((ViewGroup) root).getChildAt(0);
 
             tv = ((TextView) view);
             tv.setGravity(Gravity.CENTER);
 
-            if (!systemStyle) {
-                setBackground(MyToast.BACKGROUND_RES);
-                setTextColor(MyToast.TEXT_COLOR_RES);
+            if (useCustomStyle) {
+                assert MyToast.customStyle != null;
+                setBackground(MyToast.customStyle.BACKGROUND_RES);
+                setTextColor(MyToast.customStyle.TEXT_COLOR_RES);
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -52,9 +75,12 @@ public class ToastNative implements MyToast.IToast {
                     }
                 });
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            if (throwException) throw e;
         }
     }
+
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public MyToast.IToast setBackground(int bgRes) {
@@ -84,7 +110,8 @@ public class ToastNative implements MyToast.IToast {
     public MyToast.IToast setMessage(int msgRes) {
         try {
             tv.setText(msgRes);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return this;
     }
@@ -93,7 +120,8 @@ public class ToastNative implements MyToast.IToast {
     public MyToast.IToast setMessage(CharSequence msg) {
         try {
             tv.setText(msg);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return this;
     }
