@@ -52,50 +52,47 @@ public class MyToast {
 
     //----------------------------------------------------------------------------------------------
 
-    public final MyToast.IToast toast;
+    private MyToast.IToast toast;
 
     public MyToast(Context context, @StringRes int msg) {
-        this(context, msg, false, false);
+        this(context, context.getString(msg), false);
     }
 
     public MyToast(Context context, @StringRes int msg, boolean fastShow) {
-        this(context, msg, fastShow, false);
+        this(context, context.getString(msg), fastShow);
     }
-
-    public MyToast(Context context, @StringRes int msg, boolean fastShow, boolean useCustomStyle) {
-        this(context, context.getString(msg), fastShow, useCustomStyle);
-    }
-
 
     public MyToast(Context context, CharSequence msg) {
-        this(context, msg, false, false);
+        this(context, msg, false);
     }
 
     public MyToast(Context context, CharSequence msg, boolean fastShow) {
         this(context, msg, fastShow, false);
     }
 
-    public MyToast(Context context, CharSequence msg, boolean fastShow, boolean useCustomStyle) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-            MyToast.IToast toast;
+    public MyToast(Context context, CharSequence msg, boolean fastShow, boolean useCustomView) {
+        init(context, msg, fastShow, useCustomView || customStyle != null);
 
-            try {
-                toast = new ToastNative(context, msg, fastShow, useCustomStyle, true);
-            } catch (Exception e) {
-                if (context instanceof Activity)
-                    toast = new ToastCustom((Activity) context, msg, fastShow, useCustomStyle);
-                else
-                    toast = new ToastNative(context, msg, fastShow, useCustomStyle);
-            }
+        if (customStyle != null) {
+            setBackground(MyToast.customStyle.BACKGROUND_RES);
+            setTextColor(MyToast.customStyle.TEXT_COLOR_RES);
+        }
+    }
 
-            this.toast = toast;
+    private void init(Context context, CharSequence msg, boolean fastShow, boolean willCustomize) {
+        if (!willCustomize && Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            toast = new ToastNative(context, msg, fastShow, false);
         }
         //
         else {
-            if (context instanceof Activity)
-                toast = new ToastCustom((Activity) context, msg, fastShow, useCustomStyle);
-            else
-                toast = new ToastNative(context, msg, fastShow, useCustomStyle);
+            try {
+                toast = new ToastNative(context, msg, fastShow, true);
+            } catch (Exception e) {
+                if (context instanceof Activity)
+                    toast = new ToastCustom((Activity) context, msg, fastShow);
+                else
+                    toast = new ToastNative(context, msg, fastShow);
+            }
         }
     }
 
@@ -145,7 +142,7 @@ public class MyToast {
     }
 
     public static void show(Context context, CharSequence msg, boolean fastShow, @Nullable Integer bgRes, @Nullable Integer textColorRes) {
-        MyToast toast = new MyToast(context, msg, fastShow, customStyle != null);
+        MyToast toast = new MyToast(context, msg, fastShow, bgRes != null || textColorRes != null);
         if (bgRes != null) {
             toast.setBackground(bgRes);
         }
@@ -197,16 +194,16 @@ public class MyToast {
         return new ToastCustom(context, msg);
     }
 
-    public static ToastCustom custom(Activity context, CharSequence msg, boolean fastShow, boolean useCustomStyle) {
-        return new ToastCustom(context, msg, fastShow, useCustomStyle);
+    public static ToastCustom custom(Activity context, CharSequence msg, boolean fastShow) {
+        return new ToastCustom(context, msg, fastShow);
     }
 
     public static ToastNative system(Context context, CharSequence msg) {
         return new ToastNative(context, msg);
     }
 
-    public static ToastNative system(Context context, CharSequence msg, boolean fastShow, boolean useCustomStyle) {
-        return new ToastNative(context, msg, fastShow, useCustomStyle);
+    public static ToastNative system(Context context, CharSequence msg, boolean fastShow) {
+        return new ToastNative(context, msg, fastShow);
     }
 
 }

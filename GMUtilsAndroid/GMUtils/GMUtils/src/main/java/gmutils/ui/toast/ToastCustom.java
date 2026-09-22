@@ -33,27 +33,19 @@ public class ToastCustom implements MyToast.IToast {
 
 
     public ToastCustom(Activity activity, int msg) {
-        this(activity, activity.getString(msg), false, false);
+        this(activity, activity.getString(msg), false);
     }
 
     public ToastCustom(Activity activity, int msg, boolean fastShow) {
-        this(activity, activity.getString(msg), fastShow, false);
-    }
-
-    public ToastCustom(Activity activity, int msg, boolean fastShow, boolean useCustomStyle) {
-        this(activity, activity.getString(msg), fastShow, useCustomStyle);
+        this(activity, activity.getString(msg), fastShow);
     }
 
     public ToastCustom(Activity activity, CharSequence msg) {
-        this(activity, msg, false, false);
-    }
-
-    public ToastCustom(Activity activity, CharSequence msg, boolean fastShow) {
-        this(activity, msg, fastShow, false);
+        this(activity, msg, false);
     }
 
     @SuppressLint("ShowToast")
-    public ToastCustom(Activity activity, CharSequence msg, boolean fastShow, boolean useCustomStyle) {
+    public ToastCustom(Activity activity, CharSequence msg, boolean fastShow) {
         windowLayout = activity.findViewById(android.R.id.content);
 
         rootLayout = LayoutInflater.from(activity)
@@ -65,12 +57,6 @@ public class ToastCustom implements MyToast.IToast {
         tv.setText(msg);
 
         isFast = fastShow;
-
-        if (useCustomStyle) {
-            assert MyToast.customStyle != null;
-            setBackground(MyToast.customStyle.BACKGROUND_RES);
-            setTextColor(MyToast.customStyle.TEXT_COLOR_RES);
-        }
     }
 
     //----------------------------------------------------------------------------------------------
