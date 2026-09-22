@@ -25,7 +25,7 @@ import java.util.Set;
  * a.elsayedabdo@gmail.com
  * +201022663988
  */
-public class GeneralStorage {
+public class GeneralStorage implements IGeneralStorage {
 
     public static GeneralStorage getInstance() {
         return new GeneralStorage((String) null);
@@ -56,40 +56,50 @@ public class GeneralStorage {
         this.mPreference = preference;
     }
 
+    //----------------------------------------------------------------------------------------------
+
+    @Override
     public void save(String key, String value) {
         mPreference.edit().putString(key, value).apply();
     }
 
+    @Override
     public String retrieve(String key, String defaultValue) {
         return mPreference.getString(key, defaultValue);
     }
 
     //----------------------------------------------------------------------------------------------
 
+    @Override
     public void remove(String key) {
         mPreference.edit().remove(key).apply();
     }
 
+    @Override
     public void removeAll() {
         mPreference.edit().clear().apply();
     }
 
     //==============================================================================================
 
+    @Override
     public void saveToList(String listName, String... value) {
         saveToList(listName, false, value);
     }
 
+    @Override
     public void saveToList(String listName, List<String> value) {
         saveToList(listName, false, value);
     }
 
 
+    @Override
     public void saveToList(String listName, boolean onTop, String... value) {
         List<String> valueList = Arrays.asList(value);
         saveToList(listName, onTop, valueList);
     }
 
+    @Override
     public void saveToList(String listName, boolean onTop, List<String> value) {
         List<String> list = retrieveList(listName);
 
@@ -105,7 +115,6 @@ public class GeneralStorage {
         saveCollectionHelper(listName, list);
     }
 
-
     private void saveCollectionHelper(String listName, Collection<String> data) {
         try {
             JSONArray jsonArray = new JSONArray();
@@ -120,27 +129,8 @@ public class GeneralStorage {
         }
     }
 
-    //---------------------------------------------------------------------
 
-    public void saveToSet(String setName, String... value) {
-        List<String> valueList = Arrays.asList(value);
-        saveToSet(setName, valueList);
-    }
-
-    public void saveToSet(String setName, List<String> value) {
-        Set<String> set = new HashSet<>(retrieveList(setName));
-
-        int valueLength = value.size();
-        for (int i = valueLength - 1; i >= 0; i--) {
-            String v = value.get(i);
-            set.add(v);
-        }
-
-        saveCollectionHelper(setName, set);
-    }
-
-    //---------------------------------------------------------------------
-
+    @Override
     public List<String> retrieveList(String listName) {
         List<String> list = new ArrayList<>();
 
@@ -156,6 +146,43 @@ public class GeneralStorage {
         return list;
     }
 
+    @Override
+    public void removeFromList(String listName, String value) {
+        List<String> list = retrieveList(listName);
+
+        while (list.remove(value));
+        saveCollectionHelper(listName, list);
+
+    }
+
+    @Override
+    public void clearList(String listName) {
+        remove(listName);
+    }
+
+
+    //---------------------------------------------------------------------
+
+    @Override
+    public void saveToSet(String setName, String... value) {
+        List<String> valueList = Arrays.asList(value);
+        saveToSet(setName, valueList);
+    }
+
+    @Override
+    public void saveToSet(String setName, List<String> value) {
+        Set<String> set = new HashSet<>(retrieveList(setName));
+
+        int valueLength = value.size();
+        for (int i = valueLength - 1; i >= 0; i--) {
+            String v = value.get(i);
+            set.add(v);
+        }
+
+        saveCollectionHelper(setName, set);
+    }
+
+    @Override
     public Set<String> retrieveSet(String setName) {
         Set<String> set = new HashSet<>();
 
@@ -171,16 +198,7 @@ public class GeneralStorage {
         return set;
     }
 
-    //---------------------------------------------------------------------
-
-    public void removeFromList(String listName, String value) {
-        List<String> list = retrieveList(listName);
-
-        while (list.remove(value));
-        saveCollectionHelper(listName, list);
-
-    }
-
+    @Override
     public void removeFromSet(String setName, String value) {
         Set<String> list = retrieveSet(setName);
 
@@ -189,12 +207,7 @@ public class GeneralStorage {
 
     }
 
-    //---------------------------------------------------------------------
-
-    public void clearList(String listName) {
-        remove(listName);
-    }
-
+    @Override
     public void clearSet(String listName) {
         remove(listName);
     }
