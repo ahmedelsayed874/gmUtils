@@ -76,17 +76,23 @@ public abstract class BaseDialog {
 
     protected abstract void onDestroy();
 
-    public final AlertDialog getDialog() {
-        return dialog;
+    public final BaseDialog getDialog(ResultCallback<AlertDialog> callback) {
+        callback.invoke(dialog);
+        return this;
     }
 
     public final View getView() {
         return view;
     }
 
-    public final Context getContext() {
-        if (view != null) return view.getContext();
-        return null;
+    public final BaseDialog getView(ResultCallback<View> callback) {
+        callback.invoke(view);
+        return this;
+    }
+
+    public final BaseDialog getContext(ResultCallback<Context> callback) {
+        if (view != null) callback.invoke(view.getContext());
+        return this;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -117,12 +123,12 @@ public abstract class BaseDialog {
     public abstract BaseDialog setTextColorRes(@ColorRes int resid);
 
     public BaseDialog setBackground(int color) {
-        getView().setBackgroundColor(color);
+        view.setBackgroundColor(color);
         return this;
     }
 
     public BaseDialog setBackgroundRes(@DrawableRes int resid) {
-        getView().setBackgroundResource(resid);
+        view.setBackgroundResource(resid);
         return this;
     }
 

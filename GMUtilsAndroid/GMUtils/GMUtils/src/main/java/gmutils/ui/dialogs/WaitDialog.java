@@ -86,7 +86,7 @@ public class WaitDialog extends BaseDialog {
     @Override
     protected void onViewCreated(View view) {
         super.onViewCreated(view);
-        getDialog().setCanceledOnTouchOutside(false);
+        dialog.setCanceledOnTouchOutside(false);
     }
 
     public WaitDialog getContainer(ResultCallback<LinearLayout> callback) {

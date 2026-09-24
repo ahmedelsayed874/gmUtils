@@ -1,6 +1,5 @@
 package gmutils.ui.dialogs;
 
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import org.json.JSONArray;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import gmutils.R;
 import gmutils.listeners.ResultCallback;
@@ -63,7 +64,9 @@ public class MessageDialog extends BaseDialog {
         functions = new MessageDialogFunctions(new MessageDialogFunctions.Listener() {
             @Override
             public View getView() {
-                return MessageDialog.this.getView();
+                AtomicReference<View> view = new AtomicReference<>();
+                MessageDialog.this.getView(view::set);
+                return view.get();
             }
 
             @Override
@@ -285,8 +288,9 @@ public class MessageDialog extends BaseDialog {
             ViewGroup.LayoutParams layoutParams = lyContainer.getLayoutParams();
             layoutParams.width = -1;
             lyContainer.setLayoutParams(layoutParams);
-
-        } else {
+        }
+        //
+        else {
             lyContainer.setMinimumWidth(minWidth);
         }
 
