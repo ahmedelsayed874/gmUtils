@@ -2,6 +2,7 @@ package gmutils.ui.dialogs;
 
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
@@ -53,7 +54,11 @@ public class MessageDialog extends BaseDialog {
     private Listener listenerBtn3;
 
     MessageDialog(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    MessageDialog(Context context, ResultCallback<AlertDialog.Builder> onBuildDialog) {
+        super(context, onBuildDialog);
 
         functions = new MessageDialogFunctions(new MessageDialogFunctions.Listener() {
             @Override

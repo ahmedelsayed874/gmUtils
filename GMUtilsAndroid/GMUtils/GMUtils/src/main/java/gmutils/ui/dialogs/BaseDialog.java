@@ -34,11 +34,16 @@ public abstract class BaseDialog {
     protected abstract View createView(LayoutInflater layoutInflater);
 
     public BaseDialog(Context context) {
+        this(context, null);
+    }
+
+    public BaseDialog(Context context, ResultCallback<AlertDialog.Builder> onBuildDialog) {
         view = createView(LayoutInflater.from(context));
 
-        dialog = new AlertDialog.Builder(context)
-                .setView(view)
-                .create();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setView(view);
+        if (onBuildDialog != null) onBuildDialog.invoke(builder);
+        dialog = builder.create();
 
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 

@@ -278,7 +278,7 @@ class MainActivity : BaseActivity() {
 
         this.view.btn18.text = "Input Dialog with 3 inputs"
         this.view.btn18.setOnClickListener {
-            InputDialog.create(this)
+            InputDialog(this)
                 .setTitle("title")
                 .setMessage("message")
                 .addInputField {
@@ -345,7 +345,7 @@ class MainActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            InputDialog.create(this)
+            InputDialog(this)
                 .setTitle("Open File Explore")
                 .setMessage("Type mimetype of the file")
                 .setInputHint("Mimetype (separate by ,)")
@@ -433,7 +433,7 @@ class MainActivity : BaseActivity() {
         var bodyCache = ""
         this.view.btn30.text = "Call API"
         this.view.btn30.setOnClickListener {
-            InputDialog.create(this)
+            InputDialog(this)
                 .setTitle("Call API")
                 //
                 .setInputTitle("Method")

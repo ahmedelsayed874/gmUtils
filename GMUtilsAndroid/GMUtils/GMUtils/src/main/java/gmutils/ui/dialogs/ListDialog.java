@@ -1,5 +1,6 @@
 package gmutils.ui.dialogs;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -61,6 +62,10 @@ public class ListDialog<T> extends BaseDialog {
     }
 
     public ListDialog(Context context, Listener<T> listener) {
+        this(context, null, listener);
+    }
+
+    public ListDialog(Context context, ResultCallback<AlertDialog.Builder> onBuildDialog, Listener<T> listener) {
         super(context);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

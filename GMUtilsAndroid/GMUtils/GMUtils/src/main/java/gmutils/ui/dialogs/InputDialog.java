@@ -1,6 +1,7 @@
 package gmutils.ui.dialogs;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.TextUtils;
@@ -37,10 +38,6 @@ import gmutils.listeners.ResultCallback;
  */
 public class InputDialog extends BaseDialog {
 
-    public static InputDialog create(Context context) {
-        return new InputDialog(context);
-    }
-
     private View lyContainer;
     private TextView tvTitle;
     private TextView tvMsg;
@@ -59,7 +56,11 @@ public class InputDialog extends BaseDialog {
     }
 
     public InputDialog(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    public InputDialog(Context context, ResultCallback<AlertDialog.Builder> onBuildDialog) {
+        super(context, onBuildDialog);
 
         View view = getView();
         lyContainer = view.findViewById(R.id.lyContainer);
@@ -109,7 +110,6 @@ public class InputDialog extends BaseDialog {
                 cancelButtonCallback.run();
             dismiss(((TextView) v).getText().toString());
         });
-
     }
 
     @Override

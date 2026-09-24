@@ -154,7 +154,7 @@ class FirebaseTestActivity : BaseActivity() {
 
         this.view.btn6.text = "Retrieve Single (data)"
         this.view.btn6.setOnClickListener {
-            InputDialog.create(this)
+            InputDialog(this)
                 .setMessage("Enter the value")
                 .setInputHint("value")
                 .setPositiveButtonCallback {
@@ -178,7 +178,7 @@ class FirebaseTestActivity : BaseActivity() {
 
         this.view.btn7.text = "Retrieve Single (data) (with custom converter)"
         this.view.btn7.setOnClickListener {
-            InputDialog.create(this)
+            InputDialog(this)
                 .setMessage("Enter the value")
                 .setInputHint("value")
                 .setPositiveButtonCallback {
@@ -453,7 +453,7 @@ class FirebaseTestActivity : BaseActivity() {
             if (user != null) {
                 callback()
             } else {
-                InputDialog.create(context)
+                InputDialog(context)
                     .setMessage("enter user name & pw")
                     .addInputField {
                         it.setTitle("User name:")
