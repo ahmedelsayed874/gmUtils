@@ -45,7 +45,8 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     private LongClickListener<T> mLongClickListener;
     private OnDataSetChangedListener<T> mOnDataSetChangedListener;
     private OnListItemsChangedListener<T> mOnListItemsChangedListener;
-    private int loadMoreTriggerOffset = 0;
+    private int loadMoreTriggerTopOffset = 0;
+    private int loadMoreTriggerBottomOffset = 0;
     private OnLoadMoreListener<T> mOnLoadMoreListener;
     private Boolean isFirstItemInitialized = false;
     private RecyclerViewPaginationListener mPaginationListener;
@@ -538,11 +539,16 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void setOnLoadMoreListener(OnLoadMoreListener<T> listener) {
-        setOnLoadMoreListener(0, listener);
+        setOnLoadMoreListener(0, 0, listener);
     }
 
     public void setOnLoadMoreListener(int loadMoreTriggerOffset, OnLoadMoreListener<T> listener) {
-        this.loadMoreTriggerOffset = loadMoreTriggerOffset;
+        setOnLoadMoreListener(0, 0, listener);
+    }
+
+    public void setOnLoadMoreListener(int loadMoreTriggerTopOffset, int loadMoreTriggerBottomOffset, OnLoadMoreListener<T> listener) {
+        this.loadMoreTriggerTopOffset = loadMoreTriggerTopOffset;
+        this.loadMoreTriggerBottomOffset = loadMoreTriggerBottomOffset;
         this.mOnLoadMoreListener = listener;
         this.isFirstItemInitialized = false;
     }
@@ -597,7 +603,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
         if (mOnLoadMoreListener != null) {
             try {
-                if (position == loadMoreTriggerOffset) {
+                if (position == loadMoreTriggerTopOffset) {
                     if (isFirstItemInitialized) {
                         mOnLoadMoreListener.onLoadingMore(this, false);
                     }
@@ -606,7 +612,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
                 }
                 //
-                else if (position == getItemCount() - loadMoreTriggerOffset - 1) {
+                else if (position == getItemCount() - loadMoreTriggerBottomOffset - 1) {
                     mOnLoadMoreListener.onLoadingMore(this, true);
                 }
             } catch (Exception e) {
