@@ -24,7 +24,6 @@ import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.RecyclerViewPaginationListener;
 import gmutils.listeners.SimpleWindowAttachListener;
 
-
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
  * Computer Engineer / 2012
@@ -46,6 +45,7 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     private LongClickListener<T> mLongClickListener;
     private OnDataSetChangedListener<T> mOnDataSetChangedListener;
     private OnListItemsChangedListener<T> mOnListItemsChangedListener;
+    private int loadMoreTriggerOffset = 0;
     private OnLoadMoreListener<T> mOnLoadMoreListener;
     private Boolean isFirstItemInitialized = false;
     private RecyclerViewPaginationListener mPaginationListener;
@@ -538,6 +538,11 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
     }
 
     public void setOnLoadMoreListener(OnLoadMoreListener<T> listener) {
+        setOnLoadMoreListener(0, listener);
+    }
+
+    public void setOnLoadMoreListener(int loadMoreTriggerOffset, OnLoadMoreListener<T> listener) {
+        this.loadMoreTriggerOffset = loadMoreTriggerOffset;
         this.mOnLoadMoreListener = listener;
         this.isFirstItemInitialized = false;
     }
@@ -592,14 +597,16 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRe
 
         if (mOnLoadMoreListener != null) {
             try {
-                if (position == 0) {
+                if (position == loadMoreTriggerOffset) {
                     if (isFirstItemInitialized) {
                         mOnLoadMoreListener.onLoadingMore(this, false);
                     }
 
                     isFirstItemInitialized = true;
 
-                } else if (position == getItemCount() - 1) {
+                }
+                //
+                else if (position == getItemCount() - loadMoreTriggerOffset - 1) {
                     mOnLoadMoreListener.onLoadingMore(this, true);
                 }
             } catch (Exception e) {
