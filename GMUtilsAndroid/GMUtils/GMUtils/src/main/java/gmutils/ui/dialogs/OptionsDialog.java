@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import gmutils.R;
+import gmutils.collections.values.Value2;
+import gmutils.listeners.ActionCallback;
 import gmutils.listeners.ResultCallback;
 
 /**
@@ -31,11 +33,22 @@ public class OptionsDialog {
             void onItemSelected(Object item, Integer position);
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                CharSequence[] list,
+                Listener listener
+        ) {
             return show(context, title, list, -1, listener);
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int defaultSelect, Listener listener) {
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                CharSequence[] list,
+                int defaultSelect,
+                Listener listener
+        ) {
             return new OptionsDialog(context, title, d -> {
                 d.setSingleChoiceItems(list, defaultSelect, (dialog, which) -> {
                             if (listener != null) listener.onItemSelected(list[which], which);
@@ -47,12 +60,25 @@ public class OptionsDialog {
             });
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, Listener listener) {
-            return show(context, title, list, -1, listener);
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                Object[] list,
+                ActionCallback<Object, CharSequence> itemTextGetter,
+                Listener listener
+        ) {
+            return show(context, title, list, itemTextGetter, -1, listener);
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int defaultSelect, Listener listener) {
-            CharSequence[] items = convertObjectsToCharSequences(list);
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                Object[] list,
+                ActionCallback<Object, CharSequence> itemTextGetter,
+                int defaultSelect,
+                Listener listener
+        ) {
+            CharSequence[] items = convertObjectsToCharSequences(list, itemTextGetter);
 
             return new OptionsDialog(context, title, d -> {
                 d.setSingleChoiceItems(items, defaultSelect, (dialog, which) -> {
@@ -71,11 +97,22 @@ public class OptionsDialog {
             void onItemsSelected(Pair<Object, Integer>[] itemsAndPositions);
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, Listener listener) {
-            return show(context, title, list, null, listener);
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                CharSequence[] list,
+                Listener listener
+        ) {
+            return show(context, title, list, null, null, listener);
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, CharSequence[] list, int[] defaultSelect, Listener listener) {
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                CharSequence[] list,
+                int[] defaultSelect,
+                Listener listener
+        ) {
             boolean[] checkedItem = checkedItems(list, defaultSelect);
 
             return new OptionsDialog(context, title, d -> {
@@ -104,12 +141,66 @@ public class OptionsDialog {
             });
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, Listener listener) {
-            return show(context, title, list, null, listener);
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                Object[] list,
+                ActionCallback<Object, CharSequence> itemTextGetter,
+                Listener listener
+        ) {
+            return show(context, title, list, itemTextGetter, null, listener);
         }
 
-        public static OptionsDialog show(Context context, @Nullable String title, Object[] list, int[] defaultSelect, Listener listener) {
-            CharSequence[] items = convertObjectsToCharSequences(list);
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                Object[] list,
+                ActionCallback<Object, CharSequence> itemTextGetter,
+                int[] defaultSelect,
+                Listener listener
+        ) {
+            return show(
+                    context,
+                    title,
+                    list,
+                    itemTextGetter,
+                    defaultSelect,
+                    R.string.ok,
+                    listener
+            );
+        }
+
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                Object[] list,
+                ActionCallback<Object, CharSequence> itemTextGetter,
+                int[] defaultSelect,
+                int positiveBtnText,
+                Listener listener
+        ) {
+            return show(
+                    context,
+                    title,
+                    list,
+                    itemTextGetter,
+                    defaultSelect,
+                    positiveBtnText,
+                    listener
+            );
+        }
+
+        public static OptionsDialog show(
+                Context context,
+                @Nullable String title,
+                Object[] list,
+                ActionCallback<Object, CharSequence> itemTextGetter,
+                int[] defaultSelect,
+                int positiveBtnText,
+                Value2<CharSequence, DialogInterface.OnClickListener> extraButton,
+                Listener listener
+        ) {
+            CharSequence[] items = convertObjectsToCharSequences(list, itemTextGetter);
 
             boolean[] checkedItem = checkedItems(list, defaultSelect);
 
@@ -123,7 +214,7 @@ public class OptionsDialog {
                                 else selections.remove(which);
                             }
                         })
-                        .setPositiveButton(R.string.ok, (dialog, which) -> {
+                        .setPositiveButton(positiveBtnText, (dialog, which) -> {
                             Pair<Object, Integer>[] itemsAndPositions = new Pair[selections.size()];
                             int i = 0;
                             for (Integer integer : selections.keySet()) {
@@ -136,6 +227,10 @@ public class OptionsDialog {
                         .setNegativeButton(R.string.cancel, (dialog, which) -> {
                             dialog.dismiss();
                         });
+
+                if (extraButton != null) {
+                    d.setNeutralButton(extraButton.value1, extraButton.value2);
+                }
             });
 
         }
@@ -156,13 +251,20 @@ public class OptionsDialog {
         }
     }
 
-    private static CharSequence[] convertObjectsToCharSequences(Object[] list) {
+    private static CharSequence[] convertObjectsToCharSequences(
+            Object[] list,
+            ActionCallback<Object, CharSequence> itemTextGetter
+    ) {
         CharSequence[] items = new CharSequence[list.length];
         for (int i = 0; i < list.length; i++) {
-            items[i] = list[i].toString();
+            items[i] = itemTextGetter == null
+                    ? list[i].toString()
+                    : itemTextGetter.invoke(list[i]);
         }
         return items;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public final AlertDialog dialog;
 
