@@ -155,7 +155,7 @@ public class MyToast {
     //----------------------------------------------------------------------------------------------
 
     public static void showError(Context context, CharSequence msg, boolean fastShow) {
-        show(context, msg, fastShow, android.R.color.holo_red_dark, android.R.color.holo_red_dark);
+        show(context, msg, fastShow, android.R.color.holo_red_dark, android.R.color.white);
     }
 
     public static void showError(Context context, CharSequence msg) {
