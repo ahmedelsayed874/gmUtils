@@ -2,12 +2,14 @@ package gmutils.ui.toast;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -80,8 +82,25 @@ public class ToastCustom implements MyToast.IToast {
     public MyToast.IToast setTextColor(int textColorRes) {
         try {
             tv.setTextColor(textColorRes);
+        //} catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    @Override
+    public MyToast.IToast setTextStyle(int textStyle) {
+        try {
+            tv.setTypeface(Typeface.create(tv.getTypeface(), textStyle));
         } catch (Exception ignored) {
         }
+        return this;
+    }
+
+    @Override
+    public MyToast.IToast getTextView(ResultCallback<TextView> handler) {
+        handler.invoke(tv);
         return this;
     }
 

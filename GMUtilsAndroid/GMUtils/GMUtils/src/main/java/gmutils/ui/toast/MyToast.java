@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
+import android.widget.TextView;
 
 import androidx.annotation.StringRes;
 
 import org.jetbrains.annotations.Nullable;
 
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -30,6 +32,10 @@ public class MyToast {
         IToast setBackground(int bgRes);
 
         IToast setTextColor(int textColorRes);
+
+        IToast setTextStyle(int textStyle);
+
+        IToast getTextView(ResultCallback<TextView> handler);
 
         IToast setMessage(int msgRes);
 
@@ -155,7 +161,7 @@ public class MyToast {
     //----------------------------------------------------------------------------------------------
 
     public static void showError(Context context, CharSequence msg, boolean fastShow) {
-        show(context, msg, fastShow, android.R.color.holo_red_dark, android.R.color.white);
+        show(context, msg, fastShow, android.R.color.holo_red_dark, Color.WHITE);
     }
 
     public static void showError(Context context, CharSequence msg) {
@@ -169,24 +175,6 @@ public class MyToast {
     public static void showError(Context context, @StringRes int msgRes, boolean fastShow) {
         showError(context, context.getString(msgRes), fastShow);
     }
-
-    //----------------------------------------------------------------------------------------------
-
-    /*public static void showOS(Context context, @StringRes int msg) {
-        showOS(context, msg, false);
-    }
-
-    public static void showOS(Context context, @StringRes int msg, boolean fastShow) {
-        Toast.makeText(context, msg, fastShow ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
-    }
-
-    public static void showOS(Context context, CharSequence msg) {
-        showOS(context, msg, false);
-    }
-
-    public static void showOS(Context context, CharSequence msg, boolean fastShow) {
-        Toast.makeText(context, msg, fastShow ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show();
-    }*/
 
     //----------------------------------------------------------------------------------------------
 

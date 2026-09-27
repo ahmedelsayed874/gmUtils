@@ -2,6 +2,7 @@ package gmutils.ui.toast;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import gmutils.R;
+import gmutils.listeners.ResultCallback;
 import gmutils.listeners.SimpleWindowAttachListener;
 
 public class ToastNative implements MyToast.IToast {
@@ -86,6 +88,21 @@ public class ToastNative implements MyToast.IToast {
     public MyToast.IToast setTextColor(int textColorRes) {
         try {
             tv.setTextColor(textColorRes);
+        } catch (Exception ignored) {
+        }
+        return this;
+    }
+
+    @Override
+    public MyToast.IToast getTextView(ResultCallback<TextView> handler) {
+        if (tv != null) handler.invoke(tv);
+        return this;
+    }
+
+    @Override
+    public MyToast.IToast setTextStyle(int textStyle) {
+        try {
+            tv.setTypeface(Typeface.create(tv.getTypeface(), textStyle));
         } catch (Exception ignored) {
         }
         return this;

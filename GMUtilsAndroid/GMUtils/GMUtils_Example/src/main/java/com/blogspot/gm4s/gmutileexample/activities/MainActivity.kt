@@ -69,7 +69,8 @@ class MainActivity : BaseActivity() {
 
         this.view.btn3.text = "show my toast2"
         this.view.btn3.setOnClickListener {
-            MyToast.show(this, "test my toast", false, R.drawable.shape_solid_round_accent)
+            //MyToast.show(this, "test my toast", false, R.drawable.shape_solid_round_accent)
+            MyToast.showError(this, "test my toast")
         }
 
         this.view.btn4.text = "show original toast"
