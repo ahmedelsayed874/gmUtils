@@ -66,11 +66,15 @@ public abstract class BaseApplication extends Application implements Application
             secret = new Random().nextInt();
         }
 
-        public void add(String key, Object instance) {
+        public boolean has(String key) {
+            return this.globalInstances.containsKey(key);
+        }
+
+        public void set(String key, Object instance) {
             this.globalInstances.put(key, instance);
         }
 
-        public void add(String key, GlobalVariableDisposal instance) {
+        public void set(String key, GlobalVariableDisposal instance) {
             this.globalInstances.put(key, instance);
         }
 
@@ -85,7 +89,7 @@ public abstract class BaseApplication extends Application implements Application
             }
         }
 
-        public void clear(int secret) {
+        void clear(int secret) {
             if (this.secret != secret) {
                 throw new RuntimeException("this method can call only from container class");
             }

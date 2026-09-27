@@ -218,7 +218,7 @@ public class ImageLoader {
                 if (application == null) {
                     INSTANCE = picasso;
                 } else {
-                    application.globalVariables().add(Picasso.class.getCanonicalName(), picasso);
+                    application.globalVariables().set(Picasso.class.getCanonicalName(), picasso);
                 }
             }
         }
