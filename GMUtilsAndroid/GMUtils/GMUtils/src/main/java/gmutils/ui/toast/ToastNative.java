@@ -70,6 +70,18 @@ public class ToastNative implements MyToast.IToast {
     //----------------------------------------------------------------------------------------------
 
     @Override
+    public MyToast.IToast getRootView(ResultCallback<View> handler) {
+        handler.invoke(root);
+        return this;
+    }
+
+    @Override
+    public MyToast.IToast getTextView(ResultCallback<TextView> handler) {
+        if (tv != null) handler.invoke(tv);
+        return this;
+    }
+
+    @Override
     public MyToast.IToast setBackground(int bgRes) {
         try {
             root.setBackgroundResource(bgRes);
@@ -90,12 +102,6 @@ public class ToastNative implements MyToast.IToast {
             tv.setTextColor(textColorRes);
         } catch (Exception ignored) {
         }
-        return this;
-    }
-
-    @Override
-    public MyToast.IToast getTextView(ResultCallback<TextView> handler) {
-        if (tv != null) handler.invoke(tv);
         return this;
     }
 

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.StringRes;
@@ -29,13 +31,15 @@ public class MyToast {
 
     public interface IToast {
 
+        IToast getRootView(ResultCallback<View> handler);
+
+        IToast getTextView(ResultCallback<TextView> handler);
+
         IToast setBackground(int bgRes);
 
         IToast setTextColor(int textColorRes);
 
         IToast setTextStyle(int textStyle);
-
-        IToast getTextView(ResultCallback<TextView> handler);
 
         IToast setMessage(int msgRes);
 

@@ -50,7 +50,8 @@ public class ToastCustom implements MyToast.IToast {
     public ToastCustom(Activity activity, CharSequence msg, boolean fastShow) {
         windowLayout = activity.findViewById(android.R.id.content);
 
-        rootLayout = LayoutInflater.from(activity)
+        rootLayout = LayoutInflater
+                .from(activity)
                 .inflate(R.layout.mytoast_gmutils, null);
 
         textContainer = rootLayout.findViewById(R.id.text_container);
@@ -62,6 +63,18 @@ public class ToastCustom implements MyToast.IToast {
     }
 
     //----------------------------------------------------------------------------------------------
+
+    @Override
+    public MyToast.IToast getRootView(ResultCallback<View> handler) {
+        handler.invoke(rootLayout);
+        return this;
+    }
+
+    @Override
+    public MyToast.IToast getTextView(ResultCallback<TextView> handler) {
+        handler.invoke(tv);
+        return this;
+    }
 
     @Override
     public MyToast.IToast setBackground(int bgRes) {
@@ -95,12 +108,6 @@ public class ToastCustom implements MyToast.IToast {
             tv.setTypeface(Typeface.create(tv.getTypeface(), textStyle));
         } catch (Exception ignored) {
         }
-        return this;
-    }
-
-    @Override
-    public MyToast.IToast getTextView(ResultCallback<TextView> handler) {
-        handler.invoke(tv);
         return this;
     }
 
@@ -151,6 +158,14 @@ public class ToastCustom implements MyToast.IToast {
         rootLayout = null;
         textContainer = null;
         tv = null;
+    }
+
+    public long getDefaultDuration() {
+        return defaultDuration;
+    }
+
+    public long getDuration() {
+        return duration;
     }
 
 }
