@@ -117,6 +117,8 @@ public abstract class BaseApplication extends Application implements Application
     //----------------------------------------------------------------------------------------------
 
     public static BaseApplication register(Application application) {
+        if (application instanceof BaseApplication) return (BaseApplication) application;
+
         BaseApplication baseApplication = new BaseApplication() {
             final WeakReference<Application> app = new WeakReference<>(application);
 
@@ -428,7 +430,7 @@ public abstract class BaseApplication extends Application implements Application
         Intents.getInstance().composeEmail(
                 this,
                 null,
-                "REPORTEDBUG: " + this.getPackageName(),
+                "REPORTEDBUG: " + thisApp().getPackageName(),
                 bugs,
                 fileUri
         );
