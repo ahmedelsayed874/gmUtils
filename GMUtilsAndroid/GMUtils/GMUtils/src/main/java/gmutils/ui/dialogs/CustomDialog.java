@@ -5,11 +5,14 @@ import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,6 +40,7 @@ import gmutils.listeners.ResultCallback;
  * +201022663988
  */
 public class CustomDialog extends BaseDialog {
+    private final ScrollView scrollView;
     private final LinearLayout root;
     private final TextView titleTv;
 
@@ -52,18 +56,33 @@ public class CustomDialog extends BaseDialog {
     public CustomDialog(Context context) {
         super(context);
 
+        scrollView = getView().findViewById(R.id.scrollView);
         root = getView().findViewById(R.id.root);
         titleTv = getView().findViewById(R.id.titleTv);
+
         titleTv.setVisibility(View.GONE);
     }
 
     @Override
     protected void onViewCreated(View view) {
         super.onViewCreated(view);
-
     }
 
     //==============================================================================================
+
+    public CustomDialog setWidth(int width) {
+        ViewGroup.LayoutParams layoutParams = root.getLayoutParams();
+        layoutParams.width = width;
+        root.setLayoutParams(layoutParams);
+        return this;
+    }
+
+    public CustomDialog setMaxHeight(int maxHeight) {
+        ViewGroup.LayoutParams layoutParams = scrollView.getLayoutParams();
+        layoutParams.height = maxHeight;
+        scrollView.setLayoutParams(layoutParams);
+        return this;
+    }
 
     public CustomDialog setTitle(int title) {
         titleTv.setText(title);
@@ -93,19 +112,19 @@ public class CustomDialog extends BaseDialog {
         throw new UnsupportedOperationException("CustomDialog does not support setTextColorRes.");
     }
 
-    public CustomDialog addView(View view) {
+    public CustomDialog addChild(View view) {
         root.addView(view);
         return this;
     }
 
     public CustomDialog addChild(BaseView child) {
-        this.addView(child.build(root.getContext()));
+        root.addView(child.build(root.getContext()));
         return this;
     }
 
     public CustomDialog addChildren(BaseView... children) {
         for (BaseView child : children) {
-            this.addView(child.build(root.getContext()));
+            root.addView(child.build(root.getContext()));
         }
         return this;
     }
@@ -626,6 +645,67 @@ public class CustomDialog extends BaseDialog {
             }
 
             return linearLayout;
+        }
+    }
+
+    public static class Scroll extends BaseView {
+        private boolean isVertical = true;
+        private BaseView child;
+
+        public void setVertical(boolean vertical) {
+            this.isVertical = vertical;
+        }
+
+        public Scroll addChild(BaseView child) {
+            this.child = child;
+            return this;
+        }
+
+        @Override
+        public Scroll setWidth(int width) {
+            return (Scroll) super.setWidth(width);
+        }
+
+        @Override
+        public Scroll setHeight(Integer height) {
+            return (Scroll) super.setHeight(height);
+        }
+
+        @Override
+        public Scroll setBackgroundColor(int color) {
+            return (Scroll) super.setBackgroundColor(color);
+        }
+
+        @Override
+        public Scroll setBackgroundResource(int resId) {
+            return (Scroll) super.setBackgroundResource(resId);
+        }
+
+        @Override
+        public Scroll setPadding(
+                Integer paddingLeft,
+                Integer paddingTop,
+                Integer paddingRight,
+                Integer paddingBottom
+        ) {
+            return (Scroll) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+        }
+
+        @Override
+        protected View build(Context context) {
+            ViewGroup view;
+
+            if (isVertical) {
+                view = new ScrollView(context);
+            } else {
+                view = new HorizontalScrollView(context);
+            }
+
+            setupView(view);
+
+            view.addView(child.build(context));
+
+            return view;
         }
     }
 
