@@ -3,6 +3,8 @@
 
     <solid android:color="@color/gmDialogBackground" />
     <corners android:radius="@dimen/size_3" />
-    <stroke android:color="@color/black_trans1" android:width="@dimen/size_1" />
+    <stroke
+        android:width="@dimen/size_1"
+        android:color="@color/black_trans1" />
 
 </shape>
