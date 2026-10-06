@@ -3,12 +3,15 @@ package gmutils.ui.dialogs;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -225,13 +228,9 @@ public class CustomDialog extends BaseDialog {
                     height != null ? height : LinearLayout.LayoutParams.WRAP_CONTENT
             ));
 
-            if (bgColor != null) {
-                view.setBackgroundColor(bgColor);
-            }
-            //
-            else if (bgRes != null) {
-                view.setBackgroundResource(bgRes);
-            }
+            if (bgColor != null) view.setBackgroundColor(bgColor);
+
+            if (bgRes != null) view.setBackgroundResource(bgRes);
 
             view.setPadding(
                     paddingLeft != null ? paddingLeft : view.getPaddingLeft(),
@@ -320,22 +319,15 @@ public class CustomDialog extends BaseDialog {
         protected void setupTextView(TextView textView) {
             setupView(textView);
 
-            if (textRes != null) {
-                textView.setText(textRes);
-            }
-            //
-            else if (text != null) {
-                textView.setText(text);
-            }
-            if (color != null) {
-                textView.setTextColor(color);
-            }
-            if (typeface != null) {
-                textView.setTypeface(typeface);
-            }
-            if (textSizeSp != null) {
-                textView.setTextSize(textSizeSp);
-            }
+            if (textRes != null) textView.setText(textRes);
+
+            if (text != null) textView.setText(text);
+
+            if (color != null) textView.setTextColor(color);
+
+            if (typeface != null) textView.setTypeface(typeface);
+
+            if (textSizeSp != null) textView.setTextSize(textSizeSp);
         }
     }
 
@@ -397,17 +389,11 @@ public class CustomDialog extends BaseDialog {
 
             setupTextView(editText);
 
-            if (hintRes != null) {
-                editText.setHint(hintRes);
-            }
-            //
-            else if (hint != null) {
-                editText.setHint(hint);
-            }
+            if (hintRes != null) editText.setHint(hintRes);
 
-            if (hintColor != null) {
-                editText.setHintTextColor(hintColor);
-            }
+            if (hint != null) editText.setHint(hint);
+
+            if (hintColor != null) editText.setHintTextColor(hintColor);
 
             return editText;
         }
@@ -457,12 +443,11 @@ public class CustomDialog extends BaseDialog {
 
             setupTextView(checkBox);
 
-            if (checkboxColor != null) {
-                CompoundButtonCompat.setButtonTintList(
-                        checkBox,
-                        ColorStateList.valueOf(checkboxColor)
-                );
-            }
+            if (checkboxColor != null) CompoundButtonCompat.setButtonTintList(
+                    checkBox,
+                    ColorStateList.valueOf(checkboxColor)
+            );
+
 
             return checkBox;
         }
@@ -520,12 +505,12 @@ public class CustomDialog extends BaseDialog {
             for (Text option : options) {
                 RadioButton radioButton = new RadioButton(context);
                 option.setupTextView(radioButton);
-                if (checkColor != null) {
-                    CompoundButtonCompat.setButtonTintList(
-                            radioButton,
-                            ColorStateList.valueOf(checkColor)
-                    );
-                }
+
+                if (checkColor != null) CompoundButtonCompat.setButtonTintList(
+                        radioButton,
+                        ColorStateList.valueOf(checkColor)
+                );
+
                 radioGroup.addView(radioButton);
             }
 
@@ -579,12 +564,10 @@ public class CustomDialog extends BaseDialog {
 
             setupTextView(button);
 
-            if (tintColor != null) {
-                ViewCompat.setBackgroundTintList(
-                        button,
-                        ColorStateList.valueOf(tintColor)
-                );
-            }
+            if (tintColor != null) ViewCompat.setBackgroundTintList(
+                    button,
+                    ColorStateList.valueOf(tintColor)
+            );
 
             return button;
         }
@@ -709,6 +692,93 @@ public class CustomDialog extends BaseDialog {
         }
     }
 
+    public static class Image extends BaseView {
+        private Integer imageResId;
+        private Uri imageUri;
+        private android.graphics.drawable.Drawable imageDrawable;
+
+        public Image setImageResId(int imageResId) {
+            this.imageResId = imageResId;
+            this.imageUri = null;
+            this.imageDrawable = null;
+            return this;
+        }
+
+        public Image setImageUri(Uri imageUri) {
+            this.imageResId = null;
+            this.imageUri = imageUri;
+            this.imageDrawable = null;
+            return this;
+        }
+
+        public Image setImageDrawable(Drawable imageDrawable) {
+            this.imageResId = null;
+            this.imageUri = null;
+            this.imageDrawable = imageDrawable;
+            return this;
+        }
+
+        @Override
+        public Image setWidth(int width) {
+            return (Image) super.setWidth(width);
+        }
+
+        @Override
+        public Image setHeight(Integer height) {
+            return (Image) super.setHeight(height);
+        }
+
+        @Override
+        public Image setBackgroundColor(int color) {
+            return (Image) super.setBackgroundColor(color);
+        }
+
+        @Override
+        public Image setBackgroundResource(int resId) {
+            return (Image) super.setBackgroundResource(resId);
+        }
+
+        @Override
+        public Image setPadding(
+                Integer paddingLeft,
+                Integer paddingTop,
+                Integer paddingRight,
+                Integer paddingBottom
+        ) {
+            return (Image) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+        }
+
+        @Override
+        public Image setOnClickListener(View.OnClickListener onClickListener) {
+            return (Image) super.setOnClickListener(onClickListener);
+        }
+
+        @Override
+        public Image setOnLongClickListener(View.OnLongClickListener onLongClickListener) {
+            return (Image) super.setOnLongClickListener(onLongClickListener);
+        }
+
+        @Override
+        public Image setOnTouchListener(View.OnTouchListener onTouchListener) {
+            return (Image) super.setOnTouchListener(onTouchListener);
+        }
+
+        @Override
+        protected View build(Context context) {
+            ImageView view = new ImageView(context);
+            setupView(view);
+
+            if (imageUri != null) view.setImageURI(imageUri);
+
+            if (imageDrawable != null) view.setImageDrawable(imageDrawable);
+
+            if (imageResId != null) view.setImageResource(imageResId);
+
+            return view;
+        }
+
+    }
+
     public static class BasicView extends BaseView {
 
         public BasicView(int width, int height) {
@@ -793,4 +863,5 @@ public class CustomDialog extends BaseDialog {
         }
 
     }
+
 }
