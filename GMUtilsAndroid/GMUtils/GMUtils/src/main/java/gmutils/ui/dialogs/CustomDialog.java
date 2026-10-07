@@ -252,6 +252,14 @@ public class CustomDialog extends BaseDialog {
         private Typeface typeface;
         private Float textSizeSp;
 
+        public Text(int textRes) {
+            setTextRes(textRes);
+        }
+
+        public Text(CharSequence text) {
+            setText(text);
+        }
+
         @Override
         public Text setWidth(int width) {
             return (Text) super.setWidth(width);
@@ -336,6 +344,25 @@ public class CustomDialog extends BaseDialog {
         private CharSequence hint;
         private Integer hintColor;
 
+        public TextField() {
+            super("");
+        }
+
+        public TextField(int hintRes) {
+            super("");
+            setHintRes(hintRes);
+        }
+
+        public TextField(CharSequence hint) {
+            super("");
+            setHint(hint);
+        }
+
+        public TextField(CharSequence text, CharSequence hint) {
+            super(text);
+            setHint(hint);
+        }
+
         public Text setHintRes(int hintRes) {
             this.hintRes = hintRes;
             this.hint = null;
@@ -401,6 +428,14 @@ public class CustomDialog extends BaseDialog {
 
     public static class Checkbox extends Text {
         private Integer checkboxColor;
+
+        public Checkbox(int textRes) {
+            super(textRes);
+        }
+
+        public Checkbox(CharSequence text) {
+            super(text);
+        }
 
         public Checkbox setCheckboxColor(Integer checkboxColor) {
             this.checkboxColor = checkboxColor;
@@ -523,6 +558,14 @@ public class CustomDialog extends BaseDialog {
     public static class Button extends Text {
         private Integer tintColor;
 
+        public Button(int textRes) {
+            super(textRes);
+        }
+
+        public Button(CharSequence text) {
+            super(text);
+        }
+
         public Button setTintColor(Integer tintColor) {
             this.tintColor = tintColor;
             return this;
@@ -574,7 +617,15 @@ public class CustomDialog extends BaseDialog {
     }
 
     public static class Row extends BaseView {
-        private List<BaseView> children = new ArrayList<>();
+        private final List<BaseView> children;
+
+        public Row() {
+            this(new ArrayList<>());
+        }
+
+        public Row(List<BaseView> children) {
+            this.children = children != null ? children : new ArrayList<>();
+        }
 
         public Row addChild(BaseView child) {
             this.children.add(child);
@@ -632,8 +683,17 @@ public class CustomDialog extends BaseDialog {
     }
 
     public static class Scroll extends BaseView {
-        private boolean isVertical = true;
+        private boolean isVertical;
         private BaseView child;
+
+        public Scroll() {
+            this(true, null);
+        }
+
+        public Scroll(boolean isVertical, BaseView child) {
+            this.isVertical = isVertical;
+            this.child = child;
+        }
 
         public void setVertical(boolean vertical) {
             this.isVertical = vertical;
@@ -696,6 +756,18 @@ public class CustomDialog extends BaseDialog {
         private Integer imageResId;
         private Uri imageUri;
         private android.graphics.drawable.Drawable imageDrawable;
+
+        public Image(int imageResId) {
+            setImageResId(imageResId);
+        }
+
+        public Image(Uri imageUri) {
+            setImageUri(imageUri);
+        }
+
+        public Image(Drawable imageDrawable) {
+            setImageDrawable(imageDrawable);
+        }
 
         public Image setImageResId(int imageResId) {
             this.imageResId = imageResId;
