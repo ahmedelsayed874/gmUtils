@@ -198,6 +198,10 @@ public class CustomDialog extends BaseDialog {
         return this;
     }
 
+    public void dispatchStateUpdated(BaseView view) {
+        if (_event != null) _event.onStatusChanged(view);
+    }
+
     //==============================================================================================
 
     private boolean allowDestroy = true;
@@ -224,7 +228,7 @@ public class CustomDialog extends BaseDialog {
         throw new UnsupportedOperationException("CustomDialog does not support reinitialization.");
     }
 
-    //==============================================================================================
+    //\/////////////////////////////////////////////////////////////////////////////////////////////
 
     public interface Event {
         void onStatusChanged(BaseView view);
@@ -387,9 +391,9 @@ public class CustomDialog extends BaseDialog {
         private Value4<Integer, Integer, Integer, Integer> paddingLTRB;
         private Value4<Integer, Integer, Integer, Integer> marginLTRB;
         private int visibility = View.VISIBLE;
-        protected ResultCallback2<BaseViewBuilder, View> onClickListener;
-        private ActionCallback2<BaseViewBuilder, View, Boolean> onLongClickListener;
-        private ActionCallback3<BaseViewBuilder, View, MotionEvent, Boolean> onTouchListener;
+        protected ResultCallback2<BaseView, View> onClickListener;
+        private ActionCallback2<BaseView, View, Boolean> onLongClickListener;
+        private ActionCallback3<BaseView, View, MotionEvent, Boolean> onTouchListener;
         //
         private ResultCallback<View> onBuiltCallback;
 
@@ -473,17 +477,17 @@ public class CustomDialog extends BaseDialog {
             return this;
         }
 
-        public BaseViewBuilder setOnClickListener(ResultCallback2<BaseViewBuilder, View> onClickListener) {
+        public BaseViewBuilder setOnClickListener(ResultCallback2<BaseView, View> onClickListener) {
             this.onClickListener = onClickListener;
             return this;
         }
 
-        public BaseViewBuilder setOnLongClickListener(ActionCallback2<BaseViewBuilder, View, Boolean> onLongClickListener) {
+        public BaseViewBuilder setOnLongClickListener(ActionCallback2<BaseView, View, Boolean> onLongClickListener) {
             this.onLongClickListener = onLongClickListener;
             return this;
         }
 
-        public BaseViewBuilder setOnTouchListener(ActionCallback3<BaseViewBuilder, View, MotionEvent, Boolean> onTouchListener) {
+        public BaseViewBuilder setOnTouchListener(ActionCallback3<BaseView, View, MotionEvent, Boolean> onTouchListener) {
             this.onTouchListener = onTouchListener;
             return this;
         }
