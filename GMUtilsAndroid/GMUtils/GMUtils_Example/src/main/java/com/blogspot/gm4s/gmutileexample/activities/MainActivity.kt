@@ -485,6 +485,13 @@ class MainActivity : BaseActivity() {
                             .setOnClickListener { builder, view ->
                                 MyToast.show(this, "Row Text 2 clicked")
                             }
+                    )
+                    .addChild(
+                        CustomDialog
+                            .Text("Dispatch Data Lister")
+                            .setOnClickListener { builder, view ->
+                                cd.dispatchStateUpdated(builder)
+                            }
                     ),
 
                 //

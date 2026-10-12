@@ -981,7 +981,7 @@ public class CustomDialog extends BaseDialog {
         @Override
         public OptionElement getValue() {
             int id = ((RadioGroup) this.nativeView).getCheckedRadioButtonId();
-            if (id == 0) return null;
+            if (id <= 0) return null;
             return options.get(id - 1);
         }
 
