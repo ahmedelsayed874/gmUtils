@@ -24,7 +24,7 @@
                 android:id="@+id/titleTv"
                 style="@style/textView.pageTitle"
                 android:visibility="gone"
-                tools:text="Title"
+                tools:text="Title Title\nTitle"
                 tools:visibility="visible" />
 
         </LinearLayout>

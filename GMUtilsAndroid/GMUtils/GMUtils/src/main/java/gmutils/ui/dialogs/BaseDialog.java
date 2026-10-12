@@ -111,6 +111,10 @@ public abstract class BaseDialog {
         return this;
     }
 
+    public String getDismissedBy() {
+        return dismissedBy;
+    }
+
     //----------------------------------------------------------------------------------------------
 
     public BaseDialog setCancelable(boolean cancellable) {

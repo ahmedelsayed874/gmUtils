@@ -260,7 +260,9 @@ public class ActivityFunctions implements BaseFragmentListener {
                             if (color2 != null) {
                                 ((View) root.getParent()).setBackgroundColor(color2);
                             }
-                        } else {
+                        }
+                        //
+                        else {
                             insetsController.setAppearanceLightStatusBars(true);
                         }
                     }

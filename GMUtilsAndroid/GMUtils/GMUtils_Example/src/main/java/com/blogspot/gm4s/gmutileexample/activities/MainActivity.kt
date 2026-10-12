@@ -1,24 +1,30 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
-import android.os.Message
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.blogspot.gm4s.gmutileexample.DB
+import androidx.core.graphics.Insets
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
 import gmutils.Activities
 import gmutils.DateOp
 import gmutils.Intents
 import gmutils.app.BaseApplication
-import gmutils.backgroundWorkers.LooperThread
+import gmutils.json.JsonBuilder
+import gmutils.listeners.TextChangedListener
 import gmutils.logger.Logger
 import gmutils.logger.LoggerAbs
 import gmutils.net.SimpleHTTPRequest
@@ -27,6 +33,7 @@ import gmutils.net.retrofit.example.data.TimeOfArea
 import gmutils.net.volley.example.URLs.TimeURLs
 import gmutils.ui.activities.ActivityFunctions
 import gmutils.ui.activities.BaseActivity
+import gmutils.ui.dialogs.CustomDialog
 import gmutils.ui.dialogs.InputDialog
 import gmutils.ui.dialogs.ListDialog
 import gmutils.ui.dialogs.MessageDialog
@@ -44,396 +51,29 @@ class MainActivity : BaseActivity() {
 
     override fun getViewSource(inflater: LayoutInflater) =
         ViewSource.ViewBinding(ActivityMainBinding.inflate(inflater))
+
     override fun onConfigureStatusBar(): ActivityFunctions.StatusBarOverlappingController? {
-        return null
+        //return null
+        return object : ActivityFunctions.StatusBarOverlappingController() {
+            override fun useLightStatusBarAppearance(): Boolean? {
+                //return super.useLightStatusBarAppearance()
+                return true
+            }
+        }
     }
+
     private val view: ActivityMainBinding get() = viewBinding as ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_main)
 
-        //this.view.btn1.text = "calc size"
-        this.view.btn1.text = "test viewmodel"
-        this.view.btn1.setOnClickListener {
-            //val x = Utils.createInstance().calculatePixelInCm(this, 1.0)
-            //log("", "x = $x")
-            Activities.start(ActivityWithViewModelExampleActivity::class.java, this)
-        }
-
-        this.view.btn2.text = "read log file"
-        this.view.btn2.setOnClickListener {
-            val intent = Intent(this, ReadLogFileActivity::class.java)
-            startActivity(intent)
-        }
-
-        this.view.btn3.text = "show my toast2"
-        this.view.btn3.setOnClickListener {
-            //MyToast.show(this, "test my toast", false, R.drawable.shape_solid_round_accent)
-            MyToast.showError(this, "test my toast")
-        }
-
-        this.view.btn4.text = "show original toast"
-        this.view.btn4.setOnClickListener {
-            Toast.makeText(this, "test original toast", Toast.LENGTH_LONG).show()
-        }
-
-        this.view.btn5.text = "test BaseDatabase class"
-        this.view.btn5.setOnClickListener {
-            DB(this).test()
-        }
-
-        this.view.btn6.text =
-            "change screen brightness ${Utils.createInstance().getScreenBrightness(this)}"
-        this.view.btn6.setOnClickListener {
-            var bn = Utils.createInstance().getScreenBrightness(this)
-
-            bn += 0.1f
-            if (1f - bn < 0.1f && 1f - bn > 0) bn = 1f
-            else if (bn > 1) bn = -0.1f
-
-            Utils.createInstance().setScreenBrightness(this, bn)
-
-            this.view.btn6.text = "change screen brightness (C: $bn)"
-        }
-
-        this.view.btn7.text =
-            "change device brightness ${Utils.createInstance().getDeviceBrightness(this)}"
-        this.view.btn7.setOnClickListener {
-            val checkSelfPermission =
-                ActivityCompat.checkSelfPermission(this, "android.permission.WRITE_SETTINGS")
-            if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf("android.permission.WRITE_SETTINGS"),
-                    10
-                )
-                return@setOnClickListener
-            }
-
-            var bn = Utils.createInstance().getDeviceBrightness(this)
-
-            bn += 10
-            if (100 - bn in 1..9) bn = 100
-            else if (bn > 100) bn = 0
-
-            Utils.createInstance().setDeviceBrightness(this, bn)
-
-            this.view.btn7.text = "change device brightness (C: $bn)"
-        }
-
-        this.view.btn8.text = "DateOp"
-        this.view.btn8.setOnClickListener {
-            val d1 = DateOp.getInstance()
-            log("*****", "------------------------------")
-            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
-            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
-            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
-            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
-            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
-            log("*****", d1.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
-
-            val d11 = DateOp.getInstance("2021-03-01 11:12:13", false)
-            log("*****", "------------------------------")
-            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
-            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
-            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
-            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
-            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
-            log("*****", d11.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
-
-            val d2 = DateOp.getInstance("2021-03-01 11:12", false)
-            log("*****", "------------------------------")
-            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
-            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
-            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
-            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
-            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
-            log("*****", d2.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
-
-            val d = DateOp.getInstance("2021-03-01", false)
-            log("*****", "------------------------------")
-            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssXXX, false))
-            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ssZ, false))
-            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_z, false))
-            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSXXX, false))
-            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSSZ, false))
-            log("*****", d.formatDate(DateOp.PATTERN_yyyy_MM_dd_HH_mm_ss_SSS_z, false))
-
-        }
-
-        this.view.btn9.text = "time api"
-        this.view.btn9.setOnClickListener {
-            val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
-            log("api", "getting time from: $url")
-
-            //execute using static methods
-            SimpleHTTPRequest.call(
-                true,
-                SimpleHTTPRequest.Request(url, SimpleHTTPRequest.Method.GET),
-                null
-            ) { request, response ->
-                log("api", response.code.toString())
-                log("api", response.text)
-                log("api", "Exception: ${response.exception}")
-            }
-
-            //execute using initiating new instance
-            SimpleHTTPRequest.TextRequestExecutor(
-                SimpleHTTPRequest.Request(url, SimpleHTTPRequest.Method.GET, null)
-            ).executeAsynchronously { request, response ->
-                log("api", response.code.toString())
-                log("api", response.text)
-                log("api", "Exception: ${response.exception}")
-            }
-
-            //execute synchronously
-            Thread {
-                val response = SimpleHTTPRequest.call(
-                    false,
-                    SimpleHTTPRequest.Request(
-                        url,
-                        SimpleHTTPRequest.Method.GET,
-                        null
-                    ),
-                    null,
-                    null
-                )
-                runOnUiThread {
-                    log("api", response.second.code.toString())
-                    log("api", response.second.text)
-                    log("api", "Exception: ${response.second.exception}")
-                }
-            }.start()
-        }
-
-        this.view.btn10.text = "LooperThread"
-        var x = 1
-        this.view.btn10.setOnClickListener {
-            LooperThread("MyLooperThread") { args ->
-                this.view.btn10.postDelayed({
-                    this.view.btn10.text = "LooperThread ${args.msg.arg1}"
-                }, 1000)
-                Log.e("***", Thread.currentThread().name)
-            }.sendMessage(Message().also { it.arg1 = x++ })
-        }
-
-        this.view.btn11.text = "ColorPickerActivity"
-        this.view.btn11.setOnClickListener {
-            Activities.start(ColorPickerActivity::class.java, thisActivity())
-            Activities.start(ColorPicker2Activity::class.java, thisActivity())
-        }
-
-        this.view.btn12.text = "take photo"
-        this.view.btn12.setOnClickListener {
-            val url = Intents.getInstance().imageIntents.takePicture(this, 123)
-            log("image from camera uri", url?.toString())
-        }
-
-        this.view.btn13.text = "pick photo from gallery"
-        this.view.btn13.setOnClickListener {
-            Intents.getInstance().imageIntents.pickImage(this, 456)
-            log("pick image began", "")
-        }
-
-        this.view.btn14.text = "Test Logger Functions"
-        this.view.btn14.setOnClickListener {
-            log("test logger", "")
-            testLogger()
-        }
-
-        this.view.btn15.text = "Get App Backup"
-        this.view.btn15.setOnClickListener {
-            /*val r = this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            val f = File(r, System.currentTimeMillis().toString() + ".txt");
-            val b = f.createNewFile();*/
-
-            log("get-app-backup", "getting app backup started")
-            Logger.d().logConfigs
-                .setLogcatDeadline(DateOp.getInstance().increaseDays(1))
-                .setWriteLogsToPublicFileDeadline(DateOp.getInstance().increaseDays(1))
-                .setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
-
-            Logger.d().exportAppBackup(thisActivity(), true) {
-                log("get-app-backup", "getting app backup finished: ${it.message}")
-            }
-        }
-
-        this.view.btn16.text = "Restore App Backup"
-        this.view.btn16.setOnClickListener {
-            log("restore-app-backup", "restoring app backup started")
-            val b = FileUtils.createInstance().showFileExplorer(
-                this,
-                "application/*",
-                false,
-                null,
-                12321
-            )
-            log("restore-app-backup", "restoring app backup started: $b")
-        }
-
-        this.view.btn17.text = "Test Untrusted Connection"
-        this.view.btn17.setOnClickListener {
-            testUntrustedConnection()
-        }
-
-        this.view.btn18.text = "Input Dialog with 3 inputs"
-        this.view.btn18.setOnClickListener {
-            InputDialog(this)
-                .setTitle("title")
-                .setMessage("message")
-                .addInputField {
-                    it.setTitle("Title 1")
-                    it.setHint("input 1")
-                }
-                .addInputField {
-                    it.setHint("input 2")
-                }
-                .addInputField {
-                    it.setHint("input 3")
-                }
-                .setPositiveButtonCallback { INP ->
-                    INP.forEach {
-                        log("input dialog", it)
-                    }
-                    Array<String>(INP.size) { INP[it] }
-                }
-                .show()
-        }
-
-        this.view.btn19.text = "List Dialog"
-        this.view.btn19.setOnClickListener {
-            ListDialog<String>(this) { inp, idx ->
-                log("List Dialog", inp)
-            }.setTitle("Title")
-                .setHint("Hint")
-                .setList(listOf("Item 1", "Item 2", "Item 3"))
-                .show()
-        }
-
-        this.view.btn20.text = "Firebase"
-        this.view.btn20.setOnClickListener {
-            startActivity(Intent(this, FirebaseTestActivity::class.java))
-        }
-
-        this.view.btn25.text = "BUG"
-        this.view.btn25.setOnClickListener {
-            val dl = DateOp.getInstance().increaseDays(5)
-            Logger.d().logConfigs.setLogcatDeadline(dl).setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l1").logConfigs.setLogcatDeadline(dl)
-                .setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l2").logConfigs.setLogcatDeadline(dl)
-                .setWriteLogsToPublicFileDeadline(dl)
-            Logger.instance("l3").logConfigs.setLogcatDeadline(dl)
-                .setWriteLogsToPublicFileDeadline(dl)
-            Logger.printToAll() { "test" }
-
-            error("throw bug to test writing to all logs file")
-        }
-
-        this.view.btn26.text = "Open File"
-        this.view.btn26.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    9
-                )
-                return@setOnClickListener
-            }
-
-            InputDialog(this)
-                .setTitle("Open File Explore")
-                .setMessage("Type mimetype of the file")
-                .setInputHint("Mimetype (separate by ,)")
-                .setInputText("application/*")
-                .setPositiveButtonCallback {
-                    val split = it[0].split(',').toTypedArray()
-
-                    val b = FileUtils.createInstance().showFileExplorer(
-                        this,
-                        split,
-                        false,
-                        null,
-                        12321
-                    )
-                    log("opening-file", "opening-file of mimetype = ${it[0]} ---> got $b")
-
-                    null
-                }
-                .show()
-
-
-        }
-
-
-        this.view.btn27.text = "Write logs to text file"
-        this.view.btn27.setOnClickListener {
-            val l = Logger.instance("text").apply {
-                logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
-                logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
-                //logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Text)
-
-                log("", this.toString())
-
-                for (x in 0..30) {
-                    //writeToFile(this@MainActivity, {
-                    print({
-                        "Title #$x"
-                    }) {
-                        "Content #$x, Content #$x, Content #$x, Content #$x"
-                    }
-                }
-            }
-
-            log("", this.toString())
-        }
-
-        this.view.btn28.text = "Write logs to csv file"
-        this.view.btn28.setOnClickListener {
-            Logger.instance("csv").apply {
-                logConfigs.setLogcatDeadline(DateOp.getInstance().increaseDays(1))
-                logConfigs.setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
-                logConfigs.setExportedFileType(LoggerAbs.ExportedFileType.Csv)
-
-                for (x in 0..30) {
-                    //writeToFile(this@MainActivity, {
-                    print({
-                        "Title #$x"
-                    }) {
-                        "Content #$x, Content #$x, Content #$x, Content #$x"
-                    }
-                }
-            }
-        }
-
-        this.view.btn28.text = "Compare App Version"
-        this.view.btn28.setOnClickListener {
-            var randomVer = Random.nextInt(0, 3).toString()
-            randomVer += "."
-            randomVer += Random.nextInt(0, 3).toString()
-            randomVer += "."
-            randomVer += Random.nextInt(0, 3).toString()
-
-            val b = Utils.createInstance().compareAppVersion(this, randomVer)
-            val vn = Utils.createInstance().currentAppVersion(this)
-
-            log(
-                "compareAppVersion",
-                "compareAppVersion(focalVersion: $randomVer, currentAppVersion: $vn) ------> $b"
-            )
-        }
 
         var methodCache = ""
         var urlCache = ""
         var headersCache = ""
         var bodyCache = ""
-        this.view.btn30.text = "Call API"
-        this.view.btn30.setOnClickListener {
+        this.view.btn1.text = "Call API"
+        this.view.btn1.setOnClickListener {
             InputDialog(this)
                 .setTitle("Call API")
                 //
@@ -523,6 +163,407 @@ class MainActivity : BaseActivity() {
                     errors
                 }
                 .show()
+        }
+
+        this.view.btn2.text = "time api"
+        this.view.btn2.setOnClickListener {
+            val url = TimeURLs.CurrentTimeURL("Etc/UTC").finalURL
+            log("api", "getting time from: $url")
+
+            //execute using static methods
+            SimpleHTTPRequest.call(
+                true,
+                SimpleHTTPRequest.Request(url, SimpleHTTPRequest.Method.GET),
+                null
+            ) { request, response ->
+                log("api", response.code.toString())
+                log("api", response.text)
+                log("api", "Exception: ${response.exception}")
+            }
+
+            //execute using initiating new instance
+            SimpleHTTPRequest.TextRequestExecutor(
+                SimpleHTTPRequest.Request(url, SimpleHTTPRequest.Method.GET, null)
+            ).executeAsynchronously { request, response ->
+                log("api", response.code.toString())
+                log("api", response.text)
+                log("api", "Exception: ${response.exception}")
+            }
+
+            //execute synchronously
+            Thread {
+                val response = SimpleHTTPRequest.call(
+                    false,
+                    SimpleHTTPRequest.Request(
+                        url,
+                        SimpleHTTPRequest.Method.GET,
+                        null
+                    ),
+                    null,
+                    null
+                )
+                runOnUiThread {
+                    log("api", response.second.code.toString())
+                    log("api", response.second.text)
+                    log("api", "Exception: ${response.second.exception}")
+                }
+            }.start()
+        }
+
+        this.view.btn3.text =
+            "change screen brightness ${Utils.createInstance().getScreenBrightness(this)}"
+        this.view.btn3.setOnClickListener {
+            var bn = Utils.createInstance().getScreenBrightness(this)
+
+            bn += 0.1f
+            if (1f - bn < 0.1f && 1f - bn > 0) bn = 1f
+            else if (bn > 1) bn = -0.1f
+
+            Utils.createInstance().setScreenBrightness(this, bn)
+
+            this.view.btn6.text = "change screen brightness (C: $bn)"
+        }
+
+        this.view.btn4.text =
+            "change device brightness ${Utils.createInstance().getDeviceBrightness(this)}"
+        this.view.btn4.setOnClickListener {
+            val checkSelfPermission =
+                ActivityCompat.checkSelfPermission(this, "android.permission.WRITE_SETTINGS")
+            if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf("android.permission.WRITE_SETTINGS"),
+                    10
+                )
+                return@setOnClickListener
+            }
+
+            var bn = Utils.createInstance().getDeviceBrightness(this)
+
+            bn += 10
+            if (100 - bn in 1..9) bn = 100
+            else if (bn > 100) bn = 0
+
+            Utils.createInstance().setDeviceBrightness(this, bn)
+
+            this.view.btn7.text = "change device brightness (C: $bn)"
+        }
+
+        this.view.btn5.text = "ColorPickerActivity"
+        this.view.btn5.setOnClickListener {
+            Activities.start(ColorPickerActivity::class.java, thisActivity())
+            Activities.start(ColorPicker2Activity::class.java, thisActivity())
+        }
+
+        this.view.btn6.text = "take photo"
+        this.view.btn6.setOnClickListener {
+            val url = Intents.getInstance().imageIntents.takePicture(this, 123)
+            log("image from camera uri", url?.toString())
+        }
+
+        this.view.btn7.text = "pick photo from gallery"
+        this.view.btn7.setOnClickListener {
+            Intents.getInstance().imageIntents.pickImage(this, 456)
+            log("pick image began", "")
+        }
+
+        this.view.btn8.text = "Get App Backup"
+        this.view.btn8.setOnClickListener {
+            /*val r = this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            val f = File(r, System.currentTimeMillis().toString() + ".txt");
+            val b = f.createNewFile();*/
+
+            log("get-app-backup", "getting app backup started")
+            Logger.d().logConfigs
+                .setLogcatDeadline(DateOp.getInstance().increaseDays(1))
+                .setWriteLogsToPublicFileDeadline(DateOp.getInstance().increaseDays(1))
+                .setWriteLogsToPrivateFileDeadline(DateOp.getInstance().increaseDays(1))
+
+            Logger.d().exportAppBackup(thisActivity(), true) {
+                log("get-app-backup", "getting app backup finished: ${it.message}")
+            }
+        }
+
+        this.view.btn9.text = "Restore App Backup"
+        this.view.btn9.setOnClickListener {
+            log("restore-app-backup", "restoring app backup started")
+            val b = FileUtils.createInstance().showFileExplorer(
+                this,
+                "application/*",
+                false,
+                null,
+                12321
+            )
+            log("restore-app-backup", "restoring app backup started: $b")
+        }
+
+        this.view.btn10.text = "Test Untrusted Connection"
+        this.view.btn10.setOnClickListener {
+            testUntrustedConnection()
+        }
+
+        this.view.btn11.text = "Input Dialog with 3 inputs"
+        this.view.btn11.setOnClickListener {
+            InputDialog(this)
+                .setTitle("title")
+                .setMessage("message")
+                .addInputField {
+                    it.setTitle("Title 1")
+                    it.setHint("input 1")
+                }
+                .addInputField {
+                    it.setHint("input 2")
+                }
+                .addInputField {
+                    it.setHint("input 3")
+                }
+                .setPositiveButtonCallback { INP ->
+                    INP.forEach {
+                        log("input dialog", it)
+                    }
+                    Array<String>(INP.size) { INP[it] }
+                }
+                .show()
+        }
+
+        this.view.btn12.text = "List Dialog"
+        this.view.btn12.setOnClickListener {
+            ListDialog<String>(this) { inp, idx ->
+                log("List Dialog", inp)
+            }.setTitle("Title")
+                .setHint("Hint")
+                .setList(listOf("Item 1", "Item 2", "Item 3"))
+                .show()
+        }
+
+        this.view.btn13.text = "Firebase"
+        this.view.btn13.setOnClickListener {
+            startActivity(Intent(this, FirebaseTestActivity::class.java))
+        }
+
+        this.view.btn14.text = "Open File"
+        this.view.btn14.setOnClickListener {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    9
+                )
+                return@setOnClickListener
+            }
+
+            InputDialog(this)
+                .setTitle("Open File Explore")
+                .setMessage("Type mimetype of the file")
+                .setInputHint("Mimetype (separate by ,)")
+                .setInputText("application/*")
+                .setPositiveButtonCallback {
+                    val split = it[0].split(',').toTypedArray()
+
+                    val b = FileUtils.createInstance().showFileExplorer(
+                        this,
+                        split,
+                        false,
+                        null,
+                        12321
+                    )
+                    log("opening-file", "opening-file of mimetype = ${it[0]} ---> got $b")
+
+                    null
+                }
+                .show()
+
+
+        }
+
+        this.view.btn15.text = "Compare App Version"
+        this.view.btn15.setOnClickListener {
+            var randomVer = Random.nextInt(0, 3).toString()
+            randomVer += "."
+            randomVer += Random.nextInt(0, 3).toString()
+            randomVer += "."
+            randomVer += Random.nextInt(0, 3).toString()
+
+            val b = Utils.createInstance().compareAppVersion(this, randomVer)
+            val vn = Utils.createInstance().currentAppVersion(this)
+
+            log(
+                "compareAppVersion",
+                "compareAppVersion(focalVersion: $randomVer, currentAppVersion: $vn) ------> $b"
+            )
+        }
+
+        this.view.btn16.text = "Show Custom Dialog"
+        this.view.btn16.setOnClickListener {
+            val cd = CustomDialog(this)
+            cd.setTitle("Custom Dialog")
+            //cd.setWidth(resources.getDimensionPixelSize(R.dimen.size_400))
+            //cd.setWidthBy(R.dimen.size_400)
+            cd.setWidthToMax(50)
+            cd.addChildren(
+                //
+                CustomDialog.Text("Input 1:"),
+                CustomDialog.TextField("Input 1")
+                    .setTextChangedListener(object : TextChangedListener() {
+                        override fun onTextChanged(s: String?) {
+                            print(s)
+                        }
+                    })
+                    /*.subscribeOnUpdate { args ->
+                        print(args)
+                        //to do
+                    }*/,
+
+                //
+                CustomDialog.Text("Input 2:"),
+                CustomDialog.Checkbox("Check 1")
+                    .setOnClickListener { builder, view ->
+                        print(builder)
+                    }
+                    /*.subscribeOnUpdate { args ->
+                        print(args)
+                        //to do
+                    }*/,
+                CustomDialog.Checkbox("Check 2")
+                    .setOnClickListener { builder, view ->
+                        print(builder)
+                    }
+                    /*.subscribeOnUpdate { args ->
+                        print(args)
+                        //to do
+                    }*/,
+                CustomDialog.Checkbox("Check 3")
+                    .setOnClickListener { builder, view ->
+                        print(builder)
+                    }
+                    /*.subscribeOnUpdate { args ->
+                        print(args)
+                        //to do
+                    }*/,
+
+                //
+                CustomDialog.Text("Input 3:"),
+                CustomDialog.Options()
+                    .addOption(CustomDialog.Options.OptionElement("Option 1"))
+                    .addOption(CustomDialog.Options.OptionElement("Option 2"))
+                    .addOption(CustomDialog.Options.OptionElement("Option 3"))
+                    .setOnOptionSelected { option, idx ->
+                        print(option)
+                        print(idx)
+                    }
+                    /*.subscribeOnUpdate { args ->
+                        print(args)
+                        //to do
+                    }*/,
+
+                //
+                CustomDialog.Text("Input 4:"),
+                CustomDialog.Row()
+                    .addChild(
+                        CustomDialog
+                            .Text("Row Text 1")
+                            .setOnClickListener { builder, view ->
+                                MyToast.show(this, "Row Text 1 clicked")
+                            }
+                    )
+                    .addChild(
+                        CustomDialog
+                            .BasicView(
+                                CustomDialog.ViewSize.absolute(1),
+                                CustomDialog.ViewSize.absolute(50),
+                            )
+                            .setBackgroundColor(Color.RED)
+                            .setMarginSymmetric(10, 0)
+                    )
+                    .addChild(
+                        CustomDialog
+                            .Text("Row Text 2")
+                            .setOnClickListener { builder, view ->
+                                MyToast.show(this, "Row Text 2 clicked")
+                            }
+                    ),
+
+                //
+                CustomDialog.BasicView(
+                    CustomDialog.ViewSize.matchParent(),
+                    CustomDialog.ViewSize.absolute(3)
+                ).setBackgroundColor(
+                    Color.RED
+                ).setMarginSymmetric(
+                    0,
+                    10
+                ),
+                CustomDialog
+                    .Button("DONE")
+                    .setOnClickListener { builder, view ->
+                        print(builder)
+
+                        cd.dismiss("DONE")
+                    }
+                    .subscribeOnUpdate { args ->
+                        args.children().forEachIndexed { index, view ->
+                            Log.d(
+                                "CustomDialog",
+                                "$index | ${view.javaClass.simpleName} | ${view.nativeView}"
+                            )
+                        }
+
+                        val input1 = (args.children[1].nativeView as EditText).text
+                        val input1_ = args.children[1].value
+
+                        val input2Chk1 = (args.children[3].nativeView as CheckBox).isChecked
+                        val input2Chk1_ = args.children[3].value
+                        val input2Chk2 = (args.children[4].nativeView as CheckBox).isChecked
+                        val input2Chk2_ = args.children[4].value
+                        val input2Chk3 = (args.children[5].nativeView as CheckBox).isChecked
+                        val input2Chk3_ = args.children[5].value
+
+                        val input3 = (args.children[7].nativeView as RadioGroup).checkedRadioButtonId
+                        val input3_ = args.children[7].value
+                        val input3Opt1 = (args.children[7].subViews[0].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
+                        val input3Opt1_ = args.children[7].subViews[0].value
+                        val input3Opt2 = (args.children[7].subViews[1].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
+                        val input3Opt2_ = args.children[7].subViews[1].value
+                        val input3Opt3 = (args.children[7].subViews[2].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
+                        val input3Opt3_ = args.children[7].subViews[2].value
+
+                        val btn = (args.children[11].nativeView as Button).text
+                        val btn_ = args.children[11].value
+
+                        Log.d(
+                            "CustomDialog",
+                            JsonBuilder.ofJsonObject()
+                                .add("input1", input1)
+                                .add("input1_", input1_)
+
+                                .add("input2Chk1", input2Chk1)
+                                .add("input2Chk1_", input2Chk1_)
+                                .add("input2Chk2", input2Chk2)
+                                .add("input2Chk2_", input2Chk2_)
+                                .add("input2Chk3", input2Chk3)
+                                .add("input2Chk3_", input2Chk3_)
+
+                                .add("input3", input3)
+                                .add("input3_", input3_)
+                                .add("input3Opt1", input3Opt1)
+                                .add("input3Opt1_", input3Opt1_)
+                                .add("input3Opt2", input3Opt2)
+                                .add("input3Opt2_", input3Opt2_)
+                                .add("input3Opt3", input3Opt3)
+                                .add("input3Opt3_", input3Opt3_)
+
+                                .add("btn", btn)
+                                .add("btn_", btn_)
+
+                                .toString()
+                        )
+                    }
+            )
+            cd.show()
         }
 
         //------------------------------------------------------------------------------------------

@@ -1,15 +1,20 @@
 package gmutils.ui.dialogs;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.Editable;
+import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,12 +28,18 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.CompoundButtonCompat;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import gmutils.R;
+import gmutils.collections.values.Value4;
+import gmutils.listeners.ActionCallback2;
+import gmutils.listeners.ActionCallback3;
 import gmutils.listeners.ResultCallback;
+import gmutils.listeners.ResultCallback2;
+import gmutils.listeners.TextChangedListener;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -73,6 +84,11 @@ public class CustomDialog extends BaseDialog {
 
     //==============================================================================================
 
+    public CustomDialog getRoot(ResultCallback<LinearLayout> callback) {
+        callback.invoke(root);
+        return this;
+    }
+
     public CustomDialog setWidth(int width) {
         ViewGroup.LayoutParams layoutParams = root.getLayoutParams();
         layoutParams.width = width;
@@ -80,11 +96,31 @@ public class CustomDialog extends BaseDialog {
         return this;
     }
 
-    public CustomDialog setMaxHeight(int maxHeight) {
+    public CustomDialog setWidthBy(int dimenId) {
+        int width = root.getContext().getResources().getDimensionPixelSize(dimenId);
+        return setWidth(width);
+    }
+
+    public CustomDialog setWidthToMax(int horizontalMargin) {
+        int size = root.getContext().getResources().getDisplayMetrics().widthPixels;
+        return setWidth(size - horizontalMargin * 2);
+    }
+
+    public CustomDialog setHeight(int maxHeight) {
         ViewGroup.LayoutParams layoutParams = scrollView.getLayoutParams();
         layoutParams.height = maxHeight;
         scrollView.setLayoutParams(layoutParams);
         return this;
+    }
+
+    public CustomDialog setHeightBy(int dimenId) {
+        int height = root.getContext().getResources().getDimensionPixelSize(dimenId);
+        return setHeight(height);
+    }
+
+    public CustomDialog setHeightToMax(int verticalMargin) {
+        int size = root.getContext().getResources().getDisplayMetrics().heightPixels;
+        return setWidth(size - verticalMargin * 2);
     }
 
     public CustomDialog setTitle(int title) {
@@ -95,6 +131,12 @@ public class CustomDialog extends BaseDialog {
 
     public CustomDialog setTitle(CharSequence title) {
         titleTv.setText(title);
+        titleTv.setVisibility(View.VISIBLE);
+        return this;
+    }
+
+    public CustomDialog setTitleBy(int stringId) {
+        titleTv.setText(stringId);
         titleTv.setVisibility(View.VISIBLE);
         return this;
     }
@@ -115,39 +157,66 @@ public class CustomDialog extends BaseDialog {
         throw new UnsupportedOperationException("CustomDialog does not support setTextColorRes.");
     }
 
-    public CustomDialog addChild(View view) {
-        root.addView(view);
+    public CustomDialog getTitleView(ResultCallback<TextView> callback) {
+        callback.invoke(titleTv);
         return this;
     }
 
-    public CustomDialog addChild(BaseView child) {
-        root.addView(child.build(root.getContext()));
+    //----------------------------------------------------------------------------------------------
+
+    private final List<BaseView> children = new ArrayList<>();
+    private Event _event;
+
+    public CustomDialog addChild(@NotNull CustomDialog.BaseViewBuilder child) {
+        if (child.updateObserver != null && _event == null) {
+            _event = viewBuilder -> {
+                ViewUpdateArgs args = new ViewUpdateArgs(new ArrayList<>(children), viewBuilder);
+
+                for (BaseView c : children) {
+                    if (null == c.updateObserver) continue;
+                    c.update(args);
+                }
+
+                if (!allowDestroy) {
+                    allowDestroy = true;
+                    onDestroy();
+                }
+            };
+        }
+
+        View build = child.build(root.getContext(), _event);
+        children.add(child);
+        root.addView(build);
+
         return this;
     }
 
-    public CustomDialog addChildren(BaseView... children) {
-        for (BaseView child : children) {
-            root.addView(child.build(root.getContext()));
+    public CustomDialog addChildren(@NotNull BaseViewBuilder... children) {
+        for (BaseViewBuilder child : children) {
+            addChild(child);
         }
         return this;
     }
 
     //==============================================================================================
 
-    public CustomDialog getRoot(ResultCallback<LinearLayout> callback) {
-        callback.invoke(root);
-        return this;
-    }
+    private boolean allowDestroy = true;
 
-    public CustomDialog getTitleView(ResultCallback<TextView> callback) {
-        callback.invoke(titleTv);
-        return this;
+    @Override
+    public void dismiss(String dismissedBy) {
+        allowDestroy = _event == null;
+        super.dismiss(dismissedBy);
     }
-
-    //==============================================================================================
 
     @Override
     protected void onDestroy() {
+        if (!allowDestroy) return;
+
+        for (BaseView child : children) {
+            child.destroy();
+        }
+        children.clear();
+        _event = null;
     }
 
     @Override
@@ -157,129 +226,423 @@ public class CustomDialog extends BaseDialog {
 
     //==============================================================================================
 
+    public interface Event {
+        void onStatusChanged(BaseView view);
+    }
+
+    public record ViewUpdateArgs(List<BaseView> children, BaseView updatedViewInfo) {
+    }
+
+    //-----------------------------------------------
+
+    public static abstract class ViewSize {
+        public final float value;
+
+        public ViewSize(float value) {
+            this.value = value;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return super.toString() + " | value = " + value;
+        }
+
+        public static ViewSize wrapContent() {
+            return new Absolute(ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        public static ViewSize matchParent() {
+            return new Absolute(ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        public static ViewSize absolute(int value) {
+            return new Absolute(value);
+        }
+
+        public static ViewSize percentage(float value) {
+            return new Percentage(value);
+        }
+
+        static class Absolute extends ViewSize {
+            public Absolute(int value) {
+                super(value);
+            }
+        }
+
+        static class Percentage extends ViewSize {
+            public Percentage(float value) {
+                super(value);
+            }
+        }
+    }
+
+    //-----------------------------------------------
+
     public static abstract class BaseView {
-        private Integer width;
-        private Integer height;
+        private String id;
+        private Object extra;
+        private BaseView parent;
+        ResultCallback<ViewUpdateArgs> updateObserver;
+        View nativeView;
+
+        //----------------------------------------------------------------------
+
+        public final BaseView setId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public final String getId() {
+            return id;
+        }
+
+        //--------------------------------------------------
+
+        public final BaseView setExtra(Object extra) {
+            this.extra = extra;
+            return this;
+        }
+
+        public final Object getExtra() {
+            return extra;
+        }
+
+        //--------------------------------------------------
+
+        public final BaseView setParent(BaseView parent) {
+            this.parent = parent;
+            return this;
+        }
+
+        public BaseView getParent() {
+            return parent;
+        }
+
+        //--------------------------------------------------
+
+        public View getNativeView() {
+            return nativeView;
+        }
+
+
+        //--------------------------------------------------
+
+        public List<BaseView> getSubViews() {
+            return null;
+        }
+
+        //--------------------------------------------------
+
+        public abstract Object getValue();
+
+        //------------------------------------------------------------------------------------------
+
+        protected BaseView subscribeOnUpdate(ResultCallback<ViewUpdateArgs> updateObserver) {
+            this.updateObserver = updateObserver;
+            return this;
+        }
+
+        final void update(ViewUpdateArgs args) {
+            if (this.updateObserver != null) this.updateObserver.invoke(args);
+        }
+
+        protected void destroy() {
+            List<BaseView> subViews = getSubViews();
+            if (subViews != null) {
+                for (BaseView child : subViews) {
+                    if (child != null) child.destroy();
+                }
+            }
+
+            id = null;
+            extra = null;
+            parent = null;
+            updateObserver = null;
+            nativeView = null;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return super.toString() + "\n" +
+                    "id = " + id + "\n" +
+                    "extra = " + extra + "\n" +
+                    "nativeView = " + nativeView + "\n" +
+                    "parent = " + (parent == null ? null : parent.toShortString());
+        }
+
+        public String toShortString() {
+            return super.toString();
+        }
+
+    }
+
+    public static abstract class BaseViewBuilder extends BaseView {
+        private Float x, y;
+        private ViewSize width, height;
+        private Integer gravity;
         private Integer bgColor;
         private Integer bgRes;
-        private Integer paddingLeft;
-        private Integer paddingTop;
-        private Integer paddingRight;
-        private Integer paddingBottom;
-        private View.OnClickListener onClickListener;
-        private View.OnLongClickListener onLongClickListener;
-        private View.OnTouchListener onTouchListener;
+        private Value4<Integer, Integer, Integer, Integer> paddingLTRB;
+        private Value4<Integer, Integer, Integer, Integer> marginLTRB;
+        private int visibility = View.VISIBLE;
+        protected ResultCallback2<BaseViewBuilder, View> onClickListener;
+        private ActionCallback2<BaseViewBuilder, View, Boolean> onLongClickListener;
+        private ActionCallback3<BaseViewBuilder, View, MotionEvent, Boolean> onTouchListener;
+        //
+        private ResultCallback<View> onBuiltCallback;
 
-        public BaseView setWidth(int width) {
+        //----------------------------------------------------------------------
+
+        public BaseViewBuilder setX(Float x) {
+            this.x = x;
+            return this;
+        }
+
+        public BaseViewBuilder setY(Float y) {
+            this.y = y;
+            return this;
+        }
+
+        public BaseViewBuilder setWidth(ViewSize width) {
             this.width = width;
             return this;
         }
 
-        public BaseView setHeight(Integer height) {
+        public BaseViewBuilder setHeight(ViewSize height) {
             this.height = height;
             return this;
         }
 
-        public BaseView setBackgroundColor(int color) {
+        public BaseViewBuilder setLayoutGravity(Integer gravity) {
+            this.gravity = gravity;
+            return this;
+        }
+
+        public BaseViewBuilder setBackgroundColor(int color) {
             this.bgColor = color;
             this.bgRes = null;
             return this;
         }
 
-        public BaseView setBackgroundResource(int resId) {
+        public BaseViewBuilder setBackgroundResource(int resId) {
             this.bgColor = null;
             this.bgRes = resId;
             return this;
         }
 
-        public BaseView setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
+        public BaseViewBuilder setPaddingLTRB(
+                int left,
+                int top,
+                int right,
+                int bottom
         ) {
-            this.paddingLeft = paddingLeft;
-            this.paddingTop = paddingTop;
-            this.paddingRight = paddingRight;
-            this.paddingBottom = paddingBottom;
+            this.paddingLTRB = new Value4<>(left, top, right, bottom);
             return this;
         }
 
-        public BaseView setOnClickListener(View.OnClickListener onClickListener) {
+        public BaseViewBuilder setPaddingSymmetric(
+                int horizontal,
+                int vertical
+        ) {
+            this.paddingLTRB = new Value4<>(horizontal, vertical, horizontal, vertical);
+            return this;
+        }
+
+        public BaseViewBuilder setMarginLTRB(
+                int left,
+                int top,
+                int right,
+                int bottom
+        ) {
+            this.marginLTRB = new Value4<>(left, top, right, bottom);
+            return this;
+        }
+
+        public BaseViewBuilder setMarginSymmetric(
+                int horizontal,
+                int vertical
+        ) {
+            this.marginLTRB = new Value4<>(horizontal, vertical, horizontal, vertical);
+            return this;
+        }
+
+        public BaseViewBuilder setVisibility(int visibility) {
+            this.visibility = visibility;
+            return this;
+        }
+
+        public BaseViewBuilder setOnClickListener(ResultCallback2<BaseViewBuilder, View> onClickListener) {
             this.onClickListener = onClickListener;
             return this;
         }
 
-        public BaseView setOnLongClickListener(View.OnLongClickListener onLongClickListener) {
+        public BaseViewBuilder setOnLongClickListener(ActionCallback2<BaseViewBuilder, View, Boolean> onLongClickListener) {
             this.onLongClickListener = onLongClickListener;
             return this;
         }
 
-        public BaseView setOnTouchListener(View.OnTouchListener onTouchListener) {
+        public BaseViewBuilder setOnTouchListener(ActionCallback3<BaseViewBuilder, View, MotionEvent, Boolean> onTouchListener) {
             this.onTouchListener = onTouchListener;
             return this;
         }
 
-        protected abstract View build(Context context);
+        //----------------------------------------------------------------------
 
-        protected void setupView(View view) {
-            view.setLayoutParams(new LinearLayout.LayoutParams(
-                    width != null ? width : LinearLayout.LayoutParams.WRAP_CONTENT,
-                    height != null ? height : LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
+        public final BaseViewBuilder setOnBuiltCallback(ResultCallback<View> onBuiltCallback) {
+            this.onBuiltCallback = onBuiltCallback;
+            return this;
+        }
+
+        @Override
+        public final BaseViewBuilder subscribeOnUpdate(ResultCallback<ViewUpdateArgs> updateObserver) {
+            return (BaseViewBuilder) super.subscribeOnUpdate(updateObserver);
+        }
+
+        //----------------------------------------------------------------------
+
+        View build(Context context, Event event) {
+            this.nativeView = implementNativeView(context, event);
+            setupView(this.nativeView, event);
+            if (onBuiltCallback != null) onBuiltCallback.invoke(this.nativeView);
+            return this.nativeView;
+        }
+
+        protected abstract View implementNativeView(Context context, Event event);
+
+        @SuppressLint("ClickableViewAccessibility")
+        private void setupView(View view, Event event) {
+            if (x != null) view.setTranslationX(x);
+            if (y != null) view.setTranslationY(y);
+
+            view.setLayoutParams(instantiateLayoutParams());
 
             if (bgColor != null) view.setBackgroundColor(bgColor);
 
             if (bgRes != null) view.setBackgroundResource(bgRes);
 
-            view.setPadding(
-                    paddingLeft != null ? paddingLeft : view.getPaddingLeft(),
-                    paddingTop != null ? paddingTop : view.getPaddingTop(),
-                    paddingRight != null ? paddingRight : view.getPaddingRight(),
-                    paddingBottom != null ? paddingBottom : view.getPaddingBottom()
-            );
+            if (paddingLTRB != null) {
+                view.setPadding(
+                        paddingLTRB.value1 != null ? paddingLTRB.value1 : view.getPaddingLeft(),
+                        paddingLTRB.value2 != null ? paddingLTRB.value2 : view.getPaddingTop(),
+                        paddingLTRB.value3 != null ? paddingLTRB.value3 : view.getPaddingRight(),
+                        paddingLTRB.value4 != null ? paddingLTRB.value4 : view.getPaddingBottom()
+                );
+            }
 
-            view.setOnClickListener(onClickListener);
-            view.setOnLongClickListener(onLongClickListener);
-            view.setOnTouchListener(onTouchListener);
+            view.setVisibility(visibility);
+
+            if (onClickListener != null) {
+                view.setOnClickListener(v -> {
+                    onClickListener.invoke(this, v);
+                    if (event != null) event.onStatusChanged(this);
+                });
+            }
+
+            if (onLongClickListener != null) {
+                view.setOnLongClickListener(v -> {
+                    boolean b = onLongClickListener.invoke(this, v);
+                    if (event != null) event.onStatusChanged(this);
+                    return b;
+                });
+            }
+
+            if (onTouchListener != null) {
+                view.setOnTouchListener((v, e) -> {
+                    boolean b = onTouchListener.invoke(this, v, e);
+                    if (event != null) event.onStatusChanged(this);
+                    return b;
+                });
+            }
+
+        }
+
+        private LinearLayout.LayoutParams instantiateLayoutParams() {
+            int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            float weight = 0;
+
+            if (
+                    this.width instanceof ViewSize.Percentage &&
+                            this.height instanceof ViewSize.Percentage
+            ) {
+                throw new IllegalArgumentException("Either width or height has a Percentage size");
+            }
+
+            if (this.width != null) {
+                if (this.width instanceof ViewSize.Percentage) {
+                    width = 0;
+                    weight = this.width.value;
+                }
+                //
+                else {
+                    width = (int) this.width.value;
+                }
+            }
+
+            if (this.height != null) {
+                if (this.height instanceof ViewSize.Percentage) {
+                    height = 0;
+                    weight = this.height.value;
+                }
+                //
+                else {
+                    height = (int) this.height.value;
+                }
+            }
+
+            LinearLayout.LayoutParams layoutParams;
+            layoutParams = new LinearLayout.LayoutParams(width, height, weight);
+            if (gravity != null) layoutParams.gravity = gravity;
+
+            if (marginLTRB != null) {
+                layoutParams.setMargins(
+                        marginLTRB.value1 != null ? marginLTRB.value1 : 0,
+                        marginLTRB.value2 != null ? marginLTRB.value2 : 0,
+                        marginLTRB.value3 != null ? marginLTRB.value3 : 0,
+                        marginLTRB.value4 != null ? marginLTRB.value4 : 0
+                );
+            }
+
+            return layoutParams;
+        }
+
+        @Override
+        protected void destroy() {
+            super.destroy();
+
+            x = null;
+            y = null;
+            width = null;
+            height = null;
+            gravity = null;
+            bgColor = null;
+            paddingLTRB = null;
+            marginLTRB = null;
+
+            onClickListener = null;
+            onLongClickListener = null;
+            onTouchListener = null;
+            onBuiltCallback = null;
         }
     }
 
-    public static class Text extends BaseView {
-        private Integer textRes;
-        private CharSequence text;
+    public static class Text extends BaseViewBuilder {
+        private final Integer textRes;
+        private final CharSequence text;
         private Integer color;
         private Typeface typeface;
         private Float textSizeSp;
 
         public Text(int textRes) {
-            setTextRes(textRes);
+            this.textRes = textRes;
+            this.text = null;
         }
 
         public Text(CharSequence text) {
-            setText(text);
-        }
-
-        @Override
-        public Text setWidth(int width) {
-            return (Text) super.setWidth(width);
-        }
-
-        @Override
-        public Text setHeight(Integer height) {
-            return (Text) super.setHeight(height);
-        }
-
-        public Text setTextRes(int textRes) {
-            this.textRes = textRes;
-            this.text = null;
-            return this;
-        }
-
-        public Text setText(CharSequence text) {
             this.textRes = null;
             this.text = text;
-            return this;
         }
 
         public Text setColor(int color) {
@@ -298,34 +661,20 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        public Text setBackgroundColor(int color) {
-            return (Text) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public Text setBackgroundResource(int resId) {
-            return (Text) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public Text setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (Text) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        protected View build(Context context) {
-            TextView textView = new TextView(context);
-            setupTextView(textView);
+        protected View implementNativeView(Context context, Event event) {
+            TextView textView = instantiateTextView(context);
+            setupTextView(textView, event);
             return textView;
         }
 
-        protected void setupTextView(TextView textView) {
-            setupView(textView);
+        protected TextView instantiateTextView(Context context) {
+            return new TextView(context);
+        }
+
+        private void setupTextView(View view, Event event) {
+            super.setupView(view, event);
+
+            TextView textView = (TextView) view;
 
             if (textRes != null) textView.setText(textRes);
 
@@ -337,25 +686,34 @@ public class CustomDialog extends BaseDialog {
 
             if (textSizeSp != null) textView.setTextSize(textSizeSp);
         }
+
+        @Override
+        public Object getValue() {
+            return ((TextView) this.nativeView).getText();
+        }
     }
 
     public static class TextField extends Text {
         private Integer hintRes;
         private CharSequence hint;
         private Integer hintColor;
+        private TextChangedListener textChangedListener;
 
         public TextField() {
             super("");
+            setWidth(ViewSize.matchParent());
         }
 
         public TextField(int hintRes) {
             super("");
             setHintRes(hintRes);
+            setWidth(ViewSize.matchParent());
         }
 
         public TextField(CharSequence hint) {
             super("");
             setHint(hint);
+            setWidth(ViewSize.matchParent());
         }
 
         public TextField(CharSequence text, CharSequence hint) {
@@ -380,41 +738,14 @@ public class CustomDialog extends BaseDialog {
             return this;
         }
 
-        @Override
-        public TextField setWidth(int width) {
-            return (TextField) super.setWidth(width);
+        public Text setTextChangedListener(TextChangedListener textChangedListener) {
+            this.textChangedListener = textChangedListener;
+            return this;
         }
 
         @Override
-        public TextField setHeight(Integer height) {
-            return (TextField) super.setHeight(height);
-        }
-
-        @Override
-        public TextField setBackgroundColor(int color) {
-            return (TextField) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public TextField setBackgroundResource(int resId) {
-            return (TextField) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public TextField setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (TextField) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        protected View build(Context context) {
-            EditText editText = new EditText(context);
-
-            setupTextView(editText);
+        protected View implementNativeView(Context context, Event event) {
+            EditText editText = (EditText) super.implementNativeView(context, event);
 
             if (hintRes != null) editText.setHint(hintRes);
 
@@ -422,136 +753,33 @@ public class CustomDialog extends BaseDialog {
 
             if (hintColor != null) editText.setHintTextColor(hintColor);
 
-            return editText;
-        }
-    }
-
-    public static class Checkbox extends Text {
-        private Integer checkboxColor;
-
-        public Checkbox(int textRes) {
-            super(textRes);
-        }
-
-        public Checkbox(CharSequence text) {
-            super(text);
-        }
-
-        public Checkbox setCheckboxColor(Integer checkboxColor) {
-            this.checkboxColor = checkboxColor;
-            return this;
-        }
-
-        @Override
-        public Checkbox setWidth(int width) {
-            return (Checkbox) super.setWidth(width);
-        }
-
-        @Override
-        public Checkbox setHeight(Integer height) {
-            return (Checkbox) super.setHeight(height);
-        }
-
-        @Override
-        public Checkbox setBackgroundColor(int color) {
-            return (Checkbox) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public Checkbox setBackgroundResource(int resId) {
-            return (Checkbox) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public Checkbox setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (Checkbox) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        protected View build(Context context) {
-            CheckBox checkBox = new CheckBox(context);
-
-            setupTextView(checkBox);
-
-            if (checkboxColor != null) CompoundButtonCompat.setButtonTintList(
-                    checkBox,
-                    ColorStateList.valueOf(checkboxColor)
-            );
-
-
-            return checkBox;
-        }
-    }
-
-    public static class Options extends BaseView {
-        private Integer checkColor;
-        private List<Text> options = new ArrayList<>();
-
-        public Options setCheckColor(Integer color) {
-            this.checkColor = color;
-            return this;
-        }
-
-        public Options addOption(Text text, View.OnClickListener onClick) {
-            text.setOnClickListener(onClick);
-            options.add(text);
-            return this;
-        }
-
-        @Override
-        public Options setWidth(int width) {
-            return (Options) super.setWidth(width);
-        }
-
-        @Override
-        public Options setHeight(Integer height) {
-            return (Options) super.setHeight(height);
-        }
-
-        @Override
-        public Options setBackgroundColor(int color) {
-            return (Options) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public Options setBackgroundResource(int resId) {
-            return (Options) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public Options setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (Options) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        protected View build(Context context) {
-            RadioGroup radioGroup = new RadioGroup(context);
-
-            for (Text option : options) {
-                RadioButton radioButton = new RadioButton(context);
-                option.setupTextView(radioButton);
-
-                if (checkColor != null) CompoundButtonCompat.setButtonTintList(
-                        radioButton,
-                        ColorStateList.valueOf(checkColor)
-                );
-
-                radioGroup.addView(radioButton);
+            if (textChangedListener != null) {
+                editText.addTextChangedListener(new TextChangedListener() {
+                    @Override
+                    public void onTextChanged(String s) {
+                        textChangedListener.onTextChanged(s);
+                        if (event != null) event.onStatusChanged(TextField.this);
+                    }
+                });
             }
 
-            setupView(radioGroup);
+            return editText;
+        }
 
-            return radioGroup;
+        @Override
+        protected EditText instantiateTextView(Context context) {
+            return new EditText(context);
+        }
+
+        @Override
+        public Editable getValue() {
+            return ((EditText) this.nativeView).getText();
+        }
+
+        @Override
+        protected void destroy() {
+            super.destroy();
+            textChangedListener = null;
         }
     }
 
@@ -572,40 +800,8 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        public Button setWidth(int width) {
-            return (Button) super.setWidth(width);
-        }
-
-        @Override
-        public Button setHeight(Integer height) {
-            return (Button) super.setHeight(height);
-        }
-
-        @Override
-        public Button setBackgroundColor(int color) {
-            return (Button) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public Button setBackgroundResource(int resId) {
-            return (Button) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public Button setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (Button) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        protected View build(Context context) {
-            android.widget.Button button = new android.widget.Button(context);
-
-            setupTextView(button);
+        protected View implementNativeView(Context context, Event event) {
+            android.widget.Button button = (android.widget.Button) super.implementNativeView(context, event);
 
             if (tintColor != null) ViewCompat.setBackgroundTintList(
                     button,
@@ -614,231 +810,346 @@ public class CustomDialog extends BaseDialog {
 
             return button;
         }
+
+        @Override
+        protected android.widget.Button instantiateTextView(Context context) {
+            return new android.widget.Button(context);
+        }
+
+        @Override
+        public CharSequence getValue() {
+            return ((android.widget.Button) this.nativeView).getText();
+        }
     }
 
-    public static class Row extends BaseView {
-        private final List<BaseView> children;
+    public static class Checkbox extends Text {
+        private Integer checkboxColor;
 
-        public Row() {
+        public Checkbox(int textRes) {
+            super(textRes);
+        }
+
+        public Checkbox(CharSequence text) {
+            super(text);
+        }
+
+        public Checkbox setCheckboxColor(Integer checkboxColor) {
+            this.checkboxColor = checkboxColor;
+            return this;
+        }
+
+        @Override
+        protected View implementNativeView(Context context, Event event) {
+            CheckBox checkBox = (CheckBox) super.implementNativeView(context, event);
+
+            if (checkboxColor != null) CompoundButtonCompat.setButtonTintList(
+                    checkBox,
+                    ColorStateList.valueOf(checkboxColor)
+            );
+
+            return checkBox;
+        }
+
+        @Override
+        protected CheckBox instantiateTextView(Context context) {
+            return new CheckBox(context);
+        }
+
+        @Override
+        public Boolean getValue() {
+            return ((CheckBox) this.nativeView).isChecked();
+        }
+    }
+
+    public static class Options extends BaseViewBuilder {
+        public static class OptionElement extends Text {
+            private Integer checkColor;
+
+            public OptionElement(int textRes) {
+                super(textRes);
+            }
+
+            public OptionElement(CharSequence text) {
+                super(text);
+            }
+
+            public OptionElement setCheckColor(Integer checkColor) {
+                this.checkColor = checkColor;
+                return this;
+            }
+
+            @Override
+            protected View implementNativeView(Context context, Event event) {
+                android.widget.RadioButton option = (android.widget.RadioButton) super.implementNativeView(context, event);
+
+                if (checkColor != null) CompoundButtonCompat.setButtonTintList(
+                        option,
+                        ColorStateList.valueOf(checkColor)
+                );
+
+                return option;
+            }
+
+            @Override
+            protected android.widget.RadioButton instantiateTextView(Context context) {
+                return new android.widget.RadioButton(context);
+            }
+
+            @Override
+            public Pair<CharSequence, Boolean> getValue() {
+                //return super.getValue();
+                return new Pair<CharSequence, Boolean>(
+                        ((android.widget.RadioButton) this.nativeView).getText(),
+                        ((android.widget.RadioButton) this.nativeView).isChecked()
+                );
+            }
+        }
+
+        private final List<OptionElement> options = new ArrayList<>();
+        private Integer checkColor;
+        private Integer selectedOptionIndex;
+        private ResultCallback2<Text, Integer> onOptionSelected;
+
+        public Options setCheckColor(Integer color) {
+            this.checkColor = color;
+            return this;
+        }
+
+        public Options addOption(OptionElement option) {
+            options.add(option);
+            return this;
+        }
+
+        public Options setSelectedOptionIndex(Integer selectedOptionIndex) {
+            this.selectedOptionIndex = selectedOptionIndex;
+            return this;
+        }
+
+        public Options setOnOptionSelected(ResultCallback2<Text, Integer> onOptionSelected) {
+            this.onOptionSelected = onOptionSelected;
+            return this;
+        }
+
+        public OptionElement getOptionAt(int index) {
+            return options.get(index);
+        }
+
+        @Override
+        public List<BaseView> getSubViews() {
+            return List.copyOf(options);
+        }
+
+        @Override
+        protected View implementNativeView(Context context, Event event) {
+            RadioGroup radioGroup = new RadioGroup(context);
+
+            int i = -1;
+            for (OptionElement option : options) {
+                i++;
+
+                RadioButton radioButton = (RadioButton) option.build(context, event);
+                option.setParent(this);
+                if (Integer.valueOf(i).equals(selectedOptionIndex)) {
+                    radioButton.setChecked(true);
+                }
+
+                if (option.checkColor == null) {
+                    if (checkColor != null) CompoundButtonCompat.setButtonTintList(
+                            radioButton,
+                            ColorStateList.valueOf(checkColor)
+                    );
+                }
+
+                int finalI = i;
+                radioButton.setOnClickListener(v -> {
+                    ((RadioButton) v).setChecked(true);
+                    if (this.onClickListener != null) this.onClickListener.invoke(option, v);
+                    if (this.onOptionSelected != null) this.onOptionSelected.invoke(option, finalI);
+                    if (event != null) event.onStatusChanged(this);
+                });
+
+                radioGroup.addView(radioButton);
+            }
+
+            return radioGroup;
+        }
+
+        @Override
+        public OptionElement getValue() {
+            int id = ((RadioGroup) this.nativeView).getCheckedRadioButtonId();
+            if (id == 0) return null;
+            return options.get(id - 1);
+        }
+
+        @Override
+        protected void destroy() {
+            super.destroy();
+            onOptionSelected = null;
+        }
+    }
+
+    public static abstract class MultiChildrenView extends BaseViewBuilder {
+        private final List<BaseViewBuilder> children;
+
+        protected MultiChildrenView() {
             this(new ArrayList<>());
         }
 
-        public Row(List<BaseView> children) {
+        protected MultiChildrenView(List<BaseViewBuilder> children) {
             this.children = children != null ? children : new ArrayList<>();
         }
 
-        public Row addChild(BaseView child) {
+        public MultiChildrenView addChild(BaseViewBuilder child) {
             this.children.add(child);
             return this;
         }
 
-        public Row addChildren(BaseView... children) {
-            this.children.addAll(Arrays.asList(children));
-            return this;
+        @Override
+        public List<BaseView> getSubViews() {
+            return List.copyOf(children);
+        }
+
+        public BaseView getSubViewAt(int index) {
+            return children.get(index);
         }
 
         @Override
-        public Row setWidth(int width) {
-            return (Row) super.setWidth(width);
-        }
+        protected View implementNativeView(Context context, Event event) {
+            ViewGroup layout = instantiateViewGroup(context);
 
-        @Override
-        public Row setHeight(Integer height) {
-            return (Row) super.setHeight(height);
-        }
+            for (BaseViewBuilder child : children) {
+                if (child == null) continue;
 
-        @Override
-        public Row setBackgroundColor(int color) {
-            return (Row) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public Row setBackgroundResource(int resId) {
-            return (Row) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public Row setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (Row) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        protected View build(Context context) {
-            LinearLayout linearLayout = new LinearLayout(context);
-            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-            setupView(linearLayout);
-
-            for (BaseView child : children) {
-                linearLayout.addView(child.build(context));
+                View build = child.build(context, event);
+                child.setParent(this);
+                layout.addView(build);
             }
 
+            return layout;
+        }
+
+        protected ViewGroup instantiateViewGroup(Context context) {
+            LinearLayout linearLayout = new LinearLayout(context);
+            linearLayout.setOrientation(linearOrientation());
             return linearLayout;
+        }
+
+        protected int linearOrientation() {
+            return LinearLayout.HORIZONTAL;
+        }
+
+        @Override
+        public Object getValue() {
+            return this.nativeView;
+        }
+
+        @Override
+        protected void destroy() {
+            super.destroy();
+            if (children != null) children.clear();
         }
     }
 
-    public static class Scroll extends BaseView {
-        private boolean isVertical;
-        private BaseView child;
-
-        public Scroll() {
-            this(true, null);
+    public static class Row extends MultiChildrenView {
+        @Override
+        protected int linearOrientation() {
+            return LinearLayout.HORIZONTAL;
         }
+    }
 
-        public Scroll(boolean isVertical, BaseView child) {
+    public static class Column extends MultiChildrenView {
+        @Override
+        protected int linearOrientation() {
+            return LinearLayout.VERTICAL;
+        }
+    }
+
+    public static class Stack extends MultiChildrenView {
+        @Override
+        protected ViewGroup instantiateViewGroup(Context context) {
+            return new FrameLayout(context);
+        }
+    }
+
+    public static class Scroll extends BaseViewBuilder {
+        private final boolean isVertical;
+        public final BaseView child;
+
+        public Scroll(boolean isVertical, BaseViewBuilder child) {
             this.isVertical = isVertical;
             this.child = child;
         }
 
-        public void setVertical(boolean vertical) {
-            this.isVertical = vertical;
-        }
-
-        public Scroll addChild(BaseView child) {
-            this.child = child;
-            return this;
+        @Override
+        public List<BaseView> getSubViews() {
+            return List.of(child);
         }
 
         @Override
-        public Scroll setWidth(int width) {
-            return (Scroll) super.setWidth(width);
-        }
-
-        @Override
-        public Scroll setHeight(Integer height) {
-            return (Scroll) super.setHeight(height);
-        }
-
-        @Override
-        public Scroll setBackgroundColor(int color) {
-            return (Scroll) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public Scroll setBackgroundResource(int resId) {
-            return (Scroll) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public Scroll setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (Scroll) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        protected View build(Context context) {
+        protected View implementNativeView(Context context, Event event) {
             ViewGroup view;
 
             if (isVertical) {
                 view = new ScrollView(context);
-            } else {
+            }
+            //
+            else {
                 view = new HorizontalScrollView(context);
             }
 
-            setupView(view);
-
-            view.addView(child.build(context));
+            if (child != null) {
+                View build = ((BaseViewBuilder) child).build(context, event);
+                child.setParent(this);
+                view.addView(build);
+            }
 
             return view;
         }
+
+        @Override
+        public Object getValue() {
+            return this.nativeView;
+        }
+
+        @Override
+        protected void destroy() {
+            super.destroy();
+            if (child != null) child.destroy();
+        }
     }
 
-    public static class Image extends BaseView {
-        private Integer imageResId;
-        private Uri imageUri;
-        private android.graphics.drawable.Drawable imageDrawable;
+    public static class Image extends BaseViewBuilder {
+        private final Integer imageResId;
+        private final Uri imageUri;
+        private final android.graphics.drawable.Drawable imageDrawable;
+        private ImageView.ScaleType scaleType;
 
         public Image(int imageResId) {
-            setImageResId(imageResId);
-        }
-
-        public Image(Uri imageUri) {
-            setImageUri(imageUri);
-        }
-
-        public Image(Drawable imageDrawable) {
-            setImageDrawable(imageDrawable);
-        }
-
-        public Image setImageResId(int imageResId) {
             this.imageResId = imageResId;
             this.imageUri = null;
             this.imageDrawable = null;
-            return this;
         }
 
-        public Image setImageUri(Uri imageUri) {
+        public Image(Uri imageUri) {
             this.imageResId = null;
             this.imageUri = imageUri;
             this.imageDrawable = null;
-            return this;
         }
 
-        public Image setImageDrawable(Drawable imageDrawable) {
+        public Image(Drawable imageDrawable) {
             this.imageResId = null;
             this.imageUri = null;
             this.imageDrawable = imageDrawable;
+        }
+
+        public Image setScaleType(ImageView.ScaleType scaleType) {
+            this.scaleType = scaleType;
             return this;
         }
 
         @Override
-        public Image setWidth(int width) {
-            return (Image) super.setWidth(width);
-        }
-
-        @Override
-        public Image setHeight(Integer height) {
-            return (Image) super.setHeight(height);
-        }
-
-        @Override
-        public Image setBackgroundColor(int color) {
-            return (Image) super.setBackgroundColor(color);
-        }
-
-        @Override
-        public Image setBackgroundResource(int resId) {
-            return (Image) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public Image setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (Image) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        public Image setOnClickListener(View.OnClickListener onClickListener) {
-            return (Image) super.setOnClickListener(onClickListener);
-        }
-
-        @Override
-        public Image setOnLongClickListener(View.OnLongClickListener onLongClickListener) {
-            return (Image) super.setOnLongClickListener(onLongClickListener);
-        }
-
-        @Override
-        public Image setOnTouchListener(View.OnTouchListener onTouchListener) {
-            return (Image) super.setOnTouchListener(onTouchListener);
-        }
-
-        @Override
-        protected View build(Context context) {
+        protected View implementNativeView(Context context, Event event) {
             ImageView view = new ImageView(context);
-            setupView(view);
 
             if (imageUri != null) view.setImageURI(imageUri);
 
@@ -846,94 +1157,35 @@ public class CustomDialog extends BaseDialog {
 
             if (imageResId != null) view.setImageResource(imageResId);
 
+            if (scaleType != null) view.setScaleType(scaleType);
+
             return view;
         }
 
+        @Override
+        public Drawable getValue() {
+            return ((ImageView) this.nativeView).getDrawable();
+        }
     }
 
-    public static class BasicView extends BaseView {
-
-        public BasicView(int width, int height) {
-            this.setWidth(width);
-            this.setHeight(height);
+    public static class BasicView extends BaseViewBuilder {
+        public BasicView() {
         }
 
-        public BasicView(int width, int height, int bgRes) {
-            this.setWidth(width);
-            this.setHeight(height);
-            this.setBackgroundResource(bgRes);
-        }
-
-        public BasicView(int width, int height, int bgRes, Integer paddingLeft, Integer paddingTop, Integer paddingRight, Integer paddingBottom) {
-            this.setWidth(width);
-            this.setHeight(height);
-            this.setBackgroundResource(bgRes);
-            this.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        public BasicView(int width, int height, int bgRes, Integer paddingLeft, Integer paddingTop, Integer paddingRight, Integer paddingBottom, View.OnClickListener onClickListener, View.OnLongClickListener onLongClickListener, View.OnTouchListener onTouchListener) {
-            this.setWidth(width);
-            this.setHeight(height);
-            this.setBackgroundResource(bgRes);
-            this.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-            this.setOnClickListener(onClickListener);
-            this.setOnLongClickListener(onLongClickListener);
-            this.setOnTouchListener(onTouchListener);
-        }
-
-
-        @Override
-        public BasicView setWidth(int width) {
-            return (BasicView) super.setWidth(width);
+        public BasicView(ViewSize width, ViewSize height) {
+            setWidth(width);
+            setHeight(height);
         }
 
         @Override
-        public BasicView setHeight(Integer height) {
-            return (BasicView) super.setHeight(height);
+        protected View implementNativeView(Context context, Event event) {
+            return new View(context);
         }
 
         @Override
-        public BasicView setBackgroundColor(int color) {
-            return (BasicView) super.setBackgroundColor(color);
+        public Object getValue() {
+            return this.nativeView;
         }
-
-        @Override
-        public BasicView setBackgroundResource(int resId) {
-            return (BasicView) super.setBackgroundResource(resId);
-        }
-
-        @Override
-        public BasicView setPadding(
-                Integer paddingLeft,
-                Integer paddingTop,
-                Integer paddingRight,
-                Integer paddingBottom
-        ) {
-            return (BasicView) super.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        @Override
-        public BasicView setOnClickListener(View.OnClickListener onClickListener) {
-            return (BasicView) super.setOnClickListener(onClickListener);
-        }
-
-        @Override
-        public BasicView setOnLongClickListener(View.OnLongClickListener onLongClickListener) {
-            return (BasicView) super.setOnLongClickListener(onLongClickListener);
-        }
-
-        @Override
-        public BasicView setOnTouchListener(View.OnTouchListener onTouchListener) {
-            return (BasicView) super.setOnTouchListener(onTouchListener);
-        }
-
-        @Override
-        protected View build(Context context) {
-            View view = new View(context);
-            setupView(view);
-            return view;
-        }
-
     }
 
 }
