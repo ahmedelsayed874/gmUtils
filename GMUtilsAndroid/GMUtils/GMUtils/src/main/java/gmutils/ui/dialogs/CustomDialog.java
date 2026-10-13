@@ -168,13 +168,16 @@ public class CustomDialog extends BaseDialog {
     private Event _event;
 
     public CustomDialog addChild(@NotNull CustomDialog.BaseViewBuilder child) {
-        if (child.updateObserver != null && _event == null) {
-            _event = viewBuilder -> {
-                ViewUpdateArgs args = new ViewUpdateArgs(new ArrayList<>(children), viewBuilder);
-
+        if (_event == null) {
+            _event = (viewBuilder, triggeredBy) -> {
                 for (BaseView c : children) {
                     if (null == c.updateObserver) continue;
-                    c.update(args);
+                    c.update(new ViewUpdateArgs(
+                            new ArrayList<>(children),
+                            c,
+                            viewBuilder,
+                            triggeredBy
+                    ));
                 }
 
                 if (!allowDestroy) {
@@ -198,8 +201,8 @@ public class CustomDialog extends BaseDialog {
         return this;
     }
 
-    public void dispatchStateUpdated(BaseView view) {
-        if (_event != null) _event.onStatusChanged(view);
+    public void dispatchStateUpdated(BaseView view, String triggeredBy) {
+        if (_event != null) _event.onStatusChanged(view, triggeredBy);
     }
 
     //==============================================================================================
@@ -231,10 +234,18 @@ public class CustomDialog extends BaseDialog {
     //\/////////////////////////////////////////////////////////////////////////////////////////////
 
     public interface Event {
-        void onStatusChanged(BaseView view);
+        void onStatusChanged(
+                @NotNull BaseView view,
+                @NotNull String triggeredBy
+        );
     }
 
-    public record ViewUpdateArgs(List<BaseView> children, BaseView updatedViewInfo) {
+    public record ViewUpdateArgs(
+            @NotNull List<BaseView> children,
+            @NotNull BaseView childView,
+            @NotNull BaseView updatedView,
+            @NotNull String triggeredBy
+    ) {
     }
 
     //-----------------------------------------------
@@ -392,8 +403,11 @@ public class CustomDialog extends BaseDialog {
         private Value4<Integer, Integer, Integer, Integer> marginLTRB;
         private int visibility = View.VISIBLE;
         protected ResultCallback2<BaseView, View> onClickListener;
+        protected boolean watchClicks = false;
         private ActionCallback2<BaseView, View, Boolean> onLongClickListener;
+        protected boolean watchLongClicks = false;
         private ActionCallback3<BaseView, View, MotionEvent, Boolean> onTouchListener;
+        protected boolean watchTouches = false;
         //
         private ResultCallback<View> onBuiltCallback;
 
@@ -482,13 +496,28 @@ public class CustomDialog extends BaseDialog {
             return this;
         }
 
+        public BaseViewBuilder watchClicks() {
+            this.watchClicks = true;
+            return this;
+        }
+
         public BaseViewBuilder setOnLongClickListener(ActionCallback2<BaseView, View, Boolean> onLongClickListener) {
             this.onLongClickListener = onLongClickListener;
             return this;
         }
 
+        public BaseViewBuilder watchLongClicks() {
+            this.watchLongClicks = true;
+            return this;
+        }
+
         public BaseViewBuilder setOnTouchListener(ActionCallback3<BaseView, View, MotionEvent, Boolean> onTouchListener) {
             this.onTouchListener = onTouchListener;
+            return this;
+        }
+
+        public BaseViewBuilder watchTouches() {
+            this.watchTouches = true;
             return this;
         }
 
@@ -506,14 +535,14 @@ public class CustomDialog extends BaseDialog {
 
         //----------------------------------------------------------------------
 
-        View build(Context context, Event event) {
+        View build(Context context, @NotNull Event event) {
             this.nativeView = implementNativeView(context, event);
             setupView(this.nativeView, event);
             if (onBuiltCallback != null) onBuiltCallback.invoke(this.nativeView);
             return this.nativeView;
         }
 
-        protected abstract View implementNativeView(Context context, Event event);
+        protected abstract View implementNativeView(Context context, @NotNull Event event);
 
         @SuppressLint("ClickableViewAccessibility")
         private void setupView(View view, Event event) {
@@ -537,25 +566,27 @@ public class CustomDialog extends BaseDialog {
 
             view.setVisibility(visibility);
 
-            if (onClickListener != null) {
+            if (watchClicks || onClickListener != null) {
                 view.setOnClickListener(v -> {
-                    onClickListener.invoke(this, v);
-                    if (event != null) event.onStatusChanged(this);
+                    if (onClickListener != null) onClickListener.invoke(this, v);
+                    event.onStatusChanged(this, "ClickEvent");
                 });
             }
 
-            if (onLongClickListener != null) {
+            if (watchLongClicks || onLongClickListener != null) {
                 view.setOnLongClickListener(v -> {
-                    boolean b = onLongClickListener.invoke(this, v);
-                    if (event != null) event.onStatusChanged(this);
+                    boolean b = false;
+                    if (onLongClickListener != null) b = onLongClickListener.invoke(this, v);
+                    event.onStatusChanged(this, "LongClickEvent");
                     return b;
                 });
             }
 
-            if (onTouchListener != null) {
+            if (watchTouches || onTouchListener != null) {
                 view.setOnTouchListener((v, e) -> {
-                    boolean b = onTouchListener.invoke(this, v, e);
-                    if (event != null) event.onStatusChanged(this);
+                    boolean b = false;
+                    if (onTouchListener != null) b = onTouchListener.invoke(this, v, e);
+                    event.onStatusChanged(this, "TouchEvent-" + e.getAction());
                     return b;
                 });
             }
@@ -665,7 +696,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             TextView textView = instantiateTextView(context);
             setupTextView(textView, event);
             return textView;
@@ -702,6 +733,7 @@ public class CustomDialog extends BaseDialog {
         private CharSequence hint;
         private Integer hintColor;
         private TextChangedListener textChangedListener;
+        private boolean watchTextChanges = false;
 
         public TextField() {
             super("");
@@ -747,8 +779,13 @@ public class CustomDialog extends BaseDialog {
             return this;
         }
 
+        public Text watchTextChanges() {
+            this.watchTextChanges = true;
+            return this;
+        }
+
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             EditText editText = (EditText) super.implementNativeView(context, event);
 
             if (hintRes != null) editText.setHint(hintRes);
@@ -757,12 +794,12 @@ public class CustomDialog extends BaseDialog {
 
             if (hintColor != null) editText.setHintTextColor(hintColor);
 
-            if (textChangedListener != null) {
+            if (watchTextChanges || textChangedListener != null) {
                 editText.addTextChangedListener(new TextChangedListener() {
                     @Override
                     public void onTextChanged(String s) {
-                        textChangedListener.onTextChanged(s);
-                        if (event != null) event.onStatusChanged(TextField.this);
+                        if (textChangedListener != null) textChangedListener.onTextChanged(s);
+                        event.onStatusChanged(TextField.this, "TextChangeEvent");
                     }
                 });
             }
@@ -804,7 +841,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             android.widget.Button button = (android.widget.Button) super.implementNativeView(context, event);
 
             if (tintColor != null) ViewCompat.setBackgroundTintList(
@@ -842,8 +879,13 @@ public class CustomDialog extends BaseDialog {
             return this;
         }
 
+        public Checkbox watchCheckChanges() {
+            this.watchClicks();
+            return this;
+        }
+
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             CheckBox checkBox = (CheckBox) super.implementNativeView(context, event);
 
             if (checkboxColor != null) CompoundButtonCompat.setButtonTintList(
@@ -883,7 +925,7 @@ public class CustomDialog extends BaseDialog {
             }
 
             @Override
-            protected View implementNativeView(Context context, Event event) {
+            protected View implementNativeView(Context context, @NotNull Event event) {
                 android.widget.RadioButton option = (android.widget.RadioButton) super.implementNativeView(context, event);
 
                 if (checkColor != null) CompoundButtonCompat.setButtonTintList(
@@ -901,11 +943,14 @@ public class CustomDialog extends BaseDialog {
 
             @Override
             public Pair<CharSequence, Boolean> getValue() {
-                //return super.getValue();
                 return new Pair<CharSequence, Boolean>(
                         ((android.widget.RadioButton) this.nativeView).getText(),
                         ((android.widget.RadioButton) this.nativeView).isChecked()
                 );
+                /*return "{" +
+                        "\"text\": \"" + ((android.widget.RadioButton) this.nativeView).getText() + "\"" +
+                        "\"checked\": " + ((android.widget.RadioButton) this.nativeView).isChecked() +
+                        "}";*/
             }
         }
 
@@ -913,6 +958,7 @@ public class CustomDialog extends BaseDialog {
         private Integer checkColor;
         private Integer selectedOptionIndex;
         private ResultCallback2<Text, Integer> onOptionSelected;
+        private boolean watchOptionSelections = false;
 
         public Options setCheckColor(Integer color) {
             this.checkColor = color;
@@ -934,6 +980,11 @@ public class CustomDialog extends BaseDialog {
             return this;
         }
 
+        public Options watchOptionSelections() {
+            this.watchOptionSelections = true;
+            return this;
+        }
+
         public OptionElement getOptionAt(int index) {
             return options.get(index);
         }
@@ -944,7 +995,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             RadioGroup radioGroup = new RadioGroup(context);
 
             int i = -1;
@@ -969,7 +1020,13 @@ public class CustomDialog extends BaseDialog {
                     ((RadioButton) v).setChecked(true);
                     if (this.onClickListener != null) this.onClickListener.invoke(option, v);
                     if (this.onOptionSelected != null) this.onOptionSelected.invoke(option, finalI);
-                    if (event != null) event.onStatusChanged(this);
+                    if (watchOptionSelections) {
+                        int id = ((RadioGroup) this.nativeView).getCheckedRadioButtonId();
+                        event.onStatusChanged(
+                                Options.this,
+                                "OptionChanged-" + id
+                        );
+                    }
                 });
 
                 radioGroup.addView(radioButton);
@@ -979,10 +1036,15 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        public OptionElement getValue() {
+        public Pair<Integer, CharSequence> getValue() {
             int id = ((RadioGroup) this.nativeView).getCheckedRadioButtonId();
             if (id <= 0) return null;
-            return options.get(id - 1);
+            var r = options.get(id - 1).getValue();
+            return new Pair<Integer, CharSequence>(id - 1, r.first);
+            /*return "{" +
+                    "\"opt-index\": " + (id - 1) +
+                    "\"opt-text\": " + r + "" +
+                    "}";*/
         }
 
         @Override
@@ -1018,7 +1080,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             ViewGroup layout = instantiateViewGroup(context);
 
             for (BaseViewBuilder child : children) {
@@ -1090,7 +1152,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             ViewGroup view;
 
             if (isVertical) {
@@ -1152,7 +1214,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             ImageView view = new ImageView(context);
 
             if (imageUri != null) view.setImageURI(imageUri);
@@ -1182,7 +1244,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, Event event) {
+        protected View implementNativeView(Context context, @NotNull Event event) {
             return new View(context);
         }
 

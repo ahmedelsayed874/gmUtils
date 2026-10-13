@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -397,7 +398,7 @@ class MainActivity : BaseActivity() {
             )
         }
 
-        this.view.btn16.text = "Show Custom Dialog"
+        this.view.btn16.text = "Show Custom Dialog 1"
         this.view.btn16.setOnClickListener {
             val cd = CustomDialog(this)
             cd.setTitle("Custom Dialog")
@@ -490,7 +491,7 @@ class MainActivity : BaseActivity() {
                         CustomDialog
                             .Text("Dispatch Data Lister")
                             .setOnClickListener { builder, view ->
-                                cd.dispatchStateUpdated(builder)
+                                cd.dispatchStateUpdated(builder, "Dispatch")
                             }
                     ),
 
@@ -568,6 +569,94 @@ class MainActivity : BaseActivity() {
 
                                 .toString()
                         )
+                    }
+            )
+            cd.show()
+        }
+
+        this.view.btn17.text = "Show Custom Dialog 2"
+        this.view.btn17.setOnClickListener {
+            val cd = CustomDialog(this)
+            cd.setTitle("Custom Dialog")
+            cd.setWidthToMax(50)
+            cd.addChildren(
+                //
+                CustomDialog.Text("Input 1:"),
+                CustomDialog.TextField("Input 1").watchTextChanges(), //1
+
+                //
+                CustomDialog.Text("Input 2:"),
+                CustomDialog.Checkbox("Check 1").watchCheckChanges(), //3
+                CustomDialog.Checkbox("Check 2").watchCheckChanges(), //4
+                CustomDialog.Checkbox("Check 3").watchCheckChanges(), //5
+
+                //
+                CustomDialog.Text("Input 3:"),
+                CustomDialog.Options()                  //7
+                    .addOption(CustomDialog.Options.OptionElement("Option 1"))
+                    .addOption(CustomDialog.Options.OptionElement("Option 2"))
+                    .addOption(CustomDialog.Options.OptionElement("Option 3"))
+                    .watchOptionSelections(),
+
+                //
+                CustomDialog.Text("User actions:"),
+                CustomDialog.Text("").subscribeOnUpdate {args ->
+                    args.children().forEachIndexed { index, view ->
+                        Log.d(
+                            "CustomDialog",
+                            "$index | ${view.javaClass.simpleName} | ${view.nativeView}"
+                        )
+                    }
+
+                    val input1Text = args.children[1].value
+
+                    val input2Chk1Text = (args.children[3].nativeView as TextView).text.toString()
+                    val input2Chk1 = args.children[3].value
+
+                    val input2Chk2Text = (args.children[4].nativeView as TextView).text.toString()
+                    val input2Chk2 = args.children[4].value
+
+                    val input2Chk3Text = (args.children[5].nativeView as TextView).text.toString()
+                    val input2Chk3 = args.children[5].value
+
+                    val input3Text = (args.children[6].nativeView as TextView).text.toString()
+                    val i3v = args.children[7].value
+                    val i3vt = i3v.javaClass
+                    val input3 = (args.children[7].value as? android.util.Pair<*, *>)?.second ?: "null"
+
+                    val text = JsonBuilder.ofJsonObject()
+                        .add("text", input1Text)
+
+                        .add(input2Chk1Text, input2Chk1)
+                        .add(input2Chk2Text, input2Chk2)
+                        .add(input2Chk3Text, input2Chk3)
+
+                        .add(input3Text, input3)
+
+                        .toString(8)
+
+                    Log.d("CustomDialog", text)
+
+                    (args.childView.nativeView as TextView).text = text
+                },
+
+                //line
+                CustomDialog.BasicView(
+                    CustomDialog.ViewSize.matchParent(),
+                    CustomDialog.ViewSize.absolute(3)
+                ).setBackgroundColor(
+                    Color.RED
+                ).setMarginSymmetric(
+                    0,
+                    10
+                ),
+
+                //btn
+                CustomDialog
+                    .Button("DONE")
+                    .setLayoutGravity(Gravity.CENTER)
+                    .setOnClickListener { builder, view ->
+                        cd.dismiss("DONE")
                     }
             )
             cd.show()
