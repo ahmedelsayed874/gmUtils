@@ -729,8 +729,8 @@ public class CustomDialog extends BaseDialog {
     }
 
     public static class TextField extends Text {
-        private Integer hintRes;
-        private CharSequence hint;
+        private final Integer hintRes;
+        private final CharSequence hint;
         private Integer hintColor;
         private TextChangedListener textChangedListener;
         private boolean watchTextChanges = false;
@@ -738,35 +738,33 @@ public class CustomDialog extends BaseDialog {
         public TextField() {
             super("");
             setWidth(ViewSize.matchParent());
+
+            this.hintRes = null;
+            this.hint = null;
         }
 
         public TextField(int hintRes) {
             super("");
-            setHintRes(hintRes);
             setWidth(ViewSize.matchParent());
+
+            this.hintRes = hintRes;
+            this.hint = null;
         }
 
         public TextField(CharSequence hint) {
             super("");
-            setHint(hint);
             setWidth(ViewSize.matchParent());
+
+            this.hintRes = null;
+            this.hint = hint;
         }
 
         public TextField(CharSequence text, CharSequence hint) {
             super(text);
-            setHint(hint);
-        }
+            setWidth(ViewSize.matchParent());
 
-        public Text setHintRes(int hintRes) {
-            this.hintRes = hintRes;
-            this.hint = null;
-            return this;
-        }
-
-        public Text setHint(CharSequence hint) {
             this.hintRes = null;
             this.hint = hint;
-            return this;
         }
 
         public Text setHintColor(Integer color) {
