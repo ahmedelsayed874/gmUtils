@@ -170,15 +170,12 @@ public class CustomDialog extends BaseDialog {
     public CustomDialog addChild(@NotNull CustomDialog.BaseViewBuilder child) {
         if (_event == null) {
             _event = (viewBuilder, triggeredBy) -> {
-                for (BaseView c : children) {
-                    if (null == c.updateObserver) continue;
-                    c.update(new ViewUpdateArgs(
-                            new ArrayList<>(children),
-                            c,
-                            viewBuilder,
-                            triggeredBy
-                    ));
-                }
+                informObserver(new ViewUpdateArgs(
+                        new ArrayList<>(children),
+                        //c,
+                        viewBuilder,
+                        triggeredBy
+                ));
 
                 if (!allowDestroy) {
                     allowDestroy = true;
@@ -203,6 +200,19 @@ public class CustomDialog extends BaseDialog {
 
     public void dispatchStateUpdated(BaseView view, String triggeredBy) {
         if (_event != null) _event.onStatusChanged(view, triggeredBy);
+    }
+
+    //==============================================================================================
+
+    ResultCallback<ViewUpdateArgs> updateObserver;
+
+    public CustomDialog subscribeOnUpdate(ResultCallback<ViewUpdateArgs> updateObserver) {
+        this.updateObserver = updateObserver;
+        return this;
+    }
+
+    final void informObserver(ViewUpdateArgs args) {
+        if (this.updateObserver != null) this.updateObserver.invoke(args);
     }
 
     //==============================================================================================
@@ -242,7 +252,7 @@ public class CustomDialog extends BaseDialog {
 
     public record ViewUpdateArgs(
             @NotNull List<BaseView> children,
-            @NotNull BaseView childView,
+            //@NotNull BaseView childView,
             @NotNull BaseView updatedView,
             @NotNull String triggeredBy
     ) {
@@ -298,7 +308,6 @@ public class CustomDialog extends BaseDialog {
         private String id;
         private Object extra;
         private BaseView parent;
-        ResultCallback<ViewUpdateArgs> updateObserver;
         View nativeView;
 
         //----------------------------------------------------------------------
@@ -353,15 +362,6 @@ public class CustomDialog extends BaseDialog {
 
         //------------------------------------------------------------------------------------------
 
-        protected BaseView subscribeOnUpdate(ResultCallback<ViewUpdateArgs> updateObserver) {
-            this.updateObserver = updateObserver;
-            return this;
-        }
-
-        final void update(ViewUpdateArgs args) {
-            if (this.updateObserver != null) this.updateObserver.invoke(args);
-        }
-
         protected void destroy() {
             List<BaseView> subViews = getSubViews();
             if (subViews != null) {
@@ -373,7 +373,6 @@ public class CustomDialog extends BaseDialog {
             id = null;
             extra = null;
             parent = null;
-            updateObserver = null;
             nativeView = null;
         }
 
@@ -526,11 +525,6 @@ public class CustomDialog extends BaseDialog {
         public final BaseViewBuilder setOnBuiltCallback(ResultCallback<View> onBuiltCallback) {
             this.onBuiltCallback = onBuiltCallback;
             return this;
-        }
-
-        @Override
-        public final BaseViewBuilder subscribeOnUpdate(ResultCallback<ViewUpdateArgs> updateObserver) {
-            return (BaseViewBuilder) super.subscribeOnUpdate(updateObserver);
         }
 
         //----------------------------------------------------------------------
@@ -839,8 +833,14 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
+        public Button setColor(int color) {
+            return (Button) super.setColor(color);
+        }
+
+        @Override
         protected View implementNativeView(Context context, @NotNull Event event) {
             android.widget.Button button = (android.widget.Button) super.implementNativeView(context, event);
+            button.setAllCaps(false);
 
             if (tintColor != null) ViewCompat.setBackgroundTintList(
                     button,
@@ -1054,6 +1054,7 @@ public class CustomDialog extends BaseDialog {
 
     public static abstract class MultiChildrenView extends BaseViewBuilder {
         private final List<BaseViewBuilder> children;
+        private Integer contentGravity;
 
         protected MultiChildrenView() {
             this(new ArrayList<>());
@@ -1065,6 +1066,11 @@ public class CustomDialog extends BaseDialog {
 
         public MultiChildrenView addChild(BaseViewBuilder child) {
             this.children.add(child);
+            return this;
+        }
+
+        public MultiChildrenView setContentGravity(Integer contentGravity) {
+            this.contentGravity = contentGravity;
             return this;
         }
 
@@ -1095,6 +1101,9 @@ public class CustomDialog extends BaseDialog {
         protected ViewGroup instantiateViewGroup(Context context) {
             LinearLayout linearLayout = new LinearLayout(context);
             linearLayout.setOrientation(linearOrientation());
+
+            if (contentGravity != null) linearLayout.setGravity(contentGravity);
+
             return linearLayout;
         }
 
