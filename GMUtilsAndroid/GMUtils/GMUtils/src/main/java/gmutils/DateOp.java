@@ -31,6 +31,7 @@ import java.util.TimeZone;
 public class DateOp implements Serializable {
     //https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
 
+    /**
     public static final String PATTERN_SYMBOL_YEAR = "yyyy";
 
     public static final String PATTERN_SYMBOL_MONTH = "MM";
@@ -52,6 +53,7 @@ public class DateOp implements Serializable {
     public static final String PATTERN_SYMBOL_TIME_ZONE = "z";//General time zone -> GMT+02:00
     public static final String PATTERN_SYMBOL_TIME_ZONE_RFC822 = "Z";//+0200
     public static final String PATTERN_SYMBOL_TIME_ZONE_ISO8601 = "XXX";//+02:00
+    */
 
     //----------------------------------------------------------------------------------------------
 
@@ -940,7 +942,6 @@ public class DateOp implements Serializable {
         String format = sdf.format(calendar.getTime());
         return format;
     }
-
 
     //--------------------------------------------------------------------------------------------//
 

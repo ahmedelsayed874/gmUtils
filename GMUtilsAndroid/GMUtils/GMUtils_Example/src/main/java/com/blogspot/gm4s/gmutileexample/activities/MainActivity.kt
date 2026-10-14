@@ -1,7 +1,6 @@
 package com.blogspot.gm4s.gmutileexample.activities
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -17,7 +16,6 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
-import androidx.core.graphics.Insets
 import com.blogspot.gm4s.gmutileexample.R
 import com.blogspot.gm4s.gmutileexample.databinding.ActivityMainBinding
 import gmutils.Activities
@@ -268,7 +266,7 @@ class MainActivity : BaseActivity() {
             log("pick image began", "")
         }
 
-        this.view.btn8.text = "Get App Backup"
+        this.view.btn8.text = "Export App Backup"
         this.view.btn8.setOnClickListener {
             /*val r = this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
             val f = File(r, System.currentTimeMillis().toString() + ".txt");
@@ -414,10 +412,10 @@ class MainActivity : BaseActivity() {
                             print(s)
                         }
                     })
-                    /*.subscribeOnUpdate { args ->
-                        print(args)
-                        //to do
-                    }*/,
+                /*.subscribeOnUpdate { args ->
+                    print(args)
+                    //to do
+                }*/,
 
                 //
                 CustomDialog.Text("Input 2:"),
@@ -425,26 +423,26 @@ class MainActivity : BaseActivity() {
                     .setOnClickListener { builder, view ->
                         print(builder)
                     }
-                    /*.subscribeOnUpdate { args ->
-                        print(args)
-                        //to do
-                    }*/,
+                /*.subscribeOnUpdate { args ->
+                    print(args)
+                    //to do
+                }*/,
                 CustomDialog.Checkbox("Check 2")
                     .setOnClickListener { builder, view ->
                         print(builder)
                     }
-                    /*.subscribeOnUpdate { args ->
-                        print(args)
-                        //to do
-                    }*/,
+                /*.subscribeOnUpdate { args ->
+                    print(args)
+                    //to do
+                }*/,
                 CustomDialog.Checkbox("Check 3")
                     .setOnClickListener { builder, view ->
                         print(builder)
                     }
-                    /*.subscribeOnUpdate { args ->
-                        print(args)
-                        //to do
-                    }*/,
+                /*.subscribeOnUpdate { args ->
+                    print(args)
+                    //to do
+                }*/,
 
                 //
                 CustomDialog.Text("Input 3:"),
@@ -456,10 +454,10 @@ class MainActivity : BaseActivity() {
                         print(option)
                         print(idx)
                     }
-                    /*.subscribeOnUpdate { args ->
-                        print(args)
-                        //to do
-                    }*/,
+                /*.subscribeOnUpdate { args ->
+                    print(args)
+                    //to do
+                }*/,
 
                 //
                 CustomDialog.Text("Input 4:"),
@@ -512,65 +510,67 @@ class MainActivity : BaseActivity() {
 
                         cd.dismiss("DONE")
                     }
-                    .subscribeOnUpdate { args ->
-                        args.children().forEachIndexed { index, view ->
-                            Log.d(
-                                "CustomDialog",
-                                "$index | ${view.javaClass.simpleName} | ${view.nativeView}"
-                            )
-                        }
+            ).subscribeOnUpdate { args ->
+                args.children().forEachIndexed { index, view ->
+                    Log.d(
+                        "CustomDialog",
+                        "$index | ${view.javaClass.simpleName} | ${view.nativeView}"
+                    )
+                }
 
-                        val input1 = (args.children[1].nativeView as EditText).text
-                        val input1_ = args.children[1].value
+                val input1 = (args.children[1].nativeView as EditText).text
+                val input1_ = args.children[1].value
 
-                        val input2Chk1 = (args.children[3].nativeView as CheckBox).isChecked
-                        val input2Chk1_ = args.children[3].value
-                        val input2Chk2 = (args.children[4].nativeView as CheckBox).isChecked
-                        val input2Chk2_ = args.children[4].value
-                        val input2Chk3 = (args.children[5].nativeView as CheckBox).isChecked
-                        val input2Chk3_ = args.children[5].value
+                val input2Chk1 = (args.children[3].nativeView as CheckBox).isChecked
+                val input2Chk1_ = args.children[3].value
+                val input2Chk2 = (args.children[4].nativeView as CheckBox).isChecked
+                val input2Chk2_ = args.children[4].value
+                val input2Chk3 = (args.children[5].nativeView as CheckBox).isChecked
+                val input2Chk3_ = args.children[5].value
 
-                        val input3 = (args.children[7].nativeView as RadioGroup).checkedRadioButtonId
-                        val input3_ = args.children[7].value
-                        val input3Opt1 = (args.children[7].subViews[0].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
-                        val input3Opt1_ = args.children[7].subViews[0].value
-                        val input3Opt2 = (args.children[7].subViews[1].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
-                        val input3Opt2_ = args.children[7].subViews[1].value
-                        val input3Opt3 = (args.children[7].subViews[2].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
-                        val input3Opt3_ = args.children[7].subViews[2].value
+                val input3 = (args.children[7].nativeView as RadioGroup).checkedRadioButtonId
+                val input3_ = args.children[7].value
+                val input3Opt1 =
+                    (args.children[7].subViews[0].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
+                val input3Opt1_ = args.children[7].subViews[0].value
+                val input3Opt2 =
+                    (args.children[7].subViews[1].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
+                val input3Opt2_ = args.children[7].subViews[1].value
+                val input3Opt3 =
+                    (args.children[7].subViews[2].nativeView as RadioButton).let { "${it.id} / ${it.isChecked}" }
+                val input3Opt3_ = args.children[7].subViews[2].value
 
-                        val btn = (args.children[11].nativeView as Button).text
-                        val btn_ = args.children[11].value
+                val btn = (args.children[11].nativeView as Button).text
+                val btn_ = args.children[11].value
 
-                        Log.d(
-                            "CustomDialog",
-                            JsonBuilder.ofJsonObject()
-                                .add("input1", input1)
-                                .add("input1_", input1_)
+                Log.d(
+                    "CustomDialog",
+                    JsonBuilder.ofJsonObject()
+                        .add("input1", input1)
+                        .add("input1_", input1_)
 
-                                .add("input2Chk1", input2Chk1)
-                                .add("input2Chk1_", input2Chk1_)
-                                .add("input2Chk2", input2Chk2)
-                                .add("input2Chk2_", input2Chk2_)
-                                .add("input2Chk3", input2Chk3)
-                                .add("input2Chk3_", input2Chk3_)
+                        .add("input2Chk1", input2Chk1)
+                        .add("input2Chk1_", input2Chk1_)
+                        .add("input2Chk2", input2Chk2)
+                        .add("input2Chk2_", input2Chk2_)
+                        .add("input2Chk3", input2Chk3)
+                        .add("input2Chk3_", input2Chk3_)
 
-                                .add("input3", input3)
-                                .add("input3_", input3_)
-                                .add("input3Opt1", input3Opt1)
-                                .add("input3Opt1_", input3Opt1_)
-                                .add("input3Opt2", input3Opt2)
-                                .add("input3Opt2_", input3Opt2_)
-                                .add("input3Opt3", input3Opt3)
-                                .add("input3Opt3_", input3Opt3_)
+                        .add("input3", input3)
+                        .add("input3_", input3_)
+                        .add("input3Opt1", input3Opt1)
+                        .add("input3Opt1_", input3Opt1_)
+                        .add("input3Opt2", input3Opt2)
+                        .add("input3Opt2_", input3Opt2_)
+                        .add("input3Opt3", input3Opt3)
+                        .add("input3Opt3_", input3Opt3_)
 
-                                .add("btn", btn)
-                                .add("btn_", btn_)
+                        .add("btn", btn)
+                        .add("btn_", btn_)
 
-                                .toString()
-                        )
-                    }
-            )
+                        .toString()
+                )
+            }
             cd.show()
         }
 
@@ -600,45 +600,7 @@ class MainActivity : BaseActivity() {
 
                 //
                 CustomDialog.Text("User actions:"),
-                CustomDialog.Text("").subscribeOnUpdate {args ->
-                    args.children().forEachIndexed { index, view ->
-                        Log.d(
-                            "CustomDialog",
-                            "$index | ${view.javaClass.simpleName} | ${view.nativeView}"
-                        )
-                    }
-
-                    val input1Text = args.children[1].value
-
-                    val input2Chk1Text = (args.children[3].nativeView as TextView).text.toString()
-                    val input2Chk1 = args.children[3].value
-
-                    val input2Chk2Text = (args.children[4].nativeView as TextView).text.toString()
-                    val input2Chk2 = args.children[4].value
-
-                    val input2Chk3Text = (args.children[5].nativeView as TextView).text.toString()
-                    val input2Chk3 = args.children[5].value
-
-                    val input3Text = (args.children[6].nativeView as TextView).text.toString()
-                    val i3v = args.children[7].value
-                    val i3vt = i3v.javaClass
-                    val input3 = (args.children[7].value as? android.util.Pair<*, *>)?.second ?: "null"
-
-                    val text = JsonBuilder.ofJsonObject()
-                        .add("text", input1Text)
-
-                        .add(input2Chk1Text, input2Chk1)
-                        .add(input2Chk2Text, input2Chk2)
-                        .add(input2Chk3Text, input2Chk3)
-
-                        .add(input3Text, input3)
-
-                        .toString(8)
-
-                    Log.d("CustomDialog", text)
-
-                    (args.childView.nativeView as TextView).text = text
-                },
+                CustomDialog.Text(""),                //9
 
                 //line
                 CustomDialog.BasicView(
@@ -658,7 +620,46 @@ class MainActivity : BaseActivity() {
                     .setOnClickListener { builder, view ->
                         cd.dismiss("DONE")
                     }
-            )
+            ).subscribeOnUpdate { args ->
+                args.children().forEachIndexed { index, view ->
+                    Log.d(
+                        "CustomDialog",
+                        "$index | ${view.javaClass.simpleName} | ${view.nativeView}"
+                    )
+                }
+
+                val input1Text = args.children[1].value
+
+                val input2Chk1Text = (args.children[3].nativeView as TextView).text.toString()
+                val input2Chk1 = args.children[3].value
+
+                val input2Chk2Text = (args.children[4].nativeView as TextView).text.toString()
+                val input2Chk2 = args.children[4].value
+
+                val input2Chk3Text = (args.children[5].nativeView as TextView).text.toString()
+                val input2Chk3 = args.children[5].value
+
+                val input3Text = (args.children[6].nativeView as TextView).text.toString()
+                val i3v = args.children[7].value
+                val i3vt = i3v.javaClass
+                val input3 =
+                    (args.children[7].value as? android.util.Pair<*, *>)?.second ?: "null"
+
+                val text = JsonBuilder.ofJsonObject()
+                    .add("text", input1Text)
+
+                    .add(input2Chk1Text, input2Chk1)
+                    .add(input2Chk2Text, input2Chk2)
+                    .add(input2Chk3Text, input2Chk3)
+
+                    .add(input3Text, input3)
+
+                    .toString(8)
+
+                Log.d("CustomDialog", text)
+
+                (args.children[9].nativeView as TextView).text = text
+            }
             cd.show()
         }
 

@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import gmutils.DateOp;
@@ -336,11 +337,13 @@ public abstract class LoggerAbs {
                         long now = System.currentTimeMillis();
                         long diff = now - writeTime;
                         writeTime = now;
-                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+
+                        var tz = TimeZone.getDefault().getOffset(now);
+                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now + tz);
 
                         //time
                         sw.write("\"" +
-                                timeComponent[1] + ":" +        //hours
+                                timeComponent[1] + ":" +    //hours
                                 timeComponent[2] + ":" +    //minutes
                                 timeComponent[3] + "." +    //seconds
                                 timeComponent[4] +          //milliseconds
@@ -373,7 +376,9 @@ public abstract class LoggerAbs {
                         long now = System.currentTimeMillis();
                         long diff = now - writeTime;
                         writeTime = now;
-                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+
+                        var tz = TimeZone.getDefault().getOffset(now);
+                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now + tz);
 
                         //time
                         sw.write("\"" +
@@ -411,7 +416,10 @@ public abstract class LoggerAbs {
                         long now = System.currentTimeMillis();
                         long diff = now - writeTime;
                         writeTime = now;
-                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now);
+
+                        var tz = TimeZone.getDefault().getOffset(now);
+                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now + tz);
+
                         sw.write(
                                 timeComponent[1] + ":" +        //hours
                                         timeComponent[2] + ":" +    //minutes
