@@ -511,7 +511,7 @@ class MainActivity : BaseActivity() {
                         cd.dismiss("DONE")
                     }
             ).subscribeOnUpdate { args ->
-                args.children().forEachIndexed { index, view ->
+                args.children.forEachIndexed { index, view ->
                     Log.d(
                         "CustomDialog",
                         "$index | ${view.javaClass.simpleName} | ${view.nativeView}"
@@ -621,7 +621,7 @@ class MainActivity : BaseActivity() {
                         cd.dismiss("DONE")
                     }
             ).subscribeOnUpdate { args ->
-                args.children().forEachIndexed { index, view ->
+                args.children.forEachIndexed { index, view ->
                     Log.d(
                         "CustomDialog",
                         "$index | ${view.javaClass.simpleName} | ${view.nativeView}"

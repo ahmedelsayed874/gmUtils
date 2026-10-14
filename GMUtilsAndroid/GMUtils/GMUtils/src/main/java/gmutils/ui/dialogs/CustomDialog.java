@@ -250,12 +250,20 @@ public class CustomDialog extends BaseDialog {
         );
     }
 
-    public record ViewUpdateArgs(
-            @NotNull List<BaseView> children,
-            //@NotNull BaseView childView,
-            @NotNull BaseView updatedView,
-            @NotNull String triggeredBy
-    ) {
+    public static class ViewUpdateArgs {
+        public final List<BaseView> children;
+        public final BaseView updatedView;
+        public final String triggeredBy;
+
+        public ViewUpdateArgs(
+                @NotNull List<BaseView> children,
+                @NotNull BaseView updatedView,
+                @NotNull String triggeredBy
+        ) {
+            this.children = children;
+            this.updatedView = updatedView;
+            this.triggeredBy = triggeredBy;
+        }
     }
 
     //-----------------------------------------------
