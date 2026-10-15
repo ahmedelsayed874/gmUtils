@@ -35,6 +35,7 @@ import java.util.List;
 
 import gmutils.R;
 import gmutils.collections.values.Value4;
+import gmutils.images.ImageLoader;
 import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ActionCallback3;
 import gmutils.listeners.ResultCallback;
@@ -871,6 +872,7 @@ public class CustomDialog extends BaseDialog {
 
     public static class Checkbox extends Text {
         private Integer checkboxColor;
+        private boolean isChecked = false;
 
         public Checkbox(int textRes) {
             super(textRes);
@@ -878,6 +880,11 @@ public class CustomDialog extends BaseDialog {
 
         public Checkbox(CharSequence text) {
             super(text);
+        }
+
+        public Checkbox setChecked(boolean checked) {
+            isChecked = checked;
+            return this;
         }
 
         public Checkbox setCheckboxColor(Integer checkboxColor) {
@@ -893,6 +900,7 @@ public class CustomDialog extends BaseDialog {
         @Override
         protected View implementNativeView(Context context, @NotNull Event event) {
             CheckBox checkBox = (CheckBox) super.implementNativeView(context, event);
+            checkBox.setChecked(isChecked);
 
             if (checkboxColor != null) CompoundButtonCompat.setButtonTintList(
                     checkBox,
@@ -916,6 +924,7 @@ public class CustomDialog extends BaseDialog {
     public static class Options extends BaseViewBuilder {
         public static class OptionElement extends Text {
             private Integer checkColor;
+            private boolean isSelected = false;
 
             public OptionElement(int textRes) {
                 super(textRes);
@@ -930,9 +939,15 @@ public class CustomDialog extends BaseDialog {
                 return this;
             }
 
+            public OptionElement setSelected(boolean selected) {
+                isSelected = selected;
+                return this;
+            }
+
             @Override
             protected View implementNativeView(Context context, @NotNull Event event) {
                 android.widget.RadioButton option = (android.widget.RadioButton) super.implementNativeView(context, event);
+                option.setChecked(isSelected);
 
                 if (checkColor != null) CompoundButtonCompat.setButtonTintList(
                         option,
@@ -961,6 +976,7 @@ public class CustomDialog extends BaseDialog {
         }
 
         private final List<OptionElement> options = new ArrayList<>();
+        private boolean isVertical = true;
         private Integer checkColor;
         private Integer selectedOptionIndex;
         private ResultCallback2<Text, Integer> onOptionSelected;
@@ -978,6 +994,11 @@ public class CustomDialog extends BaseDialog {
 
         public Options setSelectedOptionIndex(Integer selectedOptionIndex) {
             this.selectedOptionIndex = selectedOptionIndex;
+            return this;
+        }
+
+        public Options setVertical(boolean vertical) {
+            isVertical = vertical;
             return this;
         }
 
@@ -1003,6 +1024,7 @@ public class CustomDialog extends BaseDialog {
         @Override
         protected View implementNativeView(Context context, @NotNull Event event) {
             RadioGroup radioGroup = new RadioGroup(context);
+            radioGroup.setOrientation(isVertical ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
 
             int i = -1;
             for (OptionElement option : options) {
@@ -1057,6 +1079,71 @@ public class CustomDialog extends BaseDialog {
         protected void destroy() {
             super.destroy();
             onOptionSelected = null;
+        }
+    }
+
+    public static class Image extends BaseViewBuilder {
+        private final Integer imageResId;
+        private final Uri imageUri;
+        private final android.graphics.drawable.Drawable imageDrawable;
+        private final String url;
+        private ImageView.ScaleType scaleType;
+
+        public Image(int imageResId) {
+            this.imageResId = imageResId;
+            this.imageUri = null;
+            this.imageDrawable = null;
+            this.url = null;
+        }
+
+        public Image(Uri imageUri) {
+            this.imageResId = null;
+            this.imageUri = imageUri;
+            this.imageDrawable = null;
+            this.url = null;
+        }
+
+        public Image(Drawable imageDrawable) {
+            this.imageResId = null;
+            this.imageUri = null;
+            this.imageDrawable = imageDrawable;
+            this.url = null;
+        }
+
+        public Image(String url) {
+            this.imageResId = null;
+            this.imageUri = null;
+            this.imageDrawable = null;
+            this.url = url;
+        }
+
+        public Image setScaleType(ImageView.ScaleType scaleType) {
+            this.scaleType = scaleType;
+            return this;
+        }
+
+        @Override
+        protected View implementNativeView(Context context, @NotNull Event event) {
+            ImageView view = new ImageView(context);
+
+            if (imageUri != null) view.setImageURI(imageUri);
+
+            if (imageDrawable != null) view.setImageDrawable(imageDrawable);
+
+            if (imageResId != null) view.setImageResource(imageResId);
+
+            if (url != null) {
+                ImageLoader.instance().load(url, view);
+            }
+
+            if (scaleType != null) view.setScaleType(scaleType);
+
+            return view;
+        }
+
+        @Override
+        public Drawable getValue() {
+            return ((ImageView) this.nativeView).getDrawable();
         }
     }
 
@@ -1196,56 +1283,6 @@ public class CustomDialog extends BaseDialog {
         protected void destroy() {
             super.destroy();
             if (child != null) child.destroy();
-        }
-    }
-
-    public static class Image extends BaseViewBuilder {
-        private final Integer imageResId;
-        private final Uri imageUri;
-        private final android.graphics.drawable.Drawable imageDrawable;
-        private ImageView.ScaleType scaleType;
-
-        public Image(int imageResId) {
-            this.imageResId = imageResId;
-            this.imageUri = null;
-            this.imageDrawable = null;
-        }
-
-        public Image(Uri imageUri) {
-            this.imageResId = null;
-            this.imageUri = imageUri;
-            this.imageDrawable = null;
-        }
-
-        public Image(Drawable imageDrawable) {
-            this.imageResId = null;
-            this.imageUri = null;
-            this.imageDrawable = imageDrawable;
-        }
-
-        public Image setScaleType(ImageView.ScaleType scaleType) {
-            this.scaleType = scaleType;
-            return this;
-        }
-
-        @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
-            ImageView view = new ImageView(context);
-
-            if (imageUri != null) view.setImageURI(imageUri);
-
-            if (imageDrawable != null) view.setImageDrawable(imageDrawable);
-
-            if (imageResId != null) view.setImageResource(imageResId);
-
-            if (scaleType != null) view.setScaleType(scaleType);
-
-            return view;
-        }
-
-        @Override
-        public Drawable getValue() {
-            return ((ImageView) this.nativeView).getDrawable();
         }
     }
 
