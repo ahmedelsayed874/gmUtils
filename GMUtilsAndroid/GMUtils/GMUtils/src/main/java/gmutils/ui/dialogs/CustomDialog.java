@@ -314,19 +314,22 @@ public class CustomDialog extends BaseDialog {
     //-----------------------------------------------
 
     public static abstract class BaseView {
-        private String id;
+        Integer id;
         private Object extra;
         private BaseView parent;
+        private boolean isEnabled = true;
         View nativeView;
 
-        //----------------------------------------------------------------------
+        //--------------------------------------------------
 
-        public final BaseView setId(String id) {
+        public final BaseView setId(int id) {
             this.id = id;
+            if (nativeView != null) nativeView.setId(id);
             return this;
         }
 
-        public final String getId() {
+        public Integer getId() {
+            if (nativeView != null) return nativeView.getId();
             return id;
         }
 
@@ -343,7 +346,7 @@ public class CustomDialog extends BaseDialog {
 
         //--------------------------------------------------
 
-        public final BaseView setParent(BaseView parent) {
+        protected final BaseView setParent(BaseView parent) {
             this.parent = parent;
             return this;
         }
@@ -358,11 +361,41 @@ public class CustomDialog extends BaseDialog {
             return nativeView;
         }
 
+        //--------------------------------------------------
+
+        public final BaseView setEnabled(boolean enabled) {
+            isEnabled = enabled;
+
+            if (nativeView != null) {
+                nativeView.setEnabled(enabled);
+
+                List<BaseView> subViews = getSubViews();
+                if (subViews != null) {
+                    for (BaseView subView : subViews) {
+                        subView.setEnabled(enabled);
+                    }
+                }
+            }
+
+            return this;
+        }
+
+        public final boolean isEnabled() {
+            if (nativeView != null) return nativeView.isEnabled();
+            return isEnabled;
+        }
 
         //--------------------------------------------------
 
         public List<BaseView> getSubViews() {
             return null;
+        }
+
+        //--------------------------------------------------
+
+        public BaseView apply(@NotNull ResultCallback<BaseView> callback) {
+            callback.invoke(this);
+            return this;
         }
 
         //--------------------------------------------------
@@ -549,6 +582,8 @@ public class CustomDialog extends BaseDialog {
 
         @SuppressLint("ClickableViewAccessibility")
         private void setupView(View view, Event event) {
+            if (this.id != null) setId(this.id);
+
             if (x != null) view.setTranslationX(x);
             if (y != null) view.setTranslationY(y);
 
@@ -568,6 +603,8 @@ public class CustomDialog extends BaseDialog {
             }
 
             view.setVisibility(visibility);
+
+            if (!isEnabled()) setEnabled(false);
 
             if (watchClicks || onClickListener != null) {
                 view.setOnClickListener(v -> {
@@ -1024,6 +1061,8 @@ public class CustomDialog extends BaseDialog {
             int selectedOptionId = 0;
             for (OptionElement option : options) {
                 i++;
+
+                option.setEnabled(this.isEnabled());
 
                 RadioButton radioButton = (RadioButton) option.build(context, event);
                 option.setParent(this);
