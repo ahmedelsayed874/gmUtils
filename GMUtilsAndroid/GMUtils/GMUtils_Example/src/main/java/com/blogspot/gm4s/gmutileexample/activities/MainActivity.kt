@@ -596,7 +596,8 @@ class MainActivity : BaseActivity() {
                     .addOption(CustomDialog.Options.OptionElement("Option 1"))
                     .addOption(CustomDialog.Options.OptionElement("Option 2"))//.setSelected(true))
                     .addOption(CustomDialog.Options.OptionElement("Option 3"))
-                    .watchOptionSelections(),
+                    .watchOptionSelections()
+                    .setEnabled(false) as CustomDialog.BaseViewBuilder,
 
                 //
                 CustomDialog.Text("User actions:"),

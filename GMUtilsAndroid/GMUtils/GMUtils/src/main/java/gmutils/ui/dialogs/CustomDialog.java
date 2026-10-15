@@ -317,7 +317,7 @@ public class CustomDialog extends BaseDialog {
         Integer id;
         private Object extra;
         private BaseView parent;
-        private boolean isEnabled = true;
+        boolean isEnabled = true;
         View nativeView;
 
         //--------------------------------------------------
@@ -604,7 +604,7 @@ public class CustomDialog extends BaseDialog {
 
             view.setVisibility(visibility);
 
-            if (!isEnabled()) setEnabled(false);
+            if (!this.isEnabled) setEnabled(false);
 
             if (watchClicks || onClickListener != null) {
                 view.setOnClickListener(v -> {
