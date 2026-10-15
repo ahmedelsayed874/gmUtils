@@ -594,7 +594,7 @@ class MainActivity : BaseActivity() {
                 CustomDialog.Text("Input 3:"),
                 CustomDialog.Options()                  //7
                     .addOption(CustomDialog.Options.OptionElement("Option 1"))
-                    .addOption(CustomDialog.Options.OptionElement("Option 2"))
+                    .addOption(CustomDialog.Options.OptionElement("Option 2"))//.setSelected(true))
                     .addOption(CustomDialog.Options.OptionElement("Option 3"))
                     .watchOptionSelections(),
 

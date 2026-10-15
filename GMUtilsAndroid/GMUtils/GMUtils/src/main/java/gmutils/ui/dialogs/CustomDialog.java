@@ -978,7 +978,6 @@ public class CustomDialog extends BaseDialog {
         private final List<OptionElement> options = new ArrayList<>();
         private boolean isVertical = true;
         private Integer checkColor;
-        private Integer selectedOptionIndex;
         private ResultCallback2<Text, Integer> onOptionSelected;
         private boolean watchOptionSelections = false;
 
@@ -989,11 +988,6 @@ public class CustomDialog extends BaseDialog {
 
         public Options addOption(OptionElement option) {
             options.add(option);
-            return this;
-        }
-
-        public Options setSelectedOptionIndex(Integer selectedOptionIndex) {
-            this.selectedOptionIndex = selectedOptionIndex;
             return this;
         }
 
@@ -1027,14 +1021,12 @@ public class CustomDialog extends BaseDialog {
             radioGroup.setOrientation(isVertical ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
 
             int i = -1;
+            int selectedOptionId = 0;
             for (OptionElement option : options) {
                 i++;
 
                 RadioButton radioButton = (RadioButton) option.build(context, event);
                 option.setParent(this);
-                if (Integer.valueOf(i).equals(selectedOptionIndex)) {
-                    radioButton.setChecked(true);
-                }
 
                 if (option.checkColor == null) {
                     if (checkColor != null) CompoundButtonCompat.setButtonTintList(
@@ -1058,6 +1050,13 @@ public class CustomDialog extends BaseDialog {
                 });
 
                 radioGroup.addView(radioButton);
+
+                if (option.isSelected) selectedOptionId = radioButton.getId();
+            }
+
+            if (selectedOptionId > 0) {
+                radioGroup.clearCheck();
+                radioGroup.check(selectedOptionId);
             }
 
             return radioGroup;
@@ -1065,14 +1064,21 @@ public class CustomDialog extends BaseDialog {
 
         @Override
         public Pair<Integer, CharSequence> getValue() {
-            int id = ((RadioGroup) this.nativeView).getCheckedRadioButtonId();
+            RadioGroup radioGroup = (RadioGroup) this.nativeView;
+            int id = radioGroup.getCheckedRadioButtonId();
             if (id <= 0) return null;
-            var r = options.get(id - 1).getValue();
-            return new Pair<Integer, CharSequence>(id - 1, r.first);
-            /*return "{" +
-                    "\"opt-index\": " + (id - 1) +
-                    "\"opt-text\": " + r + "" +
-                    "}";*/
+
+            int i = -1;
+            while (i++ < radioGroup.getChildCount()) {
+                if (radioGroup.getChildAt(i).getId() == id) {
+                    break;
+                }
+            }
+
+            if (i < 0) return null;
+
+            var r = options.get(i).getValue();
+            return new Pair<Integer, CharSequence>(i, r.first);
         }
 
         @Override
@@ -1243,9 +1249,14 @@ public class CustomDialog extends BaseDialog {
         private final boolean isVertical;
         public final BaseView child;
 
-        public Scroll(boolean isVertical, BaseViewBuilder child) {
+        public Scroll(boolean isVertical, @NotNull ViewSize size, BaseViewBuilder child) {
+            if (isVertical) assert size.value > 0;
+
             this.isVertical = isVertical;
             this.child = child;
+
+            if (isVertical) setHeight(size);
+            else setWidth(size);
         }
 
         @Override
