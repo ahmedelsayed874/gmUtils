@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -165,10 +166,10 @@ public class CustomDialog extends BaseDialog {
 
     //----------------------------------------------------------------------------------------------
 
-    private final List<BaseView> children = new ArrayList<>();
+    private final List<BaseView<?>> children = new ArrayList<>();
     private Event _event;
 
-    public CustomDialog addChild(@NotNull CustomDialog.BaseViewBuilder child) {
+    public CustomDialog addChild(@NotNull CustomDialog.BaseViewBuilder<?> child) {
         if (_event == null) {
             _event = (viewBuilder, triggeredBy) -> {
                 informObserver(new ViewUpdateArgs(
@@ -192,14 +193,14 @@ public class CustomDialog extends BaseDialog {
         return this;
     }
 
-    public CustomDialog addChildren(@NotNull BaseViewBuilder... children) {
-        for (BaseViewBuilder child : children) {
+    public CustomDialog addChildren(@NotNull BaseViewBuilder<?>... children) {
+        for (BaseViewBuilder<?> child : children) {
             addChild(child);
         }
         return this;
     }
 
-    public void dispatchStateUpdated(BaseView view, String triggeredBy) {
+    public void dispatchStateUpdated(BaseView<?> view, String triggeredBy) {
         if (_event != null) _event.onStatusChanged(view, triggeredBy);
     }
 
@@ -265,6 +266,18 @@ public class CustomDialog extends BaseDialog {
             this.updatedView = updatedView;
             this.triggeredBy = triggeredBy;
         }
+
+        public BaseView getViewById(int id) {
+            Integer id2 = id;
+
+            for (BaseView child : children) {
+                if (id2.equals( child.id)) {
+                    return child;
+                }
+            }
+
+            return null;
+        }
     }
 
     //-----------------------------------------------
@@ -313,16 +326,16 @@ public class CustomDialog extends BaseDialog {
 
     //-----------------------------------------------
 
-    public static abstract class BaseView {
+    public static abstract class BaseView<NView extends View> {
         Integer id;
         private Object extra;
-        private BaseView parent;
+        private BaseView<?> parent;
         boolean isEnabled = true;
-        View nativeView;
+        NView nativeView;
 
         //--------------------------------------------------
 
-        public final BaseView setId(int id) {
+        public final BaseView<NView> setId(int id) {
             this.id = id;
             if (nativeView != null) nativeView.setId(id);
             return this;
@@ -335,7 +348,7 @@ public class CustomDialog extends BaseDialog {
 
         //--------------------------------------------------
 
-        public final BaseView setExtra(Object extra) {
+        public final BaseView<NView> setExtra(Object extra) {
             this.extra = extra;
             return this;
         }
@@ -346,32 +359,32 @@ public class CustomDialog extends BaseDialog {
 
         //--------------------------------------------------
 
-        protected final BaseView setParent(BaseView parent) {
+        protected final BaseView<NView> setParent(BaseView<?> parent) {
             this.parent = parent;
             return this;
         }
 
-        public BaseView getParent() {
+        public BaseView<?> getParent() {
             return parent;
         }
 
         //--------------------------------------------------
 
-        public View getNativeView() {
+        public NView getNativeView() {
             return nativeView;
         }
 
         //--------------------------------------------------
 
-        public final BaseView setEnabled(boolean enabled) {
+        public final BaseView<NView> setEnabled(boolean enabled) {
             isEnabled = enabled;
 
             if (nativeView != null) {
                 nativeView.setEnabled(enabled);
 
-                List<BaseView> subViews = getSubViews();
+                List<BaseView<?>> subViews = getSubViews();
                 if (subViews != null) {
-                    for (BaseView subView : subViews) {
+                    for (BaseView<?> subView : subViews) {
                         subView.setEnabled(enabled);
                     }
                 }
@@ -387,13 +400,13 @@ public class CustomDialog extends BaseDialog {
 
         //--------------------------------------------------
 
-        public List<BaseView> getSubViews() {
+        public List<BaseView<?>> getSubViews() {
             return null;
         }
 
         //--------------------------------------------------
 
-        public BaseView apply(@NotNull ResultCallback<BaseView> callback) {
+        public BaseView<NView> apply(@NotNull ResultCallback<BaseView<NView>> callback) {
             callback.invoke(this);
             return this;
         }
@@ -405,9 +418,9 @@ public class CustomDialog extends BaseDialog {
         //------------------------------------------------------------------------------------------
 
         protected void destroy() {
-            List<BaseView> subViews = getSubViews();
+            List<BaseView<?>> subViews = getSubViews();
             if (subViews != null) {
-                for (BaseView child : subViews) {
+                for (BaseView<?> child : subViews) {
                     if (child != null) child.destroy();
                 }
             }
@@ -434,7 +447,7 @@ public class CustomDialog extends BaseDialog {
 
     }
 
-    public static abstract class BaseViewBuilder extends BaseView {
+    public static abstract class BaseViewBuilder<NView extends View> extends BaseView<NView> {
         private Float x, y;
         private ViewSize width, height;
         private Integer gravity;
@@ -443,145 +456,166 @@ public class CustomDialog extends BaseDialog {
         private Value4<Integer, Integer, Integer, Integer> paddingLTRB;
         private Value4<Integer, Integer, Integer, Integer> marginLTRB;
         private int visibility = View.VISIBLE;
-        protected ResultCallback2<BaseView, View> onClickListener;
+        protected ResultCallback2<BaseView<NView>, View> onClickListener;
         protected boolean watchClicks = false;
-        private ActionCallback2<BaseView, View, Boolean> onLongClickListener;
+        private ActionCallback2<BaseView<NView>, View, Boolean> onLongClickListener;
         protected boolean watchLongClicks = false;
-        private ActionCallback3<BaseView, View, MotionEvent, Boolean> onTouchListener;
+        private ActionCallback3<BaseView<NView>, View, MotionEvent, Boolean> onTouchListener;
         protected boolean watchTouches = false;
         //
-        private ResultCallback<View> onBuiltCallback;
+        private ResultCallback<NView> onBuiltCallback;
 
         //----------------------------------------------------------------------
 
-        public BaseViewBuilder setX(Float x) {
+        public BaseViewBuilder<NView> setX(float x) {
             this.x = x;
+            if (nativeView != null) nativeView.setTranslationX(x);
             return this;
         }
 
-        public BaseViewBuilder setY(Float y) {
+        public BaseViewBuilder<NView> setY(float y) {
             this.y = y;
+            if (nativeView != null) nativeView.setTranslationY(y);
             return this;
         }
 
-        public BaseViewBuilder setWidth(ViewSize width) {
+        public BaseViewBuilder<NView> setWidth(@NotNull ViewSize width) {
             this.width = width;
+            if (nativeView != null) nativeView.setLayoutParams(instantiateLayoutParams());
             return this;
         }
 
-        public BaseViewBuilder setHeight(ViewSize height) {
+        public BaseViewBuilder<NView> setHeight(@NotNull ViewSize height) {
             this.height = height;
+            if (nativeView != null) nativeView.setLayoutParams(instantiateLayoutParams());
             return this;
         }
 
-        public BaseViewBuilder setLayoutGravity(Integer gravity) {
+        public BaseViewBuilder<NView> setLayoutGravity(int gravity) {
             this.gravity = gravity;
+            if (nativeView != null) nativeView.setLayoutParams(instantiateLayoutParams());
             return this;
         }
 
-        public BaseViewBuilder setBackgroundColor(int color) {
+        public BaseViewBuilder<NView> setBackgroundColor(int color) {
             this.bgColor = color;
             this.bgRes = null;
+            if (nativeView != null) nativeView.setBackgroundColor(color);
             return this;
         }
 
-        public BaseViewBuilder setBackgroundResource(int resId) {
+        public BaseViewBuilder<NView> setBackgroundResource(int resId) {
             this.bgColor = null;
             this.bgRes = resId;
+            if (nativeView != null) nativeView.setBackgroundResource(resId);
             return this;
         }
 
-        public BaseViewBuilder setPaddingLTRB(
+        public BaseViewBuilder<NView> setPaddingLTRB(
                 int left,
                 int top,
                 int right,
                 int bottom
         ) {
             this.paddingLTRB = new Value4<>(left, top, right, bottom);
+            if (nativeView != null) setPadding(nativeView, paddingLTRB);
             return this;
         }
 
-        public BaseViewBuilder setPaddingSymmetric(
+        public BaseViewBuilder<NView> setPaddingSymmetric(
                 int horizontal,
                 int vertical
         ) {
             this.paddingLTRB = new Value4<>(horizontal, vertical, horizontal, vertical);
+            if (nativeView != null) setPadding(nativeView, paddingLTRB);
             return this;
         }
 
-        public BaseViewBuilder setMarginLTRB(
+        private void setPadding(View view, Value4<Integer, Integer, Integer, Integer> paddingLTRB) {
+            view.setPadding(
+                    paddingLTRB.value1 != null ? paddingLTRB.value1 : view.getPaddingLeft(),
+                    paddingLTRB.value2 != null ? paddingLTRB.value2 : view.getPaddingTop(),
+                    paddingLTRB.value3 != null ? paddingLTRB.value3 : view.getPaddingRight(),
+                    paddingLTRB.value4 != null ? paddingLTRB.value4 : view.getPaddingBottom()
+            );
+        }
+
+        public BaseViewBuilder<NView> setMarginLTRB(
                 int left,
                 int top,
                 int right,
                 int bottom
         ) {
             this.marginLTRB = new Value4<>(left, top, right, bottom);
+            if (nativeView != null) nativeView.setLayoutParams(instantiateLayoutParams());
             return this;
         }
 
-        public BaseViewBuilder setMarginSymmetric(
+        public BaseViewBuilder<NView> setMarginSymmetric(
                 int horizontal,
                 int vertical
         ) {
             this.marginLTRB = new Value4<>(horizontal, vertical, horizontal, vertical);
+            if (nativeView != null) nativeView.setLayoutParams(instantiateLayoutParams());
             return this;
         }
 
-        public BaseViewBuilder setVisibility(int visibility) {
+        public BaseViewBuilder<NView> setVisibility(int visibility) {
             this.visibility = visibility;
+            if (nativeView != null) nativeView.setVisibility(visibility);
             return this;
         }
 
-        public BaseViewBuilder setOnClickListener(ResultCallback2<BaseView, View> onClickListener) {
+        public BaseViewBuilder<NView> setOnClickListener(ResultCallback2<BaseView<NView>, View> onClickListener) {
             this.onClickListener = onClickListener;
             return this;
         }
 
-        public BaseViewBuilder watchClicks() {
+        public BaseViewBuilder<NView> watchClicks() {
             this.watchClicks = true;
             return this;
         }
 
-        public BaseViewBuilder setOnLongClickListener(ActionCallback2<BaseView, View, Boolean> onLongClickListener) {
+        public BaseViewBuilder<NView> setOnLongClickListener(ActionCallback2<BaseView<NView>, View, Boolean> onLongClickListener) {
             this.onLongClickListener = onLongClickListener;
             return this;
         }
 
-        public BaseViewBuilder watchLongClicks() {
+        public BaseViewBuilder<NView> watchLongClicks() {
             this.watchLongClicks = true;
             return this;
         }
 
-        public BaseViewBuilder setOnTouchListener(ActionCallback3<BaseView, View, MotionEvent, Boolean> onTouchListener) {
+        public BaseViewBuilder<NView> setOnTouchListener(ActionCallback3<BaseView<NView>, View, MotionEvent, Boolean> onTouchListener) {
             this.onTouchListener = onTouchListener;
             return this;
         }
 
-        public BaseViewBuilder watchTouches() {
+        public BaseViewBuilder<NView> watchTouches() {
             this.watchTouches = true;
             return this;
         }
 
         //----------------------------------------------------------------------
 
-        public final BaseViewBuilder setOnBuiltCallback(ResultCallback<View> onBuiltCallback) {
+        public final BaseViewBuilder<NView> setOnBuiltCallback(ResultCallback<NView> onBuiltCallback) {
             this.onBuiltCallback = onBuiltCallback;
             return this;
         }
 
         //----------------------------------------------------------------------
 
-        View build(Context context, @NotNull Event event) {
+        NView build(Context context, @NotNull Event event) {
             this.nativeView = implementNativeView(context, event);
             setupView(this.nativeView, event);
             if (onBuiltCallback != null) onBuiltCallback.invoke(this.nativeView);
             return this.nativeView;
         }
 
-        protected abstract View implementNativeView(Context context, @NotNull Event event);
+        protected abstract NView implementNativeView(Context context, @NotNull Event event);
 
         @SuppressLint("ClickableViewAccessibility")
-        private void setupView(View view, Event event) {
+        private void setupView(NView view, Event event) {
             if (this.id != null) setId(this.id);
 
             if (x != null) view.setTranslationX(x);
@@ -594,12 +628,7 @@ public class CustomDialog extends BaseDialog {
             if (bgRes != null) view.setBackgroundResource(bgRes);
 
             if (paddingLTRB != null) {
-                view.setPadding(
-                        paddingLTRB.value1 != null ? paddingLTRB.value1 : view.getPaddingLeft(),
-                        paddingLTRB.value2 != null ? paddingLTRB.value2 : view.getPaddingTop(),
-                        paddingLTRB.value3 != null ? paddingLTRB.value3 : view.getPaddingRight(),
-                        paddingLTRB.value4 != null ? paddingLTRB.value4 : view.getPaddingBottom()
-                );
+                setPadding(nativeView, paddingLTRB);
             }
 
             view.setVisibility(visibility);
@@ -703,53 +732,53 @@ public class CustomDialog extends BaseDialog {
         }
     }
 
-    public static class Text extends BaseViewBuilder {
+    //--- TextBase -------------------------------------
+    public static abstract class TextBase<TView extends TextView> extends BaseViewBuilder<TView> {
         private final Integer textRes;
         private final CharSequence text;
         private Integer color;
         private Typeface typeface;
         private Float textSizeSp;
 
-        public Text(int textRes) {
+        public TextBase(int textRes) {
             this.textRes = textRes;
             this.text = null;
         }
 
-        public Text(CharSequence text) {
+        public TextBase(CharSequence text) {
             this.textRes = null;
             this.text = text;
         }
 
-        public Text setColor(int color) {
+        public TextBase<TView> setColor(int color) {
             this.color = color;
+            if (nativeView != null) nativeView.setTextColor(color);
             return this;
         }
 
-        public Text setTypeface(Typeface typeface) {
+        public TextBase<TView> setTypeface(@NotNull Typeface typeface) {
             this.typeface = typeface;
+            if (nativeView != null) nativeView.setTypeface(typeface);
             return this;
         }
 
-        public Text setTextSizeInSp(float textSizeSp) {
+        public TextBase<TView> setTextSizeInSp(float textSizeSp) {
             this.textSizeSp = textSizeSp;
+            if (nativeView != null) nativeView.setTextSize(textSizeSp);
             return this;
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
-            TextView textView = instantiateTextView(context);
+        protected final TView implementNativeView(Context context, @NotNull Event event) {
+            TView textView = instantiateTextView(context, event);
             setupTextView(textView, event);
             return textView;
         }
 
-        protected TextView instantiateTextView(Context context) {
-            return new TextView(context);
-        }
+        protected abstract TView instantiateTextView(Context context, @NotNull Event event);
 
-        private void setupTextView(View view, Event event) {
-            super.setupView(view, event);
-
-            TextView textView = (TextView) view;
+        private void setupTextView(TView textView, Event event) {
+            super.setupView(textView, event);
 
             if (textRes != null) textView.setText(textRes);
 
@@ -764,11 +793,26 @@ public class CustomDialog extends BaseDialog {
 
         @Override
         public Object getValue() {
-            return ((TextView) this.nativeView).getText();
+            return this.nativeView.getText();
         }
     }
 
-    public static class TextField extends Text {
+    public static class Text extends TextBase<TextView> {
+        public Text(int textRes) {
+            super(textRes);
+        }
+
+        public Text(CharSequence text) {
+            super(text);
+        }
+
+        @Override
+        protected TextView instantiateTextView(Context context, @NotNull Event event) {
+            return new TextView(context);
+        }
+    }
+
+    public static class TextField extends TextBase<EditText> {
         private final Integer hintRes;
         private final CharSequence hint;
         private Integer hintColor;
@@ -807,24 +851,25 @@ public class CustomDialog extends BaseDialog {
             this.hint = hint;
         }
 
-        public Text setHintColor(Integer color) {
+        public TextField setHintColor(int color) {
             this.hintColor = color;
+            if (nativeView != null) nativeView.setHintTextColor(color);
             return this;
         }
 
-        public Text setTextChangedListener(TextChangedListener textChangedListener) {
+        public TextField setTextChangedListener(TextChangedListener textChangedListener) {
             this.textChangedListener = textChangedListener;
             return this;
         }
 
-        public Text watchTextChanges() {
+        public TextField watchTextChanges() {
             this.watchTextChanges = true;
             return this;
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
-            EditText editText = (EditText) super.implementNativeView(context, event);
+        protected EditText instantiateTextView(Context context, @NotNull Event event) {
+            EditText editText = new EditText(context);
 
             if (hintRes != null) editText.setHint(hintRes);
 
@@ -846,13 +891,8 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected EditText instantiateTextView(Context context) {
-            return new EditText(context);
-        }
-
-        @Override
         public Editable getValue() {
-            return ((EditText) this.nativeView).getText();
+            return this.nativeView.getText();
         }
 
         @Override
@@ -862,7 +902,7 @@ public class CustomDialog extends BaseDialog {
         }
     }
 
-    public static class Button extends Text {
+    public static class Button extends TextBase<android.widget.Button> {
         private Integer tintColor;
 
         public Button(int textRes) {
@@ -873,8 +913,12 @@ public class CustomDialog extends BaseDialog {
             super(text);
         }
 
-        public Button setTintColor(Integer tintColor) {
+        public Button setTintColor(int tintColor) {
             this.tintColor = tintColor;
+            if (nativeView != null) ViewCompat.setBackgroundTintList(
+                    nativeView,
+                    ColorStateList.valueOf(tintColor)
+            );
             return this;
         }
 
@@ -884,8 +928,9 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
-            android.widget.Button button = (android.widget.Button) super.implementNativeView(context, event);
+        protected android.widget.Button instantiateTextView(Context context, @NotNull Event event) {
+            android.widget.Button button = new android.widget.Button(context);
+
             button.setAllCaps(false);
 
             if (tintColor != null) ViewCompat.setBackgroundTintList(
@@ -897,17 +942,12 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected android.widget.Button instantiateTextView(Context context) {
-            return new android.widget.Button(context);
-        }
-
-        @Override
         public CharSequence getValue() {
             return ((android.widget.Button) this.nativeView).getText();
         }
     }
 
-    public static class Checkbox extends Text {
+    public static class Checkbox extends TextBase<CheckBox> {
         private Integer checkboxColor;
         private boolean isChecked = false;
 
@@ -921,11 +961,16 @@ public class CustomDialog extends BaseDialog {
 
         public Checkbox setChecked(boolean checked) {
             isChecked = checked;
+            if (nativeView != null) nativeView.setChecked(checked);
             return this;
         }
 
-        public Checkbox setCheckboxColor(Integer checkboxColor) {
+        public Checkbox setCheckboxColor(int checkboxColor) {
             this.checkboxColor = checkboxColor;
+            if (nativeView != null) CompoundButtonCompat.setButtonTintList(
+                    nativeView,
+                    ColorStateList.valueOf(checkboxColor)
+            );
             return this;
         }
 
@@ -935,8 +980,9 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
-            CheckBox checkBox = (CheckBox) super.implementNativeView(context, event);
+        protected CheckBox instantiateTextView(Context context, @NotNull Event event) {
+            CheckBox checkBox = new CheckBox(context);
+
             checkBox.setChecked(isChecked);
 
             if (checkboxColor != null) CompoundButtonCompat.setButtonTintList(
@@ -948,18 +994,13 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        protected CheckBox instantiateTextView(Context context) {
-            return new CheckBox(context);
-        }
-
-        @Override
         public Boolean getValue() {
-            return ((CheckBox) this.nativeView).isChecked();
+            return this.nativeView.isChecked();
         }
     }
 
-    public static class Options extends BaseViewBuilder {
-        public static class OptionElement extends Text {
+    public static class Options extends BaseViewBuilder<RadioGroup> {
+        public static class OptionElement extends TextBase<RadioButton> {
             private Integer checkColor;
             private boolean isSelected = false;
 
@@ -971,39 +1012,40 @@ public class CustomDialog extends BaseDialog {
                 super(text);
             }
 
-            public OptionElement setCheckColor(Integer checkColor) {
+            public OptionElement setCheckColor(int checkColor) {
                 this.checkColor = checkColor;
+                if (nativeView != null) CompoundButtonCompat.setButtonTintList(
+                        nativeView,
+                        ColorStateList.valueOf(checkColor)
+                );
                 return this;
             }
 
             public OptionElement setSelected(boolean selected) {
                 isSelected = selected;
+                if (nativeView != null) nativeView.setChecked(selected);
                 return this;
             }
 
             @Override
-            protected View implementNativeView(Context context, @NotNull Event event) {
-                android.widget.RadioButton option = (android.widget.RadioButton) super.implementNativeView(context, event);
-                option.setChecked(isSelected);
+            protected android.widget.RadioButton instantiateTextView(Context context, @NotNull Event event) {
+                RadioButton radioButton = new RadioButton(context);
+
+                radioButton.setChecked(isSelected);
 
                 if (checkColor != null) CompoundButtonCompat.setButtonTintList(
-                        option,
+                        radioButton,
                         ColorStateList.valueOf(checkColor)
                 );
 
-                return option;
-            }
-
-            @Override
-            protected android.widget.RadioButton instantiateTextView(Context context) {
-                return new android.widget.RadioButton(context);
+                return radioButton;
             }
 
             @Override
             public Pair<CharSequence, Boolean> getValue() {
                 return new Pair<CharSequence, Boolean>(
-                        ((android.widget.RadioButton) this.nativeView).getText(),
-                        ((android.widget.RadioButton) this.nativeView).isChecked()
+                        this.nativeView.getText(),
+                        this.nativeView.isChecked()
                 );
                 /*return "{" +
                         "\"text\": \"" + ((android.widget.RadioButton) this.nativeView).getText() + "\"" +
@@ -1015,11 +1057,16 @@ public class CustomDialog extends BaseDialog {
         private final List<OptionElement> options = new ArrayList<>();
         private boolean isVertical = true;
         private Integer checkColor;
-        private ResultCallback2<Text, Integer> onOptionSelected;
+        private ResultCallback2<OptionElement, Integer> onOptionSelected;
         private boolean watchOptionSelections = false;
 
-        public Options setCheckColor(Integer color) {
+        public Options setCheckColor(int color) {
             this.checkColor = color;
+            if (nativeView != null) {
+                for (OptionElement option : options) {
+                    option.setCheckColor(color);
+                }
+            }
             return this;
         }
 
@@ -1030,10 +1077,11 @@ public class CustomDialog extends BaseDialog {
 
         public Options setVertical(boolean vertical) {
             isVertical = vertical;
+            if (nativeView != null) nativeView.setOrientation(isVertical ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
             return this;
         }
 
-        public Options setOnOptionSelected(ResultCallback2<Text, Integer> onOptionSelected) {
+        public Options setOnOptionSelected(ResultCallback2<OptionElement, Integer> onOptionSelected) {
             this.onOptionSelected = onOptionSelected;
             return this;
         }
@@ -1048,12 +1096,12 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        public List<BaseView> getSubViews() {
+        public List<BaseView<?>> getSubViews() {
             return List.copyOf(options);
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
+        protected RadioGroup implementNativeView(Context context, @NotNull Event event) {
             RadioGroup radioGroup = new RadioGroup(context);
             radioGroup.setOrientation(isVertical ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
 
@@ -1077,7 +1125,7 @@ public class CustomDialog extends BaseDialog {
                 int finalI = i;
                 radioButton.setOnClickListener(v -> {
                     ((RadioButton) v).setChecked(true);
-                    if (this.onClickListener != null) this.onClickListener.invoke(option, v);
+                    if (this.onClickListener != null) this.onClickListener.invoke(this, v);
                     if (this.onOptionSelected != null) this.onOptionSelected.invoke(option, finalI);
                     if (watchOptionSelections) {
                         int id = ((RadioGroup) this.nativeView).getCheckedRadioButtonId();
@@ -1127,7 +1175,7 @@ public class CustomDialog extends BaseDialog {
         }
     }
 
-    public static class Image extends BaseViewBuilder {
+    public static class Image extends BaseViewBuilder<ImageView> {
         private final Integer imageResId;
         private final Uri imageUri;
         private final android.graphics.drawable.Drawable imageDrawable;
@@ -1164,11 +1212,12 @@ public class CustomDialog extends BaseDialog {
 
         public Image setScaleType(ImageView.ScaleType scaleType) {
             this.scaleType = scaleType;
+            if (nativeView != null) nativeView.setScaleType(scaleType);
             return this;
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
+        protected ImageView implementNativeView(Context context, @NotNull Event event) {
             ImageView view = new ImageView(context);
 
             if (imageUri != null) view.setImageURI(imageUri);
@@ -1192,42 +1241,47 @@ public class CustomDialog extends BaseDialog {
         }
     }
 
-    public static abstract class MultiChildrenView extends BaseViewBuilder {
-        private final List<BaseViewBuilder> children;
+    public static abstract class MultiChildrenView extends BaseViewBuilder<ViewGroup> {
+        private final List<BaseViewBuilder<?>> children;
         private Integer contentGravity;
 
         protected MultiChildrenView() {
             this(new ArrayList<>());
         }
 
-        protected MultiChildrenView(List<BaseViewBuilder> children) {
+        protected MultiChildrenView(int contentGravity) {
+            this(new ArrayList<>());
+            this.contentGravity = contentGravity;
+        }
+
+        protected MultiChildrenView(List<BaseViewBuilder<?>> children) {
             this.children = children != null ? children : new ArrayList<>();
         }
 
-        public MultiChildrenView addChild(BaseViewBuilder child) {
+        protected MultiChildrenView(int contentGravity, List<BaseViewBuilder<?>> children) {
+            this.children = children != null ? children : new ArrayList<>();
+            this.contentGravity = contentGravity;
+        }
+
+        public MultiChildrenView addChild(BaseViewBuilder<?> child) {
             this.children.add(child);
             return this;
         }
 
-        public MultiChildrenView setContentGravity(Integer contentGravity) {
-            this.contentGravity = contentGravity;
-            return this;
-        }
-
         @Override
-        public List<BaseView> getSubViews() {
+        public List<BaseView<?>> getSubViews() {
             return List.copyOf(children);
         }
 
-        public BaseView getSubViewAt(int index) {
+        public BaseView<?> getSubViewAt(int index) {
             return children.get(index);
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
+        protected ViewGroup implementNativeView(Context context, @NotNull Event event) {
             ViewGroup layout = instantiateViewGroup(context);
 
-            for (BaseViewBuilder child : children) {
+            for (BaseViewBuilder<?> child : children) {
                 if (child == null) continue;
 
                 View build = child.build(context, event);
@@ -1264,6 +1318,21 @@ public class CustomDialog extends BaseDialog {
     }
 
     public static class Row extends MultiChildrenView {
+        public Row() {
+        }
+
+        public Row(int contentGravity) {
+            super(contentGravity);
+        }
+
+        public Row(List<BaseViewBuilder<?>> children) {
+            super(children);
+        }
+
+        public Row(int contentGravity, List<BaseViewBuilder<?>> children) {
+            super(contentGravity, children);
+        }
+
         @Override
         protected int linearOrientation() {
             return LinearLayout.HORIZONTAL;
@@ -1271,6 +1340,21 @@ public class CustomDialog extends BaseDialog {
     }
 
     public static class Column extends MultiChildrenView {
+        public Column() {
+        }
+
+        public Column(int contentGravity) {
+            super(contentGravity);
+        }
+
+        public Column(List<BaseViewBuilder<?>> children) {
+            super(children);
+        }
+
+        public Column(int contentGravity, List<BaseViewBuilder<?>> children) {
+            super(contentGravity, children);
+        }
+
         @Override
         protected int linearOrientation() {
             return LinearLayout.VERTICAL;
@@ -1278,18 +1362,34 @@ public class CustomDialog extends BaseDialog {
     }
 
     public static class Stack extends MultiChildrenView {
+        public Stack() {
+        }
+
+        public Stack(int contentGravity) {
+            super(contentGravity);
+        }
+
+        public Stack(List<BaseViewBuilder<?>> children) {
+            super(children);
+        }
+
+        public Stack(int contentGravity, List<BaseViewBuilder<?>> children) {
+            super(contentGravity, children);
+        }
+
         @Override
         protected ViewGroup instantiateViewGroup(Context context) {
             return new FrameLayout(context);
         }
     }
 
-    public static class Scroll extends BaseViewBuilder {
+    public static class Scroll extends BaseViewBuilder<ViewGroup> {
         private final boolean isVertical;
-        public final BaseView child;
+        public final BaseView<?> child;
 
-        public Scroll(boolean isVertical, @NotNull ViewSize size, BaseViewBuilder child) {
-            if (isVertical) assert size.value > 0;
+        public Scroll(boolean isVertical, @NotNull ViewSize size, BaseViewBuilder<?> child) {
+            //if (isVertical) assert size.value > 0;
+            assert !isVertical || size.value > 0;
 
             this.isVertical = isVertical;
             this.child = child;
@@ -1299,12 +1399,12 @@ public class CustomDialog extends BaseDialog {
         }
 
         @Override
-        public List<BaseView> getSubViews() {
+        public List<BaseView<?>> getSubViews() {
             return List.of(child);
         }
 
         @Override
-        protected View implementNativeView(Context context, @NotNull Event event) {
+        protected ViewGroup implementNativeView(Context context, @NotNull Event event) {
             ViewGroup view;
 
             if (isVertical) {
@@ -1316,7 +1416,7 @@ public class CustomDialog extends BaseDialog {
             }
 
             if (child != null) {
-                View build = ((BaseViewBuilder) child).build(context, event);
+                View build = ((BaseViewBuilder<?>) child).build(context, event);
                 child.setParent(this);
                 view.addView(build);
             }
@@ -1336,7 +1436,7 @@ public class CustomDialog extends BaseDialog {
         }
     }
 
-    public static class BasicView extends BaseViewBuilder {
+    public static class BasicView extends BaseViewBuilder<View> {
         public BasicView() {
         }
 
