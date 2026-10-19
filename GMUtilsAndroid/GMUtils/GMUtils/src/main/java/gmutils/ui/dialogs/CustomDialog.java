@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -1181,6 +1180,7 @@ public class CustomDialog extends BaseDialog {
         private final android.graphics.drawable.Drawable imageDrawable;
         private final String url;
         private ImageView.ScaleType scaleType;
+        private Integer tintColor;
 
         public Image(int imageResId) {
             this.imageResId = imageResId;
@@ -1216,6 +1216,14 @@ public class CustomDialog extends BaseDialog {
             return this;
         }
 
+        public Image setTintColor(int tintColor) {
+            this.tintColor = tintColor;
+            if (nativeView != null) nativeView.setImageTintList(
+                    ColorStateList.valueOf(tintColor)
+            );
+            return this;
+        }
+
         @Override
         protected ImageView implementNativeView(Context context, @NotNull Event event) {
             ImageView view = new ImageView(context);
@@ -1231,6 +1239,10 @@ public class CustomDialog extends BaseDialog {
             }
 
             if (scaleType != null) view.setScaleType(scaleType);
+
+            if (tintColor != null) view.setImageTintList(
+                    ColorStateList.valueOf(tintColor)
+            );
 
             return view;
         }
