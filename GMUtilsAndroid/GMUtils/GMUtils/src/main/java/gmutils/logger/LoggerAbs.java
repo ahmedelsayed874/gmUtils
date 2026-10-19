@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1029,13 +1030,15 @@ public abstract class LoggerAbs {
 
     //region create log file
     private String _sessionId;
+    private int partCount = 1;
 
     private String sessionId() {
         if (_sessionId == null) {
-            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ENGLISH).format(new Date());
+            _sessionId = new SimpleDateFormat("yyyyMMdd-HHmmss.SSS", Locale.ENGLISH).format(new Date());
             if (!logId().isEmpty()) _sessionId = logId() + "_" + _sessionId;
         }
-        return _sessionId;
+
+        return _sessionId + String.format("_%04d", partCount);
     }
 
     private LogFileWriter getLogFileWriter(Context context) {
@@ -1053,7 +1056,9 @@ public abstract class LoggerAbs {
         }
 
         if (!logFileWriter.file.exists() || logFileWriter.fileSizeInKb() >= logConfigs.maxFileSizeInKiloBytes) {
-            _sessionId = null;
+            //_sessionId = nu ll;
+            partCount++;
+
             logFileWriter = null;
             logFileWriter = getLogFileWriter(context);
         }
@@ -1063,12 +1068,12 @@ public abstract class LoggerAbs {
 
     private synchronized File createOrGetLogFile(Context context) {
         File logFilesDir = getLogDirector(context, null);
-        int filesCount = 0;
+        /*int filesCount = 0;
         try {
             filesCount = Objects.requireNonNull(logFilesDir.list()).length;
         } catch (Exception ignored) {
-        }
-        String fileName = "LOG_FILE_" + sessionId() + "_" + (filesCount + 1);
+        }*/
+        String fileName = "LOG_FILE_" + sessionId();// + "_" + (filesCount + 1);
 
         String fileExtension;
         if (logConfigs.exportedFileType == ExportedFileType.Csv) {
@@ -1155,6 +1160,7 @@ public abstract class LoggerAbs {
             final int max_file_count = logConfigs.maxLogsFilesCount;
 
             if (list != null && list.length > max_file_count) {
+                Arrays.sort(list); //<<make sure that the files in the correct order
                 int fc = list.length - max_file_count;
                 for (int i = 0; i < fc; i++) {
                     try {
