@@ -32,28 +32,28 @@ public class DateOp implements Serializable {
     //https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
 
     /**
-    public static final String PATTERN_SYMBOL_YEAR = "yyyy";
-
-    public static final String PATTERN_SYMBOL_MONTH = "MM";
-    public static final String PATTERN_SYMBOL_MONTH_NAME = "MMMM";
-    public static final String PATTERN_SYMBOL_MONTH_HALF_NAME = "MMM";
-
-    public static final String PATTERN_SYMBOL_DAY = "dd";
-    public static final String PATTERN_SYMBOL_DAY_NAME = "EEEE";
-    public static final String PATTERN_SYMBOL_DAY_HALF_NAME = "EEE";
-
-    public static final String PATTERN_SYMBOL_HOUR24 = "HH";
-    public static final String PATTERN_SYMBOL_HOUR12 = "hh";
-
-    public static final String PATTERN_SYMBOL_MINUTE = "mm";
-    public static final String PATTERN_SYMBOL_SECOND = "ss";
-    public static final String PATTERN_SYMBOL_MILLISECOND = "SSS";
-    public static final String PATTERN_SYMBOL_AM_PM = "a";
-
-    public static final String PATTERN_SYMBOL_TIME_ZONE = "z";//General time zone -> GMT+02:00
-    public static final String PATTERN_SYMBOL_TIME_ZONE_RFC822 = "Z";//+0200
-    public static final String PATTERN_SYMBOL_TIME_ZONE_ISO8601 = "XXX";//+02:00
-    */
+     * public static final String PATTERN_SYMBOL_YEAR = "yyyy";
+     * <p>
+     * public static final String PATTERN_SYMBOL_MONTH = "MM";
+     * public static final String PATTERN_SYMBOL_MONTH_NAME = "MMMM";
+     * public static final String PATTERN_SYMBOL_MONTH_HALF_NAME = "MMM";
+     * <p>
+     * public static final String PATTERN_SYMBOL_DAY = "dd";
+     * public static final String PATTERN_SYMBOL_DAY_NAME = "EEEE";
+     * public static final String PATTERN_SYMBOL_DAY_HALF_NAME = "EEE";
+     * <p>
+     * public static final String PATTERN_SYMBOL_HOUR24 = "HH";
+     * public static final String PATTERN_SYMBOL_HOUR12 = "hh";
+     * <p>
+     * public static final String PATTERN_SYMBOL_MINUTE = "mm";
+     * public static final String PATTERN_SYMBOL_SECOND = "ss";
+     * public static final String PATTERN_SYMBOL_MILLISECOND = "SSS";
+     * public static final String PATTERN_SYMBOL_AM_PM = "a";
+     * <p>
+     * public static final String PATTERN_SYMBOL_TIME_ZONE = "z";//General time zone -> GMT+02:00
+     * public static final String PATTERN_SYMBOL_TIME_ZONE_RFC822 = "Z";//+0200
+     * public static final String PATTERN_SYMBOL_TIME_ZONE_ISO8601 = "XXX";//+02:00
+     */
 
     //----------------------------------------------------------------------------------------------
 
@@ -850,7 +850,7 @@ public class DateOp implements Serializable {
     }
 
     public DateOp setTimeToLocale() {
-        long t = calendar.getTimeInMillis() + TimeZone.getDefault().getRawOffset();
+        long t = calendar.getTimeInMillis() + TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
         return setTimeInMillis(t);
     }
 
@@ -884,7 +884,7 @@ public class DateOp implements Serializable {
     }
 
     public long getUTCTimeInMillis() {
-        return calendar.getTimeInMillis() - TimeZone.getDefault().getRawOffset();
+        return calendar.getTimeInMillis() - TimeZone.getDefault().getRawOffset() - TimeZone.getDefault().getDSTSavings();
     }
 
     public int getHour24() {
