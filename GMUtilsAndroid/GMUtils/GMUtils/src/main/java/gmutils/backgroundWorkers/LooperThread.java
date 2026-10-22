@@ -69,6 +69,9 @@ public class LooperThread extends Thread {
     private int totalMsgCount = 0;
     private int handledMsgCount = 0;
 
+    private Message lastSentMessage;
+    private Message lastHandledMessage;
+
     public LooperThread(MessageHandler onMessageHandled) {
         this(null, onMessageHandled);
     }
@@ -92,6 +95,7 @@ public class LooperThread extends Thread {
 
                 MessageArgs args = new MessageArgs(msg, handledMsgCount, totalMessageCountGetter);
                 handler.onMessageHandled(args);
+                lastHandledMessage = msg;
                 args.destroy();
             }
         });
@@ -116,11 +120,21 @@ public class LooperThread extends Thread {
     public void sendMessage(Message msg) {
         if (handler != null) {
             totalMsgCount++;
+            lastSentMessage = msg;
             handler.sendMessage(msg);
-
-        } else {
+        }
+        //
+        else {
             unHandledMessages.add(msg);
         }
+    }
+
+    public Message getLastSentMessage() {
+        return lastSentMessage;
+    }
+
+    public Message getLastHandledMessage() {
+        return lastHandledMessage;
     }
 
     public void quit() {
@@ -128,6 +142,8 @@ public class LooperThread extends Thread {
         handler = null;
         onMessageHandled = null;
         totalMessageCountGetter = null;
+        lastSentMessage = null;
+        lastHandledMessage = null;
     }
 
     public boolean isRunning() {
@@ -144,6 +160,8 @@ public class LooperThread extends Thread {
         m.put("totalMessagesCount", totalMsgCount);
         m.put("handledMessagesCount", handledMsgCount);
         m.put("isRunning", isRunning());
+        m.put("lastSentMessage", lastSentMessage);
+        m.put("lastHandledMessage", lastHandledMessage);
         return m;
     }
 
