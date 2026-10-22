@@ -1,6 +1,7 @@
 package gmutils.ui.viewModels;
 
 import android.app.Application;
+import android.util.Pair;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -495,7 +496,7 @@ public class BaseViewModel extends AndroidViewModel {
 
     private MutableLiveData<ProgressStatus> progressStatusLiveData;
     private MutableLiveData<Message> alertMessageLiveData;
-    private MutableLiveData<String> updateUiLiveData;
+    private MutableLiveData<Pair<String, Object>> eventsLiveData;
 
     public MutableLiveData<ProgressStatus> progressStatusLiveData() {
         if (progressStatusLiveData == null) progressStatusLiveData = new MutableLiveData<>();
@@ -507,9 +508,9 @@ public class BaseViewModel extends AndroidViewModel {
         return alertMessageLiveData;
     }
 
-    public MutableLiveData<String> updateUiLiveData() {
-        if (updateUiLiveData == null) updateUiLiveData = new MutableLiveData<>();
-        return updateUiLiveData;
+    public MutableLiveData<Pair<String, Object>> eventsLiveData() {
+        if (eventsLiveData == null) eventsLiveData = new MutableLiveData<>();
+        return eventsLiveData;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -612,6 +613,12 @@ public class BaseViewModel extends AndroidViewModel {
     public void postRetryMessage(StringSet message, Runnable onRetry, ResultCallback<String> onDismiss) {
         Message m = new Message(message, new MessageType.Retry(onRetry, onDismiss));
         postMessage(m);
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    public void postEvent(String name, Object args) {
+        eventsLiveData().postValue(new Pair<>(name, args));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -724,6 +731,14 @@ public class BaseViewModel extends AndroidViewModel {
     @Override
     protected void onCleared() {
         isCleared = true;
+
+        progressStatusLiveData = null;
+        alertMessageLiveData = null;
+        eventsLiveData = null;
+
+        uiHandler = null;
+        backgroundTask = null;
+
         super.onCleared();
     }
 

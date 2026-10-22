@@ -6,15 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -170,6 +169,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         }
     }
 
+    @Nullable
     public ViewModel getViewModel(int id) {
         return viewModels.get(id);
     }
@@ -207,7 +207,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
                 if (viewModel instanceof BaseViewModel) {
                     ((BaseViewModel) viewModel).progressStatusLiveData().observe(this, getProgressStatusLiveDataObserver());
                     ((BaseViewModel) viewModel).alertMessageLiveData().observe(this, getAlertMessageLiveDataObserver());
-                    ((BaseViewModel) viewModel).updateUiLiveData().observe(this, getUpdateUiLiveDataObserver());
+                    ((BaseViewModel) viewModel).eventsLiveData().observe(this, getEventsLiveDataObserver());
                 }
             }
         }
@@ -453,7 +453,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         getActivityFunctions().lifecycle().onDestroy();
+        mActivityFunctions = null;
+
+        if (viewModels != null) viewModels.clear();
+        viewModels = null;
+
     }
 
     //----------------------------------------------------------------------------------------------
@@ -470,7 +476,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
             return true;
         return super.onOptionsItemSelected(item);
     }
-
 
     //----------------------------------------------------------------------------------------------
 
@@ -529,11 +534,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseFrag
         );
     }
 
-    private Observer<String> getUpdateUiLiveDataObserver() {
-        return this::onViewModelUpdatesUi;
+    private Observer<Pair<String, Object>> getEventsLiveDataObserver() {
+        return this::onViewModelSentEvent;
     }
 
-    protected void onViewModelUpdatesUi(String args) {
+    protected void onViewModelSentEvent(Pair<String, Object> event) {
     }
 
     //----------------------------------------------------------------------------------------------

@@ -306,13 +306,12 @@ public abstract class BaseLegacyActivity extends Activity implements BaseLegacyF
 
     //----------------------------------------------------------------------------------------------
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         getActivityFunctions().destroy();
+        _activityFunctions = null;
     }
-
 
     //----------------------------------------------------------------------------------------------
 

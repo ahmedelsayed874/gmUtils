@@ -994,8 +994,7 @@ public abstract class LoggerAbs {
         getSavedFiles(context, ofPublic, (files) -> {
             ResultCallback<File> delete = (file) -> {
                 try {
-                    boolean b = file.delete();
-                    boolean b1 = b;
+                    file.delete();
                 } catch (Exception e) {
                 }
             };
@@ -1165,7 +1164,7 @@ public abstract class LoggerAbs {
                 for (int i = 0; i < fc; i++) {
                     try {
                         File f2d = new File(logFiles.getPath() + "/" + list[i]);
-                        f2d.delete();
+                        if (f2d.isFile()) f2d.delete();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

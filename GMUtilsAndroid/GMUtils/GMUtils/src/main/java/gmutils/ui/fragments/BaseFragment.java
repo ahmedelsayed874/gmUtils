@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,7 +116,9 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    @Nullable
     public ViewModel getViewModel(int id) {
+        if (viewModels == null) return null;
         return viewModels.get(id);
     }
 
@@ -164,7 +167,7 @@ public abstract class BaseFragment extends Fragment {
                 if (viewModel instanceof BaseViewModel) {
                     ((BaseViewModel) viewModel).progressStatusLiveData().observe(getViewLifecycleOwner(), getProgressStatusLiveDataObserver());
                     ((BaseViewModel) viewModel).alertMessageLiveData().observe(getViewLifecycleOwner(), getAlertMessageLiveDataObserver());
-                    ((BaseViewModel) viewModel).updateUiLiveData().observe(getViewLifecycleOwner(), getUpdateUiLiveDataObserver());
+                    ((BaseViewModel) viewModel).eventsLiveData().observe(getViewLifecycleOwner(), getEventsLiveDataObserver());
                 }
             }
         }
@@ -240,11 +243,11 @@ public abstract class BaseFragment extends Fragment {
         );
     }
 
-    private Observer<String> getUpdateUiLiveDataObserver() {
-        return this::onViewModelUpdatesUi;
+    private Observer<Pair<String, Object>> getEventsLiveDataObserver() {
+        return this::onViewModelSentEvent;
     }
 
-    protected void onViewModelUpdatesUi(String args) {
+    protected void onViewModelSentEvent(Pair<String, Object> event) {
     }
 
     //----------------------------------------------------------------------------------------------
@@ -389,7 +392,9 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         if (viewModels != null) viewModels.clear();
+        viewModels = null;
     }
 
 }

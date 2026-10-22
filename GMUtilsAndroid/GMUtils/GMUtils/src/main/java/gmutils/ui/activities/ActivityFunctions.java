@@ -524,6 +524,9 @@ public class ActivityFunctions implements BaseFragmentListener {
 
         this.delegate = null;
         this.lifecycle = null;
+
+        if (activityResultCallback != null) activityResultCallback.clear();
+        activityResultCallback = null;
     }
 
     public void destroy() {
