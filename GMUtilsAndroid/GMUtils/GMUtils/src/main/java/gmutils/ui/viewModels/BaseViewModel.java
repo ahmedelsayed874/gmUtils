@@ -55,6 +55,9 @@ public class BaseViewModel extends AndroidViewModel {
     }
 
     public interface ProgressStatus {
+        ProgressStatus setTag(Object tag);
+        Object getTag();
+
         /**
          * @param message int - CharSequence - StringSet
          */
@@ -70,8 +73,11 @@ public class BaseViewModel extends AndroidViewModel {
             return new Hide(forceHide);
         }
 
+        //----------------------------------------------------------------------------
+
         class Show implements ProgressStatus, MessageDependent {
             private final List<Object> message; // StringSet | int
+            private Object tag;
 
             public Show() {
                 this(new ArrayList<>());
@@ -132,6 +138,16 @@ public class BaseViewModel extends AndroidViewModel {
                 return message.get(idx);
             }
 
+            @Override
+            public Show setTag(Object tag) {
+                this.tag = tag;
+                return this;
+            }
+
+            @Override
+            public Object getTag() {
+                return tag;
+            }
         }
 
         class Update extends Show {
@@ -175,10 +191,17 @@ public class BaseViewModel extends AndroidViewModel {
             public int getProgress() {
                 return progress;
             }
+
+            @Override
+            public Update setTag(Object tag) {
+                super.setTag(tag);
+                return this;
+            }
         }
 
         class Hide implements ProgressStatus {
             public final boolean forceHide;
+            private Object tag;
 
             public Hide() {
                 this(false);
@@ -187,12 +210,24 @@ public class BaseViewModel extends AndroidViewModel {
             public Hide(boolean forceHide) {
                 this.forceHide = forceHide;
             }
+
+            @Override
+            public Hide setTag(Object tag) {
+                this.tag = tag;
+                return this;
+            }
+
+            @Override
+            public Object getTag() {
+                return tag;
+            }
         }
     }
 
     public static class Message implements MessageDependent {
         private final List<Object> messages; //Integer | StringSet
         public final MessageType type;
+        private Object tag;
 
         public Message() {
             this(new ArrayList<>(), new MessageType.Hint());
@@ -254,6 +289,10 @@ public class BaseViewModel extends AndroidViewModel {
             return messages.get(idx);
         }
 
+        public Message setTag(Object tag) {
+            this.tag = tag;
+            return this;
+        }
     }
 
     public interface MessageType {
