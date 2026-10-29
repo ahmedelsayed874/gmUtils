@@ -23,6 +23,7 @@ import gmutils.DateOp;
 import gmutils.Intents;
 import gmutils.MessagingCenter;
 import gmutils.R;
+import gmutils.listeners.ActionCallback2;
 import gmutils.logger.Logger;
 import gmutils.logger.LoggerAbs;
 import gmutils.storage.StorageManager;
@@ -346,32 +347,46 @@ public abstract class BaseApplication extends Application implements Application
     //----------------------------------------------------------------------------------------------
 
     public void checkBugsExist(Context context, Runnable onComplete) {
+        checkBugsExist(context, onComplete, null);
+    }
+
+    public void checkBugsExist(Context context, Runnable onComplete, ActionCallback2<MessageDialog, String, Boolean> onDialogCreated) {
         if (!hasBugs()) {
             if (onComplete != null) onComplete.run();
             return;
         }
 
         String bugs = getReportedBugs();
-        if (bugs.isEmpty()) {
+        if (bugs.length() > 0) {
             if (onComplete != null) onComplete.run();
             deleteBugs();
             return;
         }
 
-        MessageDialog.create(context)
+        MessageDialog md = MessageDialog.create(context)
                 .setMessage(bugs)
                 .setMessageGravity(Gravity.START)
+                .getMessageDialogFunctions(
+                        (f) -> f.getMessageTextView(
+                                tv -> tv.setTextIsSelectable(true)
+                        )
+                )
                 .setButton1(R.string.dismiss, null)
-                .setButton2(R.string.delete, () -> {
-                    deleteBugs();
-                })
+                .setButton2(R.string.delete, this::deleteBugs)
                 .setButton3("Send", () -> {
                     onSendBugClick(bugs, getBugFiles()[0]);
-                })
-                .setOnDismissListener(dialog -> {
-                    if (onComplete != null) onComplete.run();
-                })
-                .show();
+                });
+
+        md.setOnDismissListener(dialog -> {
+            if (onComplete != null) onComplete.run();
+        });
+
+        if (onDialogCreated != null) {
+            Boolean handled = onDialogCreated.invoke(md, bugs);
+            if (handled == Boolean.TRUE) return;
+        }
+
+        md.show();
     }
 
     public boolean hasBugs() {
@@ -430,8 +445,8 @@ public abstract class BaseApplication extends Application implements Application
         Intents.getInstance().composeEmail(
                 this,
                 null,
-                "REPORTEDBUG: " + thisApp().getPackageName(),
-                bugs,
+                new StringBuilder("REPORTEDBUG: " + thisApp().getPackageName()),
+                new StringBuilder(bugs),
                 fileUri
         );
     }

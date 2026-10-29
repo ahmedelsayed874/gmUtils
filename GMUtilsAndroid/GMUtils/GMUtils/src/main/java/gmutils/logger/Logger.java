@@ -1,7 +1,9 @@
 package gmutils.logger;
 
+import android.content.Context;
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -68,7 +70,7 @@ public class Logger extends LoggerAbs {
     }
 
     @Override
-    public void writeToLog(String tag, String msg, @Nullable LogCategory logCategory) {
+    public void writeToLog(@NotNull String tag, @NotNull String msg, @Nullable LogCategory logCategory) {
         if (logCategory == null) {
             Log.e(tag, msg);
             return;

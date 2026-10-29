@@ -427,21 +427,21 @@ public class Intents {
 
     //--------------------------------------------------------------------------------------------//
 
-    public void composeEmail(Context context, String[] addresses, String subject) {
+    public void composeEmail(Context context, String[] addresses, StringBuilder subject) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:")); // only email apps should handle this
         intent.putExtra(Intent.EXTRA_EMAIL, addresses);
-        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject.toString());
         if (intent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(intent);
         }
     }
 
-    public boolean composeEmail(Context context, String[] addresses, String subject, String body) {
+    public boolean composeEmail(Context context, String[] addresses, StringBuilder subject, StringBuilder body) {
         return composeEmail(context, addresses, subject, body, (Uri) null);
     }
 
-    public boolean composeEmail(Context context, String[] addresses, String subject, String body, Uri attachment) {
+    public boolean composeEmail(Context context, String[] addresses, StringBuilder subject, StringBuilder body, Uri attachment) {
         ArrayList<Uri> attachments = null;
 
         if (attachment != null) {
@@ -452,7 +452,7 @@ public class Intents {
         return composeEmail(context, addresses, subject, body, attachments);
     }
 
-    public boolean composeEmail(Context context, String[] addresses, String subject, String body, ArrayList<Uri> attachments) {
+    public boolean composeEmail(Context context, String[] addresses, StringBuilder subject, StringBuilder body, ArrayList<Uri> attachments) {
         Intent intent = null;
 
         if (attachments == null || attachments.size() == 1) {
@@ -463,8 +463,8 @@ public class Intents {
 
         intent.setData(Uri.parse("mailto:"));
         intent.putExtra(Intent.EXTRA_EMAIL, addresses);
-        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_TEXT, body);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject.toString());
+        intent.putExtra(Intent.EXTRA_TEXT, body.toString());
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 

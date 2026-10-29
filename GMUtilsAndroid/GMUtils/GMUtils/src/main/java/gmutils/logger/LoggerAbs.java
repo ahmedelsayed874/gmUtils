@@ -28,12 +28,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,6 +41,7 @@ import gmutils.app.BaseApplication;
 import gmutils.backgroundWorkers.BackgroundTask;
 import gmutils.backgroundWorkers.LooperThread;
 import gmutils.listeners.ActionCallback;
+import gmutils.listeners.ActionCallback2;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
 import gmutils.listeners.Runnable2;
@@ -63,7 +62,7 @@ import gmutils.utils.ZipFileUtils;
  * +201022663988
  */
 public abstract class LoggerAbs {
-    public enum ExportedFileType {Csv, /*Json,*/ Text}
+    public enum ExportedFileType {Csv, Text}
 
     public static class LogConfigs {
         private DateOp logcatDeadline;
@@ -304,23 +303,36 @@ public abstract class LoggerAbs {
 
         private Long writeTime = null;
 
-        public void write(int order, String title, String content) throws Exception {
+        public void write(
+                int order,
+                String title,
+                String content
+        ) throws Exception {
             write(order, title, content, true, true);
         }
 
-        public void write(int order, String title, String content, boolean addDate, boolean addSeparation) throws Exception {
+        public void write(
+                int order,
+                String title,
+                String content,
+                boolean addDate,
+                boolean addSeparation
+        ) throws Exception {
             OutputStream os = new FileOutputStream(file, true);
             OutputStreamWriter sw = new OutputStreamWriter(os);
 
             if (enableEncryption) {
                 try {
                     int encryptionKey2 = encryptionKey != null ? encryptionKey : LoggerAbs.DEF_ENC_KEY;
-                    content = Security.getSimpleInstance(encryptionKey2).encrypt(content);
+                    content = Security
+                            .getSimpleInstance(encryptionKey2)
+                            .encrypt(content);
                 } catch (Exception ignore) {
                 }
             }
 
             title = title == null ? "" : title;
+            content = content == null ? "" : content;
 
             try {
                 if (exportedFileType == ExportedFileType.Csv) {
@@ -359,54 +371,21 @@ public abstract class LoggerAbs {
                     sw.write("\"" + title + "\",");
 
                     //Content --> "x",
-                    sw.write("\"" + ("" + content).replaceAll("\"", "\"\"") + "\"");
+                    sw.write("\"");
+                    for (int i = 0; i < content.length(); i++) {
+                        char c = content.charAt(i);
+                        if (c == '"') sw.write("\"\"");
+                        else sw.write(c);
+                    }
+                    sw.write("\"");
 
                     sw.write("\n");
                 }
                 //
-                /*else if (exportedFileType == ExportedFileType.Json) {
-                    if (addDate && writeTime == null) {
-                        writeTime = System.currentTimeMillis();
-                        sw.write("[ \"Time\", \"ElapsedTime\", \"Title\", \"Content\" ],\n");
-                        sw.write("[\"" + new Date() + "\"],\n");
-                    }
-
-                    sw.write("[");
-
-                    if (addDate) {
-                        long now = System.currentTimeMillis();
-                        long diff = now - writeTime;
-                        writeTime = now;
-
-                        var tz = TimeZone.getDefault().getOffset(now);
-                        int[] timeComponent = DateOp.timeComponentFromTimeMillis(now + tz);
-
-                        //time
-                        sw.write("\"" +
-                                timeComponent[1] + ":" +        //hours
-                                timeComponent[2] + ":" +    //minutes
-                                timeComponent[3] + "." +    //seconds
-                                timeComponent[4] +          //milliseconds
-                                "\","
-                        );
-
-                        //elapsedTime
-                        sw.write("\"" + diff + "\",");
-                    }
-
-                    //Title
-                    sw.write("\"" + title + "\",");
-
-                    //Content
-                    sw.write("\"" + ("" + content).replaceAll(",", ";") + "\"");
-
-                    sw.write("],\n");
-                }*/
-                //
                 else {
                     String text = "[" + order + "]\n";
                     if (!TextUtils.isEmpty(title)) text += ">> " + title + "\n";
-                    if (content != null) text += ">> " + content;
+                    if (!TextUtils.isEmpty(content)) text += ">> " + content;
 
                     if (addDate && writeTime == null) {
                         writeTime = System.currentTimeMillis();
@@ -449,30 +428,28 @@ public abstract class LoggerAbs {
         //--------------------------------------------------
 
         public String readFileContent() {
-            try {
-                byte[] b;
-                try (FileInputStream is = new FileInputStream(file)) {
-                    b = new byte[is.available()];
-                    if (is.read(b) <= 0) return "";
+            if (!file.exists()) return "";
+
+            StringBuilder sb = new StringBuilder();
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
                 }
 
-                String text = new String(b);
-
+                String text = sb.toString();
                 if (enableEncryption) {
-                    Integer encryptionKey2 = encryptionKey;
-                    if (encryptionKey2 == null)
-                        encryptionKey2 = DEF_ENC_KEY;
-
+                    Integer encryptionKey2 = encryptionKey != null ? encryptionKey : DEF_ENC_KEY;
                     try {
                         text = Security.getSimpleInstance(encryptionKey2).decrypt(text);
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                     }
                 }
-
                 return text;
-
-            } catch (Exception e) {
-                return "";
+            }
+            //
+            catch (Exception e) {
+                return "EXCEPTION: " + e;
             }
         }
 
@@ -506,6 +483,13 @@ public abstract class LoggerAbs {
 
     public interface ContentGetter {
         Object getContent();
+
+        @Nullable
+        default String getContentSafely() {
+            Object content = getContent();
+            if (content == null) return null;
+            return content.toString();
+        }
     }
 
     public enum LogCategory {Verbose, Debug, Info, Warning, Error, Assert}
@@ -656,30 +640,33 @@ public abstract class LoggerAbs {
 
     public void printSync(int order, TitleGetter title, @NotNull ContentGetter content, LogCategory logCategory, boolean forceLog, boolean forceWriteToFile) {
         if (logConfigs.isLogcatEnabled() || forceLog) {
-            String title2 = "**** ";
-            if (!logId().isEmpty()) title2 += "|" + logId() + "| ";
-            if (title != null) title2 += title.getTitle();
+            StringBuilder titleStr = new StringBuilder("**** ");
+            if (!logId().isEmpty()) titleStr.append("|").append(logId()).append("| ");
+            if (title != null) titleStr.append(title.getTitle());
 
             String contentStr;
-            if (title2.length() > maxTitleLength) {
-                String[] t = refineTitle(title2);
-                title2 = t[0];
-                contentStr = (t[1] + ":\n" + content.getContent());
+            if (titleStr.length() > maxTitleLength) {
+                String[] t = refineTitle(titleStr);
+
+                titleStr.delete(0, titleStr.length());
+                titleStr.append(t[0]);
+
+                contentStr = t[1] + ":\n" + content.getContentSafely();
             }
             //
             else {
-                contentStr = ("" + content.getContent());
+                contentStr = "" + content.getContentSafely();
             }
 
             if (contentStr.length() < maxLogLength) {
-                writeToLog(title2, contentStr, logCategory);
+                writeToLog(titleStr.toString(), contentStr, logCategory);
             }
             //
             else {
-                String[] m = divideLogMsg(contentStr, 0);
+                String[] m = divideLogMsg(contentStr);
 
                 for (int i = 0; i < m.length; i++) {
-                    writeToLog(title2, "LOG[" + i + "]-> " + m[i], logCategory);
+                    writeToLog(titleStr.toString(), "LOG[" + i + "]-> " + m[i], logCategory);
                 }
             }
         }
@@ -693,8 +680,14 @@ public abstract class LoggerAbs {
                             title,
                             content
                     );
-                } catch (Exception e) {
-                    writeToLog(getClass().getSimpleName() + "[" + logId() + "] " + "ERROR", "printSync->writeToFileSync got EXCEPTION: " + e.getMessage(), LogCategory.Error);
+                }
+                //
+                catch (Exception e) {
+                    writeToLog(
+                            getClass().getSimpleName() + "[" + logId() + "] " + "ERROR",
+                            "printSync->writeToFileSync got EXCEPTION: " + e.getMessage(),
+                            LogCategory.Error
+                    );
                 }
             }
             //
@@ -704,7 +697,9 @@ public abstract class LoggerAbs {
                         "NO-CONTEXT-FOR-WRITING-LOGS: " +
                                 "BaseApplication.current() == null " +
                                 "also writingToFileContext is null, " +
-                                "so writing logs to file is not possible.",
+                                "so writing logs to file is not possible." +
+                                "\n\n" +
+                                "StackTrace:\n" + Arrays.toString(new Throwable().getStackTrace()),
                         LogCategory.Error
                 );
             }
@@ -763,7 +758,6 @@ public abstract class LoggerAbs {
             StackTraceElement[] stackTraceList = new Throwable().getStackTrace();
             runOnLoggerThread(++orderRecoder, (order) -> {
                 try {
-                    StackTraceElement stackTrace = null;
                     int idx = 1;
                     for (int s = 1; s < stackTraceList.length; s++) {
                         if (!LoggerAbs.class.getName().equals(stackTraceList[s].getClassName())) {
@@ -772,21 +766,17 @@ public abstract class LoggerAbs {
                         }
                     }
 
-                    stackTrace = stackTraceList[idx + tuner];
+                    StackTraceElement stackTrace = stackTraceList[idx + tuner];
 
-                    String moreInfo = "";
+                    StringBuilder msg = new StringBuilder();
+                    msg.append(stackTrace.getFileName());
+                    msg.append("\n");
+                    msg.append(stackTrace.getMethodName());
+                    msg.append("() -> line: ").append(stackTrace.getLineNumber());
                     if (moreInfoCallback != null) {
-                        Object content = moreInfoCallback.getContent();
-                        if (content != null) {
-                            moreInfo = content.toString();
-                        }
+                        msg.append("\n-> ");
+                        msg.append(moreInfoCallback.getContentSafely());
                     }
-
-                    String msg = stackTrace.getFileName() +
-                            "\n" +
-                            stackTrace.getMethodName() +
-                            "() -> line: " + stackTrace.getLineNumber() +
-                            (moreInfo.isEmpty() ? "" : ("\n-> " + moreInfo));
 
                     printSync(
                             order,
@@ -818,24 +808,25 @@ public abstract class LoggerAbs {
     private static final int maxTitleLength = 23;
     private final int maxLogLength = 4000;
 
-    private String[] refineTitle(String title) {
+    private String[] refineTitle(StringBuilder title) {
         String reqTitle, remTitle;
         if (title.length() > maxTitleLength) {
-            reqTitle = (title).substring(0, maxTitleLength);
-            remTitle = (title).substring(maxTitleLength);
+            reqTitle = title.substring(0, maxTitleLength);
+            remTitle = title.substring(maxTitleLength);
         }
         //
         else {
-            reqTitle = title;
+            reqTitle = title.toString();
             remTitle = "";
         }
 
         return new String[]{reqTitle, remTitle};
     }
 
-    private String[] divideLogMsg(String msg, int offset) {
+    private String[] divideLogMsg(String msg) {
         if (msg == null) msg = "null";
-        final int partLength = maxLogLength - (offset == 0 ? 0 : (offset + 2));
+        //final int partLength = maxLogLength - (offset == 0 ? 0 : (offset + 2));
+        final int partLength = maxLogLength;
 
         int parts = (int) Math.ceil(msg.length() / ((float) partLength));
 
@@ -852,12 +843,15 @@ public abstract class LoggerAbs {
                 try {
                     int fi = i * (partLength);
                     int li = fi + (partLength);
+
                     if (li < msg.length()) {
                         strings[i] = msg.substring(fi, li); //(0,4000), (4000, 8000), (8000, 12000)
-                    } else {
+                    }
+                    //
+                    else {
                         strings[i] = msg.substring(fi);
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
 
                 i++;
@@ -868,10 +862,15 @@ public abstract class LoggerAbs {
     }
     //endregion LOGs
 
-    public abstract void writeToLog(String tag, String msg, @Nullable LogCategory logCategory);
+    public abstract void writeToLog(
+            @NotNull String tag,
+            @NotNull String msg,
+            @Nullable LogCategory logCategory
+    );
 
     //----------------------------------------------------------------------------------------------
 
+    //region write-to-files utils
     private ValueGetter<Context> _writingToFileContext;
 
     public void setWritingToFileContext(ValueGetter<Context> writingToFileContext) {
@@ -885,35 +884,66 @@ public abstract class LoggerAbs {
 
     //----------------------------------------------------------------------------------------------
 
+    private ActionCallback2<
+            TitleGetter,
+            ContentGetter,
+            Pair<TitleGetter, ContentGetter>> _writingLogsToFileFilter;
+
+    public void setWritingLogsToFileFilter(ActionCallback2<
+            TitleGetter,
+            ContentGetter,
+            Pair<TitleGetter, ContentGetter>> writingLogsToFileFilter
+    ) {
+        this._writingLogsToFileFilter = writingLogsToFileFilter;
+    }
+    //endregion
+
+    //----------------------------------------------------------------------------------------------
+
     //region write to files
-    public void writeToFile(Context context, ContentGetter text) {
+    public void writeToFile(Context context, ContentGetter content) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
             runOnLoggerThread(++orderRecoder, (order) -> {
-                writeToFileSync(context, order, null, text);
+                writeToFileSync(context, order, null, content);
             });
         }
     }
 
-    public void writeToFile(Context context, TitleGetter title, ContentGetter text) {
+    public void writeToFile(Context context, TitleGetter title, ContentGetter content) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
             runOnLoggerThread(++orderRecoder, (order) -> {
-                writeToFileSync(context, order, title, text);
+                writeToFileSync(context, order, title, content);
             });
         }
     }
 
-    public void writeToFileSync(Context context, int order, TitleGetter title, ContentGetter text) {
+    public void writeToFileSync(Context context, int order, TitleGetter title, ContentGetter content) {
         if (logConfigs.isWriteLogsToFileEnabled()) {
             LogFileWriter writer = getLogFileWriter(context);
             if (writer != null) {
-                String title2 = null;
-                if (title != null) title2 = title.getTitle();
+                TitleGetter title2 = null;
+                ContentGetter content2 = null;
+
+                if (_writingLogsToFileFilter != null) {
+                    Pair<TitleGetter, ContentGetter> titleVsContent = _writingLogsToFileFilter.invoke(title, content);
+                    if (titleVsContent != null) {
+                        title2 = titleVsContent.first;
+                        content2 = titleVsContent.second;
+                    }
+                }
+
+                if (title2 == null && title != null) title2 = title;
+                if (content2 == null && content != null) content2 = content;
 
                 try {
-                    writer.write(order, title2, text.getContent().toString());
+                    writer.write(
+                            order,
+                            title2 == null ? null : title2.getTitle(),
+                            content2 == null ? null : content2.getContentSafely()
+                    );
                 } catch (Exception e) {
                     logFileWriter = null;
-                    new Thread(() -> writeToFileSync(context, order, title, text)).start();
+                    new Thread(() -> writeToFileSync(context, order, title, content)).start();
                 }
             }
         }
@@ -1172,7 +1202,9 @@ public abstract class LoggerAbs {
             }
 
             return logFiles;
-        } catch (Exception e) {
+        }
+        //
+        catch (Exception e) {
             writeToLog(
                     getClass().getSimpleName() + "[" + logId() + "] " + "ERROR",
                     "Creating log director failed due to EXCEPTION: " + e,

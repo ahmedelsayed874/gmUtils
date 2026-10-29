@@ -37,6 +37,7 @@ import gmutils.ui.utils.ViewSource
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.lang.StringBuilder
 import kotlin.concurrent.thread
 
 class FirebaseTestActivity : BaseActivity() {
@@ -601,9 +602,13 @@ class FirebaseTestActivity : BaseActivity() {
             logConfigs.setWriteLogsToPublicFileDeadline(dl)
         }
 
-        override fun writeToLog(tag: String?, msg: String?, logCategory: LogCategory?) {
+        override fun writeToLog(
+            tag: String,
+            msg: String,
+            logCategory: LogCategory?
+        ) {
             runOnUiThread {
-                log(tag ?: "", msg)
+                log(tag, msg)
             }
         }
     }
