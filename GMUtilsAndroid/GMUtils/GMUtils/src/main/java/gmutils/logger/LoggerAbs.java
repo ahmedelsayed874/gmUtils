@@ -699,7 +699,9 @@ public abstract class LoggerAbs {
                                 "also writingToFileContext is null, " +
                                 "so writing logs to file is not possible." +
                                 "\n\n" +
-                                "StackTrace:\n" + Arrays.toString(new Throwable().getStackTrace()),
+                                "logId: " + logId() + "\n" +
+                                "Title:" + (title == null ? "<NO-TITLE>" : title.getTitle()) + "\n" +
+                                "Content:" + content.getContentSafely(),
                         LogCategory.Error
                 );
             }
