@@ -9,8 +9,10 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,9 +37,14 @@ public class GeneralStorage implements IGeneralStorage {
         return new GeneralStorage(name);
     }
 
+    public static GeneralStorage inMemory() {
+        return new GeneralStorage(new HashMap<>());
+    }
+
     //----------------------------------------------------------------------------------------------
 
     private final SharedPreferences mPreference;
+    private final Map<String, String> mMemory;
 
     private GeneralStorage(String name) {
         Context appContext = StorageManager.getAppContext();
@@ -49,35 +56,49 @@ public class GeneralStorage implements IGeneralStorage {
         }*/
 
         mPreference = appContext.getSharedPreferences(name, Context.MODE_PRIVATE);
-
+        mMemory = null;
     }
 
     public GeneralStorage(SharedPreferences preference) {
         this.mPreference = preference;
+        this.mMemory = null;
+    }
+
+    public GeneralStorage(Map<String, String> memory) {
+        this.mPreference = null;
+        this.mMemory = memory;
     }
 
     //----------------------------------------------------------------------------------------------
 
     @Override
     public void save(String key, String value) {
-        mPreference.edit().putString(key, value).apply();
+        if (mPreference != null) mPreference.edit().putString(key, value).apply();
+        else mMemory.put(key, value);
     }
 
     @Override
     public String retrieve(String key, String defaultValue) {
-        return mPreference.getString(key, defaultValue);
+        if (mPreference != null) return mPreference.getString(key, defaultValue);
+        else {
+            String value = mMemory.get(key);
+            if (value == null) return defaultValue;
+            return value;
+        }
     }
 
     //----------------------------------------------------------------------------------------------
 
     @Override
     public void remove(String key) {
-        mPreference.edit().remove(key).apply();
+        if (mPreference != null) mPreference.edit().remove(key).apply();
+        else mMemory.remove(key);
     }
 
     @Override
     public void removeAll() {
-        mPreference.edit().clear().apply();
+        if (mPreference != null) mPreference.edit().clear().apply();
+        else mMemory.clear();
     }
 
     //==============================================================================================
