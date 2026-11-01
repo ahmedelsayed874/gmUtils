@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import gmutils.R;
 import gmutils.listeners.ResultCallback;
 import gmutils.listeners.ResultCallback2;
+import gmutils.storage.IGeneralStorage;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -188,6 +189,11 @@ public class MessageDialog extends BaseDialog {
 
 
     //----------------------------------------------------------------------------------------------
+
+    public MessageDialog setDontShowAgainStorage(IGeneralStorage storage) {
+        functions.setDontShowAgainStorage(storage);
+        return this;
+    }
 
     @NonNull
     private JSONArray getDontShowAgainCheckboxTagsArray() {

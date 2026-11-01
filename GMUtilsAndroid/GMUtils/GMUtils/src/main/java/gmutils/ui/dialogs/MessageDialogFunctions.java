@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import gmutils.R;
 import gmutils.listeners.ResultCallback;
 import gmutils.storage.GeneralStorage;
+import gmutils.storage.IGeneralStorage;
 
 /**
  * Created by Ahmed El-Sayed (Glory Maker)
@@ -291,9 +292,25 @@ public class MessageDialogFunctions {
 
     //----------------------------------------------------------------------------------------------
 
+    private IGeneralStorage dontShowAgainStorage;
+
+    public MessageDialogFunctions setDontShowAgainStorage(IGeneralStorage storage) {
+        this.dontShowAgainStorage = storage;
+        return this;
+    }
+
+    private IGeneralStorage getDontShowAgainStorage() {
+        IGeneralStorage preferences = dontShowAgainStorage;
+        if (preferences == null) {
+            preferences = GeneralStorage.getInstance(MessageDialogFunctions.class.getName());
+        }
+        return preferences;
+    }
+
     @NonNull
     JSONArray getDontShowAgainCheckboxTagsArray() {
-        GeneralStorage preferences = GeneralStorage.getInstance(MessageDialogFunctions.class.getName());
+        IGeneralStorage preferences = getDontShowAgainStorage();
+
         String tagsJson = preferences.retrieve("TAGS", "[]");
         try {
             JSONArray tagsJsonArray = new JSONArray(tagsJson);
@@ -305,7 +322,7 @@ public class MessageDialogFunctions {
     }
 
     void saveDontShowAgainCheckboxTagsArray(@NonNull JSONArray tagsJsonArray) {
-        GeneralStorage preferences = GeneralStorage.getInstance(MessageDialogFunctions.class.getName());
+        IGeneralStorage preferences = getDontShowAgainStorage();
         preferences.save("TAGS", tagsJsonArray.toString());
     }
 
