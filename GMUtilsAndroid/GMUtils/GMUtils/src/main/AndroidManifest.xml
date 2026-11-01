@@ -61,6 +61,11 @@
                 android:resource="@xml/file_paths" />
         </provider>-->
 
+        <!-- for installing app:: Receiver to handle PackageInstaller installation results -->
+        <receiver
+            android:name=".appUpdateHelper.AppUpdateReceiver"
+            android:exported="true" />
+
     </application>
 
 </manifest>
