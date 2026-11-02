@@ -18,6 +18,7 @@ import gmutils.Notifier;
 import gmutils.R;
 import gmutils.app.BaseApplication;
 import gmutils.logger.Logger;
+import gmutils.logger.LoggerAbs;
 import gmutils.storage.GeneralStorage;
 import gmutils.storage.SettingsStorage;
 
@@ -25,8 +26,7 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
     public static final String EXTRA_FCM_TIMESTAMP = FCM.EXTRA_FCM_TIMESTAMP;
     public static final String EXTRA_GOOGLE_MESSAGE_ID = FCM.EXTRA_GOOGLE_MESSAGE_ID;
     public  static  final  String PAYLOAD_KEY_NAME = "payload";
-
-
+    
     public interface FcmTokenChangeHandler {
         void onNewToken(Context context, String token);
     }
@@ -58,9 +58,16 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
 
     //---------------------------------------------------------------------------------------------
 
+    private LoggerAbs _logger;
+
+    protected LoggerAbs logger() {
+        if (_logger == null) _logger = Logger.d();
+        return _logger;
+    }
+
     @Override
     public void onNewToken(@NonNull String token) {
-        Logger.d().printMethod(() -> token);
+        logger().printMethod(() -> token);
         super.onNewToken(token);
 
         if (onNewToken != null) {
@@ -73,7 +80,7 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
-        Logger.d().printMethod(() -> {
+        logger().printMethod(() -> {
             StringBuilder sb = new StringBuilder();
 
             sb.append("MessageId: ").append(message.getMessageId()).append("\n");
@@ -98,7 +105,9 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
         if (onMessage != null) {
             fcmNotificationProperties = onMessage.onMessageReceived(this, message);
             BaseApplication.current().registerOnDispose(this.getClass(), this::dispose);
-        } else {
+        }
+        //
+        else {
             var storage = GeneralStorage.getInstance(GmFirebaseMessagingService.class.getSimpleName());
             FcmMessageHandler classHandler = null;
             try {
@@ -106,7 +115,7 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
                 Class<?> aClass = Class.forName(classPath);
                 classHandler = (FcmMessageHandler) aClass.newInstance();
             } catch (Exception e) {
-                Logger.d().printMethod(() -> e);
+                logger().printMethod(() -> e);
             }
 
             if (classHandler != null) {
@@ -115,6 +124,8 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         if (fcmNotificationProperties == null) {
+            logger().print(() -> "💡no notification message handler found, configure onMessage or registerBackgroundMessageHandler");
+
             fcmNotificationProperties = new FcmNotificationProperties(
                     0,
                     R.color.gmPrimary
@@ -122,17 +133,16 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         boolean en = SettingsStorage.Language.usingEnglish();
-        releaseNotification(this, message, fcmNotificationProperties, en);
-
+        resolveNotificationMessage(this, message, fcmNotificationProperties, en);
     }
 
-    protected int releaseNotification(
+    protected void resolveNotificationMessage(
             Context context,
             RemoteMessage message,
             FcmNotificationProperties notificationProperties,
             boolean en
     ) {
-        Logger.d().printMethod(() ->
+        logger().printMethod(() ->
                 "FCM._popupNotification(message: {" +
                         "id=" + message.getMessageId() + ", " +
                         "payload= " + message.getData() + "}, " +
@@ -166,10 +176,8 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         if (notificationProperties.isAllowPopup()) {
-            return releaseNotification(context, title, body, notificationProperties);
+            releaseNotification(context, title, body, notificationProperties);
         }
-
-        return 0;
     }
 
     protected int releaseNotification(
@@ -277,13 +285,13 @@ public class GmFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageSent(@NonNull String msgId) {
-        Logger.d().printMethod(() -> msgId);
+        logger().printMethod(() -> msgId);
         super.onMessageSent(msgId);
     }
 
     @Override
     public void onDeletedMessages() {
-        Logger.d().printMethod();
+        logger().printMethod();
         super.onDeletedMessages();
     }
 }

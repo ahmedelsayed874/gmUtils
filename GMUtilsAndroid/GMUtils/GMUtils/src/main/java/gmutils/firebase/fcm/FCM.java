@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gmutils.DateOp;
 import gmutils.Notifier;
 import gmutils.app.BaseApplication;
 import gmutils.backgroundWorkers.BackgroundTask;
@@ -39,7 +40,11 @@ public class FCM implements FCMFunctions {
     static FCM _instance;
 
     public static FCM instance() {
-        if (_instance == null) _instance = new FCM();
+        return instance(null);
+    }
+
+    public static FCM instance(LoggerAbs logger) {
+        if (_instance == null) _instance = new FCM(logger);
         return _instance;
     }
 
@@ -50,13 +55,11 @@ public class FCM implements FCMFunctions {
     private SendFcmMessageParameters sendFcmMessageParameters;
     private LoggerAbs logger;
 
-    private FCM() {
+    private FCM(LoggerAbs logger) {
         firebaseMessaging = FirebaseMessaging.getInstance();
 
-        LoggerAbs loggerTmp = logger;
-        logger = Logger.d();
+        this.logger = logger;
         printInstallationHint();
-        logger = loggerTmp;
     }
 
     private void printLog(LoggerAbs.ContentGetter content) {
@@ -71,6 +74,17 @@ public class FCM implements FCMFunctions {
     }
 
     public FCM printInstallationHint() {
+        LoggerAbs logger0 = this.logger;
+        LoggerAbs.LogConfigs loggerConfigs0 = logger0 == null ? null : logger0.getLogConfigs();
+
+        LoggerAbs logger = this.logger;
+        if (logger == null) logger = Logger.d();
+        logger.setLogConfigs(new LoggerAbs.LogConfigs()
+                .setLogcatDeadline(DateOp.getInstance().increaseDays(1))
+        );
+
+        this.logger = logger;
+
         printLog(() -> "[Fcm.init()] -> " +
                 "don\"t forget to use FCM.instance.redirectToPendingScreen(); " +
                 "in your home screen"
@@ -113,6 +127,9 @@ public class FCM implements FCMFunctions {
                 "     //TODO don't do anything here" +
                 "}"
         );
+
+        logger.setLogConfigs(loggerConfigs0);
+        this.logger = logger;
 
         return this;
     }
