@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigValue;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -17,17 +18,17 @@ public abstract class FBConfigSet {
     private long cacheInterval = DateOp.ONE_MINUTE_MILLIS * 5;
     private Long fetchTime = null;
 
-    void onFetchComplete(@Nullable FirebaseRemoteConfig firebaseRemoteConfig, boolean success) {
-        onFetchCompleteAbs(firebaseRemoteConfig, success);
+    void onFetchComplete(@Nullable Map<String, FirebaseRemoteConfigValue> configsCollection, boolean success) {
+        onFetchCompleteAbs(configsCollection, success);
 
-        if (firebaseRemoteConfig != null) {
+        if (configsCollection != null) {
             fetchTime = success ? System.currentTimeMillis() : null;
         }
 
         ((MutableLiveData) configs).postValue(this);
     }
 
-    protected abstract void onFetchCompleteAbs(@Nullable FirebaseRemoteConfig firebaseRemoteConfig, boolean success);
+    protected abstract void onFetchCompleteAbs(@Nullable Map<String, FirebaseRemoteConfigValue> configsCollection, boolean success);
 
     public void setCacheInterval(long cacheInterval) {
         this.cacheInterval = cacheInterval;

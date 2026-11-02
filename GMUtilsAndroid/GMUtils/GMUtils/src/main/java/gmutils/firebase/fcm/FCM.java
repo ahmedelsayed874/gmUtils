@@ -201,15 +201,15 @@ public class FCM implements FCMFunctions {
         var result = new HashMap<String, Boolean>();
 
         var savedTopics = savedTopics();
-        if (savedTopics.size() > 0) {
-            for (int i = 0; i < topics.size(); i++) {
-                var topic = topics.get(i);
-                var idx = topics.indexOf(topic);
+        if (!savedTopics.isEmpty()) {
+            for (int i = 0; i < savedTopics.size(); i++) {
+                var savedTopic = savedTopics.get(i);
+                var idx = topics.indexOf(savedTopic);
                 if (idx >= 0) {
                     topics.remove(idx);
-                    result.put(topic, true);
+                    result.put(savedTopic, true);
                 } else {
-                    result.put(topic, false);
+                    result.put(savedTopic, false);
                 }
             }
         }
@@ -249,6 +249,7 @@ public class FCM implements FCMFunctions {
         for (String topic : topics) {
             try {
                 firebaseMessaging.unsubscribeFromTopic(topic);
+                _prefs().removeFromList("FCM_Topics", topic);
                 printLog(() -> "FCM: unsubscribe from " + topic);
                 result.put(topic, true);
             } catch (Exception e) {
@@ -264,16 +265,18 @@ public class FCM implements FCMFunctions {
     public void unsubscribeFromSavedTopics(List<String> exceptedTopics, ResultCallback<Map<String, Boolean>> callback) {
         var savedTopics = savedTopics();
 
-        if (exceptedTopics != null && exceptedTopics.size() > 0) {
+        if (exceptedTopics != null && !exceptedTopics.isEmpty()) {
             savedTopics.removeAll(exceptedTopics);
         }
 
-        if (savedTopics.size() > 0) {
+        if (!savedTopics.isEmpty()) {
             unsubscribeFromTopics(savedTopics, callback);
             for (var t : savedTopics) {
                 _prefs().removeFromList("FCM_Topics", t);
             }
-        } else {
+        }
+        //
+        else {
             if (callback != null) callback.invoke(null);
         }
     }

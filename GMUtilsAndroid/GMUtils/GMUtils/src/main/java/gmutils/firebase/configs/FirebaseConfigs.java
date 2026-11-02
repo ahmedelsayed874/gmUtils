@@ -2,6 +2,7 @@ package gmutils.firebase.configs;
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigValue;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gmutils.listeners.ResultCallback;
 import gmutils.logger.LoggerAbs;
 
 public class FirebaseConfigs {
@@ -78,7 +80,7 @@ public class FirebaseConfigs {
                     .addOnCompleteListener((it) -> {
                         log(() -> "firebaseRemoteConfig.setDefaultsAsync:: " + it.isSuccessful());
                         isFetchReady = true;
-                        if (isFetchCalled) fetch();
+                        if (!isFetchCalled) fetch(null);
                     });
         }
         //
@@ -86,7 +88,7 @@ public class FirebaseConfigs {
             log(() -> "RETURNING DEFAULT (init failed)...");
 
             for (FBConfigSet configSet : configSets) {
-                configSet.onFetchComplete(firebaseRemoteConfig, false);
+                configSet.onFetchComplete(cachedConfigs(), false);
             }
         }
     }
@@ -94,7 +96,7 @@ public class FirebaseConfigs {
     private boolean isFetchReady = false;
     private boolean isFetchCalled = false;
 
-    public void fetch() {
+    public void fetch(ResultCallback<Exception> callback) {
         isFetchCalled = true;
         if (!isFetchReady) return;
 
@@ -111,7 +113,7 @@ public class FirebaseConfigs {
         if (configSets.size() == x) {
             log(() -> " DATA ALREADY FETCHED");
             for (FBConfigSet configSet : configSets) {
-                configSet.onFetchComplete(firebaseRemoteConfig, false);
+                configSet.onFetchComplete(cachedConfigs(), false);
             }
             return;
         }
@@ -121,8 +123,12 @@ public class FirebaseConfigs {
                 boolean updated = task.getResult();
                 log(() -> " Config params updated: " + updated);
 
+                if (callback != null) {
+                    callback.invoke(null);
+                }
+
                 for (FBConfigSet configSet : configSets) {
-                    configSet.onFetchComplete(firebaseRemoteConfig, true);
+                    configSet.onFetchComplete(cachedConfigs(), true);
                 }
             }
             //
@@ -132,11 +138,23 @@ public class FirebaseConfigs {
                         ") .... RETURNING DEFAULT"
                 );
 
+                if (callback != null) {
+                    callback.invoke(task.getException());
+                }
+
                 for (FBConfigSet configSet : configSets) {
-                    configSet.onFetchComplete(firebaseRemoteConfig, false);
+                    configSet.onFetchComplete(cachedConfigs(), false);
                 }
             }
         });
+    }
+
+    public Map<String, FirebaseRemoteConfigValue> cachedConfigs() {
+        try {
+            return firebaseRemoteConfig.getAll();
+        } catch (Exception ignore) {
+            return null;
+        }
     }
 
     public int getConfigSetsCount() {
