@@ -252,7 +252,9 @@ public class FCM implements FCMFunctions {
                 _prefs().removeFromList("FCM_Topics", topic);
                 printLog(() -> "FCM: unsubscribe from " + topic);
                 result.put(topic, true);
-            } catch (Exception e) {
+            }
+            //
+            catch (Exception e) {
                 printLog(() -> "FCM: failed to unsubscribe from " + topic);
                 result.put(topic, false);
             }

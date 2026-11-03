@@ -231,7 +231,6 @@ public class Notifier {
             int intentFlag = Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 
             int pendingIntentFlag = PendingIntent.FLAG_CANCEL_CURRENT;
-            //int pendingIntentFlag = PendingIntent.FLAG_UPDATE_CURRENT;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 pendingIntentFlag |= PendingIntent.FLAG_IMMUTABLE;
@@ -348,7 +347,7 @@ public class Notifier {
                 context,
                 10,
                 intent,
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
         return addAction(title, pendingIntent);
