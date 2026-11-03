@@ -69,7 +69,9 @@ public class FirebaseConfigs {
         Map<String, Object> defaults = new HashMap<>();
 
         for (FBConfigSet configSet : configSets) {
-            defaults.putAll(configSet.getDefaults());
+            Map<String, Object> def = configSet.getDefaults();
+            if (def == null || def.isEmpty()) continue;
+            defaults.putAll(def);
         }
 
         if (firebaseRemoteConfig != null) {
